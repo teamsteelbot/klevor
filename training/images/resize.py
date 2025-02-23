@@ -4,8 +4,8 @@ import cv2
 
 # Set the input and output directories
 cwd = os.getcwd()
-input_directory = os.path.join(cwd, 'original')
-output_directory = os.path.join(cwd, 'resized')
+input_directory = os.path.join(cwd, 'training', 'images','to_process')
+output_directory = os.path.join(cwd,'training', 'images', 'resized')
 
 # Set the desired new dimensions
 width = 640

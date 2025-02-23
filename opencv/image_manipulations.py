@@ -1,5 +1,6 @@
 import cv2
 import os
+import time
 
 # Resize image function
 def resize_image(input_dir: str, output_dir: str, width: int, height:int , interpolation=cv2.INTER_LINEAR):
@@ -13,6 +14,9 @@ def resize_image(input_dir: str, output_dir: str, width: int, height:int , inter
     # Iterate over the files in the given path
     for filename in os.listdir(input_dir):
         if filename.endswith(('.jpg', '.jpeg', '.png')):
+            # Start timing
+            start_time = time.time()
+
             # Read image
             img_path = os.path.join(input_dir, filename)
             img = cv2.imread(img_path)
@@ -24,5 +28,9 @@ def resize_image(input_dir: str, output_dir: str, width: int, height:int , inter
             output_path = os.path.join(output_dir, filename)
             cv2.imwrite(output_path, resized_img)
 
+            # End timing
+            end_time = time.time()
+            elapsed_time = end_time - start_time
+
             # Log
-            print(f'Resized and saved {filename} to {output_dir}')
+            print(f'Resized and saved {filename} to {output_dir} in {elapsed_time:.2f} seconds')

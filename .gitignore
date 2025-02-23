@@ -1,0 +1,6 @@
+# Virtual environment
+/.venv
+
+ # Original images
+/training/images/original/**/*
+/training/images/to_process/**/*
