@@ -1,6 +1,7 @@
 # Virtual environment
 /.venv
 
- # Original images
+ # Images used for training
 /training/images/original/**/*
 /training/images/to_process/**/*
+/training/images/augmented/**/*
