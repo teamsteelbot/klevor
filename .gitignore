@@ -1,7 +1,9 @@
 # Virtual environment
 /.venv
 
- # Images used for training
-/training/images/original/**/*
-/training/images/to_process/**/*
-/training/images/augmented/**/*
+ # Images used for processed
+/data/original/**/*
+/data/rezised/**/*
+/data/labeled/**/*
+/data/augmented/**/*
+/data/organized/**/*

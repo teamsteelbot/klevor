@@ -2,18 +2,22 @@ import cv2
 import albumentations as A
 import os
 import time
+import files.files as files
+import opencv.constants as const
 
-# Augment labeled images
-def augment_images(image_path, annotations_path, output_image_dir, output_annotations_dir, num_augmentations=5):
+# Augment to_process images
+def augment_images(input_to_process_image_path: str, input_to_process_annotations_path: str,
+                   output_augmented_images_dir: str, output_augmented_annotations_dir: str, num_augmentations=5,
+                   output_processed_image_dir: str = None, output_processed_annotations_dir: str = None):
     # Get current time
     start_time = time.time()
 
     # Read the image and convert it to RGB
-    image = cv2.imread(image_path)
+    image = cv2.imread(input_to_process_image_path)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
     # Read the annotations
-    with open(annotations_path, 'r') as f:
+    with open(input_to_process_annotations_path, 'r') as f:
         lines = f.readlines()
 
     # Parse the annotations
@@ -26,7 +30,7 @@ def augment_images(image_path, annotations_path, output_image_dir, output_annota
         bboxes.append([x_center, y_center, width, height])
         class_labels.append(class_id)
 
-    # Define the augmented pipeline
+    # Define the to_process pipeline
     transform = A.Compose([
         # Apply with a 50% probability a random brightness and contrast adjustment
         A.RandomBrightnessContrast(p=0.5),
@@ -41,10 +45,10 @@ def augment_images(image_path, annotations_path, output_image_dir, output_annota
         A.RGBShift(r_shift_limit=25, g_shift_limit=25, b_shift_limit=25, p=0.3),
 
         # Apply with a 30% probability a random crop
-        A.RandomCrop(width=int(image.shape[1] * 0.9), height=int(image.shape[0] * 0.9), p=0.3), #Optional random crop
+        A.RandomCrop(width=int(image.shape[1] * 0.9), height=int(image.shape[0] * 0.9), p=0.3),  # Optional random crop
     ], bbox_params=A.BboxParams(format='yolo', label_fields=['class_labels']))
 
-    # Apply the augmented pipeline to the image and annotations
+    # Apply the to_process pipeline to the image and annotations
     try:
         for i in range(num_augmentations):
             transformed = transform(image=image, bboxes=bboxes, class_labels=class_labels)
@@ -52,9 +56,11 @@ def augment_images(image_path, annotations_path, output_image_dir, output_annota
             transformed_bboxes = transformed['bboxes']
             transformed_class_labels = transformed['class_labels']
 
-            # Save the augmented image and annotations
-            output_image_path = os.path.join(output_image_dir, f"{os.path.splitext(os.path.basename(image_path))[0]}_aug_{i}.jpg")
-            output_annotations_path = os.path.join(output_annotations_dir, f"{os.path.splitext(os.path.basename(annotations_path))[0]}_aug_{i}.txt")
+            # Save the to_process image and annotations
+            output_image_path = os.path.join(output_augmented_images_dir,
+                                             f"{os.path.splitext(os.path.basename(input_to_process_image_path))[0]}_aug_{i}.jpg")
+            output_annotations_path = os.path.join(output_augmented_annotations_dir,
+                                                   f"{os.path.splitext(os.path.basename(input_to_process_annotations_path))[0]}_aug_{i}.txt")
 
             # Convert the image back to BGR and save it
             cv2.imwrite(output_image_path, cv2.cvtColor(transformed_image, cv2.COLOR_RGB2BGR))
@@ -75,26 +81,65 @@ def augment_images(image_path, annotations_path, output_image_dir, output_annota
             end_time = time.time()
             elapsed_time = end_time - start_time
             print(f"Augmented annotations saved to {output_annotations_path} in {elapsed_time:.2f} seconds")
+
+            # Check if the output_processed_image_dir is not None
+            if output_processed_image_dir is not None:
+                files.move_file(input_to_process_image_path, output_processed_image_dir)
+
+            # Check if the output_processed_annotations_dir is not None
+            if output_processed_annotations_dir is not None:
+                files.move_file(input_to_process_annotations_path, output_processed_annotations_dir)
+
     except Exception as e:
-        print(f"Error: {e} for {image_path}")
+        print(f"Error: {e} for {input_to_process_image_path}")
+
 
 # Augment a dataset
-def augment_dataset(image_dir, annotations_dir, output_image_dir, output_annotations_dir, num_augmentations=5):
-    # Check if the output directories exist, if not it creates them
-    for output_dir in [output_image_dir, output_annotations_dir]:
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
+def augment_dataset(input_to_process_dir:str, output_augmented_dir:str, num_augmentations=5, output_processed_dir: str = None):
+    input_to_process_images_dir = os.path.join(input_to_process_dir, const.IMAGES)
+    input_to_process_annotations_dir = os.path.join(input_to_process_dir, const.LABELS)
+    output_augmented_images_dir = os.path.join(output_augmented_dir, const.IMAGES)
+    output_augmented_annotations_dir = os.path.join(output_augmented_dir, const.LABELS)
+    output_processed_images_dir = os.path.join(output_processed_dir, const.IMAGES)
+    output_processed_annotations_dir = os.path.join(output_processed_dir, const.LABELS)
 
+    # Check if the output directories exist, if not it creates them
+    for io_dir in [input_to_process_dir, input_to_process_images_dir, input_to_process_annotations_dir,
+                       output_augmented_dir, output_augmented_images_dir, output_augmented_annotations_dir,
+                       output_processed_images_dir, output_processed_annotations_dir]:
+        if io_dir is not None and not os.path.exists(io_dir):
+            os.makedirs(io_dir)
+
+    # Define the class file and notes filename
+    classes_file = os.path.join(input_to_process_dir, const.CLASSES)
+    notes_file = os.path.join(input_to_process_dir, const.NOTES)
+    
+    # Copy the class file and notes file
+    files.copy_file(classes_file, os.path.join(output_augmented_dir, const.CLASSES))
+    files.copy_file(notes_file, os.path.join(output_augmented_dir, const.NOTES))
+    
     # Get the image files
-    image_files = [f for f in os.listdir(image_dir) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
+    image_filenames = [f for f in os.listdir(input_to_process_images_dir) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
 
     # Augment each image
-    for image_file in image_files:
-        image_path = os.path.join(image_dir, image_file)
-        annotations_file = os.path.splitext(image_file)[0] + '.txt'
-        annotations_path = os.path.join(annotations_dir, annotations_file)
+    for image_filename in image_filenames:
+        print(f"Augmenting {image_filename}")
 
-        if os.path.exists(annotations_path):
-            augment_images(image_path, annotations_path, output_image_dir, output_annotations_dir, num_augmentations)
+        # Get the image and annotations paths
+        input_to_process_image_path = os.path.join(input_to_process_images_dir, image_filename)
+        annotations_filename = os.path.splitext(image_filename)[0] + '.txt'
+        input_to_process_annotations_path = os.path.join(input_to_process_annotations_dir, annotations_filename)
+
+        if os.path.exists(input_to_process_annotations_dir):
+            augment_images(input_to_process_image_path, input_to_process_annotations_path, output_augmented_images_dir,
+                           output_augmented_annotations_dir, num_augmentations, output_processed_images_dir,
+                           output_processed_annotations_dir)
         else:
-            print(f"Warning: Annotation file not found for {image_file}")
+            print(
+                f"Warning: Annotation file not found for {input_to_process_image_path}, annotation file should be at {input_to_process_annotations_path}")
+
+    # Move the class file and notes file to the processed directory
+    if output_processed_dir is not None:
+        files.move_file(classes_file, output_processed_dir)
+        files.move_file(notes_file, output_processed_dir)
+

@@ -1,2 +1,2 @@
 @echo off
-python.exe -m training.images.resize
+python.exe -m data.resize
