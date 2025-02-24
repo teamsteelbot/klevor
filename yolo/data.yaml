@@ -1,0 +1,5 @@
+train: ./data/organized/to_process/train/images
+val: ./data/organized/to_process/val/images
+
+nc: 4  # number of classes
+names: ['blue line', 'green rectangular prism', 'orange line', 'red rectangular prism']  # class names
