@@ -1,0 +1,25 @@
+{
+  "categories": [
+    {
+      "id": 0,
+      "name": "blue line"
+    },
+    {
+      "id": 1,
+      "name": "green rectangular prism"
+    },
+    {
+      "id": 2,
+      "name": "orange line"
+    },
+    {
+      "id": 3,
+      "name": "red rectangular prism"
+    }
+  ],
+  "info": {
+    "year": 2025,
+    "version": "1.0",
+    "contributor": "Label Studio"
+  }
+}
