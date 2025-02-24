@@ -1,9 +1,15 @@
+# IDEs
+.idea
+.vscode
+
 # Virtual environment
 /.venv
 
- # Images used for processed
-/data/original/**/*
-/data/rezised/**/*
-/data/labeled/**/*
-/data/augmented/**/*
-/data/organized/**/*
+ # YOLO
+/yolo/data.yaml
+/yolo/dataset/original/**/*
+/yolo/dataset/resized/**/*
+/yolo/dataset/labeled/**/*
+/yolo/dataset/augmented/**/*
+/yolo/dataset/organized/**/*
+/yolo/runs/**/*

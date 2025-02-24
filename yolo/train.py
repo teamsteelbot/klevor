@@ -1,8 +1,18 @@
 from ultralytics import YOLO
 
-# Load a model
-model = YOLO('yolov11.yaml')
-
 if __name__ == '__main__':
+    # Load a model
+    model = YOLO("./yolo/yolo11n.pt")
+
     # Train the model
-    model.train(data='data.yaml', epochs=100, imgsz=640)
+    train_results = model.train(
+        data="./yolo/data.yaml",
+        epochs=100,
+        imgsz=640,
+        device="cpu",
+        project="./yolo/runs",
+        name="steel-bot"
+    )
+
+    # Export the model to ONNX format
+    path = model.export(format="onnx")  # return path to exported model
