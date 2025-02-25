@@ -42,3 +42,6 @@ YOLO_RUNS = os.path.join(YOLO, 'runs')
 YOLO_RUNS_WEIGHTS = os.path.join(YOLO_RUNS,YOLO_NAME, 'weights')
 YOLO_RUNS_WEIGHTS_BEST_ONNX = os.path.join(YOLO_RUNS_WEIGHTS, 'best.onnx')
 YOLO_RUNS_WEIGHTS_BEST_PT = os.path.join(YOLO_RUNS_WEIGHTS, 'best.pt')
+
+# YOLO class colors
+YOLO_CLASS_COLORS = {0: (0, 51, 255), 1:(68,214,44), 2:(255,102,0), 3:(238,39,55)}

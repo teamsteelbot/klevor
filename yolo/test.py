@@ -2,11 +2,11 @@ import random
 from opencv.model_testing import load_model, run_inference, preprocess, display_detections, outputs_to_image_bounding_boxes
 import os
 from opencv.constants import IMAGES, DEFAULT_SIZE
-from yolo.constants import YOLO_DATASET_ORGANIZED_TO_PROCESS, YOLO_RUNS_WEIGHTS_BEST_PT, TESTING, YOLO_REPO, YOLO_NAME
+from yolo.constants import YOLO_DATASET_ORGANIZED_TO_PROCESS, YOLO_RUNS_WEIGHTS_BEST_PT, TESTING, YOLO_CLASS_COLORS
 
 # Minimum confidence level and number of random images to test
 MINIMUM_CONFIDENCE_LEVEL = 0.45
-NUMBER_RANDOM_IMAGES = 5
+NUMBER_RANDOM_IMAGES = 1
 
 if __name__=='__main__':
     # Set the input and output directories
@@ -35,4 +35,4 @@ if __name__=='__main__':
         print(outputs_to_image_bounding_boxes(outputs))
 
         # Display the image with the detections
-        display_detections(preprocessed_image, outputs)
+        display_detections(model,preprocessed_image, outputs, draw_labels_name=False, rgb_colors=YOLO_CLASS_COLORS)
