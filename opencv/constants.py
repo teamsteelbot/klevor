@@ -6,7 +6,7 @@ NOTES = 'notes.json'
 IMAGES = 'images'
 LABELS = 'labels'
 
-# YOLO organized directory names
-TRAINING = 'train'
-VALIDATIONS = 'val'
-TESTING = 'test'
+# Default image dimensions
+DEFAULT_WIDTH = 640
+DEFAULT_HEIGHT = 640
+DEFAULT_SIZE=(DEFAULT_WIDTH, DEFAULT_HEIGHT)

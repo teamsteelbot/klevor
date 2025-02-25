@@ -1,0 +1,44 @@
+import os
+
+# Common suffixes and prefixes
+TO_PROCESS = 'to_process'
+PROCESSED = 'processed'
+
+# YOLO model name
+YOLO_NAME = 'steel_bot'
+
+# YOLO organized directory names
+TRAINING = 'train'
+VALIDATIONS = 'val'
+TESTING = 'test'
+
+# Folders (executed from root folder)
+CWD = os.getcwd()
+
+# YOLO folders
+YOLO = os.path.join(CWD, 'yolo')
+YOLO_REPO = 'ultralytics/ultralytics'
+YOLO_DATASET = os.path.join(YOLO, 'dataset')
+
+# YOLO Dataset folders
+YOLO_DATASET_ORIGINAL = os.path.join(YOLO_DATASET, 'original')
+YOLO_DATASET_RESIZED = os.path.join(YOLO_DATASET, 'resized')
+YOLO_DATASET_LABELED = os.path.join(YOLO_DATASET, 'labeled')
+YOLO_DATASET_AUGMENTED = os.path.join(YOLO_DATASET, 'augmented')
+YOLO_DATASET_ORGANIZED = os.path.join(YOLO_DATASET, 'organized')
+YOLO_DATASET_ORIGINAL_TO_PROCESS = os.path.join(YOLO_DATASET_ORIGINAL, TO_PROCESS)
+YOLO_DATASET_ORIGINAL_PROCESSED = os.path.join(YOLO_DATASET_ORIGINAL, PROCESSED)
+YOLO_DATASET_RESIZED_TO_PROCESS = os.path.join(YOLO_DATASET_RESIZED, TO_PROCESS)
+YOLO_DATASET_RESIZED_PROCESSED = os.path.join(YOLO_DATASET_RESIZED, PROCESSED)
+YOLO_DATASET_LABELED_TO_PROCESS = os.path.join(YOLO_DATASET_LABELED, TO_PROCESS)
+YOLO_DATASET_LABELED_PROCESSED = os.path.join(YOLO_DATASET_LABELED, PROCESSED)
+YOLO_DATASET_AUGMENTED_TO_PROCESS = os.path.join(YOLO_DATASET_AUGMENTED, TO_PROCESS)
+YOLO_DATASET_AUGMENTED_PROCESSED = os.path.join(YOLO_DATASET_AUGMENTED, PROCESSED)
+YOLO_DATASET_ORGANIZED_TO_PROCESS = os.path.join(YOLO_DATASET_ORGANIZED, TO_PROCESS)
+YOLO_DATASET_ORGANIZED_PROCESSED = os.path.join(YOLO_DATASET_ORGANIZED, PROCESSED)
+
+# YOLO Model folders
+YOLO_RUNS = os.path.join(YOLO, 'runs')
+YOLO_RUNS_WEIGHTS = os.path.join(YOLO_RUNS,YOLO_NAME, 'weights')
+YOLO_RUNS_WEIGHTS_BEST_ONNX = os.path.join(YOLO_RUNS_WEIGHTS, 'best.onnx')
+YOLO_RUNS_WEIGHTS_BEST_PT = os.path.join(YOLO_RUNS_WEIGHTS, 'best.pt')

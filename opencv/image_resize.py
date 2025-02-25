@@ -4,10 +4,10 @@ import time
 from files.files import move_file
 
 # Resize image function
-def resize_image(input_to_process_dir: str, output_manipulated_dir: str, new_image_size: tuple[int, int] , output_processed_dir: str= None, interpolation=cv2.INTER_LINEAR):
+def resize_image(input_to_process_dir: str, output_resized_to_process_dir: str, new_image_size: tuple[int, int] , output_processed_dir: str= None, interpolation=cv2.INTER_LINEAR):
     # Check if the path exists, if not it creates it
-    if not os.path.exists(output_manipulated_dir):
-        os.makedirs(output_manipulated_dir)
+    if not os.path.exists(output_resized_to_process_dir):
+        os.makedirs(output_resized_to_process_dir)
 
     # Iterate over the files in the given path
     for filename in os.listdir(input_to_process_dir):
@@ -23,7 +23,7 @@ def resize_image(input_to_process_dir: str, output_manipulated_dir: str, new_ima
             resized_image = cv2.resize(image, new_image_size, interpolation=interpolation)
 
             # Write back the image
-            output_path = os.path.join(output_manipulated_dir, filename)
+            output_path = os.path.join(output_resized_to_process_dir, filename)
             cv2.imwrite(output_path, resized_image)
 
             # End timing
@@ -31,7 +31,7 @@ def resize_image(input_to_process_dir: str, output_manipulated_dir: str, new_ima
             elapsed_time = end_time - start_time
 
             # Log
-            print(f'Resized and saved {filename} to {output_manipulated_dir} in {elapsed_time:.2f} seconds')
+            print(f'Resized and saved {filename} to {output_resized_to_process_dir} in {elapsed_time:.2f} seconds')
             
             # Check if the output_processed_dir is not None
             if output_processed_dir is not None:
