@@ -1,5 +1,5 @@
 import os
-import opencv.image_augmentation as ia
+from opencv.image_augmentation import augment_dataset
 
 if __name__ == '__main__':
     # Set the input and output directories
@@ -13,4 +13,4 @@ if __name__ == '__main__':
     output_processed_dir = os.path.join(labeled_dir, 'processed')
     num_augmentations = 10
 
-    ia.augment_dataset(input_to_processed_dir, output_augmented_dir, num_augmentations, output_processed_dir)
+    augment_dataset(input_to_processed_dir, output_augmented_dir, num_augmentations, output_processed_dir)

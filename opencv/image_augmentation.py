@@ -2,8 +2,8 @@ import cv2
 import albumentations as A
 import os
 import time
-import files.files as files
-import opencv.constants as const
+from files.files import move_file
+from opencv.constants import IMAGES, LABELS
 
 # Augment to_process images
 def augment_images(input_to_process_image_path: str, input_to_process_annotations_path: str,
@@ -84,11 +84,11 @@ def augment_images(input_to_process_image_path: str, input_to_process_annotation
 
             # Check if the output_processed_image_dir is not None
             if output_processed_image_dir is not None:
-                files.move_file(input_to_process_image_path, output_processed_image_dir)
+                move_file(input_to_process_image_path, output_processed_image_dir)
 
             # Check if the output_processed_annotations_dir is not None
             if output_processed_annotations_dir is not None:
-                files.move_file(input_to_process_annotations_path, output_processed_annotations_dir)
+                move_file(input_to_process_annotations_path, output_processed_annotations_dir)
 
     except Exception as e:
         print(f"Error: {e} for {input_to_process_image_path}")
@@ -96,12 +96,12 @@ def augment_images(input_to_process_image_path: str, input_to_process_annotation
 
 # Augment a dataset
 def augment_dataset(input_to_process_dir:str, output_augmented_dir:str, num_augmentations=5, output_processed_dir: str = None):
-    input_to_process_images_dir = os.path.join(input_to_process_dir, const.IMAGES)
-    input_to_process_annotations_dir = os.path.join(input_to_process_dir, const.LABELS)
-    output_augmented_images_dir = os.path.join(output_augmented_dir, const.IMAGES)
-    output_augmented_annotations_dir = os.path.join(output_augmented_dir, const.LABELS)
-    output_processed_images_dir = os.path.join(output_processed_dir, const.IMAGES)
-    output_processed_annotations_dir = os.path.join(output_processed_dir, const.LABELS)
+    input_to_process_images_dir = os.path.join(input_to_process_dir, IMAGES)
+    input_to_process_annotations_dir = os.path.join(input_to_process_dir, LABELS)
+    output_augmented_images_dir = os.path.join(output_augmented_dir, IMAGES)
+    output_augmented_annotations_dir = os.path.join(output_augmented_dir, LABELS)
+    output_processed_images_dir = os.path.join(output_processed_dir, IMAGES)
+    output_processed_annotations_dir = os.path.join(output_processed_dir, LABELS)
 
     # Check if the output directories exist, if not it creates them
     for io_dir in [input_to_process_dir, input_to_process_images_dir, input_to_process_annotations_dir,
@@ -109,14 +109,6 @@ def augment_dataset(input_to_process_dir:str, output_augmented_dir:str, num_augm
                        output_processed_images_dir, output_processed_annotations_dir]:
         if io_dir is not None and not os.path.exists(io_dir):
             os.makedirs(io_dir)
-
-    # Define the class file and notes filename
-    classes_file = os.path.join(input_to_process_dir, const.CLASSES)
-    notes_file = os.path.join(input_to_process_dir, const.NOTES)
-    
-    # Copy the class file and notes file
-    files.copy_file(classes_file, os.path.join(output_augmented_dir, const.CLASSES))
-    files.copy_file(notes_file, os.path.join(output_augmented_dir, const.NOTES))
     
     # Get the image files
     image_filenames = [f for f in os.listdir(input_to_process_images_dir) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
@@ -137,9 +129,3 @@ def augment_dataset(input_to_process_dir:str, output_augmented_dir:str, num_augm
         else:
             print(
                 f"Warning: Annotation file not found for {input_to_process_image_path}, annotation file should be at {input_to_process_annotations_path}")
-
-    # Move the class file and notes file to the processed directory
-    if output_processed_dir is not None:
-        files.move_file(classes_file, output_processed_dir)
-        files.move_file(notes_file, output_processed_dir)
-

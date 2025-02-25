@@ -2,6 +2,11 @@
 CLASSES = 'classes.txt'
 NOTES = 'notes.json'
 
-# Directory names
+# YOLO base directory names
 IMAGES = 'images'
 LABELS = 'labels'
+
+# YOLO organized directory names
+TRAINING = 'train'
+VALIDATIONS = 'val'
+TESTING = 'test'

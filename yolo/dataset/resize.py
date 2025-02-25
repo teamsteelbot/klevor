@@ -1,6 +1,5 @@
-import opencv.image_manipulations as im
+from opencv.image_resize import resize_image
 import os
-import cv2
 
 if __name__ == '__main__':
     # Set the input and output directories
@@ -15,4 +14,4 @@ if __name__ == '__main__':
     height = 640
 
     # Resize images
-    im.resize_image(input_to_process_dir, output_processed_dir, width, height, output_manipulated_dir)
+    resize_image(input_to_process_dir, output_processed_dir, (width, height), output_manipulated_dir)
