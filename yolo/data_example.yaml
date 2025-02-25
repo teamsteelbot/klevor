@@ -1,0 +1,5 @@
+train: path/to/train/images
+val: path/to/val/images
+
+nc: 4  # number of classes
+names: ['blue line', 'green rectangular prism', 'orange line', 'red rectangular prism']  # class names

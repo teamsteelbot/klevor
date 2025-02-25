@@ -6,10 +6,11 @@
 /.venv
 
  # YOLO
-/yolo/data.yaml
+/yolo/**/*.yaml
 /yolo/dataset/original/**/*
 /yolo/dataset/resized/**/*
 /yolo/dataset/labeled/**/*
 /yolo/dataset/augmented/**/*
 /yolo/dataset/organized/**/*
 /yolo/runs/**/*
+/yolo/**/*.zip
