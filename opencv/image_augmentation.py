@@ -3,7 +3,7 @@ import albumentations as A
 import os
 import time
 from files.files import move_file
-from opencv.constants import IMAGES, LABELS
+from opencv.constants import YOLO_IMAGES, YOLO_LABELS
 
 
 # Augment to_process images
@@ -99,12 +99,12 @@ def augment_images(input_to_process_image_path: str, input_to_process_annotation
 # Augment a dataset
 def augment_dataset(input_to_process_dir: str, output_augmented_to_process_dir: str, num_augmentations=5,
                     output_processed_dir: str = None):
-    input_to_process_images_dir = os.path.join(input_to_process_dir, IMAGES)
-    input_to_process_annotations_dir = os.path.join(input_to_process_dir, LABELS)
-    output_augmented_to_process_images_dir = os.path.join(output_augmented_to_process_dir, IMAGES)
-    output_augmented_to_process_annotations_dir = os.path.join(output_augmented_to_process_dir, LABELS)
-    output_processed_images_dir = os.path.join(output_processed_dir, IMAGES)
-    output_processed_annotations_dir = os.path.join(output_processed_dir, LABELS)
+    input_to_process_images_dir = os.path.join(input_to_process_dir, YOLO_IMAGES)
+    input_to_process_annotations_dir = os.path.join(input_to_process_dir, YOLO_LABELS)
+    output_augmented_to_process_images_dir = os.path.join(output_augmented_to_process_dir, YOLO_IMAGES)
+    output_augmented_to_process_annotations_dir = os.path.join(output_augmented_to_process_dir, YOLO_LABELS)
+    output_processed_images_dir = os.path.join(output_processed_dir, YOLO_IMAGES)
+    output_processed_annotations_dir = os.path.join(output_processed_dir, YOLO_LABELS)
 
     # Check if the output directories exist, if not it creates them
     for io_dir in [input_to_process_dir, input_to_process_images_dir, input_to_process_annotations_dir,

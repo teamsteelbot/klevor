@@ -1,2 +1,2 @@
 @echo off
-python.exe -m yolo.dataset.organize_4c
+python.exe -m yolo.organize_2c

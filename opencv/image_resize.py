@@ -3,7 +3,6 @@ import os
 import time
 from files.files import move_file
 
-
 # Resize image function
 def resize_image(input_to_process_dir: str, output_resized_to_process_dir: str, new_image_size: tuple[int, int],
                  output_processed_dir: str = None, interpolation=cv2.INTER_LINEAR):

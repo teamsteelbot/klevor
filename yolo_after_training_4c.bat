@@ -1,2 +1,2 @@
 @echo off
-python.exe -m yolo.dataset.after_training_4c
+python.exe -m yolo.after_training_4c

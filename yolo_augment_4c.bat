@@ -1,2 +1,2 @@
 @echo off
-python.exe -m yolo.dataset.augment_4c
+python.exe -m yolo.augment_4c

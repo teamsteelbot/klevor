@@ -1,2 +1,2 @@
 @echo off
-python.exe -m yolo.dataset.resize
+python.exe -m yolo.resize
