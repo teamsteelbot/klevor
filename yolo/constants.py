@@ -52,10 +52,15 @@ YOLO_DATASET_ORGANIZED_4C_TO_PROCESS = os.path.join(YOLO_DATASET_ORGANIZED_4C, Y
 YOLO_DATASET_ORGANIZED_4C_PROCESSED = os.path.join(YOLO_DATASET_ORGANIZED_4C, YOLO_PROCESSED)
 
 # YOLO model folders
+BEST_ONNX = 'best.onnx'
+BEST_PT = 'best.pt'
 YOLO_RUNS = os.path.join(YOLO, 'runs')
-YOLO_RUNS_WEIGHTS = os.path.join(YOLO_RUNS, YOLO_NAME, 'weights')
-YOLO_RUNS_WEIGHTS_BEST_ONNX = os.path.join(YOLO_RUNS_WEIGHTS, 'best.onnx')
-YOLO_RUNS_WEIGHTS_BEST_PT = os.path.join(YOLO_RUNS_WEIGHTS, 'best.pt')
+YOLO_RUNS_4C_WEIGHTS = os.path.join(YOLO_RUNS, YOLO_4C_NAME, 'weights')
+YOLO_RUNS_4C_WEIGHTS_BEST_ONNX = os.path.join(YOLO_RUNS_4C_WEIGHTS, BEST_ONNX)
+YOLO_RUNS_4C_WEIGHTS_BEST_PT = os.path.join(YOLO_RUNS_4C_WEIGHTS, BEST_PT)
+YOLO_RUNS_2C_WEIGHTS = os.path.join(YOLO_RUNS, YOLO_2C_NAME, 'weights')
+YOLO_RUNS_2C_WEIGHTS_BEST_ONNX = os.path.join(YOLO_RUNS_2C_WEIGHTS, BEST_ONNX)
+YOLO_RUNS_2C_WEIGHTS_BEST_PT = os.path.join(YOLO_RUNS_2C_WEIGHTS, BEST_PT)
 
 # YOLO zip folder
 YOLO_ZIP = os.path.join(YOLO, 'zip')
@@ -67,3 +72,7 @@ YOLO_ZIP_IGNORE_DIRS = ['runs', 'zip']
 # YOLO class colors
 YOLO_2C_COLORS = {0: (68, 214, 44), 1: (238, 39, 55)}
 YOLO_4C_COLORS = {0: (0, 51, 255), 1: (68, 214, 44), 2: (255, 102, 0), 3: (238, 39, 55)}
+
+# Minimum confidence level and number of random images to test
+YOLO_MINIMUM_CONFIDENCE_LEVEL = 0.45
+YOLO_NUMBER_RANDOM_IMAGES = 10

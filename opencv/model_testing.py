@@ -1,4 +1,5 @@
 from ultralytics import YOLO
+import onnxruntime as ort
 import cv2
 import numpy as np
 import time
@@ -6,7 +7,7 @@ import torch
 from opencv.constants import DEFAULT_SIZE, DEFAULT_COLOR
 import matplotlib.pyplot as plt
 from opencv.model_types import ImageBoundingBoxes
-
+import os
 
 # Convert RGB to BGR
 def rgb_to_bgr(rgb: tuple[int, int, int]):
@@ -24,7 +25,7 @@ def get_bgr_color(class_number: int, rgb_colors: dict[int, tuple[int, int, int]]
 
 
 # Function to display the preprocessed image and the image with detections
-def display_detections(model, preprocessed_image, outputs, draw_labels_name=False, font=cv2.FONT_HERSHEY_SIMPLEX,
+def display_detections(model_class_names:dict, preprocessed_image, outputs, draw_labels_name=False, font=cv2.FONT_HERSHEY_SIMPLEX,
                        font_x_diff=0, font_y_diff=-10, font_scale=0.9, thickness=2,
                        rgb_colors: dict[int, tuple[int, int, int]] = None):
     # Convert the image back to HWC format
@@ -50,7 +51,7 @@ def display_detections(model, preprocessed_image, outputs, draw_labels_name=Fals
         for i in range(n):
             x1, y1, x2, y2 = xyxy[i].astype(int)
             class_number = int(class_numbers[i])
-            class_name = model.names[class_number]
+            class_name = model_class_names[class_number]
             color = get_rgb_color(class_number, rgb_colors)
             cv2.rectangle(image_with_detections, (x1, y1), (x2, y2), color, thickness)
             cv2.putText(image_with_detections, class_name, (x1 + font_x_diff, y1 + font_y_diff), font, font_scale,
@@ -89,16 +90,19 @@ def preprocess(image_path, image_size: tuple[int, int] = DEFAULT_SIZE):
     return image, image_expanded
 
 
-# Load model
-def load_model(model_path: str):
+# Load PyTorch model
+def load_pt_model(model_path: str):
+    # Verify the model file exists
+    if not os.path.exists(model_path):
+        raise FileNotFoundError(f"Model file not found: {model_path}")
+
     # Load the model
     model = YOLO(model_path)
     model.eval()
     return model
 
-
-# Run inference
-def run_inference(model, preprocessed_image):
+# Run inference from PyTorch model
+def run_pt_inference(model, preprocessed_image):
     # Get time
     start_time = time.time()
 
@@ -114,6 +118,35 @@ def run_inference(model, preprocessed_image):
 
     return outputs
 
+# Load ONNX model
+def load_onnx_model(model_path: str):
+    # Verify the model file exists
+    if not os.path.exists(model_path):
+        raise FileNotFoundError(f"Model file not found: {model_path}")
+
+    # Load the ONNX model
+    session = ort.InferenceSession(model_path)
+    return session
+
+# Run inference from ONNX model
+def run_onnx_inference(session, preprocessed_image):
+    # Get input name for the ONNX model
+    input_name = session.get_inputs()[0].name
+
+    # Get time
+    start_time = time.time()
+
+    # Run inference
+    outputs = session.run(None, {input_name: preprocessed_image})
+
+    # Get time
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+
+    # Log
+    print(f'Inference took {elapsed_time:.2f} seconds')
+
+    return outputs
 
 # Convert the outputs to image bounding boxes instance
 def outputs_to_image_bounding_boxes(outputs):
