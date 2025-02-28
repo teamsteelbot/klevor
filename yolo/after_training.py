@@ -1,9 +1,9 @@
 from opencv.constants import YOLO_TRAINING, YOLO_VALIDATIONS
+from files.files import move_folder
 import os
 
-
 # Move the folders from the organized dataset to the processed dataset
-def move_folder(input_base_dir, output_base_dir):
+def move_folders(input_base_dir, output_base_dir):
     # Move the folders
     for folder in [YOLO_TRAINING, YOLO_VALIDATIONS]:
         # Set the input and output directories

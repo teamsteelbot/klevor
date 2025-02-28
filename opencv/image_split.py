@@ -35,6 +35,10 @@ def split_images(input_to_process_dir: str, output_organized_to_process_dir: str
 
     # Get the list of files
     image_filenames = os.listdir(input_to_process_images_dir)
+    if len(image_filenames) == 0:
+        print(f"Warning: No images found in {input_to_process_images_dir}")
+        return
+
     random.shuffle(image_filenames)
 
     # Split the processed

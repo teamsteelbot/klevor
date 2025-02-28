@@ -1,5 +1,5 @@
 from yolo.constants import YOLO_DATASET_ORGANIZED_2C_TO_PROCESS, YOLO_DATASET_ORGANIZED_2C_PROCESSED
-from yolo.after_training import move_folder
+from yolo.after_training import move_folders
 
 if __name__ == '__main__':
-    move_folder(YOLO_DATASET_ORGANIZED_2C_TO_PROCESS, YOLO_DATASET_ORGANIZED_2C_PROCESSED)
+    move_folders(YOLO_DATASET_ORGANIZED_2C_TO_PROCESS, YOLO_DATASET_ORGANIZED_2C_PROCESSED)

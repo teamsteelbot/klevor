@@ -3,6 +3,9 @@ import os
 # Folders (executed from root folder)
 CWD = os.getcwd()
 
+# ONNX metadata properties class names key
+ONNX_METADATA_CLASS_NAMES_KEY = 'names'
+
 # YOLO model name
 YOLO_NAME = 'steel_bot'
 YOLO_2C_NAME = 'steel_bot_2c'
@@ -64,7 +67,6 @@ YOLO_RUNS_2C_WEIGHTS_BEST_PT = os.path.join(YOLO_RUNS_2C_WEIGHTS, BEST_PT)
 
 # YOLO zip folder
 YOLO_ZIP = os.path.join(YOLO, 'zip')
-YOLO_TO_TRAIN_BASE_FILENAME = 'to_train'
 
 # YOLO zip ignore directories
 YOLO_ZIP_IGNORE_DIRS = ['runs', 'zip']

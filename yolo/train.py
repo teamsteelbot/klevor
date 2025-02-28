@@ -1,14 +1,14 @@
-from ultralytics import YOLO
 from yolo.constants import YOLO_EPOCHS
+from yolo.load import load_pt_model
 
 # Train model
 def train_model(yolo_path='yolo11n.pt', device='cpu', data='data.yaml', epochs=YOLO_EPOCHS, imgsz=640, project='yolo',
                 name='model'):
     # Load a model
-    model = YOLO(yolo_path)
+    model = load_pt_model(yolo_path)
 
     # Train the model
-    train_results = model.train(
+    model.train(
         data=data,
         epochs=epochs,
         imgsz=imgsz,
@@ -16,9 +16,3 @@ def train_model(yolo_path='yolo11n.pt', device='cpu', data='data.yaml', epochs=Y
         project=project,
         name=name,
     )
-
-    # Export the model to ONNX format
-    path = model.export(format="onnx")
-
-    # Log
-    print(f"Model exported to {path}")

@@ -1,13 +1,10 @@
-from ultralytics import YOLO
-import onnxruntime as ort
+import time
 import cv2
 import numpy as np
-import time
-import torch
 from opencv.constants import DEFAULT_SIZE, DEFAULT_COLOR
 import matplotlib.pyplot as plt
 from opencv.model_types import ImageBoundingBoxes
-import os
+import torch
 
 # Convert RGB to BGR
 def rgb_to_bgr(rgb: tuple[int, int, int]):
@@ -89,18 +86,6 @@ def preprocess(image_path, image_size: tuple[int, int] = DEFAULT_SIZE):
     image_expanded = np.expand_dims(image_transposed, axis=0)
     return image, image_expanded
 
-
-# Load PyTorch model
-def load_pt_model(model_path: str):
-    # Verify the model file exists
-    if not os.path.exists(model_path):
-        raise FileNotFoundError(f"Model file not found: {model_path}")
-
-    # Load the model
-    model = YOLO(model_path)
-    model.eval()
-    return model
-
 # Run inference from PyTorch model
 def run_pt_inference(model, preprocessed_image):
     # Get time
@@ -108,36 +93,6 @@ def run_pt_inference(model, preprocessed_image):
 
     # Run inference
     outputs = model(torch.from_numpy(preprocessed_image).float())
-
-    # Get time
-    end_time = time.time()
-    elapsed_time = end_time - start_time
-
-    # Log
-    print(f'Inference took {elapsed_time:.2f} seconds')
-
-    return outputs
-
-# Load ONNX model
-def load_onnx_model(model_path: str):
-    # Verify the model file exists
-    if not os.path.exists(model_path):
-        raise FileNotFoundError(f"Model file not found: {model_path}")
-
-    # Load the ONNX model
-    session = ort.InferenceSession(model_path)
-    return session
-
-# Run inference from ONNX model
-def run_onnx_inference(session, preprocessed_image):
-    # Get input name for the ONNX model
-    input_name = session.get_inputs()[0].name
-
-    # Get time
-    start_time = time.time()
-
-    # Run inference
-    outputs = session.run(None, {input_name: preprocessed_image})
 
     # Get time
     end_time = time.time()
