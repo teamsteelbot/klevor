@@ -1,6 +1,0 @@
-from opencv.image_split import split_images
-from yolo.constants import YOLO_DATASET_AUGMENTED_TO_PROCESS, YOLO_DATASET_AUGMENTED_PROCESSED, YOLO_DATASET_ORGANIZED_TO_PROCESS
-
-if __name__ == '__main__':
-    # Split the images
-    split_images(YOLO_DATASET_AUGMENTED_TO_PROCESS, YOLO_DATASET_ORGANIZED_TO_PROCESS, YOLO_DATASET_AUGMENTED_PROCESSED)

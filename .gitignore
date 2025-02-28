@@ -9,8 +9,12 @@
 /yolo/**/*.yaml
 /yolo/dataset/original/**/*
 /yolo/dataset/resized/**/*
-/yolo/dataset/labeled/**/*
-/yolo/dataset/augmented/**/*
-/yolo/dataset/organized/**/*
+/yolo/dataset/labeled_4c/**/*
+/yolo/dataset/labeled_2c/**/*
+/yolo/dataset/augmented_4c/**/*
+/yolo/dataset/augmented_2c/**/*
+/yolo/dataset/organized_4c/**/*
+/yolo/dataset/organized_2c/**/*
 /yolo/runs/**/*
+/yolo/zip/**/*
 /yolo/**/*.zip

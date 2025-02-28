@@ -3,8 +3,10 @@ import os
 import time
 from files.files import move_file
 
+
 # Resize image function
-def resize_image(input_to_process_dir: str, output_resized_to_process_dir: str, new_image_size: tuple[int, int] , output_processed_dir: str= None, interpolation=cv2.INTER_LINEAR):
+def resize_image(input_to_process_dir: str, output_resized_to_process_dir: str, new_image_size: tuple[int, int],
+                 output_processed_dir: str = None, interpolation=cv2.INTER_LINEAR):
     # Check if the path exists, if not it creates it
     if not os.path.exists(output_resized_to_process_dir):
         os.makedirs(output_resized_to_process_dir)
@@ -32,7 +34,7 @@ def resize_image(input_to_process_dir: str, output_resized_to_process_dir: str, 
 
             # Log
             print(f'Resized and saved {filename} to {output_resized_to_process_dir} in {elapsed_time:.2f} seconds')
-            
+
             # Check if the output_processed_dir is not None
             if output_processed_dir is not None:
                 move_file(image_path, os.path.join(output_processed_dir, filename))

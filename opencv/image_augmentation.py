@@ -5,9 +5,11 @@ import time
 from files.files import move_file
 from opencv.constants import IMAGES, LABELS
 
+
 # Augment to_process images
 def augment_images(input_to_process_image_path: str, input_to_process_annotations_path: str,
-                   output_augmented_to_process_images_dir: str, output_augmented_to_process_annotations_dir: str, num_augmentations=5,
+                   output_augmented_to_process_images_dir: str, output_augmented_to_process_annotations_dir: str,
+                   num_augmentations=5,
                    output_processed_images_dir: str = None, output_processed_annotations_dir: str = None):
     # Get current time
     start_time = time.time()
@@ -95,7 +97,8 @@ def augment_images(input_to_process_image_path: str, input_to_process_annotation
 
 
 # Augment a dataset
-def augment_dataset(input_to_process_dir:str, output_augmented_to_process_dir:str, num_augmentations=5, output_processed_dir: str = None):
+def augment_dataset(input_to_process_dir: str, output_augmented_to_process_dir: str, num_augmentations=5,
+                    output_processed_dir: str = None):
     input_to_process_images_dir = os.path.join(input_to_process_dir, IMAGES)
     input_to_process_annotations_dir = os.path.join(input_to_process_dir, LABELS)
     output_augmented_to_process_images_dir = os.path.join(output_augmented_to_process_dir, IMAGES)
@@ -105,13 +108,15 @@ def augment_dataset(input_to_process_dir:str, output_augmented_to_process_dir:st
 
     # Check if the output directories exist, if not it creates them
     for io_dir in [input_to_process_dir, input_to_process_images_dir, input_to_process_annotations_dir,
-                       output_augmented_to_process_dir, output_augmented_to_process_images_dir, output_augmented_to_process_annotations_dir,
-                       output_processed_images_dir, output_processed_annotations_dir]:
+                   output_augmented_to_process_dir, output_augmented_to_process_images_dir,
+                   output_augmented_to_process_annotations_dir,
+                   output_processed_images_dir, output_processed_annotations_dir]:
         if io_dir is not None and not os.path.exists(io_dir):
             os.makedirs(io_dir)
-    
+
     # Get the image files
-    image_filenames = [f for f in os.listdir(input_to_process_images_dir) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
+    image_filenames = [f for f in os.listdir(input_to_process_images_dir) if
+                       f.lower().endswith(('.png', '.jpg', '.jpeg'))]
 
     # Augment each image
     for image_filename in image_filenames:
@@ -123,7 +128,8 @@ def augment_dataset(input_to_process_dir:str, output_augmented_to_process_dir:st
         input_to_process_annotations_path = os.path.join(input_to_process_annotations_dir, annotations_filename)
 
         if os.path.exists(input_to_process_annotations_dir):
-            augment_images(input_to_process_image_path, input_to_process_annotations_path, output_augmented_to_process_images_dir,
+            augment_images(input_to_process_image_path, input_to_process_annotations_path,
+                           output_augmented_to_process_images_dir,
                            output_augmented_to_process_annotations_dir, num_augmentations, output_processed_images_dir,
                            output_processed_annotations_dir)
         else:
