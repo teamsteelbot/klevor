@@ -25,7 +25,7 @@ def zip_files(zipf, filenames, input_file_base_path: str, input_base_path: str,
 
 
 # Define the function to zip a folder, this ignores nested folders
-def zip_not_nested_folder(zipf, input_folder_path: str, input_base_path: str, ignore_filenames_regex: list = None):
+def zip_not_nested_folder(zipf, input_base_path: str, input_folder_path: str, ignore_filenames_regex: list = None):
     # Get the list of files in the specified folder
     filenames = [f for f in os.listdir(input_folder_path)]
 
@@ -49,6 +49,6 @@ def zip_nested_folder(zipf, input_base_path: str, input_folder_path: str, ignore
         # Zip the files in the subfolders
         zip_files(zipf, filenames, root, input_base_path, ignore_filenames_regex)
 
-        # Log
-        input_folder_rel_path = os.path.relpath(input_folder_path, input_base_path)
-        print(f'Zipped folder: {input_folder_rel_path}')
+    # Log
+    input_folder_rel_path = os.path.relpath(input_folder_path, input_base_path)
+    print(f'Zipped folder: {input_folder_rel_path}')

@@ -10,8 +10,6 @@ def split_images(input_to_process_dir: str, output_organized_to_process_dir: str
                  val_ratio=0.2):
     input_to_process_images_dir = os.path.join(input_to_process_dir, YOLO_IMAGES)
     input_to_process_annotations_dir = os.path.join(input_to_process_dir, YOLO_LABELS)
-    output_processed_images_dir = os.path.join(output_processed_dir, YOLO_IMAGES)
-    output_processed_annotations_dir = os.path.join(output_processed_dir, YOLO_LABELS)
     output_organized_training_dir = os.path.join(output_organized_to_process_dir, YOLO_TRAINING)
     output_organized_validations_dir = os.path.join(output_organized_to_process_dir, YOLO_VALIDATIONS)
     output_organized_testing_dir = os.path.join(output_organized_to_process_dir, YOLO_TESTING)
@@ -24,9 +22,8 @@ def split_images(input_to_process_dir: str, output_organized_to_process_dir: str
 
     # Check if the path exists, if not it creates it
     for io_dir in [input_to_process_dir, input_to_process_images_dir, input_to_process_annotations_dir,
-                   output_processed_dir, output_processed_images_dir, output_processed_annotations_dir,
-                   output_organized_to_process_dir, output_organized_training_dir, output_organized_validations_dir,
-                   output_organized_testing_dir, output_organized_training_images_dir,
+                   output_processed_dir, output_organized_to_process_dir, output_organized_training_dir,
+                   output_organized_validations_dir, output_organized_testing_dir, output_organized_training_images_dir,
                    output_organized_validations_images_dir, output_organized_testing_images_dir,
                    output_organized_training_annotations_dir, output_organized_validations_annotations_dir,
                    output_organized_testing_annotations_dir]:
@@ -67,5 +64,5 @@ def split_images(input_to_process_dir: str, output_organized_to_process_dir: str
 
     # Move the folders to the processed directory
     if output_processed_dir is not None:
-        move_folder(input_to_process_images_dir, output_processed_images_dir)
-        move_folder(input_to_process_annotations_dir, output_processed_annotations_dir)
+        move_folder(input_to_process_images_dir, output_processed_dir)
+        move_folder(input_to_process_annotations_dir, output_processed_dir)
