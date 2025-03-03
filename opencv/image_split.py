@@ -4,10 +4,10 @@ from files.files import copy_file, move_folder
 from opencv.constants import YOLO_IMAGES, YOLO_LABELS, YOLO_TRAINING, YOLO_VALIDATIONS, YOLO_TESTING
 
 
-# Split the images into processed, validation, and testing sets
-def split_images(input_to_process_dir: str, output_organized_to_process_dir: str, output_processed_dir: str = None,
-                 train_ratio=0.7,
-                 val_ratio=0.2):
+# Split the dataset into processed, validation, and testing sets
+def split_dataset(input_to_process_dir: str, output_organized_to_process_dir: str, output_processed_dir: str = None,
+                  train_ratio=0.7,
+                  val_ratio=0.2):
     input_to_process_images_dir = os.path.join(input_to_process_dir, YOLO_IMAGES)
     input_to_process_annotations_dir = os.path.join(input_to_process_dir, YOLO_LABELS)
     output_organized_training_dir = os.path.join(output_organized_to_process_dir, YOLO_TRAINING)

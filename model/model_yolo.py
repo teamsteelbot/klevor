@@ -20,13 +20,17 @@ def get_class_names(model):
 
     return model.names
 
-# Quantize the model
-def quantize(model):
-    return model.export(format="engine", int8=True)
+# Export the model to TensorRT format
+def export_tensor_rt(model, quantized:bool=True):
+    return model.export(format="engine", int8=quantized)
 
-# Save the ONNX model
+# Export the model to ONNX format
 def export_onnx(model):
     return model.export(format="onnx")
+
+# Export the model to TFLite format
+def export_tflite(model, quantized:bool=True):
+    return model.export(format="tflite", int8=quantized)
 
 # Run inference from PyTorch model
 def run_inference(model, preprocessed_image):
