@@ -56,6 +56,7 @@ class ImageBoundingBoxes:
     def get_boxes(self):
         return self.__cls, self.__conf, self.__xyxy
 
+
 # Convert the outputs to image bounding boxes instance
 def outputs_to_image_bounding_boxes(outputs):
     return ImageBoundingBoxes(outputs[0].boxes)

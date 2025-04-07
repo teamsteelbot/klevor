@@ -1,7 +1,7 @@
 import random
 import os
-from files.files import copy_file, move_folder
-from opencv.constants import YOLO_IMAGES, YOLO_LABELS, YOLO_TRAINING, YOLO_VALIDATIONS, YOLO_TESTING
+from files import copy_file, move_folder
+from opencv import YOLO_IMAGES, YOLO_LABELS, YOLO_TRAINING, YOLO_VALIDATIONS, YOLO_TESTING
 
 
 # Split the dataset into processed, validation, and testing sets

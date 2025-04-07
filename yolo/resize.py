@@ -1,6 +1,6 @@
-from opencv.constants import DEFAULT_SIZE
+from opencv import DEFAULT_SIZE
 from opencv.image_resize import resize_image
-from yolo.constants import YOLO_DATASET_ORIGINAL_TO_PROCESS, YOLO_DATASET_RESIZED_TO_PROCESS, \
+from yolo import YOLO_DATASET_ORIGINAL_TO_PROCESS, YOLO_DATASET_RESIZED_TO_PROCESS, \
     YOLO_DATASET_ORIGINAL_PROCESSED
 
 if __name__ == '__main__':

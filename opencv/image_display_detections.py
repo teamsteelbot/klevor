@@ -1,8 +1,9 @@
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
-from opencv.constants import DEFAULT_SIZE, DEFAULT_COLOR
+from opencv import DEFAULT_SIZE, DEFAULT_COLOR
 from model.image_bounding_boxes import ImageBoundingBoxes
+
 
 # Convert RGB to BGR
 def rgb_to_bgr(rgb: tuple[int, int, int]):
@@ -20,7 +21,8 @@ def get_bgr_color(class_number: int, rgb_colors: dict[int, tuple[int, int, int]]
 
 
 # Function to display the preprocessed image and the image with detections
-def display_detections(model_class_names:dict, preprocessed_image, image_bounding_boxes:ImageBoundingBoxes, draw_labels_name=False, font=cv2.FONT_HERSHEY_SIMPLEX,
+def display_detections(model_class_names: dict, preprocessed_image, image_bounding_boxes: ImageBoundingBoxes,
+                       draw_labels_name=False, font=cv2.FONT_HERSHEY_SIMPLEX,
                        font_x_diff=0, font_y_diff=-10, font_scale=0.9, thickness=2,
                        rgb_colors: dict[int, tuple[int, int, int]] = None):
     # Convert the image back to HWC format

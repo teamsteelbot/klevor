@@ -2,8 +2,8 @@ import cv2
 import albumentations as A
 import os
 import time
-from files.files import move_file
-from opencv.constants import YOLO_IMAGES, YOLO_LABELS
+from files import move_file
+from opencv import YOLO_IMAGES, YOLO_LABELS
 
 
 # Augment to_process images
