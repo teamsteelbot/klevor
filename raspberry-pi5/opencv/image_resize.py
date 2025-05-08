@@ -1,12 +1,13 @@
+from typing import LiteralString
+
 import cv2
 import os
 import time
 from files import move_file
 
-
 # Resize image function
-def resize_image(input_to_process_dir: str, output_resized_to_process_dir: str, new_image_size: tuple[int, int],
-                 output_processed_dir: str = None, interpolation=cv2.INTER_LINEAR):
+def resize_image(input_to_process_dir: LiteralString, output_resized_to_process_dir: LiteralString, new_image_size: tuple[int, int],
+                 output_processed_dir: LiteralString = None, interpolation=cv2.INTER_LINEAR):
     # Check if the path exists, if not it creates it
     if not os.path.exists(output_resized_to_process_dir):
         os.makedirs(output_resized_to_process_dir)

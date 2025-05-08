@@ -1,9 +1,12 @@
 import argparse
 import os
 import zipfile
+
+from args.args import get_attribute_name
 from files.zip import zip_nested_folder, zip_not_nested_folder
-from yolo import ARGS_YOLO_MODEL, ARGS_YOLO_MODEL_2C, ARGS_YOLO_MODEL_4C, ARGS_YOLO_MODEL_PROP, CWD, YOLO, \
-    YOLO_RUNS, YOLO_ZIP, YOLO_2C_NAME, YOLO_4C_NAME
+from model.model_yolo import get_model_name
+from yolo import (ARGS_YOLO_MODEL, CWD, YOLO_RUNS, YOLO_ZIP, YOLO_DIR)
+from yolo.args import add_yolo_model_argument
 
 
 # Define the function to zip the required files for model quantization
@@ -29,16 +32,14 @@ def zip_to_quantize(input_dir: str, input_yolo_dir: str, input_yolo_runs_dir: st
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Script to zip files for YOLO model quantization')
-    parser.add_argument(ARGS_YOLO_MODEL, type=str, required=True, help='YOLO model',
-                        choices=[ARGS_YOLO_MODEL_2C, ARGS_YOLO_MODEL_4C])
+    add_yolo_model_argument(parser)
     args = parser.parse_args()
 
     # Get the YOLO model
-    arg_yolo_model = getattr(args, ARGS_YOLO_MODEL_PROP)
+    arg_yolo_model = getattr(args, get_attribute_name(ARGS_YOLO_MODEL))
+
+    # Get the YOLO model name
+    model_name = get_model_name(arg_yolo_model)
 
     # Zip files
-    if arg_yolo_model == ARGS_YOLO_MODEL_2C:
-        zip_to_quantize(CWD, YOLO, YOLO_RUNS, YOLO_ZIP, YOLO_2C_NAME)
-
-    else:
-        zip_to_quantize(CWD, YOLO, YOLO_RUNS, YOLO_ZIP, YOLO_4C_NAME)
+    zip_to_quantize(CWD, YOLO_DIR, YOLO_RUNS, YOLO_ZIP, model_name)

@@ -1,12 +1,12 @@
 import argparse
 import os
+
+from args.args import get_attribute_name
+from model.model_yolo import get_dataset_model_name
 from opencv import YOLO_TRAINING, YOLO_VALIDATIONS
 from files import move_folder
-from yolo import (ARGS_YOLO_MODEL, ARGS_YOLO_MODEL_2C, ARGS_YOLO_MODEL_4C, \
-                  ARGS_YOLO_MODEL_PROP, YOLO_DATASET_ORGANIZED_2C_TO_PROCESS, \
-                  YOLO_DATASET_ORGANIZED_2C_PROCESSED, \
-                  YOLO_DATASET_ORGANIZED_4C_TO_PROCESS, \
-                  YOLO_DATASET_ORGANIZED_4C_PROCESSED)
+from yolo import (ARGS_YOLO_MODEL, YOLO_DATASET_ORGANIZED, YOLO_PROCESSED, YOLO_TO_PROCESS)
+from yolo.args import add_yolo_model_argument
 
 
 # Move the folders from the organized dataset to the processed dataset
@@ -26,16 +26,18 @@ def move_folders(input_base_dir, output_base_dir):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Script to set files as processed after YOLO model training')
-    parser.add_argument(ARGS_YOLO_MODEL, type=str, required=True, help='YOLO model',
-                        choices=[ARGS_YOLO_MODEL_2C, ARGS_YOLO_MODEL_4C])
+    add_yolo_model_argument(parser)
     args = parser.parse_args()
 
     # Get the YOLO model
-    arg_yolo_model = getattr(args, ARGS_YOLO_MODEL_PROP)
+    arg_yolo_model = getattr(args, get_attribute_name(ARGS_YOLO_MODEL))
+
+    # Get the required dataset folder name
+    organized_dataset_name = get_dataset_model_name(YOLO_DATASET_ORGANIZED, arg_yolo_model)
+
+    # Get the dataset paths
+    organized_to_process = os.path.join(YOLO_DATASET_ORGANIZED, organized_dataset_name, YOLO_TO_PROCESS)
+    organized_processed = os.path.join(YOLO_DATASET_ORGANIZED, organized_dataset_name, YOLO_PROCESSED)
 
     # Move the folders
-    if arg_yolo_model == ARGS_YOLO_MODEL_2C:
-        move_folders(YOLO_DATASET_ORGANIZED_2C_TO_PROCESS, YOLO_DATASET_ORGANIZED_2C_PROCESSED)
-
-    else:
-        move_folders(YOLO_DATASET_ORGANIZED_4C_TO_PROCESS, YOLO_DATASET_ORGANIZED_4C_PROCESSED)
+    move_folders(organized_to_process, organized_processed)

@@ -1,15 +1,20 @@
 import argparse
 import os
 import zipfile
+
+from typing_extensions import LiteralString
+
+from args.args import get_attribute_name
 from files.zip import zip_nested_folder, zip_not_nested_folder
-from yolo import (CWD, YOLO, YOLO_DATASET_ORGANIZED_2C_TO_PROCESS, YOLO_2C_NAME,
-                  YOLO_DATASET_ORGANIZED_4C_TO_PROCESS, YOLO_ZIP, YOLO_4C_NAME, ARGS_YOLO_MODEL_2C,
-                  ARGS_YOLO_MODEL, ARGS_YOLO_MODEL_4C, ARGS_YOLO_MODEL_PROP)
+from model.model_yolo import get_dataset_model_name, get_model_name
+from yolo import (CWD, YOLO_ZIP, ARGS_YOLO_MODEL, YOLO_MODEL_2C, YOLO_MODEL_4C, YOLO_DATASET_ORGANIZED, YOLO_TO_PROCESS,
+                  YOLO_DATASET, YOLO_DIR)
+from yolo.args import add_yolo_model_argument
 
 
 # Define the function to zip the required files for model training
-def zip_to_train(input_dir: str, input_yolo_dir: str, input_yolo_dataset_organized_to_process_dir: str,
-                 output_zip_dir: str,
+def zip_to_train(input_dir: LiteralString, input_yolo_dir: LiteralString, input_yolo_dataset_organized_to_process_dir: LiteralString,
+                 output_zip_dir: LiteralString,
                  model_name: str):
     # Define the output zip filename
     output_zip_filename = model_name + '_to_train.zip'
@@ -31,16 +36,21 @@ def zip_to_train(input_dir: str, input_yolo_dir: str, input_yolo_dataset_organiz
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Script to zip files for YOLO model training')
-    parser.add_argument(ARGS_YOLO_MODEL, type=str, required=True, help='YOLO model',
-                        choices=[ARGS_YOLO_MODEL_2C, ARGS_YOLO_MODEL_4C])
+    add_yolo_model_argument(parser)
     args = parser.parse_args()
 
     # Get the YOLO model
-    arg_yolo_model = getattr(args, ARGS_YOLO_MODEL_PROP)
+    arg_yolo_model = getattr(args, get_attribute_name(ARGS_YOLO_MODEL))
+
+    # Get the YOLO model name
+    model_name = get_model_name(arg_yolo_model)
+
+    # Get the required dataset folder name
+    organized_dataset_name = get_dataset_model_name(YOLO_DATASET_ORGANIZED, arg_yolo_model)
+
+    # Get the dataset paths
+    yolo_dataset_organized_to_process = os.path.join(YOLO_DATASET, organized_dataset_name, YOLO_TO_PROCESS)
 
     # Zip files
-    if arg_yolo_model == ARGS_YOLO_MODEL_2C:
-        zip_to_train(CWD, YOLO, YOLO_DATASET_ORGANIZED_2C_TO_PROCESS, YOLO_ZIP, YOLO_2C_NAME)
 
-    else:
-        zip_to_train(CWD, YOLO, YOLO_DATASET_ORGANIZED_4C_TO_PROCESS, YOLO_ZIP, YOLO_4C_NAME)
+    zip_to_train(CWD, YOLO_DIR, yolo_dataset_organized_to_process, YOLO_ZIP, model_name)

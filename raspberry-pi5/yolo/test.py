@@ -1,15 +1,17 @@
 import argparse
 import random
+
+from args.args import get_attribute_name
 from opencv.image_display_detections import preprocess, display_detections
 from model.image_bounding_boxes import outputs_to_image_bounding_boxes
 import os
 from opencv import DEFAULT_SIZE, YOLO_TESTING, YOLO_IMAGES
-from yolo import YOLO_NUMBER_RANDOM_IMAGES, ARGS_YOLO_MODEL, ARGS_YOLO_MODEL_2C, ARGS_YOLO_MODEL_4C, \
-    ARGS_YOLO_FORMAT, ARGS_YOLO_FORMAT_PT, ARGS_YOLO_QUANTIZED, ARGS_YOLO_MODEL_PROP, ARGS_YOLO_FORMAT_PROP, \
-    ARGS_YOLO_QUANTIZED_PROP, \
-    YOLO_RUNS_2C_WEIGHTS_BEST_PT, YOLO_RUNS_4C_WEIGHTS_BEST_PT, YOLO_DATASET_ORGANIZED_2C_TO_PROCESS, \
-    YOLO_DATASET_ORGANIZED_4C_TO_PROCESS, YOLO_2C_COLORS, YOLO_4C_COLORS
-from model.model_yolo import load, get_class_names, run_inference
+from yolo import (YOLO_NUMBER_RANDOM_IMAGES, ARGS_YOLO_FORMAT_PT, YOLO_2C_COLORS, YOLO_4C_COLORS, ARGS_YOLO_MODEL,
+                  ARGS_YOLO_FORMAT, ARGS_YOLO_QUANTIZED, ARGS_YOLO_VERSION, YOLO_DATASET_ORGANIZED, YOLO_MODEL_4C,
+                  YOLO_MODEL_2C)
+from model.model_yolo import load, get_class_names, run_inference, get_model_best_pt_path, get_model_weight_path, \
+    get_model_name, get_dataset_model_name
+from yolo.args import (add_yolo_model_argument, add_yolo_format_argument, add_yolo_quantized_argument, add_yolo_version_argument)
 
 
 # Test random images from the given directory
@@ -54,39 +56,48 @@ def test_random_images_pt(input_model_path: str, output_organized_dir: str, colo
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Script to test YOLO model with a given format')
-    parser.add_argument(ARGS_YOLO_MODEL, type=str, required=True, help='YOLO model',
-                        choices=[ARGS_YOLO_MODEL_2C, ARGS_YOLO_MODEL_4C])
-    parser.add_argument(ARGS_YOLO_FORMAT, type=str, required=True, help='YOLO format',
-                        choices=[ARGS_YOLO_FORMAT_PT])
-    parser.add_argument(ARGS_YOLO_QUANTIZED, type=bool, required=False, help='YOLO model quantization')
+    add_yolo_model_argument(parser)
+    add_yolo_format_argument(parser)
+    add_yolo_quantized_argument(parser)
+    add_yolo_version_argument(parser)
     args = parser.parse_args()
 
     # Get the YOLO model
-    arg_yolo_model = getattr(args, ARGS_YOLO_MODEL_PROP)
+    arg_yolo_model = getattr(args, get_attribute_name(ARGS_YOLO_MODEL))
 
     # Get the YOLO format
-    arg_yolo_format = getattr(args, ARGS_YOLO_FORMAT_PROP)
+    arg_yolo_format = getattr(args, get_attribute_name(ARGS_YOLO_FORMAT))
 
     # Get the YOLO quantization
-    arg_yolo_quantized = getattr(args, ARGS_YOLO_QUANTIZED_PROP)
-    if arg_yolo_quantized is None:
-        arg_yolo_quantized = False
+    arg_yolo_quantized = getattr(args, get_attribute_name(ARGS_YOLO_QUANTIZED))
+
+    # Get the YOLO version
+    arg_yolo_version = getattr(args, get_attribute_name(ARGS_YOLO_VERSION))
 
     # Load a model
-    model_path = None
-    if arg_yolo_model == ARGS_YOLO_MODEL_2C:
-        if arg_yolo_format == ARGS_YOLO_FORMAT_PT:
-            model_path = YOLO_RUNS_2C_WEIGHTS_BEST_PT
-
-    elif arg_yolo_model == ARGS_YOLO_MODEL_4C:
-        if arg_yolo_format == ARGS_YOLO_FORMAT_PT:
-            model_path = YOLO_RUNS_4C_WEIGHTS_BEST_PT
+    model_path = get_model_best_pt_path(arg_yolo_model, arg_yolo_version)
     model = load(model_path)
 
-    if arg_yolo_model == ARGS_YOLO_MODEL_2C:
-        if arg_yolo_format == ARGS_YOLO_FORMAT_PT:
-            test_random_images_pt(YOLO_RUNS_2C_WEIGHTS_BEST_PT, YOLO_DATASET_ORGANIZED_2C_TO_PROCESS, YOLO_2C_COLORS)
+    # Get the model name
+    model_name = get_model_name(arg_yolo_model)
 
-    elif arg_yolo_model == ARGS_YOLO_MODEL_4C:
+    # Get the model weights path
+    model_weights_path = get_model_weight_path(model_name, arg_yolo_version)
+
+    # Get the required dataset folder name
+    organized_to_process = get_dataset_model_name(YOLO_DATASET_ORGANIZED, arg_yolo_model)
+
+    # Get the dataset paths
+    weights_best_pt = get_model_best_pt_path(model_name, arg_yolo_version)
+
+    # Get the class colors
+    yolo_colors = None
+    if arg_yolo_model == YOLO_MODEL_2C:
         if arg_yolo_format == ARGS_YOLO_FORMAT_PT:
-            test_random_images_pt(YOLO_RUNS_4C_WEIGHTS_BEST_PT, YOLO_DATASET_ORGANIZED_4C_TO_PROCESS, YOLO_4C_COLORS)
+            yolo_colors = YOLO_2C_COLORS
+
+    elif arg_yolo_model == YOLO_MODEL_4C:
+        if arg_yolo_format == ARGS_YOLO_FORMAT_PT:
+            yolo_colors = YOLO_4C_COLORS
+
+    test_random_images_pt(weights_best_pt, organized_to_process, yolo_colors)

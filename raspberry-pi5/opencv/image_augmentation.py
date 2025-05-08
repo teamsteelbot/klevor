@@ -1,3 +1,5 @@
+from typing import LiteralString
+
 import cv2
 import albumentations as A
 import os
