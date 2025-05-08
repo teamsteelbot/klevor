@@ -1,7 +1,6 @@
 import argparse
 import os.path
 
-from args.args import get_attribute_name
 from model.model_yolo import get_dataset_model_name
 from opencv.image_split import split_dataset
 from yolo import (ARGS_YOLO_MODEL, YOLO_DATASET_AUGMENTED, YOLO_DATASET_ORGANIZED, YOLO_TO_PROCESS, YOLO_PROCESSED)
@@ -13,7 +12,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # Get the YOLO model
-    arg_yolo_model = getattr(args, get_attribute_name(ARGS_YOLO_MODEL))
+    arg_yolo_model = getattr(args, ARGS_YOLO_MODEL)
 
     # Get the required dataset folder name
     augmented_name = get_dataset_model_name(YOLO_DATASET_AUGMENTED, arg_yolo_model)

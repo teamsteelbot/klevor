@@ -1,0 +1,5 @@
+train: /content/drive/MyDrive/Colab Files/steel_bot_2c/yolo/dataset/organized_2c/to_process/train/images
+val: /content/drive/MyDrive/Colab Files/steel_bot_2c/yolo/dataset/organized_2c/to_process/val/images
+
+nc: 2  # number of classes
+names: [ 'green rectangular prism', 'red rectangular prism' ]  # class names

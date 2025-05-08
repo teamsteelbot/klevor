@@ -1,0 +1,5 @@
+train: C:/Users/ralva/Documents/private/projects/uncompleted/steel-bot/yolo/dataset/organized_4c/to_process/train/images
+val: C:/Users/ralva/Documents/private/projects/uncompleted/steel-bot/yolo/dataset/organized_4c/to_process/val/images
+
+nc: 4  # number of classes
+names: [ 'blue line', 'green rectangular prism', 'orange line', 'red rectangular prism' ]  # class names

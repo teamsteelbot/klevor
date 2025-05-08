@@ -1,7 +1,6 @@
 import argparse
 import random
 
-from args.args import get_attribute_name
 from opencv.image_display_detections import preprocess, display_detections
 from model.image_bounding_boxes import outputs_to_image_bounding_boxes
 import os
@@ -63,16 +62,16 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # Get the YOLO model
-    arg_yolo_model = getattr(args, get_attribute_name(ARGS_YOLO_MODEL))
+    arg_yolo_model = getattr(args, ARGS_YOLO_MODEL)
 
     # Get the YOLO format
-    arg_yolo_format = getattr(args, get_attribute_name(ARGS_YOLO_FORMAT))
+    arg_yolo_format = getattr(args, ARGS_YOLO_FORMAT)
 
     # Get the YOLO quantization
-    arg_yolo_quantized = getattr(args, get_attribute_name(ARGS_YOLO_QUANTIZED))
+    arg_yolo_quantized = getattr(args, ARGS_YOLO_QUANTIZED)
 
     # Get the YOLO version
-    arg_yolo_version = getattr(args, get_attribute_name(ARGS_YOLO_VERSION))
+    arg_yolo_version = getattr(args, ARGS_YOLO_VERSION)
 
     # Load a model
     model_path = get_model_best_pt_path(arg_yolo_model, arg_yolo_version)

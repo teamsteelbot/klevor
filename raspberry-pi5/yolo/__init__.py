@@ -1,5 +1,7 @@
 import os
 
+from args.args import get_attribute_name
+
 # Folders (executed from root folder)
 CWD = os.getcwd()
 
@@ -18,13 +20,17 @@ YOLO_NUM_AUGMENTATIONS = 10
 # Epochs
 YOLO_EPOCHS = 100
 
+# Image size
+YOLO_IMAGE_SIZE = 640
+
 # YOLO folders
 YOLO_DIR = os.path.join(CWD, 'yolo')
 YOLO_MODEL_2C = '2c'
 YOLO_MODEL_4C = '4c'
 YOLO_VERSION_5 = 'v5'
 YOLO_VERSION_11 = 'v11'
-YOLO_DATASET = os.path.join(YOLO, 'dataset')
+YOLO_COLAB = os.path.join(YOLO_DIR, 'colab')
+YOLO_DATASET = os.path.join(YOLO_DIR, 'dataset')
 YOLO_REPO = 'ultralytics/ultralytics'
 
 # Yolo folders common suffixes and prefixes
@@ -48,7 +54,7 @@ YOLO_RUNS = 'runs'
 YOLO_WEIGHTS = 'weights'
 
 # YOLO zip folder
-YOLO_ZIP = os.path.join(YOLO, 'zip')
+YOLO_ZIP = 'zip'
 
 # YOLO class colors
 YOLO_2C_COLORS = {0: (68, 214, 44), 1: (238, 39, 55)}
@@ -60,10 +66,13 @@ YOLO_NUMBER_RANDOM_IMAGES = 10
 
 # Arguments
 ARGS_YOLO_FORMAT = 'format'
+ARGS_YOLO_QUANTIZED = 'quantized'
+ARGS_YOLO_MODEL = 'model'
+ARGS_YOLO_VERSION = 'version'
+
+# YOLO formats
 ARGS_YOLO_FORMAT_ONNX = 'onnx'
 ARGS_YOLO_FORMAT_TFLITE = 'tflite'
 ARGS_YOLO_FORMAT_TENSOR_RT = 'tensor_rt'
 ARGS_YOLO_FORMAT_PT = 'pt'
-ARGS_YOLO_QUANTIZED = 'quantized'
-ARGS_YOLO_MODEL = 'model'
-ARGS_YOLO_VERSION = 'version'
+
