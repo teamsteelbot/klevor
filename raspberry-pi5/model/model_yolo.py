@@ -1,6 +1,7 @@
 import os
 import time
 from typing import LiteralString
+from pathlib import Path
 
 import torch
 from ultralytics import YOLO
@@ -10,13 +11,15 @@ from yolo import (YOLO_DATASET, YOLO_TO_PROCESS, YOLO_PROCESSED,
                   YOLO_RUNS, YOLO_NAME, YOLO_WEIGHTS, BEST_PT, YOLO_DIR, )
 
 # Load YOLO PyTorch model
-def load(model_path: str, task='detect'):
-    # Verify the model file exists
-    if not os.path.exists(model_path):
-        raise FileNotFoundError(f"Model file not found: {model_path}")
+def load(model: str, task='detect'):
+    # Check if the model has a parent directory
+    if Path(model).parent != Path('.'):
+        # Verify the model file exists
+        if not os.path.exists(model):
+            raise FileNotFoundError(f"Model file not found: {model}")
 
     # Load the model
-    model = YOLO(model_path, task=task, verbose=True)
+    model = YOLO(model, task=task, verbose=True)
     return model
 
 
