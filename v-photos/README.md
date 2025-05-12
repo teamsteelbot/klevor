@@ -1,0 +1,1 @@
+Esta carpeta contiene todas las fotos correspondientes al vehículo Klevor.
