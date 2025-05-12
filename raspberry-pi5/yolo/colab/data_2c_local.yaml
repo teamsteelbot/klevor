@@ -1,5 +1,0 @@
-train: C:/Users/ralva/Documents/private/projects/uncompleted/steel-bot/yolo/dataset/organized_2c/to_process/train/images
-val: C:/Users/ralva/Documents/private/projects/uncompleted/steel-bot/yolo/dataset/organized_2c/to_process/val/images
-
-nc: 2  # number of classes
-names: [ 'green rectangular prism', 'red rectangular prism' ]  # class names
