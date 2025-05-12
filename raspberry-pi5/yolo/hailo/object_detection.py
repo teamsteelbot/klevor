@@ -2,7 +2,6 @@
 
 import argparse
 import os
-import sys
 from pathlib import Path
 import numpy as np
 from loguru import logger
@@ -11,8 +10,6 @@ import threading
 import cv2
 from typing import List
 from object_detection_utils import ObjectDetectionUtils
-
-# Add the parent directory to the system path to access utils module
 from utils import HailoAsyncInference, load_images_opencv, validate_images, divide_list_to_batches
 
 CAMERA_CAP_WIDTH = 1920
