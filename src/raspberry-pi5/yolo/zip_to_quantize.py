@@ -4,7 +4,6 @@ import zipfile
 from typing import LiteralString
 
 from files.zip import zip_nested_folder, zip_not_nested_folder
-from model.model_yolo import get_model_name
 from yolo import (ARGS_YOLO_MODEL, CWD, YOLO_RUNS, YOLO_ZIP, YOLO_DIR, YOLO_COLAB,
                   ARGS_YOLO_VERSION)
 from yolo.args import add_yolo_model_argument, add_yolo_version_argument
@@ -60,9 +59,6 @@ if __name__ == '__main__':
     # Get the YOLO version
     arg_yolo_version = getattr(args, ARGS_YOLO_VERSION)
 
-    # Get the YOLO model name
-    model_name = get_model_name(arg_yolo_model)
-
     # Get the YOLO version folder
     yolo_version_dir = os.path.join(YOLO_DIR, arg_yolo_version)
 
@@ -76,4 +72,4 @@ if __name__ == '__main__':
     yolo_colab_dir = os.path.join(yolo_version_dir, YOLO_COLAB)
 
     # Zip files
-    zip_to_quantize(CWD, YOLO_DIR, yolo_colab_dir, yolo_runs_dir, yolo_version_dir, yolo_zip_dir, model_name)
+    zip_to_quantize(CWD, YOLO_DIR, yolo_colab_dir, yolo_runs_dir, yolo_version_dir, yolo_zip_dir, arg_yolo_model)

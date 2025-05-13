@@ -1,18 +1,10 @@
 import os
 
-from args.args import get_attribute_name
-
 # Folders (executed from root folder)
 CWD = os.getcwd()
 
 # ONNX metadata properties class names key
 ONNX_METADATA_CLASS_NAMES_KEY = 'names'
-
-# Spacer
-SPACER = '_'
-
-# YOLO model name
-YOLO_NAME = 'steel_bot'
 
 # Number of augmentations
 YOLO_NUM_AUGMENTATIONS = 10
@@ -23,26 +15,34 @@ YOLO_EPOCHS = 100
 # Image size
 YOLO_IMAGE_SIZE = 640
 
-# YOLO folders
+# YOLO folder
 YOLO_DIR = os.path.join(CWD, 'yolo')
+
+# YOLO model names
 YOLO_MODEL_2C = '2c'
+YOLO_MODEL_3C = '3c'
 YOLO_MODEL_4C = '4c'
+
+# YOLO model versions
 YOLO_VERSION_5 = 'v5'
 YOLO_VERSION_11 = 'v11'
+
+# YOLO dataset folders
 YOLO_COLAB = os.path.join(YOLO_DIR, 'colab')
 YOLO_DATASET = os.path.join(YOLO_DIR, 'dataset')
-YOLO_REPO = 'ultralytics/ultralytics'
-
-# Yolo folders common suffixes and prefixes
-YOLO_TO_PROCESS = 'to_process'
-YOLO_PROCESSED = 'processed'
-
-# YOLO dataset main folders
+YOLO_DATASET_GENERAL = 'general'
 YOLO_DATASET_ORIGINAL = 'original'
 YOLO_DATASET_RESIZED = 'resized'
 YOLO_DATASET_LABELED = 'labeled'
 YOLO_DATASET_AUGMENTED = 'augmented'
 YOLO_DATASET_ORGANIZED = 'organized'
+YOLO_DATASET_TO_PROCESS = 'to_process'
+YOLO_DATASET_PROCESSED = 'processed'
+YOLO_DATASET_IMAGES = 'images'
+YOLO_DATASET_LABELS = 'labels'
+YOLO_DATASET_TRAINING = 'train'
+YOLO_DATASET_VALIDATIONS = 'val'
+YOLO_DATASET_TESTING = 'test'
 
 # YOLO models
 BEST_ONNX = 'best.onnx'
@@ -58,6 +58,7 @@ YOLO_ZIP = 'zip'
 
 # YOLO class colors
 YOLO_2C_COLORS = {0: (68, 214, 44), 1: (238, 39, 55)}
+YOLO_3C_COLORS = {0: (68, 214, 44), 1: (238, 39, 55), 2: (255, 0, 255)}
 YOLO_4C_COLORS = {0: (0, 51, 255), 1: (68, 214, 44), 2: (255, 102, 0), 3: (238, 39, 55)}
 
 # Minimum confidence level and number of random images to test

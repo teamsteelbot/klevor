@@ -1,11 +1,9 @@
-from typing import LiteralString
-
 import cv2
 import albumentations as A
 import os
 import time
 from files import move_file
-from opencv import YOLO_IMAGES, YOLO_LABELS
+from yolo import (YOLO_DATASET_IMAGES, YOLO_DATASET_LABELS)
 
 
 # Augment to_process images
@@ -46,7 +44,8 @@ def augment_images(input_to_process_image_path: str, input_to_process_annotation
         A.ShiftScaleRotate(shift_limit=0.1, scale_limit=0.1, rotate_limit=15, p=0.5),
 
         # Apply with a 30% probability a random RGB shift
-        A.RGBShift(r_shift_limit=25, g_shift_limit=25, b_shift_limit=25, p=0.3),
+        # A.RGBShift(r_shift_limit=25, g_shift_limit=25, b_shift_limit=25, p=0.3),
+        # Currently, this is being on hold because it may trigger incorrect labels due to the color shift
 
         # Apply with a 30% probability a random crop
         A.RandomCrop(width=int(image.shape[1] * 0.9), height=int(image.shape[0] * 0.9), p=0.3),  # Optional random crop
@@ -101,12 +100,12 @@ def augment_images(input_to_process_image_path: str, input_to_process_annotation
 # Augment a dataset
 def augment_dataset(input_to_process_dir: str, output_augmented_to_process_dir: str, num_augmentations=5,
                     output_processed_dir: str = None):
-    input_to_process_images_dir = os.path.join(input_to_process_dir, YOLO_IMAGES)
-    input_to_process_annotations_dir = os.path.join(input_to_process_dir, YOLO_LABELS)
-    output_augmented_to_process_images_dir = os.path.join(output_augmented_to_process_dir, YOLO_IMAGES)
-    output_augmented_to_process_annotations_dir = os.path.join(output_augmented_to_process_dir, YOLO_LABELS)
-    output_processed_images_dir = os.path.join(output_processed_dir, YOLO_IMAGES)
-    output_processed_annotations_dir = os.path.join(output_processed_dir, YOLO_LABELS)
+    input_to_process_images_dir = os.path.join(input_to_process_dir, YOLO_DATASET_IMAGES)
+    input_to_process_annotations_dir = os.path.join(input_to_process_dir, YOLO_DATASET_LABELS)
+    output_augmented_to_process_images_dir = os.path.join(output_augmented_to_process_dir, YOLO_DATASET_IMAGES)
+    output_augmented_to_process_annotations_dir = os.path.join(output_augmented_to_process_dir, YOLO_DATASET_LABELS)
+    output_processed_images_dir = os.path.join(output_processed_dir, YOLO_DATASET_IMAGES)
+    output_processed_annotations_dir = os.path.join(output_processed_dir, YOLO_DATASET_LABELS)
 
     # Check if the output directories exist, if not it creates them
     for io_dir in [input_to_process_dir, input_to_process_images_dir, input_to_process_annotations_dir,

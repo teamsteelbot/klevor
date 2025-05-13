@@ -1,10 +1,9 @@
 import argparse
-import os.path
 
-from model.model_yolo import get_dataset_model_name
 from opencv.image_split import split_dataset
-from yolo import (ARGS_YOLO_MODEL, YOLO_DATASET_AUGMENTED, YOLO_DATASET_ORGANIZED, YOLO_TO_PROCESS, YOLO_PROCESSED)
+from yolo import (ARGS_YOLO_MODEL, YOLO_DATASET_AUGMENTED, YOLO_DATASET_ORGANIZED, YOLO_DATASET_TO_PROCESS, YOLO_DATASET_PROCESSED)
 from yolo.args import add_yolo_model_argument
+from yolo.files import get_dataset_model_dir_path
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Script to split YOLO dataset images and labels')
@@ -14,14 +13,10 @@ if __name__ == '__main__':
     # Get the YOLO model
     arg_yolo_model = getattr(args, ARGS_YOLO_MODEL)
 
-    # Get the required dataset folder name
-    augmented_name = get_dataset_model_name(YOLO_DATASET_AUGMENTED, arg_yolo_model)
-    organized_name = get_dataset_model_name(YOLO_DATASET_ORGANIZED, arg_yolo_model)
-
     # Get the dataset paths
-    augmented_to_process = os.path.join(YOLO_DATASET_AUGMENTED, augmented_name, YOLO_TO_PROCESS)
-    organized_to_process = os.path.join(YOLO_DATASET_ORGANIZED, organized_name, YOLO_TO_PROCESS)
-    augmented_processed = os.path.join(YOLO_DATASET_AUGMENTED, augmented_name, YOLO_PROCESSED)
+    augmented_to_process_dir = get_dataset_model_dir_path(YOLO_DATASET_AUGMENTED, YOLO_DATASET_TO_PROCESS, arg_yolo_model)
+    organized_to_process_dir = get_dataset_model_dir_path(YOLO_DATASET_ORGANIZED, YOLO_DATASET_TO_PROCESS, arg_yolo_model)
+    augmented_processed_dir = get_dataset_model_dir_path(YOLO_DATASET_AUGMENTED, YOLO_DATASET_PROCESSED, arg_yolo_model)
 
     # Split the images
-    split_dataset(augmented_to_process, organized_to_process, augmented_processed)
+    split_dataset(augmented_to_process_dir, organized_to_process_dir, augmented_processed_dir)

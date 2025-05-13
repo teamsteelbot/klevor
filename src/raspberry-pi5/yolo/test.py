@@ -4,13 +4,13 @@ import random
 from opencv.image_display_detections import preprocess, display_detections
 from model.image_bounding_boxes import outputs_to_image_bounding_boxes
 import os
-from opencv import DEFAULT_SIZE, YOLO_TESTING, YOLO_IMAGES
+from opencv import DEFAULT_SIZE
 from yolo import (YOLO_NUMBER_RANDOM_IMAGES, ARGS_YOLO_FORMAT_PT, YOLO_2C_COLORS, YOLO_4C_COLORS, ARGS_YOLO_MODEL,
                   ARGS_YOLO_FORMAT, ARGS_YOLO_QUANTIZED, ARGS_YOLO_VERSION, YOLO_DATASET_ORGANIZED, YOLO_MODEL_4C,
-                  YOLO_MODEL_2C)
-from model.model_yolo import load, get_class_names, run_inference, get_model_best_pt_path, get_model_weight_path, \
-    get_model_name, get_dataset_model_name
+                  YOLO_MODEL_2C, YOLO_DATASET_TO_PROCESS, YOLO_3C_COLORS, YOLO_DATASET_TESTING, YOLO_DATASET_IMAGES)
+from model.yolo import (load, get_class_names, run_inference)
 from yolo.args import (add_yolo_model_argument, add_yolo_format_argument, add_yolo_quantized_argument, add_yolo_version_argument)
+from yolo.files import (get_dataset_model_dir_path, get_model_best_pt_path, get_model_weight_dir_path)
 
 
 # Test random images from the given directory
@@ -18,7 +18,7 @@ def test_random_images(model, model_class_names: dict, run_inference_fn, input_o
                        draw_labels_name: bool, rgb_colors: dict[int, tuple[int, int, int]] = None,
                        image_size: tuple[int, int] = DEFAULT_SIZE):
     # Get testing folder
-    input_images_testing_dir = os.path.join(input_organized_dir, YOLO_TESTING, YOLO_IMAGES)
+    input_images_testing_dir = os.path.join(input_organized_dir, YOLO_DATASET_TESTING, YOLO_DATASET_IMAGES)
 
     # Get some random images
     filenames = os.listdir(input_images_testing_dir)
@@ -77,17 +77,14 @@ if __name__ == '__main__':
     model_path = get_model_best_pt_path(arg_yolo_model, arg_yolo_version)
     model = load(model_path)
 
-    # Get the model name
-    model_name = get_model_name(arg_yolo_model)
-
     # Get the model weights path
-    model_weights_path = get_model_weight_path(model_name, arg_yolo_version)
+    model_weights_path = get_model_weight_dir_path(arg_yolo_model, arg_yolo_version)
 
     # Get the required dataset folder name
-    organized_to_process = get_dataset_model_name(YOLO_DATASET_ORGANIZED, arg_yolo_model)
+    organized_to_process_dir = get_dataset_model_dir_path(YOLO_DATASET_ORGANIZED, YOLO_DATASET_TO_PROCESS, arg_yolo_model)
 
     # Get the dataset paths
-    weights_best_pt = get_model_best_pt_path(model_name, arg_yolo_version)
+    weights_best_pt = get_model_best_pt_path(arg_yolo_model, arg_yolo_version)
 
     # Get the class colors
     yolo_colors = None
@@ -95,8 +92,12 @@ if __name__ == '__main__':
         if arg_yolo_format == ARGS_YOLO_FORMAT_PT:
             yolo_colors = YOLO_2C_COLORS
 
+    elif arg_yolo_model == YOLO_3C_COLORS:
+        if arg_yolo_format == ARGS_YOLO_FORMAT_PT:
+            yolo_colors = YOLO_3C_COLORS
+
     elif arg_yolo_model == YOLO_MODEL_4C:
         if arg_yolo_format == ARGS_YOLO_FORMAT_PT:
             yolo_colors = YOLO_4C_COLORS
 
-    test_random_images_pt(weights_best_pt, organized_to_process, yolo_colors)
+    test_random_images_pt(weights_best_pt, organized_to_process_dir, yolo_colors)

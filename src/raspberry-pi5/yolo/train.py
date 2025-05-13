@@ -1,5 +1,5 @@
 from yolo import YOLO_EPOCHS
-from model.model_yolo import load
+from model.yolo import load
 
 
 # Train model

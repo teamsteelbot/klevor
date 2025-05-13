@@ -1,17 +1,17 @@
 import argparse
 import os
 
-from model.model_yolo import get_dataset_model_name
-from opencv import YOLO_TRAINING, YOLO_VALIDATIONS
 from files import move_folder
-from yolo import (ARGS_YOLO_MODEL, YOLO_DATASET_ORGANIZED, YOLO_PROCESSED, YOLO_TO_PROCESS)
+from yolo import (ARGS_YOLO_MODEL, YOLO_DATASET_ORGANIZED, YOLO_DATASET_PROCESSED, YOLO_DATASET_TO_PROCESS,
+                  YOLO_DATASET_TRAINING, YOLO_DATASET_VALIDATIONS)
 from yolo.args import add_yolo_model_argument
+from yolo.files import get_dataset_model_dir_path
 
 
 # Move the folders from the organized dataset to the processed dataset
 def move_folders(input_base_dir, output_base_dir):
     # Move the folders
-    for folder in [YOLO_TRAINING, YOLO_VALIDATIONS]:
+    for folder in [YOLO_DATASET_TRAINING, YOLO_DATASET_VALIDATIONS]:
         # Set the input and output directories
         input_dir = os.path.join(input_base_dir, folder)
         output_dir = os.path.join(output_base_dir, folder)
@@ -31,12 +31,9 @@ if __name__ == '__main__':
     # Get the YOLO model
     arg_yolo_model = getattr(args, ARGS_YOLO_MODEL)
 
-    # Get the required dataset folder name
-    organized_dataset_name = get_dataset_model_name(YOLO_DATASET_ORGANIZED, arg_yolo_model)
-
     # Get the dataset paths
-    organized_to_process = os.path.join(YOLO_DATASET_ORGANIZED, organized_dataset_name, YOLO_TO_PROCESS)
-    organized_processed = os.path.join(YOLO_DATASET_ORGANIZED, organized_dataset_name, YOLO_PROCESSED)
+    organized_to_process_dir = get_dataset_model_dir_path(YOLO_DATASET_ORGANIZED, YOLO_DATASET_TO_PROCESS, arg_yolo_model)
+    organized_processed_dir = get_dataset_model_dir_path(YOLO_DATASET_ORGANIZED, YOLO_DATASET_PROCESSED, arg_yolo_model)
 
     # Move the folders
-    move_folders(organized_to_process, organized_processed)
+    move_folders(organized_to_process_dir, organized_processed_dir)
