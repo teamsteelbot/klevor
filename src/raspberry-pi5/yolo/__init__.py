@@ -27,8 +27,19 @@ YOLO_MODEL_4C = '4c'
 YOLO_VERSION_5 = 'v5'
 YOLO_VERSION_11 = 'v11'
 
+# YOLO data
+YOLO_DATA = 'data'
+
+# YOLO colab
+YOLO_COLAB = 'colab'
+
+# YOLO local
+YOLO_LOCAL = 'local'
+
+# YOLO notebooks
+YOLO_NOTEBOOKS = 'notebooks'
+
 # YOLO dataset folders
-YOLO_COLAB = os.path.join(YOLO_DIR, 'colab')
 YOLO_DATASET = os.path.join(YOLO_DIR, 'dataset')
 YOLO_DATASET_GENERAL = 'general'
 YOLO_DATASET_ORIGINAL = 'original'
@@ -70,6 +81,7 @@ ARGS_YOLO_FORMAT = 'format'
 ARGS_YOLO_QUANTIZED = 'quantized'
 ARGS_YOLO_MODEL = 'model'
 ARGS_YOLO_VERSION = 'version'
+ARGS_YOLO_IS_RETRAINING = 'is_retraining'
 
 # YOLO formats
 ARGS_YOLO_FORMAT_ONNX = 'onnx'
