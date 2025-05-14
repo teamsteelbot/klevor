@@ -5,6 +5,7 @@ from pathlib import Path
 import torch
 from ultralytics import YOLO
 
+
 # Load YOLO PyTorch model
 def load(model: str, task='detect'):
     # Check if the model has a parent directory

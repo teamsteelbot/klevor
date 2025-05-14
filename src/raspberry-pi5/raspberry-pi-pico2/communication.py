@@ -2,7 +2,7 @@ import serial
 import time
 
 try:
-    ser = serial.Serial('/dev/ttyACM0', 115200) # Replace with your Pico's serial port
+    ser = serial.Serial('/dev/ttyACM0', 115200)  # Replace with your Pico's serial port
     print("Serial port opened successfully!")
 
     while True:

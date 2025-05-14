@@ -1,2 +1,2 @@
 # Arguments
-ARGS_PREFIX= '--'
+ARGS_PREFIX = '--'

@@ -60,8 +60,11 @@ BEST_ONNX = 'best.onnx'
 BEST_PT = 'best.pt'
 BEST_TENSOR_RT_QUANTIZED = 'best.engine'
 
-# YOLO weights
+# YOLO runs
+YOLO_RUNS_OLD = 'runs_old'
 YOLO_RUNS = 'runs'
+
+# YOLO weights
 YOLO_WEIGHTS = 'weights'
 
 # YOLO zip folder
