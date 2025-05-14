@@ -38,7 +38,7 @@ def zip_to_quantize(input_dir: LiteralString, input_yolo_dir: LiteralString, inp
 
         # Zip the YOLO notebooks folder
         zip_nested_folder(zipf, input_dir, input_yolo_notebooks_dir)
-        print('Zip the YOLO version colab folder')
+        print('Zip the YOLO notebooks folder')
 
         # Zip the YOLO model runs folder
         zip_nested_folder(zipf, input_dir, input_yolo_runs_dir)
