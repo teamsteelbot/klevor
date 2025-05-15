@@ -16,7 +16,7 @@ from yolo.files import (get_dataset_model_dir_path, get_model_weight_dir_path, g
 # Define the function to zip the required files for model training
 def zip_to_train(input_dir: LiteralString, input_yolo_dir: LiteralString, input_yolo_dataset_organized_to_process_dir: LiteralString,
                  input_yolo_version_dir: LiteralString, input_yolo_data_dir: LiteralString, input_yolo_notebooks_dir: LiteralString, input_yolo_weights_dir: LiteralString, output_zip_dir: LiteralString,
-                 model_name: str, is_retraining: bool):
+                 model_name: str, is_retraining: str):
     # Define the output zip filename
     output_zip_filename = model_name + '_to_train.zip'
     output_zip_path = os.path.join(output_zip_dir, output_zip_filename)
@@ -52,7 +52,7 @@ def zip_to_train(input_dir: LiteralString, input_yolo_dir: LiteralString, input_
         print('Zip the YOLO notebooks folder')
 
         # Check if the model is retraining
-        if is_retraining:
+        if is_retraining=="True":
             # Zip the YOLO model weights folder
             zip_not_nested_folder(zipf, input_dir, input_yolo_weights_dir)
             print('Zip the YOLO model weights folder')
