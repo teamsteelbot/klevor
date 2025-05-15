@@ -70,10 +70,17 @@ YOLO_WEIGHTS = 'weights'
 # YOLO zip folder
 YOLO_ZIP = 'zip'
 
+# Colors
+GREEN_COLOR = (68, 214, 44)
+MAGENTA_COLOR = (255, 0, 255)
+RED_COLOR = (238, 39, 55)
+BLUE_COLOR = (0, 51, 255)
+ORANGE_COLOR = (255, 102, 0)
+
 # YOLO class colors
-YOLO_2C_COLORS = {0: (68, 214, 44), 1: (238, 39, 55)}
-YOLO_3C_COLORS = {0: (68, 214, 44), 1: (238, 39, 55), 2: (255, 0, 255)}
-YOLO_4C_COLORS = {0: (0, 51, 255), 1: (68, 214, 44), 2: (255, 102, 0), 3: (238, 39, 55)}
+YOLO_2C_COLORS = {0: GREEN_COLOR, 1: RED_COLOR}
+YOLO_3C_COLORS = {0: GREEN_COLOR, 1: MAGENTA_COLOR, 2: RED_COLOR}
+YOLO_4C_COLORS = {0: BLUE_COLOR, 1: GREEN_COLOR, 2: ORANGE_COLOR, 3: RED_COLOR}
 
 # Minimum confidence level and number of random images to test
 YOLO_MINIMUM_CONFIDENCE_LEVEL = 0.70

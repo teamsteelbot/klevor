@@ -16,8 +16,11 @@
 4. **[Modelos 3D](models/README.md)**
 5. **[Diagramas y esquemas](schemes/README.md)**
    1. [Diagrama de conexiones](#schemes/connection-diagram.jpg)
-   2. [ Esquema de decisiones](#schemes/flowchart.jpg)
+   2. [Esquema de decisiones](#schemes/flowchart.jpg)
 6. **[Código](src/README.md)**
+   1. [Raspberry Pi 5](src/raspberry-pi5/README.md)
+      1. [YOLO](src/raspberry-pi5/yolo/README.md)
+   2. [Raspberry Pi Pico 2 WH](src/raspberry-pi-pico2/README.md)
 7. **[Fotos del equipo](t-photos/README.md)**
 8. **[Fotos de Klevor](v-photos/README.md)**
 9. **[Vídeos](video/README.md)**

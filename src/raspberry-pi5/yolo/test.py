@@ -8,7 +8,8 @@ import os
 from opencv import DEFAULT_SIZE
 from yolo import (YOLO_NUMBER_RANDOM_IMAGES, ARGS_YOLO_FORMAT_PT, YOLO_2C_COLORS, YOLO_4C_COLORS, ARGS_YOLO_MODEL,
                   ARGS_YOLO_FORMAT, ARGS_YOLO_QUANTIZED, ARGS_YOLO_VERSION, YOLO_DATASET_ORGANIZED, YOLO_MODEL_4C,
-                  YOLO_MODEL_2C, YOLO_DATASET_TO_PROCESS, YOLO_3C_COLORS, YOLO_DATASET_TESTING, YOLO_DATASET_IMAGES)
+                  YOLO_MODEL_2C, YOLO_DATASET_TO_PROCESS, YOLO_3C_COLORS, YOLO_DATASET_TESTING, YOLO_DATASET_IMAGES,
+                  YOLO_MODEL_3C)
 from model.yolo import (load, get_class_names, run_inference)
 from yolo.args import (add_yolo_model_argument, add_yolo_format_argument, add_yolo_quantized_argument, add_yolo_version_argument)
 from yolo.files import (get_dataset_model_dir_path, get_model_best_pt_path, get_model_weight_dir_path)
@@ -93,7 +94,7 @@ if __name__ == '__main__':
         if arg_yolo_format == ARGS_YOLO_FORMAT_PT:
             yolo_colors = YOLO_2C_COLORS
 
-    elif arg_yolo_model == YOLO_3C_COLORS:
+    elif arg_yolo_model == YOLO_MODEL_3C:
         if arg_yolo_format == ARGS_YOLO_FORMAT_PT:
             yolo_colors = YOLO_3C_COLORS
 
