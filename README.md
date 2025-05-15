@@ -53,7 +53,9 @@ A continuación, está la descripción de todos los componentes principales de K
 
 <h2 id="componentes-raspberry-pi-5">Raspberry Pi 5 (16GB RAM)</h2>
 
-[![Raspberry Pi 5](https://i.postimg.cc/wxDfLJkj/8713-a-1-removebg-preview.png)](https://postimg.cc/dDtjKhXb)
+<p align="center">
+  <img src="https://i.postimg.cc/wxDfLJkj/8713-a-1-removebg-preview.png" alt="Raspberry Pi 5" width="400">
+</p>
 
 Equipada con un procesador ARM Cortex-A76 de 64 bits a 2.4 Ghz [[1](#raspberry-pi-5-16gb-8gb-4gb-2gb-tiendatec)]. La Raspberry Pi 5 es nuestro controlador principal de elección, decidimos usar a la Raspberry Pi 5 debido a múltiples factores, entre ellos:
 
@@ -61,17 +63,21 @@ Equipada con un procesador ARM Cortex-A76 de 64 bits a 2.4 Ghz [[1](#raspberry-p
 
 - **Potencia**: La Raspberry Pi 5 es uno de los controladores más potentes actualmente, gracias a esto, funciones demandantes como lo es el procesamiento de imágenes en tiempo real, son fácilmente realizables por una Raspberry Pi 5.
 
-- **Portabilidad**: La Raspberry Pi 5 destaca entre los controladores, ya que no es una computadora bastante pesada, apenas llegando a los 60g, hace que incorporarlo a Klevor sea una opción prácticamente segura.
+- **Portabilidad**: La Raspberry Pi 5 destaca entre los controladores, ya que no es una computadora bastante pesada, apenas llegando a los 60 g, hace que incorporarlo a Klevor sea una opción prácticamente segura.
 
 <h2 id="componentes-raspberry-pi-camera-module-3-wide">Raspberry Pi Camera Module 3 Wide</h2>
 
-[![Raspberry Pi Camera Module 3](https://i.postimg.cc/fTf0cWFd/raspberry-pi-camera-module-3-raspberry-pi-sc0872-43251879182531-700x-removebg-preview.png)](https://postimg.cc/D8mZFh7f)
+<p align="center">
+  <img src="https://i.postimg.cc/fTf0cWFd/raspberry-pi-camera-module-3-raspberry-pi-sc0872-43251879182531-700x-removebg-preview.png" alt="Raspberry Pi Camera Module 3 Wide" width="200">
+</p>
 
 La Raspberry Pi Camera Module 3 Wide es nuestra elección de preferencia, como los demás componentes Raspberry, esta se destaca por ser bastante ligera y portátil, ya que, pues es una cámara bastante pequeña, midiendo apenas 25 mm × 24 mm × 12.4 mm y pesando 4 gramos, sin perder absolutamente ni una pizca de eficiencia, porque puede grabar a 1536 × 864p120, ahora bien, decidimos utilizar la versión Wide por su campo de visión horizontal de 102 grados [[2](#raspberry-pi-camera-module-3-geek-factory)], porque nos permite tener un rango de visión óptimo para poder detectar todos los obstáculos de la pista.
 
 <h2 id="componentes-raspberry-pi-ai-hat-26-tops">Raspberry Pi AI HAT+ (26 TOPS)</h2>
 
-[![Raspberry Pi AI HAT](https://i.postimg.cc/6399NRt6/raspberry-pi-ai-hat-raspberry-pi-71328528531841-removebg-preview.png)](https://postimg.cc/HJhGwrrF)
+<p align="center">
+  <img src="https://i.postimg.cc/6399NRt6/raspberry-pi-ai-hat-raspberry-pi-71328528531841-removebg-preview.png" alt="Raspberry Pi AI HAT+ 26 TOPS" width="400">
+</p>
 
 Si bien la Raspberry Pi 5 es capaz de procesar imágenes en tiempo real, tuvimos en cuenta que necesitaba un poco más de poder, por lo cual decidimos incorporar la AI HAT+ a la Raspberry Pi 5 para poder alcanzar el nivel de procesamiento necesario. 
 
@@ -79,7 +85,9 @@ El Raspberry Pi AI HAT+ tiene dos versiones, una de 13 Trillones de Operaciones 
 
 <h2 id="componentes-raspberry-pi-pico-2-wh">Raspberry Pi Pico 2 WH</h2>
 
-[![Raspberry Pi Pico 2 WH](https://i.postimg.cc/JzvDmp2r/raspberry-pi-pico-2-w-raspberry-pi-sc1634-1146616007-removebg-preview.png)](https://postimg.cc/LJk633Sw)
+<p align="center">
+  <img src="https://i.postimg.cc/JzvDmp2r/raspberry-pi-pico-2-w-raspberry-pi-sc1634-1146616007-removebg-preview.png" alt="Raspberry Pi Pico 2 WH" width="300">
+</p>
 
 Construido sobre el chip RP235x [[4](#raspberry-pi-pico-2-2w-2h-2wh-kubii)], la Raspberry Pi Pico 2 es el microcontrolador de motores por excelencia de Klevor, además de ser un microcontrolador ligero y pequeño, este chip permite una fácil integración con el resto de los componentes Raspberry.
 
@@ -87,7 +95,9 @@ Además de ofrecer una frecuencia de procesamiento de 150 Mhz, superior a varios
 
 <h2 id="componentes-rplidar-c1">RPLiDAR C1</h2>
 
-[![RPLiDAR C1](https://i.postimg.cc/02wVPSzs/slamtec-rplidar-c1-360-laser-scanner-12m-removebg-preview.png)](https://postimg.cc/crdRcr79)
+<p align="center">
+  <img src="https://i.postimg.cc/02wVPSzs/slamtec-rplidar-c1-360-laser-scanner-12m-removebg-preview.png" alt="RPLiDAR C1" width="250">
+</p>
 
 El RPLiDAR C1 es un escáner de rango láser de 360 grados, el cual puede detectar superficies que están hasta 12 metros de distancia, su punto ciego es de tan solo 5 centímetros alrededor del mismo [[5](#rplidar-c1-robot-shop)], todos estos factores hacen que el RPLiDAR C1 sea una gran opción para poder guíar a Klevor por la pista.
 
@@ -95,7 +105,9 @@ Este RPLiDAR C1 permite a Klevor poder identificar que tan cerca o que tan lejos
 
 <h2 id="componentes-shargeek-storm-2">Shargeek Storm 2</h2>
 
-[![Shargeek Storm 2](https://i.postimg.cc/fTcgYXDv/shargeek-100-power-bank-removebg-preview.png)](https://postimg.cc/0bNfsz66)
+<p align="center">
+  <img src="https://i.postimg.cc/fTcgYXDv/shargeek-100-power-bank-removebg-preview.png" alt="Shargeek Storm 2" width="400">
+</p>
 
 El Shargeek Storm 2 es un Power Bank, con múltiples características interesantes [[6](#shargeek-storm-2-amazon)] como:
 
@@ -120,19 +132,25 @@ Estos factores hacen que sea un componente un tanto difícil de incorporar a Kle
 
 <h2 id="componentes-injora-180-motor-48t">INJORA 180 Motor 48T</h2>
 
-[![INJORA 180 Motor 48T](https://i.postimg.cc/fyTjX3K8/IMG-4570-1800x1800-removebg-preview.png)](https://postimg.cc/ZB2dz5XN)
+<p align="center">
+  <img src="https://i.postimg.cc/fyTjX3K8/IMG-4570-1800x1800-removebg-preview.png" alt="RPLiDAR C1" width="250">
+</p>
 
 El INJORA 180 Motor 48T es un motor diseñado para carros controlados por radio, ya que estos carros suelen tener un peso y medidas similares a las de Klevor, decidimos que este motor sería una buena incorporación. Debido a su tamaño compacto, bajo voltaje (necesitando apenas 7.4v), y bajo peso [[7](#injora-180-48t-amazon)].
 
 <h2 id="componentes-injora-mb100-20a-mini-esc">INJORA MB100 20A mini ESC</h2>
 
-[![INJORA MB100 mini ESC](https://i.postimg.cc/4yq7dnF7/DSC07300-1-1800x1800-3a89d5de-363f-4693-9ab8-815393072006-removebg-preview.png)](https://postimg.cc/y3hYp6Ks)
+<p align="center">
+  <img src="https://i.postimg.cc/4yq7dnF7/DSC07300-1-1800x1800-3a89d5de-363f-4693-9ab8-815393072006-removebg-preview.png" alt="RPLiDAR C1" width="250">
+</p>
 
 El INJORA MB100 20A mini ESC es un controlador de velocidad [[8](#injora-mb100-r80-amazon)], normalmente este se usa en conjunto con el INJORA 180 Motor 48T, este permite la conexión entre el INJORA 180 Motor 48T y la Raspberry Pi Pico 2.
 
 <h2 id="componentes-urgenex-74v-battery">URGENEX 7.4V Battery</h2>
 
-[![URGENEX 7.4V Battery](https://i.postimg.cc/25ybNPwX/71r3-PDycx-LL-AC-SL1500-1-removebg-preview.png)](https://postimg.cc/Z9kKrsXr)
+<p align="center">
+  <img src="https://i.postimg.cc/25ybNPwX/71r3-PDycx-LL-AC-SL1500-1-removebg-preview.png" alt="URGENEX 7.4V Battery" width="250">
+</p>
 
 La URGENEX 7.4 V Battery es nuestra segunda batería la cual cumple la única función de alimentar al INJORA 180 Motor 48T, además de esto es una batería recargable lo que lo convierte en una opción sólida para poder alimentar el motor principal.
 
@@ -140,7 +158,9 @@ Si bien cualquier batería de 7.4 V funcionaría perfectamente para poder utiliz
 
 <h2 id="componentes-injora-7kg-2065-micro-servo">INJORA 7Kg 2065 Micro Servo</h2>
 
-[![INJORA Micro Servo](https://i.postimg.cc/Qt5MXsWS/61d-MNIVpk-YL-AC-SX300-SY300-QL70-FMwebp-removebg-preview.png)](https://postimg.cc/HcYm2qz7)
+<p align="center">
+  <img src="https://i.postimg.cc/Qt5MXsWS/61d-MNIVpk-YL-AC-SX300-SY300-QL70-FMwebp-removebg-preview.png" alt="INJORA Micro Servo" width="200">
+</p>
 
 El INJORA 7KG 2065 Micro Servo es el motor encargado de controlar la dirección de Klevor, decidimos utilizar este modelo debido a su reducido tamaño y peso, además de una precisión más que suficiente para poder manejar a Klevor.
 
