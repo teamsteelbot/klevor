@@ -38,15 +38,15 @@ Actualmente, este equipo está conformado por 3 miembros:
 
 <h1 id="estructura-de-archivos">Estructura de archivos</h1>
 
-- `models` contiene todos los archivos en 3D que se utilizaron para poder construir a nuestro robot (Klevor)
+- `models` contiene todos los archivos en 3D que se utilizaron para poder construir a nuestro robot (Klevor).
 
-- `schemes` contiene todos los esquemas y diagramas de todas las conexiones de nuestro robot (Klevor)
+- `schemes` contiene todos los esquemas y diagramas de todas las conexiones de nuestro robot (Klevor).
 
 - `src` contiene todo el código el cual fue utilizado para poder controlar este robot de manera autónoma.
 
-- `t-photos` contiene las fotos del equipo
+- `t-photos` contiene las fotos del equipo.
 
-- `v-photos` contiene las fotos de Klevor
+- `v-photos` contiene las fotos de Klevor.
 
 - `video` contiene los vídeos de Klevor en la pista, tanto en el Desafío Abierto como en el Desafío Cerrado.
 
@@ -65,9 +65,9 @@ A continuación, está la descripción de todos los componentes principales de K
 | Ancho      | 56 mm     |
 | Peso       | 46 g      |
 
-Equipada con un procesador ARM Cortex-A76 de 64 bits a 2.4 Ghz. [[1](#raspberry-pi-5-16gb-8gb-4gb-2gb-tiendatec)][[2](#raspberry-pi-16gb-ram)][[3](#raspberry-pi-5-datasheet)]La Raspberry Pi 5 es nuestro controlador principal de elección, decidimos usar a la Raspberry Pi 5 debido a múltiples factores, entre ellos:
+Equipada con un procesador ARM Cortex-A76 de 64 bits a 2.4 Ghz. [[1](#raspberry-pi-5-16gb-8gb-4gb-2gb-tiendatec)][[2](#raspberry-pi-16gb-ram)][[3](#raspberry-pi-5-datasheet)] La Raspberry Pi 5 es nuestro controlador principal de elección, decidimos usar a la Raspberry Pi 5 debido a múltiples factores, entre ellos:
 
-- **Compatibilidad**: Existen muchos componentes de Klevor (como el Camera Module 3) que a su vez pertenecen al ecosistema Raspberry, lo que hace que implementarlos a la Raspberry Pi 5 no requiera tanto esfuerzo.
+- **Compatibilidad**: Existen muchos componentes de Klevor (como el Camera Module 3 Wide) que a su vez pertenecen al ecosistema Raspberry, lo que hace que implementarlos a la Raspberry Pi 5 no requiera tanto esfuerzo.
 
 - **Potencia**: La Raspberry Pi 5 es uno de los controladores más potentes actualmente, gracias a esto, funciones demandantes como lo es el procesamiento de imágenes en tiempo real, son fácilmente realizables por una Raspberry Pi 5.
 
@@ -84,7 +84,7 @@ Equipada con un procesador ARM Cortex-A76 de 64 bits a 2.4 Ghz. [[1](#raspberry-
 | Ancho      | 12.4 mm   |
 | Peso       | 4 g       |
 
-La Raspberry Pi Camera Module 3 Wide es nuestra elección de preferencia, como los demás componentes Raspberry, esta se destaca por ser bastante ligera y portátil, ya que, pues es una cámara bastante pequeña, midiendo apenas 25 mm × 24 mm × 12.4 mm y pesando 4 gramos, sin perder absolutamente ni una pizca de eficiencia, porque puede grabar a 1536 × 864p120, ahora bien, decidimos utilizar la versión Wide por su campo de visión horizontal de 102 grados, [[4](#raspberry-pi-camera-module-3-geek-factory)][[5](#raspberry-pi-camera-documentation)] porque nos permite tener un rango de visión óptimo para poder detectar todos los obstáculos de la pista.
+La Raspberry Pi Camera Module 3 Wide es nuestra elección de preferencia, como los demás componentes Raspberry, esta se destaca por ser bastante ligera y portátil, ya que, pues es una cámara bastante pequeña, midiendo apenas 25 mm × 24 mm × 12.4 mm y pesando 4 gramos, sin perder absolutamente ni una pizca de eficiencia, porque puede grabar a 1536 x 864p120, ahora bien, decidimos utilizar la versión Wide por su campo de visión horizontal de 102 grados, [[4](#raspberry-pi-camera-module-3-geek-factory)][[5](#raspberry-pi-camera-documentation)] porque nos permite tener un rango de visión óptimo para poder detectar todos los obstáculos de la pista.
 
 <h2 id="componentes-raspberry-pi-ai-hat-26-tops">Raspberry Pi AI HAT+ (26 TOPS)</h2>
 
@@ -139,9 +139,6 @@ Especificaciones técnicas:
 | Frecuencia de muestreo | 5 kHz                                                                               |
 | Resolución angular     | 0,72°                                                                               |
 | Ángulo de inclinación  | 0°-1,5°                                                                             |
-
-Resolución angular: 0,72°
-Ángulo de inclinación: 0°-1,5°
 
 <h2 id="componentes-shargeek-storm-2">Shargeek Storm 2</h2>
 
