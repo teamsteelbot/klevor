@@ -1,26 +1,96 @@
-<!--
-, Índice
+<h1 id="index">Índice</h1>
 
-# Detección de Objetos
+1. **[Detección de Objetos](#deteccion-de-objetos)**
+   1. [Funcionamiento](#funcionamiento)
+      1. [Preprocesamiento de Imágenes](#funcionamiento-preprocesamiento-de-imagenes)
+      2. [Arquitectura del Modelo](#funcionamiento-arquitectura-del-modelo)
+      3. [Evaluación de Métricas](#funcionamiento-evaluacion-de-metricas)
+   2. [YOLO](#yolo)
+   3. [NPU](#npu)
+      1. [Características Clave de las NPU](#npu-caracteristicas-clave)
+2. **[Recursos Externos](#recursos-externos)**
 
-# YOLO
+<h1 id="deteccion-de-objetos">Detección de Objetos</h1>
 
-Para la presente competencia, en relación a la detección de objetos, se utilizó el modelo YOLOv11. Este modelo es una versión mejorada de YOLOv5 y YOLOv8, que son ampliamente utilizados en la comunidad de visión por computadora.
+Para la presente competencia, debido a la necesidad de poder reconocer distintos prismas de diferentes colores, específicamente en el Desafío con Obstáculos, se optó por utilizar un modelo de detección de objetos.
 
-# NPU
+Dicha detección de objetos, es una tarea de visión por computadora que emplea redes neuronales para identificar y localizar objetos en imágenes o videos, al enmarcarlos con cuadros delimitadores y asignarles etiquetas. 
 
+A través de esta técnica, se pueden clasificar y localizar múltiples objetos dentro de una sola imagen. Además, se considera una parte de la inteligencia artificial, ya que permite a las máquinas interpretar y comprender el contenido visual de manera similar a los humanos.
 
-[[1](#custom-dataset)]
--->
+<h2 id="funcionamiento">Funcionamiento</h2>
 
-# Recursos Externos
+Primeramente, debemos comprender distintos conceptos relacionados con la detección de objetos, como el preprocesamiento de imágenes, la arquitectura del modelo y las métricas de evaluación para la detección de objetos. A continuación, se presentan estos conceptos:
 
-1. *What is object detection?*. (3 de enero de 2024) IBM. <a id="object-detection">https://www.ibm.com/topics/object-detection</a>
-2. *What is neural processing unit (NPU)?*. (27 de septiembre de 2024). IBM. <a id="npu">https://www.ibm.com/topics/neural-processing-unit</a>
+<h3 id="funcionamiento-preprocesamiento-de-imagenes">Preprocesamiento de Imágenes</h3>
+
+Para la visión por computadora, las imágenes se expresan como funciones continuas en un plano de coordenadas 2D representadas como f(x, y). Cuando se digitalizan, las imágenes pasan por dos procesos primarios llamados muestreo y cuantización, que, en resumen, convierten la función de imagen continua en una estructura de cuadrícula discreta de elementos que representan píxeles [[1](#object-detection-ibm)]. 
+
+<p align="center">
+  <img src="https://assets-global.website-files.com/5d7b77b063a9066d83e1209c/627d121f86896a59aad78407_60f49c3f218440673e6baa97_apples1.png" alt="Imagen con distintas anotaciones de manzanas" width="400">
+</p>
+<p align="center">
+    <i>Imagen con distintas anotaciones de manzanas</i>
+</p>
+
+Al ser anotada la imagen, el modelo de detección de objetos puede reconocer regiones con características similares a las definidas en el conjunto de datos de entrenamiento como el mismo objeto. Los modelos de detección de objetos no reconocen objetos per se, sino agregados de propiedades como tamaño, forma, color, etc., y clasifican regiones según patrones visuales inferidos a partir de datos de entrenamiento anotados manualmente [[1](#object-detection-ibm)].
+
+<h3 id="funcionamiento-arquitectura-del-modelo">Arquitectura del Modelo</h3>
+
+Los modelos de detección de objetos siguen una estructura general que incluye un modelo de fondo, cuello y cabeza [[1](#object-detection-ibm)].
+
+El modelo de fondo extrae características de una imagen de entrada. A menudo, el modelo de fondo se deriva de parte de un modelo de clasificación preentrenado. La extracción de características produce una miríada de mapas de características de diferentes resoluciones que el modelo de fondo pasa al cuello. Esta última parte de la estructura concatena los mapas de características para cada imagen. Luego, la arquitectura pasa los mapas de características en capas a la cabeza, que predice cuadros delimitadores y puntuaciones de clasificación para cada conjunto de características [[1](#object-detection-ibm)].
+
+<h3 id="funcionamiento-evaluacion-de-metricas">Evaluación de Métricas</h3>
+
+La evaluación de métricas es un paso crucial en el proceso de detección de objetos, ya que permite medir la precisión y efectividad del modelo. Existen varias métricas utilizadas para evaluar modelos de detección de objetos, entre las cuales se encuentran:
+
+- **Precisión**: Mide la proporción de verdaderos positivos (TP) entre el total de predicciones positivas (TP + FP). Es decir, cuántas de las predicciones realizadas por el modelo son correctas.
+- **Exhaustividad (Recall)**: Mide la proporción de verdaderos positivos (TP) entre el total de casos positivos reales (TP + FN). Es decir, cuántos de los objetos que realmente están presentes en la imagen fueron detectados por el modelo.
+- **F1 Score**: Es la media armónica entre precisión y exhaustividad. Se utiliza para evaluar el rendimiento del modelo en situaciones donde hay un desbalance entre las clases.
+- **Mean Average Precision (mAP)**: Es una métrica que combina precisión y exhaustividad en un solo valor. Se calcula promediando la precisión a diferentes niveles de exhaustividad. El mAP se utiliza comúnmente para evaluar modelos de detección de objetos, ya que proporciona una medida más completa del rendimiento del modelo.
+
+<h2 id="yolo">YOLO</h2>
+
+YOLO, o "You Only Look Once" ("Solo Miras Una Vez"), consiste en una familia de modelos de una sola etapa que realizan detección de objetos en tiempo real. A diferencia de otros modelos de detección de objetos que utilizan un enfoque de dos etapas, YOLO divide la imagen en una cuadrícula y predice simultáneamente los cuadros delimitadores y las probabilidades de clase para cada celda de la cuadrícula. Esto permite que YOLO sea extremadamente rápido y eficiente [[1](#object-detection-ibm)].
+
+Para Klevor, la detección de objetos se basa en el modelo YOLOv11; la última versión de YOLO hasta la fecha [[9](#models-ultralytics)].
+
+<h2 id="npu">NPU</h2>
+
+Una unidad de procesamiento neuronal (NPU) es un microprocesador especializado diseñado para imitar la función de procesamiento del cerebro humano. Están optimizados para tareas y aplicaciones de inteligencia artificial (IA), redes neuronales, aprendizaje profundo y aprendizaje automático [[2](#npu-ibm)].
+
+<p align="center">
+  <img src="https://i.postimg.cc/6399NRt6/raspberry-pi-ai-hat-raspberry-pi-71328528531841-removebg-preview.png" alt="Raspberry Pi AI HAT+ 26 TOPS" width="400">
+</p>
+<p align="center">
+    <i>tRaspberry Pi AI HAT+ 26 TOPS</i>
+</p>
+
+A diferencia de las unidades de procesamiento gráfico (GPU) y las unidades de procesamiento central (CPU), que son procesadores de propósito general, las NPUs están diseñadas para acelerar tareas y cargas de trabajo de IA, como el cálculo de capas de redes neuronales compuestas por matemáticas escalares, vectoriales y tensoriales [[2](#npu-ibm)].
+
+<h3 id="npu-caracteristicas-clave">Características Clave de las NPU</h3>
+
+Las NPUs están diseñadas para realizar tareas que requieran una baja latencia y un alto rendimiento en paralelo, lo que las hace ideales para aplicaciones de inteligencia artificial. Estas tareas incluyen el procesamiento de algoritmos de aprendizaje profundo, reconocimiento de voz, procesamiento de lenguaje natural, procesamiento de fotos y videos, y detección de objetos [[2](#npu-ibm)].
+
+Entre las características clave de las NPUs se encuentran:
+
+- **Procesamiento paralelo**: Las NPUs están diseñadas para realizar cálculos en paralelo, lo que les permite procesar múltiples operaciones simultáneamente. Esto es especialmente útil para tareas de aprendizaje profundo, donde se requieren grandes cantidades de cálculos en matrices y tensores.
+
+- **Baja precisión aritmética**: Las NPUs a menudo admiten operaciones de 8 bits (o menos) para reducir la complejidad computacional y aumentar la eficiencia energética.
+
+- **Memoria de alto ancho de banda**: Muchas NPUs cuentan con memoria de alto ancho de banda en el chip para realizar eficientemente tareas de procesamiento de IA que requieren grandes conjuntos de datos.
+
+- **Aceleración por hardware**: Los avances en el diseño de NPUs han llevado a la incorporación de técnicas de aceleración por hardware, como arquitecturas de matriz sistólica o procesamiento tensorial mejorado para optimizar el rendimiento de las cargas de trabajo de IA.
+
+<h1 id="recursos-externos">Recursos Externos</h1>
+
+1. Murel, J., Kavlakoglu, E. *What is object detection?*. (3 de enero de 2024) IBM. <a id="object-detection-ibm">https://www.ibm.com/topics/object-detection</a>
+2. Schneider, J., Smalley, I. *What is neural processing unit (NPU)?*. (27 de septiembre de 2024). IBM. <a id="npu-ibm">https://www.ibm.com/topics/neural-processing-unit</a>
 3. *Label Studio*. (2025). Label Studio. <a id="label-studio">https://labelstud.io/</a>
-4. *AI Kit and AI HAT+ software*. (2025). Raspberry Pi. <a id="getting-started">https://www.raspberrypi.com/documentation/computers/ai.html#getting-started</a>
-5. *AI Hat+*. (2025). Raspberry Pi. <a id="ai-hat-plus">https://www.raspberrypi.com/documentation/accessories/ai-hat-plus.html#ai-hat-plus</a>
-6. Hailo AI. (2025). *Hailo Application Code Examples*. GitHub. <a id="hailo-ai-examples">https://github.com/hailo-ai/Hailo-Application-Code-Examples</a>
-7. d'Oleron, L. (23 de abril de 2025). *Custom dataset with Hailo AI Hat, Yolo, Raspberry PI 5, and Docker*. Medium. <a id="custom-dataset">https://pub.towardsai.net/custom-dataset-with-hailo-ai-hat-yolo-raspberry-pi-5-and-docker-0d88ef5eb70f</a>
+4. *AI Kit and AI HAT+ software*. (2025). Raspberry Pi. <a id="getting-started-raspberry-pi">https://www.raspberrypi.com/documentation/computers/ai.html#getting-started</a>
+5. *AI Hat+*. (2025). Raspberry Pi. <a id="ai-hat-plus-raspberry-pi">https://www.raspberrypi.com/documentation/accessories/ai-hat-plus.html#ai-hat-plus</a>
+6. Hailo AI. (2025). *Hailo Application Code Examples*. GitHub. <a id="hailo-ai-examples-github">https://github.com/hailo-ai/Hailo-Application-Code-Examples</a>
+7. d'Oleron, L. (23 de abril de 2025). *Custom dataset with Hailo AI Hat, Yolo, Raspberry PI 5, and Docker*. Medium. <a id="custom-dataset-medium">https://pub.towardsai.net/custom-dataset-with-hailo-ai-hat-yolo-raspberry-pi-5-and-docker-0d88ef5eb70f</a>
 8. *Google Colab*. (2025). Google Colab. <a id="google-colab">https://colab.research.google.com/</a>
-9. *Models*. (2025). Ultralytics. <a id="models">https://docs.ultralytics.com/models/</a>
+9. *Models*. (2025). Ultralytics. <a id="models-ultralytics">https://docs.ultralytics.com/models/</a>
