@@ -18,7 +18,7 @@ def add_yolo_format_argument(parser) -> None:
 
 # Add YOLO quantized argument to the parser
 def add_yolo_quantized_argument(parser) -> None:
-    parser.add_argument(get_attribute_name(ARGS_YOLO_QUANTIZED), type=bool, required=False, help='YOLO model quantization', default=False)
+    parser.add_argument(get_attribute_name(ARGS_YOLO_QUANTIZED), type=str, required=False, help='YOLO model quantization', choices=["True", "False"], default="False")
 
 # Add YOLO version argument to the parser
 def add_yolo_version_argument(parser) -> None:
@@ -27,4 +27,4 @@ def add_yolo_version_argument(parser) -> None:
 
 # Add YOLO is retraining argument to the parser
 def add_yolo_is_retraining_argument(parser) -> None:
-    parser.add_argument(get_attribute_name(ARGS_YOLO_IS_RETRAINING), type=bool, required=False, help='YOLO model retraining', default=False)
+    parser.add_argument(get_attribute_name(ARGS_YOLO_IS_RETRAINING), type=str, required=False, help='YOLO model retraining', choices=["True", "False"], default="False")

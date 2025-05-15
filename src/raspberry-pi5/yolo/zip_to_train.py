@@ -4,9 +4,10 @@ import zipfile
 
 from typing_extensions import LiteralString
 
+from args.args import get_attribute_from_args
 from files.zip import zip_nested_folder, zip_not_nested_folder
-from yolo import (CWD, YOLO_ZIP, ARGS_YOLO_MODEL, YOLO_DATASET_ORGANIZED, YOLO_DATASET_TO_PROCESS, YOLO_DIR,
-                  ARGS_YOLO_VERSION, ARGS_YOLO_IS_RETRAINING)
+from yolo import (CWD, ARGS_YOLO_MODEL, YOLO_DATASET_ORGANIZED, YOLO_DATASET_TO_PROCESS, YOLO_DIR,
+                  ARGS_YOLO_VERSION, ARGS_YOLO_IS_RETRAINING, ZIP_IGNORE_DIR)
 from yolo.args import add_yolo_model_argument, add_yolo_version_argument, add_yolo_is_retraining_argument
 from yolo.files import (get_dataset_model_dir_path, get_model_weight_dir_path, get_yolo_notebooks_dir_path,
                         get_yolo_data_dir_path, get_yolo_zip_dir_path, get_yolo_version_dir_path)
@@ -27,7 +28,7 @@ def zip_to_train(input_dir: LiteralString, input_yolo_dir: LiteralString, input_
 
     with (zipfile.ZipFile(output_zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf):
         # Zip the folders except the YOLO folder
-        zip_nested_folder(zipf, input_dir, input_dir, ['yolo', '.git', '.venv', '.idea'])
+        zip_nested_folder(zipf, input_dir, input_dir, ZIP_IGNORE_DIR)
         print('Zip the folders except the YOLO folder')
 
         # Zip the YOLO folder files  except its nested folders
@@ -65,13 +66,13 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # Get the YOLO model
-    arg_yolo_model = getattr(args, ARGS_YOLO_MODEL)
+    arg_yolo_model = get_attribute_from_args(args, ARGS_YOLO_MODEL)
 
     # Get the YOLO version
-    arg_yolo_version = getattr(args, ARGS_YOLO_VERSION)
+    arg_yolo_version = get_attribute_from_args(args, ARGS_YOLO_VERSION)
 
     # Get the YOLO is retraining
-    arg_yolo_is_retraining = getattr(args, ARGS_YOLO_IS_RETRAINING)
+    arg_yolo_is_retraining = get_attribute_from_args(args, ARGS_YOLO_IS_RETRAINING)
 
     # Get the dataset paths
     organized_to_process_dir = get_dataset_model_dir_path(YOLO_DATASET_ORGANIZED, YOLO_DATASET_TO_PROCESS, arg_yolo_model)

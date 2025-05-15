@@ -3,9 +3,10 @@ import os
 import zipfile
 from typing import LiteralString
 
+from args.args import get_attribute_from_args
 from files.zip import zip_nested_folder, zip_not_nested_folder
 from yolo import (ARGS_YOLO_MODEL, CWD, YOLO_DIR,
-                  ARGS_YOLO_VERSION)
+                  ARGS_YOLO_VERSION, ZIP_IGNORE_DIR)
 from yolo.args import add_yolo_model_argument, add_yolo_version_argument
 from yolo.files import (get_yolo_zip_dir_path, get_yolo_runs_dir_path,
                         get_yolo_version_dir_path, get_yolo_notebooks_dir_path)
@@ -25,7 +26,7 @@ def zip_to_quantize(input_dir: LiteralString, input_yolo_dir: LiteralString, inp
 
     with (zipfile.ZipFile(output_zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf):
         # Zip the folders except the YOLO folder
-        zip_nested_folder(zipf, input_dir, input_dir, ['yolo', '.git', '.venv', '.idea'])
+        zip_nested_folder(zipf, input_dir, input_dir, ZIP_IGNORE_DIR)
         print('Zip the folders except the YOLO folder')
 
         # Zip the YOLO folder files except its nested folders
@@ -52,10 +53,10 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # Get the YOLO model
-    arg_yolo_model = getattr(args, ARGS_YOLO_MODEL)
+    arg_yolo_model = get_attribute_from_args(args, ARGS_YOLO_MODEL)
 
     # Get the YOLO version
-    arg_yolo_version = getattr(args, ARGS_YOLO_VERSION)
+    arg_yolo_version = get_attribute_from_args(args, ARGS_YOLO_VERSION)
 
     # Get the YOLO version folder
     yolo_version_dir = get_yolo_version_dir_path(arg_yolo_version)

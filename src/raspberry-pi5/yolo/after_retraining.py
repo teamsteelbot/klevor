@@ -1,6 +1,7 @@
 import argparse
 import os
 
+from args.args import get_attribute_from_args
 from files import move_folder
 from yolo import (ARGS_YOLO_MODEL, ARGS_YOLO_VERSION)
 from yolo.args import add_yolo_model_argument, add_yolo_version_argument
@@ -13,10 +14,10 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # Get the YOLO model
-    arg_yolo_model = getattr(args, ARGS_YOLO_MODEL)
+    arg_yolo_model = get_attribute_from_args(args, ARGS_YOLO_MODEL)
 
     # Get the YOLO version
-    arg_yolo_version = getattr(args, ARGS_YOLO_VERSION)
+    arg_yolo_version = get_attribute_from_args(args, ARGS_YOLO_VERSION)
 
     # Get the runs folder path
     yolo_runs_dir = get_yolo_runs_dir_path(arg_yolo_version)

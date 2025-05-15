@@ -1,5 +1,5 @@
 <!--
-# Índice
+, Índice
 
 # Detección de Objetos
 

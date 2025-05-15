@@ -1,5 +1,6 @@
 import argparse
 
+from args.args import get_attribute_from_args
 from model.yolo import load, export_onnx, export_tflite, export_tensor_rt
 from yolo import (ARGS_YOLO_FORMAT_ONNX, ARGS_YOLO_FORMAT_TFLITE, ARGS_YOLO_MODEL, ARGS_YOLO_FORMAT,
                   ARGS_YOLO_QUANTIZED, ARGS_YOLO_VERSION)
@@ -16,16 +17,16 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # Get the YOLO model
-    arg_yolo_model = getattr(args, ARGS_YOLO_MODEL)
+    arg_yolo_model = get_attribute_from_args(args, ARGS_YOLO_MODEL)
 
     # Get the YOLO format
-    arg_yolo_format = getattr(args, ARGS_YOLO_FORMAT)
+    arg_yolo_format = get_attribute_from_args(args, ARGS_YOLO_FORMAT)
 
     # Get the YOLO quantization
-    arg_yolo_quantized = getattr(args, ARGS_YOLO_QUANTIZED)
+    arg_yolo_quantized = get_attribute_from_args(args, ARGS_YOLO_QUANTIZED)
 
     # Get the YOLO version
-    arg_yolo_version = getattr(args, ARGS_YOLO_VERSION)
+    arg_yolo_version = get_attribute_from_args(args, ARGS_YOLO_VERSION)
 
     # Load a model
     model_path = get_model_best_pt_path(arg_yolo_model, arg_yolo_version)
@@ -35,12 +36,14 @@ if __name__ == '__main__':
     path = None
     if arg_yolo_format == ARGS_YOLO_FORMAT_ONNX:
         path = export_onnx(model)
-
-    elif arg_yolo_format == ARGS_YOLO_FORMAT_TFLITE:
-        path = export_tflite(model, quantized=arg_yolo_quantized)
-
     else:
-        path = export_tensor_rt(model, quantized=arg_yolo_quantized)
+        is_quantized = arg_yolo_quantized == "True"
+
+        if arg_yolo_format == ARGS_YOLO_FORMAT_TFLITE:
+            path = export_tflite(model, quantized=is_quantized)
+
+        else:
+            path = export_tensor_rt(model, quantized=is_quantized)
 
     # Log
     print(f"Model exported to {path}")

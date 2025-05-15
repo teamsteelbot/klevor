@@ -1,5 +1,6 @@
 import argparse
 
+from args.args import get_attribute_from_args
 from opencv.image_augmentation import augment_dataset
 from yolo import (YOLO_NUM_AUGMENTATIONS, ARGS_YOLO_MODEL,
                   YOLO_DATASET_LABELED, YOLO_DATASET_AUGMENTED, YOLO_DATASET_TO_PROCESS, YOLO_DATASET_PROCESSED)
@@ -12,7 +13,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # Get the YOLO model
-    arg_yolo_model = getattr(args, ARGS_YOLO_MODEL)
+    arg_yolo_model = get_attribute_from_args(args, ARGS_YOLO_MODEL)
 
     # Get the dataset paths
     labeled_to_process_dir = get_dataset_model_dir_path(YOLO_DATASET_LABELED, YOLO_DATASET_TO_PROCESS, arg_yolo_model)

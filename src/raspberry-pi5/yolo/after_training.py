@@ -1,6 +1,7 @@
 import argparse
 import os
 
+from args.args import get_attribute_from_args
 from files import move_folder
 from yolo import (ARGS_YOLO_MODEL, YOLO_DATASET_ORGANIZED, YOLO_DATASET_PROCESSED, YOLO_DATASET_TO_PROCESS,
                   YOLO_DATASET_TRAINING, YOLO_DATASET_VALIDATIONS)
@@ -29,7 +30,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # Get the YOLO model
-    arg_yolo_model = getattr(args, ARGS_YOLO_MODEL)
+    arg_yolo_model = get_attribute_from_args(args, ARGS_YOLO_MODEL)
 
     # Get the dataset paths
     organized_to_process_dir = get_dataset_model_dir_path(YOLO_DATASET_ORGANIZED, YOLO_DATASET_TO_PROCESS, arg_yolo_model)

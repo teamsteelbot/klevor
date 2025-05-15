@@ -84,7 +84,7 @@ ARGS_YOLO_FORMAT = 'format'
 ARGS_YOLO_QUANTIZED = 'quantized'
 ARGS_YOLO_MODEL = 'model'
 ARGS_YOLO_VERSION = 'version'
-ARGS_YOLO_IS_RETRAINING = 'is_retraining'
+ARGS_YOLO_IS_RETRAINING = 'is-retraining'
 
 # YOLO formats
 ARGS_YOLO_FORMAT_ONNX = 'onnx'
@@ -92,3 +92,5 @@ ARGS_YOLO_FORMAT_TFLITE = 'tflite'
 ARGS_YOLO_FORMAT_TENSOR_RT = 'tensor_rt'
 ARGS_YOLO_FORMAT_PT = 'pt'
 
+# Ignore lists
+ZIP_IGNORE_DIR = ['.git', '.venv', '.idea', 'raspberry-pi-pico2', 'scripts', 'yolo']
