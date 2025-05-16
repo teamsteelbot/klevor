@@ -1,14 +1,14 @@
 import argparse
 import random
 
-from args.args import get_attribute_from_args
+from args.args import get_attribute_from_args, parse_args_as_dict
 from opencv.image_display_detections import preprocess, display_detections
 from model.image_bounding_boxes import outputs_to_image_bounding_boxes
 import os
 from opencv import DEFAULT_SIZE
 from yolo import (YOLO_NUMBER_RANDOM_IMAGES, ARGS_YOLO_FORMAT_PT, YOLO_GR_COLORS, YOLO_BGOR_COLORS, ARGS_YOLO_INPUT_MODEL,
-                  ARGS_YOLO_FORMAT, ARGS_YOLO_QUANTIZED, ARGS_YOLO_VERSION, YOLO_DATASET_ORGANIZED, YOLO_MODEL_BGOR,
-                  YOLO_MODEL_GR, YOLO_DATASET_TO_PROCESS, YOLO_GMR_COLORS, YOLO_DATASET_TESTING, YOLO_DATASET_IMAGES,
+                  ARGS_YOLO_FORMAT, ARGS_YOLO_VERSION, YOLO_DATASET_ORGANIZED, YOLO_MODEL_BGOR,
+                  YOLO_MODEL_GR, YOLO_GMR_COLORS, YOLO_DATASET_TESTING, YOLO_DATASET_IMAGES,
                   YOLO_MODEL_GMR)
 from model.yolo import (load, get_class_names, run_inference)
 from yolo.args import (add_yolo_input_model_argument, add_yolo_format_argument, add_yolo_quantized_argument, add_yolo_version_argument)
@@ -59,18 +59,14 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Script to test YOLO model with a given format')
     add_yolo_input_model_argument(parser)
     add_yolo_format_argument(parser)
-    add_yolo_quantized_argument(parser)
     add_yolo_version_argument(parser)
-    args = parser.parse_args()
+    args = parse_args_as_dict(parser)
 
     # Get the YOLO input model
     arg_yolo_input_model = get_attribute_from_args(args, ARGS_YOLO_INPUT_MODEL)
 
     # Get the YOLO format
     arg_yolo_format = get_attribute_from_args(args, ARGS_YOLO_FORMAT)
-
-    # Get the YOLO quantization
-    arg_yolo_quantized = get_attribute_from_args(args, ARGS_YOLO_QUANTIZED)
 
     # Get the YOLO version
     arg_yolo_version = get_attribute_from_args(args, ARGS_YOLO_VERSION)

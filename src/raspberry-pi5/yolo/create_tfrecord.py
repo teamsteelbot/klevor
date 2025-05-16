@@ -3,7 +3,7 @@ import argparse
 import tensorflow as tf
 import os
 
-from args.args import get_attribute_from_args
+from args.args import get_attribute_from_args, parse_args_as_dict
 from yolo import (YOLO_DATASET_ORGANIZED, YOLO_DATASET_TO_PROCESS, ARGS_YOLO_INPUT_MODEL, YOLO_DATASET_IMAGES,
     YOLO_DATASET_LABELS, ARGS_YOLO_VERSION, YOLO_DATASET_TESTING)
 from yolo.args import add_yolo_input_model_argument, add_yolo_version_argument
@@ -47,7 +47,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Script to create TFRecord from images and labels')
     add_yolo_input_model_argument(parser)
     add_yolo_version_argument(parser)
-    args = parser.parse_args()
+    args = parse_args_as_dict(parser)
 
     # Get the YOLO input model
     arg_yolo_input_model = get_attribute_from_args(args, ARGS_YOLO_INPUT_MODEL)

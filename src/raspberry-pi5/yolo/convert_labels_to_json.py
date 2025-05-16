@@ -2,7 +2,7 @@ import argparse
 import os
 import json
 
-from args.args import get_attribute_from_args
+from args.args import get_attribute_from_args, parse_args_as_dict
 from yolo import ARGS_YOLO_INPUT_MODEL, ARGS_YOLO_VERSION, YOLO_DATASET_LABELED, YOLO_DATASET_TO_PROCESS, YOLO_DATASET_IMAGES, \
     YOLO_DATASET_LABELS, YOLO_DATASET_IMAGES_EXT, YOLO_DATASET_ANNOTATIONS_JSON
 from yolo.args import add_yolo_input_model_argument, add_yolo_version_argument
@@ -41,7 +41,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Script to convert YOLO labels to JSON format for Label Studio')
     add_yolo_input_model_argument(parser)
     add_yolo_version_argument(parser)
-    args = parser.parse_args()
+    args = parse_args_as_dict(parser)
 
     # Get the YOLO input model
     arg_yolo_input_model = get_attribute_from_args(args, ARGS_YOLO_INPUT_MODEL)

@@ -3,7 +3,7 @@ import os
 import zipfile
 from typing import LiteralString
 
-from args.args import get_attribute_from_args
+from args.args import get_attribute_from_args, parse_args_as_dict
 from files.zip import zip_nested_folder, zip_not_nested_folder
 from yolo import (ARGS_YOLO_INPUT_MODEL, CWD, YOLO_DIR,
                   ARGS_YOLO_VERSION, ZIP_IGNORE_DIR)
@@ -48,7 +48,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Script to zip files for YOLO model quantization')
     add_yolo_input_model_argument(parser)
     add_yolo_version_argument(parser)
-    args = parser.parse_args()
+    args = parse_args_as_dict(parser)
 
     # Get the YOLO input model
     arg_yolo_input_model = get_attribute_from_args(args, ARGS_YOLO_INPUT_MODEL)

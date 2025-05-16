@@ -4,7 +4,7 @@ import zipfile
 
 from typing_extensions import LiteralString
 
-from args.args import get_attribute_from_args
+from args.args import get_attribute_from_args, parse_args_as_dict
 from files.zip import zip_nested_folder, zip_not_nested_folder
 from yolo import (CWD, ARGS_YOLO_INPUT_MODEL, YOLO_DATASET_ORGANIZED, YOLO_DATASET_TO_PROCESS, YOLO_DIR,
                   ARGS_YOLO_VERSION, ARGS_YOLO_IS_RETRAINING, ZIP_IGNORE_DIR)
@@ -61,7 +61,7 @@ if __name__ == '__main__':
     add_yolo_input_model_argument(parser)
     add_yolo_version_argument(parser)
     add_yolo_is_retraining_argument(parser)
-    args = parser.parse_args()
+    args = parse_args_as_dict(parser)
 
     # Get the YOLO input model
     arg_yolo_input_model = get_attribute_from_args(args, ARGS_YOLO_INPUT_MODEL)

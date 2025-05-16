@@ -2,7 +2,7 @@ import argparse
 
 import torch
 
-from args.args import get_attribute_from_args
+from args.args import get_attribute_from_args, parse_args_as_dict
 from yolo import ARGS_YOLO_INPUT_MODEL, ARGS_YOLO_VERSION, ARGS_YOLO_CLASSES
 from yolo.args import add_yolo_input_model_argument, add_yolo_version_argument, add_yolo_classes_argument
 from yolo.files import get_model_best_pt_path
@@ -31,7 +31,7 @@ if __name__ == "__main__":
     add_yolo_input_model_argument(parser)
     add_yolo_version_argument(parser)
     add_yolo_classes_argument(parser)
-    args = parser.parse_args()
+    args = parse_args_as_dict(parser)
 
     # Get the YOLO input model
     arg_yolo_input_model = get_attribute_from_args(args, ARGS_YOLO_INPUT_MODEL)

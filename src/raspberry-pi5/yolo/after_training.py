@@ -1,7 +1,7 @@
 import argparse
 import os
 
-from args.args import get_attribute_from_args
+from args.args import get_attribute_from_args, parse_args_as_dict
 from files import move_folder
 from yolo import (ARGS_YOLO_INPUT_MODEL, YOLO_DATASET_ORGANIZED, YOLO_DATASET_PROCESSED, YOLO_DATASET_TO_PROCESS,
                   YOLO_DATASET_TRAINING, YOLO_DATASET_VALIDATIONS)
@@ -24,7 +24,7 @@ def after_training(input_dir):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Script to set files as processed after YOLO model training')
     add_yolo_input_model_argument(parser)
-    args = parser.parse_args()
+    args = parse_args_as_dict(parser)
 
     # Get the YOLO input model
     arg_yolo_input_model = get_attribute_from_args(args, ARGS_YOLO_INPUT_MODEL)

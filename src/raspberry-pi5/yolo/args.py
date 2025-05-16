@@ -15,7 +15,7 @@ def add_yolo_input_model_argument(parser) -> None:
 # Add YOLO output model argument to the parser
 def add_yolo_output_model_argument(parser) -> None:
     parser.add_argument(get_attribute_name(ARGS_YOLO_OUTPUT_MODEL), type=str, required=True, help='YOLO output model',
-                        choices=[YOLO_MODEL_GR, YOLO_MODEL_GMR, YOLO_MODEL_BGOR])
+                        choices=[YOLO_MODEL_M, YOLO_MODEL_GR, YOLO_MODEL_GMR, YOLO_MODEL_BGOR])
 
 # Add YOLO format argument to the parser
 def add_yolo_format_argument(parser, required:bool=False) -> None:
@@ -24,7 +24,7 @@ def add_yolo_format_argument(parser, required:bool=False) -> None:
 
 # Add YOLO quantized argument to the parser
 def add_yolo_quantized_argument(parser, required:bool=False) -> None:
-    parser.add_argument(get_attribute_name(ARGS_YOLO_QUANTIZED), type=str, required=required, help='YOLO model quantization', choices=["True", "False"], default="False")
+    parser.add_argument(get_attribute_name(ARGS_YOLO_QUANTIZED), type=bool, required=required, help='YOLO model quantization', default=False)
 
 # Add YOLO version argument to the parser
 def add_yolo_version_argument(parser) -> None:
@@ -33,12 +33,12 @@ def add_yolo_version_argument(parser) -> None:
 
 # Add YOLO is retraining argument to the parser
 def add_yolo_is_retraining_argument(parser, required:bool=True) -> None:
-    parser.add_argument(get_attribute_name(ARGS_YOLO_IS_RETRAINING), type=str, required=required, help='YOLO model retraining', choices=["True", "False"], default="False")
+    parser.add_argument(get_attribute_name(ARGS_YOLO_IS_RETRAINING), type=bool, required=required, help='YOLO model retraining', default=False)
 
 # Add YOLO classes argument to the parser
 def add_yolo_classes_argument(parser, required:bool=True) -> None:
-    parser.add_argument(get_attribute_name(ARGS_YOLO_CLASSES), type=list, required=required, help='YOLO classes')
+    parser.add_argument(get_attribute_name(ARGS_YOLO_CLASSES), type=str, required=required, help='YOLO classes', nargs="*")
 
 # Add YOLO ignore classes argument to the parser
 def add_yolo_ignore_classes_argument(parser, required:bool=True) -> None:
-    parser.add_argument(get_attribute_name(ARGS_YOLO_IGNORE_CLASSES), type=list, required=required, help='YOLO ignore classes')
+    parser.add_argument(get_attribute_name(ARGS_YOLO_IGNORE_CLASSES), type=str, required=required, help='YOLO ignore classes', nargs="*")

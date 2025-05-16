@@ -7,12 +7,12 @@ from yolo import (YOLO_MODEL_GR, YOLO_MODEL_GMR, YOLO_MODEL_BGOR, YOLO_VERSION_5
                   YOLO_DATASET_PROCESSED, YOLO_DATASET_ORGANIZED, YOLO_DATASET_RESIZED, YOLO_DATASET_ORIGINAL,
                   YOLO_DATASET, YOLO_DATASET_GENERAL, YOLO_DIR, YOLO_RUNS, YOLO_WEIGHTS, BEST_PT, YOLO_DATASET_LABELED,
                   YOLO_DATASET_AUGMENTED, YOLO_ZIP, YOLO_COLAB, YOLO_DATA, YOLO_NOTEBOOKS, YOLO_LOCAL, YOLO_RUNS_OLD,
-                  YOLO_TF_RECORDS, YOLO_DATASET_NOTES_JSON, YOLO_DATASET_CLASSES_TXT)
+                  YOLO_TF_RECORDS, YOLO_DATASET_NOTES_JSON, YOLO_DATASET_CLASSES_TXT, YOLO_MODEL_M)
 
 # Check validity of model name
 def check_model_name(model_name: str) -> None:
-    if model_name not in [YOLO_MODEL_GR, YOLO_MODEL_GMR, YOLO_MODEL_BGOR]:
-        raise ValueError(f"Invalid model name: {model_name}. Must be '{YOLO_MODEL_GR}', '{YOLO_MODEL_GMR}' or '{YOLO_MODEL_BGOR}'.")
+    if model_name not in [YOLO_MODEL_M, YOLO_MODEL_GR, YOLO_MODEL_GMR, YOLO_MODEL_BGOR]:
+        raise ValueError(f"Invalid model name: {model_name}. Must be '{YOLO_MODEL_M}', '{YOLO_MODEL_GR}', '{YOLO_MODEL_GMR}' or '{YOLO_MODEL_BGOR}'.")
 
 # Check validity of yolo version
 def check_yolo_version(yolo_version: str) -> None:
@@ -31,10 +31,6 @@ def check_model_dataset_status(dataset_name: str, dataset_status: str|None) -> N
     if dataset_status is not None:
         if dataset_name in [YOLO_DATASET_AUGMENTED, YOLO_DATASET_ORGANIZED]:
             raise ValueError(f"Invalid dataset path. The dataset name '{dataset_name}' should not be used with dataset status '{dataset_status}'.")
-
-    # Check if the dataset name is split by dataset status
-    elif dataset_name not in [YOLO_DATASET_AUGMENTED, YOLO_DATASET_ORGANIZED]:
-        raise ValueError(f"Invalid dataset path. The dataset name '{dataset_name}' should not be used without dataset status '{dataset_status}'.")
 
 # Check validity of dataset name
 def check_dataset_name(dataset_name: str) -> None:

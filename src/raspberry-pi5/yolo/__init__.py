@@ -35,7 +35,7 @@ YOLO_DIR = os.path.join(CWD, 'yolo')
 YOLO_MODEL_M = 'm'
 YOLO_MODEL_GR = 'gr'
 YOLO_MODEL_GMR = 'gmr'
-YOLO_MODEL_BGOR = 'gbor'
+YOLO_MODEL_BGOR = 'bgor'
 
 # YOLO model versions
 YOLO_VERSION_5 = 'v5'
@@ -71,7 +71,7 @@ YOLO_DATASET_TESTING = 'test'
 YOLO_DATASET_ANNOTATIONS_JSON = 'annotations.json'
 YOLO_DATASET_CLASSES_TXT = 'classes.txt'
 YOLO_DATASET_NOTES_JSON = 'notes.json'
-YOLO_DATASET_IMAGES_EXT = 'jpg'
+YOLO_DATASET_IMAGES_EXT = '.jpg'
 
 # YOLO models
 BEST_ONNX = 'best.onnx'
