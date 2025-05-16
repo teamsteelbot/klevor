@@ -1,6 +1,8 @@
 import os
 import re
 
+from files import IGNORE_DIRS
+
 
 # Match any regex pattern in a list
 def match_any(regex_list: list[re.Pattern], string: str):
@@ -40,11 +42,14 @@ def zip_not_nested_folder(zipf, input_base_path: str, input_folder_path: str, ig
 # Define the function to zip a folder, this includes nested folders
 def zip_nested_folder(zipf, input_base_path: str, input_folder_path: str, ignore_dirs: list[str] = None,
                       ignore_filenames_regex: list[re.Pattern] = None):
+    # Added to ignore directories the list of directories that should be always ignored
+    if ignore_dirs is None:
+        ignore_dirs = []
+    ignore_dirs += IGNORE_DIRS
+
     for root, _, filenames in os.walk(input_folder_path):
         # Skip directories in the ignore list
-        if ignore_dirs is not None:
-            filenames = [f for f in filenames if
-                         not any(os.path.relpath(root, input_base_path).startswith(d) for d in ignore_dirs)]
+        filenames = [f for f in filenames if not any(os.path.relpath(root, input_base_path).startswith(d) for d in ignore_dirs)]
 
         # Zip the files in the subfolders
         zip_files(zipf, filenames, root, input_base_path, ignore_filenames_regex)

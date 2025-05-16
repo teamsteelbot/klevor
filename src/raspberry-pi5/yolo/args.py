@@ -1,15 +1,15 @@
 from args.args import get_attribute_name
-from yolo import (ARGS_YOLO_MODEL, YOLO_MODEL_2C, YOLO_MODEL_3C, YOLO_MODEL_4C, ARGS_YOLO_FORMAT_TFLITE,
+from yolo import (ARGS_YOLO_MODEL, YOLO_MODEL_GR, YOLO_MODEL_GMR, YOLO_MODEL_BGOR, ARGS_YOLO_FORMAT_TFLITE,
                   ARGS_YOLO_FORMAT_TENSOR_RT,
                   ARGS_YOLO_FORMAT_ONNX, ARGS_YOLO_FORMAT, ARGS_YOLO_QUANTIZED, ARGS_YOLO_VERSION, YOLO_VERSION_5,
                   YOLO_VERSION_11,
-                  ARGS_YOLO_FORMAT_PT, ARGS_YOLO_IS_RETRAINING)
+                  ARGS_YOLO_FORMAT_PT, ARGS_YOLO_IS_RETRAINING, YOLO_MODEL_M)
 
 
 # Add YOLO model argument to the parser
 def add_yolo_model_argument(parser) -> None:
     parser.add_argument(get_attribute_name(ARGS_YOLO_MODEL), type=str, required=True, help='YOLO model',
-                        choices=[YOLO_MODEL_2C, YOLO_MODEL_3C, YOLO_MODEL_4C])
+                        choices=[YOLO_MODEL_M, YOLO_MODEL_GR, YOLO_MODEL_GMR, YOLO_MODEL_BGOR])
 
 # Add YOLO format argument to the parser
 def add_yolo_format_argument(parser) -> None:

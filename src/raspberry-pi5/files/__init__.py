@@ -1,6 +1,8 @@
 import os
 import shutil
 
+# Directories to ignore always
+IGNORE_DIRS = ['.git', '__pycache__', '.idea', '.vscode', '.venv', 'venv', 'env']
 
 # Move file between folders
 def move_file(input_path, output_dir):

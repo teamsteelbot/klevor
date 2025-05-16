@@ -1,2 +1,0 @@
-@echo off
-python.exe -m yolo.export --model 3c --format tflite --quantized True --version v5

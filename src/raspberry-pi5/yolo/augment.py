@@ -18,7 +18,7 @@ if __name__ == '__main__':
     # Get the dataset paths
     labeled_to_process_dir = get_dataset_model_dir_path(YOLO_DATASET_LABELED, YOLO_DATASET_TO_PROCESS, arg_yolo_model)
     labeled_processed_dir = get_dataset_model_dir_path(YOLO_DATASET_LABELED, YOLO_DATASET_PROCESSED, arg_yolo_model)
-    augmented_to_process_dir = get_dataset_model_dir_path(YOLO_DATASET_AUGMENTED, YOLO_DATASET_TO_PROCESS, arg_yolo_model)
+    augmented_dir = get_dataset_model_dir_path(YOLO_DATASET_AUGMENTED, None, arg_yolo_model)
 
     # Augment the dataset
-    augment_dataset(labeled_to_process_dir, augmented_to_process_dir, YOLO_NUM_AUGMENTATIONS, labeled_processed_dir)
+    augment_dataset(labeled_to_process_dir, augmented_dir, YOLO_NUM_AUGMENTATIONS, labeled_processed_dir)

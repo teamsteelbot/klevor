@@ -99,28 +99,41 @@ Para la creación del conjunto de datos, primeramente tomamos imágenes de los p
 
 <p align="center">
    <img src="https://i.postimg.cc/RFBvkzPz/IMG-20250221-135320.jpg" alt="Imagen sin redimensionar del conjunto de datos" width="400">
+</p>
+<p align="center">
    <i>Imagen sin redimensionar del conjunto de datos</i>
 </p>
 
 <p align="center">
    <img src="https://i.postimg.cc/B6r7YqNx/IMG-20250221-135449.jpg" alt="Imagen redimensionada del conjunto de datos" width="400">
+</p>
+<p align="center">
    <i>Imagen redimensionada del conjunto de datos</i>
 </p>
 
-Posteriormente, se realizó la anotación de las imágenes, donde se etiquetaron los prismas con sus respectivos colores. Para ello, se utilizó la herramienta Label Studio, una herramienta de etiquetado de datos de código abierto que permite crear conjuntos de datos personalizados para el entrenamiento de modelos de aprendizaje automático [[3](#label-studio)]. En esta, creamos tres etiquetas: ```green rectangular prism```, ```magenta rectangular prism``` y ```red rectangular prism```, los cuales representan el prisma verde, magenta y rojo, respectivamente.
+Posteriormente, se realizó la anotación de las imágenes, donde se etiquetaron los prismas con sus respectivos colores. Para ello, se utilizó la herramienta Label Studio, una herramienta de etiquetado de datos de código abierto que permite crear conjuntos de datos personalizados para el entrenamiento de modelos de aprendizaje automático [[3](#label-studio)].
 
-Durante el proceso, manejamos conjunto de datos de 2, 3, 4 clases, las cuales fuimos variando a lo largo del desarrollo del proyecto. Primeramente, desarrollamos un modelo de 4 clases, sin embargo, no logró un buen rendimiento para todas las clases, ya que incluía, además del prisma rojo y verde, la línea naranja y la línea azul, que finalmente, debido a nuestros componentes, se podían inferir mediante el RPLIDAR C1. Posteriormente, se decidió omitir las clases relacionadas con las líneas de la pista, las cuales no eran necesarias para la detección de los prismas. Finalmente, se optó por un modelo de 2 clases, el cual fue capaz de detectar los prismas rojo y verde. Cómo se observó anteriormente, se optó por un conjunto de datos de 3 clases, ya que añadimos una clase adicional, el prisma magenta, para poder realizar la detección del estacionamiento. 
+<p align="center">
+   <img src="https://i.postimg.cc/DyFZ1ryX/Screenshot-162.png" alt="Anotación de imágenes con Label Studio" width="400">
+</p>
+<p align="center">
+   <i>Anotación de imágenes con Label Studio</i>
+</p>
 
-Cabe destacar que, así como variamos el número de clases, también variamos el número de imágenes por clase, desde un dataset de alrededor de 350 imágenes antes de realizar el *data augmentation*, hasta un dataset de alrededor de 1100 imágenes antes de realizar el *data augmentation*, donde cada una fue anotada por algún integrante del equipo de forma manual para entrenar el modelo de la forma más precisa posible.
+Durante el proceso, manejamos conjunto de datos de 1 (**M**), 2 (**GR**), 3 (**GMR**), 4 (**BGOR**) clases, las cuales fuimos variando a lo largo del desarrollo del proyecto, donde **M** proviene de ```magenta rectangular prism```, **G** de ```green rectangular prism```, **R** de ```red rectangular prism```, **B** de ```blue line``` y **O** de ```orange line```. Primeramente, desarrollamos un modelo de 4 clases, sin embargo, no logró un buen rendimiento para todas las clases, ya que incluía, además del prisma rojo y verde, la línea naranja y la línea azul, que finalmente, debido a nuestros componentes, se podían inferir mediante el RPLIDAR C1. Posteriormente, se decidió omitir las clases relacionadas con las líneas de la pista, las cuales no eran necesarias para la detección de los prismas. Luego, se optó por un modelo de 2 clases, el cual fue capaz de detectar los prismas rojo y verde. Seguidamente, se optó por un conjunto de datos de 3 clases, ya que añadimos una clase adicional, el prisma magenta, para poder realizar la detección del estacionamiento. Finalmente, debido a la cuantización del modelo para ser compatible con el formato del NPU Hailo 8L, se optó por dos modelos, uno con dos clases (**GR**), para poder detectar los obstáculos de la pista, y otro de una sola clase (**M**) para la detección del estacionamiento después de haber recorrido toda la pista. 
 
-Después de haber anotado las imágenes con la plataforma Label Studio, se exportaron las anotaciones en formato YOLO y se guardaron, en el caso del modelo de 3 clases, en la carpeta [```dataset/3c/labeled/to_process```](dataset/3c/labeled/to_process). Posteriormente, se ejecutó el script [```augment.py```](augment.py) para generar alrededor de 10 imágenes por cada imagen del conjunto de datos, utilizando la biblioteca OpenCV. Este script aplica distintas transformaciones a las imágenes, como rotación, escalado, traslación y cambio de brillo y contraste, para aumentar la variabilidad del conjunto de datos y mejorar el rendimiento del modelo. Las imágenes generadas se guardaron en la carpeta [```dataset/3c/augmented/to_process```](dataset/3c/augmented/to_process).
+Cabe destacar que, así como variamos el número de clases, también variamos el número de imágenes por clase, desde un dataset de alrededor de 350 imágenes antes de realizar el *data augmentation*, hasta un dataset de alrededor de 1300 imágenes antes de realizar el *data augmentation*, donde cada una fue anotada por algún integrante del equipo de forma manual para entrenar el modelo de la forma más precisa posible.
 
-Luego, se ejecutó el script [```split.py```](split.py) para dividir el conjunto de datos en un conjunto de entrenamiento [```dataset/3c/organized/train```](dataset/3c/organized/to_process/train), un conjunto de validación [```dataset/3c/organized/val```](dataset/3c/organized/to_process/val) y un conjunto de testing [```dataset/3c/organized/test```](dataset/3c/organized/to_process/test), con una distribución del 70%, 20% y 10%, respectivamente. Este script utiliza la biblioteca ```os``` para crear las carpetas necesarias y mover las imágenes a las carpetas correspondientes.
+Después de haber anotado las imágenes con la plataforma Label Studio, se exportaron las anotaciones en formato YOLO y se guardaron, en el caso del modelo de 3 clases, en la carpeta [```dataset/3c/labeled/to_process```](dataset/3c/labeled/to_process). Posteriormente, se ejecutó el script [```augment.py```](augment.py) para generar alrededor de 10 imágenes por cada imagen del conjunto de datos, utilizando la biblioteca OpenCV. Este script aplica distintas transformaciones a las imágenes, como rotación, escalado, traslación y cambio de brillo y contraste, para aumentar la variabilidad del conjunto de datos y mejorar el rendimiento del modelo. Las imágenes generadas se guardaron en la carpeta [```dataset/3c/augmented```](dataset/3c/augmented).
 
-*NOTA: Se puede observar, que en cada una de las rutas, se encuentra la carpeta ```to_process```, la cual es una carpeta temporal, que se utiliza para guardar las imágenes que se están procesando. Una vez que se han procesado las imágenes, los archivos dentro de las mismas se mueven a una carpeta ```processed``` correspondiente, la cual se encuentra en la misma ruta. De esta forma, se evita que las imágenes procesadas se mezclen con las imágenes por procesar, así como permite a futuro seguir entrenando el mismo modelo, sin necesidad de volver a procesar las mismas imágenes.*
+Luego, se ejecutó el script [```split.py```](split.py) para dividir el conjunto de datos en un conjunto de entrenamiento [```dataset/3c/organized/train```](dataset/3c/organized/train), un conjunto de validación [```dataset/3c/organized/val```](dataset/3c/organized/val) y un conjunto de testing [```dataset/3c/organized/test```](dataset/3c/organized/test), con una distribución del 70%, 20% y 10%, respectivamente. Este script utiliza la biblioteca ```os``` para crear las carpetas necesarias y mover las imágenes a las carpetas correspondientes.
+
+*NOTA: Se puede observar, que en cada una de las rutas, se encuentra la carpeta ```to_process```, la cual es una carpeta temporal, que se utiliza para guardar las imágenes que se están procesando. Una vez que se han procesado las imágenes, los archivos dentro de las mismas se mueven a una carpeta ```processed``` correspondiente, la cual se encuentra en la misma ruta. De esta forma, se evita que las imágenes procesadas se mezclen con las imágenes por procesar, así como permite a futuro seguir entrenando el mismo modelo, sin necesidad de volver a procesar las mismas imágenes. Así mismo, se puede observar que tanto para ```augmented``` y ```organized```, no existe la carpeta ```to_process```, ya que, después de ser procesadas estas imágenes, son eliminadas debido al gran número de estas al momento de realizar el ```data augmentation```.*
 
 <p align="center">
    <img src="https://i.postimg.cc/B6kkr5ZP/Figure-2.png" alt="Imagen con distintas inferencias realizadas (modelo de 3 clases)" width="400">
+</p>
+<p align="center">
    <i>Imagen con distintas inferencias realizadas (modelo de 3 clases)</i>
 </p>
 

@@ -9,19 +9,16 @@ from yolo.args import add_yolo_model_argument
 from yolo.files import get_dataset_model_dir_path
 
 
-# Move the folders from the organized dataset to the processed dataset
-def move_folders(input_base_dir, output_base_dir):
+# Remove the YOLO training and validation folders from the dataset
+def after_training(input_dir):
     # Move the folders
     for folder in [YOLO_DATASET_TRAINING, YOLO_DATASET_VALIDATIONS]:
-        # Set the input and output directories
-        input_dir = os.path.join(input_base_dir, folder)
-        output_dir = os.path.join(output_base_dir, folder)
-
-        # Move the folder
-        move_folder(input_dir, output_dir)
-
-        # Log
-        print(f'Moved {input_dir} to {output_dir}')
+        folder_path = os.path.join(input_dir, folder)
+        if os.path.exists(folder_path):
+            os.remove(folder_path)
+            print(f'Removed {folder} folder from {input_dir} folder')
+        else:
+            print(f'{folder} folder does not exist in {input_dir}')
 
 
 if __name__ == '__main__':
@@ -33,8 +30,7 @@ if __name__ == '__main__':
     arg_yolo_model = get_attribute_from_args(args, ARGS_YOLO_MODEL)
 
     # Get the dataset paths
-    organized_to_process_dir = get_dataset_model_dir_path(YOLO_DATASET_ORGANIZED, YOLO_DATASET_TO_PROCESS, arg_yolo_model)
-    organized_processed_dir = get_dataset_model_dir_path(YOLO_DATASET_ORGANIZED, YOLO_DATASET_PROCESSED, arg_yolo_model)
+    organized_dir = get_dataset_model_dir_path(YOLO_DATASET_ORGANIZED, YOLO_DATASET_TO_PROCESS, arg_yolo_model)
 
     # Move the folders
-    move_folders(organized_to_process_dir, organized_processed_dir)
+    after_training(organized_dir)

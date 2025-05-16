@@ -2,7 +2,7 @@ import os
 import time
 from typing import LiteralString
 
-from yolo import (YOLO_MODEL_2C, YOLO_MODEL_3C, YOLO_MODEL_4C, YOLO_VERSION_5, YOLO_VERSION_11, YOLO_DATASET_TO_PROCESS,
+from yolo import (YOLO_MODEL_GR, YOLO_MODEL_GMR, YOLO_MODEL_BGOR, YOLO_VERSION_5, YOLO_VERSION_11, YOLO_DATASET_TO_PROCESS,
                   YOLO_DATASET_PROCESSED, YOLO_DATASET_ORGANIZED, YOLO_DATASET_RESIZED, YOLO_DATASET_ORIGINAL,
                   YOLO_DATASET, YOLO_DATASET_GENERAL, YOLO_DIR, YOLO_RUNS, YOLO_WEIGHTS, BEST_PT, YOLO_DATASET_LABELED,
                   YOLO_DATASET_AUGMENTED, YOLO_ZIP, YOLO_COLAB, YOLO_DATA, YOLO_NOTEBOOKS, YOLO_LOCAL, YOLO_RUNS_OLD,
@@ -10,8 +10,8 @@ from yolo import (YOLO_MODEL_2C, YOLO_MODEL_3C, YOLO_MODEL_4C, YOLO_VERSION_5, Y
 
 # Check validity of model name
 def check_model_name(model_name: str) -> None:
-    if model_name not in [YOLO_MODEL_2C, YOLO_MODEL_3C, YOLO_MODEL_4C]:
-        raise ValueError(f"Invalid model name: {model_name}. Must be '{YOLO_MODEL_2C}', '{YOLO_MODEL_3C}' or '{YOLO_MODEL_4C}'.")
+    if model_name not in [YOLO_MODEL_GR, YOLO_MODEL_GMR, YOLO_MODEL_BGOR]:
+        raise ValueError(f"Invalid model name: {model_name}. Must be '{YOLO_MODEL_GR}', '{YOLO_MODEL_GMR}' or '{YOLO_MODEL_BGOR}'.")
 
 # Check validity of yolo version
 def check_yolo_version(yolo_version: str) -> None:
@@ -19,12 +19,31 @@ def check_yolo_version(yolo_version: str) -> None:
         raise ValueError(f"Invalid yolo version: {yolo_version}. Must be '{YOLO_VERSION_5}' or '{YOLO_VERSION_11}'.")
 
 # Check validity of dataset status
-def check_dataset_status(dataset_status: str) -> None:
-    if dataset_status not in [YOLO_DATASET_TO_PROCESS, YOLO_DATASET_PROCESSED]:
-        raise ValueError(f"Invalid dataset status: {dataset_status}. Must be '{YOLO_DATASET_TO_PROCESS}' or '{YOLO_DATASET_PROCESSED}'.")
+def check_dataset_status(dataset_status: str|None) -> None:
+    if dataset_status is not None:
+        if dataset_status not in [YOLO_DATASET_TO_PROCESS, YOLO_DATASET_PROCESSED]:
+            raise ValueError(f"Invalid dataset status: {dataset_status}. Must be '{YOLO_DATASET_TO_PROCESS}' or '{YOLO_DATASET_PROCESSED}'.")
+
+# Check validity of model dataset status
+def check_model_dataset_status(dataset_name: str, dataset_status: str|None) -> None:
+    # Check if the dataset name is split by dataset status
+    if dataset_status is not None:
+        if dataset_name in [YOLO_DATASET_AUGMENTED, YOLO_DATASET_ORGANIZED]:
+            raise ValueError(f"Invalid dataset path. The dataset name '{dataset_name}' should not be used with dataset status '{dataset_status}'.")
+
+    # Check if the dataset name is split by dataset status
+    elif dataset_name not in [YOLO_DATASET_AUGMENTED, YOLO_DATASET_ORGANIZED]:
+        raise ValueError(f"Invalid dataset path. The dataset name '{dataset_name}' should not be used without dataset status '{dataset_status}'.")
 
 # Check validity of dataset name
-def check_dataset_name(dataset_name:str, model_name:str|None)-> None:
+def check_dataset_name(dataset_name: str) -> None:
+    # Check validity of dataset name
+    if dataset_name not in [YOLO_DATASET_ORIGINAL, YOLO_DATASET_RESIZED, YOLO_DATASET_LABELED, YOLO_DATASET_AUGMENTED,
+                            YOLO_DATASET_ORGANIZED]:
+        raise ValueError(f"Invalid dataset name: {dataset_name}. Must be one of the defined dataset folders.")
+
+# Check validity of the model dataset name
+def check_model_dataset_name(dataset_name:str, model_name:str|None)-> None:
     # Check if the dataset name is split by model name
     if model_name is not None:
         if dataset_name in [YOLO_DATASET_ORIGINAL, YOLO_DATASET_RESIZED]:
@@ -34,24 +53,32 @@ def check_dataset_name(dataset_name:str, model_name:str|None)-> None:
     elif dataset_name not in [YOLO_DATASET_ORIGINAL, YOLO_DATASET_RESIZED]:
         raise ValueError(f"Invalid dataset path. The dataset name '{dataset_name}' should not be used without a model name.")
 
-    # Check validity of dataset name
-    if dataset_name not in [YOLO_DATASET_ORIGINAL, YOLO_DATASET_RESIZED, YOLO_DATASET_LABELED, YOLO_DATASET_AUGMENTED,
-                                       YOLO_DATASET_ORGANIZED]:
-        raise ValueError(f"Invalid dataset name: {dataset_name}. Must be one of the defined dataset folders.")
-
 # Get dataset model directory path
-def get_dataset_model_dir_path(dataset_name: str, dataset_status: str, model_name: str|None) -> LiteralString | str | bytes:
+def get_dataset_model_dir_path(dataset_name: str, dataset_status: str|None, model_name: str|None) -> LiteralString | str | bytes:
+    # Check model name
+    if model_name is not None:
+        check_model_name(model_name)
+
     # Check dataset status
-    check_dataset_status(dataset_status)
+    if dataset_status is not None:
+        check_dataset_status(dataset_status)
+        check_model_dataset_status(dataset_name, dataset_status)
 
     # Check dataset name
-    check_dataset_name(dataset_name, model_name)
+    check_dataset_name(dataset_name)
+    check_model_dataset_name(dataset_name, model_name)
 
     # Check if the dataset is split by model name
-    if model_name is not None:
+    if dataset_status is not None and model_name is not None:
         return os.path.join(YOLO_DATASET, model_name, dataset_name, dataset_status)
 
-    return os.path.join(YOLO_DATASET, YOLO_DATASET_GENERAL, dataset_name, dataset_status)
+    if dataset_status is not None:
+        return os.path.join(YOLO_DATASET, YOLO_DATASET_GENERAL, dataset_name, dataset_status)
+
+    if model_name is not None:
+        return os.path.join(YOLO_DATASET, model_name, dataset_name)
+
+    return os.path.join(YOLO_DATASET, YOLO_DATASET_GENERAL, dataset_name)
 
 # Get the YOLO version folder path
 def get_yolo_version_dir_path(arg_yolo_version: str) -> LiteralString | str | bytes:
