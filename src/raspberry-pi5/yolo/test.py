@@ -6,12 +6,12 @@ from opencv.image_display_detections import preprocess, display_detections
 from model.image_bounding_boxes import outputs_to_image_bounding_boxes
 import os
 from opencv import DEFAULT_SIZE
-from yolo import (YOLO_NUMBER_RANDOM_IMAGES, ARGS_YOLO_FORMAT_PT, YOLO_GR_COLORS, YOLO_BGOR_COLORS, ARGS_YOLO_MODEL,
+from yolo import (YOLO_NUMBER_RANDOM_IMAGES, ARGS_YOLO_FORMAT_PT, YOLO_GR_COLORS, YOLO_BGOR_COLORS, ARGS_YOLO_INPUT_MODEL,
                   ARGS_YOLO_FORMAT, ARGS_YOLO_QUANTIZED, ARGS_YOLO_VERSION, YOLO_DATASET_ORGANIZED, YOLO_MODEL_BGOR,
                   YOLO_MODEL_GR, YOLO_DATASET_TO_PROCESS, YOLO_GMR_COLORS, YOLO_DATASET_TESTING, YOLO_DATASET_IMAGES,
                   YOLO_MODEL_GMR)
 from model.yolo import (load, get_class_names, run_inference)
-from yolo.args import (add_yolo_model_argument, add_yolo_format_argument, add_yolo_quantized_argument, add_yolo_version_argument)
+from yolo.args import (add_yolo_input_model_argument, add_yolo_format_argument, add_yolo_quantized_argument, add_yolo_version_argument)
 from yolo.files import (get_dataset_model_dir_path, get_model_best_pt_path, get_model_weight_dir_path)
 
 
@@ -57,14 +57,14 @@ def test_random_images_pt(input_model_path: str, output_organized_dir: str, colo
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Script to test YOLO model with a given format')
-    add_yolo_model_argument(parser)
+    add_yolo_input_model_argument(parser)
     add_yolo_format_argument(parser)
     add_yolo_quantized_argument(parser)
     add_yolo_version_argument(parser)
     args = parser.parse_args()
 
-    # Get the YOLO model
-    arg_yolo_model = get_attribute_from_args(args, ARGS_YOLO_MODEL)
+    # Get the YOLO input model
+    arg_yolo_input_model = get_attribute_from_args(args, ARGS_YOLO_INPUT_MODEL)
 
     # Get the YOLO format
     arg_yolo_format = get_attribute_from_args(args, ARGS_YOLO_FORMAT)
@@ -76,30 +76,30 @@ if __name__ == '__main__':
     arg_yolo_version = get_attribute_from_args(args, ARGS_YOLO_VERSION)
 
     # Load a model
-    model_path = get_model_best_pt_path(arg_yolo_model, arg_yolo_version)
+    model_path = get_model_best_pt_path(arg_yolo_input_model, arg_yolo_version)
     model = load(model_path)
 
     # Get the model weights path
-    model_weights_path = get_model_weight_dir_path(arg_yolo_model, arg_yolo_version)
+    model_weights_path = get_model_weight_dir_path(arg_yolo_input_model, arg_yolo_version)
 
     # Get the required dataset folder name
-    organized_to_process_dir = get_dataset_model_dir_path(YOLO_DATASET_ORGANIZED, YOLO_DATASET_TO_PROCESS, arg_yolo_model)
+    organized_dir = get_dataset_model_dir_path(YOLO_DATASET_ORGANIZED, None, arg_yolo_input_model)
 
     # Get the dataset paths
-    weights_best_pt = get_model_best_pt_path(arg_yolo_model, arg_yolo_version)
+    weights_best_pt = get_model_best_pt_path(arg_yolo_input_model, arg_yolo_version)
 
     # Get the class colors
     yolo_colors = None
-    if arg_yolo_model == YOLO_MODEL_GR:
+    if arg_yolo_input_model == YOLO_MODEL_GR:
         if arg_yolo_format == ARGS_YOLO_FORMAT_PT:
             yolo_colors = YOLO_GR_COLORS
 
-    elif arg_yolo_model == YOLO_MODEL_GMR:
+    elif arg_yolo_input_model == YOLO_MODEL_GMR:
         if arg_yolo_format == ARGS_YOLO_FORMAT_PT:
             yolo_colors = YOLO_GMR_COLORS
 
-    elif arg_yolo_model == YOLO_MODEL_BGOR:
+    elif arg_yolo_input_model == YOLO_MODEL_BGOR:
         if arg_yolo_format == ARGS_YOLO_FORMAT_PT:
             yolo_colors = YOLO_BGOR_COLORS
 
-    test_random_images_pt(weights_best_pt, organized_to_process_dir, yolo_colors)
+    test_random_images_pt(weights_best_pt, organized_dir, yolo_colors)

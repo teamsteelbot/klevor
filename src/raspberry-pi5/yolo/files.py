@@ -2,11 +2,12 @@ import os
 import time
 from typing import LiteralString
 
-from yolo import (YOLO_MODEL_GR, YOLO_MODEL_GMR, YOLO_MODEL_BGOR, YOLO_VERSION_5, YOLO_VERSION_11, YOLO_DATASET_TO_PROCESS,
+from yolo import (YOLO_MODEL_GR, YOLO_MODEL_GMR, YOLO_MODEL_BGOR, YOLO_VERSION_5, YOLO_VERSION_11,
+                  YOLO_DATASET_TO_PROCESS,
                   YOLO_DATASET_PROCESSED, YOLO_DATASET_ORGANIZED, YOLO_DATASET_RESIZED, YOLO_DATASET_ORIGINAL,
                   YOLO_DATASET, YOLO_DATASET_GENERAL, YOLO_DIR, YOLO_RUNS, YOLO_WEIGHTS, BEST_PT, YOLO_DATASET_LABELED,
                   YOLO_DATASET_AUGMENTED, YOLO_ZIP, YOLO_COLAB, YOLO_DATA, YOLO_NOTEBOOKS, YOLO_LOCAL, YOLO_RUNS_OLD,
-                  YOLO_TF_RECORDS)
+                  YOLO_TF_RECORDS, YOLO_DATASET_NOTES_JSON, YOLO_DATASET_CLASSES_TXT)
 
 # Check validity of model name
 def check_model_name(model_name: str) -> None:
@@ -204,3 +205,17 @@ def get_tf_record_path(model_name: str, yolo_version: str) -> LiteralString | st
     check_model_name(model_name)
 
     return os.path.join(yolo_version_dir, YOLO_TF_RECORDS, model_name+'.tfrecord')
+
+# Get the YOLO dataset notes file path
+def get_yolo_dataset_notes_file_path(dataset_name: str, dataset_status: str|None, model_name: str|None) -> LiteralString | str | bytes:
+    # Get the dataset model directory path
+    dataset_model_dir_path = get_dataset_model_dir_path(dataset_name, dataset_status, model_name)
+
+    return os.path.join(dataset_model_dir_path, YOLO_DATASET_NOTES_JSON)
+
+# Get the YOLO dataset classes file path
+def get_yolo_dataset_classes_file_path(dataset_name: str, dataset_status: str|None, model_name: str|None) -> LiteralString | str | bytes:
+    # Get the dataset model directory path
+    dataset_model_dir_path = get_dataset_model_dir_path(dataset_name, dataset_status, model_name)
+
+    return os.path.join(dataset_model_dir_path, YOLO_DATASET_CLASSES_TXT)

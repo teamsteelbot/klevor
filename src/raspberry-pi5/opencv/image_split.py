@@ -11,8 +11,11 @@ from yolo import (YOLO_DATASET_IMAGES, YOLO_DATASET_LABELS, YOLO_DATASET_TRAININ
 def split_dataset(input_dir: LiteralString, output_dir: LiteralString,
                   train_ratio=0.7,
                   val_ratio=0.2):
+    # Get the input images and annotations directories
     input_images_dir = os.path.join(input_dir, YOLO_DATASET_IMAGES)
     input_annotations_dir = os.path.join(input_dir, YOLO_DATASET_LABELS)
+
+    # Get the output directories
     output_training_dir = os.path.join(output_dir, YOLO_DATASET_TRAINING)
     output_validations_dir = os.path.join(output_dir, YOLO_DATASET_VALIDATIONS)
     output_testing_dir = os.path.join(output_dir, YOLO_DATASET_TESTING)
@@ -29,8 +32,7 @@ def split_dataset(input_dir: LiteralString, output_dir: LiteralString,
                    output_validations_images_dir, output_testing_images_dir,
                    output_training_annotations_dir, output_validations_annotations_dir,
                    output_testing_annotations_dir]:
-        if io_dir is not None and not os.path.exists(io_dir):
-            os.makedirs(io_dir)
+        os.makedirs(io_dir, exist_ok=True)
 
     # Get the list of files
     image_filenames = os.listdir(input_images_dir)

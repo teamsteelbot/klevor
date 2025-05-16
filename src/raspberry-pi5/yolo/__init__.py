@@ -69,6 +69,8 @@ YOLO_DATASET_TRAINING = 'train'
 YOLO_DATASET_VALIDATIONS = 'val'
 YOLO_DATASET_TESTING = 'test'
 YOLO_DATASET_ANNOTATIONS_JSON = 'annotations.json'
+YOLO_DATASET_CLASSES_TXT = 'classes.txt'
+YOLO_DATASET_NOTES_JSON = 'notes.json'
 YOLO_DATASET_IMAGES_EXT = 'jpg'
 
 # YOLO models
@@ -96,9 +98,12 @@ YOLO_NUMBER_RANDOM_IMAGES = 10
 # Arguments
 ARGS_YOLO_FORMAT = 'format'
 ARGS_YOLO_QUANTIZED = 'quantized'
-ARGS_YOLO_MODEL = 'model'
+ARGS_YOLO_INPUT_MODEL = 'input-model'
+ARGS_YOLO_OUTPUT_MODEL = 'output-model'
 ARGS_YOLO_VERSION = 'version'
 ARGS_YOLO_IS_RETRAINING = 'is-retraining'
+ARGS_YOLO_CLASSES = 'classes'
+ARGS_YOLO_IGNORE_CLASSES = 'ignore-classes'
 
 # YOLO formats
 ARGS_YOLO_FORMAT_ONNX = 'onnx'

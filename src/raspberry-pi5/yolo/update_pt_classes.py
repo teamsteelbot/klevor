@@ -1,17 +1,46 @@
+import argparse
+
 import torch
 
-from yolo import YOLO_MODEL_GMR, YOLO_VERSION_11
+from args.args import get_attribute_from_args
+from yolo import ARGS_YOLO_INPUT_MODEL, ARGS_YOLO_VERSION, ARGS_YOLO_CLASSES
+from yolo.args import add_yolo_input_model_argument, add_yolo_version_argument, add_yolo_classes_argument
 from yolo.files import get_model_best_pt_path
 
-# Get the model path
-model_path = get_model_best_pt_path(YOLO_MODEL_GMR, YOLO_VERSION_11)
+# Update classes from a PyTorch model
+def update_classes(model_name, model_version, new_classes):
+    # Get the model path
+    model_path = get_model_best_pt_path(model_name, model_version)
 
-# Load the model
-model = torch.load(model_path, weights_only=False)
+    # Load the model
+    model = torch.load(model_path, weights_only=False)
 
-# Update class names
-print(model["model"].names)
-model["model"].names = ["green rectangular prism", "magenta rectangular prism", "red rectangular prism"]  # Modify as needed
+    # Check if the model has the same number of classes as the new classes
+    if len(model["model"].names) != len(new_classes):
+        print(f"Error: The model has {len(model['model'].names)} classes, but the new classes have {len(new_classes)} classes.")
+        return
 
-# Save the modified model
-torch.save(model, model_path)
+    # Update class names
+    model["model"].names = new_classes
+
+    # Save the modified model
+    torch.save(model, model_path)
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Script to update YOLO model classes')
+    add_yolo_input_model_argument(parser)
+    add_yolo_version_argument(parser)
+    add_yolo_classes_argument(parser)
+    args = parser.parse_args()
+
+    # Get the YOLO input model
+    arg_yolo_input_model = get_attribute_from_args(args, ARGS_YOLO_INPUT_MODEL)
+
+    # Get the YOLO version
+    arg_yolo_version = get_attribute_from_args(args, ARGS_YOLO_VERSION)
+
+    # Get the YOLO classes
+    arg_yolo_classes = get_attribute_from_args(args, ARGS_YOLO_CLASSES)
+
+    # Update the classes
+    update_classes(arg_yolo_input_model, arg_yolo_version, arg_yolo_classes)
