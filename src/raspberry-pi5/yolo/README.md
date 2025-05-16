@@ -10,9 +10,9 @@
       1. [Características Clave de las NPU](#npu-caracteristicas-clave)
 2. **[Montaje del Modelo de Detección de Objetos](#montaje-del-modelo-de-deteccion-de-objetos)**
    1. [Creación del Conjunto de Datos](#creacion-del-conjunto-de-datos)
-   2. [Instalación de Hailo AI HAT+](#instalacion-de-hailo-ai-hat)
-   3. [Entrenamiento del Modelo](#entrenamiento-del-modelo)
-   4. [Conversión del Modelo](#conversion-del-modelo)
+   2. [Entrenamiento del Modelo](#entrenamiento-del-modelo)
+   3. [Conversión del Modelo](#conversion-del-modelo)
+   4. [Instalación de Hailo AI HAT+](#instalacion-de-hailo-ai-hat)
 3. **[Recursos Externos](#recursos-externos)**
 
 <h1 id="deteccion-de-objetos">Detección de Objetos</h1>
@@ -32,10 +32,9 @@ Primeramente, debemos comprender distintos conceptos relacionados con la detecci
 Para la visión por computadora, las imágenes se expresan como funciones continuas en un plano de coordenadas 2D representadas como f(x, y). Cuando se digitalizan, las imágenes pasan por dos procesos primarios llamados muestreo y cuantización, que, en resumen, convierten la función de imagen continua en una estructura de cuadrícula discreta de elementos que representan píxeles [[1](#object-detection-ibm)]. 
 
 <p align="center">
-  <img src="https://assets-global.website-files.com/5d7b77b063a9066d83e1209c/627d121f86896a59aad78407_60f49c3f218440673e6baa97_apples1.png" alt="Imagen con distintas anotaciones de manzanas" width="400">
-</p>
-<p align="center">
-    <i>Imagen con distintas anotaciones de manzanas</i>
+   <img src="https://assets-global.website-files.com/5d7b77b063a9066d83e1209c/627d121f86896a59aad78407_60f49c3f218440673e6baa97_apples1.png" alt="Imagen con distintas anotaciones de manzanas" width="400">
+   <br>
+   <i>Imagen con distintas anotaciones de manzanas</i>
 </p>
 
 Al ser anotada la imagen, el modelo de detección de objetos puede reconocer regiones con características similares a las definidas en el conjunto de datos de entrenamiento como el mismo objeto. Los modelos de detección de objetos no reconocen objetos per se, sino agregados de propiedades como tamaño, forma, color, etc., y clasifican regiones según patrones visuales inferidos a partir de datos de entrenamiento anotados manualmente [[1](#object-detection-ibm)].
@@ -66,10 +65,9 @@ Para Klevor, la detección de objetos se basa en el modelo YOLOv11; la última v
 Una unidad de procesamiento neuronal (NPU) es un microprocesador especializado diseñado para imitar la función de procesamiento del cerebro humano. Están optimizados para tareas y aplicaciones de inteligencia artificial (IA), redes neuronales, aprendizaje profundo y aprendizaje automático [[2](#npu-ibm)].
 
 <p align="center">
-  <img src="https://i.postimg.cc/6399NRt6/raspberry-pi-ai-hat-raspberry-pi-71328528531841-removebg-preview.png" alt="Raspberry Pi AI HAT+ 26 TOPS" width="400">
-</p>
-<p align="center">
-    <i>Raspberry Pi AI HAT+ 26 TOPS</i>
+   <img src="https://i.postimg.cc/6399NRt6/raspberry-pi-ai-hat-raspberry-pi-71328528531841-removebg-preview.png" alt="Raspberry Pi AI HAT+ 26 TOPS" width="400">
+   <br>
+   <i>Raspberry Pi AI HAT+ 26 TOPS</i>
 </p>
 
 A diferencia de las unidades de procesamiento gráfico (GPU) y las unidades de procesamiento central (CPU), que son procesadores de propósito general, las NPUs están diseñadas para acelerar tareas y cargas de trabajo de IA, como el cálculo de capas de redes neuronales compuestas por matemáticas escalares, vectoriales y tensoriales [[2](#npu-ibm)].
@@ -98,15 +96,13 @@ Para la creación del conjunto de datos, primeramente tomamos imágenes de los p
 
 <p align="center">
    <img src="https://i.postimg.cc/RFBvkzPz/IMG-20250221-135320.jpg" alt="Imagen sin redimensionar del conjunto de datos" width="400">
-</p>
-<p align="center">
+   <br>
    <i>Imagen sin redimensionar del conjunto de datos</i>
 </p>
 
 <p align="center">
    <img src="https://i.postimg.cc/B6r7YqNx/IMG-20250221-135449.jpg" alt="Imagen redimensionada del conjunto de datos" width="400">
-</p>
-<p align="center">
+   <br>
    <i>Imagen redimensionada del conjunto de datos</i>
 </p>
 
@@ -116,8 +112,7 @@ Posteriormente, se realizó la anotación de las imágenes, donde se etiquetaron
 
 <p align="center">
    <img src="https://i.postimg.cc/DyFZ1ryX/Screenshot-162.png" alt="Anotación de imágenes con Label Studio" width="800">
-</p>
-<p align="center">
+   <br>
    <i>Anotación de imágenes con Label Studio</i>
 </p>
 
@@ -133,18 +128,37 @@ Luego, se ejecutó el script [```split.py```](split.py) para dividir el conjunto
 
 *NOTA: Se puede observar, que en cada una de las rutas, se encuentra la carpeta ```to_process```, la cual es una carpeta temporal, que se utiliza para guardar las imágenes que se están procesando. Una vez que se han procesado las imágenes, los archivos dentro de las mismas se mueven a una carpeta ```processed``` correspondiente, la cual se encuentra en la misma ruta. De esta forma, se evita que las imágenes procesadas se mezclen con las imágenes por procesar, así como permite a futuro seguir entrenando el mismo modelo, sin necesidad de volver a procesar las mismas imágenes. Así mismo, se puede observar que tanto para ```augmented``` y ```organized```, no existe la carpeta ```to_process```, ya que, después de ser procesadas estas imágenes, son eliminadas debido al gran número de estas al momento de realizar el ```data augmentation```.*
 
-<h1 id="instalacion-de-hailo-ai-hat">Instalación de Hailo AI HAT+</h1>
-
 <h1 id="entrenamiento-del-modelo">Entrenamiento del Modelo</h1>
 
 <p align="center">
    <img src="https://i.postimg.cc/B6kkr5ZP/Figure-2.png" alt="Imagen con distintas inferencias realizadas (modelo GR)" width="800">
-</p>
-<p align="center">
+   <br>
    <i>Imagen con distintas inferencias realizadas (modelo GR)</i>
 </p>
 
 Finalmente, ejecutamos el script [```after_training.py```](after_training.py) para eliminar la carpeta [```dataset/gr/organized/train```](dataset/gr/organized/train) y [```dataset/gr/organized/val```](dataset/gr/organized/val) y mover las imágenes de la carpeta [```dataset/gr/augmented```](dataset/gr/augmented) a la carpeta [```dataset/gr/organized/train```](dataset/gr/organized/train), ya que estas no serán necesarias para los próximos pasos.
+
+<h1 id="instalacion-de-hailo-ai-hat">Instalación de Hailo AI HAT+</h1>
+
+<p align="center">
+   <img src="https://www.raspberrypi.com/documentation/accessories/images/ai-hat-plus-installation-02.png?hash=facb3c8fa8c3ae9595100a428e21560f" alt="Instalación de Hailo AI HAT+" width="300">
+   <br>
+   <i>Instalación de Hailo AI HAT+</i>
+</p>
+
+Para la instalación, empleamos las dos guías de la documentación oficial de Raspberry Pi, donde se explica cómo instalar el Hailo AI HAT+ y cómo instalar el software necesario para su funcionamiento [[4](#getting-started-raspberry-pi)][[5](#ai-hat-plus-raspberry-pi)].
+
+1. Verificamos que la Raspberry Pi 5 esté actualizada, sino la actualizamos con el siguiente comando: `sudo apt update && sudo apt full-upgrade`
+2. Revisamos la versión actual del firmware instalado en la Raspberry Pi con el siguiente comando: `sudo rpi-eeprom-update`
+   1. Si dicho comando imprime una fecha anterior al 6 de diciembre de 2023, entonces debemos actualizar el firmware de la Raspberry Pi 5. Para ello, ejecutamos el siguiente comando: `sudo raspi-config`
+   2. En el menú de configuración, seleccionamos la opción ```Advanced Options``` y luego ```Bootloader Version```. Elegimos la opción ```Latest``` y salimos del menú de configuración.
+3. Ejecutamos el siguiente comando para actualizar el firmware: `sudo rpi-eeprom-update -a`
+4. Reiniciamos la Raspberry Pi 5 con el siguiente comando: `sudo reboot`
+5. Desconectamos la Raspberry Pi 5 de la corriente y desconectamos todos los dispositivos conectados a ella.
+6. Instalamos los espaciadores de la Raspberry Pi 5 utilizando los cuatro tornillos proporcionados. Presionamos firmemente el conector GPIO apilado sobre los pines GPIO de la Raspberry Pi. Desconectamos el cable plano del AI HAT+ y conectamos el otro extremo al puerto PCIe de la Raspberry Pi. Levantamos el soporte del cable plano desde ambos lados, luego insertamos el cable con los puntos de contacto de cobre hacia adentro, hacia los puertos USB. Con el cable plano completamente insertado en el puerto PCIe, empujamos el soporte del cable hacia abajo desde ambos lados para asegurar el cable plano firmemente en su lugar.
+7. Colocamos el AI HAT+ sobre los espaciadores y utilizamos los cuatro tornillos restantes para asegurarla en su lugar.
+8. Conectamos el cable plano al AI HAT+ y lo aseguramos en su lugar. Para ello, levantamos el soporte del cable plano desde ambos lados, luego insertamos el cable con los puntos de contacto de cobre hacia arriba. Con el cable plano completamente insertado en el puerto PCIe, empujamos el soporte del cable hacia abajo desde ambos lados para asegurar el cable plano firmemente en su lugar.
+
 
 <h1 id="conversion-del-modelo">Conversión del Modelo</h1>
 
