@@ -1,5 +1,6 @@
 import argparse
 import os
+import shutil
 
 from args.args import get_attribute_from_args, parse_args_as_dict
 from files import move_folder
@@ -15,11 +16,10 @@ def after_training(input_dir):
     for folder in [YOLO_DATASET_TRAINING, YOLO_DATASET_VALIDATIONS]:
         folder_path = os.path.join(input_dir, folder)
         if os.path.exists(folder_path):
-            os.remove(folder_path)
+            shutil.rmtree(folder_path)
             print(f'Removed {folder} folder from {input_dir} folder')
         else:
             print(f'{folder} folder does not exist in {input_dir}')
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Script to set files as processed after YOLO model training')

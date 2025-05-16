@@ -3,7 +3,6 @@ import albumentations as A
 import os
 import time
 from files import move_file
-from yolo import (YOLO_DATASET_IMAGES, YOLO_DATASET_LABELS)
 
 
 # Augment to_process images
@@ -95,46 +94,3 @@ def augment_images(input_to_process_image_path: str, input_to_process_annotation
 
     except Exception as e:
         print(f"Error: {e} for {input_to_process_image_path}")
-
-
-# Augment a dataset
-def augment_dataset(input_to_process_dir: str, output_augmented_dir: str, num_augmentations=5,
-                    output_processed_dir: str = None):
-    # Get the input images and annotations directories
-    input_to_process_images_dir = os.path.join(input_to_process_dir, YOLO_DATASET_IMAGES)
-    input_to_process_annotations_dir = os.path.join(input_to_process_dir, YOLO_DATASET_LABELS)
-
-    # Get the output directories
-    output_augmented_images_dir = os.path.join(output_augmented_dir, YOLO_DATASET_IMAGES)
-    output_augmented_annotations_dir = os.path.join(output_augmented_dir, YOLO_DATASET_LABELS)
-    output_processed_images_dir = os.path.join(output_processed_dir, YOLO_DATASET_IMAGES)
-    output_processed_annotations_dir = os.path.join(output_processed_dir, YOLO_DATASET_LABELS)
-
-    # Check if the output directories exist, if not it creates them
-    for io_dir in [input_to_process_dir, input_to_process_images_dir, input_to_process_annotations_dir,
-                   output_augmented_dir, output_augmented_images_dir,
-                   output_augmented_annotations_dir,
-                   output_processed_images_dir, output_processed_annotations_dir]:
-        os.makedirs(io_dir, exist_ok=True)
-
-    # Get the image files
-    image_filenames = [f for f in os.listdir(input_to_process_images_dir) if
-                       f.lower().endswith(('.png', '.jpg', '.jpeg'))]
-
-    # Augment each image
-    for image_filename in image_filenames:
-        print(f"Augmenting {image_filename}")
-
-        # Get the image and annotations paths
-        input_to_process_image_path = os.path.join(input_to_process_images_dir, image_filename)
-        annotations_filename = os.path.splitext(image_filename)[0] + '.txt'
-        input_to_process_annotations_path = os.path.join(input_to_process_annotations_dir, annotations_filename)
-
-        if os.path.exists(input_to_process_annotations_dir):
-            augment_images(input_to_process_image_path, input_to_process_annotations_path,
-                           output_augmented_images_dir,
-                           output_augmented_annotations_dir, num_augmentations, output_processed_images_dir,
-                           output_processed_annotations_dir)
-        else:
-            print(
-                f"Warning: Annotation file not found for {input_to_process_image_path}, annotation file should be at {input_to_process_annotations_path}")
