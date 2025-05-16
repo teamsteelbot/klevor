@@ -5,7 +5,8 @@ from typing import LiteralString
 from yolo import (YOLO_MODEL_2C, YOLO_MODEL_3C, YOLO_MODEL_4C, YOLO_VERSION_5, YOLO_VERSION_11, YOLO_DATASET_TO_PROCESS,
                   YOLO_DATASET_PROCESSED, YOLO_DATASET_ORGANIZED, YOLO_DATASET_RESIZED, YOLO_DATASET_ORIGINAL,
                   YOLO_DATASET, YOLO_DATASET_GENERAL, YOLO_DIR, YOLO_RUNS, YOLO_WEIGHTS, BEST_PT, YOLO_DATASET_LABELED,
-                  YOLO_DATASET_AUGMENTED, YOLO_ZIP, YOLO_COLAB, YOLO_DATA, YOLO_NOTEBOOKS, YOLO_LOCAL, YOLO_RUNS_OLD)
+                  YOLO_DATASET_AUGMENTED, YOLO_ZIP, YOLO_COLAB, YOLO_DATA, YOLO_NOTEBOOKS, YOLO_LOCAL, YOLO_RUNS_OLD,
+                  YOLO_TF_RECORDS)
 
 # Check validity of model name
 def check_model_name(model_name: str) -> None:
@@ -166,3 +167,13 @@ def get_yolo_notebooks_dir_path(yolo_version: str) -> LiteralString | str | byte
     check_yolo_version(yolo_version)    
     
     return os.path.join(YOLO_DIR, yolo_version, YOLO_NOTEBOOKS)
+
+# Get the TF Record path
+def get_tf_record_path(model_name: str, yolo_version: str) -> LiteralString | str | bytes:
+    # Get the YOLO version folder path
+    yolo_version_dir = get_yolo_version_dir_path(yolo_version)
+
+    # Check model name
+    check_model_name(model_name)
+
+    return os.path.join(yolo_version_dir, YOLO_TF_RECORDS, model_name+'.tfrecord')

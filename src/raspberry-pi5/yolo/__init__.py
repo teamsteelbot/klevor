@@ -60,6 +60,9 @@ BEST_ONNX = 'best.onnx'
 BEST_PT = 'best.pt'
 BEST_TENSOR_RT_QUANTIZED = 'best.engine'
 
+# TF Records
+YOLO_TF_RECORDS = 'tf_records'
+
 # YOLO runs
 YOLO_RUNS_OLD = 'runs_old'
 YOLO_RUNS = 'runs'

@@ -8,7 +8,13 @@
    2. [YOLO](#yolo)
    3. [NPU](#npu)
       1. [Características Clave de las NPU](#npu-caracteristicas-clave)
-2. **[Recursos Externos](#recursos-externos)**
+2. **[Montaje del Modelo de Detección de Objetos](#montaje-del-modelo-de-deteccion-de-objetos)**
+   1. [Creación del Conjunto de Datos](#creacion-del-conjunto-de-datos)
+   2. [Instalación de Hailo AI HAT+](#instalacion-de-hailo-ai-hat)
+   3. [Entrenamiento del Modelo](#entrenamiento-del-modelo)
+   4. [Conversión del Modelo](#conversion-del-modelo)
+   5. [Inferencia del Modelo](#inferencia-del-modelo)
+3. **[Recursos Externos](#recursos-externos)**
 
 <h1 id="deteccion-de-objetos">Detección de Objetos</h1>
 
@@ -64,7 +70,7 @@ Una unidad de procesamiento neuronal (NPU) es un microprocesador especializado d
   <img src="https://i.postimg.cc/6399NRt6/raspberry-pi-ai-hat-raspberry-pi-71328528531841-removebg-preview.png" alt="Raspberry Pi AI HAT+ 26 TOPS" width="400">
 </p>
 <p align="center">
-    <i>tRaspberry Pi AI HAT+ 26 TOPS</i>
+    <i>Raspberry Pi AI HAT+ 26 TOPS</i>
 </p>
 
 A diferencia de las unidades de procesamiento gráfico (GPU) y las unidades de procesamiento central (CPU), que son procesadores de propósito general, las NPUs están diseñadas para acelerar tareas y cargas de trabajo de IA, como el cálculo de capas de redes neuronales compuestas por matemáticas escalares, vectoriales y tensoriales [[2](#npu-ibm)].
@@ -82,6 +88,42 @@ Entre las características clave de las NPUs se encuentran:
 - **Memoria de alto ancho de banda**: Muchas NPUs cuentan con memoria de alto ancho de banda en el chip para realizar eficientemente tareas de procesamiento de IA que requieren grandes conjuntos de datos.
 
 - **Aceleración por hardware**: Los avances en el diseño de NPUs han llevado a la incorporación de técnicas de aceleración por hardware, como arquitecturas de matriz sistólica o procesamiento tensorial mejorado para optimizar el rendimiento de las cargas de trabajo de IA.
+
+<h1 id="montaje-del-modelo-de-deteccion-de-objetos">Montaje del Modelo de Detección de Objetos</h1>
+
+Para el montaje del modelo de detección de objetos, se deben seguir los siguientes pasos:
+
+<h2 id="creacion-del-conjunto-de-datos">Creación del Conjunto de Datos</h2>
+
+Para la creación del conjunto de datos, primeramente tomamos imágenes de los prismas que se utilizarán en la competencia. Estas imágenes fueron tomadas con los distintos dispositivos de nuestro equipo, en distintas condiciones de luz y ángulos, y las cuales guardamos en la carpeta [```dataset/general/original/to_process```](dataset/general/original/to_process). Seguidamente, ejecutamos el script [```resize.py```](resize.py) para redimensionar las imágenes a un tamaño de 640 × 640 píxeles, que es el tamaño de entrada del modelo YOLOv11. Este script utiliza la biblioteca OpenCV para redimensionar las imágenes y guardarlas en la carpeta [```dataset/general/resized/to_process```](dataset/general/resized/to_process).
+
+<p align="center">
+   <img src="https://i.postimg.cc/RFBvkzPz/IMG-20250221-135320.jpg" alt="Imagen sin redimensionar del conjunto de datos" width="400">
+   <i>Imagen sin redimensionar del conjunto de datos</i>
+</p>
+
+<p align="center">
+   <img src="https://i.postimg.cc/B6r7YqNx/IMG-20250221-135449.jpg" alt="Imagen redimensionada del conjunto de datos" width="400">
+   <i>Imagen redimensionada del conjunto de datos</i>
+</p>
+
+Posteriormente, se realizó la anotación de las imágenes, donde se etiquetaron los prismas con sus respectivos colores. Para ello, se utilizó la herramienta Label Studio, una herramienta de etiquetado de datos de código abierto que permite crear conjuntos de datos personalizados para el entrenamiento de modelos de aprendizaje automático [[3](#label-studio)]. En esta, creamos tres etiquetas: ```green rectangular prism```, ```magenta rectangular prism``` y ```red rectangular prism```, los cuales representan el prisma verde, magenta y rojo, respectivamente.
+
+Durante el proceso, manejamos conjunto de datos de 2, 3, 4 clases, las cuales fuimos variando a lo largo del desarrollo del proyecto. Primeramente, desarrollamos un modelo de 4 clases, sin embargo, no logró un buen rendimiento para todas las clases, ya que incluía, además del prisma rojo y verde, la línea naranja y la línea azul, que finalmente, debido a nuestros componentes, se podían inferir mediante el RPLIDAR C1. Posteriormente, se decidió omitir las clases relacionadas con las líneas de la pista, las cuales no eran necesarias para la detección de los prismas. Finalmente, se optó por un modelo de 2 clases, el cual fue capaz de detectar los prismas rojo y verde. Cómo se observó anteriormente, se optó por un conjunto de datos de 3 clases, ya que añadimos una clase adicional, el prisma magenta, para poder realizar la detección del estacionamiento. 
+
+Cabe destacar que, así como variamos el número de clases, también variamos el número de imágenes por clase, desde un dataset de alrededor de 350 imágenes antes de realizar el *data augmentation*, hasta un dataset de alrededor de 1100 imágenes antes de realizar el *data augmentation*, donde cada una fue anotada por algún integrante del equipo de forma manual para entrenar el modelo de la forma más precisa posible.
+
+Después de haber anotado las imágenes con la plataforma Label Studio, se exportaron las anotaciones en formato YOLO y se guardaron, en el caso del modelo de 3 clases, en la carpeta [```dataset/3c/labeled/to_process```](dataset/3c/labeled/to_process). Posteriormente, se ejecutó el script [```augment.py```](augment.py) para generar alrededor de 10 imágenes por cada imagen del conjunto de datos, utilizando la biblioteca OpenCV. Este script aplica distintas transformaciones a las imágenes, como rotación, escalado, traslación y cambio de brillo y contraste, para aumentar la variabilidad del conjunto de datos y mejorar el rendimiento del modelo. Las imágenes generadas se guardaron en la carpeta [```dataset/3c/augmented/to_process```](dataset/3c/augmented/to_process).
+
+Luego, se ejecutó el script [```split.py```](split.py) para dividir el conjunto de datos en un conjunto de entrenamiento [```dataset/3c/organized/train```](dataset/3c/organized/to_process/train), un conjunto de validación [```dataset/3c/organized/val```](dataset/3c/organized/to_process/val) y un conjunto de testing [```dataset/3c/organized/test```](dataset/3c/organized/to_process/test), con una distribución del 70%, 20% y 10%, respectivamente. Este script utiliza la biblioteca ```os``` para crear las carpetas necesarias y mover las imágenes a las carpetas correspondientes.
+
+*NOTA: Se puede observar, que en cada una de las rutas, se encuentra la carpeta ```to_process```, la cual es una carpeta temporal, que se utiliza para guardar las imágenes que se están procesando. Una vez que se han procesado las imágenes, los archivos dentro de las mismas se mueven a una carpeta ```processed``` correspondiente, la cual se encuentra en la misma ruta. De esta forma, se evita que las imágenes procesadas se mezclen con las imágenes por procesar, así como permite a futuro seguir entrenando el mismo modelo, sin necesidad de volver a procesar las mismas imágenes.*
+
+<p align="center">
+   <img src="https://i.postimg.cc/B6kkr5ZP/Figure-2.png" alt="Imagen con distintas inferencias realizadas (modelo de 3 clases)" width="400">
+   <i>Imagen con distintas inferencias realizadas (modelo de 3 clases)</i>
+</p>
+
 
 <h1 id="recursos-externos">Recursos Externos</h1>
 
