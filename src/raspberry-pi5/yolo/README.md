@@ -58,7 +58,7 @@ La evaluación de métricas es un paso crucial en el proceso de detección de ob
 
 YOLO, o "You Only Look Once" ("Solo Miras Una Vez"), consiste en una familia de modelos de una sola etapa que realizan detección de objetos en tiempo real. A diferencia de otros modelos de detección de objetos que utilizan un enfoque de dos etapas, YOLO divide la imagen en una cuadrícula y predice simultáneamente los cuadros delimitadores y las probabilidades de clase para cada celda de la cuadrícula. Esto permite que YOLO sea extremadamente rápido y eficiente [[1](#object-detection-ibm)].
 
-Para Klevor, la detección de objetos se basa en el modelo YOLOv11; la última versión de YOLO hasta la fecha [[9](#models-ultralytics)].
+Para Klevor, la detección de objetos se basa en el modelo YOLOv11; la última versión de YOLO hasta la fecha [[10](#models-ultralytics)].
 
 <h2 id="npu">NPU</h2>
 
@@ -138,6 +138,8 @@ Luego, se ejecutó el script [```split.py```](split.py) para dividir el conjunto
 
 Finalmente, ejecutamos el script [```after_training.py```](after_training.py) para eliminar la carpeta [```dataset/gr/organized/train```](dataset/gr/organized/train) y [```dataset/gr/organized/val```](dataset/gr/organized/val) y mover las imágenes de la carpeta [```dataset/gr/augmented```](dataset/gr/augmented) a la carpeta [```dataset/gr/organized/train```](dataset/gr/organized/train), ya que estas no serán necesarias para los próximos pasos.
 
+<h1 id="conversion-del-modelo">Conversión del Modelo</h1>
+
 <h1 id="instalacion-de-hailo-ai-hat">Instalación de Hailo AI HAT+</h1>
 
 <p align="center">
@@ -158,9 +160,30 @@ Para la instalación, empleamos las dos guías de la documentación oficial de R
 6. Instalamos los espaciadores de la Raspberry Pi 5 utilizando los cuatro tornillos proporcionados. Presionamos firmemente el conector GPIO apilado sobre los pines GPIO de la Raspberry Pi. Desconectamos el cable plano del AI HAT+ y conectamos el otro extremo al puerto PCIe de la Raspberry Pi. Levantamos el soporte del cable plano desde ambos lados, luego insertamos el cable con los puntos de contacto de cobre hacia adentro, hacia los puertos USB. Con el cable plano completamente insertado en el puerto PCIe, empujamos el soporte del cable hacia abajo desde ambos lados para asegurar el cable plano firmemente en su lugar.
 7. Colocamos el AI HAT+ sobre los espaciadores y utilizamos los cuatro tornillos restantes para asegurarla en su lugar.
 8. Conectamos el cable plano al AI HAT+ y lo aseguramos en su lugar. Para ello, levantamos el soporte del cable plano desde ambos lados, luego insertamos el cable con los puntos de contacto de cobre hacia arriba. Con el cable plano completamente insertado en el puerto PCIe, empujamos el soporte del cable hacia abajo desde ambos lados para asegurar el cable plano firmemente en su lugar.
+9. Conectamos la Raspberry Pi 5 a la corriente y encendemos el dispositivo.
+10. Para habilitar velocidades PCIe Gen 3.0 [[6](#computers-raspberry-pi)], ejecutamos el siguiente comando: `sudo raspi-config`
+    1. En el menú de configuración, seleccionamos la opción ```Advanced Options``` y luego ```PCIe Speed```. Elegimos la opción ```Yes``` para habilitar el modo PCIe Gen 3.0.
+    2. Reiniciamos la Raspberry Pi 5.
+11. Instalamos las dependencias requeridas para usar el NPU. Ejecutamos el siguiente comando desde una ventana de terminal: `sudo apt install hailo-all`. Cabe destacar que, debido a que la última actualización (4.21.0) es muy reciente, recomendamos instalar la versión anterior que es con la que hemos podido trabajar y comprobar su correcto funcionamiento, para lo cual, en vez del anterior comando, sería: ```sudo apt install hailo-all=4.20.0```. Esto instalará las siguientes dependencias:
+    - Controlador de dispositivo del kernel Hailo y firmware
+    - Software de middleware HailoRT
+    - Bibliotecas de post-procesamiento central Tappas de Hailo
+    - Etapas de software de demostración de post-procesamiento rpicam-apps Hailo
+12. Finalmente, reiniciamos la Raspberry Pi de nuevo para que estos ajustes tengan efecto.
+13. Para verificar que el NPU está correctamente instalado y funcionando, ejecutamos el siguiente comando: `hailortcli fw-control identify`. Si el NPU está correctamente instalado, deberíamos ver un mensaje similar al siguiente:
 
-
-<h1 id="conversion-del-modelo">Conversión del Modelo</h1>
+```
+Executing on device: 0000:01:00.0
+Identifying board
+Control Protocol Version: 2
+Firmware Version: 4.20.0 (release,app,extended context switch buffer)
+Logger Version: 0
+Board Name: Hailo-8
+Device Architecture: HAILO8L
+Serial Number: HLDDLBB234500054
+Part Number: HM21LB1C2LAE
+Product Name: HAILO-8L AI ACC M.2 B+M KEY MODULE EXT TMP
+```
 
 <h1 id="recursos-externos">Recursos Externos</h1>
 
@@ -169,7 +192,8 @@ Para la instalación, empleamos las dos guías de la documentación oficial de R
 3. *Label Studio*. (2025). Label Studio. <a id="label-studio">https://labelstud.io/</a>
 4. *AI Kit and AI HAT+ software*. (2025). Raspberry Pi. <a id="getting-started-raspberry-pi">https://www.raspberrypi.com/documentation/computers/ai.html#getting-started</a>
 5. *AI Hat+*. (2025). Raspberry Pi. <a id="ai-hat-plus-raspberry-pi">https://www.raspberrypi.com/documentation/accessories/ai-hat-plus.html#ai-hat-plus</a>
-6. Hailo AI. (2025). *Hailo Application Code Examples*. GitHub. <a id="hailo-ai-examples-github">https://github.com/hailo-ai/Hailo-Application-Code-Examples</a>
-7. d'Oleron, L. (23 de abril de 2025). *Custom dataset with Hailo AI Hat, Yolo, Raspberry PI 5, and Docker*. Medium. <a id="custom-dataset-medium">https://pub.towardsai.net/custom-dataset-with-hailo-ai-hat-yolo-raspberry-pi-5-and-docker-0d88ef5eb70f</a>
-8. *Google Colab*. (2025). Google Colab. <a id="google-colab">https://colab.research.google.com/</a>
-9. *Models*. (2025). Ultralytics. <a id="models-ultralytics">https://docs.ultralytics.com/models/</a>
+6. *Raspberry Pi*. (2025). Raspberry Pi. <a id="computers-raspberry-pi">https://www.raspberrypi.com/documentation/computers/raspberry-pi.html</a>
+7. Hailo AI. (2025). *Hailo Application Code Examples*. GitHub. <a id="hailo-ai-examples-github">https://github.com/hailo-ai/Hailo-Application-Code-Examples</a>
+8. d'Oleron, L. (23 de abril de 2025). *Custom dataset with Hailo AI Hat, Yolo, Raspberry PI 5, and Docker*. Medium. <a id="custom-dataset-medium">https://pub.towardsai.net/custom-dataset-with-hailo-ai-hat-yolo-raspberry-pi-5-and-docker-0d88ef5eb70f</a>
+9. *Google Colab*. (2025). Google Colab. <a id="google-colab">https://colab.research.google.com/</a>
+10. *Models*. (2025). Ultralytics. <a id="models-ultralytics">https://docs.ultralytics.com/models/</a>

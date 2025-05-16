@@ -1,0 +1,5 @@
+train: /content/drive/MyDrive/.../gmr_to_train/yolo/dataset/gmr/organized/train/images
+val: /content/drive/MyDrive/.../gmr_to_train/yolo/dataset/gmr/organized/val/images
+
+nc: 3  # number of classes
+names: [ 'green rectangular prism', 'magenta rectangular prism', 'red rectangular prism']  # class names
