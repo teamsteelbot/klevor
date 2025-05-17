@@ -1,6 +1,7 @@
 <h1 id="index">Índice</h1>
 
-1. **[Detección de Objetos](#deteccion-de-objetos)**
+1. **[Machine Learning](#machine-learning)**
+2. **[Detección de Objetos](#deteccion-de-objetos)**
    1. [Funcionamiento](#funcionamiento)
       1. [Preprocesamiento de Imágenes](#funcionamiento-preprocesamiento-de-imagenes)
       2. [Arquitectura del Modelo](#funcionamiento-arquitectura-del-modelo)
@@ -8,12 +9,27 @@
    2. [YOLO](#yolo)
    3. [NPU](#npu)
       1. [Características Clave de las NPU](#npu-caracteristicas-clave)
-2. **[Montaje del Modelo de Detección de Objetos](#montaje-del-modelo-de-deteccion-de-objetos)**
+3. **[Montaje del Modelo de Detección de Objetos](#montaje-del-modelo-de-deteccion-de-objetos)**
    1. [Creación del Conjunto de Datos](#creacion-del-conjunto-de-datos)
    2. [Entrenamiento del Modelo](#entrenamiento-del-modelo)
    3. [Conversión del Modelo](#conversion-del-modelo)
+      1. [Docker](#que-es-docker)
+         1. [Dockerfile](#que-es-dockerfile)
+         2. [Docker Image](#que-es-docker-image)
+         3. [Docker Container](#que-es-docker-container)
+      2. [Cómo Convertir el Modelo a un Formato Compatible al Hailo 8L](#como-convertir-el-modelo-a-un-formato-compatible-al-hailo-8l) 
    4. [Instalación de Hailo AI HAT+](#instalacion-de-hailo-ai-hat)
-3. **[Recursos Externos](#recursos-externos)**
+4. **[Recursos Externos](#recursos-externos)**
+
+<h1 id="machine-learning">Machine Learning</h1>
+
+El Machine Learning (ML) es una rama de la inteligencia artificial enfocada en imitar la manera en que los humanos piensan en una computadora, para realizar tareas de forma autónoma, y para mejorar el rendimiento y precisión a medida que se expone a un mayor conjunto de datos.
+
+Normalmente, se divide en 3 partes el sistema de aprendizaje de un algoritmo de Machine Learning:
+
+1. **Proceso de decisión**: En general, los algoritmos de Machine Learning son empleados para predecir o clasificar, a través de unos datos de entrada, que pueden ser etiquetados o no etiquetados, los cuales producen un patrón estimado de dicho conjunto de datos.
+2. **Función de error**: Una función de error que evalúa las predicciones del modelo. Este emplea conjuntos de datos, de los cuales ya se conoce su resultado, para poder comparar la precisión del modelo.
+3. **Proceso de optimización del modelo**: Si el modelo puede encajar mejor al conjunto de los datos en el set de entrenamiento, los pesos son ajustados para reducir la diferencia entre las estimaciones y los resultados conocidos. Este proceso iterativo de evaluación y optimización, se repite de forma autónoma hasta actualizar los pesos a un umbral de aceptación.
 
 <h1 id="deteccion-de-objetos">Detección de Objetos</h1>
 
@@ -29,7 +45,7 @@ Primeramente, debemos comprender distintos conceptos relacionados con la detecci
 
 <h3 id="funcionamiento-preprocesamiento-de-imagenes">Preprocesamiento de Imágenes</h3>
 
-Para la visión por computadora, las imágenes se expresan como funciones continuas en un plano de coordenadas 2D representadas como f(x, y). Cuando se digitalizan, las imágenes pasan por dos procesos primarios llamados muestreo y cuantización, que, en resumen, convierten la función de imagen continua en una estructura de cuadrícula discreta de elementos que representan píxeles [[1](#object-detection-ibm)]. 
+Para la visión por computadora, las imágenes se expresan como funciones continuas en un plano de coordenadas 2D representadas como f(x, y). Cuando se digitalizan, las imágenes pasan por dos procesos primarios llamados muestreo y cuantización, que, en resumen, convierten la función de imagen continua en una estructura de cuadrícula discreta de elementos que representan píxeles [[2](#object-detection-ibm)]. 
 
 <p align="center">
    <img src="https://assets-global.website-files.com/5d7b77b063a9066d83e1209c/627d121f86896a59aad78407_60f49c3f218440673e6baa97_apples1.png" alt="Imagen con distintas anotaciones de manzanas" width="400">
@@ -37,13 +53,13 @@ Para la visión por computadora, las imágenes se expresan como funciones contin
    <i>Imagen con distintas anotaciones de manzanas</i>
 </p>
 
-Al ser anotada la imagen, el modelo de detección de objetos puede reconocer regiones con características similares a las definidas en el conjunto de datos de entrenamiento como el mismo objeto. Los modelos de detección de objetos no reconocen objetos per se, sino agregados de propiedades como tamaño, forma, color, etc., y clasifican regiones según patrones visuales inferidos a partir de datos de entrenamiento anotados manualmente [[1](#object-detection-ibm)].
+Al ser anotada la imagen, el modelo de detección de objetos puede reconocer regiones con características similares a las definidas en el conjunto de datos de entrenamiento como el mismo objeto. Los modelos de detección de objetos no reconocen objetos per se, sino agregados de propiedades como tamaño, forma, color, etc., y clasifican regiones según patrones visuales inferidos a partir de datos de entrenamiento anotados manualmente [[2](#object-detection-ibm)].
 
 <h3 id="funcionamiento-arquitectura-del-modelo">Arquitectura del Modelo</h3>
 
-Los modelos de detección de objetos siguen una estructura general que incluye un modelo de fondo, cuello y cabeza [[1](#object-detection-ibm)].
+Los modelos de detección de objetos siguen una estructura general que incluye un modelo de fondo, cuello y cabeza [[2](#object-detection-ibm)].
 
-El modelo de fondo extrae características de una imagen de entrada. A menudo, el modelo de fondo se deriva de parte de un modelo de clasificación preentrenado. La extracción de características produce una miríada de mapas de características de diferentes resoluciones que el modelo de fondo pasa al cuello. Esta última parte de la estructura concatena los mapas de características para cada imagen. Luego, la arquitectura pasa los mapas de características en capas a la cabeza, que predice cuadros delimitadores y puntuaciones de clasificación para cada conjunto de características [[1](#object-detection-ibm)].
+El modelo de fondo extrae características de una imagen de entrada. A menudo, el modelo de fondo se deriva de parte de un modelo de clasificación preentrenado. La extracción de características produce una miríada de mapas de características de diferentes resoluciones que el modelo de fondo pasa al cuello. Esta última parte de la estructura concatena los mapas de características para cada imagen. Luego, la arquitectura pasa los mapas de características en capas a la cabeza, que predice cuadros delimitadores y puntuaciones de clasificación para cada conjunto de características [[2](#object-detection-ibm)].
 
 <h3 id="funcionamiento-evaluacion-de-metricas">Evaluación de Métricas</h3>
 
@@ -56,13 +72,13 @@ La evaluación de métricas es un paso crucial en el proceso de detección de ob
 
 <h2 id="yolo">YOLO</h2>
 
-YOLO, o "You Only Look Once" ("Solo Miras Una Vez"), consiste en una familia de modelos de una sola etapa que realizan detección de objetos en tiempo real. A diferencia de otros modelos de detección de objetos que utilizan un enfoque de dos etapas, YOLO divide la imagen en una cuadrícula y predice simultáneamente los cuadros delimitadores y las probabilidades de clase para cada celda de la cuadrícula. Esto permite que YOLO sea extremadamente rápido y eficiente [[1](#object-detection-ibm)].
+YOLO, o "You Only Look Once" ("Solo Miras Una Vez"), consiste en una familia de modelos de una sola etapa que realizan detección de objetos en tiempo real. A diferencia de otros modelos de detección de objetos que utilizan un enfoque de dos etapas, YOLO divide la imagen en una cuadrícula y predice simultáneamente los cuadros delimitadores y las probabilidades de clase para cada celda de la cuadrícula. Esto permite que YOLO sea extremadamente rápido y eficiente [[2](#object-detection-ibm)].
 
-Para Klevor, la detección de objetos se basa en el modelo YOLOv11; la última versión de YOLO hasta la fecha [[10](#models-ultralytics)].
+Para Klevor, la detección de objetos se basa en el modelo YOLOv11; la última versión de YOLO hasta la fecha [[11](#models-ultralytics)].
 
 <h2 id="npu">NPU</h2>
 
-Una unidad de procesamiento neuronal (NPU) es un microprocesador especializado diseñado para imitar la función de procesamiento del cerebro humano. Están optimizados para tareas y aplicaciones de inteligencia artificial (IA), redes neuronales, aprendizaje profundo y aprendizaje automático [[2](#npu-ibm)].
+Una unidad de procesamiento neuronal (NPU) es un microprocesador especializado diseñado para imitar la función de procesamiento del cerebro humano. Están optimizados para tareas y aplicaciones de inteligencia artificial (IA), redes neuronales, aprendizaje profundo y aprendizaje automático [[3](#npu-ibm)].
 
 <p align="center">
    <img src="https://i.postimg.cc/6399NRt6/raspberry-pi-ai-hat-raspberry-pi-71328528531841-removebg-preview.png" alt="Raspberry Pi AI HAT+ 26 TOPS" width="400">
@@ -70,11 +86,11 @@ Una unidad de procesamiento neuronal (NPU) es un microprocesador especializado d
    <i>Raspberry Pi AI HAT+ 26 TOPS</i>
 </p>
 
-A diferencia de las unidades de procesamiento gráfico (GPU) y las unidades de procesamiento central (CPU), que son procesadores de propósito general, las NPUs están diseñadas para acelerar tareas y cargas de trabajo de IA, como el cálculo de capas de redes neuronales compuestas por matemáticas escalares, vectoriales y tensoriales [[2](#npu-ibm)].
+A diferencia de las unidades de procesamiento gráfico (GPU) y las unidades de procesamiento central (CPU), que son procesadores de propósito general, las NPUs están diseñadas para acelerar tareas y cargas de trabajo de IA, como el cálculo de capas de redes neuronales compuestas por matemáticas escalares, vectoriales y tensoriales [[3](#npu-ibm)].
 
 <h3 id="npu-caracteristicas-clave">Características Clave de las NPU</h3>
 
-Las NPUs están diseñadas para realizar tareas que requieran una baja latencia y un alto rendimiento en paralelo, lo que las hace ideales para aplicaciones de inteligencia artificial. Estas tareas incluyen el procesamiento de algoritmos de aprendizaje profundo, reconocimiento de voz, procesamiento de lenguaje natural, procesamiento de fotos y videos, y detección de objetos [[2](#npu-ibm)].
+Las NPUs están diseñadas para realizar tareas que requieran una baja latencia y un alto rendimiento en paralelo, lo que las hace ideales para aplicaciones de inteligencia artificial. Estas tareas incluyen el procesamiento de algoritmos de aprendizaje profundo, reconocimiento de voz, procesamiento de lenguaje natural, procesamiento de fotos y videos, y detección de objetos [[3](#npu-ibm)].
 
 Entre las características clave de las NPUs se encuentran:
 
@@ -106,7 +122,7 @@ Para la creación del conjunto de datos, primeramente tomamos imágenes de los p
    <i>Imagen redimensionada del conjunto de datos</i>
 </p>
 
-Posteriormente, se realizó la anotación de las imágenes, donde se etiquetaron los prismas con sus respectivos colores. Para ello, se utilizó la herramienta Label Studio, una herramienta de etiquetado de datos de código abierto que permite crear conjuntos de datos personalizados para el entrenamiento de modelos de aprendizaje automático [[3](#label-studio)].
+Posteriormente, se realizó la anotación de las imágenes, donde se etiquetaron los prismas con sus respectivos colores. Para ello, se utilizó la herramienta Label Studio, una herramienta de etiquetado de datos de código abierto que permite crear conjuntos de datos personalizados para el entrenamiento de modelos de aprendizaje automático [[4](#label-studio)].
 
 *TIP: Si el número de imágenes por anotar es muy grande, notaremos que la herramienta Label Studio arrojará un error ```The number of files exceeded settings.DATA_UPLOAD_MAX_NUMBER_FILES```. Para solucionarlo, si Label Studio fue instalado como un paquete de Python, se puede modificar el archivo ```settings.py``` que se encuentra en la carpeta ```label_studio/core/settings.py```, donde se debe cambiar el valor de ```DATA_UPLOAD_MAX_NUMBER_FILES``` a un número mayor al número de imágenes por anotar o ```None``` si se desea un número ilimitado. En caso de no encontrar este archivo, se puede buscar en la carpeta ```site-packages/label_studio/core/settings.py``` dentro del entorno virtual de Python donde fue instalado Label Studio.*
 
@@ -144,7 +160,7 @@ Existen dos maneras de entrenar el modelo dependiendo del equipo disponible en e
 
 1. **Entrenamiento de forma local**: Para ello, se debe contar con una GPU dedicada para el entrenamiento.   
    1. En este caso, debemos ejecutar el script [```train.py```](train.py) para entrenar el modelo YOLOv11. Este script utiliza la biblioteca ```ultralytics``` para realizar el entrenamiento del modelo y guardar los pesos en la carpeta [```v11/runs/gr```](v11/runs/gr).
-2. **Entrenamiento de forma remota**: Para ello, se puede utilizar Google Colab, donde se puede utilizar una GPU de forma gratuita o de paga, dependiendo del tiempo requerido para el entrenamiento y la velocidad en la que se quiere completar dicho entrenamiento.
+2. **Entrenamiento de forma remota**: Para ello, se puede utilizar Google Colab [[10](#google-colab)], donde se puede utilizar una GPU de forma gratuita o de paga, dependiendo del tiempo requerido para el entrenamiento y la velocidad en la que se quiere completar dicho entrenamiento.
    1. En este caso, debemos ejecutar primero el script [```zip_to_train.py```](zip_to_train.py), el cual se encargará de crear un archivo comprimido con el conjunto de datos, el cual se guardará en la carpeta [```v11/zip```](v11/zip).
    2. Luego, tenemos dos opciones:
       1. Podemos descomprimir este archivo de forma local y subir dicha carpeta al Google Drive, considerando que Google Drive no tiene funciones para comprimir/descomprimir de forma nativa (al momento de realizar esta guía), en la carpeta ```Colab Files```. 
@@ -165,6 +181,36 @@ Existen dos maneras de entrenar el modelo dependiendo del equipo disponible en e
 
 <h1 id="conversion-del-modelo">Conversión del Modelo</h1>
 
+Para la conversión del modelo a un formato compatible con el Hailo 8L, requerimos de Docker (mas no es imprescindible), para crear un contenedor con todos los paquetes necesarios para su correcto funcionamiento.
+
+<h2 id="que-es-docker">Docker</h2>
+
+Docker es una plataforma open-source (o de código abierto), con el cual se puede empaquetar una aplicación así como todas las dependencias que esta requiere, en una unidad denominada *contenedor* [[12](#what-is-docker)]. Estas son ligeras en peso, lo cual permite su portabilidad. Así mismo, los contenedores están aislados de la infraestructura donde está siendo ejecutados, y por ende la imagen del contenedor puede ser ejecutada como un contenedor en cualquier sistema operativo donde esté instalado Docker [[12](#what-is-docker)]. 
+
+Si su sistema operativo es Windows, Docker Desktop se puede instalar con facilidad desde la Microsoft Store.
+
+<h3 id="que-es-dockerfile">Dockerfile</h3>
+
+Docker emplea archivos, denominados *Dockerfile*, los cuales usan DSL (Domain Specific Language) para describir todas las instrucciones necesarias para crear una imagen de forma rápida [[12](#que-es-dockerfile)].
+
+<h3 id="que-es-docker-image">Docker Image</h3>
+
+Es un archivo compuesto de múltiples capas, empleado para ejecutar un contenedor Docker [[12](#que-es-docker-image")]. Es un paquete de software ejecutable que contiene todo lo necesario para correr la aplicación. Esta imagen informa cómo un contenedor debe inicializarse, determinando qué software debe ejecutarse y de qué forma.
+
+<h3 id="que-es-docker-container">Docker Container</h3>
+
+Un contenedor Docker es una instancia *runtime* de una imagen Docker [[12](#que-es-docker-container")]. Contiene todo el kit requerido para una aplicación, y permite ser ejecutada de forma aislada.
+
+<h2 id="como-convertir-el-modelo-a-un-formato-compatible-al-hailo-8l">Cómo Convertir el Modelo a un Formato Compatible al Hailo 8L</h2>
+
+Primeramente, ejecutamos el script [```export.py```](export.py), y pasamos como formato del modelo ```onnx```, el cual es un formato abierto empleado para representar modelos de Machine Learning de forma interoperable entre distintos frameworks, herramientas, entre otros [[13](#onnx)]. 
+
+Posteriormente, cambiamos el directorio actual a [```hailo/hef```](hailo/hef), en el cual debe haber un archivo ```Dockerfile````.
+
+<!--
+[[9](#custom-dataset-medium)]
+-->
+
 <h1 id="instalacion-de-hailo-ai-hat">Instalación de Hailo AI HAT+</h1>
 
 <p align="center">
@@ -173,7 +219,7 @@ Existen dos maneras de entrenar el modelo dependiendo del equipo disponible en e
    <i>Instalación de Hailo AI HAT+</i>
 </p>
 
-Para la instalación, empleamos las dos guías de la documentación oficial de Raspberry Pi, donde se explica cómo instalar el Hailo AI HAT+ y cómo instalar el software necesario para su funcionamiento [[4](#getting-started-raspberry-pi)][[5](#ai-hat-plus-raspberry-pi)].
+Para la instalación, empleamos las dos guías de la documentación oficial de Raspberry Pi, donde se explica cómo instalar el Hailo AI HAT+ y cómo instalar el software necesario para su funcionamiento [[5](#getting-started-raspberry-pi)][[6](#ai-hat-plus-raspberry-pi)].
 
 1. Verificamos que la Raspberry Pi 5 esté actualizada, sino la actualizamos con el siguiente comando: `sudo apt update && sudo apt full-upgrade`
 2. Revisamos la versión actual del firmware instalado en la Raspberry Pi con el siguiente comando: `sudo rpi-eeprom-update`
@@ -186,7 +232,7 @@ Para la instalación, empleamos las dos guías de la documentación oficial de R
 7. Colocamos el AI HAT+ sobre los espaciadores y utilizamos los cuatro tornillos restantes para asegurarla en su lugar.
 8. Conectamos el cable plano al AI HAT+ y lo aseguramos en su lugar. Para ello, levantamos el soporte del cable plano desde ambos lados, luego insertamos el cable con los puntos de contacto de cobre hacia arriba. Con el cable plano completamente insertado en el puerto PCIe, empujamos el soporte del cable hacia abajo desde ambos lados para asegurar el cable plano firmemente en su lugar.
 9. Conectamos la Raspberry Pi 5 a la corriente y encendemos el dispositivo.
-10. Para habilitar velocidades PCIe Gen 3.0 [[6](#computers-raspberry-pi)], ejecutamos el siguiente comando: `sudo raspi-config`
+10. Para habilitar velocidades PCIe Gen 3.0 [[7](#computers-raspberry-pi)], ejecutamos el siguiente comando: `sudo raspi-config`
     1. En el menú de configuración, seleccionamos la opción ```Advanced Options``` y luego ```PCIe Speed```. Elegimos la opción ```Yes``` para habilitar el modo PCIe Gen 3.0.
     2. Reiniciamos la Raspberry Pi 5.
 11. Instalamos las dependencias requeridas para usar el NPU. Ejecutamos el siguiente comando desde una ventana de terminal: `sudo apt install hailo-all`. Cabe destacar que, debido a que la última actualización (4.21.0) es muy reciente, recomendamos instalar la versión anterior que es con la que hemos podido trabajar y comprobar su correcto funcionamiento, para lo cual, en vez del anterior comando, sería: ```sudo apt install hailo-all=4.20.0```. Esto instalará las siguientes dependencias:
@@ -212,13 +258,16 @@ Product Name: HAILO-8L AI ACC M.2 B+M KEY MODULE EXT TMP
 
 <h1 id="recursos-externos">Recursos Externos</h1>
 
-1. Murel, J., Kavlakoglu, E. *What is object detection?*. (3 de enero de 2024) IBM. <a id="object-detection-ibm">https://www.ibm.com/topics/object-detection</a>
-2. Schneider, J., Smalley, I. *What is neural processing unit (NPU)?*. (27 de septiembre de 2024). IBM. <a id="npu-ibm">https://www.ibm.com/topics/neural-processing-unit</a>
-3. *Label Studio*. (2025). Label Studio. <a id="label-studio">https://labelstud.io/</a>
-4. *AI Kit and AI HAT+ software*. (2025). Raspberry Pi. <a id="getting-started-raspberry-pi">https://www.raspberrypi.com/documentation/computers/ai.html#getting-started</a>
-5. *AI Hat+*. (2025). Raspberry Pi. <a id="ai-hat-plus-raspberry-pi">https://www.raspberrypi.com/documentation/accessories/ai-hat-plus.html#ai-hat-plus</a>
-6. *Raspberry Pi*. (2025). Raspberry Pi. <a id="computers-raspberry-pi">https://www.raspberrypi.com/documentation/computers/raspberry-pi.html</a>
-7. Hailo AI. (2025). *Hailo Application Code Examples*. GitHub. <a id="hailo-ai-examples-github">https://github.com/hailo-ai/Hailo-Application-Code-Examples</a>
-8. d'Oleron, L. (23 de abril de 2025). *Custom dataset with Hailo AI Hat, Yolo, Raspberry PI 5, and Docker*. Medium. <a id="custom-dataset-medium">https://pub.towardsai.net/custom-dataset-with-hailo-ai-hat-yolo-raspberry-pi-5-and-docker-0d88ef5eb70f</a>
-9. *Google Colab*. (2025). Google Colab. <a id="google-colab">https://colab.research.google.com/</a>
-10. *Models*. (2025). Ultralytics. <a id="models-ultralytics">https://docs.ultralytics.com/models/</a>
+1. *What is machine learning?*. (22 de septiembre de 2021). IBM. <a id="machine-learning-ibm">https://www.ibm.com/think/topics/machine-learning</a>
+2. Murel, J., Kavlakoglu, E. *What is object detection?*. (3 de enero de 2024) IBM. <a id="object-detection-ibm">https://www.ibm.com/topics/object-detection</a>
+3. Schneider, J., Smalley, I. *What is neural processing unit (NPU)?*. (27 de septiembre de 2024). IBM. <a id="npu-ibm">https://www.ibm.com/topics/neural-processing-unit</a>
+4. *Label Studio*. (2025). Label Studio. <a id="label-studio">https://labelstud.io/</a>
+5. *AI Kit and AI HAT+ software*. (2025). Raspberry Pi. <a id="getting-started-raspberry-pi">https://www.raspberrypi.com/documentation/computers/ai.html#getting-started</a>
+6. *AI Hat+*. (2025). Raspberry Pi. <a id="ai-hat-plus-raspberry-pi">https://www.raspberrypi.com/documentation/accessories/ai-hat-plus.html#ai-hat-plus</a>
+7. *Raspberry Pi*. (2025). Raspberry Pi. <a id="computers-raspberry-pi">https://www.raspberrypi.com/documentation/computers/raspberry-pi.html</a>
+8. Hailo AI. (2025). *Hailo Application Code Examples*. GitHub. <a id="hailo-ai-examples-github">https://github.com/hailo-ai/Hailo-Application-Code-Examples</a>
+9. d'Oleron, L. (23 de abril de 2025). *Custom dataset with Hailo AI Hat, Yolo, Raspberry PI 5, and Docker*. Medium. <a id="custom-dataset-medium">https://pub.towardsai.net/custom-dataset-with-hailo-ai-hat-yolo-raspberry-pi-5-and-docker-0d88ef5eb70f</a>
+10. *Google Colab*. (2025). Google Colab. <a id="google-colab">https://colab.research.google.com/</a>
+11. *Models*. (2025). Ultralytics. <a id="models-ultralytics">https://docs.ultralytics.com/models/</a>
+12. *What is Docker?*. (22 de abril de 2025). Geeks for Geeks. <a id="what-is-docker">https://www.geeksforgeeks.org/introduction-to-docker/</a>
+13. *ONNX*. (2025). ONNX. <a id="onnx">https://onnx.ai/</a>
