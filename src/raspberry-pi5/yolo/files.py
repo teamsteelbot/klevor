@@ -7,7 +7,8 @@ from yolo import (YOLO_MODEL_GR, YOLO_MODEL_GMR, YOLO_MODEL_BGOR, YOLO_VERSION_5
                   YOLO_DATASET_PROCESSED, YOLO_DATASET_ORGANIZED, YOLO_DATASET_RESIZED, YOLO_DATASET_ORIGINAL,
                   YOLO_DATASET, YOLO_DATASET_GENERAL, YOLO_DIR, YOLO_RUNS, YOLO_WEIGHTS, BEST_PT, YOLO_DATASET_LABELED,
                   YOLO_DATASET_AUGMENTED, YOLO_ZIP, YOLO_COLAB, YOLO_DATA, YOLO_NOTEBOOKS, YOLO_LOCAL, YOLO_RUNS_OLD,
-                  YOLO_TF_RECORDS, YOLO_DATASET_NOTES_JSON, YOLO_DATASET_CLASSES_TXT, YOLO_MODEL_M)
+                  YOLO_TF_RECORDS, YOLO_DATASET_NOTES_JSON, YOLO_DATASET_CLASSES_TXT, YOLO_MODEL_M, YOLO_HAILO,
+                  YOLO_HEF, BEST_ONNX)
 
 # Check validity of model name
 def check_model_name(model_name: str) -> None:
@@ -50,7 +51,7 @@ def check_model_dataset_name(dataset_name:str, model_name:str|None)-> None:
     elif dataset_name not in [YOLO_DATASET_ORIGINAL, YOLO_DATASET_RESIZED]:
         raise ValueError(f"Invalid dataset path. The dataset name '{dataset_name}' should not be used without a model name.")
 
-# Get dataset model directory path
+# Get the dataset model directory path
 def get_dataset_model_dir_path(dataset_name: str, dataset_status: str|None, model_name: str|None) -> LiteralString | str | bytes:
     # Check model name
     if model_name is not None:
@@ -77,24 +78,41 @@ def get_dataset_model_dir_path(dataset_name: str, dataset_status: str|None, mode
 
     return os.path.join(YOLO_DATASET, YOLO_DATASET_GENERAL, dataset_name)
 
-# Get the YOLO version folder path
-def get_yolo_version_dir_path(arg_yolo_version: str) -> LiteralString | str | bytes:
-    # Check yolo version
-    check_yolo_version(arg_yolo_version)
+# Get the Hailo HEF folder path
+def get_hailo_hef_dir_path() -> LiteralString | str | bytes:
+    return os.path.join(YOLO_DIR, YOLO_HAILO, YOLO_HEF)
 
-    return os.path.join(YOLO_DIR, arg_yolo_version)
+# Get the model Hailo HEF path
+def get_model_hailo_hef_path(model_name: str, yolo_version: str) -> LiteralString | str | bytes:
+    # Get the Hailo HEF folder path
+    hailo_hef_dir = get_hailo_hef_dir_path()
+
+    # Check model name
+    check_model_name(model_name)
+
+    # Check YOLO version
+    check_yolo_version(yolo_version)
+
+    return os.path.join(hailo_hef_dir, yolo_version, model_name)
+
+# Get the YOLO version folder path
+def get_yolo_version_dir_path(yolo_version: str) -> LiteralString | str | bytes:
+    # Check yolo version
+    check_yolo_version(yolo_version)
+
+    return os.path.join(YOLO_DIR, yolo_version)
 
 # Get the YOLO runs folder path
-def get_yolo_runs_dir_path(arg_yolo_version: str) -> LiteralString | str | bytes:
+def get_yolo_runs_dir_path(yolo_version: str) -> LiteralString | str | bytes:
     # Get the YOLO version folder path
-    yolo_version_dir = get_yolo_version_dir_path(arg_yolo_version)
+    yolo_version_dir = get_yolo_version_dir_path(yolo_version)
 
     return os.path.join(yolo_version_dir, YOLO_RUNS)
 
 # Get the YOLO runs folder path with the new name
-def get_yolo_runs_dir_new_name_path(arg_yolo_version: str) -> LiteralString | str | bytes:
+def get_yolo_runs_dir_new_name_path(yolo_version: str) -> LiteralString | str | bytes:
     # Get the YOLO version folder path
-    yolo_version_dir = get_yolo_version_dir_path(arg_yolo_version)
+    yolo_version_dir = get_yolo_version_dir_path(yolo_version)
 
     # Get the current Unix timestamp
     current_unix_timestamp = int(time.time())
@@ -102,13 +120,13 @@ def get_yolo_runs_dir_new_name_path(arg_yolo_version: str) -> LiteralString | st
     return os.path.join(yolo_version_dir, f'{YOLO_RUNS}_{current_unix_timestamp}')
 
 # Get the YOLO old runs folder path
-def get_yolo_old_runs_dir_path(arg_yolo_version: str) -> LiteralString | str | bytes:
+def get_yolo_old_runs_dir_path(yolo_version: str) -> LiteralString | str | bytes:
     # Get the YOLO version folder path
-    yolo_version_dir = get_yolo_version_dir_path(arg_yolo_version)
+    yolo_version_dir = get_yolo_version_dir_path(yolo_version)
 
     return os.path.join(yolo_version_dir, YOLO_RUNS_OLD)
 
-# Get model runs path
+# Get the model runs path
 def get_model_runs_dir_path(model_name: str, yolo_version: str) -> LiteralString | str | bytes:
     # Get the YOLO runs folder path
     yolo_runs_dir = get_yolo_runs_dir_path(yolo_version)
@@ -118,26 +136,33 @@ def get_model_runs_dir_path(model_name: str, yolo_version: str) -> LiteralString
 
     return os.path.join(yolo_runs_dir, model_name)
 
-# Get model weights path
+# Get the model weights path
 def get_model_weight_dir_path(model_name: str, yolo_version: str) -> LiteralString | str | bytes:
-    # Get model runs path
+    # Get the model runs path
     model_runs_path = get_model_runs_dir_path(model_name, yolo_version)
 
     return os.path.join(model_runs_path, YOLO_WEIGHTS)
 
-# Get model best PyTorch path
+# Get the model best PyTorch path
 def get_model_best_pt_path(model_name: str, yolo_version: str) -> LiteralString | str | bytes:
-    # Get model weight path
+    # Get the model weight path
     model_weight_path = get_model_weight_dir_path(model_name, yolo_version)
 
     return os.path.join(model_weight_path, BEST_PT)
 
-# Get the YOLO zip folder path
-def get_yolo_zip_dir_path(arg_yolo_version: str) -> LiteralString | str | bytes:
-    # Check yolo version
-    check_yolo_version(arg_yolo_version)
+# Get  the model best ONNX path
+def get_model_best_onnx_path(model_name: str, yolo_version: str) -> LiteralString | str | bytes:
+    # Get the model weight path
+    model_weight_path = get_model_weight_dir_path(model_name, yolo_version)
 
-    return os.path.join(YOLO_DIR, arg_yolo_version, YOLO_ZIP)
+    return os.path.join(model_weight_path, BEST_ONNX)
+
+# Get the YOLO zip folder path
+def get_yolo_zip_dir_path(yolo_version: str) -> LiteralString | str | bytes:
+    # Check yolo version
+    check_yolo_version(yolo_version)
+
+    return os.path.join(YOLO_DIR, yolo_version, YOLO_ZIP)
 
 # Get the YOLO data folder path
 def get_yolo_data_dir_path() -> LiteralString | str | bytes:

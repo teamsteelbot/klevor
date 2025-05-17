@@ -169,7 +169,10 @@ Existen dos maneras de entrenar el modelo dependiendo del equipo disponible en e
    4. Ejecutamos las secciones del Jupyter Notebook [```v11/notebooks/colab/gr_train.ipynb```](v11/notebooks/colab/gr_train.ipynb), omitiendo la sección antes mencionada relacionada con la descompresión del archivo comprimido. Este Jupyter Notebook utiliza la biblioteca ```ultralytics``` para realizar el entrenamiento del modelo y guarda los pesos en la carpeta [```v11/runs/gr```](v11/runs/gr).
    5. Una vez finalizado el entrenamiento, se puede descargar el archivo comprimido con los pesos del modelo desde Google Drive y descomprimirlo en la carpeta [```v11/runs/gr```](v11/runs/gr) de forma local.
 3. **Inferencia**: Ejecutamos el script [```test.py```](test.py) para realizar la inferencia del modelo entrenado y evaluar el rendimiento del modelo con imágenes que no ha visualizado con anterioridad. Este script genera imágenes con las inferencias realizadas por el modelo, donde se muestran los cuadros delimitadores y las etiquetas de los objetos detectados.
-4. **Limpieza**: Finalmente, ejecutamos el script [```after_training.py```](after_training.py) para eliminar la carpeta [```dataset/gr/organized/train```](dataset/gr/organized/train) y [```dataset/gr/organized/val```](dataset/gr/organized/val), ya que estas no serán necesarias para los próximos pasos.
+4. **ONNX**: Ejecutamos el script [```export.py```](export.py), y pasamos como formato del modelo ```onnx```, el cual es un formato abierto empleado para representar modelos de Machine Learning de forma interoperable entre distintos frameworks, herramientas, entre otros [[13](#onnx)].  
+5. **Limpieza**: Finalmente, ejecutamos el script [```after_training.py```](after_training.py) para eliminar la carpeta [```dataset/gr/organized/val```](dataset/gr/organized/val), ya que esta no serán necesaria para los próximos pasos, y además moverá la carpeta [```dataset/gr/organized/train```](dataset/gr/organized/train) al subdirectorio en ```hailo/hef```, para que el modelo pueda ser convertido a un formato compatible con el Hailo 8L, así como moverá los pesos de formato ```ONNX``` con mejor resultado correspondiente al modelo. 
+
+*TIP: En el caso de emplear Google Colab y que se desconecte la sesión del entorno de ejecución durante el entrenamiento del modelo, se puede retomar el mismo, al modificar la ruta del modelo o el nombre del modelo a emplear en la función ```train_model``` del Notebook, por la ruta donde se guardó los mejores pesos del entrenamiento, en nuestro caso: ```gr_to_train/yolo/v11/runs/m/weights/best.pt```.*
 
 <p align="center">
    <img src="https://mediasysdubai.com/wp-content/uploads/2023/12/L4_Front.png" alt="Vista frontal de la GPU Tesla L4 de NVIDIA" width="400">
@@ -182,6 +185,12 @@ Existen dos maneras de entrenar el modelo dependiendo del equipo disponible en e
 <h1 id="conversion-del-modelo">Conversión del Modelo</h1>
 
 Para la conversión del modelo a un formato compatible con el Hailo 8L, requerimos de Docker (mas no es imprescindible), para crear un contenedor con todos los paquetes necesarios para su correcto funcionamiento.
+
+<p align="center">
+   <img src="https://cdn4.iconfinder.com/data/icons/logos-and-brands/512/97_Docker_logo_logos-1024.png" alt="Logo de Docker" width="200">
+   <br>
+   <i>Logo de Docker</i>
+</p>
 
 <h2 id="que-es-docker">Docker</h2>
 
@@ -203,13 +212,72 @@ Un contenedor Docker es una instancia *runtime* de una imagen Docker [[12](#que-
 
 <h2 id="como-convertir-el-modelo-a-un-formato-compatible-al-hailo-8l">Cómo Convertir el Modelo a un Formato Compatible al Hailo 8L</h2>
 
-Primeramente, ejecutamos el script [```export.py```](export.py), y pasamos como formato del modelo ```onnx```, el cual es un formato abierto empleado para representar modelos de Machine Learning de forma interoperable entre distintos frameworks, herramientas, entre otros [[13](#onnx)]. 
+Primeramente, visitamos la página oficial de Hailo, en el cual debemos crearnos una cuenta, iniciar sesión y luego nos dirigimos al apartado de desarrolladores. Dentro de esta sección, seleccionamos el apartado de descargas de software, y descargamos los siguientes paquetes necesarios [[9](#custom-dataset-medium)]:
 
-Posteriormente, cambiamos el directorio actual a [```hailo/hef```](hailo/hef), en el cual debe haber un archivo ```Dockerfile````.
+- HailoRT, para la arquitectura donde está siendo ejecutado el Docker (en nuestro caso, ```amd64```). Recomendamos la versión 4.21.0. 
+- Paquete de Python (whl) de HailoRT, para la arquitectura donde está siendo ejecutado el Docker (en nuestro caso, ```x86_64```), y la versión de Python del Dockerfile (de no ser modificado, debe ser la versión 3.10). Recomendamos la versión 4.21.0.
+- Hailo Dataflow Compiler, para la arquitectura donde está siendo ejecutado el Docker (en nuestro caso, ```x86_64```). Recomendamos la versión 3.31.0.
 
-<!--
-[[9](#custom-dataset-medium)]
--->
+*NOTA: En el caso de emplear una GPU NVIDIA para la conversión a formato ```.hef```, también debemos instalar el [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html)*
+
+Estos archivos descargados recientemente, los guardamos en la carpeta [```hailo/hef/libs```](hailo/hef/libs). Nos cambiamos de directorio actual, a la carpeta [```hailo/hef/libs```](hailo/hef/libs), y realizamos un clone del siguiente repositorio de GitHub que contiene todo lo necesario para la conversión del modelo de formato ```ONNX``` a ```HEF```: ```git clone https://github.com/hailo-ai/hailo_model_zoo.git``` 
+
+Posteriormente, cambiamos de nuevo el directorio actual a [```hailo/hef```](hailo/hef), en el cual debe haber un archivo [```Dockerfile```](hailo/hef/Dockerfile).
+
+Ejecutamos el siguiente comando: ```docker build -t hailo_compiler:v0 .```
+
+Esperamos a que se instalen todas las dependencias necesarias y la imagen del contenedor Docker esté lista.
+
+Posteriormente, inicializamos el contenedor Docker:
+
+- En el caso de contar con GPU:
+```
+docker run -it --name compile_onnx_file --gpus all --ipc=host -v {path}:/home/hailo/shared hailo_compiler:v0
+```
+- En el caso de no contar con GPU:
+```
+docker run -it --name compile_onnx_file --ipc=host -v {path}:/home/hailo/shared hailo_compiler:v0
+```
+
+*NOTA: Substituimos ```path``` por la ruta absoluta de la carpeta [hailo/hef](hailo/hef).*
+
+En el mismo terminal, creamos un entorno virtual para Python
+```
+python -m venv .venv
+source .venv/bin/activate
+```
+
+Ahora instalamos los 3 paquetes anteriormente descargados, que actualmente se encuentran en la carpeta [```hailo/hef/libs```](hailo/hef/libs). Para las versiones que descargamos, ejecutamos los siguientes comandos:
+```
+dpkg -i ./libs/hailort_4.21.0_amd64.deb
+pip install ./libs/hailort-4.21.0-cp310-cp310-linux_x86_64.whl
+pip install ./libs/hailo_dataflow_compiler-3.31.0-py3-none-linux_x86_64.whl
+```
+
+Ahora nos movemos del directorio actual al correspondiente del repositorio ```hailo-model-zoo```, e instalamos todas las dependencias requeridas: 
+```
+cd ./libs/hailo_model_zoo
+pip install -e .
+```
+
+Evaluamos si los paquetes se han instalado correctamente con el siguiente comando: ```hailomz --version```
+
+Ahora modificamos el archivo de configuración del modelo, estableciendo el número de clases con el que se ha entrenado el mismo (para el modelo **GR** serían 2):
+```
+sudo nano hailo_model_zoo/cfg/postprocess_config/yolov11n_nms_config.json
+```
+
+Establecemos la variable de entorno ```USER``` como Hailo:
+```
+export USER=hailo
+```
+
+Compilamos el modelo ```.onnx``` a ```.hef``` con el siguiente comando:
+```
+hailomz compile --ckpt /home/hailo/shared/v11/gr/best.onnx --calib-path /home/hailo/shared/train/images --yaml hailo_model_zoo/cfg/networks/yolov11n.yaml
+```
+
+Esperamos a que se complete el anterior paso, y ya tendríamos nuestro modelo personalizado y compatible con el Hailo 8L.
 
 <h1 id="instalacion-de-hailo-ai-hat">Instalación de Hailo AI HAT+</h1>
 

@@ -73,6 +73,10 @@ YOLO_DATASET_CLASSES_TXT = 'classes.txt'
 YOLO_DATASET_NOTES_JSON = 'notes.json'
 YOLO_DATASET_IMAGES_EXT = '.jpg'
 
+# YOLO Hailo-related folders
+YOLO_HAILO = 'hailo'
+YOLO_HEF = 'hef'
+
 # YOLO models
 BEST_ONNX = 'best.onnx'
 BEST_PT = 'best.pt'
