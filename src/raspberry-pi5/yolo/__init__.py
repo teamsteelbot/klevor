@@ -99,11 +99,15 @@ YOLO_NUMBER_RANDOM_IMAGES = 10
 ARGS_YOLO_FORMAT = 'format'
 ARGS_YOLO_QUANTIZED = 'quantized'
 ARGS_YOLO_INPUT_MODEL = 'input-model'
+ARGS_YOLO_INPUT_MODEL_PT = 'input-model-pt'
 ARGS_YOLO_OUTPUT_MODEL = 'output-model'
 ARGS_YOLO_VERSION = 'version'
 ARGS_YOLO_IS_RETRAINING = 'is-retraining'
 ARGS_YOLO_CLASSES = 'classes'
 ARGS_YOLO_IGNORE_CLASSES = 'ignore-classes'
+ARGS_YOLO_EPOCHS = 'epochs'
+ARGS_YOLO_DEVICE = 'device'
+ARGS_YOLO_IMAGE_SIZE = 'imgsz'
 
 # YOLO formats
 ARGS_YOLO_FORMAT_ONNX = 'onnx'

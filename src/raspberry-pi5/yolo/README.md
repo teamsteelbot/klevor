@@ -131,12 +131,37 @@ Luego, se ejecutó el script [```split.py```](split.py) para dividir el conjunto
 <h1 id="entrenamiento-del-modelo">Entrenamiento del Modelo</h1>
 
 <p align="center">
-   <img src="https://i.postimg.cc/B6kkr5ZP/Figure-2.png" alt="Imagen con distintas inferencias realizadas (modelo GR)" width="800">
+   <img src="https://i.postimg.cc/B6kkr5ZP/Figure-2.png" alt="Imagen con distintas inferencias realizadas (modelo GMR)" width="800">
    <br>
-   <i>Imagen con distintas inferencias realizadas (modelo GR)</i>
+   <i>Imagen con distintas inferencias realizadas (modelo GMR)</i>
 </p>
 
-Finalmente, ejecutamos el script [```after_training.py```](after_training.py) para eliminar la carpeta [```dataset/gr/organized/train```](dataset/gr/organized/train) y [```dataset/gr/organized/val```](dataset/gr/organized/val) y mover las imágenes de la carpeta [```dataset/gr/augmented```](dataset/gr/augmented) a la carpeta [```dataset/gr/organized/train```](dataset/gr/organized/train), ya que estas no serán necesarias para los próximos pasos.
+Primeramente, dependiendo del modelo y la forma en la que se vaya a entrenar el mismo, se debe modificar un archivo ```.yaml```, los cuales se encuentran dentro de la carpeta ````yolo/data````, donde se debe modificar la ruta de las imágenes y las etiquetas a las rutas correspondientes. En este caso, se debe modificar el archivo [```gr.yaml```](yolo/data/colab/gr.yaml) para el modelo de 2 clases y el archivo [```m.yaml```](data/colab/m.yaml) para el modelo de 1 clase, cuya carpeta padre variará entre ```colab``` y ```local``` dependiendo del entorno.
+
+*NOTA: Al momento de clonar este repositorio, se suministran archivos plantilla para los ```.yaml```, los cuales terminan en ```.yaml.example```. A los cuales posterior a su modificación, se les debe cambiar la extensión a ```.yaml```.*
+
+Existen dos maneras de entrenar el modelo dependiendo del equipo disponible en el momento:
+
+1. **Entrenamiento de forma local**: Para ello, se debe contar con una GPU dedicada para el entrenamiento.   
+   1. En este caso, debemos ejecutar el script [```train.py```](train.py) para entrenar el modelo YOLOv11. Este script utiliza la biblioteca ```ultralytics``` para realizar el entrenamiento del modelo y guardar los pesos en la carpeta [```v11/runs/gr```](v11/runs/gr).
+2. **Entrenamiento de forma remota**: Para ello, se puede utilizar Google Colab, donde se puede utilizar una GPU de forma gratuita o de paga, dependiendo del tiempo requerido para el entrenamiento y la velocidad en la que se quiere completar dicho entrenamiento.
+   1. En este caso, debemos ejecutar primero el script [```zip_to_train.py```](zip_to_train.py), el cual se encargará de crear un archivo comprimido con el conjunto de datos, el cual se guardará en la carpeta [```v11/zip```](v11/zip).
+   2. Luego, tenemos dos opciones:
+      1. Podemos descomprimir este archivo de forma local y subir dicha carpeta al Google Drive, considerando que Google Drive no tiene funciones para comprimir/descomprimir de forma nativa (al momento de realizar esta guía), en la carpeta ```Colab Files```. 
+      2. Otra opción es subir el archivo comprimido a la carpeta ```Colab Files``` de Google Drive, y resubimos el Jupyter Notebook correspondiente, en este caso [```v11/notebooks/colab/gr_train.ipynb```](v11/notebooks/colab/gr_train.ipynb), ya que este contiene una sección que tiene la lógica para descomprimir el archivo comprimido. Ejecutamos la sección correspondiente a la conexión con Google Drive y ejecutamos la sección correspondiente a la descompresión del archivo comprimido.
+   3. Seleccionamos el entorno de ejecución acorde a nuestra disponibilidad. Puedes utilizar de forma gratuita una GPU Tesla T4 de NVIDIA por alrededor de 5 h diarias, o comprar 100 créditos (que cuestan $10 al momento de redactar esta guía) de la plataforma para poder usarlo por más tiempo y/o utilizar mejores GPUs. En nuestro caso, empleamos una GPU Tesla L4 de NVIDIA, la cual consumió alrededor de 6 créditos por entrenar un modelo completo.
+   4. Ejecutamos las secciones del Jupyter Notebook [```v11/notebooks/colab/gr_train.ipynb```](v11/notebooks/colab/gr_train.ipynb), omitiendo la sección antes mencionada relacionada con la descompresión del archivo comprimido. Este Jupyter Notebook utiliza la biblioteca ```ultralytics``` para realizar el entrenamiento del modelo y guarda los pesos en la carpeta [```v11/runs/gr```](v11/runs/gr).
+   5. Una vez finalizado el entrenamiento, se puede descargar el archivo comprimido con los pesos del modelo desde Google Drive y descomprimirlo en la carpeta [```v11/runs/gr```](v11/runs/gr) de forma local.
+3. **Inferencia**: Ejecutamos el script [```test.py```](test.py) para realizar la inferencia del modelo entrenado y evaluar el rendimiento del modelo con imágenes que no ha visualizado con anterioridad. Este script genera imágenes con las inferencias realizadas por el modelo, donde se muestran los cuadros delimitadores y las etiquetas de los objetos detectados.
+4. **Limpieza**: Finalmente, ejecutamos el script [```after_training.py```](after_training.py) para eliminar la carpeta [```dataset/gr/organized/train```](dataset/gr/organized/train) y [```dataset/gr/organized/val```](dataset/gr/organized/val), ya que estas no serán necesarias para los próximos pasos.
+
+<p align="center">
+   <img src="https://mediasysdubai.com/wp-content/uploads/2023/12/L4_Front.png" alt="Vista frontal de la GPU Tesla L4 de NVIDIA" width="400">
+    <br>
+    <i>Vista frontal de la GPU Tesla L4 de NVIDIA</i>
+</p>
+
+*NOTA: Durante esta sección se menciona la versión 11 de YOLO, pero, de la misma forma que se menciona el dataset **GR** a fines didáctivos, se puede utilizar cualquier versión de YOLO, así como cualquier dataset, ya que el proceso es el mismo. Sin embargo, se recomienda utilizar la versión 11 de YOLO, ya que es la más reciente y cuenta con mejoras significativas en comparación con versiones anteriores.*
 
 <h1 id="conversion-del-modelo">Conversión del Modelo</h1>
 
