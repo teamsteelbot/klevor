@@ -13,18 +13,21 @@
    8. [INJORA MB100 20A mini ESC](#componentes-injora-mb100-20a-mini-esc) 
    9. [URGENEX 7.4V Battery](#componentes-urgenex-74v-battery) 
    10. [INJORA 7KG 2065 Micro Servo](#componentes-injora-7kg-2065-micro-servo) 
-4. **[Modelos 3D](models/README.md)**
-5. **[Diagramas y esquemas](schemes/README.md)**
+4. **[Lenguajes de Programación](#lenguajes-de-programacion)**
+   1. [Python](#python)
+   2. [MicroPython](#micropython)
+5. **[Modelos 3D](models/README.md)**
+6. **[Diagramas y esquemas](schemes/README.md)**
    1. [Diagrama de conexiones](#schemes/connection-diagram.jpg)
    2. [Esquema de decisiones](#schemes/flowchart.jpg)
-6. **[Código](src/README.md)**
+7. **[Código](src/README.md)**
    1. [Raspberry Pi 5](src/raspberry-pi5/README.md)
       1. [YOLO](src/raspberry-pi5/yolo/README.md)
    2. [Raspberry Pi Pico 2 WH](src/raspberry-pi-pico2/README.md)
-7. **[Fotos del equipo](t-photos/README.md)**
-8. **[Fotos de Klevor](v-photos/README.md)**
-9. **[Vídeos](video/README.md)**
-10. **[Recursos Externos](#recursos-externos)**
+8. **[Fotos del equipo](t-photos/README.md)**
+9. **[Fotos de Klevor](v-photos/README.md)**
+10. **[Vídeos](video/README.md)**
+11. **[Recursos Externos](#recursos-externos)**
 
 <h1 id="introduccion">Introducción</h1>
 
@@ -258,6 +261,30 @@ No sólo estos aspectos definieron la elección, el INJORA 7KG 2065 ofrece tambi
 | Ancho      | 13 mm     |
 | Peso       | 20 g      |
 
+<h1 id="lenguajes-de-programacion">Lenguajes de Programación</h1>
+
+Muchos robots autónomos necesitan de un lenguaje de programación para poder llevar a cabo tareas complejas, en el caso de Klevor, utilizamos un lenguaje principal: Python, y una implementación en microcontroladores como la Raspberry Pi Pico 2 WH, MicroPython.
+
+<h2 id="python">Python</h2>
+
+<p align="center">
+  <img src= "https://i.postimg.cc/9MGx4R3B/5848152fcef1014c0b5e4967.webp" alt="Python" width="300">
+</p>
+
+Python es un lenguaje de programación de alto nivel, este lenguaje es cumple muchísimas funciones en general y es uno de los más vérsatiles en general. Klevor utiliza Python como lenguaje de programación para tareas como la detección de los obstáculos y el estacionamiento, escaneo 2D de los datos del RPLidar C1 y el control de los dos motores. 
+
+La ventaja principal de Python es la versatilidad, pues no necesitamos administrar cada tarea en su lenguaje de programación distinto. [[18](#lenguaje-python)]
+
+<h2 id="micropython">MicroPython</h2>
+
+<p align="center">
+  <img src= "https://i.postimg.cc/GmjdDQY4/image-1.png" alt="MicroPython" width="300">
+</p>
+
+MicroPython es una implementación de Python en microcontroladores, a pesar de estar escrito en en el lenguaje de programación C, éste replica todas las funciones de Python en microcontroladores como la ESP32 y ESP8266.
+
+En el caso de Klevor, utilizamos MicroPython en la Raspberry Pi Pico 2 WH, para permitir una comunicación más eficiente entre la Raspberry Pi 5 y la Raspberry Pi Pico 2 WH. [[19](#lenguaje-micropython)]
+
 # Recursos Externos
 
 1. *RASPBERRY PI 5 16GB, 8GB, 4GB, 2GB – MODELO B*. (2025). tiendatec. <a id="raspberry-pi-5-16gb-8gb-4gb-2gb-tiendatec">https://www.tiendatec.es/raspberry-pi/gama-raspberry-pi/2149-raspberry-pi-5-16gb-8gb-4gb-2gb-modelo-b.html</a>
@@ -294,3 +321,7 @@ No sólo estos aspectos definieron la elección, el INJORA 7KG 2065 ofrece tambi
 16. *URGENEX 3000mAh 7.4 V Li-ion Battery with Dean-Style T Plug 2S Rechargeable RC Battery Fit for WLtoys 4WD High Speed RC Cars and Most 1/10, 1/12, 1/16 Scale RC Cars Trucks with 7.4V Battery Charger*. (2025). Amazon. <a id="urgenex-3000-mah-amazon">https://www.amazon.com/URGENEX-Bater%C3%ADa-enchufe-recargable-velocidad/dp/B0CYNVSN7W?ref_=ast_sto_dp</a>
 
 17. *INJORA 7KG 2065 Digital Servo Waterproof High Voltage Sub-Micro Shift Servo for TRX4 TRX6 SCX10 III 1/10 RC Crawler Car,1PCS*. (2025). Amazon. <a id="injora-7kg-2065-amazon">https://www.amazon.com/digital-impermeable-voltaje-Sub-Micro-Crawler/dp/B0BLBMVYCW?ref_=ast_sto_dp</a>
+
+18. *El tutorial de Python*. (2025). Python Software Fundation. <a id="lenguaje-python">https://docs.python.org/es/3/tutorial/</a>
+
+19. *Qué es MicroPython, el lenguaje de programación que ya puedes usar en tu Arduino.* (2022). GenBeta. <a id="lenguaje-micropython">https://www.genbeta.com/desarrollo/que-micropython-lenguaje-programacion-que-puedes-usar-tu-arduino-probar-tu-navegador</a>
