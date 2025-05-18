@@ -13,6 +13,7 @@
    8. [INJORA MB100 20A mini ESC](#componentes-injora-mb100-20a-mini-esc) 
    9. [URGENEX 7.4V Battery](#componentes-urgenex-74v-battery) 
    10. [INJORA 7KG 2065 Micro Servo](#componentes-injora-7kg-2065-micro-servo) 
+   11. [HitLego Time-of-Flight Sensor VL53L0X](#sensor-tof-hitlego)
 4. **[Lenguajes de Programación](#lenguajes-de-programacion)**
    1. [Python](#python)
    2. [MicroPython](#micropython)
@@ -261,6 +262,23 @@ No sólo estos aspectos definieron la elección, el INJORA 7KG 2065 ofrece tambi
 | Ancho      | 13 mm     |
 | Peso       | 20 g      |
 
+<h2 id="sensor-tof-hitlego">HitLego Time-of-Flight Sensor VL53L0X</h2>
+
+<p align="center">
+  <img src="https://i.postimg.cc/tJKzWrmG/61-Y5-Qt-Pu-NGL-SX466-removebg-preview.png" alt="sensor-tof-hitlego" width="200">
+</p>
+
+El sensor VL53L0X en sí mismo es un pequeño sensor de distancia muy popular que utiliza la tecnología Time-of-Flight (ToF) para medir la distancia a un objeto. El sensor VL53L0X emite un pulso de luz láser infrarroja invisible y mide el tiempo que tarda en regresar al sensor. 
+
+Estos sensores son una buena alternativa a los sensores ultrasónicos como el HC-SR04, además de ser más pequeños y confiables[[18](#sensor-tof)].
+
+| **Medida** | **Valor** |
+|------------|-----------|
+| Largo      | 25 mm     |
+| Alto       | 1 mm      |
+| Ancho      | 10.7 mm   |
+| Peso       | 0.8 g     |
+
 <h1 id="lenguajes-de-programacion">Lenguajes de Programación</h1>
 
 Muchos robots autónomos necesitan de un lenguaje de programación para poder llevar a cabo tareas complejas, en el caso de Klevor, utilizamos un lenguaje principal: Python, y una implementación en microcontroladores como la Raspberry Pi Pico 2 WH, MicroPython.
@@ -268,7 +286,7 @@ Muchos robots autónomos necesitan de un lenguaje de programación para poder ll
 <h2 id="python">Python</h2>
 
 <p align="center">
-  <img src= "https://i.postimg.cc/9MGx4R3B/5848152fcef1014c0b5e4967.webp" alt="Python" width="300">
+  <img src= "https://i.postimg.cc/9MGx4R3B/5848152fcef1014c0b5e4967.webp" alt="Python" width="100">
 </p>
 
 Python es un lenguaje de programación de alto nivel, este lenguaje es cumple muchísimas funciones en general y es uno de los más vérsatiles en general. Klevor utiliza Python como lenguaje de programación para tareas como la detección de los obstáculos y el estacionamiento, escaneo 2D de los datos del RPLidar C1 y el control de los dos motores. 
@@ -278,7 +296,7 @@ La ventaja principal de Python es la versatilidad, pues no necesitamos administr
 <h2 id="micropython">MicroPython</h2>
 
 <p align="center">
-  <img src= "https://i.postimg.cc/GmjdDQY4/image-1.png" alt="MicroPython" width="300">
+  <img src= "https://i.postimg.cc/GmjdDQY4/image-1.png" alt="MicroPython" width="100">
 </p>
 
 MicroPython es una implementación de Python en microcontroladores, a pesar de estar escrito en en el lenguaje de programación C, éste replica todas las funciones de Python en microcontroladores como la ESP32 y ESP8266.
@@ -322,6 +340,8 @@ En el caso de Klevor, utilizamos MicroPython en la Raspberry Pi Pico 2 WH, para 
 
 17. *INJORA 7KG 2065 Digital Servo Waterproof High Voltage Sub-Micro Shift Servo for TRX4 TRX6 SCX10 III 1/10 RC Crawler Car,1PCS*. (2025). Amazon. <a id="injora-7kg-2065-amazon">https://www.amazon.com/digital-impermeable-voltaje-Sub-Micro-Crawler/dp/B0BLBMVYCW?ref_=ast_sto_dp</a>
 
-18. *El tutorial de Python*. (2025). Python Software Fundation. <a id="lenguaje-python">https://docs.python.org/es/3/tutorial/</a>
+18. *VL53L0X*. (2025). STMicroElectronics. <a id="sensor-tof">https://www.st.com/en/imaging-and-photonics-solutions/vl53l0x.html</a>
 
-19. *Qué es MicroPython, el lenguaje de programación que ya puedes usar en tu Arduino.* (2022). GenBeta. <a id="lenguaje-micropython">https://www.genbeta.com/desarrollo/que-micropython-lenguaje-programacion-que-puedes-usar-tu-arduino-probar-tu-navegador</a>
+19. *El tutorial de Python*. (2025). Python Software Fundation. <a id="lenguaje-python">https://docs.python.org/es/3/tutorial/</a>
+
+20. *Qué es MicroPython, el lenguaje de programación que ya puedes usar en tu Arduino.* (2022). GenBeta. <a id="lenguaje-micropython">https://www.genbeta.com/desarrollo/que-micropython-lenguaje-programacion-que-puedes-usar-tu-arduino-probar-tu-navegador</a>
