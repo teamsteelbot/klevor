@@ -214,11 +214,12 @@ Un contenedor Docker es una instancia *runtime* de una imagen Docker [[12](#que-
 
 Primeramente, visitamos la página oficial de Hailo, en el cual debemos crearnos una cuenta, iniciar sesión y luego nos dirigimos al apartado de desarrolladores. Dentro de esta sección, seleccionamos el apartado de descargas de software, y descargamos los siguientes paquetes necesarios [[9](#custom-dataset-medium)]:
 
-- HailoRT, para la arquitectura donde está siendo ejecutado el Docker (en nuestro caso, ```amd64```). Recomendamos la versión 4.21.0. 
-- Paquete de Python (whl) de HailoRT, para la arquitectura donde está siendo ejecutado el Docker (en nuestro caso, ```x86_64```), y la versión de Python del Dockerfile (de no ser modificado, debe ser la versión 3.10). Recomendamos la versión 4.21.0.
-- Hailo Dataflow Compiler, para la arquitectura donde está siendo ejecutado el Docker (en nuestro caso, ```x86_64```). Recomendamos la versión 3.31.0.
+- HailoRT, para la arquitectura donde está siendo ejecutado el Docker (en nuestro caso, ```amd64```). Recomendamos la versión 4.20.0. 
+- Hailo Dataflow Compiler, para la arquitectura donde está siendo ejecutado el Docker (en nuestro caso, ```x86_64```). Recomendamos la versión 3.30.0.
 
-*NOTA: En el caso de emplear una GPU NVIDIA para la conversión a formato ```.hef```, también debemos instalar el [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html)*
+*NOTA: En el caso de emplear una GPU NVIDIA para la optimización del formato ```.har```, también debemos instalar el [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html)*
+
+*NOTA: Debido a un cambio en el Dataflow Compiler para la versión 3.31.0, donde se emplean mecanismos distintos para la detección del error de forma predeterminada, las versiones viejas (previas a la 4.21.0) del HailoRT no serán capaces de ejecutar archivos HEF compilados por la nueva versión del DataFlow Compiler [[14](#2025-04-hailo")]. Recomendamos revisar la [```tabla de compatibilidad```](https://hailo.ai/developer-zone/documentation/hailo-sw-suite-2025-04/?sp_referrer=suite/versions_compatibility.html), para así poder tener conocimiento de las versiones de los paquetes que debemos instalar para que todos sean compatibles entre sí.*
 
 Estos archivos descargados recientemente, los guardamos en la carpeta [```hailo/suite/libs```](hailo/suite/libs). Nos cambiamos de directorio actual, a la carpeta [```hailo/suite/libs```](hailo/suite/libs), y realizamos un clone del siguiente repositorio de GitHub que contiene todo lo necesario para la conversión del modelo de formato ```ONNX``` a ```HEF```: ```git clone https://github.com/hailo-ai/hailo_model_zoo.git``` 
 
@@ -292,7 +293,6 @@ hailomz compile --har ./gr_optimized.har --yaml hailo_model_zoo/cfg/networks/yol
 mv ./yolov11n.hef ./gr_compiled.hef
 ```
 
-
 Esperamos a que se complete el anterior paso, y ya tendríamos nuestro modelo personalizado y compatible con el Hailo 8L.
 
 Para mover todos los archivos generados en el directorio [```hailo/suite/libs/hailo_model_zoo```](hailo/suite/libs/hailo_model_zoo) a la carpeta con los pesos del modelo correspondiente, ejecutamos el script [```after_hailo_compilation.py```](after_hailo_compilation.py).
@@ -359,3 +359,4 @@ Product Name: HAILO-8L AI ACC M.2 B+M KEY MODULE EXT TMP
 11. *Models*. (2025). Ultralytics. <a id="models-ultralytics">https://docs.ultralytics.com/models/</a>
 12. *What is Docker?*. (22 de abril de 2025). Geeks for Geeks. <a id="what-is-docker">https://www.geeksforgeeks.org/introduction-to-docker/</a>
 13. *ONNX*. (2025). ONNX. <a id="onnx">https://onnx.ai/</a>
+14. *2025-04 | Hailo*. (2025). Hailo. <a id="2025-04-hailo">https://hailo.ai/developer-zone/documentation/hailo-sw-suite-2025-04/?sp_referrer=suite/suite_changelog.html</a>
