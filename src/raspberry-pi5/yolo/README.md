@@ -12,13 +12,13 @@
 3. **[Montaje del Modelo de Detección de Objetos](#montaje-del-modelo-de-deteccion-de-objetos)**
    1. [Creación del Conjunto de Datos](#creacion-del-conjunto-de-datos)
    2. [Entrenamiento del Modelo](#entrenamiento-del-modelo)
-   3. [Conversión del Modelo](#conversion-del-modelo)
+   3. [Instalación de Hailo AI HAT+](#instalacion-de-hailo-ai-hat)
+   4. [Conversión del Modelo](#conversion-del-modelo)
       1. [Docker](#que-es-docker)
          1. [Dockerfile](#que-es-dockerfile)
          2. [Docker Image](#que-es-docker-image)
          3. [Docker Container](#que-es-docker-container)
       2. [Cómo Convertir el Modelo a un Formato Compatible al Hailo 8L](#como-convertir-el-modelo-a-un-formato-compatible-al-hailo-8l) 
-   4. [Instalación de Hailo AI HAT+](#instalacion-de-hailo-ai-hat)
 4. **[Recursos Externos](#recursos-externos)**
 
 <h1 id="machine-learning">Machine Learning</h1>
@@ -182,123 +182,6 @@ Existen dos maneras de entrenar el modelo dependiendo del equipo disponible en e
 
 *NOTA: Durante esta sección se menciona la versión 11 de YOLO, pero, de la misma forma que se menciona el dataset **GR** a fines didáctivos, se puede utilizar cualquier versión de YOLO, así como cualquier dataset, ya que el proceso es el mismo. Sin embargo, se recomienda utilizar la versión 11 de YOLO, ya que es la más reciente y cuenta con mejoras significativas en comparación con versiones anteriores.*
 
-<h1 id="conversion-del-modelo">Conversión del Modelo</h1>
-
-Para la conversión del modelo a un formato compatible con el Hailo 8L, requerimos de Docker (mas no es imprescindible), para crear un contenedor con todos los paquetes necesarios para su correcto funcionamiento.
-
-<p align="center">
-   <img src="https://cdn4.iconfinder.com/data/icons/logos-and-brands/512/97_Docker_logo_logos-1024.png" alt="Logo de Docker" width="200">
-   <br>
-   <i>Logo de Docker</i>
-</p>
-
-<h2 id="que-es-docker">Docker</h2>
-
-Docker es una plataforma open-source (o de código abierto), con el cual se puede empaquetar una aplicación así como todas las dependencias que esta requiere, en una unidad denominada *contenedor* [[12](#what-is-docker)]. Estas son ligeras en peso, lo cual permite su portabilidad. Así mismo, los contenedores están aislados de la infraestructura donde está siendo ejecutados, y por ende la imagen del contenedor puede ser ejecutada como un contenedor en cualquier sistema operativo donde esté instalado Docker [[12](#what-is-docker)]. 
-
-Si su sistema operativo es Windows, Docker Desktop se puede instalar con facilidad desde la Microsoft Store.
-
-<h3 id="que-es-dockerfile">Dockerfile</h3>
-
-Docker emplea archivos, denominados *Dockerfile*, los cuales usan DSL (Domain Specific Language) para describir todas las instrucciones necesarias para crear una imagen de forma rápida [[12](#que-es-dockerfile)].
-
-<h3 id="que-es-docker-image">Docker Image</h3>
-
-Es un archivo compuesto de múltiples capas, empleado para ejecutar un contenedor Docker [[12](#que-es-docker-image")]. Es un paquete de software ejecutable que contiene todo lo necesario para correr la aplicación. Esta imagen informa cómo un contenedor debe inicializarse, determinando qué software debe ejecutarse y de qué forma.
-
-<h3 id="que-es-docker-container">Docker Container</h3>
-
-Un contenedor Docker es una instancia *runtime* de una imagen Docker [[12](#que-es-docker-container")]. Contiene todo el kit requerido para una aplicación, y permite ser ejecutada de forma aislada.
-
-<h2 id="como-convertir-el-modelo-a-un-formato-compatible-al-hailo-8l">Cómo Convertir el Modelo a un Formato Compatible al Hailo 8L</h2>
-
-Primeramente, visitamos la página oficial de Hailo, en el cual debemos crearnos una cuenta, iniciar sesión y luego nos dirigimos al apartado de desarrolladores. Dentro de esta sección, seleccionamos el apartado de descargas de software, y descargamos los siguientes paquetes necesarios [[9](#custom-dataset-medium)]:
-
-- HailoRT, para la arquitectura donde está siendo ejecutado el Docker (en nuestro caso, ```amd64```). Recomendamos la versión 4.20.0. 
-- Hailo Dataflow Compiler, para la arquitectura donde está siendo ejecutado el Docker (en nuestro caso, ```x86_64```). Recomendamos la versión 3.30.0.
-
-*NOTA: En el caso de emplear una GPU NVIDIA para la optimización del formato ```.har```, también debemos instalar el [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html)*
-
-*NOTA: Debido a un cambio en el Dataflow Compiler para la versión 3.31.0, donde se emplean mecanismos distintos para la detección del error de forma predeterminada, las versiones viejas (previas a la 4.21.0) del HailoRT no serán capaces de ejecutar archivos HEF compilados por la nueva versión del DataFlow Compiler [[14](#2025-04-hailo")]. Recomendamos revisar la [```tabla de compatibilidad```](https://hailo.ai/developer-zone/documentation/hailo-sw-suite-2025-04/?sp_referrer=suite/versions_compatibility.html), para así poder tener conocimiento de las versiones de los paquetes que debemos instalar para que todos sean compatibles entre sí.*
-
-Estos archivos descargados recientemente, los guardamos en la carpeta [```hailo/suite/libs```](hailo/suite/libs). Nos cambiamos de directorio actual, a la carpeta [```hailo/suite/libs```](hailo/suite/libs), y realizamos un clone del siguiente repositorio de GitHub que contiene todo lo necesario para la conversión del modelo de formato ```ONNX``` a ```HEF```: ```git clone https://github.com/hailo-ai/hailo_model_zoo.git``` 
-
-Posteriormente, cambiamos de nuevo el directorio actual: 
-- Si contamos con GPU, al directorio [```hailo/suite/dockerfiles/gpu```](hailo/suite/dockerfiles/gpu).
-- En el caso de no contar con GPU, al directorio [```hailo/suite/dockerfiles/no-gpu```](hailo/suite/dockerfiles/no-gpu).
-
-En ambos casos, debe existir este archivo [```Dockerfile```](hailo/suite/dockerfiles/gpu) o este [```Dockerfile```](hailo/suite/dockerfiles/no-gpu), dependiendo de la carpeta en la que nos encontramos.
-
-Para crear la imagen de Docker, ejecutamos el siguiente comando: ```docker build -t hailo_compiler:v0 .```
-
-Esperamos a que se instalen todas las dependencias necesarias y la imagen del contenedor Docker esté lista.
-
-Posteriormente, inicializamos el contenedor Docker:
-
-- En el caso de contar con GPU:
-```
-docker run -it --name compile_onnx_file --gpus all --ipc=host -v {path}:/home/hailo/shared hailo_compiler:v0
-```
-- En el caso de no contar con GPU:
-```
-docker run -it --name compile_onnx_file --ipc=host -v {path}:/home/hailo/shared hailo_compiler:v0
-```
-
-*NOTA: Sustituimos ```path``` por la ruta absoluta de la carpeta [```hailo/suite```](hailo/suite).*
-
-Dentro del contenedor, nos movemos al directorio [```/home/hailo/shared```](hailo/suite). En el mismo terminal, creamos un entorno virtual para Python
-```
-python -m venv .venv
-source .venv/bin/activate
-```
-
-Ahora instalamos los 2 paquetes anteriormente descargados, que actualmente se encuentran en la carpeta [```hailo/suite/libs```](hailo/suite/libs). Para las versiones que descargamos, ejecutamos los siguientes comandos:
-```
-dpkg -i ./libs/hailort_4.20.0_amd64.deb
-pip install ./libs/hailo_dataflow_compiler-3.30.0-py3-none-linux_x86_64.whl
-```
-
-Ahora nos movemos del directorio actual al correspondiente del repositorio ```hailo-model-zoo```, e instalamos todas las dependencias requeridas: 
-```
-cd ./libs/hailo_model_zoo
-pip install -e .
-```
-
-Evaluamos si los paquetes se han instalado correctamente con el siguiente comando: ```hailomz --version```
-
-Ahora modificamos el archivo de configuración del modelo, estableciendo el número de clases con el que se ha entrenado el mismo (para el modelo **GR** serían 2):
-```
-sudo nano hailo_model_zoo/cfg/postprocess_config/yolov11n_nms_config.json
-```
-
-Establecemos la variable de entorno ```USER``` como Hailo:
-```
-export USER=hailo
-```
-
-Ahora, para convertir el modelo a un formato compatible con el Hailo 8L, ejecutamos los siguientes comandos:
-- Primero, parseamos el modelo:
-```
-hailomz parse --ckpt /home/hailo/shared/v11/gr/best.onnx --yaml hailo_model_zoo/cfg/networks/yolov11n.yaml --hw-arch hailo8l
-mv ./yolov11n.har ./gr_parsed.har
-```
-- Optimizamos el modelo:
-```
-hailomz optimize --har ./gr_parsed.har --classes 2 --calib-path ../../train/images --yaml hailo_model_zoo/cfg/networks/yolov11n.yaml --hw-arch hailo8l
-mv ./yolov11n.har ./gr_optimized.har
-```
-- Finalmente, compilamos el modelo:
-```
-hailomz compile --har ./gr_optimized.har --yaml hailo_model_zoo/cfg/networks/yolov11n.yaml --hw-arch hailo8l
-mv ./yolov11n.hef ./gr_compiled.hef
-```
-
-Esperamos a que se complete el anterior paso, y ya tendríamos nuestro modelo personalizado y compatible con el Hailo 8L.
-
-Para mover todos los archivos generados en el directorio [```hailo/suite/libs/hailo_model_zoo```](hailo/suite/libs/hailo_model_zoo) a la carpeta con los pesos del modelo correspondiente, ejecutamos el script [```after_hailo_compilation.py```](after_hailo_compilation.py).
-
-Por último, para salir del contenedor Docker, ejecutamos el siguiente comando: ```exit```.
-
 <h1 id="instalacion-de-hailo-ai-hat">Instalación de Hailo AI HAT+</h1>
 
 <p align="center">
@@ -343,6 +226,143 @@ Serial Number: HLDDLBB234500054
 Part Number: HM21LB1C2LAE
 Product Name: HAILO-8L AI ACC M.2 B+M KEY MODULE EXT TMP
 ```
+
+<h1 id="conversion-del-modelo">Conversión del Modelo</h1>
+
+Para la conversión del modelo a un formato compatible con el Hailo 8L, requerimos de Docker (mas no es imprescindible), para crear un contenedor con todos los paquetes necesarios para su correcto funcionamiento.
+
+<p align="center">
+   <img src="https://cdn4.iconfinder.com/data/icons/logos-and-brands/512/97_Docker_logo_logos-1024.png" alt="Logo de Docker" width="200">
+   <br>
+   <i>Logo de Docker</i>
+</p>
+
+<h2 id="que-es-docker">Docker</h2>
+
+Docker es una plataforma open-source (o de código abierto), con el cual se puede empaquetar una aplicación así como todas las dependencias que esta requiere, en una unidad denominada *contenedor* [[12](#what-is-docker)]. Estas son ligeras en peso, lo cual permite su portabilidad. Así mismo, los contenedores están aislados de la infraestructura donde está siendo ejecutados, y por ende la imagen del contenedor puede ser ejecutada como un contenedor en cualquier sistema operativo donde esté instalado Docker [[12](#what-is-docker)]. 
+
+Si su sistema operativo es Windows, Docker Desktop se puede instalar con facilidad desde la Microsoft Store.
+
+<h3 id="que-es-dockerfile">Dockerfile</h3>
+
+Docker emplea archivos, denominados *Dockerfile*, los cuales usan DSL (Domain Specific Language) para describir todas las instrucciones necesarias para crear una imagen de forma rápida [[12](#que-es-dockerfile)].
+
+<h3 id="que-es-docker-image">Docker Image</h3>
+
+Es un archivo compuesto de múltiples capas, empleado para ejecutar un contenedor Docker [[12](#que-es-docker-image")]. Es un paquete de software ejecutable que contiene todo lo necesario para correr la aplicación. Esta imagen informa cómo un contenedor debe inicializarse, determinando qué software debe ejecutarse y de qué forma.
+
+<h3 id="que-es-docker-container">Docker Container</h3>
+
+Un contenedor Docker es una instancia *runtime* de una imagen Docker [[12](#que-es-docker-container")]. Contiene todo el kit requerido para una aplicación, y permite ser ejecutada de forma aislada.
+
+<h2 id="como-convertir-el-modelo-a-un-formato-compatible-al-hailo-8l">Cómo Convertir el Modelo a un Formato Compatible al Hailo 8L</h2>
+
+Al momento de la instalación del AI HAT+, ejecutamos el comando `hailortcli fw-control identify`, donde pudimos notar la siguiente línea:
+```
+Firmware Version: 4.20.0 (release,app,extended context switch buffer)
+```
+
+Como podemos observar, en nuestro caso, la versión del firmware es 4.20.0, por lo que debemos asegurarnos de que la versión de HailoRT y el Dataflow Compiler, así como todos los paquetes de la suite de Hailo empleada en los siguientes pasos, sean compatibles con esta versión. Por ejemplo, debido a un cambio en el Dataflow Compiler para la versión 3.31.0, donde se emplean mecanismos distintos para la detección del error de forma predeterminada, las versiones viejas (previas a la 4.21.0) del HailoRT no serán capaces de ejecutar archivos HEF compilados por la nueva versión del DataFlow Compiler [[14](#2025-04-hailo")]. Recomendamos revisar la [```tabla de compatibilidad```](https://hailo.ai/developer-zone/documentation/hailo-sw-suite-2025-04/?sp_referrer=suite/versions_compatibility.html), para así poder tener conocimiento de las versiones de los paquetes que debemos instalar para que todos sean compatibles entre sí.
+
+Primeramente, visitamos la página oficial de Hailo, en el cual debemos crearnos una cuenta, iniciar sesión y luego nos dirigimos al apartado de desarrolladores. Dentro de esta sección, seleccionamos el apartado de descargas de software, y descargamos los siguientes paquetes necesarios [[9](#custom-dataset-medium)]:
+
+- HailoRT, para la arquitectura donde está siendo ejecutado el Docker (en nuestro caso, ```amd64```). Versión recomendada: 4.20.0. 
+- Paquete de Python (whl) de HailoRT, para la arquitectura donde está siendo ejecutado el Docker (en nuestro caso, x86_64), y la versión de Python del contenedor (de no ser modificado, debe ser la versión 3.10). Versión recomendada: 4.20.0.
+- Hailo Dataflow Compiler, para la arquitectura donde está siendo ejecutado el Docker (en nuestro caso, ```x86_64```). Versión recomendada: 3.30.0.
+<!--
+- Paquete de Python (whl) de Hailo Model Zoo, para la arquitectura donde está siendo ejecutado el Docker (en nuestro caso, x86_64), y la versión de Python del contenedor (de no ser modificado, debe ser la versión 3.10). Versión recomendada: 2.14.0.
+-->
+
+*NOTA: En el caso de emplear una GPU NVIDIA para la optimización del formato ```.har```, también debemos instalar el [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html)*
+
+*NOTA: En el caso de no conseguir uno de los paquetes, en el portal para descargar software de Hailo, se tienen dos formas para buscar los paquetes: ```latest releases``` (o últimas versiones), y ```archive``` (o archivados); el primero de ellos es el predeterminado. De no conseguir el respectivo paquete en ```latest releases```, este probablemente esté en ```archive```*
+
+Posteriormente, cambiamos de nuevo el directorio actual: 
+- Si contamos con GPU, al directorio [```hailo/suite/dockerfiles/gpu```](hailo/suite/dockerfiles/gpu).
+- En el caso de no contar con GPU, al directorio [```hailo/suite/dockerfiles/no-gpu```](hailo/suite/dockerfiles/no-gpu).
+
+En ambos casos, debe existir este archivo [```Dockerfile```](hailo/suite/dockerfiles/gpu) o este [```Dockerfile```](hailo/suite/dockerfiles/no-gpu), dependiendo de la carpeta en la que nos encontramos.
+
+Para crear la imagen de Docker, ejecutamos el siguiente comando: ```docker build -t hailo_compiler:v0 .```
+
+Esperamos a que se instalen todas las dependencias necesarias y la imagen del contenedor Docker esté lista.
+
+Posteriormente, inicializamos el contenedor Docker:
+
+- En el caso de contar con GPU:
+```
+docker run -it --name compile_onnx_file --gpus all --ipc=host -v {path}:/home/hailo/shared hailo_compiler:v0
+```
+- En el caso de no contar con GPU:
+```
+docker run -it --name compile_onnx_file --ipc=host -v {path}:/home/hailo/shared hailo_compiler:v0
+```
+
+*NOTA: Sustituimos ```path``` por la ruta absoluta de la carpeta [```hailo/suite```](hailo/suite).*
+
+Dentro del contenedor, nos movemos al directorio [```/home/hailo/shared/libs```](hailo/suite). En el mismo terminal, creamos un entorno virtual para Python:
+```
+python -m venv .venv
+source .venv/bin/activate
+```
+
+Ahora instalamos los paquetes anteriormente descargados, que actualmente se encuentran en la carpeta [```hailo/suite/libs```](hailo/suite/libs). Para las versiones que descargamos, ejecutamos los siguientes comandos:
+```
+dpkg -i hailort_4.20.0_amd64.deb
+pip install  hailort-4.20.0-cp310-cp310-linux_x86_64.whl
+pip install hailo_dataflow_compiler-3.30.0-py3-none-linux_x86_64.whl
+```
+<!--
+```
+dpkg -i hailort_4.20.0_amd64.deb
+pip install  hailort-4.20.0-cp310-cp310-linux_x86_64.whl
+pip install hailo_dataflow_compiler-3.30.0-py3-none-linux_x86_64.whl
+pip install hailomz-2.14.0-py3-none-any.whl
+```
+-->
+
+Realizamos un clone del siguiente repositorio de GitHub que contiene todo lo necesario para la conversión del modelo de formato ```ONNX``` a ```HEF```: ```git clone https://github.com/hailo-ai/hailo_model_zoo.git```. Ahora nos movemos del directorio actual al correspondiente del repositorio ```hailo-model-zoo```:
+
+Sin embargo, en nuestro caso, requerimos específicamente la versión 2.14, por lo tanto, nos cambiamos a la rama de dicha versión: ```git checkout v2.14```. 
+Instalamos todas las dependencias requeridas: ```pip install -e .```
+
+Evaluamos si los paquetes se han instalado correctamente con el siguiente comando: ```hailomz --version```
+
+Establecemos la variable de entorno ```USER``` como Hailo:
+```
+export USER=hailo
+```
+
+<!--
+Creamos la carpeta ```hailo_model_zoo``` dentro de la carpeta [```hailo/suite/libs```](hailo/suite/libs), y nos cambiamos a dicho directorio
+```
+mkdir hailo_model_zoo
+cd hailo_model_zoo
+```
+-->
+
+Ahora, para convertir el modelo a un formato compatible con el Hailo 8L, ejecutamos los siguientes comandos:
+- Primero, parseamos el modelo:
+```
+hailomz parse yolov11n --ckpt /home/hailo/shared/v11/gr/best.onnx --hw-arch hailo8l
+mv ./yolov11n.har ./gr_parsed.har
+```
+- Optimizamos el modelo:
+```
+hailomz optimize yolov11n --har ./gr_parsed.har --classes 2 --calib-path ../../train/images --hw-arch hailo8l
+mv ./yolov11n.har ./gr_optimized.har
+```
+- Finalmente, compilamos el modelo:
+```
+hailomz compile yolov11n --har ./gr_optimized.har --hw-arch hailo8l
+mv ./yolov11n.hef ./gr_compiled.hef
+```
+
+Esperamos a que se complete el anterior paso, y ya tendríamos nuestro modelo personalizado y compatible con el Hailo 8L.
+
+Para mover todos los archivos generados en el directorio [```hailo/suite/libs/hailo_model_zoo```](hailo/suite/libs/hailo_model_zoo) a la carpeta con los pesos del modelo correspondiente, ejecutamos el script [```after_hailo_compilation.py```](after_hailo_compilation.py).
+
+Por último, para salir del contenedor Docker, ejecutamos el siguiente comando: ```exit```.
 
 <h1 id="recursos-externos">Recursos Externos</h1>
 
