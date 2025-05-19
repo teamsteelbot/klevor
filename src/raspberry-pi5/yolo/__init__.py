@@ -75,7 +75,9 @@ YOLO_DATASET_IMAGES_EXT = '.jpg'
 
 # YOLO Hailo-related folders
 YOLO_HAILO = 'hailo'
-YOLO_HEF = 'hef'
+YOLO_SUITE = 'suite'
+YOLO_LIBS = 'libs'
+YOLO_HAILO_MODEL_ZOO = 'hailo_model_zoo'
 
 # YOLO models
 BEST_ONNX = 'best.onnx'

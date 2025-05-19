@@ -8,7 +8,7 @@ from yolo import (YOLO_MODEL_GR, YOLO_MODEL_GMR, YOLO_MODEL_BGOR, YOLO_VERSION_5
                   YOLO_DATASET, YOLO_DATASET_GENERAL, YOLO_DIR, YOLO_RUNS, YOLO_WEIGHTS, BEST_PT, YOLO_DATASET_LABELED,
                   YOLO_DATASET_AUGMENTED, YOLO_ZIP, YOLO_COLAB, YOLO_DATA, YOLO_NOTEBOOKS, YOLO_LOCAL, YOLO_RUNS_OLD,
                   YOLO_TF_RECORDS, YOLO_DATASET_NOTES_JSON, YOLO_DATASET_CLASSES_TXT, YOLO_MODEL_M, YOLO_HAILO,
-                  YOLO_HEF, BEST_ONNX)
+                  YOLO_SUITE, BEST_ONNX, YOLO_HAILO_MODEL_ZOO, YOLO_LIBS)
 
 # Check validity of model name
 def check_model_name(model_name: str) -> None:
@@ -78,14 +78,14 @@ def get_dataset_model_dir_path(dataset_name: str, dataset_status: str|None, mode
 
     return os.path.join(YOLO_DATASET, YOLO_DATASET_GENERAL, dataset_name)
 
-# Get the Hailo HEF folder path
-def get_hailo_hef_dir_path() -> LiteralString | str | bytes:
-    return os.path.join(YOLO_DIR, YOLO_HAILO, YOLO_HEF)
+# Get the Hailo Suite folder path
+def get_hailo_suite_dir_path() -> LiteralString | str | bytes:
+    return os.path.join(YOLO_DIR, YOLO_HAILO, YOLO_SUITE)
 
-# Get the model Hailo HEF path
-def get_model_hailo_hef_path(model_name: str, yolo_version: str) -> LiteralString | str | bytes:
-    # Get the Hailo HEF folder path
-    hailo_hef_dir = get_hailo_hef_dir_path()
+# Get the model Hailo Suite path
+def get_model_hailo_suite_path(model_name: str, yolo_version: str) -> LiteralString | str | bytes:
+    # Get the Hailo Suite folder path
+    hailo_suite_dir = get_hailo_suite_dir_path()
 
     # Check model name
     check_model_name(model_name)
@@ -93,7 +93,7 @@ def get_model_hailo_hef_path(model_name: str, yolo_version: str) -> LiteralStrin
     # Check YOLO version
     check_yolo_version(yolo_version)
 
-    return os.path.join(hailo_hef_dir, yolo_version, model_name)
+    return os.path.join(hailo_suite_dir, yolo_version, model_name)
 
 # Get the YOLO version folder path
 def get_yolo_version_dir_path(yolo_version: str) -> LiteralString | str | bytes:
@@ -240,3 +240,28 @@ def get_yolo_dataset_classes_file_path(dataset_name: str, dataset_status: str|No
     dataset_model_dir_path = get_dataset_model_dir_path(dataset_name, dataset_status, model_name)
 
     return os.path.join(dataset_model_dir_path, YOLO_DATASET_CLASSES_TXT)
+
+# Get the model parsed HAR file name
+def get_model_parsed_har_file_name(model_name: str) -> LiteralString | str | bytes:
+    # Check model name
+    check_model_name(model_name)
+
+    return os.path.join(YOLO_HAILO, model_name, f'{model_name}_parsed.har')
+
+# Get the model optimized HAR file path
+def get_model_optimized_har_file_path(model_name: str) -> LiteralString | str | bytes:
+    # Check model name
+    check_model_name(model_name)
+
+    return os.path.join(YOLO_HAILO, model_name, f'{model_name}_optimized.har')
+
+# Get the model compiled HEF file path
+def get_model_compiled_hef_file_path(model_name: str) -> LiteralString | str | bytes:
+    # Check model name
+    check_model_name(model_name)
+
+    return os.path.join(YOLO_HAILO, model_name, f'{model_name}_compiled.hef')
+
+# Get the Hailo Model Zoo path
+def get_hailo_model_zoo_path() -> LiteralString | str | bytes:
+    return os.path.join(YOLO_DIR, YOLO_HAILO, YOLO_SUITE, YOLO_LIBS, YOLO_HAILO_MODEL_ZOO)
