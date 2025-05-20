@@ -30,3 +30,14 @@ def move_folder_content(input_dir, output_dir):
 def copy_file(input_path, output_path):
     if os.path.exists(input_path):
         shutil.copy(input_path, output_path)
+
+# Ensure the path exists
+def ensure_path_exists(output_path):
+    # Check if it contains an extension
+    if os.path.splitext(output_path)[1]:
+        output_dir = os.path.dirname(output_path)
+    else:
+        output_dir = output_path
+
+    # Ensure the output directory exists
+    os.makedirs(output_dir, exist_ok=True)

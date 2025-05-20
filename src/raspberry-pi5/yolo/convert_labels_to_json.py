@@ -2,7 +2,7 @@ import argparse
 import os
 import json
 
-from args.args import get_attribute_from_args, parse_args_as_dict
+from args import get_attribute_from_args, parse_args_as_dict
 from yolo import ARGS_YOLO_INPUT_MODEL, ARGS_YOLO_VERSION, YOLO_DATASET_LABELED, YOLO_DATASET_TO_PROCESS, YOLO_DATASET_IMAGES, \
     YOLO_DATASET_LABELS, YOLO_DATASET_IMAGES_EXT, YOLO_DATASET_ANNOTATIONS_JSON
 from yolo.args import add_yolo_input_model_argument, add_yolo_version_argument

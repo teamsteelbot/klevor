@@ -1,7 +1,8 @@
 import argparse
 import os
 
-from args.args import get_attribute_from_args, parse_args_as_dict
+from args import get_attribute_from_args, parse_args_as_dict
+from files import ensure_path_exists
 from opencv.image_augmentation import augment_images
 from yolo import (YOLO_NUM_AUGMENTATIONS, ARGS_YOLO_INPUT_MODEL,
                   YOLO_DATASET_LABELED, YOLO_DATASET_AUGMENTED, YOLO_DATASET_TO_PROCESS, YOLO_DATASET_PROCESSED,
@@ -28,7 +29,7 @@ def augment_dataset(input_to_process_dir: str, output_augmented_dir: str, num_au
                    output_augmented_dir, output_augmented_images_dir,
                    output_augmented_annotations_dir,
                    output_processed_images_dir, output_processed_annotations_dir]:
-        os.makedirs(io_dir, exist_ok=True)
+        ensure_path_exists(io_dir)
 
     # Get the image files
     image_filenames = [f for f in os.listdir(input_to_process_images_dir) if

@@ -4,8 +4,8 @@ import os
 import shutil
 from typing import LiteralString
 
-from args.args import get_attribute_from_args, parse_args_as_dict
-from files import copy_file
+from args import get_attribute_from_args, parse_args_as_dict
+from files import copy_file, ensure_path_exists
 from yolo import (ARGS_YOLO_INPUT_MODEL, YOLO_DATASET_AUGMENTED, YOLO_DATASET_ORGANIZED,
                   YOLO_DATASET_IMAGES, YOLO_DATASET_LABELS, YOLO_DATASET_TRAINING, YOLO_DATASET_VALIDATIONS,
                   YOLO_DATASET_TESTING)
@@ -37,7 +37,7 @@ def split_dataset(input_dir: LiteralString, output_dir: LiteralString,
                    output_validations_images_dir, output_testing_images_dir,
                    output_training_annotations_dir, output_validations_annotations_dir,
                    output_testing_annotations_dir]:
-        os.makedirs(io_dir, exist_ok=True)
+        ensure_path_exists(io_dir)
 
     # Get the list of files
     image_filenames = os.listdir(input_images_dir)

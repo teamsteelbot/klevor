@@ -3,7 +3,8 @@ import argparse
 import tensorflow as tf
 import os
 
-from args.args import get_attribute_from_args, parse_args_as_dict
+from args import get_attribute_from_args, parse_args_as_dict
+from files import ensure_path_exists
 from yolo import (YOLO_DATASET_ORGANIZED, YOLO_DATASET_TO_PROCESS, ARGS_YOLO_INPUT_MODEL, YOLO_DATASET_IMAGES,
     YOLO_DATASET_LABELS, ARGS_YOLO_VERSION, YOLO_DATASET_TESTING)
 from yolo.args import add_yolo_input_model_argument, add_yolo_version_argument
@@ -13,8 +14,7 @@ from yolo.files import get_dataset_model_dir_path, get_tf_record_path
 # This script creates a TFRecord file from images and their labels
 def create_tfrecord(output_path, image_dir, label_dir):
     # Check if the output directory exists, if not create it
-    if not os.path.exists(os.path.dirname(output_path)):
-        os.makedirs(os.path.dirname(output_path))
+    ensure_path_exists(output_path)
     writer = tf.io.TFRecordWriter(output_path)
 
     for image_name in os.listdir(image_dir):

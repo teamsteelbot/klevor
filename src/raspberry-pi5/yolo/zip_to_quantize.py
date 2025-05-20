@@ -3,7 +3,8 @@ import os
 import zipfile
 from typing import LiteralString
 
-from args.args import get_attribute_from_args, parse_args_as_dict
+from args import get_attribute_from_args, parse_args_as_dict
+from files import ensure_path_exists
 from files.zip import zip_nested_folder, zip_not_nested_folder
 from yolo import (ARGS_YOLO_INPUT_MODEL, CWD, YOLO_DIR,
                   ARGS_YOLO_VERSION, ZIP_IGNORE_DIR)
@@ -20,7 +21,7 @@ def zip_to_quantize(input_dir: LiteralString, input_yolo_dir: LiteralString, inp
     output_zip_path = os.path.join(output_zip_dir, output_zip_filename)
 
     # Check if the folder exists, if not create it
-    os.makedirs(output_zip_dir, exist_ok=True)
+    ensure_path_exists(output_zip_dir)
 
     with (zipfile.ZipFile(output_zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf):
         # Zip the folders except the YOLO folder

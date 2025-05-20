@@ -2,7 +2,7 @@ import argparse
 
 import torch
 
-from args.args import get_attribute_from_args, parse_args_as_dict
+from args import get_attribute_from_args, parse_args_as_dict
 from yolo import ARGS_YOLO_INPUT_MODEL, ARGS_YOLO_VERSION, ARGS_YOLO_CLASSES
 from yolo.args import add_yolo_input_model_argument, add_yolo_version_argument, add_yolo_classes_argument
 from yolo.files import get_model_best_pt_path

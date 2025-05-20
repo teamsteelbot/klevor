@@ -1,6 +1,6 @@
 import argparse
 
-from args.args import get_attribute_from_args, parse_args_as_dict
+from args import get_attribute_from_args, parse_args_as_dict
 from model.yolo import load, export_onnx, export_tflite, export_tensor_rt
 from yolo import (ARGS_YOLO_FORMAT_ONNX, ARGS_YOLO_FORMAT_TFLITE, ARGS_YOLO_INPUT_MODEL, ARGS_YOLO_FORMAT,
                   ARGS_YOLO_QUANTIZED, ARGS_YOLO_VERSION)

@@ -1,11 +1,11 @@
 import argparse
 import os
 
-from args.args import get_attribute_from_args, parse_args_as_dict
+from args import get_attribute_from_args, parse_args_as_dict
 from files import move_folder
 from yolo import (ARGS_YOLO_INPUT_MODEL, ARGS_YOLO_VERSION)
 from yolo.args import add_yolo_input_model_argument, add_yolo_version_argument
-from yolo.files import get_yolo_runs_dir_path, get_yolo_old_runs_dir_path, get_yolo_runs_dir_new_name_path
+from yolo.files import get_yolo_runs_dir_path, get_yolo_old_runs_dir_path, get_yolo_runs_new_name_dir_path
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Script to move YOLO model runs folder to old runs folder')
@@ -23,7 +23,7 @@ if __name__ == '__main__':
     yolo_runs_dir = get_yolo_runs_dir_path(arg_yolo_version)
 
     # Get the runs folder path with the new name
-    yolo_runs_new_name_dir = get_yolo_runs_dir_new_name_path(arg_yolo_version)
+    yolo_runs_new_name_dir = get_yolo_runs_new_name_dir_path(arg_yolo_version)
 
     # Check if the new name folder exists
     if os.path.exists(yolo_runs_new_name_dir):

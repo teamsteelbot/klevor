@@ -1,4 +1,4 @@
-from args.args import get_attribute_name
+from args import get_attribute_name
 from yolo import (ARGS_YOLO_INPUT_MODEL, YOLO_MODEL_GR, YOLO_MODEL_GMR, YOLO_MODEL_BGOR, ARGS_YOLO_FORMAT_TFLITE,
                   ARGS_YOLO_FORMAT_TENSOR_RT,
                   ARGS_YOLO_FORMAT_ONNX, ARGS_YOLO_FORMAT, ARGS_YOLO_QUANTIZED, ARGS_YOLO_VERSION, YOLO_VERSION_5,

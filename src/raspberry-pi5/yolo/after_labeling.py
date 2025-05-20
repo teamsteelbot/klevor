@@ -1,6 +1,6 @@
 import argparse
 
-from args.args import parse_args_as_dict
+from args import parse_args_as_dict
 from files import move_folder_content
 from yolo import (YOLO_DATASET_RESIZED, YOLO_DATASET_TO_PROCESS, YOLO_DATASET_PROCESSED)
 from yolo.files import get_dataset_model_dir_path

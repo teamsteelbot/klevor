@@ -1,6 +1,6 @@
 import argparse
 
-from args.args import parse_args_as_dict, get_attribute_from_args
+from args import parse_args_as_dict, get_attribute_from_args
 from yolo import (YOLO_EPOCHS, ARGS_YOLO_DEVICE, ARGS_YOLO_INPUT_MODEL_PT, ARGS_YOLO_EPOCHS, ARGS_YOLO_IMAGE_SIZE,
                 ARGS_YOLO_INPUT_MODEL)
 from model.yolo import load

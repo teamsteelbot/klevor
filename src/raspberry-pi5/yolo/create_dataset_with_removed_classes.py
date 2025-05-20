@@ -3,7 +3,8 @@ import json
 import os
 import shutil
 
-from args.args import get_attribute_from_args, parse_args_as_dict
+from args import get_attribute_from_args, parse_args_as_dict
+from files import ensure_path_exists
 from yolo import (ARGS_YOLO_INPUT_MODEL, YOLO_DATASET_LABELED, ARGS_YOLO_OUTPUT_MODEL, ARGS_YOLO_IGNORE_CLASSES,
                   YOLO_DATASET_LABELS, YOLO_DATASET_IMAGES, YOLO_DATASET_IMAGES_EXT, YOLO_DATASET_CLASSES_TXT,
                   YOLO_DATASET_NOTES_JSON, YOLO_DATASET_TO_PROCESS)
@@ -14,7 +15,7 @@ from yolo.files import get_dataset_model_dir_path
 # Create a new dataset with the labeled classes removed
 def create_dataset_with_removed_classes(input_dir, input_to_process_dir, output_dir, output_to_process_dir, ignore_classes):
     # Create the output directory if it doesn't exist
-    os.makedirs(output_dir, exist_ok=True)
+    ensure_path_exists(output_dir)
 
     # Get the input directory for images and labels
     input_annotations_dir = os.path.join(input_to_process_dir, YOLO_DATASET_LABELS)
@@ -29,7 +30,7 @@ def create_dataset_with_removed_classes(input_dir, input_to_process_dir, output_
     output_images_dir = os.path.join(output_to_process_dir, YOLO_DATASET_IMAGES)
 
     for dir_path in [output_annotations_dir, output_images_dir]:
-        os.makedirs(dir_path, exist_ok=True)
+        ensure_path_exists(dir_path)
 
     # Get the output classes and notes file paths
     output_classes_path = os.path.join(output_dir, YOLO_DATASET_CLASSES_TXT)
@@ -70,7 +71,6 @@ def create_dataset_with_removed_classes(input_dir, input_to_process_dir, output_
     print(f"Copied {input_classes_path} to {output_classes_path}")
 
     # Remove the ignored classes from the notes file
-    new_notes_json_data=None
     with open(input_notes_path, 'r') as f:
         new_notes_json_data = json.load(f)
 
@@ -111,7 +111,6 @@ def create_dataset_with_removed_classes(input_dir, input_to_process_dir, output_
         print(f"Copied {input_image_path} to {output_image_path}")
 
         # Read the label file and filter out the ignored classes
-        lines = []
         with open(input_label_path, 'r') as f:
             lines = f.readlines()
 

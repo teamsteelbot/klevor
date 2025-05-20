@@ -3,7 +3,7 @@ from typing import LiteralString
 import cv2
 import os
 import time
-from files import move_file
+from files import move_file, ensure_path_exists
 
 
 # Resize image function
@@ -11,7 +11,7 @@ def resize_image(input_to_process_dir: LiteralString, output_resized_to_process_
                  new_image_size: tuple[int, int],
                  output_processed_dir: LiteralString = None, interpolation=cv2.INTER_LINEAR):
     # Check if the path exists, if not it creates it
-    os.makedirs(output_resized_to_process_dir, exist_ok=True)
+    ensure_path_exists(output_resized_to_process_dir)
 
     # Iterate over the files in the given path
     for filename in os.listdir(input_to_process_dir):

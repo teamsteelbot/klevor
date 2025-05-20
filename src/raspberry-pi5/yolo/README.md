@@ -169,8 +169,11 @@ Existen dos maneras de entrenar el modelo dependiendo del equipo disponible en e
    4. Ejecutamos las secciones del Jupyter Notebook [```v11/notebooks/colab/gr_train.ipynb```](v11/notebooks/colab/gr_train.ipynb), omitiendo la sección antes mencionada relacionada con la descompresión del archivo comprimido. Este Jupyter Notebook utiliza la biblioteca ```ultralytics``` para realizar el entrenamiento del modelo y guarda los pesos en la carpeta [```v11/runs/gr```](v11/runs/gr).
    5. Una vez finalizado el entrenamiento, se puede descargar el archivo comprimido con los pesos del modelo desde Google Drive y descomprimirlo en la carpeta [```v11/runs/gr```](v11/runs/gr) de forma local.
 3. **Inferencia**: Ejecutamos el script [```test.py```](test.py) para realizar la inferencia del modelo entrenado y evaluar el rendimiento del modelo con imágenes que no ha visualizado con anterioridad. Este script genera imágenes con las inferencias realizadas por el modelo, donde se muestran los cuadros delimitadores y las etiquetas de los objetos detectados.
-4. **ONNX**: Ejecutamos el script [```export.py```](export.py), y pasamos como formato del modelo ```onnx```, el cual es un formato abierto empleado para representar modelos de Machine Learning de forma interoperable entre distintos frameworks, herramientas, entre otros [[13](#onnx)].  
-5. **Limpieza**: Finalmente, ejecutamos el script [```after_training.py```](after_training.py) para eliminar la carpeta [```dataset/gr/organized/val```](dataset/gr/organized/val), ya que esta no serán necesaria para los próximos pasos, y además moverá la carpeta [```dataset/gr/organized/train```](dataset/gr/organized/train) al subdirectorio en ```hailo/suite```, para que el modelo pueda ser convertido a un formato compatible con el Hailo 8L, así como moverá los pesos de formato ```ONNX``` con mejor resultado correspondiente al modelo. 
+4. **ONNX**: Ejecutamos el script [```export.py```](export.py), y pasamos como formato del modelo ```onnx```, el cual es un formato abierto empleado para representar modelos de Machine Learning de forma interoperable entre distintos frameworks, herramientas, entre otros [[13](#onnx)].
+5. **Limpieza**: Finalmente, ejecutamos el script [```after_training.py```](after_training.py) para eliminar la carpeta [```dataset/gr/organized/val```](dataset/gr/organized/val), ya que esta no serán necesaria para los próximos pasos. Además, moverá el contenido de la carpeta [```dataset/gr/organized/train/images```](dataset/gr/organized/train/images) al subdirectorio en [```hailo/suite/train```](hailo/suite/train), para posteriormente ser eliminada la primera. Así mismo, para que el modelo pueda ser convertido a un formato compatible con el Hailo 8L, moverá los pesos de formato ```ONNX``` con mejor resultado correspondiente al modelo. 
+<!--  
+5. **Limpieza**: Finalmente, ejecutamos el script [```after_training_with_calib_set.py```](after_training_with_calib_set.py) para crear un set de calibración en la carpeta [```hailo/suite/calib```](hailo/suite/calib), para eliminar la carpeta [```dataset/gr/organized/train```](dataset/gr/organized/train) y [```dataset/gr/organized/val```](dataset/gr/organized/val), ya que estas no serán necesarias para los próximos pasos, así como moverá los pesos de formato ```ONNX``` con mejor resultado correspondiente al modelo. 
+-->
 
 *TIP: En el caso de emplear Google Colab y que se desconecte la sesión del entorno de ejecución durante el entrenamiento del modelo, se puede retomar el mismo, al modificar la ruta del modelo o el nombre del modelo a emplear en la función ```train_model``` del Notebook, por la ruta donde se guardó los mejores pesos del entrenamiento, en nuestro caso: ```gr_to_train/yolo/v11/runs/m/weights/best.pt```.*
 
@@ -262,20 +265,17 @@ Al momento de la instalación del AI HAT+, ejecutamos el comando `hailortcli fw-
 Firmware Version: 4.20.0 (release,app,extended context switch buffer)
 ```
 
-Como podemos observar, en nuestro caso, la versión del firmware es 4.20.0, por lo que debemos asegurarnos de que la versión de HailoRT y el Dataflow Compiler, así como todos los paquetes de la suite de Hailo empleada en los siguientes pasos, sean compatibles con esta versión. Por ejemplo, debido a un cambio en el Dataflow Compiler para la versión 3.31.0, donde se emplean mecanismos distintos para la detección del error de forma predeterminada, las versiones viejas (previas a la 4.21.0) del HailoRT no serán capaces de ejecutar archivos HEF compilados por la nueva versión del DataFlow Compiler [[14](#2025-04-hailo")]. Recomendamos revisar la [```tabla de compatibilidad```](https://hailo.ai/developer-zone/documentation/hailo-sw-suite-2025-04/?sp_referrer=suite/versions_compatibility.html), para así poder tener conocimiento de las versiones de los paquetes que debemos instalar para que todos sean compatibles entre sí.
+Como podemos observar, en nuestro caso, la versión del firmware es 4.20.0, por lo que debemos asegurarnos de que el Dataflow Compiler, sea compatible con esta versión. Por ejemplo, debido a un cambio en el Dataflow Compiler para la versión 3.31.0, donde se emplean mecanismos distintos para la detección del error de forma predeterminada, las versiones viejas (previas a la 4.21.0) del HailoRT no serán capaces de ejecutar archivos HEF compilados por la nueva versión del DataFlow Compiler [[14](#2025-04-hailo")]. Recomendamos revisar la [```Tabla de Compatibilidad```](https://hailo.ai/developer-zone/documentation/hailo-sw-suite-2025-04/?sp_referrer=suite/versions_compatibility.html), para así poder tener conocimiento de las versiones de los paquetes que debemos instalar para que todos sean compatibles entre sí.
 
 Primeramente, visitamos la página oficial de Hailo, en el cual debemos crearnos una cuenta, iniciar sesión y luego nos dirigimos al apartado de desarrolladores. Dentro de esta sección, seleccionamos el apartado de descargas de software, y descargamos los siguientes paquetes necesarios [[9](#custom-dataset-medium)]:
 
 - HailoRT, para la arquitectura donde está siendo ejecutado el Docker (en nuestro caso, ```amd64```). Versión recomendada: 4.20.0. 
 - Paquete de Python (whl) de HailoRT, para la arquitectura donde está siendo ejecutado el Docker (en nuestro caso, x86_64), y la versión de Python del contenedor (de no ser modificado, debe ser la versión 3.10). Versión recomendada: 4.20.0.
 - Hailo Dataflow Compiler, para la arquitectura donde está siendo ejecutado el Docker (en nuestro caso, ```x86_64```). Versión recomendada: 3.30.0.
-<!--
-- Paquete de Python (whl) de Hailo Model Zoo, para la arquitectura donde está siendo ejecutado el Docker (en nuestro caso, x86_64), y la versión de Python del contenedor (de no ser modificado, debe ser la versión 3.10). Versión recomendada: 2.14.0.
--->
 
 *NOTA: En el caso de emplear una GPU NVIDIA para la optimización del formato ```.har```, también debemos instalar el [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html)*
 
-*NOTA: En el caso de no conseguir uno de los paquetes, en el portal para descargar software de Hailo, se tienen dos formas para buscar los paquetes: ```latest releases``` (o últimas versiones), y ```archive``` (o archivados); el primero de ellos es el predeterminado. De no conseguir el respectivo paquete en ```latest releases```, este probablemente esté en ```archive```*
+*NOTA: En el caso de no conseguir uno de los paquetes, en el portal para descargar software de Hailo, se tienen dos formas para buscar los paquetes: ```Latest releases``` (o últimas versiones), y ```Archive``` (o archivados); el primero de ellos es el predeterminado. De no conseguir el respectivo paquete en ```Latest releases```, este probablemente esté en ```Archive```*
 
 Posteriormente, cambiamos de nuevo el directorio actual: 
 - Si contamos con GPU, al directorio [```hailo/suite/dockerfiles/gpu```](hailo/suite/dockerfiles/gpu).
@@ -306,57 +306,69 @@ python -m venv .venv
 source .venv/bin/activate
 ```
 
-Ahora instalamos los paquetes anteriormente descargados, que actualmente se encuentran en la carpeta [```hailo/suite/libs```](hailo/suite/libs). Para las versiones que descargamos, ejecutamos los siguientes comandos:
+Ahora instalamos los paquetes anteriormente descargados, que actualmente se encuentran en la carpeta [```hailo/suite/libs```](hailo/suite/libs). Para la versión que descargamos, ejecutamos el siguiente comando:
 ```
 dpkg -i hailort_4.20.0_amd64.deb
 pip install  hailort-4.20.0-cp310-cp310-linux_x86_64.whl
 pip install hailo_dataflow_compiler-3.30.0-py3-none-linux_x86_64.whl
 ```
-<!--
-```
-dpkg -i hailort_4.20.0_amd64.deb
-pip install  hailort-4.20.0-cp310-cp310-linux_x86_64.whl
-pip install hailo_dataflow_compiler-3.30.0-py3-none-linux_x86_64.whl
-pip install hailomz-2.14.0-py3-none-any.whl
-```
--->
 
-Realizamos un clone del siguiente repositorio de GitHub que contiene todo lo necesario para la conversión del modelo de formato ```ONNX``` a ```HEF```: ```git clone https://github.com/hailo-ai/hailo_model_zoo.git```. Ahora nos movemos del directorio actual al correspondiente del repositorio ```hailo-model-zoo```:
+Realizamos un clone del siguiente repositorio de GitHub que contiene todo lo necesario para la conversión del modelo de formato ```ONNX``` a ```HEF```: ```git clone https://github.com/hailo-ai/hailo_model_zoo.git```. Sin embargo, en nuestro caso, como requerimos de la versión v2.14, el comando sería el siguiente: ```git clone -b v2.14 https://github.com/hailo-ai/hailo_model_zoo.git```. Ahora nos movemos del directorio actual al correspondiente del repositorio ```hailo-model-zoo```:
 
-Sin embargo, en nuestro caso, requerimos específicamente la versión 2.14, por lo tanto, nos cambiamos a la rama de dicha versión: ```git checkout v2.14```. 
 Instalamos todas las dependencias requeridas: ```pip install -e .```
 
+*NOTA: En el caso de obtener un error similar a:*
+```
+ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.
+tensorflow 2.12.0 requires numpy<1.24,>=1.22, but you have numpy 2.2.6 which is incompatible.
+hailo-dataflow-compiler 3.30.0 requires numpy==1.23.3, but you have numpy 2.2.6 which is incompatible.
+```
+*Debemos modificar el archivo ```setup.py``` que se encuentra dentro del repositorio, y en la línea 44, dentro de la función ```main```, sustituimos ```"numpy"``` por ```"numpy==1.23.3"```, así como en la línea 46, sustituimos ```"scipy"``` por ```"scipy==1.9.3"```. Reintentamos el comando: ```pip install -e .```*
+
 Evaluamos si los paquetes se han instalado correctamente con el siguiente comando: ```hailomz --version```
+
+Ahora modificamos el archivo de configuración del modelo, en el campo ```classes```, estableciendo el número de clases con el que se ha entrenado el mismo (para el modelo **GR** serían 2):
+```
+sudo nano hailo_model_zoo/cfg/postprocess_config/yolov11n_nms_config.json
+```
 
 Establecemos la variable de entorno ```USER``` como Hailo:
 ```
 export USER=hailo
 ```
 
-<!--
-Creamos la carpeta ```hailo_model_zoo``` dentro de la carpeta [```hailo/suite/libs```](hailo/suite/libs), y nos cambiamos a dicho directorio
-```
-mkdir hailo_model_zoo
-cd hailo_model_zoo
-```
--->
-
 Ahora, para convertir el modelo a un formato compatible con el Hailo 8L, ejecutamos los siguientes comandos:
 - Primero, parseamos el modelo:
 ```
-hailomz parse yolov11n --ckpt /home/hailo/shared/v11/gr/best.onnx --hw-arch hailo8l
-mv ./yolov11n.har ./gr_parsed.har
+hailomz parse --ckpt ~hailo/shared/v11/gr/best.onnx --hw-arch hailo8l yolov11n
+mv yolov11n.har gr_parsed.har
 ```
-- Optimizamos el modelo:
+- Segundo, optimizamos el modelo:
 ```
-hailomz optimize yolov11n --har ./gr_parsed.har --classes 2 --calib-path ../../train/images --hw-arch hailo8l
-mv ./yolov11n.har ./gr_optimized.har
+hailomz optimize --har gr_parsed.har --classes 2 --calib-path ~hailo/shared/train --hw-arch hailo8l yolov11n
+mv yolov11n.har gr_optimized.har
 ```
 - Finalmente, compilamos el modelo:
 ```
-hailomz compile yolov11n --har ./gr_optimized.har --hw-arch hailo8l
+hailomz compile --har gr_optimized.har --hw-arch hailo8l yolov11n
+mv yolov11n.hef gr_compiled.hef
+```
+<!--
+Ahora, para convertir el modelo a un formato compatible con el Hailo 8L, ejecutamos los siguientes comandos:
+- Primero, parseamos el modelo:
+```
+hailo parser onnx --net-name yolov11n --hw-arch hailo8l --har-path ~hailo/shared/v11/gr/best_parsed.har ~hailo/shared/v11/gr/best.onnx
+```
+- Optimizamos el modelo:
+```
+hailo optimize --hw-arch hailo8l --calib-set-path ~hailo/shared/calib/calib.npy --output-har-path ~hailo/shared/v11/gr/best_optimized.har ~hailo/shared/v11/gr/best_parsed.har
+```
+- Finalmente, compilamos el modelo:
+```
+hailo compiler --hw-arch hailo8l --output-dir ~hailo/shared/v11/gr --output-har-path ~hailo/shared/v11/gr/best_compiled.har ~hailo/shared/v11/gr/best_optimized.har
 mv ./yolov11n.hef ./gr_compiled.hef
 ```
+-->
 
 Esperamos a que se complete el anterior paso, y ya tendríamos nuestro modelo personalizado y compatible con el Hailo 8L.
 
@@ -380,3 +392,4 @@ Por último, para salir del contenedor Docker, ejecutamos el siguiente comando: 
 12. *What is Docker?*. (22 de abril de 2025). Geeks for Geeks. <a id="what-is-docker">https://www.geeksforgeeks.org/introduction-to-docker/</a>
 13. *ONNX*. (2025). ONNX. <a id="onnx">https://onnx.ai/</a>
 14. *2025-04 | Hailo*. (2025). Hailo. <a id="2025-04-hailo">https://hailo.ai/developer-zone/documentation/hailo-sw-suite-2025-04/?sp_referrer=suite/suite_changelog.html</a>
+15. *Try to complie YOLOv11 with DFC 3.30 got ValueError: failed to initialize intent(inout) array – expected elsize=8 but got 4*. (19 de enero de 2025). Hailo Community. <a id="try-to-compile-yolo-hailo">https://community.hailo.ai/t/try-to-complie-yolov11-with-dfc-3-30-got-valueerror-failed-to-initialize-intent-inout-array-expected-elsize-8-but-got-4/9024/3</a>

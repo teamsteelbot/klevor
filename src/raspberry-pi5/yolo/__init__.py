@@ -75,14 +75,17 @@ YOLO_DATASET_IMAGES_EXT = '.jpg'
 
 # YOLO Hailo-related folders
 YOLO_HAILO = 'hailo'
+YOLO_CALIB = 'calib'
 YOLO_SUITE = 'suite'
 YOLO_LIBS = 'libs'
 YOLO_HAILO_MODEL_ZOO = 'hailo_model_zoo'
 
 # YOLO models
+BEST = 'best'
 BEST_ONNX = 'best.onnx'
 BEST_PT = 'best.pt'
 BEST_TENSOR_RT_QUANTIZED = 'best.engine'
+LAST = 'last'
 
 # TF Records
 YOLO_TF_RECORDS = 'tf_records'
