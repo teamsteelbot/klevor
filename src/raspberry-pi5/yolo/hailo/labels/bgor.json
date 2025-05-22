@@ -1,0 +1,11 @@
+{
+    "detection_threshold": 0.5,
+    "max_boxes":200,
+    "labels": [
+      "unlabeled",
+      "blue line",
+      "green rectangular prism",
+      "orange line",
+      "red rectangular prism"
+    ]
+}

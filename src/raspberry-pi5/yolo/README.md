@@ -18,7 +18,8 @@
          1. [Dockerfile](#que-es-dockerfile)
          2. [Docker Image](#que-es-docker-image)
          3. [Docker Container](#que-es-docker-container)
-      2. [Cómo Convertir el Modelo a un Formato Compatible al Hailo 8](#como-convertir-el-modelo-a-un-formato-compatible-al-hailo-8l) 
+      2. [Cómo Convertir el Modelo a un Formato Compatible al Hailo 8](#como-convertir-el-modelo-a-un-formato-compatible-al-hailo-8l)
+   5. [Prueba del Funcionamiento](#prueba-del-funcionamiento)
 4. **[Recursos Externos](#recursos-externos)**
 
 <h1 id="machine-learning">Machine Learning</h1>
@@ -375,6 +376,35 @@ Esperamos a que se complete el anterior paso, y ya tendríamos nuestro modelo pe
 Para mover todos los archivos generados en el directorio [```hailo/suite/libs/hailo_model_zoo```](hailo/suite/libs/hailo_model_zoo) a la carpeta con los pesos del modelo correspondiente, ejecutamos el script [```after_hailo_compilation.py```](after_hailo_compilation.py).
 
 Por último, para salir del contenedor Docker, ejecutamos el siguiente comando: ```exit```.
+
+<h2 id="prueba-del-funcionamiento">Prueba del Funcionamiento</h2>
+
+Después de haber completado todos los pasos anteriores, nos movemos a la carpeta [```hailo/suite/libs```](hailo/suite/libs), y clonamos el siguiente repositorio: ```git clone https://github.com/hailo-ai/hailo-rpi5-examples.git```. Nos cambiamos de nuevo de carpeta, ahora a ```hailo-rpi5-examples```.
+
+Ejecutamos el siguiente comando para instalar todas las dependencias necesarias:
+```
+./install.sh
+```
+
+Ahora, cada vez que abramos un nuevo terminal, ejecutamos el siguiente comando:
+```
+source setup_env.sh
+```
+
+En este momento, ya podemos probar tanto que todo esté funcionando correctamente, como la precisión del modelo:
+
+- Si contamos con una cámara con puerto CSI compatible con la Raspberry Pi, después de conectarlo, ejecutamos el siguiente comando:
+```
+python basic_pipelines/detection.py --input rpi --labels-json ../labels/gr.json --hef-path ../../v11/runs/gr/weights/compiled.hef
+```
+- Si no contamos con una cámara, podemos utilizar el siguiente comando para probar el modelo con una imagen de prueba:
+```
+python basic_pipelines/detection.py --input {imagen} --labels-json ../labels/gr.json --hef-path ../../v11/runs/gr/weights/compiled.hef
+```
+
+*NOTA: Sustituimos ```imagen``` por la ruta de la imagen a probar.*
+
+Esto abrirá una ventana con la cámara, donde se mostrarán los cuadros delimitadores y las etiquetas de los objetos detectados. Si todo está funcionando correctamente, deberíamos ver los objetos detectados en tiempo real.
 
 <h1 id="recursos-externos">Recursos Externos</h1>
 
