@@ -125,7 +125,8 @@ def create_dataset_with_removed_classes(input_dir, input_to_process_dir, output_
                     f.write(" ".join(line_parts) + '\n')
         print(f"Copied {input_label_path} to {output_label_path}")
 
-if __name__ == '__main__':
+# Main function to run the script
+def main() -> None:
     parser = argparse.ArgumentParser(description='Script to remove labeled classes from a given YOLO model dataset')
     add_yolo_input_model_argument(parser)
     add_yolo_output_model_argument(parser)
@@ -143,9 +144,15 @@ if __name__ == '__main__':
 
     # Get the dataset paths
     input_labeled_dir = get_dataset_model_dir_path(YOLO_DATASET_LABELED, None, arg_yolo_input_model)
-    input_labeled_to_process_dir = get_dataset_model_dir_path(YOLO_DATASET_LABELED, YOLO_DATASET_TO_PROCESS, arg_yolo_input_model)
+    input_labeled_to_process_dir = get_dataset_model_dir_path(YOLO_DATASET_LABELED, YOLO_DATASET_TO_PROCESS,
+                                                              arg_yolo_input_model)
     output_labeled_dir = get_dataset_model_dir_path(YOLO_DATASET_LABELED, None, arg_yolo_output_model)
-    output_labeled_to_process_dir = get_dataset_model_dir_path(YOLO_DATASET_LABELED, YOLO_DATASET_TO_PROCESS, arg_yolo_output_model)
+    output_labeled_to_process_dir = get_dataset_model_dir_path(YOLO_DATASET_LABELED, YOLO_DATASET_TO_PROCESS,
+                                                               arg_yolo_output_model)
 
     # Create the dataset with removed classes
-    create_dataset_with_removed_classes(input_labeled_dir, input_labeled_to_process_dir, output_labeled_dir, output_labeled_to_process_dir, arg_yolo_ignore_classes)
+    create_dataset_with_removed_classes(input_labeled_dir, input_labeled_to_process_dir, output_labeled_dir,
+                                        output_labeled_to_process_dir, arg_yolo_ignore_classes)
+
+if __name__ == '__main__':
+    main()

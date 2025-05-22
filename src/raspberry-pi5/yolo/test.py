@@ -6,7 +6,7 @@ from opencv.image_display_detections import preprocess, display_detections
 from model.image_bounding_boxes import outputs_to_image_bounding_boxes
 import os
 from opencv import DEFAULT_SIZE
-from yolo import (YOLO_NUMBER_RANDOM_IMAGES, ARGS_YOLO_FORMAT_PT, YOLO_GR_COLORS, YOLO_BGOR_COLORS, ARGS_YOLO_INPUT_MODEL,
+from yolo import (YOLO_NUMBER_RANDOM_IMAGES, YOLO_FORMAT_PT, YOLO_GR_COLORS, YOLO_BGOR_COLORS, ARGS_YOLO_INPUT_MODEL,
                   ARGS_YOLO_FORMAT, ARGS_YOLO_VERSION, YOLO_DATASET_ORGANIZED, YOLO_MODEL_BGOR,
                   YOLO_MODEL_GR, YOLO_GMR_COLORS, YOLO_DATASET_TESTING, YOLO_DATASET_IMAGES,
                   YOLO_MODEL_GMR)
@@ -54,8 +54,8 @@ def test_random_images_pt(input_model_path: str, output_organized_dir: str, colo
     test_random_images(model, model_class_names, run_inference, output_organized_dir, False, colors,
                        image_size=image_size)
 
-
-if __name__ == '__main__':
+# Main function to run the script
+def main() -> None:
     parser = argparse.ArgumentParser(description='Script to test YOLO model with a given format')
     add_yolo_input_model_argument(parser)
     add_yolo_format_argument(parser)
@@ -87,15 +87,18 @@ if __name__ == '__main__':
     # Get the class colors
     yolo_colors = None
     if arg_yolo_input_model == YOLO_MODEL_GR:
-        if arg_yolo_format == ARGS_YOLO_FORMAT_PT:
+        if arg_yolo_format == YOLO_FORMAT_PT:
             yolo_colors = YOLO_GR_COLORS
 
     elif arg_yolo_input_model == YOLO_MODEL_GMR:
-        if arg_yolo_format == ARGS_YOLO_FORMAT_PT:
+        if arg_yolo_format == YOLO_FORMAT_PT:
             yolo_colors = YOLO_GMR_COLORS
 
     elif arg_yolo_input_model == YOLO_MODEL_BGOR:
-        if arg_yolo_format == ARGS_YOLO_FORMAT_PT:
+        if arg_yolo_format == YOLO_FORMAT_PT:
             yolo_colors = YOLO_BGOR_COLORS
 
     test_random_images_pt(weights_best_pt, organized_dir, yolo_colors)
+
+if __name__ == '__main__':
+    main()

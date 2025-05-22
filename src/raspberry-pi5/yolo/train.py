@@ -25,7 +25,8 @@ def train_model(model='yolo11n.pt', device='cpu', data='data.yaml', epochs=YOLO_
         name=name,
     )
 
-if __name__ == '__main__':
+# Main function to run the script
+def main() -> None:
     parser = argparse.ArgumentParser(description='Script to train YOLO model')
     add_yolo_input_model_argument(parser)
     add_yolo_input_model_pt_argument(parser)
@@ -53,4 +54,9 @@ if __name__ == '__main__':
     model_local_data_path = get_model_local_data_path(arg_yolo_input_model)
 
     # Train the model
-    train_model(model=arg_yolo_input_model_pt, data=model_local_data_path, epochs=arg_yolo_epochs, imgsz=arg_yolo_image_size, project=arg_yolo_input_model, name=arg_yolo_input_model)
+    train_model(model=arg_yolo_input_model_pt, data=model_local_data_path, epochs=arg_yolo_epochs,
+                imgsz=arg_yolo_image_size, project=arg_yolo_input_model, name=arg_yolo_input_model)
+
+
+if __name__ == '__main__':
+    main()

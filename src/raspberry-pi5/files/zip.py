@@ -1,7 +1,10 @@
 import os
 import re
+import time
+import zipfile
 
-from files import IGNORE_DIRS
+from files import IGNORE_DIRS, ensure_path_exists, BATCH_SIZE, ENVIRONMENT_LOCAL, ENVIRONMENT_COLAB, \
+    GOOGLE_DRIVE_API_CALL_DELAY
 
 
 # Match any regex pattern in a list
@@ -57,3 +60,29 @@ def zip_nested_folder(zipf, input_base_path: str, input_folder_path: str, ignore
     # Log
     input_folder_rel_path = os.path.relpath(input_folder_path, input_base_path)
     print(f'Zipped folder: {input_folder_rel_path}')
+
+# Extract all files from a zip file by batches
+def extract_all(zip_path, output_dir, environment=ENVIRONMENT_LOCAL, batch_size=BATCH_SIZE):
+    ensure_path_exists(output_dir)
+
+    with zipfile.ZipFile(zip_path, "r") as zip_ref:
+        files = zip_ref.namelist()
+    
+        for i in range(0, len(files), batch_size):
+            # Extract a batch of files
+            batch_files = files[i:i + batch_size]
+    
+            for file in batch_files:
+                print(f"Extracting {file}...")
+
+                # Extract the file to the output directory
+                file_path = os.path.join(output_dir, file)
+                ensure_path_exists(file_path)
+                zip_ref.extract(file, output_dir)
+
+                if environment == ENVIRONMENT_LOCAL:
+                    continue
+
+                # Sleep to avoid Google Drive API call limit
+                if environment == ENVIRONMENT_COLAB:
+                    time.sleep(GOOGLE_DRIVE_API_CALL_DELAY)

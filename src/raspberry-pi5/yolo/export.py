@@ -2,13 +2,14 @@ import argparse
 
 from args import get_attribute_from_args, parse_args_as_dict
 from model.yolo import load, export_onnx, export_tflite, export_tensor_rt
-from yolo import (ARGS_YOLO_FORMAT_ONNX, ARGS_YOLO_FORMAT_TFLITE, ARGS_YOLO_INPUT_MODEL, ARGS_YOLO_FORMAT,
+from yolo import (YOLO_FORMAT_ONNX, YOLO_FORMAT_TFLITE, ARGS_YOLO_INPUT_MODEL, ARGS_YOLO_FORMAT,
                   ARGS_YOLO_QUANTIZED, ARGS_YOLO_VERSION)
 from yolo.args import (add_yolo_input_model_argument, add_yolo_format_argument, add_yolo_quantized_argument,
                        add_yolo_version_argument)
 from yolo.files import get_model_best_pt_path
 
-if __name__ == '__main__':
+# Main function to run the script
+def main() -> None:
     parser = argparse.ArgumentParser(description='Script to export YOLO model to a given format')
     add_yolo_input_model_argument(parser)
     add_yolo_format_argument(parser)
@@ -34,10 +35,10 @@ if __name__ == '__main__':
 
     # Export the model
     path = None
-    if arg_yolo_format == ARGS_YOLO_FORMAT_ONNX:
+    if arg_yolo_format == YOLO_FORMAT_ONNX:
         path = export_onnx(model)
     elif arg_yolo_quantized:
-        if arg_yolo_format == ARGS_YOLO_FORMAT_TFLITE:
+        if arg_yolo_format == YOLO_FORMAT_TFLITE:
             path = export_tflite(model, quantized=arg_yolo_quantized)
 
         else:
@@ -45,3 +46,6 @@ if __name__ == '__main__':
 
     # Log
     print(f"Model exported to {path}")
+
+if __name__ == '__main__':
+    main()

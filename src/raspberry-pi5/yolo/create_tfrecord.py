@@ -43,7 +43,8 @@ def create_tfrecord(output_path, image_dir, label_dir):
 
     writer.close()
 
-if __name__ == "__main__":
+# Main function to run the script
+def main() -> None:
     parser = argparse.ArgumentParser(description='Script to create TFRecord from images and labels')
     add_yolo_input_model_argument(parser)
     add_yolo_version_argument(parser)
@@ -69,3 +70,6 @@ if __name__ == "__main__":
 
     # Create TFRecord
     create_tfrecord(output_tfrecord, testing_images_dir, testing_labels_dir)
+
+if __name__ == "__main__":
+    main()

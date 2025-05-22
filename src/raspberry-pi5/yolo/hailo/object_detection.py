@@ -9,8 +9,12 @@ import queue
 import threading
 import cv2
 from typing import List
+
+from args import parse_args_as_dict, get_attribute_from_args
 from object_detection_utils import ObjectDetectionUtils
 from utils import HailoAsyncInference, load_images_opencv, validate_images, divide_list_to_batches
+from yolo import ARGS_YOLO_INPUT_MODEL
+from yolo.args import add_yolo_input_model_argument
 
 CAMERA_CAP_WIDTH = 1920
 CAMERA_CAP_HEIGHT = 1080 
@@ -284,12 +288,22 @@ def infer(
     logger.info('Inference was successful!')
 
 
+# Main function to run the script
 def main() -> None:
-    """
-    Main function to run the script.
-    """
-    # Parse command line arguments
-    args = parse_args()
+    parser = argparse.ArgumentParser(description='Script to run the inference from the models')
+    add_yolo_input_model_argument(parser)
+    args = parse_args_as_dict(parser)
+
+    # Get the YOLO input model
+    arg_yolo_input_model = get_attribute_from_args(args, ARGS_YOLO_INPUT_MODEL)
+
+    # Get the dataset paths
+    labeled_to_process_dir = get_dataset_model_dir_path(YOLO_DATASET_LABELED, YOLO_DATASET_TO_PROCESS, arg_yolo_input_model)
+    labeled_processed_dir = get_dataset_model_dir_path(YOLO_DATASET_LABELED, YOLO_DATASET_PROCESSED, arg_yolo_input_model)
+    augmented_dir = get_dataset_model_dir_path(YOLO_DATASET_AUGMENTED, None, arg_yolo_input_model)
+
+    # Augment the dataset
+    augment_dataset(labeled_to_process_dir, augmented_dir, YOLO_NUM_AUGMENTATIONS, labeled_processed_dir)
 
     # Start the inference
     infer(args.input, args.save_stream_output, args.net, args.labels, args.batch_size)

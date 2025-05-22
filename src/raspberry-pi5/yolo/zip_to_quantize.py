@@ -10,11 +10,11 @@ from yolo import (ARGS_YOLO_INPUT_MODEL, CWD, YOLO_DIR,
                   ARGS_YOLO_VERSION, ZIP_IGNORE_DIR)
 from yolo.args import add_yolo_input_model_argument, add_yolo_version_argument
 from yolo.files import (get_yolo_zip_dir_path, get_yolo_runs_dir_path,
-                        get_yolo_version_dir_path, get_yolo_notebooks_dir_path)
+                        get_yolo_version_dir_path)
 
 
 # Define the function to zip the required files for model quantization
-def zip_to_quantize(input_dir: LiteralString, input_yolo_dir: LiteralString, input_yolo_runs_dir: LiteralString, input_yolo_version_dir: LiteralString, input_yolo_notebooks_dir: LiteralString, output_zip_dir: LiteralString,
+def zip_to_quantize(input_dir: LiteralString, input_yolo_dir: LiteralString, input_yolo_runs_dir: LiteralString, input_yolo_version_dir: LiteralString, output_zip_dir: LiteralString,
                     model_name: str):
     # Define the output zip filename
     output_zip_filename = model_name + '_to_quantize.zip'
@@ -36,16 +36,12 @@ def zip_to_quantize(input_dir: LiteralString, input_yolo_dir: LiteralString, inp
         zip_not_nested_folder(zipf, input_dir, input_yolo_version_dir)
         print('Zip the YOLO version folder except its nested folders')
 
-        # Zip the YOLO notebooks folder
-        zip_nested_folder(zipf, input_dir, input_yolo_notebooks_dir)
-        print('Zip the YOLO notebooks folder')
-
         # Zip the YOLO model runs folder
         zip_nested_folder(zipf, input_dir, input_yolo_runs_dir)
         print('Zip the YOLO model runs folder')
 
-
-if __name__ == '__main__':
+# Main function to run the script
+def main() -> None:
     parser = argparse.ArgumentParser(description='Script to zip files for YOLO model quantization')
     add_yolo_input_model_argument(parser)
     add_yolo_version_argument(parser)
@@ -66,8 +62,8 @@ if __name__ == '__main__':
     # Get the YOLO zip folder
     yolo_zip_dir = get_yolo_zip_dir_path(arg_yolo_version)
 
-    # Get the YOLO notebooks folder
-    yolo_notebooks_dir = get_yolo_notebooks_dir_path(arg_yolo_version)
-
     # Zip files
-    zip_to_quantize(CWD, YOLO_DIR, yolo_runs_dir, yolo_version_dir, yolo_notebooks_dir, yolo_zip_dir, arg_yolo_input_model)
+    zip_to_quantize(CWD, YOLO_DIR, yolo_runs_dir, yolo_version_dir, yolo_zip_dir, arg_yolo_input_model)
+
+if __name__ == '__main__':
+    main()

@@ -1,5 +1,6 @@
 import argparse
 import os
+import shutil
 
 from args import get_attribute_from_args, parse_args_as_dict
 from files import ensure_path_exists
@@ -52,6 +53,10 @@ def augment_dataset(input_to_process_dir: str, output_augmented_dir: str, num_au
         else:
             print(
                 f"Warning: Annotation file not found for {input_to_process_image_path}, annotation file should be at {input_to_process_annotations_path}")
+
+    # Remove the input images and annotations folders
+    shutil.rmtree(input_to_process_images_dir)
+    shutil.rmtree(input_to_process_annotations_dir)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Script to augment YOLO model')

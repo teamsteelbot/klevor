@@ -26,7 +26,8 @@ def update_classes(model_name, model_version, new_classes):
     # Save the modified model
     torch.save(model, model_path)
 
-if __name__ == "__main__":
+# Main function to run the script
+def main() -> None:
     parser = argparse.ArgumentParser(description='Script to update YOLO model classes')
     add_yolo_input_model_argument(parser)
     add_yolo_version_argument(parser)
@@ -44,3 +45,6 @@ if __name__ == "__main__":
 
     # Update the classes
     update_classes(arg_yolo_input_model, arg_yolo_version, arg_yolo_classes)
+
+if __name__ == "__main__":
+    main()

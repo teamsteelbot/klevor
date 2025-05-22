@@ -18,7 +18,7 @@
          1. [Dockerfile](#que-es-dockerfile)
          2. [Docker Image](#que-es-docker-image)
          3. [Docker Container](#que-es-docker-container)
-      2. [Cómo Convertir el Modelo a un Formato Compatible al Hailo 8L](#como-convertir-el-modelo-a-un-formato-compatible-al-hailo-8l) 
+      2. [Cómo Convertir el Modelo a un Formato Compatible al Hailo 8](#como-convertir-el-modelo-a-un-formato-compatible-al-hailo-8l) 
 4. **[Recursos Externos](#recursos-externos)**
 
 <h1 id="machine-learning">Machine Learning</h1>
@@ -132,9 +132,9 @@ Posteriormente, se realizó la anotación de las imágenes, donde se etiquetaron
    <i>Anotación de imágenes con Label Studio</i>
 </p>
 
-Durante el proceso, manejamos conjunto de datos de 1 (**M**), 2 (**GR**), 3 (**GMR**), 4 (**BGOR**) clases, las cuales fuimos variando a lo largo del desarrollo del proyecto, donde **M** proviene de ```magenta rectangular prism```, **G** de ```green rectangular prism```, **R** de ```red rectangular prism```, **B** de ```blue line``` y **O** de ```orange line```. Primeramente, desarrollamos un modelo de 4 clases, sin embargo, no logró un buen rendimiento para todas las clases, ya que incluía, además del prisma rojo y verde, la línea naranja y la línea azul, que finalmente, debido a nuestros componentes, se podían inferir mediante el RPLIDAR C1. Posteriormente, se decidió omitir las clases relacionadas con las líneas de la pista, las cuales no eran necesarias para la detección de los prismas. Luego, se optó por un modelo de 2 clases, el cual fue capaz de detectar los prismas rojo y verde. Seguidamente, se optó por un conjunto de datos de 3 clases, ya que añadimos una clase adicional, el prisma magenta, para poder realizar la detección del estacionamiento. Finalmente, debido a la cuantización del modelo para ser compatible con el formato del NPU Hailo 8L, se optó por dos modelos, uno con dos clases (**GR**), para poder detectar los obstáculos de la pista, y otro de una sola clase (**M**) para la detección del estacionamiento después de haber recorrido toda la pista. 
+Durante el proceso, manejamos conjunto de datos de 1 (**G**, **M**, **R**), 2 (**GR**), 3 (**GMR**), 4 (**BGOR**) clases, las cuales fuimos variando a lo largo del desarrollo del proyecto, donde **M** proviene de ```magenta rectangular prism```, **G** de ```green rectangular prism```, **R** de ```red rectangular prism```, **B** de ```blue line``` y **O** de ```orange line```. Primeramente, desarrollamos un modelo de 4 clases, sin embargo, no logró un buen rendimiento para todas las clases, ya que incluía, además del prisma rojo y verde, la línea naranja y la línea azul, que finalmente, debido a nuestros componentes, se podían inferir mediante el RPLIDAR C1. Posteriormente, se decidió omitir las clases relacionadas con las líneas de la pista, las cuales no eran necesarias para la detección de los prismas. Luego, se optó por un modelo de 2 clases, el cual fue capaz de detectar los prismas rojo y verde. Seguidamente, se optó por un conjunto de datos de 3 clases, ya que añadimos una clase adicional, el prisma magenta, para poder realizar la detección del estacionamiento. Después, se optó por dos modelos, uno con dos clases (**GR**), para poder detectar los obstáculos de la pista, y otro de una sola clase (**M**) para la detección del estacionamiento después de haber recorrido toda la pista. Finalmente, debido a ciertas complicaciones por la optimización de los modelos para el NPU Hailo 8, se optó por tres modelos de 1 clase (**G**, **M**, **R**), donde cada uno de estos modelos fue capaz de detectar los prismas de un color específico, acorde a lo requerido en la pista.
 
-Ahora, vamos a explicar los pasos necesarios para continuar con el montaje del modelo de detección de objetos, donde se utilizará como ejemplo el modelo de 2 clases (**GR**), el cual fue el modelo que se utilizó para la competencia. Sin embargo, los pasos son los mismos para los demás modelos, donde solo se debe cambiar la ruta de las imágenes y el número de clases.
+Ahora, vamos a explicar los pasos necesarios para continuar con el montaje del modelo de detección de objetos, donde se utilizará como ejemplo el modelo de 2 clases (**GR**). Sin embargo, los pasos son los mismos para los demás modelos, donde solo se debe cambiar la ruta de las imágenes y el número de clases.
 
 Cabe destacar que, así como variamos el número de clases, también variamos el número de imágenes por clase, desde un dataset de alrededor de 350 imágenes antes de realizar el *data augmentation*, hasta un dataset de alrededor de 1300 imágenes antes de realizar el *data augmentation*, donde cada una fue anotada por algún integrante del equipo de forma manual para entrenar el modelo de la forma más precisa posible.
 
@@ -170,7 +170,7 @@ Existen dos maneras de entrenar el modelo dependiendo del equipo disponible en e
    5. Una vez finalizado el entrenamiento, se puede descargar el archivo comprimido con los pesos del modelo desde Google Drive y descomprimirlo en la carpeta [```v11/runs/gr```](v11/runs/gr) de forma local.
 3. **Inferencia**: Ejecutamos el script [```test.py```](test.py) para realizar la inferencia del modelo entrenado y evaluar el rendimiento del modelo con imágenes que no ha visualizado con anterioridad. Este script genera imágenes con las inferencias realizadas por el modelo, donde se muestran los cuadros delimitadores y las etiquetas de los objetos detectados.
 4. **ONNX**: Ejecutamos el script [```export.py```](export.py), y pasamos como formato del modelo ```onnx```, el cual es un formato abierto empleado para representar modelos de Machine Learning de forma interoperable entre distintos frameworks, herramientas, entre otros [[13](#onnx)].
-5. **Limpieza**: Finalmente, ejecutamos el script [```after_training.py```](after_training.py) para eliminar la carpeta [```dataset/gr/organized/val```](dataset/gr/organized/val), ya que esta no serán necesaria para los próximos pasos. Además, moverá el contenido de la carpeta [```dataset/gr/organized/train/images```](dataset/gr/organized/train/images) al subdirectorio en [```hailo/suite/train```](hailo/suite/train), para posteriormente ser eliminada la primera. Así mismo, para que el modelo pueda ser convertido a un formato compatible con el Hailo 8L, moverá los pesos de formato ```ONNX``` con mejor resultado correspondiente al modelo. 
+5. **Limpieza**: Finalmente, ejecutamos el script [```after_training.py```](after_training.py) para eliminar la carpeta [```dataset/gr/organized/val```](dataset/gr/organized/val), ya que esta no serán necesaria para los próximos pasos. Además, moverá el contenido de la carpeta [```dataset/gr/organized/train/images```](dataset/gr/organized/train/images) al subdirectorio en [```hailo/suite/train```](hailo/suite/train), para posteriormente ser eliminada la primera. Así mismo, para que el modelo pueda ser convertido a un formato compatible con el Hailo 8, moverá los pesos de formato ```ONNX``` con mejor resultado correspondiente al modelo. 
 <!--  
 5. **Limpieza**: Finalmente, ejecutamos el script [```after_training_with_calib_set.py```](after_training_with_calib_set.py) para crear un set de calibración en la carpeta [```hailo/suite/calib```](hailo/suite/calib), para eliminar la carpeta [```dataset/gr/organized/train```](dataset/gr/organized/train) y [```dataset/gr/organized/val```](dataset/gr/organized/val), ya que estas no serán necesarias para los próximos pasos, así como moverá los pesos de formato ```ONNX``` con mejor resultado correspondiente al modelo. 
 -->
@@ -218,21 +218,21 @@ Para la instalación, empleamos las dos guías de la documentación oficial de R
 13. Para verificar que el NPU está correctamente instalado y funcionando, ejecutamos el siguiente comando: `hailortcli fw-control identify`. Si el NPU está correctamente instalado, deberíamos ver un mensaje similar al siguiente:
 
 ```
-Executing on device: 0000:01:00.0
+Executing on device: 0001:01:00.0
 Identifying board
 Control Protocol Version: 2
 Firmware Version: 4.20.0 (release,app,extended context switch buffer)
 Logger Version: 0
 Board Name: Hailo-8
-Device Architecture: HAILO8L
-Serial Number: HLDDLBB234500054
-Part Number: HM21LB1C2LAE
-Product Name: HAILO-8L AI ACC M.2 B+M KEY MODULE EXT TMP
+Device Architecture: HAILO8
+Serial Number: <N/A>
+Part Number: <N/A>
+Product Name: <N/A>
 ```
 
 <h1 id="conversion-del-modelo">Conversión del Modelo</h1>
 
-Para la conversión del modelo a un formato compatible con el Hailo 8L, requerimos de Docker (mas no es imprescindible), para crear un contenedor con todos los paquetes necesarios para su correcto funcionamiento.
+Para la conversión del modelo a un formato compatible con el Hailo 8, requerimos de Docker (mas no es imprescindible), para crear un contenedor con todos los paquetes necesarios para su correcto funcionamiento.
 
 <p align="center">
    <img src="https://cdn4.iconfinder.com/data/icons/logos-and-brands/512/97_Docker_logo_logos-1024.png" alt="Logo de Docker" width="200">
@@ -258,7 +258,7 @@ Es un archivo compuesto de múltiples capas, empleado para ejecutar un contenedo
 
 Un contenedor Docker es una instancia *runtime* de una imagen Docker [[12](#que-es-docker-container")]. Contiene todo el kit requerido para una aplicación, y permite ser ejecutada de forma aislada.
 
-<h2 id="como-convertir-el-modelo-a-un-formato-compatible-al-hailo-8l">Cómo Convertir el Modelo a un Formato Compatible al Hailo 8L</h2>
+<h2 id="como-convertir-el-modelo-a-un-formato-compatible-al-hailo-8l">Cómo Convertir el Modelo a un Formato Compatible al Hailo 8</h2>
 
 Al momento de la instalación del AI HAT+, ejecutamos el comando `hailortcli fw-control identify`, donde pudimos notar la siguiente línea:
 ```
@@ -337,24 +337,24 @@ Establecemos la variable de entorno ```USER``` como Hailo:
 export USER=hailo
 ```
 
-Ahora, para convertir el modelo a un formato compatible con el Hailo 8L, ejecutamos los siguientes comandos:
+Ahora, para convertir el modelo a un formato compatible con el Hailo 8, ejecutamos los siguientes comandos:
 - Primero, parseamos el modelo:
 ```
-hailomz parse --ckpt ~hailo/shared/v11/gr/best.onnx --hw-arch hailo8l yolov11n
+hailomz parse --ckpt ~hailo/shared/v11/gr/best.onnx --hw-arch hailo8 yolov11n
 mv yolov11n.har gr_parsed.har
 ```
 - Segundo, optimizamos el modelo:
 ```
-hailomz optimize --har gr_parsed.har --classes 2 --calib-path ~hailo/shared/train --hw-arch hailo8l yolov11n
+hailomz optimize --har gr_parsed.har --classes 2 --calib-path ~hailo/shared/train --hw-arch hailo8 yolov11n
 mv yolov11n.har gr_optimized.har
 ```
 - Finalmente, compilamos el modelo:
 ```
-hailomz compile --har gr_optimized.har --hw-arch hailo8l yolov11n
+hailomz compile --har gr_optimized.har --hw-arch hailo8 yolov11n
 mv yolov11n.hef gr_compiled.hef
 ```
 <!--
-Ahora, para convertir el modelo a un formato compatible con el Hailo 8L, ejecutamos los siguientes comandos:
+Ahora, para convertir el modelo a un formato compatible con el Hailo 8, ejecutamos los siguientes comandos:
 - Primero, parseamos el modelo:
 ```
 hailo parser onnx --net-name yolov11n --hw-arch hailo8l --har-path ~hailo/shared/v11/gr/best_parsed.har ~hailo/shared/v11/gr/best.onnx
@@ -370,7 +370,7 @@ mv ./yolov11n.hef ./gr_compiled.hef
 ```
 -->
 
-Esperamos a que se complete el anterior paso, y ya tendríamos nuestro modelo personalizado y compatible con el Hailo 8L.
+Esperamos a que se complete el anterior paso, y ya tendríamos nuestro modelo personalizado y compatible con el Hailo 8.
 
 Para mover todos los archivos generados en el directorio [```hailo/suite/libs/hailo_model_zoo```](hailo/suite/libs/hailo_model_zoo) a la carpeta con los pesos del modelo correspondiente, ejecutamos el script [```after_hailo_compilation.py```](after_hailo_compilation.py).
 

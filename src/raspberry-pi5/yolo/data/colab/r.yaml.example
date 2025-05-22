@@ -1,0 +1,5 @@
+train: /content/drive/MyDrive/.../r_to_train/yolo/dataset/r/organized/train/images
+val: /content/drive/MyDrive/.../r_to_train/yolo/dataset/r/organized/val/images
+
+nc: 1  # number of classes
+names: [ red rectangular prism' ]  # class names

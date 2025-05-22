@@ -35,15 +35,17 @@ def after_training(input_dir, calib_set_file_path, model_hailo_suite_dir, best_o
     else:
         print(f'{best_onnx_weights_path} does not exist')
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Script to removed the unnecessary files and prepare the dataset for Hailo with calibration set')
+# Main function to run the script
+def main() -> None:
+    parser = argparse.ArgumentParser(
+        description='Script to removed the unnecessary files and prepare the dataset for Hailo with calibration set')
     add_yolo_input_model_argument(parser)
     add_yolo_version_argument(parser)
     args = parse_args_as_dict(parser)
 
     # Get the YOLO input model
     arg_yolo_input_model = get_attribute_from_args(args, ARGS_YOLO_INPUT_MODEL)
-    
+
     # Get the YOLO version
     arg_yolo_version = get_attribute_from_args(args, ARGS_YOLO_VERSION)
 
@@ -61,3 +63,7 @@ if __name__ == '__main__':
 
     # Move the folders
     after_training(organized_dir, calibration_set_file_path, model_hailo_suite_dir, best_onnx_weights_path)
+
+
+if __name__ == '__main__':
+    main()

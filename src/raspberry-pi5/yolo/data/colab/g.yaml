@@ -1,0 +1,5 @@
+train: /content/drive/MyDrive/Colab Files/g_to_train/yolo/dataset/g/organized/train/images
+val: /content/drive/MyDrive/Colab Files/g_to_train/yolo/dataset/g/organized/val/images
+
+nc: 1  # number of classes
+names: [ 'green rectangular prism' ]  # class names

@@ -19,7 +19,7 @@ def after_compilation(model_name, hailo_model_zoo_dir, hailo_suite_dir, model_we
 
     # Get the training images folder from model Hailo Suite folder
     model_hailo_suite_training_dir = os.path.join(hailo_suite_dir, YOLO_DATASET_TRAINING)
-    
+
     # Remove the training images folder from the model Hailo Suite folder
     if os.path.exists(model_hailo_suite_training_dir):
         shutil.rmtree(model_hailo_suite_training_dir)
@@ -37,8 +37,10 @@ def after_compilation(model_name, hailo_model_zoo_dir, hailo_suite_dir, model_we
         else:
             print(f'{src} does not exist')
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="Script to copy the generated '.har' and '.hef' files from the Hailo Suite folder")
+# Main function to run the script
+def main() -> None:
+    parser = argparse.ArgumentParser(
+        description="Script to copy the generated '.har' and '.hef' files from the Hailo Suite folder")
     add_yolo_input_model_argument(parser)
     add_yolo_version_argument(parser)
     args = parse_args_as_dict(parser)
@@ -54,9 +56,12 @@ if __name__ == '__main__':
 
     # Get the Hailo Suite path
     hailo_suite_dir = get_hailo_suite_dir_path()
-    
+
     # Get the weights folder
     model_weights_dir = get_model_weight_dir_path(arg_yolo_input_model, arg_yolo_version)
 
     # Copy the files from the Hailo Model Zoo folder
     after_compilation(arg_yolo_input_model, hailo_model_zoo_dir, hailo_suite_dir, model_weights_dir)
+
+if __name__ == '__main__':
+    main()

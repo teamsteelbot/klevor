@@ -75,7 +75,8 @@ def split_dataset(input_dir: LiteralString, output_dir: LiteralString,
     shutil.rmtree(input_images_dir)
     shutil.rmtree(input_annotations_dir)
 
-if __name__ == '__main__':
+# Main function to run the script
+def main() -> None:
     parser = argparse.ArgumentParser(description='Script to split YOLO dataset images and labels')
     add_yolo_input_model_argument(parser)
     args = parse_args_as_dict(parser)
@@ -89,3 +90,6 @@ if __name__ == '__main__':
 
     # Split the images
     split_dataset(augmented_dir, organized_dir)
+
+if __name__ == '__main__':
+    main()

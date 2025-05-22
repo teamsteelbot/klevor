@@ -37,7 +37,8 @@ def convert_yolo_labels_to_json(annotations_dir, images_dir, output_json):
     with open(output_json, "w") as f:
         json.dump(annotations, f, indent=4)
 
-if __name__ == "__main__":
+# Main function to run the script
+def main() -> None:
     parser = argparse.ArgumentParser(description='Script to convert YOLO labels to JSON format for Label Studio')
     add_yolo_input_model_argument(parser)
     add_yolo_version_argument(parser)
@@ -61,4 +62,8 @@ if __name__ == "__main__":
     labeled_annotations_json = os.path.join(labeled_to_process_dir, YOLO_DATASET_ANNOTATIONS_JSON)
 
     # Convert YOLO labels to JSON format
-    convert_yolo_labels_to_json(labeled_to_process_annotations_dir, labeled_to_process_images_dir, labeled_annotations_json)
+    convert_yolo_labels_to_json(labeled_to_process_annotations_dir, labeled_to_process_images_dir,
+                                labeled_annotations_json)
+
+if __name__ == "__main__":
+    main()

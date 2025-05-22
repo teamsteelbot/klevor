@@ -40,7 +40,7 @@ def augment_images(input_to_process_image_path: str, input_to_process_annotation
         A.HorizontalFlip(p=0.5),
 
         # Apply with a 50% probability a random shift, scale, and rotation
-        A.ShiftScaleRotate(shift_limit=0.1, scale_limit=0.1, rotate_limit=15, p=0.5),
+        A.ShiftScaleRotate(shift_limit=0.2, scale_limit=0.2, rotate_limit=25, p=0.5),
 
         # Apply with a 30% probability a random RGB shift
         # A.RGBShift(r_shift_limit=25, g_shift_limit=25, b_shift_limit=25, p=0.3),

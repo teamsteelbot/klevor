@@ -1,0 +1,5 @@
+train: .../yolo/dataset/g/organized/train/images
+val: .../yolo/dataset/g/organized/val/images
+
+nc: 1  # number of classes
+names: [ 'green rectangular prism' ]  # class names
