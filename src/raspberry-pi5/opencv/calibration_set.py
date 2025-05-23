@@ -7,9 +7,10 @@ import cv2
 from files import ensure_path_exists
 from opencv import DEFAULT_WIDTH, DEFAULT_HEIGHT, MAX_CALIB_SET_SAMPLES
 
-
-# Preprocess images from a folder and save them as a .npy file.
 def preprocess_images_to_npy(input_folder, output_file, target_shape=(DEFAULT_WIDTH, DEFAULT_HEIGHT, 3)):
+    """
+    Preprocess images from a folder and save them as a .npy file.
+    """
     # Ensure the output directory exists
     ensure_path_exists(output_file)
 

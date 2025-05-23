@@ -10,8 +10,10 @@ from yolo.files import (get_model_parsed_har_file_name, get_model_weight_dir_pat
                         get_hailo_suite_dir_path)
 
 
-# Copy files from the Hailo Model Zoo folder and remove the training folder from the model Hailo Suite folder
 def after_compilation(model_name, hailo_model_zoo_dir, hailo_suite_dir, model_weights_dir):
+    """
+    Copy files from the Hailo Model Zoo folder and remove the training folder from the model Hailo Suite folder.
+    """
     # Get the parsed, optimized, and compiled model names
     parsed_model_name = get_model_parsed_har_file_name(model_name)
     optimized_model_name = get_model_optimized_har_file_name(model_name)
@@ -37,8 +39,10 @@ def after_compilation(model_name, hailo_model_zoo_dir, hailo_suite_dir, model_we
         else:
             print(f'{src} does not exist')
 
-# Main function to run the script
 def main() -> None:
+    """
+    Main function to run the script.
+    """
     parser = argparse.ArgumentParser(
         description="Script to copy the generated '.har' and '.hef' files from the Hailo Suite folder")
     add_yolo_input_model_argument(parser)

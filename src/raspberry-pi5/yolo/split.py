@@ -12,10 +12,13 @@ from yolo import (ARGS_YOLO_INPUT_MODEL, YOLO_DATASET_AUGMENTED, YOLO_DATASET_OR
 from yolo.args import add_yolo_input_model_argument
 from yolo.files import get_dataset_model_dir_path
 
-# Split the dataset into processed, validation, and testing sets
+
 def split_dataset(input_dir: LiteralString, output_dir: LiteralString,
                   train_ratio=0.7,
                   val_ratio=0.2):
+    """
+    Split the dataset into processed, validation, and testing sets.
+    """
     # Get the input images and annotations directories
     input_images_dir = os.path.join(input_dir, YOLO_DATASET_IMAGES)
     input_annotations_dir = os.path.join(input_dir, YOLO_DATASET_LABELS)
@@ -75,8 +78,10 @@ def split_dataset(input_dir: LiteralString, output_dir: LiteralString,
     shutil.rmtree(input_images_dir)
     shutil.rmtree(input_annotations_dir)
 
-# Main function to run the script
 def main() -> None:
+    """
+    Main function to run the script.
+    """
     parser = argparse.ArgumentParser(description='Script to split YOLO dataset images and labels')
     add_yolo_input_model_argument(parser)
     args = parse_args_as_dict(parser)

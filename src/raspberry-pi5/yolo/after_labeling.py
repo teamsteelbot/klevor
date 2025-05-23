@@ -5,8 +5,10 @@ from files import move_folder_content
 from yolo import (YOLO_DATASET_RESIZED, YOLO_DATASET_TO_PROCESS, YOLO_DATASET_PROCESSED)
 from yolo.files import get_dataset_model_dir_path
 
-# Main function to run the script
 def main() -> None:
+    """
+    Main function to run the script.
+    """
     parser = argparse.ArgumentParser(description='Script to move YOLO model resized to process folder content to processed folder')
     args = parse_args_as_dict(parser)
 

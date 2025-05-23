@@ -1,21 +1,6 @@
 import cv2
 import numpy as np
 
-
-def generate_color(class_id: int) -> tuple:
-    """
-    Generate a unique color for a given class ID.
-
-    Args:
-        class_id (int): The class ID to generate a color for.
-
-    Returns:
-        tuple: A tuple representing an RGB color.
-    """
-    np.random.seed(class_id)
-    return tuple(np.random.randint(0, 255, size=3).tolist())
-
-
 class ObjectDetectionUtils:
     def __init__(self, labels_path: str, padding_color: tuple = (114, 114, 114), label_font: str = "LiberationSans-Regular.ttf"):
         """

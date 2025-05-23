@@ -12,8 +12,10 @@ from yolo.args import add_yolo_input_model_argument, add_yolo_output_model_argum
 from yolo.files import get_dataset_model_dir_path
 
 
-# Create a new dataset with the labeled classes removed
 def create_dataset_with_removed_classes(input_dir, input_to_process_dir, output_dir, output_to_process_dir, ignore_classes):
+    """
+    Create a new dataset with the labeled classes removed.
+    """
     # Create the output directory if it doesn't exist
     ensure_path_exists(output_dir)
 
@@ -125,8 +127,10 @@ def create_dataset_with_removed_classes(input_dir, input_to_process_dir, output_
                     f.write(" ".join(line_parts) + '\n')
         print(f"Copied {input_label_path} to {output_label_path}")
 
-# Main function to run the script
 def main() -> None:
+    """
+    Main function to run the script.
+    """
     parser = argparse.ArgumentParser(description='Script to remove labeled classes from a given YOLO model dataset')
     add_yolo_input_model_argument(parser)
     add_yolo_output_model_argument(parser)

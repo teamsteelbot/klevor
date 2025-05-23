@@ -2,6 +2,7 @@
 
 import argparse
 import os
+from multiprocessing import Event
 from pathlib import Path
 import numpy as np
 from loguru import logger
@@ -11,13 +12,26 @@ import cv2
 from typing import List
 
 from args import parse_args_as_dict, get_attribute_from_args
+from camera.images_queue import ImagesQueue
 from object_detection_utils import ObjectDetectionUtils
 from utils import HailoAsyncInference, load_images_opencv, validate_images, divide_list_to_batches
 from yolo import ARGS_YOLO_INPUT_MODEL
 from yolo.args import add_yolo_input_model_argument
 
-CAMERA_CAP_WIDTH = 1920
-CAMERA_CAP_HEIGHT = 1080 
+class HailoHandler:
+    """
+    Class to handle Hailo inference.
+    """
+    __stop_event = None
+
+    def __init__(self, images_queue:ImagesQueue=None,stop_event:Event=None):
+        """
+        Initialize the Hailo handler class.
+        """
+        # Check if stop_event is None
+        if stop_event is None:
+            raise ValueError("stop_event cannot be None")
+        self.__stop_event = stop_event
         
 def parse_args() -> argparse.Namespace:
     """
@@ -289,7 +303,7 @@ def infer(
 
 
 # Main function to run the script
-def main() -> None:
+def main(model_name: str, yolo_version: str, images_queue:ImagesQueue=None,stop_event:Event=None) -> None:
     parser = argparse.ArgumentParser(description='Script to run the inference from the models')
     add_yolo_input_model_argument(parser)
     args = parse_args_as_dict(parser)

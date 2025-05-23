@@ -15,10 +15,12 @@ from yolo.args import (add_yolo_input_model_argument, add_yolo_format_argument, 
 from yolo.files import (get_dataset_model_dir_path, get_model_best_pt_path, get_model_weight_dir_path)
 
 
-# Test random images from the given directory
 def test_random_images(model, model_class_names: dict, run_inference_fn, input_organized_dir: str,
                        draw_labels_name: bool, rgb_colors: dict[int, tuple[int, int, int]] = None,
                        image_size: tuple[int, int] = DEFAULT_SIZE):
+    """
+    Test random images from the given directory.
+    """
     # Get testing folder
     input_images_testing_dir = os.path.join(input_organized_dir, YOLO_DATASET_TESTING, YOLO_DATASET_IMAGES)
 
@@ -46,16 +48,20 @@ def test_random_images(model, model_class_names: dict, run_inference_fn, input_o
                            draw_labels_name=draw_labels_name, rgb_colors=rgb_colors)
 
 
-# Test random images from the given directory using the given PyTorch model
 def test_random_images_pt(input_model_path: str, output_organized_dir: str, colors: dict[int, tuple[int, int, int]],
                           image_size: tuple[int, int] = DEFAULT_SIZE):
+    """
+    Test random images from the given directory using the given PyTorch model.
+    """
     model = load(input_model_path)
     model_class_names = get_class_names(model)
     test_random_images(model, model_class_names, run_inference, output_organized_dir, False, colors,
                        image_size=image_size)
 
-# Main function to run the script
 def main() -> None:
+    """
+    Main function to run the script.
+    """
     parser = argparse.ArgumentParser(description='Script to test YOLO model with a given format')
     add_yolo_input_model_argument(parser)
     add_yolo_format_argument(parser)

@@ -6,10 +6,12 @@ import time
 from files import move_file, ensure_path_exists
 
 
-# Resize image function
 def resize_image(input_to_process_dir: LiteralString, output_resized_to_process_dir: LiteralString,
                  new_image_size: tuple[int, int],
                  output_processed_dir: LiteralString = None, interpolation=cv2.INTER_LINEAR):
+    """
+    Resize image function.
+    """
     # Check if the path exists, if not it creates it
     ensure_path_exists(output_resized_to_process_dir)
 

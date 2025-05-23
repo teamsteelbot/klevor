@@ -1,4 +1,7 @@
 import io
+from multiprocessing import Lock
+
+from PIL.Image import Image
 from picamera2 import Picamera2
 from picamera2.encoders import H264Encoder
 from picamera2.outputs import FileOutput
@@ -10,104 +13,152 @@ HEIGHT=640
 FPS=30
 DEFAULT_CODEC= 'mjpeg'
 DEFAULT_FORMAT = 'jpeg'
-DEFAULT_ADJUST_DURATION=2
+DEFAULT_ADJUST_DURATION=0.02
 
 # Server settings
 SERVER_PORT=8080
 
-# Class that wraps the functionality required for the Raspberry Pi Camera
 class Camera:
+    """
+    Class that wraps the functionality required for the Raspberry Pi Camera.
+    """
+    __lock = None
     __picam2 = None
+    __started_preview = False
     __config = None
-    __preview_state = None
+    __video_config = None
 
-    # Constructor
-    def __init__(self, width=WIDTH, height=HEIGHT):
-        # Configure the camera globally
+    def __init__(self, width=WIDTH, height=HEIGHT, video_config=None):
+        """
+        Constructor.
+        """
+        # Initialize the lock
+        self.__lock = Lock()
+
+        # Configure the camera and video settings
         self.__picam2 = Picamera2()
         self.__config = self.__picam2.create_still_configuration(main={"size": (width, height)})
         self.__picam2.configure(self.__config)
-        self.__picam2.start()
+        self.__video_config = video_config
+        self.__started_preview = False
 
-    # Capture a video
-    def record_video(self, duration=10, file_path='video.h264', encoder=H264Encoder()):
-        # Configure the camera for video recording
-        video_config = self.__picam2.create_video_configuration()
-        self.__picam2.configure(video_config)
+    def record_video(self, width=WIDTH, height=HEIGHT,duration=10, file_path='video.h264', encoder=H264Encoder()):
+        """
+        Record a video with the camera.
+        """
+        with self.__lock:
+            # Stop the camera preview if it is running
+            if self.__started_preview:
+                self.__picam2.stop_preview()
+                self.__started_preview = False
 
-        # Get the  output
-        output = FileOutput(file_path)
+            # Configure the camera for video recording
+            if self.__video_config is None:
+                self.__video_config = self.__picam2.create_video_configuration(main={"size": (width, height)}, display="preview")
+            self.__picam2.configure(self.__video_config)
 
-        # Start the recording
-        self.__picam2.start_recording(encoder, output)
-        print(f"Recording for {duration} seconds...")
+            # Get the  output
+            output = FileOutput(file_path)
 
-        # Sleep for the duration of the recording
-        sleep(duration)
+            # Start the recording
+            self.__picam2.start_recording(encoder, output)
+            print(f"Recording for {duration} seconds...")
 
-        # Stop the recording
-        self.__picam2.stop_recording()
-        print("Recording stopped.")
+            # Sleep for the duration of the recording
+            sleep(duration)
 
-    # Set camera as preview
-    def start_preview(self):
-        if self.__preview_state is None:
-            self.__picam2.start_preview()
-            self.__preview_state = True
-        else:
-            print("Preview already started.")
-
-    # Stop camera preview
-    def stop_preview(self):
-        if self.__preview_state is not None:
-            self.__picam2.stop_preview()
-            self.__preview_state = None
-        else:
-            print("Preview already stopped.")
+            # Stop the recording
+            self.__picam2.stop_recording()
+            print("Recording stopped.")
 
 
-    # Capture an image with pycamera
     def capture_image(self, adjust_duration=DEFAULT_ADJUST_DURATION, stop_preview=False):
-        # Start the camera preview
-        self.start_preview()
+        """
+        Capture an image with PyCamera2.
+        """
+        with self.__lock:
+            # Start the camera preview
+            if not self.__started_preview:
+                self.__picam2.start_preview()
+                self.__started_preview = True
 
-        # Allow time for the camera to adjust
-        sleep(adjust_duration)
+            # Allow time for the camera to adjust
+            sleep(adjust_duration)
 
-        # Capture the image
-        image = self.__picam2.capture()
+            # Capture the image
+            image = self.__picam2.capture()
 
-        # Stop the camera preview if required
-        if stop_preview:
-            self.stop_preview()
+            # Stop the camera preview if required
+            if stop_preview:
+                self.__picam2.stop_preview()
+                self.__started_preview = False
 
-        # Return the image
-        return image
+            # Return the image
+            return image
 
-    # Capture a image stream
     def capture_image_stream(self, adjust_duration=DEFAULT_ADJUST_DURATION, stop_preview=False, format=DEFAULT_FORMAT):
-        # Start the camera preview
-        self.start_preview()
+        """
+        Capture an image stream.
+        """
+        with self.__lock:
+            # Start the camera preview
+            if not self.__started_preview:
+                self.__picam2.start_preview()
+                self.__started_preview = True
 
-        # Allow time for the camera to adjust
-        sleep(adjust_duration)
+            # Allow time for the camera to adjust
+            sleep(adjust_duration)
 
-        # Capture the image stream
-        image_stream = io.BytesIO()
-        self.__picam2.capture(image_stream, format=format)
+            # Capture the image stream
+            image_stream = io.BytesIO()
+            self.__picam2.capture(image_stream, format=format)
 
-        # Stop the camera preview if required
-        if stop_preview:
-            self.stop_preview()
+            # Stop the camera preview if required
+            if stop_preview:
+                self.__picam2.stop_preview()
+                self.__started_preview = False
 
-        # Return the image stream
-        return image_stream
+            # Return the image stream
+            return image_stream
 
-    # Delete
+    def capture_image_pil(self, adjust_duration=DEFAULT_ADJUST_DURATION, stop_preview=False) -> Image:
+        """
+        Capture an image and return a PIL image.
+        """
+        # Capture an image stream
+        image_stream = self.capture_image_stream(adjust_duration, stop_preview)
+
+        # Convert the image stream to a PIL image
+        image_stream.seek(0)
+        return Image.open(image_stream)
+
+    def start_preview(self):
+        """
+        Start the camera preview.
+        """
+        with self.__lock:
+            if not self.__started_preview:
+                self.__picam2.start_preview()
+                self.__started_preview = True
+                print("Camera preview started.")
+
+    def stop_preview(self):
+        """
+        Stop the camera preview.
+        """
+        with self.__lock:
+            if self.__started_preview:
+                self.__picam2.stop_preview()
+                self.__started_preview = False
+                print("Camera preview stopped.")
+
     def __del__(self):
+        """
+        Delete.
+        """
         # Stop the camera preview
-        if self.__preview_state is not None:
-            self.stop_preview()
+        if self.__started_preview:
+            self.__picam2.stop_preview()
 
         # Stop the camera
         self.__picam2.close()

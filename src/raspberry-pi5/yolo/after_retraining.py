@@ -3,19 +3,17 @@ import os
 
 from args import get_attribute_from_args, parse_args_as_dict
 from files import move_folder
-from yolo import (ARGS_YOLO_INPUT_MODEL, ARGS_YOLO_VERSION)
-from yolo.args import add_yolo_input_model_argument, add_yolo_version_argument
+from yolo import (ARGS_YOLO_VERSION)
+from yolo.args import add_yolo_version_argument
 from yolo.files import get_yolo_runs_dir_path, get_yolo_old_runs_dir_path, get_yolo_runs_new_name_dir_path
 
-# Main function to run the script
 def main() -> None:
+    """
+    Main function to run the script.
+    """
     parser = argparse.ArgumentParser(description='Script to move YOLO model runs folder to old runs folder')
-    add_yolo_input_model_argument(parser)
     add_yolo_version_argument(parser)
     args = parse_args_as_dict(parser)
-
-    # Get the YOLO input model
-    arg_yolo_input_model = get_attribute_from_args(args, ARGS_YOLO_INPUT_MODEL)
 
     # Get the YOLO version
     arg_yolo_version = get_attribute_from_args(args, ARGS_YOLO_VERSION)

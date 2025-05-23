@@ -8,8 +8,10 @@ from yolo.args import (add_yolo_input_model_argument, add_yolo_format_argument, 
                        add_yolo_version_argument)
 from yolo.files import get_model_best_pt_path
 
-# Main function to run the script
 def main() -> None:
+    """
+    Main function to run the script.
+    """
     parser = argparse.ArgumentParser(description='Script to export YOLO model to a given format')
     add_yolo_input_model_argument(parser)
     add_yolo_format_argument(parser)

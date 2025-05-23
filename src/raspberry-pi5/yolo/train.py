@@ -9,9 +9,11 @@ from yolo.args import (add_yolo_input_model_argument, add_yolo_input_model_pt_ar
 from yolo.files import get_model_local_data_path
 
 
-# Train model
 def train_model(model='yolo11n.pt', device='cpu', data='data.yaml', epochs=YOLO_EPOCHS, imgsz=640, project='yolo',
                 name='model'):
+    """
+    Train model.
+    """
     # Load a model
     model = load(model)
 
@@ -25,8 +27,10 @@ def train_model(model='yolo11n.pt', device='cpu', data='data.yaml', epochs=YOLO_
         name=name,
     )
 
-# Main function to run the script
 def main() -> None:
+    """
+    Main function to run the script.
+    """
     parser = argparse.ArgumentParser(description='Script to train YOLO model')
     add_yolo_input_model_argument(parser)
     add_yolo_input_model_pt_argument(parser)
@@ -55,7 +59,8 @@ def main() -> None:
 
     # Train the model
     train_model(model=arg_yolo_input_model_pt, data=model_local_data_path, epochs=arg_yolo_epochs,
-                imgsz=arg_yolo_image_size, project=arg_yolo_input_model, name=arg_yolo_input_model)
+                imgsz=arg_yolo_image_size, project=arg_yolo_input_model, name=arg_yolo_input_model,
+                device=arg_yolo_device)
 
 
 if __name__ == '__main__':

@@ -3,9 +3,15 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from camera import SERVER_PORT
 from camera.frames import generate_frames
 
-# Streaming server for live video feed
 class StreamingHandler(BaseHTTPRequestHandler):
+    """
+    Streaming server for live video feed.
+    """
+
     def do_GET(self):
+        """
+        Handle GET requests for the streaming server.
+        """
         if self.path == '/':
             self.send_response(200)
             self.send_header('Content-type', 'text/html')
@@ -29,7 +35,13 @@ class StreamingHandler(BaseHTTPRequestHandler):
             self.send_error(404)
             self.end_headers()
 
-if __name__ == "__main__":
+def main():
+    """
+    Main function to start the streaming server.
+    """
     with HTTPServer(('0.0.0.0', SERVER_PORT), StreamingHandler) as server:
         print(f'Streaming on http://localhost:{SERVER_PORT}/')
         server.serve_forever()
+
+if __name__ == "__main__":
+    main()

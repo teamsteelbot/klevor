@@ -4,9 +4,10 @@ import shlex
 from camera import FPS, DEFAULT_CODEC
 from opencv import DEFAULT_WIDTH, DEFAULT_HEIGHT
 
-
-# Generate frames from the camera using libcamera-vid
 def generate_frames():
+    """
+    Generate frames from the camera using libcamera-vid.
+    """
     # Execute the libcamera-vid command to capture video
     command = f'libcamera-vid -n -t 0 --width {DEFAULT_WIDTH} --height {DEFAULT_HEIGHT} --framerate {FPS} --codec {DEFAULT_CODEC} -o -'
     process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, stderr=subprocess.PIPE,

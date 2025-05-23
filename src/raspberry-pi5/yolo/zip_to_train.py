@@ -14,10 +14,12 @@ from yolo.files import (get_dataset_model_dir_path, get_model_weight_dir_path,
                         get_yolo_data_dir_path, get_yolo_zip_dir_path, get_yolo_version_dir_path)
 
 
-# Define the function to zip the required files for model training
 def zip_to_train(input_dir: LiteralString, input_yolo_dir: LiteralString, input_yolo_dataset_organized_dir: LiteralString,
                  input_yolo_version_dir: LiteralString, input_yolo_data_dir: LiteralString, input_yolo_weights_dir: LiteralString, output_zip_dir: LiteralString,
                  model_name: str, retraining: str):
+    """
+    Define the function to zip the required files for model training.
+    """
     # Define the output zip filename
     output_zip_filename = model_name + '_to_train.zip'
     output_zip_path = os.path.join(output_zip_dir, output_zip_filename)
@@ -52,8 +54,10 @@ def zip_to_train(input_dir: LiteralString, input_yolo_dir: LiteralString, input_
             zip_not_nested_folder(zipf, input_dir, input_yolo_weights_dir)
             print('Zip the YOLO model weights folder')
 
-# Main function to run the script
 def main() -> None:
+    """
+    Main function to run the script.
+    """
     parser = argparse.ArgumentParser(description='Script to zip files for YOLO model training')
     add_yolo_input_model_argument(parser)
     add_yolo_version_argument(parser)

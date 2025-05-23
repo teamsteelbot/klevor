@@ -8,8 +8,11 @@ from yolo import ARGS_YOLO_INPUT_MODEL, ARGS_YOLO_VERSION, YOLO_DATASET_LABELED,
 from yolo.args import add_yolo_input_model_argument, add_yolo_version_argument
 from yolo.files import get_dataset_model_dir_path
 
-# Convert YOLO labels to JSON format for Label Studio
+
 def convert_yolo_labels_to_json(annotations_dir, images_dir, output_json):
+    """
+    Convert YOLO labels to JSON format for Label Studio.
+    """
     annotations = []
 
     for label_name in os.listdir(annotations_dir):
@@ -37,18 +40,16 @@ def convert_yolo_labels_to_json(annotations_dir, images_dir, output_json):
     with open(output_json, "w") as f:
         json.dump(annotations, f, indent=4)
 
-# Main function to run the script
 def main() -> None:
+    """
+    Main function to run the script.
+    """
     parser = argparse.ArgumentParser(description='Script to convert YOLO labels to JSON format for Label Studio')
     add_yolo_input_model_argument(parser)
-    add_yolo_version_argument(parser)
     args = parse_args_as_dict(parser)
 
     # Get the YOLO input model
     arg_yolo_input_model = get_attribute_from_args(args, ARGS_YOLO_INPUT_MODEL)
-
-    # Get the YOLO version
-    arg_yolo_version = get_attribute_from_args(args, ARGS_YOLO_VERSION)
 
     # Get the dataset paths
     labeled_to_process_dir = get_dataset_model_dir_path(YOLO_DATASET_LABELED, YOLO_DATASET_TO_PROCESS,

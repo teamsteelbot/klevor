@@ -137,45 +137,59 @@ ARGS_YOLO_IMAGE_SIZE = 'imgsz'
 # Ignore lists
 ZIP_IGNORE_DIR = ['.git', '.venv', '.idea', 'raspberry-pi-pico2', 'scripts', 'yolo']
 
-# Add single quotes to each element from the list
 def add_single_quotes_to_list_elements(lst: list) -> list:
+    """
+    Add single quotes to each element from the list.
+    """
     return [f"'{item}'" for item in lst]
 
-# Check the validity of model name
 def check_model_name(model_name: str) -> None:
+    """
+    Check the validity of model name.
+    """
     if model_name not in YOLO_MODELS_NAME:
         mapped_yolo_models_name = add_single_quotes_to_list_elements(YOLO_MODELS_NAME)
         raise ValueError(f"Invalid model name: {model_name}. Must be one of the following: {', '.join(mapped_yolo_models_name)}.")
 
-# Check the validity of YOLO version
 def check_yolo_version(yolo_version: str) -> None:
+    """
+    Check the validity of YOLO version.
+    """
     if yolo_version not in YOLO_VERSIONS:
         mapped_yolo_versions = add_single_quotes_to_list_elements(YOLO_MODELS_NAME)
         raise ValueError(f"Invalid yolo version: {yolo_version}. Must be one of the following: {', '.join(mapped_yolo_versions)}.")
 
-# Check the validity of dataset status
 def check_dataset_status(dataset_status: str|None) -> None:
+    """
+    Check the validity of dataset status.
+    """
     if dataset_status is not None:
         if dataset_status not in [YOLO_DATASET_TO_PROCESS, YOLO_DATASET_PROCESSED]:
             mapped_yolo_dataset_statuses = add_single_quotes_to_list_elements(YOLO_DATASET_STATUSES)
             raise ValueError(f"Invalid dataset status: {dataset_status}. Must be one of the following: {', '.join(mapped_yolo_dataset_statuses)}.")
 
-# Check the validity of model dataset status
 def check_model_dataset_status(dataset_name: str, dataset_status: str|None) -> None:
+    """
+    Check the validity of model dataset status.
+    """
     # Check if the dataset name is split by dataset status
     if dataset_status is not None:
         if dataset_name in [YOLO_DATASET_AUGMENTED, YOLO_DATASET_ORGANIZED]:
             raise ValueError(f"Invalid dataset path. The dataset name '{dataset_name}' should not be used with dataset status '{dataset_status}'.")
 
-# Check the validity of dataset name
 def check_dataset_name(dataset_name: str) -> None:
+    """
+    Check the validity of dataset name.
+    """
     # Check the validity of dataset name
     if dataset_name not in [YOLO_DATASET_ORIGINAL, YOLO_DATASET_RESIZED, YOLO_DATASET_LABELED, YOLO_DATASET_AUGMENTED,
                             YOLO_DATASET_ORGANIZED]:
         raise ValueError(f"Invalid dataset name: {dataset_name}. Must be one of the defined dataset folders.")
 
-# Check the validity of the model dataset name
 def check_model_dataset_name(dataset_name:str, model_name:str|None)-> None:
+    """
+    Check the validity of the model dataset name.
+    """
     # Check if the dataset name is split by model name
     if model_name is not None:
         if dataset_name in [YOLO_DATASET_ORIGINAL, YOLO_DATASET_RESIZED]:
@@ -186,8 +200,10 @@ def check_model_dataset_name(dataset_name:str, model_name:str|None)-> None:
         raise ValueError(f"Invalid dataset path. The dataset name '{dataset_name}' should not be used without a model name.")
 
 
-# Get the model classes color palette
 def get_model_classes_color_pallete(model_name: str) -> dict[int, tuple[int, int, int]] | None:
+    """
+    Get the model classes color palette.
+    """
     # Check the validity of the model name
     check_model_name(model_name)
 

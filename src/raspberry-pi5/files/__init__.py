@@ -16,20 +16,26 @@ BATCH_SIZE = 1000
 # Directories to ignore always
 IGNORE_DIRS = ['.git', '__pycache__', '.idea', '.vscode', '.venv', 'venv', 'env']
 
-# Move file between folders
 def move_file(input_path, output_dir):
+    """
+    Move file between folders.
+    """
     if os.path.exists(input_path):
         shutil.move(input_path, output_dir)
 
 
-# Move folder between folders
 def move_folder(input_dir, output_dir):
+    """
+    Move folder between folders.
+    """
     if os.path.exists(input_dir):
         shutil.move(input_dir, output_dir)
 
 
-# Move folder content to another folder
 def move_folder_content(input_dir, output_dir):
+    """
+    Move folder content to another folder.
+    """
     if os.path.exists(input_dir):
         # Check if the output directory exists, if not create it
         ensure_path_exists(output_dir)
@@ -55,13 +61,17 @@ def move_folder_content(input_dir, output_dir):
             # Move each item to the output directory
             shutil.move(item_input_path, output_dir)
 
-# Copy file between folders
 def copy_file(input_path, output_path):
+    """
+    Copy a file from input_path to output_path.
+    """
     if os.path.exists(input_path):
         shutil.copy(input_path, output_path)
 
-# Ensure the path exists
 def ensure_path_exists(output_path):
+    """
+    Ensure the path exists, if not create it.
+    """
     # Check if it contains an extension
     if os.path.splitext(output_path)[1]:
         output_dir = os.path.dirname(output_path)

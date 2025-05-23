@@ -11,8 +11,10 @@ from yolo.args import add_yolo_input_model_argument, add_yolo_version_argument
 from yolo.files import get_dataset_model_dir_path, get_tf_record_path
 
 
-# This script creates a TFRecord file from images and their labels
 def create_tfrecord(output_path, image_dir, label_dir):
+    """
+    This script creates a TFRecord file from images and their labels.
+    """
     # Check if the output directory exists, if not create it
     ensure_path_exists(output_path)
     writer = tf.io.TFRecordWriter(output_path)
@@ -43,8 +45,10 @@ def create_tfrecord(output_path, image_dir, label_dir):
 
     writer.close()
 
-# Main function to run the script
 def main() -> None:
+    """
+    Main function to run the script.
+    """
     parser = argparse.ArgumentParser(description='Script to create TFRecord from images and labels')
     add_yolo_input_model_argument(parser)
     add_yolo_version_argument(parser)

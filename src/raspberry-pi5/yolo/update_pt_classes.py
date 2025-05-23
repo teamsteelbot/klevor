@@ -7,8 +7,10 @@ from yolo import ARGS_YOLO_INPUT_MODEL, ARGS_YOLO_VERSION, ARGS_YOLO_CLASSES
 from yolo.args import add_yolo_input_model_argument, add_yolo_version_argument, add_yolo_classes_argument
 from yolo.files import get_model_best_pt_path
 
-# Update classes from a PyTorch model
 def update_classes(model_name, model_version, new_classes):
+    """
+    Update classes from a PyTorch model.
+    """
     # Get the model path
     model_path = get_model_best_pt_path(model_name, model_version)
 
@@ -26,8 +28,10 @@ def update_classes(model_name, model_version, new_classes):
     # Save the modified model
     torch.save(model, model_path)
 
-# Main function to run the script
 def main() -> None:
+    """
+    Main function to run the script.
+    """
     parser = argparse.ArgumentParser(description='Script to update YOLO model classes')
     add_yolo_input_model_argument(parser)
     add_yolo_version_argument(parser)

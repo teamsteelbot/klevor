@@ -5,26 +5,34 @@ from opencv import DEFAULT_SIZE, DEFAULT_COLOR
 from model.image_bounding_boxes import ImageBoundingBoxes
 
 
-# Convert RGB to BGR
 def rgb_to_bgr(rgb: tuple[int, int, int]):
+    """
+    Convert RGB to BGR.
+    """
     return rgb[::-1]
 
 
-# Get RGB color
 def get_rgb_color(class_number: int, rgb_colors: dict[int, tuple[int, int, int]] = None):
+    """
+    Get RGB color.
+    """
     return rgb_colors[class_number] if rgb_colors is not None and class_number in rgb_colors else DEFAULT_COLOR
 
 
-# Get BGR color
 def get_bgr_color(class_number: int, rgb_colors: dict[int, tuple[int, int, int]] = None):
+    """
+    Get BGR color.
+    """
     return rgb_to_bgr(get_rgb_color(class_number, rgb_colors))
 
 
-# Function to display the preprocessed image and the image with detections
 def display_detections(model_class_names: dict, preprocessed_image, image_bounding_boxes: ImageBoundingBoxes,
                        draw_labels_name=False, font=cv2.FONT_HERSHEY_SIMPLEX,
                        font_x_diff=0, font_y_diff=-10, font_scale=0.9, thickness=2,
                        rgb_colors: dict[int, tuple[int, int, int]] = None):
+    """
+    Function to display the preprocessed image and the image with detections.
+    """
     # Convert the image back to HWC format
     preprocessed_image_hwc = np.transpose(preprocessed_image[0], (1, 2, 0))
 
@@ -71,8 +79,10 @@ def display_detections(model_class_names: dict, preprocessed_image, image_boundi
     plt.show()
 
 
-# Preprocess the image
 def preprocess(image_path, image_size: tuple[int, int] = DEFAULT_SIZE):
+    """
+    Preprocess the image.
+    """
     # Resize the image and convert it to RGB
     image = cv2.imread(image_path)
     image_resized = cv2.resize(image, image_size)

@@ -5,11 +5,13 @@ import time
 from files import move_file
 
 
-# Augment to_process images
 def augment_images(input_to_process_image_path: str, input_to_process_annotations_path: str,
                    output_augmented_images_dir: str, output_augmented_annotations_dir: str,
                    num_augmentations=5,
                    output_processed_images_dir: str = None, output_processed_annotations_dir: str = None):
+    """
+    Augment to_process images.
+    """
     # Get current time
     start_time = time.time()
 

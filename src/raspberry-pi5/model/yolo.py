@@ -6,8 +6,10 @@ import torch
 from ultralytics import YOLO
 
 
-# Load YOLO PyTorch model
 def load(model: str, task='detect'):
+    """
+    Load YOLO PyTorch model.
+    """
     # Check if the model has a parent directory
     if Path(model).parent != Path('.'):
         # Verify the model file exists
@@ -18,32 +20,37 @@ def load(model: str, task='detect'):
     model = YOLO(model, task=task, verbose=True)
     return model
 
-
-# Get YOLO PyTorch model class names
 def get_class_names(model):
+    """
+    Get YOLO PyTorch model class names.
+    """
     # Detected PyTorch model class names
     print(f'Classes: {model.names}')
 
     return model.names
 
-
-# Export the model to TensorRT format
 def export_tensor_rt(model, quantized: bool = True):
+    """
+    Export the model to TensorRT format.
+    """
     return model.export(format="engine", int8=quantized)
 
-
-# Export the model to ONNX format
 def export_onnx(model):
+    """
+    Export the model to ONNX format.
+    """
     return model.export(format="onnx")
 
-
-# Export the model to TFLite format
 def export_tflite(model, quantized: bool = True):
+    """
+    Export the model to TFLite format.
+    """
     return model.export(format="tflite", int8=quantized)
 
-
-# Run inference from PyTorch model
 def run_inference(model, preprocessed_image):
+    """
+    Run inference from PyTorch model.
+    """
     # Get time
     start_time = time.time()
 

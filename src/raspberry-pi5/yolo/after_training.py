@@ -11,8 +11,10 @@ from yolo.files import (get_dataset_model_dir_path, get_hailo_suite_dir_path, ge
                         get_model_hailo_suite_dir_path)
 
 
-# Remove the YOLO training and validation folders from the dataset, move the training folder and copy the best ONNX weights to the Hailo Suite folder
 def after_training(input_dir, hailo_suite_dir, model_hailo_suite_dir, best_onnx_weights_path):
+    """
+    Remove the YOLO training and validation folders from the dataset, move the training folder and copy the best ONNX weights to the Hailo Suite folder.
+    """
     # Move the training folder to the Hailo Suite folder
     input_training_images_path = os.path.join(input_dir, YOLO_DATASET_TRAINING, YOLO_DATASET_IMAGES)
     output_training_path = os.path.join(hailo_suite_dir, YOLO_DATASET_TRAINING)
@@ -39,8 +41,10 @@ def after_training(input_dir, hailo_suite_dir, model_hailo_suite_dir, best_onnx_
     else:
         print(f'{best_onnx_weights_path} does not exist')
 
-# Main function to run the script
 def main() -> None:
+    """
+    Main function to run the script.
+    """
     parser = argparse.ArgumentParser(
         description='Script to removed the unnecessary files and prepare the dataset for Hailo')
     add_yolo_input_model_argument(parser)

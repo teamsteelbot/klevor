@@ -1,18 +1,30 @@
 from typing import List, Generator, Optional, Tuple, Dict
 from pathlib import Path
 from functools import partial
-import queue
+import cv2
+from PIL import Image
 from loguru import logger
 import numpy as np
 from hailo_platform import (HEF, VDevice,
                             FormatType, HailoSchedulingAlgorithm)
-IMAGE_EXTENSIONS: Tuple[str, ...] = ('.jpg', '.png', '.bmp', '.jpeg')
+
+from yolo.hailo import IMAGE_ALLOWED_EXTENSIONS
+from yolo.hailo.image_stream_queue import ImageStreamQueue
 
 
 class HailoAsyncInference:
+    """
+    Hailo asynchronous inference.
+    """
+    __image_stream_queue = None
+    __hef = None
+    __target = None
+    __infer_model = None
+    __output_type = None
+    __send_original_frame = None
+
     def __init__(
-        self, hef_path: str, input_queue: queue.Queue,
-        output_queue: queue.Queue, batch_size: int = 1,
+        self, hef_path: str, image_stream_queue: ImageStreamQueue, batch_size: int = 1,
         input_type: Optional[str] = None, output_type: Optional[Dict[str, str]] = None,
         send_original_frame: bool = False) -> None:
         """
@@ -21,32 +33,43 @@ class HailoAsyncInference:
 
         Args:
             hef_path (str): Path to the HEF model file.
-            input_queue (queue.Queue): Queue from which to pull input frames 
-                                       for inference.
-            output_queue (queue.Queue): Queue to hold the inference results.
+            image_stream_queue (ImageStreamQueue): Queue for input images.
             batch_size (int): Batch size for inference. Defaults to 1.
             input_type (Optional[str]): Format type of the input stream. 
                                         Possible values: 'UINT8', 'UINT16'.
             output_type Optional[dict[str, str]] : Format type of the output stream. 
                                          Possible values: 'UINT8', 'UINT16', 'FLOAT32'.
         """
-        self.input_queue = input_queue
-        self.output_queue = output_queue
+        # Set the image stream queue
+        self.__image_stream_queue = image_stream_queue
+
+        # Create the VDevice parameters
         params = VDevice.create_params()
+
         # Set the scheduling algorithm to round-robin to activate the scheduler
         params.scheduling_algorithm = HailoSchedulingAlgorithm.ROUND_ROBIN
 
-        self.hef = HEF(hef_path)
-        self.target = VDevice(params)
-        self.infer_model = self.target.create_infer_model(hef_path)
-        self.infer_model.set_batch_size(batch_size)      
+        # Enable multi-processing service
+        params.group_id = "SHARED"
+        params.multi_process_service = True
+
+        # Set the VDevice parameters
+        self.__target = VDevice(params)
+
+        # Set the HEF model
+        self.__hef = HEF(hef_path)
+        self.__infer_model = self.__target.create_infer_model(hef_path)
+        self.__infer_model.set_batch_size(batch_size)
+
+        # Set the input and output types
         if input_type is not None:
             self._set_input_type(input_type)
         if output_type is not None:
             self._set_output_type(output_type)
+        self.__output_type = output_type
 
-        self.output_type = output_type
-        self.send_original_frame = send_original_frame
+        # Send the original frame
+        self.__send_original_frame = send_original_frame
 
     def _set_input_type(self, input_type: Optional[str] = None) -> None:
         """
@@ -56,7 +79,7 @@ class HailoAsyncInference:
         Args:
             input_type (Optional[str]): Format type of the input stream.
         """
-        self.infer_model.input().set_format_type(getattr(FormatType, input_type))
+        self.__infer_model.input().set_format_type(getattr(FormatType, input_type))
     
     def _set_output_type(self, output_type_dict: Optional[Dict[str, str]] = None) -> None:
         """
@@ -67,7 +90,7 @@ class HailoAsyncInference:
             output_type_dict (Optional[dict[str, str]]): Format type of the output stream.
         """
         for output_name, output_type in output_type_dict.items():
-            self.infer_model.output(output_name).set_format_type(
+            self.__infer_model.output(output_name).set_format_type(
                 getattr(FormatType, output_type)
             )
 
@@ -82,7 +105,7 @@ class HailoAsyncInference:
                              inference task.
             bindings_list (list): List of binding objects containing input 
                                   and output buffers.
-            processed_batch (list): The processed batch of images.
+            input_batch (list): The processed batch of images.
         """
         if completion_info.exception:
             logger.error(f'Inference error: {completion_info.exception}')
@@ -99,7 +122,7 @@ class HailoAsyncInference:
                         )
                         for name in bindings._output_names
                     }
-                self.output_queue.put((input_batch[i], result))
+                self.__output_queue.put((input_batch[i], result))
 
     def get_vstream_info(self) -> Tuple[list, list]:
 
@@ -111,8 +134,8 @@ class HailoAsyncInference:
                                output stream layer information.
         """
         return (
-            self.hef.get_input_vstream_infos(), 
-            self.hef.get_output_vstream_infos()
+            self.__hef.get_input_vstream_infos(),
+            self.__hef.get_output_vstream_infos()
         )
 
     def get_hef(self) -> HEF:
@@ -122,7 +145,7 @@ class HailoAsyncInference:
         Returns:
             HEF: A HEF (Hailo Executable File) containing the model.
         """
-        return self.hef
+        return self.__hef
 
     def get_input_shape(self) -> Tuple[int, ...]:
         """
@@ -131,12 +154,12 @@ class HailoAsyncInference:
         Returns:
             Tuple[int, ...]: Shape of the model's input layer.
         """
-        return self.hef.get_input_vstream_infos()[0].shape  # Assumes one input
+        return self.__hef.get_input_vstream_infos()[0].shape  # Assumes one input
 
-    def run(self) -> None:
-        with self.infer_model.configure() as configured_infer_model:
+    async def run(self) -> None:
+        with self.__infer_model.configure() as configured_infer_model:
             while True:
-                batch_data = self.input_queue.get()
+                batch_data = self.__input_queue.get()
                 if batch_data is None:
                     break  # Sentinel value to stop the inference loop
 
@@ -208,14 +231,13 @@ def load_images_opencv(images_path: str) -> List[np.ndarray]:
     Returns:
         List[np.ndarray]: List of images as NumPy arrays.
     """
-    import cv2
     path = Path(images_path)
-    if path.is_file() and path.suffix.lower() in IMAGE_EXTENSIONS:
+    if path.is_file() and path.suffix.lower() in IMAGE_ALLOWED_EXTENSIONS:
         return [cv2.imread(str(path))]
     elif path.is_dir():
         return [
             cv2.imread(str(img)) for img in path.glob("*")
-            if img.suffix.lower() in IMAGE_EXTENSIONS
+            if img.suffix.lower() in IMAGE_ALLOWED_EXTENSIONS
         ]
     return []
 
@@ -229,14 +251,13 @@ def load_input_images(images_path: str):
     Returns:
         List[Image.Image]: List of PIL.Image.Image objects.
     """
-    from PIL import Image
     path = Path(images_path)
-    if path.is_file() and path.suffix.lower() in IMAGE_EXTENSIONS:
+    if path.is_file() and path.suffix.lower() in IMAGE_ALLOWED_EXTENSIONS:
         return [Image.open(path)]
     elif path.is_dir():
         return [
             Image.open(img) for img in path.glob("*") 
-            if img.suffix.lower() in IMAGE_EXTENSIONS
+            if img.suffix.lower() in IMAGE_ALLOWED_EXTENSIONS
         ]
     return []
 
