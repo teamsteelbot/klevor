@@ -1,7 +1,8 @@
 <h1 id="indice">Índice</h1>
 
 1. [Instalación de MicroPython](#instalacion-de-micropython)
-2. [Recursos Externos](#recursos-externos)
+2. [Instalación de CircuitPython](#instalación-de-circuitpython)
+3. [Recursos Externos](#recursos-externos)
 
 <h1 id="instalacion-de-micropython">Instalación de MicroPython</h1>
 
@@ -11,14 +12,33 @@
     <i>MicroPython</i>
 </p>
 
-Por defecto, la Raspberry Pi Pico 2 WH viene con MicroPython preinstalado. Sin embargo, si deseas instalar una versión diferente o actualizarla, puedes seguir estos pasos [1](#micropython)[2](#raspberry-pi-micropython):
+Por defecto, la Raspberry Pi Pico 2 WH viene con MicroPython preinstalado. Sin embargo, si deseas instalar una versión diferente o actualizarla, puedes seguir estos pasos [[1]](#micropython)[ [2]](#raspberry-pi-micropython):
 
 1. Descargar la última versión de MicroPython para Raspberry Pi Pico desde el sitio oficial: [MicroPython](https://micropython.org/download/rp2-pico-w/).
 2. Presionar el botón BOOTSEL en la Raspberry Pi Pico 2 WH y conectarla a la computadora mediante un cable USB (mantener presionado el botón hasta que se reconozca la Pico como un dispositivo de almacenamiento).
 3. Copiar el archivo `.uf2` descargado en la unidad de almacenamiento de la Raspberry Pi Pico. Automáticamente, la Raspberry Pi Pico se reiniciará.
 4. Desconectar la Raspberry Pi Pico y volver a conectarla sin presionar el botón BOOTSEL.
 
+<h1 id="instalacion-de-circuitpython">CircuitPython</h1>
+
+<p align="center">
+    <img src="https://i.postimg.cc/G2GdpCfL/Adafruit-blinka-angles-left-svg.png" alt="CircuitPython" width="200">
+    <br>
+    <i>CircuitPython</i>
+</p>
+
+CircuitPython es una ramificación de MicroPython diseñada para ser compatibles con microcontroladores pequeños y baratos. [[3]](#circuitpython)
+
+Debido a unos problemas de compatibilidad con la librería del giroscopio GY-BNO085 de Adafruit, ya que ésta estaba diseñada para ser utilizada con CircuitPython, decidimos utilizar CircuitPython en la Raspberry Pi Pico para evitar estos problemas de compatibilidad y no tener que modificar la librería casi en su totalidad.
+
+1. Descargar la última versión de MicroPython para Raspberry Pi Pico desde el sitio oficial: [CircuitPython](https://circuitpython.org/board/raspberry_pi_pico2_w/).
+2. Presionar el botón BOOTSEL en la Raspberry Pi Pico 2 WH y conectarla a la computadora mediante un cable USB (mantener presionado el botón hasta que se reconozca la Pico como un dispositivo de almacenamiento).
+3. Copiar el archivo `.uf2` descargado en la unidad de almacenamiento de la Raspberry Pi Pico. Automáticamente, la Raspberry Pi Pico se reiniciará.
+4. Desconectar la Raspberry Pi Pico y volver a conectarla sin presionar el botón BOOTSEL
+
+Después del reinicio, tu Raspberry Pi Pico debería aparecer ahora como una nueva unidad de disco llamada "CIRCUITPY".
 <h1 id="recursos-externos">Recursos Externos</h1>
 
 1. *MicroPython*. (2025). MicroPython. <a id="micropython">https://micropython.org/</a>
-2. *MycroPython*. (2025). Raspberry Pi. <a id="raspberry-pi-micropython">https://www.raspberrypi.com/documentation/micropython/</a>
+2. *MicroPython*. (2025). Raspberry Pi. <a id="raspberry-pi-micropython">https://www.raspberrypi.com/documentation/micropython/</a>
+3. *CircuitPython*. (2025). CircuitPython. <a id="circuitpython">https://docs.circuitpython.org/en/latest/README.html</a>
