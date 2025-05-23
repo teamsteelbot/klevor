@@ -50,3 +50,4 @@
 4. Python Software Foundation. (2025). *Multiprocessing*. Python documentation. <a id="multiprocessing">https://docs.python.org/3/library/multiprocessing.html</a>
 5. Brownlee, J. (28 de julio de 2022). *Use an Event in the Multiprocessing Pool*. SuperFastPython*. <a id="multiprocessing-pool">https://superfastpython.com/multiprocessing-pool/</a>
 6. *Camera*. (2025). Raspberry Pi. <a id="camera">https://www.raspberrypi.com/documentation/computers/camera.html</a>
+7. Brownlee, J. (21 de noviembre de 2022). *What is a Multiprocessing Manager*. SuperFastPython. <a id="multiprocessing-manager">https://superfastpython.com/multiprocessing-manager/</a>

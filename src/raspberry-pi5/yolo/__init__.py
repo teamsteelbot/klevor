@@ -137,6 +137,10 @@ ARGS_YOLO_IMAGE_SIZE = 'imgsz'
 # Ignore lists
 ZIP_IGNORE_DIR = ['.git', '.venv', '.idea', 'raspberry-pi-pico2', 'scripts', 'yolo']
 
+# Logs folders
+LOG_DIR = os.path.join(CWD, 'logs')
+LOGS_DIR = os.path.join(LOG_DIR, 'logs')
+
 def add_single_quotes_to_list_elements(lst: list) -> list:
     """
     Add single quotes to each element from the list.

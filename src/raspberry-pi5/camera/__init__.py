@@ -154,7 +154,7 @@ class Camera:
 
     def __del__(self):
         """
-        Delete.
+        Delete the camera object.
         """
         # Stop the camera preview
         if self.__started_preview:

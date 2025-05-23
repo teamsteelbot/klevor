@@ -1,4 +1,3 @@
-import threading
 from multiprocessing import Queue, Event, Lock
 
 from PIL.Image import Image
@@ -18,7 +17,7 @@ class ImagesQueue:
     __output_inference_queue = None
     __stop_event = None
 
-    def __init__(self, camera: Camera=None):
+    def __init__(self, camera: Camera):
         """
         Initialize the images queue.
         """
@@ -30,8 +29,8 @@ class ImagesQueue:
         self.__output_inference_queue = Queue()
 
         # Initialize the camera
-        if camera is None:
-            raise ValueError("camera cannot be None")
+        if not isinstance(camera, Camera):
+            raise ValueError("camera must be an instance of Camera")
         self.__camera = camera
 
         # Initialize the events
@@ -57,7 +56,7 @@ class ImagesQueue:
         """
         with self.__lock:
             # Check the input images queue size
-            if self.__input_images_queue.qsize() == 0:
+            if self.__input_images_queue.empty():
                 # Clear the pending image event
                 self.__pending_image_event.clear()
                 return None
@@ -81,7 +80,7 @@ class ImagesQueue:
         """
         with self.__lock:
             # Check the output inference queue size
-            if self.__output_inference_queue.qsize() == 0:
+            if self.__output_inference_queue.empty():
                 # Clear the pending inference event
                 self.__pending_inference_event.clear()
                 return None
@@ -157,17 +156,27 @@ def main(images_queue: ImagesQueue=None):
     Main function to run the script.
     """
     # Check if the images queue is None
-    if images_queue is None:
-        raise ValueError("images_queue cannot be None")
+    if isinstance(images_queue, ImagesQueue):
+        raise ValueError("images_queue must be an instance of ImagesQueue")
 
     # Get the stop event
     stop_event = images_queue.get_stop_event()
 
+    # Get the capture image event
+    capture_image_event = images_queue.get_capture_image_event()
+
     # Start the images queue
     images_queue.start()
 
-    while stop_event.is_not_set():
+    while not stop_event.is_set():
         # Wait for capture image event
-        self.__capture_image_event.wait()
-        self.capture_image()
-        self.__capture_image_event.clear()
+        capture_image_event.wait()
+
+        # Capture image from camera
+        images_queue.capture_image()
+
+        # Clear the capture image event
+        capture_image_event.clear()
+
+    # Stop the images queue
+    images_queue.stop()

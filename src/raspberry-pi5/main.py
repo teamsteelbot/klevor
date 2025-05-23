@@ -1,14 +1,43 @@
 import argparse
-from multiprocessing import Process, Queue, Manager
+from multiprocessing import Process, Manager
+from threading import Thread
 
-from camera import Camera
-from raspberry_pi_pico2.serial_communication import SerialCommunication
 from args import parse_args_as_dict
 from yolo import ARGS_YOLO_INPUT_MODEL, ARGS_YOLO_VERSION
 from yolo.args import add_yolo_input_model_argument, add_yolo_version_argument
-from camera.images_queue import ImagesQueue
+from yolo.files import get_log_file_path
 from yolo.hailo.object_detection import main as object_detection_main
+from camera.images_queue import main as images_queue_main
 from raspberry_pi_pico2.serial_communication import main as serial_communication_main
+from log import main as log_main
+
+def process_1_fn(serial_communication, logger):
+    """
+    Process 1: Serial communication with Raspberry Pi Pico and logging.
+    """
+    # Creating threads
+    thread1 = Thread(target=serial_communication_main, args=(serial_communication,))
+    thread2 = Thread(target=log_main, args=(logger,))
+
+    # Starting threads
+    thread1.start()
+    thread2.start()
+
+    # Waiting for threads to finish
+    thread1.join()
+    thread2.join()
+
+def process_2_fn(images_queue):
+    """
+    Process 2: Images queue for camera.
+    """
+    images_queue_main(images_queue)
+
+def process_3_fn(hailo):
+    """
+    Process 3: Object detection using YOLO.
+    """
+    hailo_main(hailo)
 
 def main():
     """
@@ -28,30 +57,41 @@ def main():
 
     # Create a manager for shared objects
     with Manager() as manager:
-        # Create the camera instance
+        # Create the camera object with multiprocessing safety
         camera = manager.Camera()
 
-        # Images queue wrapper with multiprocessing safety
-        images_queue = ImagesQueue(camera=camera)
-
-        # Get the event signal to capture the image
-        capture_image_event = images_queue.get_capture_image_event()
+        # Create the images queue with multiprocessing safety
+        images_queue = manager.ImagesQueue(camera)
 
         # Raspberry Pi Pico serial communication wrapper with multiprocessing safety
-        serial_communication = SerialCommunication(capture_image_event=capture_image_event)
+        serial_communication = manager.SerialCommunication(images_queue)
+
+        # Get the log file path
+        log_file_path = get_log_file_path()
 
         # Get the stop event signal
         stop_event = serial_communication.get_stop_event()
 
-        # Start the object detection main process
-        object_detection_process = Process(target=object_detection_main, args=(arg_yolo_input_model, arg_yolo_version, images_queue, stop_event))
-        object_detection_process.start()
-        object_detection_process.join()
+        # Create the logger object with multiprocessing safety
+        logger = manager.Logger(log_file_path, stop_event)
 
-        # Start the serial communication main process
-        serial_process = Process(target=serial_communication_main, args=(serial_communication,))
-        serial_process.start()
-        serial_process.join()
+        # Create the Hailo object detection wrapper with multiprocessing safety
+        #object_detection = manager.ObjectDetection(arg_yolo_input_model, arg_yolo_version, images_queue, stop_event)
+
+        # Start the first process
+        process_1 = Process(target=process_1_fn, args=(serial_communication, logger))
+        process_1.start()
+        process_1.join()
+
+        # Start the second process
+        process_2 = Process(target=process_2_fn, args=(images_queue,))
+        process_2.start()
+        process_2.join()
+
+        # Start the third process
+        process_3 = Process(target=process_3_fn, args=(hailo,))
+        process_3.start()
+        process_3.join()
 
         # Await for the stop event signal
         stop_event.wait()

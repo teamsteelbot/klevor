@@ -1,5 +1,5 @@
 import os
-import time
+from time import time
 from typing import LiteralString
 
 from yolo import (YOLO_DATASET, YOLO_DATASET_GENERAL, YOLO_DIR, YOLO_RUNS, YOLO_WEIGHTS, BEST_PT,
@@ -7,7 +7,7 @@ from yolo import (YOLO_DATASET, YOLO_DATASET_GENERAL, YOLO_DIR, YOLO_RUNS, YOLO_
                   YOLO_TF_RECORDS, YOLO_DATASET_NOTES_JSON, YOLO_DATASET_CLASSES_TXT, YOLO_HAILO,
                   YOLO_SUITE, BEST_ONNX, YOLO_HAILO_MODEL_ZOO, YOLO_LIBS, YOLO_CALIB, check_model_name,
                   check_dataset_status, check_model_dataset_status, check_dataset_name, check_model_dataset_name,
-                  check_yolo_version)
+                  check_yolo_version, LOGS_DIR)
 
 def get_dataset_model_dir_path(dataset_name: str, dataset_status: str|None, model_name: str|None) -> LiteralString | str | bytes:
     """
@@ -64,9 +64,9 @@ def get_yolo_runs_new_name_dir_path(yolo_version: str) -> LiteralString | str | 
     yolo_version_dir = get_yolo_version_dir_path(yolo_version)
 
     # Get the current Unix timestamp
-    current_unix_timestamp = int(time.time())
+    unix_timestamp = int(time())
 
-    return os.path.join(yolo_version_dir, f'{YOLO_RUNS}_{current_unix_timestamp}')
+    return os.path.join(yolo_version_dir, f'{YOLO_RUNS}_{unix_timestamp}')
 
 def get_yolo_old_runs_dir_path(yolo_version: str) -> LiteralString | str | bytes:
     """
@@ -306,3 +306,12 @@ def get_hailo_model_zoo_dir_path() -> LiteralString | str | bytes:
     Get the Hailo Model Zoo path
     """
     return os.path.join(YOLO_DIR, YOLO_HAILO, YOLO_SUITE, YOLO_LIBS, YOLO_HAILO_MODEL_ZOO)
+
+def get_log_file_path() -> LiteralString | str | bytes:
+    """
+    Get the log file path.
+    """
+    # Get the UNIX timestamp
+    unix_timestamp = int(time())
+
+    return os.path.join(LOGS_DIR, f'{unix_timestamp}.txt')

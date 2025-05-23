@@ -13,17 +13,20 @@ class SerialCommunication:
     __stop_event = None
     __images_queue = None
 
-    def __init__(self, images_queue: ImagesQueue=None):
+    def __init__(self, images_queue: ImagesQueue):
         """
         Initialize the serial communication class.
         """
+        # Check if the images_queue is None
+        if not isinstance(images_queue, ImagesQueue):
+            raise ValueError("images_queue must be an instance of ImagesQueue")
+        self.__images_queue = images_queue
+
         # Create the stop event
         self.__stop_event = Event()
 
-        # Check if the images_queue is None
-        if images_queue is None:
-            raise ValueError("images_queue cannot be None")
-        self.__images_queue = images_queue
+        # Get the capture image event
+        self.__capture_image_event = self.__images_queue.get_capture_image_event()
 
         print("Serial communication initialized.")
 
@@ -70,11 +73,15 @@ finally:
         print("Serial port closed.")
 """
 
-def main(serial_communication: SerialCommunication=None) -> None:
+def main(serial_communication: SerialCommunication) -> None:
     """
     Main function to run the script.
     """
     # Check if the serial_communication is None
+    if isinstance(serial_communication, SerialCommunication):
+        raise ValueError("serial_communication must be an instance of SerialCommunication")
+
+    # Get the stop event
     stop_event = serial_communication.get_stop_event()
 
     # Wait for the stop event
