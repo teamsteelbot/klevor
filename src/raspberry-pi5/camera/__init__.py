@@ -157,8 +157,7 @@ class Camera:
         Delete the camera object.
         """
         # Stop the camera preview
-        if self.__started_preview:
-            self.__picam2.stop_preview()
+        self.stop_preview()
 
         # Stop the camera
         self.__picam2.close()

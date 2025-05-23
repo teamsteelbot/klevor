@@ -51,18 +51,17 @@ class Logger:
             # Set the write log event
             self.__write_log_event.set()
 
-    def get_message(self):
+    def __get_message(self):
         """
         Get a message from the queue.
 
         Returns:
             str: Message from the queue.
         """
-        with self.__lock:
-            # Get the message from the queue
-            return self.__messages_queue.get()
+        # Get the message from the queue
+        return self.__messages_queue.get()
 
-    def log(self, message: str):
+    def __log(self, message: str):
         """
         Log a message to the log file.
 
@@ -80,15 +79,15 @@ class Logger:
         # Write the message to the log file
         self.__file.write(f"{unix_time}: {message}\n")
 
-    def log_last_message(self):
+    def log(self):
         """
         Log the last message to the log file.
         """
         # Get the last message from the queue
-        message = self.get_message()
+        message = self.__get_message()
 
         # Log the message
-        self.log(message)
+        self.__log(message)
 
     def open(self):
         """
@@ -150,7 +149,7 @@ def main(logger:Logger) -> None:
         write_log_event.wait()
 
         # Log the last message
-        logger.log_last_message()
+        logger.log()
 
         # Clear the write log event
         write_log_event.clear()
