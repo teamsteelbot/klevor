@@ -1,4 +1,4 @@
-from multiprocessing import Event, Queue, Lock, Value
+from multiprocessing import Event, Queue, Lock
 from threading import Thread
 
 import serial
@@ -44,6 +44,12 @@ class Message:
         # Set the message content
         self.__content = message_content
 
+    def __str__(self):
+        """
+        String representation of the message.
+        """
+        return f"{self.__type}{MESSAGE_HEADER_SEPARATOR}{self.__content}{MESSAGE_END}"
+
     def get_type(self) -> str:
         """
         Get the message type.
@@ -55,12 +61,6 @@ class Message:
         Get the message content.
         """
         return self.__content
-
-    def __repr__(self):
-        """
-        String representation of the message.
-        """
-        return f"{self.__type}{MESSAGE_HEADER_SEPARATOR}{self.__content}{MESSAGE_END}"
 
 class SerialCommunication:
     """
@@ -109,7 +109,7 @@ class SerialCommunication:
         self.__pending_outgoing_message_event = Event()
 
         # Create the last incoming message
-        self.__last_incoming_message = Value()
+        self.__last_incoming_message = None
 
         # Set the serial port and baud rate
         self.__port = port
@@ -148,7 +148,7 @@ class SerialCommunication:
             self.__clear_events()
 
             # Clear the last incoming message
-            self.__last_incoming_message.value = None
+            self.__last_incoming_message = None
 
             # Create the incoming and outgoing messages queues
             self.__incoming_messages_queue = Queue()
@@ -175,7 +175,7 @@ class SerialCommunication:
             self.__clear_events()
 
             # Clear the last incoming message
-            self.__last_incoming_message.value = None
+            self.__last_incoming_message = None
 
             # Close the queues
             self.__incoming_messages_queue.close()
@@ -194,7 +194,7 @@ class SerialCommunication:
             self.__outgoing_messages_queue.put(message)
 
             # Set the last incoming message
-            self.__last_incoming_message.value = message
+            self.__last_incoming_message = message
 
             # Set the pending incoming message event
             self.__pending_incoming_message_event.set()
@@ -223,7 +223,7 @@ class SerialCommunication:
         """
         with self.__lock:
             if self.__is_open():
-                return self.__last_incoming_message.value
+                return self.__last_incoming_message
 
     def put_outgoing_message(self, message: Message):
         """

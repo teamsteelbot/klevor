@@ -1,18 +1,15 @@
 import argparse
-from multiprocessing import Process, Manager
+from multiprocessing import Process, Manager, Event
 from threading import Thread
 
-from args import parse_args_as_dict
-from raspberry_pi_pico2 import SerialCommunication
-from yolo import ARGS_YOLO_INPUT_MODEL, ARGS_YOLO_VERSION
-from yolo.args import add_yolo_input_model_argument, add_yolo_version_argument
+from args import parse_args_as_dict, get_attribute_from_args
+from raspberry_pi_pico2 import SerialCommunication, main as serial_communication_main
+from yolo import ARGS_YOLO_VERSION, ARGS_DEBUG
+from yolo.args import add_yolo_version_argument, add_debug_argument
 from yolo.files import get_log_file_path
 from yolo.hailo.object_detection import main as object_detection_main
 from camera.images_queue import main as images_queue_main, ImagesQueue
-from raspberry_pi_pico2.__init__ import main as serial_communication_main
 from log import main as log_main, Logger
-
-
 
 def process_1_fn(serial_communication: SerialCommunication):
     """
@@ -37,22 +34,41 @@ def process_2_fn(images_queue: ImagesQueue, logger: Logger):
         raise TypeError("logger must be an instance of Logger")
 
     # Creating threads
-    thread1 = Thread(target=images_queue_main, args=(images_queue,))
-    thread2 = Thread(target=log_main, args=(logger,))
+    pool = [
+        Thread(target=images_queue_main, args=(images_queue,)),
+        Thread(target=log_main, args=(logger,))
+    ]
 
     # Starting threads
-    thread1.start()
-    thread2.start()
+    for thread in pool:
+        thread.start()
 
     # Waiting for threads to finish
-    thread1.join()
-    thread2.join()
+    for thread in pool:
+        thread.join()
 
-def process_3_fn(hailo):
+def process_3_fn(debug: bool, yolo_version: str, images_queue: ImagesQueue, stop_event: Event):
     """
-    Process 3: Object detection using YOLO.
+    Process 3: Hailo object detection.
     """
-    hailo_main(hailo)
+    # Check the debug mode
+    if not isinstance(debug, bool):
+        raise TypeError("debug must be a boolean")
+
+    # Check the type of yolo version
+    if not isinstance(yolo_version, str):
+        raise TypeError("yolo_version must be a string")
+
+    # Check the type of images queue
+    if not isinstance(images_queue, ImagesQueue):
+        raise TypeError("images_queue must be an instance of ImageQueue")
+
+    # Check the type of stop event
+    if not isinstance(stop_event, Event):
+        raise TypeError("stop_event must be an instance of Event")
+
+    object_detection_main(debug, yolo_version, images_queue, stop_event)
+
 
 def main():
     """
@@ -61,10 +77,14 @@ def main():
     parser = argparse.ArgumentParser(
         description="Klevor - WRO 2025 - Future Engineers Car")
     add_yolo_version_argument(parser)
+    add_debug_argument(parser)
     args = parse_args_as_dict(parser)
 
     # Get the YOLO version
-    arg_yolo_version = args.get(ARGS_YOLO_VERSION)
+    arg_yolo_version = get_attribute_from_args(args, ARGS_YOLO_VERSION)
+
+    # Get the debug mode
+    arg_debug = get_attribute_from_args(args, ARGS_DEBUG)
 
     # Create a manager for shared objects
     with Manager() as manager:
@@ -86,9 +106,6 @@ def main():
         # Raspberry Pi Pico serial communication wrapper with multiprocessing safety
         serial_communication = manager.SerialCommunication(stop_event, logger, images_queue)
 
-        # Create the Hailo object detection wrapper with multiprocessing safety
-        #object_detection = manager.ObjectDetection(arg_yolo_input_model, arg_yolo_version, images_queue, stop_event)
-
         # Start the first process
         process_1 = Process(target=process_1_fn, args=(serial_communication,))
         process_1.start()
@@ -100,7 +117,7 @@ def main():
         process_2.join()
 
         # Start the third process
-        process_3 = Process(target=process_3_fn, args=(hailo,))
+        process_3 = Process(target=process_3_fn, args=(arg_debug, arg_yolo_version, images_queue, stop_event))
         process_3.start()
         process_3.join()
 

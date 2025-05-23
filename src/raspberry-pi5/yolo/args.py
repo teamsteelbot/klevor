@@ -2,7 +2,7 @@ from args import get_attribute_name
 from yolo import (ARGS_YOLO_INPUT_MODEL, ARGS_YOLO_FORMAT, ARGS_YOLO_QUANTIZED, ARGS_YOLO_VERSION, YOLO_VERSION_5,
                   YOLO_FORMAT_PT, ARGS_YOLO_RETRAINING, ARGS_YOLO_OUTPUT_MODEL, ARGS_YOLO_CLASSES,
                   ARGS_YOLO_IGNORE_CLASSES, ARGS_YOLO_EPOCHS, ARGS_YOLO_DEVICE, ARGS_YOLO_INPUT_MODEL_PT,
-                  ARGS_YOLO_IMAGE_SIZE, YOLO_MODELS_NAME, YOLO_VERSIONS, YOLO_FORMATS)
+                  ARGS_YOLO_IMAGE_SIZE, YOLO_MODELS_NAME, YOLO_VERSIONS, YOLO_FORMATS, ARGS_DEBUG)
 
 def add_yolo_input_model_argument(parser) -> None:
     """
@@ -85,3 +85,11 @@ def add_yolo_image_size_argument(parser, required:bool=True) -> None:
     Add YOLO image size argument to the parser.
     """
     parser.add_argument(get_attribute_name(ARGS_YOLO_IMAGE_SIZE), type=int, required=required, help='YOLO image size', default=640)
+
+def add_debug_argument(parser, default:bool=False) -> None:
+    """
+    Add debug argument to the parser.
+    """
+    parser.add_argument(f"--no-{ARGS_DEBUG}", dest=ARGS_DEBUG, action="store_false", help="Set debug flag as 'False'")
+    parser.add_argument(f"--{ARGS_DEBUG}", dest=ARGS_DEBUG, action="store_true", help="Set debug flag as 'True'")
+    parser.set_defaults(**{ARGS_DEBUG: default})
