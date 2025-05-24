@@ -13,10 +13,12 @@
    8. [INJORA MB100 20A mini ESC](#componentes-injora-mb100-20a-mini-esc) 
    9. [URGENEX 7.4V Battery](#componentes-urgenex-74v-battery) 
    10. [INJORA 7KG 2065 Micro Servo](#componentes-injora-7kg-2065-micro-servo) 
-   11. [HitLego Time-of-Flight Sensor VL53L0X](#sensor-tof-hitlego)
+   11. [HiLetgo Time-of-Flight Sensor VL53L0X](#sensor-tof-hiletgo)
+   12. [9-Axis IMU Gyroscope GY-BNO085](#gyroscope-gy-bno085)
 4. **[Lenguajes de Programación](#lenguajes-de-programacion)**
    1. [Python](#python)
    2. [MicroPython](#micropython)
+   3. [CircuitPython](#circuitpython)
 5. **[Modelos 3D](models/README.md)**
 6. **[Diagramas y esquemas](schemes/README.md)**
    1. [Diagrama de conexiones](#schemes/connection-diagram.jpg)
@@ -52,7 +54,7 @@ Actualmente, este equipo está conformado por 3 miembros:
 
 - `v-photos` contiene las fotos de Klevor.
 
-- `video` contiene los vídeos de Klevor en la pista, tanto en el Desafío Abierto como en el Desafío con Obstáculos (Desafío Abierto).
+- `video` contiene los vídeos de Klevor en la pista, tanto en el Desafío Abierto como en el Desafío con Obstáculos (Desafío Cerrado).
 
 <h1 id="componentes">Componentes</h1>
 
@@ -262,10 +264,10 @@ No sólo estos aspectos definieron la elección, el INJORA 7KG 2065 ofrece tambi
 | Ancho      | 13 mm     |
 | Peso       | 20 g      |
 
-<h2 id="sensor-tof-hitlego">HitLego Time-of-Flight Sensor VL53L0X</h2>
+<h2 id="sensor-tof-hiletgo">HiLetgo Time-of-Flight Sensor VL53L0X</h2>
 
 <p align="center">
-  <img src="https://i.postimg.cc/tJKzWrmG/61-Y5-Qt-Pu-NGL-SX466-removebg-preview.png" alt="sensor-tof-hitlego" width="200">
+  <img src="https://i.postimg.cc/tJKzWrmG/61-Y5-Qt-Pu-NGL-SX466-removebg-preview.png" alt="sensor-tof-hiletgo" width="200">
 </p>
 
 El sensor VL53L0X en sí mismo es un pequeño sensor de distancia muy popular que utiliza la tecnología Time-of-Flight (ToF) para medir la distancia a un objeto. El sensor VL53L0X emite un pulso de luz láser infrarroja invisible y mide el tiempo que tarda en regresar al sensor. 
@@ -278,6 +280,22 @@ Estos sensores son una buena alternativa a los sensores ultrasónicos como el HC
 | Alto       | 1 mm      |
 | Ancho      | 10.7 mm   |
 | Peso       | 0.8 g     |
+
+<h2 id="gyroscope-gy-bno085">9-Axis IMU Gyroscope GY-BNO085</h2>
+
+<p align="center">
+  <img src="https://i.postimg.cc/Y9WJnxvg/gyroscope-removebg-preview.png"
+  alt="gyroscope-gy-bno085" width="200">
+</p>
+
+El GY-BNO085 es un sensor de orientación inercial (IMU) de 9 Grados de Libertad (9DOF), ampliamente utilizado en aplicaciones que requieren un seguimiento de movimiento preciso. En el caso de Klevor, optamos por utilizar este sensor para poder lograr una mayor autonomía del robot en los cruces, ya que este sensor le permite alinearse casi perfectamente y poder ajustarse.
+
+| **Medida** | **Valor** |
+|------------|-----------|
+| Largo      | 25.75 mm  |
+| Alto       | 15.5 mm   |
+| Ancho      | 1.8 mm    |
+| Peso       | 3 g       |
 
 <h1 id="lenguajes-de-programacion">Lenguajes de Programación</h1>
 
@@ -302,6 +320,16 @@ La ventaja principal de Python es la versatilidad, pues no necesitamos administr
 MicroPython es una implementación de Python en microcontroladores, a pesar de estar escrito en en el lenguaje de programación C, éste replica todas las funciones de Python en microcontroladores como la ESP32 y ESP8266.
 
 En el caso de Klevor, utilizamos MicroPython en la Raspberry Pi Pico 2 WH, para permitir una comunicación más eficiente entre la Raspberry Pi 5 y la Raspberry Pi Pico 2 WH. [[19](#lenguaje-micropython)]
+
+<h2 id="circuitpython">CircuitPython</h2>
+
+<p align="center">
+    <img src="https://i.postimg.cc/G2GdpCfL/Adafruit-blinka-angles-left-svg.png" alt="CircuitPython" width="200">
+</p>
+
+CircuitPython es una ramificación de MicroPython diseñada para ser compatibles con microcontroladores pequeños y baratos. [[21](#circuit-python)]
+
+Debido a unos problemas de compatibilidad con la librería del giroscopio GY-BNO085 de Adafruit, ya que ésta estaba diseñada para ser utilizada con CircuitPython, decidimos utilizar CircuitPython en la Raspberry Pi Pico para evitar estos problemas de compatibilidad y no tener que modificar la librería casi en su totalidad.
 
 # Recursos Externos
 
@@ -345,3 +373,5 @@ En el caso de Klevor, utilizamos MicroPython en la Raspberry Pi Pico 2 WH, para 
 19. *El tutorial de Python*. (2025). Python Software Fundation. <a id="lenguaje-python">https://docs.python.org/es/3/tutorial/</a>
 
 20. *Qué es MicroPython, el lenguaje de programación que ya puedes usar en tu Arduino.* (2022). GenBeta. <a id="lenguaje-micropython">https://www.genbeta.com/desarrollo/que-micropython-lenguaje-programacion-que-puedes-usar-tu-arduino-probar-tu-navegador</a>
+
+21. *CircuitPython*. (2025). CircuitPython. <a id="circuitpython">https://docs.circuitpython.org/en/latest/README.html</a>
