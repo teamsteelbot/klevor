@@ -3,41 +3,51 @@ from multiprocessing import Queue, Event, Lock
 from PIL.Image import Image
 
 from camera import Camera
+from log import Logger
+from model.image_bounding_boxes import ImageBoundingBoxes
+
 
 class ImagesQueue:
     """
     Queue for images to be processed.
     """
     __lock = None
+    __logger = None
     __camera = None
     __capture_image_event = None
-    __pending_image_event = None
-    __pending_inference_event = None
+    __pending_input_image_event = None
+    __pending_output_inference_event = None
     __input_images_queue = None
     __output_inference_queue = None
     __stop_event = None
 
-    def __init__(self, camera: Camera):
+    def __init__(self, stop_event: Event, logger: Logger, camera: Camera):
         """
         Initialize the images queue.
         """
         # Initialize the lock
         self.__lock = Lock()
 
-        # Initialize the queues
-        self.__input_images_queue = Queue()
-        self.__output_inference_queue = Queue()
+        # Check the type of the stop event
+        if not isinstance(stop_event, Event):
+            raise ValueError("stop_event must be an instance of Event")
+        self.__stop_event = stop_event
 
-        # Initialize the camera
+        # Check the type of the logger
+        if not isinstance(logger, Logger):
+            raise ValueError("logger must be an instance of Logger")
+        self.__logger = logger
+
+        # Check the type of the camera
         if not isinstance(camera, Camera):
             raise ValueError("camera must be an instance of Camera")
         self.__camera = camera
 
         # Initialize the events
         self.__capture_image_event = Event()
-        self.__pending_image_event = Event()
-        self.__pending_inference_event = Event()
-        self.__stop_event = Event()
+        self.__pending_input_image_event = Event()
+        self.__pending_output_inference_event = Event()
+        self.__stop_event = stop_event
 
     def put_input_image(self, image: Image) -> None:
         """
@@ -47,23 +57,27 @@ class ImagesQueue:
             # Put image in input images queue
             self.__input_images_queue.put(image)
 
-            # Set the pending image event
-            self.__pending_image_event.set()
+            # Set the pending input image event
+            self.__pending_input_image_event.set()
 
     def get_input_image(self) -> Image|None:
         """
         Get image from input images queue.
         """
         with self.__lock:
-            # Check the input images queue size
-            if self.__input_images_queue.empty():
-                # Clear the pending image event
-                self.__pending_image_event.clear()
+            # Check if the pending input image event is set
+            if self.__pending_input_image_event.is_set():
                 return None
-
-            return self.__input_images_queue.get()
-
-    def put_output_inference(self, inference) -> None:
+            
+            # Get the image from input images queue
+            image = self.__input_images_queue.get()
+            
+            # Clear the pending input image event
+            if self.__input_images_queue.empty():
+                self.__pending_input_image_event.clear()
+            return image
+        
+    def put_output_inference(self, inference:ImageBoundingBoxes) -> None:
         """
         Put inference in output inference queue.
         """
@@ -71,21 +85,25 @@ class ImagesQueue:
             # Put inference in output inference queue
             self.__output_inference_queue.put(inference)
 
-            # Set the pending inference event
-            self.__pending_inference_event.set()
+            # Set the pending output inference event
+            self.__pending_output_inference_event.set()
 
-    def get_output_inference(self):
+    def get_output_inference(self) -> ImageBoundingBoxes|None:
         """
         Get inference from output inference queue.
         """
         with self.__lock:
-            # Check the output inference queue size
-            if self.__output_inference_queue.empty():
-                # Clear the pending inference event
-                self.__pending_inference_event.clear()
+            # Check if the pending output inference event is set
+            if self.__pending_output_inference_event.is_set():
                 return None
 
-            return self.__output_inference_queue.get()
+            # Get the inference from output inference queue
+            inference = self.__output_inference_queue.get()
+
+            # Clear the pending output inference event
+            if self.__output_inference_queue.empty():
+                self.__pending_output_inference_event.clear()
+            return inference
 
     def capture_image(self):
         """
@@ -105,58 +123,68 @@ class ImagesQueue:
 
     def get_pending_image_event(self) -> Event:
         """
-        Get pending image event.
+        Get pending input image event.
         """
-        return self.__pending_image_event
+        return self.__pending_input_image_event
 
     def get_pending_inference_event(self) -> Event:
         """
-        Get pending inference event.
+        Get pending output inference event.
         """
-        return self.__pending_inference_event
+        return self.__pending_output_inference_event
 
     def get_stop_event(self) -> Event:
         """
         Get stop event.
         """
         return self.__stop_event
+
+    def __clear_events(self):
+        """
+        Clear the events.
+        """
+        # Clear the events
+        self.__capture_image_event.clear()
+        self.__pending_input_image_event.clear()
+        self.__pending_output_inference_event.clear()
             
     def start(self):
         """
         Start the images queue.
         """
-        # Set the stop event
-        self.__stop_event.clear()
-        
-    def stop(self):
+        with self.__lock:
+            # Initialize the queues
+            self.__input_images_queue = Queue()
+            self.__output_inference_queue = Queue()
+    
+            # Clear the events
+            self.__clear_events()
+
+    def close(self):
         """
-        Stop the images queue.
+        Close the images queue.
         """
-        # Set the stop event
-        self.__stop_event.set()
+        with self.__lock:
+            # Close the queues
+            self.__input_images_queue.close()
+            self.__output_inference_queue.close()
+    
+            # Clear the events
+            self.__clear_events()
 
     def __del__(self):
         """
         Destructor for the images queue.
         """
-        # Close the queues
-        self.__input_images_queue.close()
-        self.__output_inference_queue.close()
-        
-        # Stop the images queue
-        self.stop()
-        
-        # Clear all events
-        self.__capture_image_event.clear()
-        self.__pending_image_event.clear()
-        self.__pending_inference_event.clear()
+        # Close the images queue
+        self.close()
 
 def main(images_queue: ImagesQueue=None):
     """
     Main function to run the script.
     """
-    # Check if the images queue is None
-    if isinstance(images_queue, ImagesQueue):
+    # Check the type of the images queue
+    if not isinstance(images_queue, ImagesQueue):
         raise ValueError("images_queue must be an instance of ImagesQueue")
 
     # Get the stop event
@@ -178,5 +206,5 @@ def main(images_queue: ImagesQueue=None):
         # Clear the capture image event
         capture_image_event.clear()
 
-    # Stop the images queue
-    images_queue.stop()
+    # Close the images queue
+    images_queue.close()

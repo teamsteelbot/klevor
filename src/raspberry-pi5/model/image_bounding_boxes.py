@@ -2,19 +2,25 @@ class ImageBoundingBoxes:
     """
     Custom class that represents the detected objects bounding boxes from a YOLO model on an image.
     """
+    __xywh = None
+    __xywhn = None
+    __xyxy = None
+    __xyxyn = None
+    __cls = None
+    __conf = None
+    __n = None
 
-    def __init__(self, boxes):
+    def __init__(self, xwyhn=None, xyxy=None, xywh=None, xyxyn=None, cls=None, conf=None, n=None):
         """
         Constructor.
         """
-        # Get the bounding box coordinates
-        self.__xywh = boxes.xywh.cpu().numpy()
-        self.__xywhn = boxes.xywhn.cpu().numpy()
-        self.__xyxy = boxes.xyxy.cpu().numpy()
-        self.__xyxyn = boxes.xyxyn.cpu().numpy()
-        self.__cls = boxes.cls.cpu().numpy()
-        self.__conf = boxes.conf.cpu().numpy()
-        self.__n = len(self.__cls)
+        self.__xywh = xywh
+        self.__xywhn = xwyhn
+        self.__xyxy = xyxy
+        self.__xyxyn = xyxyn
+        self.__cls = cls
+        self.__conf = conf
+        self.__n = n
 
     def __str__(self):
         """
@@ -30,6 +36,57 @@ class ImageBoundingBoxes:
             ]
             bounding_boxes.append(f"Box {i + 1}:\n\t" + "\n\t".join(bounding_box_attributes))
         return "\n".join(bounding_boxes)
+
+    @staticmethod
+    def from_pt_cpu(boxes):
+        """
+        Initialize a new ImageBoundingBoxes instances from a PyTorch CPU tensor.
+
+        Args:
+            boxes (torch.Tensor): The bounding boxes tensor.
+
+        Returns:
+            ImageBoundingBoxes: An instance containing the bounding boxes, classes, and confidences.
+        """
+        return ImageBoundingBoxes(
+            xywh=boxes.xywh.cpu().numpy(),
+            xywhn=boxes.xywhn.cpu().numpy(),
+            xyxy=boxes.xyxy.cpu().numpy(),
+            xyxyn=boxes.xyxyn.cpu().numpy(),
+            cls=boxes.cls.cpu().numpy(),
+            conf=boxes.conf.cpu().numpy(),
+            n=len(boxes.cls)
+        )
+
+    @staticmethod
+    def from_hailo(input_data: list, threshold: float = 0.5):
+        """
+        Extract detections from the input data.
+
+        Args:
+            input_data (list): Raw detections from the model.
+            threshold (float): Score threshold for filtering detections. Defaults to 0.5.
+
+        Returns:
+            ImageBoundingBoxes: An instance containing the bounding boxes, classes, and confidences.
+        """
+        boxes, scores, classes = [], [], []
+        num_detections = 0
+
+        for i, detection in enumerate(input_data):
+            if len(detection) == 0:
+                continue
+
+            for det in detection:
+                bbox, score = det[:4], det[4]
+
+                if score >= threshold:
+                    boxes.append(bbox)
+                    scores.append(score)
+                    classes.append(i)
+                    num_detections += 1
+
+        return ImageBoundingBoxes(n=num_detections, xyxy=boxes, cls=classes, conf=scores)
 
     def get_number_of_objects(self):
         """

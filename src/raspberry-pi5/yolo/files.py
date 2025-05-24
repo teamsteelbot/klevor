@@ -5,9 +5,10 @@ from typing import LiteralString
 from yolo import (YOLO_DATASET, YOLO_DATASET_GENERAL, YOLO_DIR, YOLO_RUNS, YOLO_WEIGHTS, BEST_PT,
                   YOLO_ZIP, YOLO_COLAB, YOLO_DATA, YOLO_NOTEBOOKS, YOLO_LOCAL, YOLO_RUNS_OLD,
                   YOLO_TF_RECORDS, YOLO_DATASET_NOTES_JSON, YOLO_DATASET_CLASSES_TXT, YOLO_HAILO,
-                  YOLO_SUITE, BEST_ONNX, YOLO_HAILO_MODEL_ZOO, YOLO_LIBS, YOLO_CALIB, check_model_name,
+                  YOLO_HAILO_SUITE, BEST_ONNX, YOLO_HAILO_MODEL_ZOO, YOLO_HAILO_LIBS, YOLO_HAILO_CALIB,
+                  check_model_name,
                   check_dataset_status, check_model_dataset_status, check_dataset_name, check_model_dataset_name,
-                  check_yolo_version, LOGS_DIR)
+                  check_yolo_version, LOGS_DIR, YOLO_HAILO_LABELS)
 
 def get_dataset_model_dir_path(dataset_name: str, dataset_status: str|None, model_name: str|None) -> LiteralString | str | bytes:
     """
@@ -221,11 +222,20 @@ def get_yolo_dataset_classes_file_path(dataset_name: str, dataset_status: str|No
 
     return os.path.join(dataset_model_dir_path, YOLO_DATASET_CLASSES_TXT)
 
+def get_hailo_dir_path() -> LiteralString | str | bytes:
+    """
+    Get the Hailo folder path.
+    """
+    return os.path.join(YOLO_DIR, YOLO_HAILO)
+
 def get_hailo_suite_dir_path() -> LiteralString | str | bytes:
     """
     Get the Hailo Suite folder path.
     """
-    return os.path.join(YOLO_DIR, YOLO_HAILO, YOLO_SUITE)
+    # Get the Hailo folder path
+    hailo_dir = get_hailo_dir_path()
+
+    return os.path.join(hailo_dir, YOLO_HAILO_SUITE)
 
 def get_model_hailo_suite_dir_path(model_name: str, yolo_version: str) -> LiteralString | str | bytes:
     """
@@ -251,23 +261,86 @@ def get_model_hailo_suite_file_path(model_name: str, yolo_version: str, filename
 
     return os.path.join(model_hailo_suite_dir, filename)
 
-def get_model_parsed_har_file_name(model_name: str) -> LiteralString | str | bytes:
+def get_model_hailo_suite_parsed_har_file_name(model_name: str) -> LiteralString | str | bytes:
     """
     Get the Hailo Suite parsed filename.
     """
     return f'{model_name}_parsed.har'
 
-def get_model_optimized_har_file_name(model_name: str) -> LiteralString | str | bytes:
+def get_model_hailo_suite_optimized_har_file_name(model_name: str) -> LiteralString | str | bytes:
     """
     Get the Hailo Suite optimized filename.
     """
     return f'{model_name}_optimized.har'
 
-def get_model_compiled_hef_file_name(model_name: str) -> LiteralString | str | bytes:
+def get_model_hailo_suite_compiled_hef_file_name(model_name: str) -> LiteralString | str | bytes:
     """
     Get the Hailo Suite compiled filename.
     """
     return f'{model_name}_compiled.hef'
+
+def get_model_hailo_suite_parsed_har_file_path(model_name: str, yolo_version: str) -> LiteralString | str | bytes:
+    """
+    Get the model Hailo Suite parsed file path.
+    """
+    # Get the model Hailo Suite path
+    model_hailo_suite_dir = get_model_hailo_suite_dir_path(model_name, yolo_version)
+
+    # Get the Hailo Suite parsed filename
+    model_hailo_suite_parsed_har_file_name = get_model_hailo_suite_parsed_har_file_name(model_name)
+
+    return os.path.join(model_hailo_suite_dir, model_hailo_suite_parsed_har_file_name)
+
+def get_model_hailo_suite_optimized_har_file_path(model_name: str, yolo_version: str) -> LiteralString | str | bytes:
+    """
+    Get the model Hailo Suite optimized file path.
+    """
+    # Get the model Hailo Suite path
+    model_hailo_suite_dir = get_model_hailo_suite_dir_path(model_name, yolo_version)
+
+    # Get the Hailo Suite optimized filename
+    model_hailo_suite_optimized_har_file_name = get_model_hailo_suite_optimized_har_file_name(model_name)
+
+    return os.path.join(model_hailo_suite_dir, model_hailo_suite_optimized_har_file_name)
+
+def get_model_hailo_suite_compiled_hef_file_path(model_name: str, yolo_version: str) -> LiteralString | str | bytes:
+    """
+    Get the model Hailo Suite compiled file path.
+    """
+    # Get the model Hailo Suite path
+    model_hailo_suite_dir = get_model_hailo_suite_dir_path(model_name, yolo_version)
+
+    # Get the Hailo Suite compiled filename
+    model_hailo_suite_compiled_hef_file_name = get_model_hailo_suite_compiled_hef_file_name(model_name)
+
+    return os.path.join(model_hailo_suite_dir, model_hailo_suite_compiled_hef_file_name)
+
+def get_model_weights_parsed_har_file_path(model_name: str, yolo_version: str) -> LiteralString | str | bytes:
+    """
+    Get the model weights parsed file path.
+    """
+    # Get the model weights directory path
+    model_weights_dir = get_model_weight_dir_path(model_name, yolo_version)
+
+    return os.path.join(model_weights_dir, 'parsed.har')
+
+def get_model_weights_optimized_har_file_path(model_name: str, yolo_version: str) -> LiteralString | str | bytes:
+    """
+    Get the model weights optimized file path.
+    """
+    # Get the model weights directory path
+    model_weights_dir = get_model_weight_dir_path(model_name, yolo_version)
+
+    return os.path.join(model_weights_dir, 'optimized.har')
+
+def get_model_weights_compiled_hef_file_path(model_name: str, yolo_version: str) -> LiteralString | str | bytes:
+    """
+    Get the model weights compiled file path.
+    """
+    # Get the model weights directory path
+    model_weights_dir = get_model_weight_dir_path(model_name, yolo_version)
+
+    return os.path.join(model_weights_dir, 'compiled.hef')
 
 """
 # Get the Hailo Suite parsed filename
@@ -290,7 +363,7 @@ def get_hailo_suite_calib_dir_path() -> LiteralString | str | bytes:
     # Get the model Hailo Suite path
     model_hailo_suite_dir = get_hailo_suite_dir_path()
 
-    return os.path.join(model_hailo_suite_dir, YOLO_CALIB)
+    return os.path.join(model_hailo_suite_dir, YOLO_HAILO_CALIB)
 
 def get_hailo_suite_calib_file_path() -> LiteralString | str | bytes:
     """
@@ -299,13 +372,13 @@ def get_hailo_suite_calib_file_path() -> LiteralString | str | bytes:
     # Get the Hailo Suite calibration set folder path
     hailo_suite_calib_dir = get_hailo_suite_calib_dir_path()
 
-    return os.path.join(hailo_suite_calib_dir, YOLO_CALIB + '.npy')
+    return os.path.join(hailo_suite_calib_dir, YOLO_HAILO_CALIB + '.npy')
 
 def get_hailo_model_zoo_dir_path() -> LiteralString | str | bytes:
     """
     Get the Hailo Model Zoo path
     """
-    return os.path.join(YOLO_DIR, YOLO_HAILO, YOLO_SUITE, YOLO_LIBS, YOLO_HAILO_MODEL_ZOO)
+    return os.path.join(YOLO_DIR, YOLO_HAILO, YOLO_HAILO_SUITE, YOLO_HAILO_LIBS, YOLO_HAILO_MODEL_ZOO)
 
 def get_log_file_path() -> LiteralString | str | bytes:
     """
@@ -315,3 +388,24 @@ def get_log_file_path() -> LiteralString | str | bytes:
     unix_timestamp = int(time())
 
     return os.path.join(LOGS_DIR, f'{unix_timestamp}.txt')
+
+def get_hailo_labels_dir_path() -> LiteralString | str | bytes:
+    """
+    Get the Hailo labels folder path.
+    """
+    # Get the Hailo folder path
+    hailo_dir = get_hailo_dir_path()
+
+    return os.path.join(hailo_dir, YOLO_HAILO_LABELS)
+
+def get_hailo_labels_file_path(model_name: str) -> LiteralString | str | bytes:
+    """
+    Get the Hailo labels file path.
+    """
+    # Check the validity of the model name
+    check_model_name(model_name)
+
+    # Get the Hailo labels folder path
+    hailo_labels_dir = get_hailo_labels_dir_path()
+
+    return os.path.join(hailo_labels_dir, model_name+'.txt')
