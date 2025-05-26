@@ -19,6 +19,13 @@
    1. [Python](#python)
    2. [MicroPython](#micropython)
    3. [CircuitPython](#circuitpython)
+4. **[Librerías](#librerias)**
+   1. [Ultralytics YOLO](#ultralytics-yolo)
+   2. [OpenCV](#opencv)
+   3. [Numpy](#numpy)
+   4. [Pytorch](#pytorch)
+   5. [PiCamera2](#picamera2)
+   6. [Hailo Platform](#hailo-platform)
 5. **[Modelos 3D](models/README.md)**
 6. **[Diagramas y esquemas](schemes/README.md)**
    1. [Diagrama de conexiones](#schemes/connection-diagram.jpg)
@@ -330,6 +337,37 @@ En el caso de Klevor, utilizamos MicroPython en la Raspberry Pi Pico 2 WH, para 
 CircuitPython es una ramificación de MicroPython diseñada para ser compatibles con microcontroladores pequeños y baratos. [[21](#circuit-python)]
 
 Debido a unos problemas de compatibilidad con la librería del giroscopio GY-BNO085 de Adafruit, ya que ésta estaba diseñada para ser utilizada con CircuitPython, decidimos utilizar CircuitPython en la Raspberry Pi Pico para evitar estos problemas de compatibilidad y no tener que modificar la librería casi en su totalidad.
+
+<h1 id="librerias">Librerías</h1> 
+
+<h2 id="ultralytics-yolo">Ultralytics YOLO</h2>
+
+
+La librería Ultralytics YOLO está construida sobre PyTorch y se caracteriza por su modularidad y su enfoque en la eficiencia y la facilidad de uso. Todo gira en torno a la clase YOLO, que encapsula todas las funcionalidades clave. En su núcleo se basa en los modelos YOLO (You Only Look Once) originales, que, a diferencia de los algoritmos de dos etapas (primero proponen regiones y luego la clasifica) los modelos YOLO se caracterizan por su detección de objetos de una pasada en la red neuronal, dándole una gran velocidad de detección.
+
+Clase YOLO: Es la interfaz principal para interactuar con los modelos. Permite cargar modelos pre-entrenados, construir nuevos modelos desde cero, entrenar, validar, realizar inferencias, exportar y rastrear objetos. Además de la clase,la librería contiene múltiples modos para  poder organizar todas sus funciones (como `train`, `val`, `predict` o `export`)
+
+Detección de Objetos: La tarea central de YOLO. Identifica la ubicación de objetos en una imagen/video mediante cajas delimitadoras (bounding boxes) y asigna una clase a cada objeto. Los modelos están disponibles en diferentes tamaños (Nano `n`, Small `s`, Medium `m`, Large `l`, XLarge `x`) para escalar según las necesidades de rendimiento y precisión. Si bien la librería contiene múltiples usos, en el caso de Klevor utilizamos la Detección de Objetos para poder detectar e identificar los obstáculos.
+
+<h2 id="opencv">OpenCV</h2>
+
+OpenCV (Open Source Computer Vision Library) es una de las librerías de software más populares y potentes del mundo para la visión por computadora y el aprendizaje automático (Machine Learning). Fue desarrollada inicialmente por Intel y ahora es mantenida por una comunidad global activa. En su esencia, OpenCV es una colección masiva de algoritmos y funciones que te permiten procesar imágenes y videos, extraer información de ellos y hacer que las computadoras "vean" y "entiendan" el mundo visual de una manera similar a como lo hacen los humanos.
+
+Su propósito principal es proporcionar una infraestructura común para aplicaciones de visión por computadora y acelerar el uso de la percepción automática en productos comerciales, investigación y desarrollo.
+
+<h2 id="numpy">NumPy</h2>
+
+La librería NumPy o Numerical Python es una librería la cual contiene muchísimas funciones utilizadas ampliamente en el ecosistema de Python, gracias a esta librería, otras más populares y más flexibles como TensorFlow y PyTorch pudieron ser construidas. Esta librería se basa en la computación numérica y científica en Python.
+
+El propósito general es permitir operaciones numéricas rápidas y eficientes en grandes cantidades de datos. Estos cálculos tan extensos, se utilizan para el procesamiento de imágenes de Klevor, aunque también tiene usos como el análisis de datos.
+
+<h2 id="pytorch">Pytorch</h2>
+
+PyTorch es un framework
+
+<h2 id="picamera2">PiCamera 2</h2>
+
+<h2 id="hailo-platform">Hailo Platform</h2>
 
 # Recursos Externos
 
