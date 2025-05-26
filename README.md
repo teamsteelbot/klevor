@@ -19,25 +19,25 @@
    1. [Python](#python)
    2. [MicroPython](#micropython)
    3. [CircuitPython](#circuitpython)
-4. **[Librerías](#librerias)**
+5. **[Librerías](#librerias)**
    1. [Ultralytics YOLO](#ultralytics-yolo)
    2. [OpenCV](#opencv)
-   3. [Numpy](#numpy)
-   4. [Pytorch](#pytorch)
-   5. [PiCamera2](#picamera2)
+   3. [NumPy](#numpy)
+   4. [PyTorch](#pytorch)
+   5. [PiCamera2](#picamera-2)
    6. [Hailo Platform](#hailo-platform)
-5. **[Modelos 3D](models/README.md)**
-6. **[Diagramas y esquemas](schemes/README.md)**
-   1. [Diagrama de conexiones](#schemes/connection-diagram.jpg)
+6. **[Modelos 3D](models/README.md)**
+7. **[Diagramas y esquemas](schemes/README.md)**
+   1. [Diagrama de conexiones](#schemes/Simplified-Connection-Diagram.png)
    2. [Esquema de decisiones](#schemes/flowchart.jpg)
-7. **[Código](src/README.md)**
+8. **[Código](src/README.md)**
    1. [Raspberry Pi 5](src/raspberry-pi5/README.md)
       1. [YOLO](src/raspberry-pi5/yolo/README.md)
    2. [Raspberry Pi Pico 2 WH](src/raspberry-pi-pico2/README.md)
-8. **[Fotos del equipo](t-photos/README.md)**
-9. **[Fotos de Klevor](v-photos/README.md)**
-10. **[Vídeos](video/README.md)**
-11. **[Recursos Externos](#recursos-externos)**
+9. **[Fotos del equipo](t-photos/README.md)**
+10. **[Fotos de Klevor](v-photos/README.md)**
+11. **[Vídeos](video/README.md)**
+12. **[Recursos Externos](#recursos-externos)**
 
 <h1 id="introduccion">Introducción</h1>
 
@@ -342,32 +342,68 @@ Debido a unos problemas de compatibilidad con la librería del giroscopio GY-BNO
 
 <h2 id="ultralytics-yolo">Ultralytics YOLO</h2>
 
+<p align="center">
+    <img src="https://i.postimg.cc/8cW6ZZSV/26833451.png" alt="ultralytics-yolo" width="200">
+</p>
 
 La librería Ultralytics YOLO está construida sobre PyTorch y se caracteriza por su modularidad y su enfoque en la eficiencia y la facilidad de uso. Todo gira en torno a la clase YOLO, que encapsula todas las funcionalidades clave. En su núcleo se basa en los modelos YOLO (You Only Look Once) originales, que, a diferencia de los algoritmos de dos etapas (primero proponen regiones y luego la clasifica) los modelos YOLO se caracterizan por su detección de objetos de una pasada en la red neuronal, dándole una gran velocidad de detección.
 
 Clase YOLO: Es la interfaz principal para interactuar con los modelos. Permite cargar modelos pre-entrenados, construir nuevos modelos desde cero, entrenar, validar, realizar inferencias, exportar y rastrear objetos. Además de la clase,la librería contiene múltiples modos para  poder organizar todas sus funciones (como `train`, `val`, `predict` o `export`)
 
-Detección de Objetos: La tarea central de YOLO. Identifica la ubicación de objetos en una imagen/video mediante cajas delimitadoras (bounding boxes) y asigna una clase a cada objeto. Los modelos están disponibles en diferentes tamaños (Nano `n`, Small `s`, Medium `m`, Large `l`, XLarge `x`) para escalar según las necesidades de rendimiento y precisión. Si bien la librería contiene múltiples usos, en el caso de Klevor utilizamos la Detección de Objetos para poder detectar e identificar los obstáculos.
+Detección de Objetos: La tarea central de YOLO. Identifica la ubicación de objetos en una imagen/video mediante cajas delimitadoras (bounding boxes) y asigna una clase a cada objeto. Los modelos están disponibles en diferentes tamaños (Nano `n`, Small `s`, Medium `m`, Large `l`, XLarge `x`) para escalar según las necesidades de rendimiento y precisión. Si bien la librería contiene múltiples usos, en el caso de Klevor utilizamos la Detección de Objetos para poder detectar e identificar los obstáculos. [[22](#ultralytics-yolo-docs)]
 
 <h2 id="opencv">OpenCV</h2>
 
+<p align="center">
+    <img src="https://i.postimg.cc/CKzdvcG6/Open-CV-logo-black-svg-removebg-preview.png" alt="opencv" width="200">
+</p>
+
 OpenCV (Open Source Computer Vision Library) es una de las librerías de software más populares y potentes del mundo para la visión por computadora y el aprendizaje automático (Machine Learning). Fue desarrollada inicialmente por Intel y ahora es mantenida por una comunidad global activa. En su esencia, OpenCV es una colección masiva de algoritmos y funciones que te permiten procesar imágenes y videos, extraer información de ellos y hacer que las computadoras "vean" y "entiendan" el mundo visual de una manera similar a como lo hacen los humanos.
 
-Su propósito principal es proporcionar una infraestructura común para aplicaciones de visión por computadora y acelerar el uso de la percepción automática en productos comerciales, investigación y desarrollo.
+Su propósito principal es proporcionar una infraestructura común para aplicaciones de visión por computadora y acelerar el uso de la percepción automática en productos comerciales, investigación y desarrollo.[[23](#opencv-documentation)]
 
 <h2 id="numpy">NumPy</h2>
 
+<p align="center">
+    <img src="https://i.postimg.cc/wTLX2jqs/Num-Py-logo-2020-svg.png" alt="numpy" width="200">
+</p>
+
 La librería NumPy o Numerical Python es una librería la cual contiene muchísimas funciones utilizadas ampliamente en el ecosistema de Python, gracias a esta librería, otras más populares y más flexibles como TensorFlow y PyTorch pudieron ser construidas. Esta librería se basa en la computación numérica y científica en Python.
 
-El propósito general es permitir operaciones numéricas rápidas y eficientes en grandes cantidades de datos. Estos cálculos tan extensos, se utilizan para el procesamiento de imágenes de Klevor, aunque también tiene usos como el análisis de datos.
+El propósito general es permitir operaciones numéricas rápidas y eficientes en grandes cantidades de datos.[[24](#numpy-documentation)]Estos cálculos tan extensos, se utilizan para el procesamiento de imágenes de Klevor, aunque también tiene usos como el análisis de datos.
 
 <h2 id="pytorch">Pytorch</h2>
 
-PyTorch es un framework
+<p align="center">
+    <img src="https://i.postimg.cc/mkGDgR00/Py-Torch-logo-black-svg-removebg-preview.png" alt="pytorch" width="200">
+</p>
 
-<h2 id="picamera2">PiCamera 2</h2>
+PyTorch es una librería de software de código abierto diseñada en el Aprendizaje Automático (Machine Learning), y, en particular para el Aprendizaje Profundo (Deep Learning). PyTorch se ha convertido en uno de los frameworks más populares para el desarrollo de las IA. [[25](#pytorch-documentation)]
+
+Al igual que muchas de las librerías ya mencionadas, PyTorch es bastante útil cuando se trata de desarrollar un programa que involucre Visión por Computadoras, o el Aprendizaje por Refuerzo. Ya que, facilitan el desarrollo de modelos de Inteligencia Artificial.
+
+<h2 id="picamera-2">PiCamera 2</h2>
+
+<p align="center">
+    <img src="https://i.postimg.cc/jjwd6LTp/Raspberry-Pi-Logo-svg.png" alt="picamera-2" width="200">
+</p>
+
+La librería PiCamera 2 es la sucesora de la `picamera` original, desarrollada por Raspberry Pi Foundation. [[26](#the-picamera2-library)] Esta librería permite la conexión entre la RPi Camera Module 3 y el Modelo de Detección de Obstáculos. Entre sus múltiples funciones se encuentran:
+
+- Obtener streams de video para procesamiento en tiempo real (por ejemplo, con OpenCV o NumPy).
+- Controlar diversos parámetros de la cámara (exposición, ganancia, balance de blancos, modos de enfoque, etc.).
+
+Además de, obviamente, permitir la toma de imágenes y videos
 
 <h2 id="hailo-platform">Hailo Platform</h2>
+
+<p align="center">
+    <img src="https://i.postimg.cc/WbNNW9j6/104fa2e233ff6083d630584510405aba146e9471-1.png" alt="hailo'platform" width="200">
+</p>
+
+Hailo Platform es un ecosistema tanto de hardware y software desarrollado por la empresa Hailo, este ecosistema está diseñado para llevar un modelo de Deep Learning desde su entrenamiento hasta su aplicación en tiempo real en periféricos. [[27](#hailo-ai-software-suite)]
+
+Además de esto, la Hailo Platform también incluye múltiples librerías, el objetivo principal de estas librerías (como HailoRT o PyHailoRT) es la de acelerar el proceso de desarrollo de extremo a extremo, tanto en la compilación y optimización hasta su uso en tiempo real.
 
 # Recursos Externos
 
@@ -413,3 +449,15 @@ PyTorch es un framework
 20. *Qué es MicroPython, el lenguaje de programación que ya puedes usar en tu Arduino.* (2022). GenBeta. <a id="lenguaje-micropython">https://www.genbeta.com/desarrollo/que-micropython-lenguaje-programacion-que-puedes-usar-tu-arduino-probar-tu-navegador</a>
 
 21. *CircuitPython*. (2025). CircuitPython. <a id="circuitpython">https://docs.circuitpython.org/en/latest/README.html</a>
+
+22. *Ultralytics Docs*. (2025). Ultralytics Inc. <a id="ultralytics-yolo-docs">https://docs.ultralytics.com/#where-to-start</a>
+
+23. *OpenCV Documentation*. (2025). OpenCV. <a id="opencv-documentation">https://docs.opencv.org/4.11.0/d1/dfb/intro.html</a>
+
+24. *NumPy Documentation*. (2024). NumPy Developers. <a id="numpy-documentation">https://numpy.org/doc/stable/user/index.html</a>
+
+25. *PyTorch Documentation*. (2025). PyTorch Contributors. <a id="pytorch-documentation">https://docs.pytorch.org/docs/stable/index.html</a>
+
+26. *The PiCamera 2 Library*. (2025). Raspberry Pi Ltd. <a id="the-picamera2-library">https://datasheets.raspberrypi.com/camera/picamera2-manual.pdf</a>
+
+27. *Hailo AI Software Suite*. (2025). Hailo Technologies Ltd. <a id="hailo-ai-software-suite">https://hailo.ai/products/hailo-software/hailo-ai-software-suite/#sw-overview</a>
