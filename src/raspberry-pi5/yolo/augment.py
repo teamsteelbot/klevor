@@ -4,10 +4,10 @@ import shutil
 
 from args import get_attribute_from_args, parse_args_as_dict
 from files import ensure_path_exists
-from opencv.image_augmentation import augment_images
+from opencv.image_augmentation import augment_image
 from yolo import (YOLO_NUM_AUGMENTATIONS, ARGS_YOLO_INPUT_MODEL,
                   YOLO_DATASET_LABELED, YOLO_DATASET_AUGMENTED, YOLO_DATASET_TO_PROCESS, YOLO_DATASET_PROCESSED,
-                  YOLO_DATASET_IMAGES, YOLO_DATASET_LABELS)
+                  YOLO_DATASET_IMAGES, YOLO_DATASET_LABELS, IMAGE_EXTENSIONS)
 from yolo.args import add_yolo_input_model_argument
 from yolo.files import get_dataset_model_dir_path
 
@@ -36,7 +36,7 @@ def augment_dataset(input_to_process_dir: str, output_augmented_dir: str, num_au
 
     # Get the image files
     image_filenames = [f for f in os.listdir(input_to_process_images_dir) if
-                       f.lower().endswith(('.png', '.jpg', '.jpeg'))]
+                       f.lower().endswith(IMAGE_EXTENSIONS)]
 
     # Augment each image
     for image_filename in image_filenames:
@@ -48,10 +48,10 @@ def augment_dataset(input_to_process_dir: str, output_augmented_dir: str, num_au
         input_to_process_annotations_path = os.path.join(input_to_process_annotations_dir, annotations_filename)
 
         if os.path.exists(input_to_process_annotations_dir):
-            augment_images(input_to_process_image_path, input_to_process_annotations_path,
-                           output_augmented_images_dir,
-                           output_augmented_annotations_dir, num_augmentations, output_processed_images_dir,
-                           output_processed_annotations_dir)
+            augment_image(input_to_process_image_path, input_to_process_annotations_path,
+                          output_augmented_images_dir,
+                          output_augmented_annotations_dir, num_augmentations, output_processed_images_dir,
+                          output_processed_annotations_dir)
         else:
             print(
                 f"Warning: Annotation file not found for {input_to_process_image_path}, annotation file should be at {input_to_process_annotations_path}")

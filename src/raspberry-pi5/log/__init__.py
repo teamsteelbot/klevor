@@ -1,6 +1,8 @@
 from time import time
 from multiprocessing import Lock, Event, Queue
 
+from env import get_debug_mode
+
 
 class Logger:
     """
@@ -134,6 +136,9 @@ def main(logger:Logger) -> None:
     # Check if the logger is None
     if not isinstance(logger, Logger):
         raise ValueError("logger must be an instance of Logger")
+
+    # Get the debug mode from the environment variable
+    debug = get_debug_mode()
 
     # Get the stop event
     stop_event = logger.get_stop_event()

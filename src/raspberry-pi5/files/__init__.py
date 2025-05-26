@@ -14,7 +14,7 @@ GOOGLE_DRIVE_API_CALL_DELAY = GOOGLE_DRIVE_API_LIMIT_PERIOD / GOOGLE_DRIVE_API_L
 BATCH_SIZE = 1000
 
 # Directories to ignore always
-IGNORE_DIRS = ['.git', '__pycache__', '.idea', '.vscode', '.venv', 'venv', 'env']
+IGNORE_DIRS = ('.git', '__pycache__', '.idea', '.vscode', '.venv', 'venv', 'env')
 
 def move_file(input_path, output_dir):
     """
@@ -80,3 +80,9 @@ def ensure_path_exists(output_path):
 
     # Ensure the output directory exists
     os.makedirs(output_dir, exist_ok=True)
+
+def check_path_exists(path):
+    """
+    Check if the path exists.
+    """
+    return os.path.exists(path)

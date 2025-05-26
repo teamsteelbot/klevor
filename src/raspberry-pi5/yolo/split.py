@@ -17,7 +17,7 @@ def split_dataset(input_dir: LiteralString, output_dir: LiteralString,
                   train_ratio=0.7,
                   val_ratio=0.2):
     """
-    Split the dataset into processed, validation, and testing sets.
+    Split the dataset into training, validation, and testing sets.
     """
     # Get the input images and annotations directories
     input_images_dir = os.path.join(input_dir, YOLO_DATASET_IMAGES)
@@ -50,7 +50,7 @@ def split_dataset(input_dir: LiteralString, output_dir: LiteralString,
 
     random.shuffle(image_filenames)
 
-    # Split the processed
+    # Split the dataset
     train_split = int(len(image_filenames) * train_ratio)
     val_split = int(len(image_filenames) * val_ratio)
 

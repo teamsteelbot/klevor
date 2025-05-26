@@ -1,10 +1,12 @@
 import argparse
+import os
 from multiprocessing import Process, Manager, Event
 from threading import Thread
 
 from args import parse_args_as_dict, get_attribute_from_args
 from raspberry_pi_pico2 import SerialCommunication, main as serial_communication_main
 from yolo import ARGS_YOLO_VERSION, ARGS_DEBUG
+from env import ENV_YOLO_VERSION, ENV_DEBUG
 from yolo.args import add_yolo_version_argument, add_debug_argument
 from yolo.files import get_log_file_path
 from yolo.hailo.object_detection import main as object_detection_main
@@ -47,27 +49,23 @@ def process_2_fn(images_queue: ImagesQueue, logger: Logger):
     for thread in pool:
         thread.join()
 
-def process_3_fn(debug: bool, yolo_version: str, images_queue: ImagesQueue, stop_event: Event):
+def process_3_fn(images_queue: ImagesQueue, parking_event: Event, stop_event: Event):
     """
     Process 3: Hailo object detection.
     """
-    # Check the debug mode
-    if not isinstance(debug, bool):
-        raise TypeError("debug must be a boolean")
-
-    # Check the type of yolo version
-    if not isinstance(yolo_version, str):
-        raise TypeError("yolo_version must be a string")
-
     # Check the type of images queue
     if not isinstance(images_queue, ImagesQueue):
         raise TypeError("images_queue must be an instance of ImageQueue")
+
+    # Check the type of parking event
+    if not isinstance(parking_event, Event):
+        raise TypeError("parking_event must be an instance of Event")
 
     # Check the type of stop event
     if not isinstance(stop_event, Event):
         raise TypeError("stop_event must be an instance of Event")
 
-    object_detection_main(debug, yolo_version, images_queue, stop_event)
+    object_detection_main(images_queue, parking_event, stop_event)
 
 
 def main():
@@ -86,8 +84,15 @@ def main():
     # Get the debug mode
     arg_debug = get_attribute_from_args(args, ARGS_DEBUG)
 
+    # Set the debug mode and YOLO version as environment variables
+    os.environ[ENV_DEBUG] = str(arg_debug).lower()
+    os.environ[ENV_YOLO_VERSION] = arg_yolo_version
+
     # Create a manager for shared objects
     with Manager() as manager:
+        # Create the parking event signal
+        parking_event = manager.Event()
+
         # Create the stop event signal
         stop_event = manager.Event()
 
@@ -104,7 +109,7 @@ def main():
         images_queue = manager.ImagesQueue(stop_event, logger, camera)
 
         # Raspberry Pi Pico serial communication wrapper with multiprocessing safety
-        serial_communication = manager.SerialCommunication(stop_event, logger, images_queue)
+        serial_communication = manager.SerialCommunication(parking_event, stop_event, logger, images_queue)
 
         # Start the first process
         process_1 = Process(target=process_1_fn, args=(serial_communication,))
@@ -117,7 +122,7 @@ def main():
         process_2.join()
 
         # Start the third process
-        process_3 = Process(target=process_3_fn, args=(arg_debug, arg_yolo_version, images_queue, stop_event))
+        process_3 = Process(target=process_3_fn, args=(images_queue, parking_event, stop_event))
         process_3.start()
         process_3.join()
 

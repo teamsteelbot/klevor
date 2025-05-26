@@ -1,2 +1,5 @@
 # Image allowed extensions
-IMAGE_ALLOWED_EXTENSIONS: list[str] =['.jpg', '.png', '.bmp', '.jpeg']
+IMAGE_ALLOWED_EXTENSIONS: tuple = ('.jpg', '.png', '.bmp', '.jpeg')
+
+# Padding color
+IMAGE_PADDING_COLOR: tuple[int, int, int] =(0, 0, 0)

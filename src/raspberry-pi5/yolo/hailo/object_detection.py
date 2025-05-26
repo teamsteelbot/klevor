@@ -4,27 +4,27 @@ from hailo_platform import (HEF, VDevice,
                             FormatType, HailoSchedulingAlgorithm)
 
 import os
-from multiprocessing import Event, Value
+from multiprocessing import Event
 from pathlib import Path
-import numpy as np
 from PIL.Image import Image
 from loguru import logger
 from queue import Queue
 import threading
 import cv2
-from typing import List
+import numpy as np
 
+
+from camera import WIDTH, HEIGHT
 from camera.images_queue import ImagesQueue
-from object_detection_utils import ObjectDetectionUtils
-from yolo import YOLO_MODEL_G, YOLO_MODEL_M, YOLO_MODEL_R
+from env import get_debug_mode
+from yolo import YOLO_MODEL_G, YOLO_MODEL_M, YOLO_MODEL_R, get_model_classes_color_palette
 from yolo.files import (get_model_hailo_suite_compiled_hef_file_path, get_hailo_labels_file_path)
+from yolo.hailo import IMAGE_PADDING_COLOR
 
 # Currently models file paths
 MODELS_NAME = [YOLO_MODEL_G, YOLO_MODEL_M, YOLO_MODEL_R]
-
-import cv2
-import numpy as np
-
+NO_PARKING_MODELS_NAME = [YOLO_MODEL_G, YOLO_MODEL_R]
+PARKING_MODELS_NAME = [YOLO_MODEL_M]
 
 class ObjectDetectionUtils:
     def __init__(self, labels_path: str, padding_color: tuple = (114, 114, 114),
@@ -54,29 +54,6 @@ class ObjectDetectionUtils:
         with open(labels_path, 'r', encoding="utf-8") as f:
             class_names = f.read().splitlines()
         return class_names
-
-    def preprocess(self, image: np.ndarray, model_w: int, model_h: int) -> np.ndarray:
-        """
-        Resize image with unchanged aspect ratio using padding.
-
-        Args:
-            image (np.ndarray): Input image.
-            model_w (int): Model input width.
-            model_h (int): Model input height.
-
-        Returns:
-            np.ndarray: Preprocessed and padded image.
-        """
-        img_h, img_w, _ = image.shape[:3]
-        scale = min(model_w / img_w, model_h / img_h)
-        new_img_w, new_img_h = int(img_w * scale), int(img_h * scale)
-        image = cv2.resize(image, (new_img_w, new_img_h), interpolation=cv2.INTER_CUBIC)
-
-        padded_image = np.full((model_h, model_w, 3), self.padding_color, dtype=np.uint8)
-        x_offset = (model_w - new_img_w) // 2
-        y_offset = (model_h - new_img_h) // 2
-        padded_image[y_offset:y_offset + new_img_h, x_offset:x_offset + new_img_w] = image
-        return padded_image
 
     def draw_detection(self, image: np.ndarray, box: list, cls: int, score: float, color: tuple, scale_factor: float):
         """
@@ -158,209 +135,68 @@ class HailoHandler:
     """
     __debug = None
     __hef_file_path = None
+    __hef = None
     __labels_path = None
     __images_queue = None
+    __class_colors = None
+    __padding_color = None
+    __target = None
+    __infer_model = None
+    __output_type = None
+    __send_original_frame = None
+    __batch_size = None
 
-    def __init__(self, debug: bool, hef_file_path:str, labels_path: str, images_queue:ImagesQueue=None):
+    def __init__(self, debug: bool, hef_file_path:str, labels_path: str, images_queue:ImagesQueue,
+                 class_colors: dict[int, tuple[int,int,int]], padding_color:tuple = IMAGE_PADDING_COLOR,
+                 multi_threading: bool = True, multi_processing: bool = False, batch_size: int = 1,
+                 input_type: Optional[str] = None, output_type: Optional[Dict[str, str]] = None,
+                 send_original_frame: bool = False
+                 ):
         """
         Initialize the Hailo handler class.
         """
         # Check the debug mode
         if not isinstance(debug, bool):
             raise TypeError("debug must be a boolean")
+        self.__debug = debug
 
         # Check the HEF file path
         if not isinstance(hef_file_path, str):
             raise TypeError("hef_file_path must be a string")
+        if not os.path.exists(hef_file_path):
+            raise ValueError(f"HEF file {hef_file_path} does not exist.")
+        self.__hef_file_path = hef_file_path
 
         # Check the labels path
         if not isinstance(labels_path, str):
             raise TypeError("labels_path must be a string")
+        if not os.path.exists(labels_path):
+            raise ValueError(f"Labels file {labels_path} does not exist.")
+        self.__labels_path = labels_path
 
         # Check the images queue
         if not isinstance(images_queue, ImagesQueue):
             raise TypeError("images_queue must be an instance of ImagesQueue")
+        self.__images_queue = images_queue
 
-def preprocess(
-    images: List[np.ndarray],
-    cap: cv2.VideoCapture,
-    batch_size: int,
-    input_queue: queue.Queue,
-    width: int,
-    height: int,
-    utils: ObjectDetectionUtils
-) -> None:
-    """
-    Preprocess and enqueue images or camera frames into the input queue as they are ready.
+        # Check the class colors
+        if not isinstance(class_colors, dict):
+            raise TypeError("class_colors must be a dictionary")
+        self.__class_colors = class_colors
 
-    Args:
-        images (List[np.ndarray], optional): List of images as NumPy arrays.
-        camera (bool, optional): Boolean indicating whether to use the camera stream.
-        batch_size (int): Number of images per batch.
-        input_queue (queue.Queue): Queue for input images.
-        width (int): Model input width.
-        height (int): Model input height.
-        utils (ObjectDetectionUtils): Utility class for object detection preprocessing.
-    """
-    if cap is None:
-        preprocess_images(images, batch_size, input_queue, width, height, utils)
-    else:
-        preprocess_from_cap(cap, batch_size, input_queue, width, height, utils)
+        # Check the padding color
+        if not isinstance(padding_color, tuple):
+            raise TypeError("padding_color must be a tuple")
+        if len(padding_color) != 3:
+            raise ValueError("padding_color must be a tuple of length 3")
+        self.__padding_color = padding_color
 
-    input_queue.put(None)  # Add sentinel value to signal end of input
-
-def preprocess_from_cap(cap: cv2.VideoCapture, batch_size: int, input_queue: queue.Queue, width: int, height: int, utils: ObjectDetectionUtils) -> None:
-    """
-    Process frames from the camera stream and enqueue them.
-
-    Args:
-        batch_size (int): Number of images per batch.
-        input_queue (queue.Queue): Queue for input images.
-        width (int): Model input width.
-        height (int): Model input height.
-        utils (ObjectDetectionUtils): Utility class for object detection preprocessing.
-    """
-    frames = []
-    processed_frames = []
-
-    while True:
-        ret, frame = cap.read()
-        if not ret:
-            break
-
-        frames.append(frame)
-        processed_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        processed_frame = utils.preprocess(processed_frame, width, height)
-        processed_frames.append(processed_frame)
-
-        if len(frames) == batch_size:
-            input_queue.put((frames, processed_frames))
-            processed_frames, frames = [], []
-
-
-def preprocess_images(images: List[np.ndarray], batch_size: int, input_queue: queue.Queue, width: int, height: int, utils: ObjectDetectionUtils) -> None:
-    """
-    Process a list of images and enqueue them.
-
-    Args:
-        images (List[np.ndarray]): List of images as NumPy arrays.
-        batch_size (int): Number of images per batch.
-        input_queue (queue.Queue): Queue for input images.
-        width (int): Model input width.
-        height (int): Model input height.
-        utils (ObjectDetectionUtils): Utility class for object detection preprocessing.
-    """
-    for batch in divide_list_to_batches(images, batch_size):
-        input_tuple = ([image for image in batch], [utils.preprocess(image, width, height) for image in batch])
-        input_queue.put(input_tuple)
-
-def postprocess(
-    output_queue: queue.Queue,
-    cap: cv2.VideoCapture,
-    save_stream_output: bool,
-    utils: ObjectDetectionUtils
-) -> None:
-    """
-    Process and visualize the output results.
-
-    Args:
-        output_queue (queue.Queue): Queue for output results.
-        camera (bool): Flag indicating if the input is from a camera.
-        save_stream_output (bool): Flag indicating if the camera output should be saved.
-        utils (ObjectDetectionUtils): Utility class for object detection visualization.
-    """
-    image_id = 0
-    out = None
-    output_path = Path('output')
-    if cap is not None:
-        # Create a named window
-        cv2.namedWindow("Output", cv2.WND_PROP_FULLSCREEN)
-
-        # Set the window to fullscreen
-        cv2.setWindowProperty("Output", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-
-        if save_stream_output:
-            output_path.mkdir(exist_ok=True)
-            frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-            frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-             # Define the codec and create VideoWriter object
-            fourcc = cv2.VideoWriter_fourcc(*'XVID')
-            # Save the output video in the output path
-            fps = cap.get(cv2.CAP_PROP_FPS)
-            if fps == 0:  # If FPS is not available, set a default value
-                print(f"fps: {fps}")
-                fps = 20.0
-            out = cv2.VideoWriter(str(output_path / 'output_video.avi'), fourcc, fps, (frame_width, frame_height))
-
-    if (cap is None):
-        # Create output directory if it doesn't exist
-        output_path.mkdir(exist_ok=True)
-
-    while True:
-        result = output_queue.get()
-        if result is None:
-            break  # Exit the loop if sentinel value is received
-
-        original_frame, infer_results = result
-
-        # Deals with the expanded results from hailort versions < 4.19.0
-        if len(infer_results) == 1:
-            infer_results = infer_results[0]
-
-        detections = utils.extract_detections(infer_results)
-
-        frame_with_detections = utils.draw_detections(
-            detections, original_frame,
-        )
-        
-        if cap is not None:
-            # Display output
-            cv2.imshow("Output", frame_with_detections)
-            if save_stream_output:
-                out.write(frame_with_detections)
-        else:
-            cv2.imwrite(str(output_path / f"output_{image_id}.png"), frame_with_detections)
-
-        # Wait for key press "q"
-        image_id += 1
-
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            # Close the window and release the camera
-            if save_stream_output:
-                out.release()  # Release the VideoWriter object
-            cap.release()
-            cv2.destroyAllWindows()
-            break
-
-    if cap is not None and save_stream_output:
-            out.release()  # Release the VideoWriter object
-    output_queue.task_done()  # Indicate that processing is complete
-\__image_stream_queue = None
-    __hef = None
-    __target = None
-    __infer_model = None
-    __output_type = None
-    __send_original_frame = None
-
-    def __init__(
-        self, hef_path: str, image_stream_queue: ImageStreamQueue, batch_size: int = 1,
-        input_type: Optional[str] = None, output_type: Optional[Dict[str, str]] = None,
-        send_original_frame: bool = False) -> None:
-        """
-        Initialize the HailoAsyncInference class with the provided HEF model
-        file path and input/output queues.
-
-        Args:
-            hef_path (str): Path to the HEF model file.
-            image_stream_queue (ImageStreamQueue): Queue for input images.
-            batch_size (int): Batch size for inference. Defaults to 1.
-            input_type (Optional[str]): Format type of the input stream.
-                                        Possible values: 'UINT8', 'UINT16'.
-            output_type Optional[dict[str, str]] : Format type of the output stream.
-                                         Possible values: 'UINT8', 'UINT16', 'FLOAT32'.
-        """
-        # Set the image stream queue
-        self.__image_stream_queue = image_stream_queue
+        # Set the batch size
+        if not isinstance(batch_size, int):
+            raise TypeError("batch_size must be an integer")
+        if batch_size < 1:
+            raise ValueError("batch_size must be greater than 0")
+        self.__batch_size = batch_size
 
         # Create the VDevice parameters
         params = VDevice.create_params()
@@ -368,16 +204,20 @@ def postprocess(
         # Set the scheduling algorithm to round-robin to activate the scheduler
         params.scheduling_algorithm = HailoSchedulingAlgorithm.ROUND_ROBIN
 
+        # Set the group ID to SHARED
+        if multi_threading or multi_processing:
+            params.group_id = "SHARED"
+
         # Enable multi-processing service
-        params.group_id = "SHARED"
-        params.multi_process_service = True
+        if multi_processing:
+            params.multi_process_service = True
 
         # Set the VDevice parameters
         self.__target = VDevice(params)
 
         # Set the HEF model
-        self.__hef = HEF(hef_path)
-        self.__infer_model = self.__target.create_infer_model(hef_path)
+        self.__hef = HEF(self.__hef_file_path)
+        self.__infer_model = self.__target.create_infer_model(self.__hef_file_path)
         self.__infer_model.set_batch_size(batch_size)
 
         # Set the input and output types
@@ -413,6 +253,54 @@ def postprocess(
                 getattr(FormatType, output_type)
             )
 
+    def _get_output_type_str(self, output_info) -> str | None:
+        """
+        Get the output type string for the HEF model.
+        """
+        if self.__output_type is None:
+            return str(output_info.format.type).split(".")[1].lower()
+        else:
+            self.__output_type[output_info.name].lower()
+
+    def get_input_shape(self) -> Tuple[int, ...]:
+        """
+        Get the shape of the model's input layer.
+
+        Returns:
+            Tuple[int, ...]: Shape of the model's input layer.
+        """
+        return self.__hef.get_input_vstream_infos()[0].shape  # Assumes one input
+
+    def preprocess(self, image: Image, width: int=WIDTH, height: int=HEIGHT) -> np.ndarray:
+        """
+        Resize image with unchanged aspect ratio using padding.
+
+        Args:
+            image (Image): Input image.
+            width (int): Model input width.
+            height (int): Model input height.
+
+        Returns:
+            np.ndarray: Preprocessed and padded image.
+        """
+        # Convert image to numpy array
+        image = np.array(image)
+
+        # Resize image with unchanged aspect ratio using padding
+        img_height, img_width, _ = image.shape[:3]
+        scale = min(width / img_width, height / img_height)
+        new_img_width, new_img_height = int(img_width * scale), int(img_height * scale)
+        image = cv2.resize(image, (new_img_width, new_img_height), interpolation=cv2.INTER_CUBIC)
+
+        # Calculate padding and create padded image
+        padded_image = np.full((height, width, 3), self.__padding_color, dtype=np.uint8)
+        x_offset =(height - new_img_width) // 2
+        y_offset = (height - new_img_height) // 2
+        padded_image[y_offset:y_offset + new_img_height, x_offset:x_offset + new_img_width] = image
+        return padded_image
+
+    # TO CHECK
+
     def callback(
         self, completion_info, bindings_list: list, input_batch: list,
     ) -> None:
@@ -443,38 +331,6 @@ def postprocess(
                     }
                 self.__output_queue.put((input_batch[i], result))
 
-    def get_vstream_info(self) -> Tuple[list, list]:
-
-        """
-        Get information about input and output stream layers.
-
-        Returns:
-            Tuple[list, list]: List of input stream layer information, List of
-                               output stream layer information.
-        """
-        return (
-            self.__hef.get_input_vstream_infos(),
-            self.__hef.get_output_vstream_infos()
-        )
-
-    def get_hef(self) -> HEF:
-        """
-        Get the object's HEF file
-
-        Returns:
-            HEF: A HEF (Hailo Executable File) containing the model.
-        """
-        return self.__hef
-
-    def get_input_shape(self) -> Tuple[int, ...]:
-        """
-        Get the shape of the model's input layer.
-
-        Returns:
-            Tuple[int, ...]: Shape of the model's input layer.
-        """
-        return self.__hef.get_input_vstream_infos()[0].shape  # Assumes one input
-
     async def run(self) -> None:
         with self.__infer_model.configure() as configured_infer_model:
             while True:
@@ -502,12 +358,6 @@ def postprocess(
                     )
                 )
             job.wait(10000)  # Wait for the last job
-
-    def _get_output_type_str(self, output_info) -> str:
-        if self.output_type is None:
-            return str(output_info.format.type).split(".")[1].lower()
-        else:
-            self.output_type[output_info.name].lower()
 
     def _create_bindings(self, configured_infer_model) -> object:
         """
@@ -539,70 +389,90 @@ def postprocess(
             output_buffers=output_buffers
         )
 
+    def postprocess(
+        output_queue: queue.Queue,
+        cap: cv2.VideoCapture,
+        save_stream_output: bool,
+        utils: ObjectDetectionUtils
+    ) -> None:
+        """
+        Process and visualize the output results.
 
+        Args:
+            output_queue (queue.Queue): Queue for output results.
+            camera (bool): Flag indicating if the input is from a camera.
+            save_stream_output (bool): Flag indicating if the camera output should be saved.
+            utils (ObjectDetectionUtils): Utility class for object detection visualization.
+        """
+        image_id = 0
+        out = None
+        output_path = Path('output')
 
-def infer(
-    input,
-    save_stream_output: bool,
-    net_path: str,
-    labels_path: str,
-    batch_size: int,
-) -> None:
+        if (cap is None):
+            # Create output directory if it doesn't exist
+            output_path.mkdir(exist_ok=True)
+
+        while True:
+            result = output_queue.get()
+            if result is None:
+                break  # Exit the loop if sentinel value is received
+
+            original_frame, infer_results = result
+
+            # Deals with the expanded results from hailort versions < 4.19.0
+            if len(infer_results) == 1:
+                infer_results = infer_results[0]
+
+            detections = utils.extract_detections(infer_results)
+
+            frame_with_detections = utils.draw_detections(
+                detections, original_frame,
+            )
+
+            cv2.imwrite(str(output_path / f"output_{image_id}.png"), frame_with_detections)
+
+            # Wait for key press "q"
+            image_id += 1
+
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                # Close the window and release the camera
+                if save_stream_output:
+                    out.release()  # Release the VideoWriter object
+                cap.release()
+                cv2.destroyAllWindows()
+                break
+
+        output_queue.task_done()  # Indicate that processing is complete
+
+def infer(image: Image, infer_queue: Queue, hailo_handler: HailoHandler, height:int, width:int) -> None:
     """
-    Initialize queues, HailoAsyncInference instance, and run the inference.
-
-    Args:
-        images (List[Image.Image]): List of images to process.
-        net_path (str): Path to the HEF model file.
-        labels_path (str): Path to a text file containing labels.
-        batch_size (int): Number of images per batch.
-        output_path (Path): Path to save the output images.
+    Run inference on the image using Hailo.
     """
-    det_utils = ObjectDetectionUtils(labels_path)
+    #det_utils = ObjectDetectionUtils(labels_path)
 
-    input_queue = queue.Queue()
-    output_queue = queue.Queue()
+    # Preprocess image
+    preprocessed_image = hailo_handler.preprocess(image, width, height)
 
-    hailo_inference = HailoAsyncInference(
-        net_path, input_queue, output_queue, batch_size, send_original_frame=True
-    )
-    height, width, _ = hailo_inference.get_input_shape()
+    # Run inference
+    hailo_inference.run
 
-    preprocess_thread = threading.Thread(
-        target=preprocess,
-        args=(images, cap, batch_size, input_queue, width, height, det_utils)
-    )
+
     postprocess_thread = threading.Thread(
         target=postprocess,
         args=(output_queue, cap, save_stream_output, det_utils)
     )
 
-    preprocess_thread.start()
-    postprocess_thread.start()
 
     hailo_inference.run()
-    
+
     preprocess_thread.join()
     output_queue.put(None)  # Signal process thread to exit
     postprocess_thread.join()
 
-    logger.info('Inference was successful!')
-
-def infer(image: Image, infer_queue: Queue, hailo_handler: HailoHandler) -> None:
-    return
-
-def main(debug: bool, yolo_version: str, images_queue: ImagesQueue, stop_event: Event) -> None:
+def main(images_queue: ImagesQueue, parking_event: Event, stop_event: Event) -> None:
     """
     Main function to run the script.
     """
-    # Check the debug mode
-    if not isinstance(debug, bool):
-        raise TypeError("debug must be a boolean")
-
-    # Check the type of yolo version
-    if not isinstance(yolo_version, str):
-        raise TypeError("yolo_version must be a string")
-
     # Check the type of images queue
     if not isinstance(images_queue, ImagesQueue):
         raise ValueError("images_queue must be an instance of ImagesQueue")
@@ -610,6 +480,9 @@ def main(debug: bool, yolo_version: str, images_queue: ImagesQueue, stop_event: 
     # Check the type of stop event
     if not isinstance(stop_event, Event):
         raise TypeError("stop_event must be an instance of Event")
+
+    # Get the debug mode from the environment variable
+    debug = get_debug_mode()
 
     # Get the required file paths
     hef_file_paths = dict()
@@ -623,6 +496,8 @@ def main(debug: bool, yolo_version: str, images_queue: ImagesQueue, stop_event: 
 
     # Create the Hailo handlers
     hailo_handlers = dict()
+    hailo_input_shapes = dict()
+    infer_queues = dict()
     for model_name in MODELS_NAME:
         # Get the HEF file path
         hef_file_path = hef_file_paths.get(model_name)
@@ -630,45 +505,51 @@ def main(debug: bool, yolo_version: str, images_queue: ImagesQueue, stop_event: 
         # Get the labels file path
         labels_file_path = labels_file_paths.get(model_name)
 
-        # Check if the HEF file path exists
-        if not os.path.exists(hef_file_path):
-            raise ValueError(f"HEF file {hef_file_path} does not exist.")
+        # Create the infer queue for the model
+        infer_queues[model_name] = Queue()
 
-        # Check if the labels file path exists
-        if not os.path.exists(labels_file_path):
-            raise ValueError(f"Labels file {labels_file_path} does not exist.")
+        # Get the model class colors
+        model_class_colors = get_model_classes_color_palette(model_name)
 
         # Create the Hailo handler
-        hailo_handlers[model_name] = HailoHandler(debug, hef_file_path, labels_file_path, images_queue)
+        hailo_handler = HailoHandler(debug, hef_file_path, labels_file_path, images_queue, model_class_colors)
+        hailo_handlers[model_name] = hailo_handler
+
+        # Get the input shape of the model
+        height, width, _ = hailo_handler.get_input_shape()
+        hailo_input_shapes[model_name] = (height, width)
 
     # Get the pending image event from the images queue
     pending_image_event = images_queue.get_pending_image_event()
-
-    # Create the infer queues dictionary
-    infer_queues = dict()
-    for model_name in MODELS_NAME:
-        # Create the infer queue for the model
-        infer_queues[model_name] = Queue()
 
     # Wait for the stop event
     while not stop_event.is_set():
         # Wait for the pending image event
         pending_image_event.wait()
 
+        # Check if the parking event is set
+        if parking_event.is_set():
+            models_name = PARKING_MODELS_NAME
+        else:
+            models_name = NO_PARKING_MODELS_NAME
+
         # Get the image from the images queue
         image = images_queue.get_input_image()
 
         # Iterate over the models
         pool=[]
-        for model_name in MODELS_NAME:
+        for model_name in models_name:
             # Get the infer queue for the model
             infer_queue = infer_queues.get(model_name)
 
             # Get the Hailo handler for the model
             hailo_handler = hailo_handlers.get(model_name)
 
+            # Get the input shape of the model
+            height, width = hailo_input_shapes.get(model_name)
+
             # Thread to handle the inference
-            thread=threading.Thread(target=infer, args=(image, infer_queue, hailo_handler))
+            thread=threading.Thread(target=infer, args=(image, infer_queue, hailo_handler, height, width))
 
             # Append the thread to the pool
             pool.append(thread)
@@ -681,7 +562,7 @@ def main(debug: bool, yolo_version: str, images_queue: ImagesQueue, stop_event: 
             thread.join()
 
         # Check which inference were successful
-        for model_name in MODELS_NAME:
+        for model_name in models_name:
             # Get the infer queue for the model
             infer_queue = infer_queues.get(model_name)
 

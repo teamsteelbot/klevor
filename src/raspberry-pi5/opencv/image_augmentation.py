@@ -5,12 +5,12 @@ import time
 from files import move_file
 
 
-def augment_images(input_to_process_image_path: str, input_to_process_annotations_path: str,
-                   output_augmented_images_dir: str, output_augmented_annotations_dir: str,
-                   num_augmentations=5,
-                   output_processed_images_dir: str = None, output_processed_annotations_dir: str = None):
+def augment_image(input_to_process_image_path: str, input_to_process_annotations_path: str,
+                  output_augmented_images_dir: str, output_augmented_annotations_dir: str,
+                  num_augmentations=5,
+                  output_processed_images_dir: str = None, output_processed_annotations_dir: str = None):
     """
-    Augment to_process images.
+    Augment to process image.
     """
     # Get current time
     start_time = time.time()
@@ -33,7 +33,7 @@ def augment_images(input_to_process_image_path: str, input_to_process_annotation
         bboxes.append([x_center, y_center, width, height])
         class_labels.append(class_id)
 
-    # Define the to_process pipeline
+    # Define the pipeline
     transform = A.Compose([
         # Apply with a 50% probability a random brightness and contrast adjustment
         A.RandomBrightnessContrast(p=0.5),
@@ -52,7 +52,7 @@ def augment_images(input_to_process_image_path: str, input_to_process_annotation
         A.RandomCrop(width=int(image.shape[1] * 0.9), height=int(image.shape[0] * 0.9), p=0.3),  # Optional random crop
     ], bbox_params=A.BboxParams(format='yolo', label_fields=['class_labels']))
 
-    # Apply the to_process pipeline to the image and annotations
+    # Apply the pipeline to the image and annotations
     try:
         for i in range(num_augmentations):
             transformed = transform(image=image, bboxes=bboxes, class_labels=class_labels)
@@ -60,7 +60,7 @@ def augment_images(input_to_process_image_path: str, input_to_process_annotation
             transformed_bboxes = transformed['bboxes']
             transformed_class_labels = transformed['class_labels']
 
-            # Save the to_process image and annotations
+            # Save the image and annotations
             output_image_path = os.path.join(output_augmented_images_dir,
                                              f"{os.path.splitext(os.path.basename(input_to_process_image_path))[0]}_aug_{i}.jpg")
             output_annotations_path = os.path.join(output_augmented_annotations_dir,

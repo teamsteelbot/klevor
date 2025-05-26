@@ -5,6 +5,7 @@ import serial
 import time
 
 from camera.images_queue import ImagesQueue
+from env import get_debug_mode
 from log import Logger
 
 # Message delay
@@ -68,6 +69,7 @@ class SerialCommunication:
     """
     __lock = None
     __serial = None
+    __parking_event = None
     __stop_event = None
     __logger = None
     __images_queue = None
@@ -79,12 +81,17 @@ class SerialCommunication:
     __pending_outgoing_message_event = None
     __last_incoming_message = None
 
-    def __init__(self, stop_event: Event, logger: Logger, images_queue: ImagesQueue, port='/dev/ttyACM0', baudrate=115200):
+    def __init__(self, parking_event: Event, stop_event: Event, logger: Logger, images_queue: ImagesQueue, port='/dev/ttyACM0', baudrate=115200):
         """
         Initialize the serial communication class.
         """
         # Create the lock
         self.__lock = Lock()
+
+        # Check the type of the parking event
+        if not isinstance(parking_event, Event):
+            raise ValueError("parking_event must be an instance of Event")
+        self.__parking_event = parking_event
 
         # Check the type of the stop event
         if not isinstance(stop_event, Event):
@@ -363,6 +370,9 @@ def main(serial_communication: SerialCommunication) -> None:
     # Check the type of the serial communication
     if isinstance(serial_communication, SerialCommunication):
         raise ValueError("serial_communication must be an instance of SerialCommunication")
+
+    # Get the debug mode from the environment variable
+    debug = get_debug_mode()
 
     # Get the stop event
     stop_event = serial_communication.get_stop_event()

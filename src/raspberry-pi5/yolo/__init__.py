@@ -40,12 +40,12 @@ YOLO_MODEL_R = 'r'
 YOLO_MODEL_GR = 'gr'
 YOLO_MODEL_GMR = 'gmr'
 YOLO_MODEL_BGOR = 'bgor'
-YOLO_MODELS_NAME = [YOLO_MODEL_M, YOLO_MODEL_G, YOLO_MODEL_R, YOLO_MODEL_GR, YOLO_MODEL_GMR, YOLO_MODEL_BGOR]
+YOLO_MODELS_NAME = (YOLO_MODEL_M, YOLO_MODEL_G, YOLO_MODEL_R, YOLO_MODEL_GR, YOLO_MODEL_GMR, YOLO_MODEL_BGOR)
 
 # YOLO model versions
 YOLO_VERSION_5 = 'v5'
 YOLO_VERSION_11 = 'v11'
-YOLO_VERSIONS = [YOLO_VERSION_5, YOLO_VERSION_11]
+YOLO_VERSIONS = (YOLO_VERSION_5, YOLO_VERSION_11)
 
 # YOLO data
 YOLO_DATA = 'data'
@@ -80,7 +80,7 @@ YOLO_DATASET_IMAGES_EXT = '.jpg'
 # YOLO dataset status folders
 YOLO_DATASET_TO_PROCESS = 'to_process'
 YOLO_DATASET_PROCESSED = 'processed'
-YOLO_DATASET_STATUSES = [YOLO_DATASET_TO_PROCESS, YOLO_DATASET_PROCESSED]
+YOLO_DATASET_STATUSES = (YOLO_DATASET_TO_PROCESS, YOLO_DATASET_PROCESSED)
 
 # YOLO Hailo-related folders
 YOLO_HAILO = 'hailo'
@@ -119,7 +119,7 @@ YOLO_FORMAT_ONNX = 'onnx'
 YOLO_FORMAT_TFLITE = 'tflite'
 YOLO_FORMAT_TENSOR_RT = 'tensor_rt'
 YOLO_FORMAT_PT = 'pt'
-YOLO_FORMATS = [YOLO_FORMAT_ONNX, YOLO_FORMAT_TFLITE, YOLO_FORMAT_TENSOR_RT, YOLO_FORMAT_PT]
+YOLO_FORMATS = (YOLO_FORMAT_ONNX, YOLO_FORMAT_TFLITE, YOLO_FORMAT_TENSOR_RT, YOLO_FORMAT_PT)
 
 # Arguments
 ARGS_DEBUG = 'debug'
@@ -137,11 +137,14 @@ ARGS_YOLO_DEVICE = 'device'
 ARGS_YOLO_IMAGE_SIZE = 'imgsz'
 
 # Ignore lists
-ZIP_IGNORE_DIR = ['.git', '.venv', '.idea', 'raspberry-pi-pico2', 'scripts', 'yolo']
+ZIP_IGNORE_DIR = ('.git', '.venv', '.idea', 'raspberry-pi-pico2', 'scripts', 'yolo')
 
 # Logs folders
 LOG_DIR = os.path.join(CWD, 'logs')
 LOGS_DIR = os.path.join(LOG_DIR, 'logs')
+
+# Allowed image extensions
+IMAGE_EXTENSIONS = ('.png', '.jpg', '.jpeg')
 
 def add_single_quotes_to_list_elements(lst: list) -> list:
     """
@@ -206,7 +209,7 @@ def check_model_dataset_name(dataset_name:str, model_name:str|None)-> None:
         raise ValueError(f"Invalid dataset path. The dataset name '{dataset_name}' should not be used without a model name.")
 
 
-def get_model_classes_color_pallete(model_name: str) -> dict[int, tuple[int, int, int]] | None:
+def get_model_classes_color_palette(model_name: str) -> dict[int, tuple[int, int, int]] | None:
     """
     Get the model classes color palette.
     """
