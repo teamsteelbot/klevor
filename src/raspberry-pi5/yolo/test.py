@@ -3,7 +3,7 @@ import random
 
 from args import get_attribute_from_args, parse_args_as_dict
 from opencv.image_display_detections import preprocess, display_detections
-from model.image_bounding_boxes import outputs_to_image_bounding_boxes
+from model.image_bounding_boxes import ImageBoundingBoxes
 import os
 from opencv import DEFAULT_SIZE
 from yolo import (YOLO_NUMBER_RANDOM_IMAGES, YOLO_FORMAT_PT, YOLO_GR_COLORS, YOLO_BGOR_COLORS, ARGS_YOLO_INPUT_MODEL,
@@ -37,10 +37,10 @@ def test_random_images(model, model_class_names: dict, run_inference_fn, input_o
         original_image, preprocessed_image = preprocess(input_image_path, image_size)
 
         # Run inference
-        outputs = run_inference_fn(model, preprocessed_image)
+        input_data = run_inference_fn(model, preprocessed_image)
 
         # Print the detections
-        image_bounding_boxes = outputs_to_image_bounding_boxes(outputs)
+        image_bounding_boxes = ImageBoundingBoxes.from_pt_cpu(input_data)
         print(image_bounding_boxes)
 
         # Display the image with the detections

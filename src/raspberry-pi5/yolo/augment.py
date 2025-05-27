@@ -50,7 +50,7 @@ def augment_dataset(input_to_process_dir: str, output_augmented_dir: str, num_au
         if os.path.exists(input_to_process_annotations_dir):
             augment_image(input_to_process_image_path, input_to_process_annotations_path,
                           output_augmented_images_dir,
-                          output_augmented_annotations_dir, num_augmentations, output_processed_images_dir,
+                          output_augmented_annotations_dir, output_processed_images_dir,
                           output_processed_annotations_dir)
         else:
             print(

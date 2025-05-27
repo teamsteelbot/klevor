@@ -3,14 +3,24 @@ import albumentations as A
 import os
 import time
 from files import move_file
+from opencv import AUGMENTATION_SAMPLES
 
 
 def augment_image(input_to_process_image_path: str, input_to_process_annotations_path: str,
                   output_augmented_images_dir: str, output_augmented_annotations_dir: str,
-                  num_augmentations=5,
-                  output_processed_images_dir: str = None, output_processed_annotations_dir: str = None):
+                  output_processed_images_dir: str = None, output_processed_annotations_dir: str = None,
+                  num_augmentations=AUGMENTATION_SAMPLES)-> None:
     """
     Augment to process image.
+
+    Args:
+        input_to_process_image_path (str): Path to the image to be augmented.
+        input_to_process_annotations_path (str): Path to the annotations for the image.
+        output_augmented_images_dir (str): Directory where the augmented images will be saved.
+        output_augmented_annotations_dir (str): Directory where the augmented annotations will be saved.
+        num_augmentations (int): Number of augmentations to perform on the image.
+        output_processed_images_dir (str, optional): Directory where the original image will be moved after processing.
+        output_processed_annotations_dir (str, optional): Directory where the original annotations will be moved after processing.
     """
     # Get current time
     start_time = time.time()

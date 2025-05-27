@@ -1,13 +1,20 @@
 import asyncio
 import io
+from multiprocessing import Event
 from typing import Awaitable
 
 import websockets
 from PIL.Image import Image
 
+from log import Logger
+
 # Server configuration
 HOST='localhost'
 PORT = 8765
+
+# Serial communication tags
+TAG_SERIAL_INCOMING_MESSAGE = "serial_incoming_message"
+TAG_SERIAL_OUTGOING_MESSAGE = "serial_outgoing_message"
 
 # Image tags
 TAG_IMAGE_ORIGINAL = "image_original"
@@ -23,25 +30,40 @@ class RealtimeTrackerServer:
     A WebSocket server that handles real-time tracking updates.
     It allows clients to connect and receive messages about tracking events.
     """
+    __log_tag = "RealtimeTrackerServer"
     __host = None
     __port = None
     __connected_clients = None
     __started = None
+    __stop_event = None
 
-    def __init__(self, host=HOST, port=PORT):
+    def __init__(self, stop_event:Event, logger: Logger, host=HOST, port=PORT):
         """
         Initializes the WebSocket server with the specified host and port.
         """
-        # Check the type of host and port
+        # Check the type of stop event
+        if not isinstance(stop_event, Event):
+            raise ValueError("stop_event must be an instance of Event")
+        self.__stop_event = stop_event
+
+        # Check the type of host
         if not isinstance(host, str):
             raise ValueError("host must be a string")
+        self.__host = host
 
+        # Check the type of port
         if not isinstance(port, int):
             raise ValueError("port must be an integer")
-
-        # Set the host, port and initialize the connected clients set
-        self.__host = host
         self.__port = port
+
+        # Check the type of logger
+        if not isinstance(logger, Logger):
+            raise ValueError("logger must be an instance of Logger")
+
+        # Get the sub-logger for this class
+        self.__logger = logger.get_sub_logger(self.__log_tag)
+
+        # Initialize the connected clients set
         self.__connected_clients = set()
 
     async def __reactive_handler(self, connection) -> Awaitable[None]:
@@ -50,22 +72,22 @@ class RealtimeTrackerServer:
         """
         # Add the client to the set of connected clients
         self.__connected_clients.add(connection)
-        print(f"Client connected: {connection.remote_address}")
+        self.__logger.log(f"Client connected: {connection.remote_address}")
 
         try:
             while True:
                 # Keep the connection alive
                 await asyncio.sleep(1)
         except websockets.exceptions.ConnectionClosedOK:
-            print(f"Client {connection.remote_address} disconnected gracefully.")
+            self.__logger.log(f"Client {connection.remote_address} disconnected gracefully.")
         except websockets.exceptions.ConnectionClosedError as e:
-            print(f"Client {connection.remote_address} disconnected with error: {e}")
+            self.__logger.log(f"Client {connection.remote_address} disconnected with error: {e}")
         except Exception as e:
-            print(f"An unexpected error occurred with {connection.remote_address}: {e}")
+            self.__logger.log(f"An unexpected error occurred with {connection.remote_address}: {e}")
         finally:
             # Remove the client from the set of connected clients
             self.__connected_clients.remove(connection)
-            print(f"Client {connection.remote_address} removed.")
+            self.__logger.log(f"Client {connection.remote_address} removed.")
 
     async def __broadcast_message(self, message):
         """
@@ -74,13 +96,13 @@ class RealtimeTrackerServer:
         if self.__connected_clients:  # Only broadcast if there are clients
             await asyncio.gather(*(client.send(message) for client in self.__connected_clients))
 
-    def send_message(self, message):
+    def _send_message(self, message):
         """
         Broadcasts a message to all connected clients.
         """
         asyncio.run_coroutine_threadsafe(self.__broadcast_message(message), asyncio.get_event_loop())
 
-    async def send_image_with_tag(self, tag: str, img: Image):
+    async def _send_image_with_tag(self, tag: str, img: Image):
         """
         Sends an image with a tag to all the connected clients.
         """
@@ -95,10 +117,62 @@ class RealtimeTrackerServer:
             tagged_data = f"{tag}:".encode() + binary_data
 
             # Send the tagged binary data to the clients
-            self.send_message(tagged_data)
-            print(f"Image with tag '{tag}' sent to the clients.")
+            self._send_message(tagged_data)
+            self.__logger.log(f"Image with tag '{tag}' sent to the clients.")
         except Exception as e:
-            print(f"Error sending image: {e}")
+            self.__logger.log(f"Error sending image: {e}")
+
+    async def send_image_original(self, img: Image):
+        """
+        Sends the original image to all connected clients.
+        """
+        await self._send_image_with_tag(TAG_IMAGE_ORIGINAL, img)
+
+    async def send_image_model_g(self, img: Image):
+        """
+        Sends the image processed by model G to all connected clients.
+        """
+        await self._send_image_with_tag(TAG_IMAGE_MODEL_G, img)
+
+    async def send_image_model_m(self, img: Image):
+        """
+        Sends the image processed by model M to all connected clients.
+        """
+        await self._send_image_with_tag(TAG_IMAGE_MODEL_M, img)
+
+    async def send_image_model_r(self, img: Image):
+        """
+        Sends the image processed by model R to all connected clients.
+        """
+        await self._send_image_with_tag(TAG_IMAGE_MODEL_R, img)
+
+    async def send_serial_incoming_message(self, message: str):
+        """
+        Sends a serial incoming message to all connected clients.
+        """
+        if not isinstance(message, str):
+            raise ValueError("message must be a string")
+
+        # Send a tagged message
+        tagged_message = f"{TAG_SERIAL_INCOMING_MESSAGE}:{message}"
+        self._send_message(tagged_message)
+
+        # Log
+        self.__logger.log(f"Serial incoming message sent: {message}")
+
+    async def send_serial_outgoing_message(self, message: str):
+        """
+        Sends a serial outgoing message to all connected clients.
+        """
+        if not isinstance(message, str):
+            raise ValueError("message must be a string")
+
+        # Send a tagged message
+        tagged_message = f"{TAG_SERIAL_OUTGOING_MESSAGE}:{message}"
+        self._send_message(tagged_message)
+
+        # Log
+        self.__logger.log(f"Serial outgoing message sent: {message}")
 
     async def start(self):
         """
@@ -106,15 +180,19 @@ class RealtimeTrackerServer:
         """
         # Check if it's already running
         if self.__started:
-            print("WebSocket server is already running.")
             return
 
         # Set the started flag
         self.__started = True
 
-        print(f"Starting WebSocket server on ws://{HOST}:{PORT}")
-        async with websockets.serve(self.__reactive_handler, HOST, PORT):
-            await asyncio.Future()  # Run forever
+        # Start the WebSocket server
+        self.__logger.log(f"Starting WebSocket server on ws://{self.__host}:{self.__port}")
+        async with websockets.serve(self.__reactive_handler, self.__host, self.__port):
+            self.__logger.log("WebSocket server started successfully.")
+            self.__stop_event.wait()
+
+        self.__logger.log("WebSocket server is stopping...")
+        self.__started = False
 
 async def main(realtime_tracker_server: RealtimeTrackerServer):
     """

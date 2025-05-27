@@ -8,9 +8,16 @@ from files import move_file, ensure_path_exists
 
 def resize_image(input_to_process_dir: LiteralString, output_resized_to_process_dir: LiteralString,
                  new_image_size: tuple[int, int],
-                 output_processed_dir: LiteralString = None, interpolation=cv2.INTER_LINEAR):
+                 output_processed_dir: LiteralString = None, interpolation=cv2.INTER_LINEAR)->None:
     """
     Resize image function.
+
+    Args:
+        input_to_process_dir (str): Directory containing images to be resized.
+        output_resized_to_process_dir (str): Directory where resized images will be saved.
+        new_image_size (tuple[int, int]): New size for the images as (width, height).
+        output_processed_dir (str, optional): Directory where original images will be moved after processing.
+        interpolation: Interpolation method used for resizing.
     """
     # Check if the path exists, if not it creates it
     ensure_path_exists(output_resized_to_process_dir)

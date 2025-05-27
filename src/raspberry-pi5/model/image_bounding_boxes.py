@@ -22,7 +22,7 @@ class ImageBoundingBoxes:
         self.__conf = conf
         self.__n = n
 
-    def __str__(self):
+    def __str__(self) -> str:
         """
         String representation of the objects detected in the image.
         """
@@ -38,7 +38,7 @@ class ImageBoundingBoxes:
         return "\n".join(bounding_boxes)
 
     @staticmethod
-    def from_pt_cpu(boxes):
+    def from_pt_cpu_boxes(boxes):
         """
         Initialize a new ImageBoundingBoxes instances from a PyTorch CPU tensor.
 
@@ -57,6 +57,19 @@ class ImageBoundingBoxes:
             conf=boxes.conf.cpu().numpy(),
             n=len(boxes.cls)
         )
+
+    @staticmethod
+    def from_pt_cpu(input_data: list):
+        """
+        Extract detections from the input data.
+
+        Args:
+            input_data (list): Raw detections from the model.
+
+        Returns:
+            ImageBoundingBoxes: An instance containing the bounding boxes, classes, and confidences.
+        """
+        return ImageBoundingBoxes.from_pt_cpu_boxes(input_data[0].boxes)
 
     @staticmethod
     def from_hailo(input_data: list, threshold: float = 0.5):
@@ -91,54 +104,71 @@ class ImageBoundingBoxes:
     def get_number_of_objects(self):
         """
         Get the number of detected objects.
+
+        Returns:
+            int: The number of detected objects.
         """
         return self.__n
 
     def get_xyxy(self):
         """
         Get the bounding box coordinates in the format (x1, y1, x2, y2).
+
+        Returns:
+            list: A list of bounding box coordinates in the format (x1, y1, x2, y2).
         """
         return self.__xyxy
 
     def get_xywh(self):
         """
         Get the bounding box coordinates in the format (x_center, y_center, width, height).
+
+        Returns:
+            list: A list of bounding box coordinates in the format (x_center, y_center, width, height).
         """
         return self.__xywh
 
     def get_xywhn(self):
         """
         Get the bounding box coordinates in the format (x_center, y_center, width, height) normalized.
+
+        Returns:
+            list: A list of bounding box coordinates in the format (x_center, y_center, width, height) normalized.
         """
         return self.__xywhn
 
     def get_xyxyn(self):
         """
         Get the bounding box coordinates in the format (x1, y1, x2, y2) normalized.
+
+        Returns:
+            list: A list of bounding box coordinates in the format (x1, y1, x2, y2) normalized.
         """
         return self.__xyxyn
 
     def get_classes(self):
         """
         Get the classes of the detected objects.
+
+        Returns:
+            list: A list of class indices for each detected object.
         """
         return self.__cls
 
-    def get_confidences(self):
+    def get_confidences(self)-> list:
         """
         Get the confidence of the detected objects.
+
+        Returns:
+            list: A list of confidence scores for each detected object.
         """
         return self.__conf
 
-    def get_boxes(self):
+    def get_boxes(self) -> tuple:
         """
         Get the bounding box coordinates and class of the detected objects.
+
+        Returns:
+            tuple: A tuple containing the class, confidence, and bounding box coordinates in xyxy format.
         """
         return self.__cls, self.__conf, self.__xyxy
-
-
-def outputs_to_image_bounding_boxes(outputs):
-    """
-    Convert the outputs to image bounding boxes instance.
-    """
-    return ImageBoundingBoxes(outputs[0].boxes)

@@ -5,17 +5,16 @@ import serial
 import time
 
 from camera.images_queue import ImagesQueue
-from env import get_debug_mode
 from log import Logger
+from server import RealtimeTrackerServer
 
 # Message delay
 MESSAGE_DELAY = 0.01
 
 # Types of messages
-MESSAGE_TYPE = {
-    'CAPTURE_IMAGE': 0,
-    'INFERENCE': 1,
-}
+MESSAGE_TYPE_CAPTURE_IMAGE = 'capture_image'
+MESSAGE_TYPE_INFERENCE = 'inference'
+MESSAGE_TYPES = [MESSAGE_TYPE_INFERENCE, MESSAGE_TYPE_CAPTURE_IMAGE]
 
 # Message header separator
 MESSAGE_HEADER_SEPARATOR = ':'
@@ -36,16 +35,20 @@ class Message:
     def __init__(self, message_type: str, message_content: str):
         """
         Initialize the message class.
+
+        Args:
+            message_type (str): The type of the message. Must be one of MESSAGE_TYPES.
+            message_content (str): The content of the message.
         """
         # Check if the message type is valid
-        if message_type not in MESSAGE_TYPE:
+        if message_type not in MESSAGE_TYPES:
             raise ValueError(f"Invalid message type: {message_type}")
         self.__type = message_type
 
         # Set the message content
         self.__content = message_content
 
-    def __str__(self):
+    def __str__(self) -> str:
         """
         String representation of the message.
         """
@@ -54,12 +57,18 @@ class Message:
     def get_type(self) -> str:
         """
         Get the message type.
+
+        Returns:
+            str: The type of the message.
         """
         return self.__type
 
     def get_content(self) -> str:
         """
         Get the message content.
+
+        Returns:
+            str: The content of the message.
         """
         return self.__content
 
@@ -68,6 +77,7 @@ class SerialCommunication:
     Class to handle the serial communication with the Raspberry Pi Pico.
     """
     __lock = None
+    __log_tag = "SerialCommunication"
     __serial = None
     __parking_event = None
     __stop_event = None
@@ -80,8 +90,9 @@ class SerialCommunication:
     __outgoing_messages_queue = None
     __pending_outgoing_message_event = None
     __last_incoming_message = None
+    __server = None
 
-    def __init__(self, parking_event: Event, stop_event: Event, logger: Logger, images_queue: ImagesQueue, port='/dev/ttyACM0', baudrate=115200):
+    def __init__(self, parking_event: Event, stop_event: Event, logger: Logger, images_queue: ImagesQueue, port='/dev/ttyACM0', baudrate=115200, server: RealtimeTrackerServer=None):
         """
         Initialize the serial communication class.
         """
@@ -98,15 +109,17 @@ class SerialCommunication:
             raise ValueError("stop_event must be an instance of Event")
         self.__stop_event = stop_event
 
-        # Check the type of the logger
-        if not isinstance(logger, Logger):
-            raise ValueError("logger must be an instance of Logger")
-        self.__logger = logger
-
         # Check the type of the images queue
         if not isinstance(images_queue, ImagesQueue):
             raise ValueError("images_queue must be an instance of ImagesQueue")
         self.__images_queue = images_queue
+
+        # Check the type of the logger
+        if not isinstance(logger, Logger):
+            raise ValueError("logger must be an instance of Logger")
+
+        # Get the sub-logger for this class
+        self.__logger = logger.get_sub_logger(self.__log_tag)
 
         # Get the capture image event
         self.__capture_image_event = self.__images_queue.get_capture_image_event()
@@ -122,7 +135,11 @@ class SerialCommunication:
         self.__port = port
         self.__baudrate = baudrate
 
-    def __clear_events(self):
+        # Set the server
+        if server is not None and isinstance(server, RealtimeTrackerServer):
+            self.__server = server
+
+    def __clear_events(self)->None:
         """
         Clear the events.
         """
@@ -136,13 +153,16 @@ class SerialCommunication:
         self.__pending_incoming_message_event.clear()
         self.__pending_outgoing_message_event.clear()
 
-    def __is_open(self):
+    def __is_open(self) -> bool:
         """
         Check if the serial port is open.
+
+        Returns:
+            bool: True if the serial port is open, False otherwise.
         """
         return self.__serial is not None and self.__serial.is_open
 
-    def start(self):
+    def start(self)->None:
         """
         Start the communication.
         """
@@ -164,12 +184,14 @@ class SerialCommunication:
             # Open the serial port
             try:
                 self.__serial = serial.Serial(self.__port, self.__baudrate)
-                print("Serial port opened successfully!")
             except serial.SerialException as e:
-                print(f"Error opening serial port: {e}")
+                self.__logger.log(f"Error opening serial port: {e}")
                 return
 
-    def close(self):
+        # Log
+        self.__logger.log(f"Serial port {self.__port} opened with baudrate {self.__baudrate}.")
+
+    def close(self)->None:
         """
         Close the communication.
         """
@@ -190,11 +212,16 @@ class SerialCommunication:
 
             # Close the serial port
             self.__serial.close()
-            print("Serial port closed.")
 
-    def __put_incoming_message(self, message):
+        # Log
+        self.__logger.log(f"Serial port {self.__port} closed.")
+
+    def __put_incoming_message(self, message: Message)->None:
         """
         Put a message in the incoming messages queue.
+
+        Args:
+            message (Message): The message to put in the queue.
         """
         if self.__is_open():
             # Put the message in the queue
@@ -206,51 +233,77 @@ class SerialCommunication:
             # Set the pending incoming message event
             self.__pending_incoming_message_event.set()
 
-    def get_incoming_message(self) -> str|None:
+        # If the server is set, send the message to the server
+        if self.__server is not None:
+            self.__server.send_serial_incoming_message(str(message))
+
+        # Log
+        self.__logger.log(f"Received message: {message}")
+
+    def get_incoming_message(self) -> Message|None:
         """
         Get a message from the incoming messages queue.
+
+        Returns:
+            Message|None: The message from the incoming messages queue or None if no message is available.
         """
         with self.__lock:
-            if self.__is_open():
-                # Check if there is a pending incoming message
-                if not self.__pending_incoming_message_event.is_set():
-                    return None
+            if not self.__is_open():
+                return None
 
-                # Get the message from the queue
-                message = self.__incoming_messages_queue.get()
+            # Check if there is a pending incoming message
+            if not self.__pending_incoming_message_event.is_set():
+                return None
 
-                # Clear the pending incoming message event
-                if self.__incoming_messages_queue.empty():
-                    self.__pending_incoming_message_event.clear()
-                return message
+            # Get the message from the queue
+            message = self.__incoming_messages_queue.get()
+
+            # Clear the pending incoming message event
+            if self.__incoming_messages_queue.empty():
+                self.__pending_incoming_message_event.clear()
+
+            return message
 
     def peek_incoming_message(self) -> Message|None:
         """
         Peek a message from the incoming messages queue without removing it.
+
+        Returns:
+            Message|None: The last incoming message or None if no message is available.
         """
         with self.__lock:
-            if self.__is_open():
-                return self.__last_incoming_message
+            if not self.__is_open():
+                return None
 
-    def put_outgoing_message(self, message: Message):
+            return self.__last_incoming_message
+
+    def put_outgoing_message(self, message: Message)->None:
         """
         Put a message in the outgoing messages queue.
+
+        Args:
+            message (Message): The message to put in the queue.
         """
         # Check the type of the message
         if not isinstance(message, Message):
             raise ValueError("message must be an instance of Message")
 
         with self.__lock:
-            if self.__is_open():
-                # Put the message in the queue
-                self.__outgoing_messages_queue.put(message)
+            if not self.__is_open():
+                return
 
-                # Set the pending outgoing message event
-                self.__pending_outgoing_message_event.set()
+            # Put the message in the queue
+            self.__outgoing_messages_queue.put(message)
+
+            # Set the pending outgoing message event
+            self.__pending_outgoing_message_event.set()
 
     def __get_outgoing_message(self) -> str|None:
         """
         Get a message from the outgoing messages queue.
+
+        Returns:
+            str|None: The message from the outgoing messages queue or None if no message is available.
         """
         if self.__is_open():
             # Check if there is a pending outgoing message
@@ -263,66 +316,88 @@ class SerialCommunication:
             # Clear the pending outgoing message event
             if self.__outgoing_messages_queue.empty():
                 self.__pending_outgoing_message_event.clear()
-            return message
 
-    def send_message(self):
+        # Log
+        self.__logger.log(f"Sending message: {message}")
+
+        # If the server is set, send the message to the server
+        if self.__server is not None:
+            self.__server.send_serial_outgoing_message(message)
+
+        return message
+
+    def send_message(self)->None:
         """
         Send a message to the serial port.
         """
         with self.__lock:
-            if self.__is_open():
-                # Check if there is a message to send
-                if not self.__pending_outgoing_message_event.is_set():
-                    return
+            if not self.__is_open():
+                return
 
-                # Get the message from the queue
-                message = self.__get_outgoing_message()
+            # Check if there is a message to send
+            if not self.__pending_outgoing_message_event.is_set():
+                return
 
-                # Send the message to the serial port
-                self.__serial.write(str(message).encode(ENCODE))
+            # Get the message from the queue
+            message = self.__get_outgoing_message()
 
-                # Wait for the message to be sent
-                time.sleep(MESSAGE_DELAY)
+            # Send the message to the serial port
+            self.__serial.write(str(message).encode(ENCODE))
 
-    def receive_message(self):
+            # Wait for the message to be sent
+            time.sleep(MESSAGE_DELAY)
+
+    def receive_message(self)->None:
         """
         Receive a message from the serial port.
         """
         with self.__lock:
-            if self.__is_open():
-                # Check if there is a message to read
-                if self.__serial.in_waiting > 0:
-                    # Read the message from the serial port
-                    message_str = self.__serial.readline().decode(ENCODE).strip()
+            if not self.__is_open():
+                return
 
-                    # Split the message into type and content
-                    message_separator_idx = message_str.find(MESSAGE_HEADER_SEPARATOR)
-
-                    # Create the message object
-                    message = Message(
-                        message_str[:message_separator_idx],
-                        message_str[message_separator_idx + 1:],
-                    )
-
-                    # Put the message in the incoming messages queue
-                    self.__put_incoming_message(message)
+            # Check if there is a message to read
+            if not self.__serial.in_waiting > 0:
                 return None
 
-    def get_stop_event(self):
+            # Read the message from the serial port
+            message_str = self.__serial.readline().decode(ENCODE).strip()
+
+            # Split the message into type and content
+            message_separator_idx = message_str.find(MESSAGE_HEADER_SEPARATOR)
+
+            # Create the message object
+            message = Message(
+                message_str[:message_separator_idx],
+                message_str[message_separator_idx + 1:],
+            )
+
+            # Put the message in the incoming messages queue
+            self.__put_incoming_message(message)
+
+    def get_stop_event(self)->Event:
         """
         Get the stop event status.
+
+        Returns:
+            Event: The event that indicates when to stop the communication.
         """
         return self.__stop_event
 
-    def get_pending_incoming_message_event(self):
+    def get_pending_incoming_message_event(self)->Event:
         """
         Get the pending incoming message event status.
+
+        Returns:
+            Event: The event that indicates when there is a pending incoming message.
         """
         return self.__pending_incoming_message_event
 
-    def get_pending_outgoing_message_event(self):
+    def get_pending_outgoing_message_event(self)->Event:
         """
         Get the pending outgoing message event status.
+
+        Returns:
+            Event: The event that indicates when there is a pending outgoing message.
         """
         return self.__pending_outgoing_message_event
 
@@ -370,9 +445,6 @@ def main(serial_communication: SerialCommunication) -> None:
     # Check the type of the serial communication
     if isinstance(serial_communication, SerialCommunication):
         raise ValueError("serial_communication must be an instance of SerialCommunication")
-
-    # Get the debug mode from the environment variable
-    debug = get_debug_mode()
 
     # Get the stop event
     stop_event = serial_communication.get_stop_event()

@@ -1,5 +1,5 @@
 import os
-import re
+from re import Pattern
 import time
 import zipfile
 
@@ -7,17 +7,28 @@ from files import IGNORE_DIRS, ensure_path_exists, BATCH_SIZE, ENVIRONMENT_LOCAL
     GOOGLE_DRIVE_API_CALL_DELAY
 
 
-def match_any(regex_list: list[re.Pattern], string: str):
+def match_any(regex_list: list[Pattern], string: str) -> bool:
     """
     Match any regex pattern in a list.
+
+    Args:
+        regex_list (list[Pattern]): List of compiled regex patterns.
+        string (str): String to match against the regex patterns.
     """
     return any(regex.match(string) for regex in regex_list)
 
 
 def zip_files(zipf, filenames, input_file_base_path: str, input_base_path: str,
-              ignore_filenames_regex: list[re.Pattern] = None):
+              ignore_filenames_regex: list[Pattern] = None) -> None:
     """
     Define the function to zip the files in a folder.
+
+    Args:
+        zipf: ZipFile object to write to.
+        filenames (list): List of filenames to zip.
+        input_file_base_path (str): Base path of the files to be zipped.
+        input_base_path (str): Base path for relative file paths in the zip.
+        ignore_filenames_regex (list[Pattern], optional): List of regex patterns to ignore certain files.
     """
     for filename in filenames:
         # Skip the file if it is in the ignore list
@@ -32,9 +43,15 @@ def zip_files(zipf, filenames, input_file_base_path: str, input_base_path: str,
         # Log
         print(f'Zipped file: {file_rel_path}')
 
-def zip_not_nested_folder(zipf, input_base_path: str, input_folder_path: str, ignore_filenames_regex: list = None):
+def zip_not_nested_folder(zipf, input_base_path: str, input_folder_path: str, ignore_filenames_regex: list = None)->None:
     """
     Define the function to zip a folder, this ignores nested folders.
+
+    Args:
+        zipf: ZipFile object to write to.
+        input_base_path (str): Base path for relative file paths in the zip.
+        input_folder_path (str): Path of the folder to be zipped.
+        ignore_filenames_regex (list[Pattern], optional): List of regex patterns to ignore certain files.
     """
     # Get the list of files in the specified folder
     filenames = [f for f in os.listdir(input_folder_path)]
@@ -47,9 +64,16 @@ def zip_not_nested_folder(zipf, input_base_path: str, input_folder_path: str, ig
     print(f'Zipped folder: {input_folder_rel_path}')
 
 def zip_nested_folder(zipf, input_base_path: str, input_folder_path: str, ignore_dirs: list[str] = None,
-                      ignore_filenames_regex: list[re.Pattern] = None):
+                      ignore_filenames_regex: list[Pattern] = None)->None:
     """
     Define the function to zip a folder, this includes nested folders.
+
+    Args:
+        zipf: ZipFile object to write to.
+        input_base_path (str): Base path for relative file paths in the zip.
+        input_folder_path (str): Path of the folder to be zipped.
+        ignore_dirs (list[str], optional): List of directories to ignore.
+        ignore_filenames_regex (list[Pattern], optional): List of regex patterns to ignore certain files.
     """
     # Added to ignore directories the list of directories that should be always ignored
     if ignore_dirs is None:
@@ -67,9 +91,15 @@ def zip_nested_folder(zipf, input_base_path: str, input_folder_path: str, ignore
     input_folder_rel_path = os.path.relpath(input_folder_path, input_base_path)
     print(f'Zipped folder: {input_folder_rel_path}')
 
-def extract_all(zip_path, output_dir, environment=ENVIRONMENT_LOCAL, batch_size=BATCH_SIZE):
+def extract_all(zip_path, output_dir, environment=ENVIRONMENT_LOCAL, batch_size=BATCH_SIZE)->None:
     """
     Extract all files from a zip file by batches.
+
+    Args:
+        zip_path (str): Path to the zip file.
+        output_dir (str): Directory where files will be extracted.
+        environment (str): Environment type, either 'local' or 'colab'.
+        batch_size (int): Number of files to extract in each batch.
     """
     # Check if the path exists, if not it creates it
     ensure_path_exists(output_dir)

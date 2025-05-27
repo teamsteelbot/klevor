@@ -5,23 +5,40 @@ from opencv import DEFAULT_SIZE, DEFAULT_COLOR
 from model.image_bounding_boxes import ImageBoundingBoxes
 
 
-def rgb_to_bgr(rgb: tuple[int, int, int]):
+def rgb_to_bgr(rgb: tuple[int, int, int]) -> tuple:
     """
     Convert RGB to BGR.
+
+    Args:
+        rgb (tuple[int, int, int]): RGB color tuple.
+    Returns:
+        tuple: BGR color tuple.
     """
     return rgb[::-1]
 
 
-def get_rgb_color(class_number: int, rgb_colors: dict[int, tuple[int, int, int]] = None):
+def get_rgb_color(class_number: int, rgb_colors: dict[int, tuple[int, int, int]] = None) -> tuple[int, int, int]:
     """
     Get RGB color.
+
+    Args:
+        class_number (int): Class number.
+        rgb_colors (dict[int, tuple[int, int, int]], optional): Dictionary mapping class numbers to RGB colors.
+    Returns:
+        tuple[int, int, int]: RGB color tuple for the class number.
     """
     return rgb_colors[class_number] if rgb_colors is not None and class_number in rgb_colors else DEFAULT_COLOR
 
 
-def get_bgr_color(class_number: int, rgb_colors: dict[int, tuple[int, int, int]] = None):
+def get_bgr_color(class_number: int, rgb_colors: dict[int, tuple[int, int, int]] = None)-> tuple:
     """
     Get BGR color.
+
+    Args:
+        class_number (int): Class number.
+        rgb_colors (dict[int, tuple[int, int, int]], optional): Dictionary mapping class numbers to RGB colors.
+    Returns:
+        tuple[int, int, int]: BGR color tuple for the class number.
     """
     return rgb_to_bgr(get_rgb_color(class_number, rgb_colors))
 
@@ -79,9 +96,15 @@ def display_detections(model_class_names: dict, preprocessed_image, image_boundi
     plt.show()
 
 
-def preprocess(image_path, image_size: tuple[int, int] = DEFAULT_SIZE):
+def preprocess(image_path, image_size: tuple[int, int] = DEFAULT_SIZE)-> tuple:
     """
     Preprocess the image.
+
+    Args:
+        image_path (str): Path to the image file.
+        image_size (tuple[int, int]): Size to resize the image to, default is DEFAULT_SIZE.
+    Returns:
+        tuple: Original image and preprocessed image tensor.
     """
     # Resize the image and convert it to RGB
     image = cv2.imread(image_path)

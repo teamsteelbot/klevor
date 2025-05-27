@@ -5,6 +5,7 @@ from threading import Thread
 
 from args import parse_args_as_dict, get_attribute_from_args
 from raspberry_pi_pico2 import SerialCommunication, main as serial_communication_main
+from server import RealtimeTrackerServer
 from yolo import ARGS_YOLO_VERSION, ARGS_DEBUG
 from env import ENV_YOLO_VERSION, ENV_DEBUG
 from yolo.args import add_yolo_version_argument, add_debug_argument
@@ -12,20 +13,49 @@ from yolo.files import get_log_file_path
 from yolo.hailo.object_detection import main as object_detection_main
 from camera.images_queue import main as images_queue_main, ImagesQueue
 from log import main as log_main, Logger
+from server import main as server_main
 
-def process_1_fn(serial_communication: SerialCommunication):
+def process_1_fn(serial_communication: SerialCommunication, server: RealtimeTrackerServer|None):
     """
     Process 1: Serial communication with Raspberry Pi Pico.
+
+    Args:
+        serial_communication (SerialCommunication): The serial communication object.
+        server (RealtimeTrackerServer|None): The WebSocket server for real-time tracking updates.
     """
     # Check the type of serial communication
     if not isinstance(serial_communication, SerialCommunication):
         raise TypeError("serial_communication must be an instance of SerialCommunication")
 
-    serial_communication_main(serial_communication)
+    # Check the type of server
+    if server is not None and not isinstance(server, RealtimeTrackerServer):
+        raise TypeError("server must be an instance of RealtimeTrackerServer or None")
+
+    # Check if the server is None
+    if server is None:
+        serial_communication_main(serial_communication)
+    else:
+        # Creating threads
+        pool = [
+            Thread(target=serial_communication_main, args=(serial_communication,)),
+            Thread(target=server_main, args=(server,))
+        ]
+
+        # Starting threads
+        for thread in pool:
+            thread.start()
+
+        # Waiting for threads to finish
+        for thread in pool:
+            thread.join()
 
 def process_2_fn(images_queue: ImagesQueue, logger: Logger):
     """
     Process 2: Images queue for camera and logging.
+
+    Args:
+        images_queue (ImagesQueue): The images queue object.
+        logger (Logger): The logger object for logging messages.
     """
     # Check the type of images queue
     if not isinstance(images_queue, ImagesQueue):
@@ -52,6 +82,11 @@ def process_2_fn(images_queue: ImagesQueue, logger: Logger):
 def process_3_fn(images_queue: ImagesQueue, parking_event: Event, stop_event: Event):
     """
     Process 3: Hailo object detection.
+
+    Args:
+        images_queue (ImagesQueue): The images queue object.
+        parking_event (Event): The event signal for parking detection.
+        stop_event (Event): The event signal to stop processing.
     """
     # Check the type of images queue
     if not isinstance(images_queue, ImagesQueue):
@@ -102,17 +137,23 @@ def main():
         # Create the logger object with multiprocessing safety
         logger = manager.Logger(log_file_path, stop_event)
 
+        # Create the websocket server
+        if not arg_debug:
+            server = None
+        else:
+            server = manager.WebsocketServer(stop_event, logger)
+
         # Create the camera object with multiprocessing safety
-        camera = manager.Camera()
+        camera = manager.Camera(logger)
 
         # Create the images queue with multiprocessing safety
-        images_queue = manager.ImagesQueue(stop_event, logger, camera)
+        images_queue = manager.ImagesQueue(stop_event, logger, camera, server=server)
 
         # Raspberry Pi Pico serial communication wrapper with multiprocessing safety
-        serial_communication = manager.SerialCommunication(parking_event, stop_event, logger, images_queue)
+        serial_communication = manager.SerialCommunication(parking_event, stop_event, logger, images_queue, server=server)
 
         # Start the first process
-        process_1 = Process(target=process_1_fn, args=(serial_communication,))
+        process_1 = Process(target=process_1_fn, args=(serial_communication, server))
         process_1.start()
         process_1.join()
 
