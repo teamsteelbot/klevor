@@ -62,8 +62,7 @@ class ImagesQueue:
             image (Image): Image to put in the input images queue.
         """
         # Check the type of the image
-        if not isinstance(image, Image):
-            raise TypeError("image must be an instance of PIL.Image.Image")
+        check_type(image, Image)
 
         with self.__lock:
             # Put image in input images queue
@@ -79,7 +78,7 @@ class ImagesQueue:
         # Log
         self.__logger.log(f"Image {counter} added to input images queue.")
 
-    def get_input_image(self) -> Image|None:
+    def get_input_image(self) -> Image | None:
         """
         Get image from input images queue.
 
@@ -90,10 +89,10 @@ class ImagesQueue:
             # Check if the pending input image event is set
             if self.__pending_input_image_event.is_set():
                 return None
-            
+
             # Get the image from input images queue
             image = self.__input_images_queue.get()
-            
+
             # Clear the pending input image event
             if self.__input_images_queue.empty():
                 self.__pending_input_image_event.clear()
@@ -106,8 +105,8 @@ class ImagesQueue:
             self.__server.send_image_original(image)
 
         return image
-        
-    def put_output_inference(self, inference:ImageBoundingBoxes) -> None:
+
+    def put_output_inference(self, inference: ImageBoundingBoxes) -> None:
         """
         Put inference in output inference queue.
 
@@ -124,7 +123,7 @@ class ImagesQueue:
         # Log
         self.__logger.log(f"Inference added to output inference queue.")
 
-    def get_output_inference(self) -> ImageBoundingBoxes|None:
+    def get_output_inference(self) -> ImageBoundingBoxes | None:
         """
         Get inference from output inference queue.
 
@@ -202,7 +201,7 @@ class ImagesQueue:
         self.__capture_image_event.clear()
         self.__pending_input_image_event.clear()
         self.__pending_output_inference_event.clear()
-            
+
     def start(self):
         """
         Start the images queue.
@@ -211,7 +210,7 @@ class ImagesQueue:
             # Initialize the queues
             self.__input_images_queue = Queue()
             self.__output_inference_queue = Queue()
-    
+
             # Clear the events
             self.__clear_events()
 
@@ -226,7 +225,7 @@ class ImagesQueue:
             # Close the queues
             self.__input_images_queue.close()
             self.__output_inference_queue.close()
-    
+
             # Clear the events
             self.__clear_events()
 
@@ -243,13 +242,13 @@ class ImagesQueue:
         # Close the images queue
         self.close()
 
-def main(images_queue: ImagesQueue=None):
+
+def main(images_queue: ImagesQueue = None):
     """
     Main function to run the script.
     """
     # Check the type of the images queue
-    if not isinstance(images_queue, ImagesQueue):
-        raise TypeError("images_queue must be an instance of ImagesQueue")
+    check_type(images_queue, ImagesQueue)
 
     # Get the stop event
     stop_event = images_queue.get_stop_event()

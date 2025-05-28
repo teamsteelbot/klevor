@@ -1,5 +1,6 @@
 from argparse import ArgumentParser
 
+
 class Args:
     """
     Class to handle command line arguments.

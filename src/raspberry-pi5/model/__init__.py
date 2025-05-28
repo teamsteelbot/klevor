@@ -1,6 +1,4 @@
-import os
 import time
-from pathlib import Path
 
 import torch
 from ultralytics import YOLO
@@ -35,7 +33,7 @@ class Yolo:
         return model
 
     @staticmethod
-    def get_class_names(model: YOLO)-> dict[int, str]:
+    def get_class_names(model: YOLO) -> dict[int, str]:
         """
         Get YOLO PyTorch model class names.
 
@@ -50,7 +48,7 @@ class Yolo:
         return model.names
 
     @staticmethod
-    def export_tensor_rt(model: YOLO, quantized: bool = True)-> str:
+    def export_tensor_rt(model: YOLO, quantized: bool = True) -> str:
         """
         Export the model to TensorRT format.
 
@@ -63,7 +61,7 @@ class Yolo:
         return model.export(format="engine", int8=quantized)
 
     @staticmethod
-    def export_onnx(model: YOLO)-> str:
+    def export_onnx(model: YOLO) -> str:
         """
         Export the model to ONNX format.
 
@@ -75,7 +73,7 @@ class Yolo:
         return model.export(format="onnx")
 
     @staticmethod
-    def export_tflite(model: YOLO, quantized: bool = True)-> str:
+    def export_tflite(model: YOLO, quantized: bool = True) -> str:
         """
         Export the model to TFLite format.
 

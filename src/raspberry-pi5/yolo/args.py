@@ -1,95 +1,131 @@
-from args import get_attribute_name
-from yolo import (ARGS_YOLO_INPUT_MODEL, ARGS_YOLO_FORMAT, ARGS_YOLO_QUANTIZED, ARGS_YOLO_VERSION, YOLO_VERSION_5,
-                  YOLO_FORMAT_PT, ARGS_YOLO_RETRAINING, ARGS_YOLO_OUTPUT_MODEL, ARGS_YOLO_CLASSES,
-                  ARGS_YOLO_IGNORE_CLASSES, ARGS_YOLO_EPOCHS, ARGS_YOLO_DEVICE, ARGS_YOLO_INPUT_MODEL_PT,
-                  ARGS_YOLO_IMAGE_SIZE, YOLO_MODELS_NAME, YOLO_VERSIONS, YOLO_FORMATS, ARGS_DEBUG)
+from args import Args as A
+from yolo import Yolo
 
-def add_yolo_input_model_argument(parser) -> None:
-    """
-    Add YOLO input model argument to the parser.
-    """
-    parser.add_argument(get_attribute_name(ARGS_YOLO_INPUT_MODEL), type=str, required=True, help='YOLO input model',
-                        choices=YOLO_MODELS_NAME)
 
-def add_yolo_input_model_pt_argument(parser) -> None:
+class Args(A):
     """
-    Add YOLO input PyTorch model argument to the parser.
+    Class to handle command line arguments.
     """
-    parser.add_argument(get_attribute_name(ARGS_YOLO_INPUT_MODEL_PT), type=str, required=True, help='YOLO input PyTorch model')
+    # Arguments
+    DEBUG = 'debug'
+    FORMAT = 'format'
+    QUANTIZED = 'quantized'
+    INPUT_MODEL = 'input-model'
+    INPUT_MODEL_PT = 'input-model-pt'
+    OUTPUT_MODEL = 'output-model'
+    VERSION = 'version'
+    RETRAINING = 'retraining'
+    CLASSES = 'classes'
+    IGNORE_CLASSES = 'ignore-classes'
+    EPOCHS = 'epochs'
+    DEVICE = 'device'
+    IMAGE_SIZE = 'imgsz'
 
-def add_yolo_output_model_argument(parser) -> None:
-    """
-    Add YOLO output model argument to the parser.
-    """
-    parser.add_argument(get_attribute_name(ARGS_YOLO_OUTPUT_MODEL), type=str, required=True, help='YOLO output model',
-                        choices=YOLO_MODELS_NAME)
+    @classmethod
+    def add_yolo_input_model_argument(cls, parser) -> None:
+        """
+        Add YOLO input model argument to the parser.
+        """
+        parser.add_argument(cls.get_attribute_name(cls.INPUT_MODEL), type=str, required=True, help='YOLO input model',
+                            choices=Yolo.MODELS_NAME)
 
-def add_yolo_format_argument(parser, required:bool=False) -> None:
-    """
-    Add YOLO format argument to the parser.
-    """
-    parser.add_argument(get_attribute_name(ARGS_YOLO_FORMAT), type=str, required=required, help='YOLO format',
-                        choices=YOLO_FORMATS, default=YOLO_FORMAT_PT)
+    @classmethod
+    def add_yolo_input_model_pt_argument(cls, parser) -> None:
+        """
+        Add YOLO input PyTorch model argument to the parser.
+        """
+        parser.add_argument(cls.get_attribute_name(cls.INPUT_MODEL_PT), type=str, required=True,
+                            help='YOLO input PyTorch model')
 
-def add_yolo_quantized_argument(parser, default:bool=False) -> None:
-    """
-    Add YOLO quantized argument to the parser.
-    """
-    parser.add_argument(f"--no-{ARGS_YOLO_QUANTIZED}", dest=ARGS_YOLO_QUANTIZED, action="store_false", help="Disable quantized")
-    parser.add_argument(f"--{ARGS_YOLO_QUANTIZED}", dest=ARGS_YOLO_QUANTIZED, action="store_true", help="Enable quantized")
-    parser.set_defaults(**{ARGS_YOLO_QUANTIZED: default})
+    @classmethod
+    def add_yolo_output_model_argument(cls, parser) -> None:
+        """
+        Add YOLO output model argument to the parser.
+        """
+        parser.add_argument(cls.get_attribute_name(cls.OUTPUT_MODEL), type=str, required=True, help='YOLO output model',
+                            choices=Yolo.MODELS_NAME)
 
-def add_yolo_version_argument(parser) -> None:
-    """
-    Add YOLO version argument to the parser.
-    """
-    parser.add_argument(get_attribute_name(ARGS_YOLO_VERSION), type=str, required=True, help='YOLO model version',
-                        choices=YOLO_VERSIONS)
+    @classmethod
+    def add_yolo_format_argument(cls, parser, required: bool = False) -> None:
+        """
+        Add YOLO format argument to the parser.
+        """
+        parser.add_argument(cls.get_attribute_name(cls.FORMAT), type=str, required=required, help='YOLO format',
+                            choices=Yolo.FORMATS, default=Yolo.FORMAT_PT)
 
-def add_yolo_retraining_argument(parser, default:bool=False) -> None:
-    """
-    Add YOLO retraining argument to the parser.
-    """
-    parser.add_argument(f"--no-{ARGS_YOLO_RETRAINING}", dest=ARGS_YOLO_RETRAINING, action="store_false",
-                        help="Set retraining flag as 'False'")
-    parser.add_argument(f"--{ARGS_YOLO_RETRAINING}", dest=ARGS_YOLO_RETRAINING, action="store_true",
-                        help="Set retraining flag as 'True'")
-    parser.set_defaults(**{ARGS_YOLO_RETRAINING: default})
+    @classmethod
+    def add_yolo_quantized_argument(cls, parser, default: bool = False) -> None:
+        """
+        Add YOLO quantized argument to the parser.
+        """
+        parser.add_argument(f"--no-{cls.QUANTIZED}", dest=cls.QUANTIZED, action="store_false", help="Disable quantized")
+        parser.add_argument(f"--{cls.QUANTIZED}", dest=cls.QUANTIZED, action="store_true", help="Enable quantized")
+        parser.set_defaults(**{cls.QUANTIZED: default})
 
-def add_yolo_classes_argument(parser, required:bool=True) -> None:
-    """
-    Add YOLO classes argument to the parser.
-    """
-    parser.add_argument(get_attribute_name(ARGS_YOLO_CLASSES), type=str, required=required, help='YOLO classes', nargs="*")
+    @classmethod
+    def add_yolo_version_argument(cls, parser) -> None:
+        """
+        Add YOLO version argument to the parser.
+        """
+        parser.add_argument(cls.get_attribute_name(cls.VERSION), type=str, required=True, help='YOLO model version',
+                            choices=Yolo.VERSIONS)
 
-def add_yolo_ignore_classes_argument(parser, required:bool=True) -> None:
-    """
-    Add YOLO ignore classes argument to the parser.
-    """
-    parser.add_argument(get_attribute_name(ARGS_YOLO_IGNORE_CLASSES), type=str, required=required, help='YOLO ignore classes', nargs="*")
+    @classmethod
+    def add_yolo_retraining_argument(cls, parser, default: bool = False) -> None:
+        """
+        Add YOLO retraining argument to the parser.
+        """
+        parser.add_argument(f"--no-{cls.RETRAINING}", dest=cls.RETRAINING, action="store_false",
+                            help="Set retraining flag as 'False'")
+        parser.add_argument(f"--{cls.RETRAINING}", dest=cls.RETRAINING, action="store_true",
+                            help="Set retraining flag as 'True'")
+        parser.set_defaults(**{cls.RETRAINING: default})
 
-def add_yolo_epochs_argument(parser, required:bool=True) -> None:
-    """
-    Add YOLO epochs argument to the parser.
-    """
-    parser.add_argument(get_attribute_name(ARGS_YOLO_EPOCHS), type=int, required=required, help='YOLO epochs', default=100)
+    @classmethod
+    def add_yolo_classes_argument(cls, parser, required: bool = True) -> None:
+        """
+        Add YOLO classes argument to the parser.
+        """
+        parser.add_argument(cls.get_attribute_name(cls.CLASSES), type=str, required=required, help='YOLO classes',
+                            nargs="*")
 
-def add_yolo_device_argument(parser, required:bool=True) -> None:
-    """
-    Add YOLO device argument to the parser.
-    """
-    parser.add_argument(get_attribute_name(ARGS_YOLO_DEVICE), type=str, required=required, help='YOLO device', default='0')
+    @classmethod
+    def add_yolo_ignore_classes_argument(cls, parser, required: bool = True) -> None:
+        """
+        Add YOLO ignore classes argument to the parser.
+        """
+        parser.add_argument(cls.get_attribute_name(cls.IGNORE_CLASSES), type=str, required=required,
+                            help='YOLO ignore classes', nargs="*")
 
-def add_yolo_image_size_argument(parser, required:bool=True) -> None:
-    """
-    Add YOLO image size argument to the parser.
-    """
-    parser.add_argument(get_attribute_name(ARGS_YOLO_IMAGE_SIZE), type=int, required=required, help='YOLO image size', default=640)
+    @classmethod
+    def add_yolo_epochs_argument(cls, parser, required: bool = True) -> None:
+        """
+        Add YOLO epochs argument to the parser.
+        """
+        parser.add_argument(cls.get_attribute_name(cls.EPOCHS), type=int, required=required, help='YOLO epochs',
+                            default=100)
 
-def add_debug_argument(parser, default:bool=False) -> None:
-    """
-    Add debug argument to the parser.
-    """
-    parser.add_argument(f"--no-{ARGS_DEBUG}", dest=ARGS_DEBUG, action="store_false", help="Set debug flag as 'False'")
-    parser.add_argument(f"--{ARGS_DEBUG}", dest=ARGS_DEBUG, action="store_true", help="Set debug flag as 'True'")
-    parser.set_defaults(**{ARGS_DEBUG: default})
+    @classmethod
+    def add_yolo_device_argument(cls, parser, required: bool = True) -> None:
+        """
+        Add YOLO device argument to the parser.
+        """
+        parser.add_argument(cls.get_attribute_name(cls.DEVICE), type=str, required=required, help='YOLO device',
+                            default='0')
+
+    @classmethod
+    def add_yolo_image_size_argument(cls, parser, required: bool = True) -> None:
+        """
+        Add YOLO image size argument to the parser.
+        """
+        parser.add_argument(cls.get_attribute_name(cls.IMAGE_SIZE), type=int, required=required, help='YOLO image size',
+                            default=640)
+
+    @classmethod
+    def add_debug_argument(cls, parser, default: bool = False) -> None:
+        """
+        Add debug argument to the parser.
+        """
+        parser.add_argument(f"--no-{cls.DEBUG}", dest=cls.DEBUG, action="store_false", help="Set debug flag as 'False'")
+        parser.add_argument(f"--{cls.DEBUG}", dest=cls.DEBUG, action="store_true", help="Set debug flag as 'True'")
+        parser.set_defaults(**{cls.DEBUG: default})

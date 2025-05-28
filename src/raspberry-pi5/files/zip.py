@@ -1,7 +1,7 @@
 import os
-from re import Pattern
 import time
 import zipfile
+from re import Pattern
 
 from files import Files
 from utils import match_any
@@ -38,8 +38,9 @@ class Zip:
             # Log
             print(f'Zipped file: {file_rel_path}')
 
-    @staticmethod
-    def zip_not_nested_folder(zipf, input_base_path: str, input_folder_path: str, ignore_filenames_regex: list = None)->None:
+    @classmethod
+    def zip_not_nested_folder(cls, zipf, input_base_path: str, input_folder_path: str,
+                              ignore_filenames_regex: list = None) -> None:
         """
         Define the function to zip a folder, this ignores nested folders.
 
@@ -53,15 +54,15 @@ class Zip:
         filenames = [f for f in os.listdir(input_folder_path)]
 
         # Zip the files in the folder
-        Zip.zip_files(zipf, filenames, input_folder_path, input_base_path, ignore_filenames_regex)
+        cls.zip_files(zipf, filenames, input_folder_path, input_base_path, ignore_filenames_regex)
 
         # Log
         input_folder_rel_path = os.path.relpath(input_folder_path, input_base_path)
         print(f'Zipped folder: {input_folder_rel_path}')
 
-    @staticmethod
-    def zip_nested_folder(zipf, input_base_path: str, input_folder_path: str, ignore_dirs: list[str] = None,
-                          ignore_filenames_regex: list[Pattern] = None)->None:
+    @classmethod
+    def zip_nested_folder(cls, zipf, input_base_path: str, input_folder_path: str, ignore_dirs: list[str] = None,
+                          ignore_filenames_regex: list[Pattern] = None) -> None:
         """
         Define the function to zip a folder, this includes nested folders.
 
@@ -79,17 +80,18 @@ class Zip:
 
         for root, _, filenames in os.walk(input_folder_path):
             # Skip directories in the ignore list
-            filenames = [f for f in filenames if not any(os.path.relpath(root, input_base_path).startswith(d) for d in ignore_dirs)]
+            filenames = [f for f in filenames if
+                         not any(os.path.relpath(root, input_base_path).startswith(d) for d in ignore_dirs)]
 
             # Zip the files in the subfolders
-            Zip.zip_files(zipf, filenames, root, input_base_path, ignore_filenames_regex)
+            cls.zip_files(zipf, filenames, root, input_base_path, ignore_filenames_regex)
 
         # Log
         input_folder_rel_path = os.path.relpath(input_folder_path, input_base_path)
         print(f'Zipped folder: {input_folder_rel_path}')
 
     @staticmethod
-    def extract_all(zip_path, output_dir, environment=Files.ENVIRONMENT_LOCAL, batch_size=Files.BATCH_SIZE)->None:
+    def extract_all(zip_path, output_dir, environment=Files.ENVIRONMENT_LOCAL, batch_size=Files.BATCH_SIZE) -> None:
         """
         Extract all files from a zip file by batches.
 

@@ -8,7 +8,8 @@ from PIL.Image import Image
 
 from log import Logger
 from utils import check_type
-from yolo import YOLO_MODEL_G, YOLO_MODEL_M, YOLO_MODEL_R
+from yolo import Yolo
+
 
 class RealtimeTrackerServer:
     """
@@ -35,7 +36,7 @@ class RealtimeTrackerServer:
     # Image format
     IMAGE_FORMAT = "JPEG"
 
-    def __init__(self, stop_event:Event, logger: Logger, host=HOST, port=PORT):
+    def __init__(self, stop_event: Event, logger: Logger, host=HOST, port=PORT):
         """
         Initializes the WebSocket server with the specified host and port.
         """
@@ -151,11 +152,11 @@ class RealtimeTrackerServer:
             img (Image): The image to send.
             model_name (str): The name of the model that processed the image.
         """
-        if model_name == YOLO_MODEL_G:
+        if model_name == Yolo.MODEL_G:
             await self.__send_image_model_g(img)
-        elif model_name == YOLO_MODEL_M:
+        elif model_name == Yolo.MODEL_M:
             await self.__send_image_model_m(img)
-        elif model_name == YOLO_MODEL_R:
+        elif model_name == Yolo.MODEL_R:
             await self.__send_image_model_r(img)
         else:
             raise ValueError(f"Unknown model name: {model_name}")
@@ -164,8 +165,7 @@ class RealtimeTrackerServer:
         """
         Sends a serial incoming message to all connected clients.
         """
-        if not isinstance(message, str):
-            raise TypeError("message must be a string")
+        check_type(message, str)
 
         # Send a tagged message
         tagged_message = f"{self.TAG_SERIAL_INCOMING_MESSAGE}:{message}"
@@ -178,8 +178,7 @@ class RealtimeTrackerServer:
         """
         Sends a serial outgoing message to all connected clients.
         """
-        if not isinstance(message, str):
-            raise TypeError("message must be a string")
+        check_type(message, str)
 
         # Send a tagged message
         tagged_message = f"{self.TAG_SERIAL_OUTGOING_MESSAGE}:{message}"
@@ -207,6 +206,7 @@ class RealtimeTrackerServer:
 
         self.__logger.log("WebSocket server is stopping...")
         self.__started = False
+
 
 async def main(realtime_tracker_server: RealtimeTrackerServer):
     """

@@ -1,15 +1,18 @@
-import cv2
-import albumentations as A
 import os
 import time
+
+import albumentations as A
+import cv2
+
 from files import Files
 from opencv import AUGMENTATION_SAMPLES
+from opencv.preprocessing import Preprocessing
 
 
 def augment_image(input_to_process_image_path: str, input_to_process_annotations_path: str,
                   output_augmented_images_dir: str, output_augmented_annotations_dir: str,
                   output_processed_images_dir: str = None, output_processed_annotations_dir: str = None,
-                  num_augmentations=AUGMENTATION_SAMPLES)-> None:
+                  num_augmentations=AUGMENTATION_SAMPLES) -> None:
     """
     Augment to process image.
 
@@ -26,8 +29,7 @@ def augment_image(input_to_process_image_path: str, input_to_process_annotations
     start_time = time.time()
 
     # Read the image and convert it to RGB
-    image = Preprocessing.load_image(input_to_process_image_path)
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    image = Preprocessing.load_image(input_to_process_image_path, )
 
     # Read the annotations
     with open(input_to_process_annotations_path, 'r') as f:

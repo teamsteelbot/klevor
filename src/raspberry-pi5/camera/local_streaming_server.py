@@ -2,8 +2,6 @@ import shlex
 import subprocess
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
-from camera import Camera
-
 
 class StreamingHandler(BaseHTTPRequestHandler):
     """
@@ -87,6 +85,7 @@ class StreamingHandler(BaseHTTPRequestHandler):
             self.send_error(404)
             self.end_headers()
 
+
 def main():
     """
     Main function to start the streaming server.
@@ -94,6 +93,7 @@ def main():
     with HTTPServer((StreamingHandler.HOST, StreamingHandler.PORT), StreamingHandler) as server:
         print(f'Streaming on http://{StreamingHandler.HOST}:{StreamingHandler.PORT}/')
         server.serve_forever()
+
 
 if __name__ == "__main__":
     main()

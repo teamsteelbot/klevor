@@ -1,21 +1,30 @@
 import argparse
 
-from args import parse_args_as_dict, get_attribute_from_args
-from yolo import (YOLO_EPOCHS, ARGS_YOLO_DEVICE, ARGS_YOLO_INPUT_MODEL_PT, ARGS_YOLO_EPOCHS, ARGS_YOLO_IMAGE_SIZE,
-                ARGS_YOLO_INPUT_MODEL)
-from model.__init__ import load
-from yolo.args import (add_yolo_input_model_argument, add_yolo_input_model_pt_argument, add_yolo_device_argument,
-    add_yolo_epochs_argument, add_yolo_image_size_argument)
-from yolo.files import get_model_local_data_path
+from yolo import Yolo
+from yolo.args import Args
+from yolo.files import Files
 
 
-def train_model(model='yolo11n.pt', device='cpu', data='data.yaml', epochs=YOLO_EPOCHS, imgsz=640, project='yolo',
+def train_model(model='yolo11n.pt', device='cpu', data='data.yaml', epochs=Yolo.EPOCHS, imgsz=Yolo.IMAGE_SIZE,
+                project='yolo',
                 name='model'):
     """
     Train model.
+
+    Args:
+        model (str): Path to the YOLO model file.
+        device (str): Device to use for training (e.g., 'cpu', 'cuda').
+        data (str): Path to the dataset configuration file.
+        epochs (int): Number of training epochs.
+        imgsz (int): Image size for training.
+        project (str): Project name for saving results.
+        name (str): Name of the model.
+
+    Returns:
+        None
     """
     # Load a model
-    model = load(model)
+    model = Yolo.load(model)
 
     # Train the model
     model.train(
@@ -27,35 +36,36 @@ def train_model(model='yolo11n.pt', device='cpu', data='data.yaml', epochs=YOLO_
         name=name,
     )
 
+
 def main() -> None:
     """
     Main function to run the script.
     """
     parser = argparse.ArgumentParser(description='Script to train YOLO model')
-    add_yolo_input_model_argument(parser)
-    add_yolo_input_model_pt_argument(parser)
-    add_yolo_epochs_argument(parser)
-    add_yolo_device_argument(parser)
-    add_yolo_image_size_argument(parser)
-    args = parse_args_as_dict(parser)
+    Args.add_yolo_input_model_argument(parser)
+    Args.add_yolo_input_model_pt_argument(parser)
+    Args.add_yolo_epochs_argument(parser)
+    Args.add_yolo_device_argument(parser)
+    Args.add_yolo_image_size_argument(parser)
+    args = Args.parse_args_as_dict(parser)
 
     # Get the YOLO input model
-    arg_yolo_input_model = get_attribute_from_args(args, ARGS_YOLO_INPUT_MODEL)
+    arg_yolo_input_model = Args.get_attribute_from_args(args, Args.INPUT_MODEL)
 
     # Get the YOLO input PyTorch model
-    arg_yolo_input_model_pt = get_attribute_from_args(args, ARGS_YOLO_INPUT_MODEL_PT)
+    arg_yolo_input_model_pt = Args.get_attribute_from_args(args, Args.INPUT_MODEL_PT)
 
     # Get the YOLO epochs
-    arg_yolo_epochs = get_attribute_from_args(args, ARGS_YOLO_EPOCHS)
+    arg_yolo_epochs = Args.get_attribute_from_args(args, Args.EPOCHS)
 
     # Get the YOLO device
-    arg_yolo_device = get_attribute_from_args(args, ARGS_YOLO_DEVICE)
+    arg_yolo_device = Args.get_attribute_from_args(args, Args.DEVICE)
 
     # Get the YOLO image size
-    arg_yolo_image_size = get_attribute_from_args(args, ARGS_YOLO_IMAGE_SIZE)
+    arg_yolo_image_size = Args.get_attribute_from_args(args, Args.IMAGE_SIZE)
 
     # Get model local data path
-    model_local_data_path = get_model_local_data_path(arg_yolo_input_model)
+    model_local_data_path = Files.get_model_local_data_path(arg_yolo_input_model)
 
     # Train the model
     train_model(model=arg_yolo_input_model_pt, data=model_local_data_path, epochs=arg_yolo_epochs,

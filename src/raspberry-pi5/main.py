@@ -1,21 +1,22 @@
 import argparse
-import os
 from multiprocessing import Process, Manager, Event
 from threading import Thread
 
-from args import parse_args_as_dict, get_attribute_from_args
+from args import Args
+from camera.images_queue import main as images_queue_main, ImagesQueue
+from env import Env
+from log import main as log_main, Logger
 from raspberry_pi_pico2 import SerialCommunication, main as serial_communication_main
 from server import RealtimeTrackerServer
+from server import main as server_main
+from utils import check_type
 from yolo import ARGS_YOLO_VERSION, ARGS_DEBUG
-from env import ENV_YOLO_VERSION, ENV_DEBUG
 from yolo.args import add_yolo_version_argument, add_debug_argument
 from yolo.files import get_log_file_path
 from yolo.hailo.object_detection import main as object_detection_main
-from camera.images_queue import main as images_queue_main, ImagesQueue
-from log import main as log_main, Logger
-from server import main as server_main
 
-def process_1_fn(serial_communication: SerialCommunication, server: RealtimeTrackerServer|None):
+
+def process_1_fn(serial_communication: SerialCommunication, server: RealtimeTrackerServer | None):
     """
     Process 1: Serial communication with Raspberry Pi Pico.
 
@@ -24,12 +25,11 @@ def process_1_fn(serial_communication: SerialCommunication, server: RealtimeTrac
         server (RealtimeTrackerServer|None): The WebSocket server for real-time tracking updates.
     """
     # Check the type of serial communication
-    if not isinstance(serial_communication, SerialCommunication):
-        raise TypeError("serial_communication must be an instance of SerialCommunication")
+    check_type(serial_communication, SerialCommunication)
 
     # Check the type of server
-    if server is not None and not isinstance(server, RealtimeTrackerServer):
-        raise TypeError("server must be an instance of RealtimeTrackerServer or None")
+    if server is not None:
+        check_type(server, RealtimeTrackerServer)
 
     # Check if the server is None
     if server is None:
@@ -49,6 +49,7 @@ def process_1_fn(serial_communication: SerialCommunication, server: RealtimeTrac
         for thread in pool:
             thread.join()
 
+
 def process_2_fn(images_queue: ImagesQueue, logger: Logger):
     """
     Process 2: Images queue for camera and logging.
@@ -58,12 +59,10 @@ def process_2_fn(images_queue: ImagesQueue, logger: Logger):
         logger (Logger): The logger object for logging messages.
     """
     # Check the type of images queue
-    if not isinstance(images_queue, ImagesQueue):
-        raise TypeError("images_queue must be an instance of ImageQueue")
+    check_type(images_queue, ImagesQueue)
 
     # Check the type of logger
-    if not isinstance(logger, Logger):
-        raise TypeError("logger must be an instance of Logger")
+    check_type(logger, Logger)
 
     # Creating threads
     pool = [
@@ -79,6 +78,7 @@ def process_2_fn(images_queue: ImagesQueue, logger: Logger):
     for thread in pool:
         thread.join()
 
+
 def process_3_fn(images_queue: ImagesQueue, parking_event: Event, stop_event: Event):
     """
     Process 3: Hailo object detection.
@@ -89,16 +89,13 @@ def process_3_fn(images_queue: ImagesQueue, parking_event: Event, stop_event: Ev
         stop_event (Event): The event signal to stop processing.
     """
     # Check the type of images queue
-    if not isinstance(images_queue, ImagesQueue):
-        raise TypeError("images_queue must be an instance of ImageQueue")
+    check_type(images_queue, ImagesQueue)
 
     # Check the type of parking event
-    if not isinstance(parking_event, Event):
-        raise TypeError("parking_event must be an instance of Event")
+    check_type(parking_event, Event)
 
     # Check the type of stop event
-    if not isinstance(stop_event, Event):
-        raise TypeError("stop_event must be an instance of Event")
+    check_type(stop_event, Event)
 
     object_detection_main(images_queue, parking_event, stop_event)
 
@@ -111,17 +108,17 @@ def main():
         description="Klevor - WRO 2025 - Future Engineers Car")
     add_yolo_version_argument(parser)
     add_debug_argument(parser)
-    args = parse_args_as_dict(parser)
+    args = Args.parse_args_as_dict(parser)
 
     # Get the YOLO version
-    arg_yolo_version = get_attribute_from_args(args, ARGS_YOLO_VERSION)
+    arg_yolo_version = Args.get_attribute_from_args(args, ARGS_YOLO_VERSION)
 
     # Get the debug mode
-    arg_debug = get_attribute_from_args(args, ARGS_DEBUG)
+    arg_debug = Args.get_attribute_from_args(args, ARGS_DEBUG)
 
     # Set the debug mode and YOLO version as environment variables
-    os.environ[ENV_DEBUG] = str(arg_debug).lower()
-    os.environ[ENV_YOLO_VERSION] = arg_yolo_version
+    Env.set_yolo_version(arg_yolo_version)
+    Env.set_debug_mode(arg_debug)
 
     # Create a manager for shared objects
     with Manager() as manager:
@@ -150,25 +147,27 @@ def main():
         images_queue = manager.ImagesQueue(stop_event, logger, camera, server=server)
 
         # Raspberry Pi Pico serial communication wrapper with multiprocessing safety
-        serial_communication = manager.SerialCommunication(parking_event, stop_event, logger, images_queue, server=server)
+        serial_communication = manager.SerialCommunication(parking_event, stop_event, logger, images_queue,
+                                                           server=server)
 
-        # Start the first process
+        # First process
         process_1 = Process(target=process_1_fn, args=(serial_communication, server))
-        process_1.start()
-        process_1.join()
 
-        # Start the second process
+        # Second process
         process_2 = Process(target=process_2_fn, args=(images_queue, logger))
-        process_2.start()
-        process_2.join()
 
-        # Start the third process
+        # Third process
         process_3 = Process(target=process_3_fn, args=(images_queue, parking_event, stop_event))
-        process_3.start()
-        process_3.join()
 
-        # Await for the stop event signal
-        stop_event.wait()
+        # Start the processes
+        processes = [process_1, process_2, process_3]
+        for process in processes:
+            process.start()
+
+        # Wait for the processes to finish
+        for process in processes:
+            process.join()
+
 
 if __name__ == "__main__":
     main()

@@ -1,22 +1,26 @@
 import argparse
-
-import tensorflow as tf
 import os
 
-from args import get_attribute_from_args, parse_args_as_dict
-from files import ensure_path_exists
-from yolo import (YOLO_DATASET_ORGANIZED, YOLO_DATASET_TO_PROCESS, ARGS_YOLO_INPUT_MODEL, YOLO_DATASET_IMAGES,
-    YOLO_DATASET_LABELS, ARGS_YOLO_VERSION, YOLO_DATASET_TESTING)
-from yolo.args import add_yolo_input_model_argument, add_yolo_version_argument
-from yolo.files import get_dataset_model_dir_path, get_tf_record_path
+import tensorflow as tf
+
+from yolo.args import Args
+from yolo.files import Files
 
 
-def create_tfrecord(output_path, image_dir, label_dir):
+def create_tfrecord(output_path: str, image_dir: str, label_dir: str):
     """
     This script creates a TFRecord file from images and their labels.
+
+    Args:
+        output_path (str): The path where the TFRecord file will be saved.
+        image_dir (str): The directory containing the images.
+        label_dir (str): The directory containing the label files.
+
+    Returns:
+        None
     """
     # Check if the output directory exists, if not create it
-    ensure_path_exists(output_path)
+    Files.ensure_path_exists(output_path)
     writer = tf.io.TFRecordWriter(output_path)
 
     for image_name in os.listdir(image_dir):
@@ -45,35 +49,37 @@ def create_tfrecord(output_path, image_dir, label_dir):
 
     writer.close()
 
+
 def main() -> None:
     """
     Main function to run the script.
     """
     parser = argparse.ArgumentParser(description='Script to create TFRecord from images and labels')
-    add_yolo_input_model_argument(parser)
-    add_yolo_version_argument(parser)
-    args = parse_args_as_dict(parser)
+    Args.add_yolo_input_model_argument(parser)
+    Args.add_yolo_version_argument(parser)
+    args = Args.parse_args_as_dict(parser)
 
     # Get the YOLO input model
-    arg_yolo_input_model = get_attribute_from_args(args, ARGS_YOLO_INPUT_MODEL)
+    arg_yolo_input_model = Args.get_attribute_from_args(args, Args.INPUT_MODEL)
 
     # Get the YOLO version
-    arg_yolo_version = get_attribute_from_args(args, ARGS_YOLO_VERSION)
+    arg_yolo_version = Args.get_attribute_from_args(args, Args.VERSION)
 
     # Get the dataset paths
-    organized_to_process_dir = get_dataset_model_dir_path(YOLO_DATASET_ORGANIZED, YOLO_DATASET_TO_PROCESS,
-                                                          arg_yolo_input_model)
+    organized_to_process_dir = Args.get_dataset_model_dir_path(Files.DATASET_ORGANIZED, Files.DATASET_TO_PROCESS,
+                                                               arg_yolo_input_model)
 
     # Get the images and labels directories
-    organized_to_process_testing_dir = os.path.join(organized_to_process_dir, YOLO_DATASET_TESTING)
-    testing_images_dir = os.path.join(organized_to_process_testing_dir, YOLO_DATASET_IMAGES)
-    testing_labels_dir = os.path.join(organized_to_process_testing_dir, YOLO_DATASET_LABELS)
+    organized_to_process_testing_dir = os.path.join(organized_to_process_dir, Files.DATASET_TESTING)
+    testing_images_dir = os.path.join(organized_to_process_testing_dir, Files.DATASET_IMAGES)
+    testing_labels_dir = os.path.join(organized_to_process_testing_dir, Files.DATASET_LABELS)
 
     # Get the TF Record output path
-    output_tfrecord = get_tf_record_path(arg_yolo_input_model, arg_yolo_version)
+    output_tfrecord = Files.get_tf_record_path(arg_yolo_input_model, arg_yolo_version)
 
     # Create TFRecord
     create_tfrecord(output_tfrecord, testing_images_dir, testing_labels_dir)
+
 
 if __name__ == "__main__":
     main()

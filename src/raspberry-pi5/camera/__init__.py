@@ -1,11 +1,11 @@
 import io
 from multiprocessing import Lock
+from time import sleep
 
 from PIL.Image import Image
 from picamera2 import Picamera2
 from picamera2.encoders import H264Encoder
 from picamera2.outputs import FileOutput
-from time import sleep
 
 from log import Logger
 from utils import check_type
@@ -53,7 +53,8 @@ class Camera:
         self.__video_config = video_config
         self.__started_preview = False
 
-    def record_video(self, width=WIDTH, height=HEIGHT,duration=10, file_path='video.h264', encoder=H264Encoder()) -> None:
+    def record_video(self, width=WIDTH, height=HEIGHT, duration=10, file_path='video.h264',
+                     encoder=H264Encoder()) -> None:
         """
         Record a video with the camera.
 
@@ -72,7 +73,8 @@ class Camera:
 
             # Configure the camera for video recording
             if self.__video_config is None:
-                self.__video_config = self.__picam2.create_video_configuration(main={"size": (width, height)}, display="preview")
+                self.__video_config = self.__picam2.create_video_configuration(main={"size": (width, height)},
+                                                                               display="preview")
             self.__picam2.configure(self.__video_config)
 
             # Get the  output
@@ -173,7 +175,7 @@ class Camera:
         image_stream.seek(0)
         return Image.open(image_stream)
 
-    def start_preview(self)->None:
+    def start_preview(self) -> None:
         """
         Start the camera preview.
         """
@@ -186,7 +188,7 @@ class Camera:
         # Log
         self.__logger.log("Camera preview started.")
 
-    def stop_preview(self)->None:
+    def stop_preview(self) -> None:
         """
         Stop the camera preview.
         """

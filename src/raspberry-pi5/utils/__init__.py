@@ -12,6 +12,7 @@ def check_type(obj: object, class_or_tuple: type | UnionType | tuple[Any, ...]) 
             f"Expected type {class_or_tuple}, got {type(obj)} for object {obj}"
         )
 
+
 def match_any(regex_list: list[Pattern], string: str) -> bool:
     """
     Match any regex pattern in a list.
@@ -21,3 +22,10 @@ def match_any(regex_list: list[Pattern], string: str) -> bool:
         string (str): String to match against the regex patterns.
     """
     return any(regex.match(string) for regex in regex_list)
+
+
+def add_single_quotes_to_list_elements(lst: list | tuple) -> list:
+    """
+    Add single quotes to each element in a list or tuple.
+    """
+    return [f"'{item}'" for item in lst]

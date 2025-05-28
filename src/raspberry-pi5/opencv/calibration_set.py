@@ -1,13 +1,15 @@
 import os
 import random
 
-import numpy as np
 import cv2
+import numpy as np
 
 from files import Files
-from opencv import DEFAULT_WIDTH, DEFAULT_HEIGHT, MAX_CALIB_SET_SAMPLES
+from opencv import MAX_CALIB_SET_SAMPLES
+from opencv.preprocessing import Preprocessing
 
-def preprocess_images_to_npy(input_folder, output_file, target_shape=(DEFAULT_WIDTH, DEFAULT_HEIGHT, 3))->None:
+
+def preprocess_images_to_npy(input_folder, output_file, target_shape=Preprocessing.SHAPE) -> None:
     """
     Preprocess images from a folder and save them as a .npy file.
 
@@ -35,22 +37,10 @@ def preprocess_images_to_npy(input_folder, output_file, target_shape=(DEFAULT_WI
     counter = 0
     for _, image_name in image_files:
         image_path = os.path.join(input_folder, image_name)
-        image = cv2.imread(image_path)
-
-        if image is None:
-            print(f"Warning: Unable to read {image_path}. Skipping...")
-            continue
-
-        # Resize the image to the target shape
-        resized_image = cv2.resize(image, (w, h))
-
-        # Ensure the image has the correct number of channels
-        if resized_image.shape[-1] != c:
-            print(f"Warning: {image_path} has unexpected channels. Skipping...")
-            continue
+        image = Preprocessing.load_image(image_path, image_size=(w, h), to_rgb=True, interpolation=cv2.INTER_LINEAR)
 
         # Add the preprocessed image to the array
-        images_array[counter] = resized_image
+        images_array[counter] = image
         counter += 1
 
     # Save the array to a .npy file

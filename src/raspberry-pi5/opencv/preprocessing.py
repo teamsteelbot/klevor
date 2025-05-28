@@ -12,6 +12,8 @@ class Preprocessing:
     WIDTH = 640
     HEIGHT = 640
     SIZE = (WIDTH, HEIGHT)
+    CHANNELS = 3
+    SHAPE = (HEIGHT, WIDTH, CHANNELS)
 
     # Color
     COLOR = (0, 255, 0)
@@ -46,8 +48,9 @@ class Preprocessing:
         """
         return rgb[::-1]
 
-    @staticmethod
-    def get_rgb_color(class_number: int, rgb_colors: dict[int, tuple[int, int, int]] = None) -> tuple[int, int, int]:
+    @classmethod
+    def get_rgb_color(cls, class_number: int, rgb_colors: dict[int, tuple[int, int, int]] = None) -> tuple[
+        int, int, int]:
         """
         Get RGB color.
 
@@ -57,10 +60,10 @@ class Preprocessing:
         Returns:
             tuple[int, int, int]: RGB color tuple for the class number.
         """
-        return rgb_colors[class_number] if rgb_colors is not None and class_number in rgb_colors else Preprocessing.COLOR
+        return rgb_colors[class_number] if rgb_colors is not None and class_number in rgb_colors else cls.COLOR
 
-    @staticmethod
-    def get_bgr_color(class_number: int, rgb_colors: dict[int, tuple[int, int, int]] = None) -> tuple:
+    @classmethod
+    def get_bgr_color(cls, class_number: int, rgb_colors: dict[int, tuple[int, int, int]] = None) -> tuple:
         """
         Get BGR color.
 
@@ -70,10 +73,11 @@ class Preprocessing:
         Returns:
             tuple[int, int, int]: BGR color tuple for the class number.
         """
-        return Preprocessing.rgb_to_bgr(Preprocessing.get_rgb_color(class_number, rgb_colors))
+        return cls.rgb_to_bgr(cls.get_rgb_color(class_number, rgb_colors))
 
-    @staticmethod
-    def load_image(image_path: str, image_size: tuple[int, int] = None, to_rgb: bool = True, interpolation=cv2.INTER_LINEAR) -> np.ndarray:
+    @classmethod
+    def load_image(cls, image_path: str, image_size: tuple[int, int] = None, to_rgb: bool = True,
+                   interpolation=cv2.INTER_LINEAR) -> np.ndarray:
         """
         Load an image from a file.
 
@@ -81,6 +85,7 @@ class Preprocessing:
             image_path (str): Path to the image file.
             image_size (tuple[int, int]): Size to resize the image to, default is None.
             to_rgb (bool): Whether to convert the image to RGB format, default is True.
+            interpolation: Interpolation method used for resizing.
         Returns:
             np.ndarray: Loaded image.
         """
@@ -93,7 +98,7 @@ class Preprocessing:
             raise ValueError(f"Image at {image_path} could not be loaded.")
 
         # Resize the image if image_size is specified
-        image = Preprocessing.resize_image(image, image_size, interpolation)
+        image = cls.resize_image(image, image_size, interpolation)
 
         # Convert the image to RGB if specified
         if to_rgb:
@@ -101,8 +106,8 @@ class Preprocessing:
 
         return image
 
-    @staticmethod
-    def preprocess(image_path, image_size: tuple[int, int] = SIZE) -> tuple:
+    @classmethod
+    def preprocess(cls, image_path: str, image_size: tuple[int, int] = SIZE) -> tuple:
         """
         Preprocess the image.
 
@@ -113,7 +118,7 @@ class Preprocessing:
             tuple: Original image and preprocessed image tensor.
         """
         # Resize the image and convert it to RGB
-        image = Preprocessing.load_image(image_path, image_size, to_rgb=True)
+        image = cls.load_image(image_path, image_size)
 
         # Normalize the image and transpose it
         image_normalized = image.astype(np.float32) / 255.0

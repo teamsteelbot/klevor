@@ -24,7 +24,7 @@ class SubLogger:
         check_type(tag, str)
         self.__tag = tag
 
-    def log(self, content: str)-> None:
+    def log(self, content: str) -> None:
         """
         Log a message with the specified tag.
 

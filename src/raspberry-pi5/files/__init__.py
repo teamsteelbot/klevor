@@ -1,6 +1,7 @@
 import os
 import shutil
 
+
 class Files:
     """
     Files utility class.
@@ -21,7 +22,7 @@ class Files:
     IGNORE_DIRS = ('.git', '__pycache__', '.idea', '.vscode', '.venv', 'venv', 'env')
 
     @staticmethod
-    def move_file(input_path, output_dir)->None:
+    def move_file(input_path, output_dir) -> None:
         """
         Move file between folders.
 
@@ -33,7 +34,7 @@ class Files:
             shutil.move(input_path, output_dir)
 
     @staticmethod
-    def move_folder(input_dir, output_dir)->None:
+    def move_folder(input_dir, output_dir) -> None:
         """
         Move folder between folders.
 
@@ -44,8 +45,8 @@ class Files:
         if os.path.exists(input_dir):
             shutil.move(input_dir, output_dir)
 
-    @staticmethod
-    def move_folder_content(input_dir, output_dir)->None:
+    @classmethod
+    def move_folder_content(cls, input_dir, output_dir) -> None:
         """
         Move folder content to another folder.
 
@@ -55,7 +56,7 @@ class Files:
         """
         if os.path.exists(input_dir):
             # Check if the output directory exists, if not create it
-            Files.ensure_path_exists(output_dir)
+            cls.ensure_path_exists(output_dir)
 
             # Get all files and folders in the input directory
             for item in os.listdir(input_dir):
@@ -74,12 +75,11 @@ class Files:
                 else:
                     os.remove(item_output_path)
 
-
                 # Move each item to the output directory
                 shutil.move(item_input_path, output_dir)
 
     @staticmethod
-    def copy_file(input_path, output_path)->None:
+    def copy_file(input_path, output_path) -> None:
         """
         Copy a file from input path to output path.
 
@@ -91,7 +91,7 @@ class Files:
             shutil.copy(input_path, output_path)
 
     @staticmethod
-    def ensure_path_exists(path: str)->None:
+    def ensure_path_exists(path: str) -> None:
         """
         Ensure the path exists, if not create it.
 
@@ -108,7 +108,7 @@ class Files:
         os.makedirs(output_dir, exist_ok=True)
 
     @staticmethod
-    def check_path_exists(path: str)->bool:
+    def check_path_exists(path: str) -> bool:
         """
         Check if the path exists.
 

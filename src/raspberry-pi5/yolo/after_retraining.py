@@ -1,28 +1,26 @@
 import argparse
 import os
 
-from args import get_attribute_from_args, parse_args_as_dict
-from files import move_folder
-from yolo import (ARGS_YOLO_VERSION)
-from yolo.args import add_yolo_version_argument
-from yolo.files import get_yolo_runs_dir_path, get_yolo_old_runs_dir_path, get_yolo_runs_new_name_dir_path
+from yolo.args import Args
+from yolo.files import Files
+
 
 def main() -> None:
     """
     Main function to run the script.
     """
     parser = argparse.ArgumentParser(description='Script to move YOLO model runs folder to old runs folder')
-    add_yolo_version_argument(parser)
-    args = parse_args_as_dict(parser)
+    Args.add_yolo_version_argument(parser)
+    args = Args.parse_args_as_dict(parser)
 
     # Get the YOLO version
-    arg_yolo_version = get_attribute_from_args(args, ARGS_YOLO_VERSION)
+    arg_yolo_version = Args.get_attribute_from_args(args, Args.VERSION)
 
     # Get the runs folder path
-    yolo_runs_dir = get_yolo_runs_dir_path(arg_yolo_version)
+    yolo_runs_dir = Files.get_yolo_runs_dir_path(arg_yolo_version)
 
     # Get the runs folder path with the new name
-    yolo_runs_new_name_dir = get_yolo_runs_new_name_dir_path(arg_yolo_version)
+    yolo_runs_new_name_dir = Files.get_yolo_runs_new_name_dir_path(arg_yolo_version)
 
     # Check if the new name folder exists
     if os.path.exists(yolo_runs_new_name_dir):
@@ -38,10 +36,11 @@ def main() -> None:
     os.rename(yolo_runs_dir, yolo_runs_new_name_dir)
 
     # Get the old runs folder path
-    yolo_old_runs_dir = get_yolo_old_runs_dir_path(arg_yolo_version)
+    yolo_old_runs_dir = Files.get_yolo_old_runs_dir_path(arg_yolo_version)
 
     # Move the folder
-    move_folder(yolo_runs_new_name_dir, yolo_old_runs_dir)
+    Files.move_folder(yolo_runs_new_name_dir, yolo_old_runs_dir)
+
 
 if __name__ == '__main__':
     main()

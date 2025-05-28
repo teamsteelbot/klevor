@@ -1,6 +1,7 @@
-from time import time
 from multiprocessing import Lock, Event, Queue
+from time import time
 
+from log.sub_logger import SubLogger
 from raspberry_pi_pico2 import Message
 from utils import check_type
 
@@ -10,7 +11,7 @@ class Logger:
     Class to handle logging functionality.
     """
 
-    def __init__(self, file_path: str, stop_event:Event):
+    def __init__(self, file_path: str, stop_event: Event):
         """
         Initialize the Logger class.
 
@@ -35,7 +36,7 @@ class Logger:
         # Initialize the write log event
         self.__write_log_event = Event()
 
-    def put_message(self, message: Message)->None:
+    def put_message(self, message: Message) -> None:
         """
         Put a message in the queue.
 
@@ -62,7 +63,7 @@ class Logger:
         # Get the message from the queue
         return self.__messages_queue.get()
 
-    def __log(self, message: str)->None:
+    def __log(self, message: str) -> None:
         """
         Log a message to the log file.
 
@@ -80,7 +81,7 @@ class Logger:
         # Write the message to the log file
         self.__file.write(f"{unix_time}: {message}\n")
 
-    def log_last_message(self)->None:
+    def log_last_message(self) -> None:
         """
         Log the last message to the log file.
         """
@@ -90,7 +91,7 @@ class Logger:
         # Log the message
         self.__log(message)
 
-    def open(self)->None:
+    def open(self) -> None:
         """
         Open the log file.
         """
@@ -101,7 +102,7 @@ class Logger:
             else:
                 print(f"Log file {self.__file_path} is already open.")
 
-    def close(self)->None:
+    def close(self) -> None:
         """
         Close the log file.
         """
@@ -110,7 +111,7 @@ class Logger:
                 self.__file.close()
                 self.__file = None
 
-    def get_stop_event(self)->Event:
+    def get_stop_event(self) -> Event:
         """
         Get the stop event status.
 
@@ -119,7 +120,7 @@ class Logger:
         """
         return self.__stop_event
 
-    def get_write_log_event(self)->Event:
+    def get_write_log_event(self) -> Event:
         """
         Get the write log event status.
 
@@ -128,7 +129,7 @@ class Logger:
         """
         return self.__write_log_event
 
-    def get_sub_logger(self, tag: str) -> 'SubLogger':
+    def get_sub_logger(self, tag: str) -> SubLogger:
         """
         Get a sub_logger with a specific tag.
 
@@ -148,6 +149,7 @@ class Logger:
         Destructor to close the log file if it is open.
         """
         self.close()
+
 
 def main(logger: Logger) -> None:
     """

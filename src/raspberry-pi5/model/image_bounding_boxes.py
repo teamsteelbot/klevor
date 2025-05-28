@@ -148,7 +148,7 @@ class ImageBoundingBoxes:
         """
         return self.__cls
 
-    def get_confidences(self)-> list:
+    def get_confidences(self) -> list:
         """
         Get the confidence of the detected objects.
 

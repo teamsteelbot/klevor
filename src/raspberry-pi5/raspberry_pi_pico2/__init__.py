@@ -1,8 +1,8 @@
+import time
 from multiprocessing import Event, Queue, Lock
 from threading import Thread
 
 import serial
-import time
 
 from camera.images_queue import ImagesQueue
 from log import Logger
@@ -24,7 +24,8 @@ class SerialCommunication:
     # Encode
     ENCODE = 'utf-8'
 
-    def __init__(self, parking_event: Event, stop_event: Event, logger: Logger, images_queue: ImagesQueue, port='/dev/ttyACM0', baudrate=115200, server: RealtimeTrackerServer=None):
+    def __init__(self, parking_event: Event, stop_event: Event, logger: Logger, images_queue: ImagesQueue,
+                 port='/dev/ttyACM0', baudrate=115200, server: RealtimeTrackerServer = None):
         """
         Initialize the serial communication class.
 
@@ -77,7 +78,7 @@ class SerialCommunication:
         self.__port = port
         self.__baudrate = baudrate
 
-    def __clear_events(self)->None:
+    def __clear_events(self) -> None:
         """
         Clear the events.
         """
@@ -100,7 +101,7 @@ class SerialCommunication:
         """
         return self.__serial is not None and self.__serial.is_open
 
-    def start(self)->None:
+    def start(self) -> None:
         """
         Start the communication.
         """
@@ -129,7 +130,7 @@ class SerialCommunication:
         # Log
         self.__logger.log(f"Serial port {self.__port} opened with baudrate {self.__baudrate}.")
 
-    def close(self)->None:
+    def close(self) -> None:
         """
         Close the communication.
         """
@@ -154,7 +155,7 @@ class SerialCommunication:
         # Log
         self.__logger.log(f"Serial port {self.__port} closed.")
 
-    def __put_incoming_message(self, message: Message)->None:
+    def __put_incoming_message(self, message: Message) -> None:
         """
         Put a message in the incoming messages queue.
 
@@ -178,7 +179,7 @@ class SerialCommunication:
         # Log
         self.__logger.log(f"Received message: {message}")
 
-    def get_incoming_message(self) -> Message|None:
+    def get_incoming_message(self) -> Message | None:
         """
         Get a message from the incoming messages queue.
 
@@ -202,7 +203,7 @@ class SerialCommunication:
 
             return message
 
-    def peek_incoming_message(self) -> Message|None:
+    def peek_incoming_message(self) -> Message | None:
         """
         Peek a message from the incoming messages queue without removing it.
 
@@ -215,7 +216,7 @@ class SerialCommunication:
 
             return self.__last_incoming_message
 
-    def put_outgoing_message(self, message: Message)->None:
+    def put_outgoing_message(self, message: Message) -> None:
         """
         Put a message in the outgoing messages queue.
 
@@ -235,7 +236,7 @@ class SerialCommunication:
             # Set the pending outgoing message event
             self.__pending_outgoing_message_event.set()
 
-    def __get_outgoing_message(self) -> str|None:
+    def __get_outgoing_message(self) -> str | None:
         """
         Get a message from the outgoing messages queue.
 
@@ -264,7 +265,7 @@ class SerialCommunication:
 
         return message
 
-    def send_message(self)->None:
+    def send_message(self) -> None:
         """
         Send a message to the serial port.
         """
@@ -285,7 +286,7 @@ class SerialCommunication:
             # Wait for the message to be sent
             time.sleep(self.DELAY)
 
-    def receive_message(self)->None:
+    def receive_message(self) -> None:
         """
         Receive a message from the serial port.
         """
@@ -312,7 +313,7 @@ class SerialCommunication:
             # Put the message in the incoming messages queue
             self.__put_incoming_message(message)
 
-    def get_stop_event(self)->Event:
+    def get_stop_event(self) -> Event:
         """
         Get the stop event status.
 
@@ -321,7 +322,7 @@ class SerialCommunication:
         """
         return self.__stop_event
 
-    def get_pending_incoming_message_event(self)->Event:
+    def get_pending_incoming_message_event(self) -> Event:
         """
         Get the pending incoming message event status.
 
@@ -330,7 +331,7 @@ class SerialCommunication:
         """
         return self.__pending_incoming_message_event
 
-    def get_pending_outgoing_message_event(self)->Event:
+    def get_pending_outgoing_message_event(self) -> Event:
         """
         Get the pending outgoing message event status.
 
@@ -346,6 +347,7 @@ class SerialCommunication:
         # Close the communication
         self.close()
 
+
 def receiving_thread(stop_event: Event, serial_communication: SerialCommunication) -> None:
     """
     Thread to handle receiving messages from the serial port.
@@ -359,6 +361,7 @@ def receiving_thread(stop_event: Event, serial_communication: SerialCommunicatio
 
         # Sleep for a short time to avoid busy waiting
         time.sleep(SerialCommunication.DELAY)
+
 
 def sending_thread(stop_event: Event, serial_communication: SerialCommunication) -> None:
     """
@@ -374,6 +377,7 @@ def sending_thread(stop_event: Event, serial_communication: SerialCommunication)
         # Sleep for a short time to avoid busy waiting
         time.sleep(SerialCommunication.DELAY)
 
+
 def main(serial_communication: SerialCommunication) -> None:
     """
     Main function to run the script.
@@ -385,11 +389,11 @@ def main(serial_communication: SerialCommunication) -> None:
     stop_event = serial_communication.get_stop_event()
 
     # Thread to handle receiving messages
-    thread_1 = Thread(target=serial_communication.receive_message, args=(stop_event,serial_communication))
+    thread_1 = Thread(target=serial_communication.receive_message, args=(stop_event, serial_communication))
     thread_1.start()
     thread_1.join()
 
     # Thread to handle sending messages
-    thread_2 = Thread(target=serial_communication.send_message, args=(stop_event,serial_communication))
+    thread_2 = Thread(target=serial_communication.send_message, args=(stop_event, serial_communication))
     thread_2.start()
     thread_2.join()
