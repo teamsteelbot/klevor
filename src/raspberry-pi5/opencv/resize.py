@@ -3,7 +3,8 @@ from typing import LiteralString
 import cv2
 import os
 import time
-from files import move_file, ensure_path_exists
+from files import Files
+from opencv.preprocessing import Preprocessing
 
 
 def resize_image(input_to_process_dir: LiteralString, output_resized_to_process_dir: LiteralString,
@@ -20,7 +21,7 @@ def resize_image(input_to_process_dir: LiteralString, output_resized_to_process_
         interpolation: Interpolation method used for resizing.
     """
     # Check if the path exists, if not it creates it
-    ensure_path_exists(output_resized_to_process_dir)
+    Files.ensure_path_exists(output_resized_to_process_dir)
 
     # Iterate over the files in the given path
     for filename in os.listdir(input_to_process_dir):
@@ -30,14 +31,11 @@ def resize_image(input_to_process_dir: LiteralString, output_resized_to_process_
 
             # Read image
             image_path = os.path.join(input_to_process_dir, filename)
-            image = cv2.imread(image_path)
-
-            # Resize image
-            resized_image = cv2.resize(image, new_image_size, interpolation=interpolation)
+            image = Preprocessing.load_image(image_path, new_image_size, interpolation=interpolation)
 
             # Write back the image
             output_path = os.path.join(output_resized_to_process_dir, filename)
-            cv2.imwrite(output_path, resized_image)
+            cv2.imwrite(output_path, image)
 
             # End timing
             end_time = time.time()
@@ -48,4 +46,4 @@ def resize_image(input_to_process_dir: LiteralString, output_resized_to_process_
 
             # Check if the output_processed_dir is not None
             if output_processed_dir is not None:
-                move_file(image_path, os.path.join(output_processed_dir, filename))
+                Files.move_file(image_path, os.path.join(output_processed_dir, filename))

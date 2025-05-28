@@ -3,7 +3,7 @@ import argparse
 from args import parse_args_as_dict, get_attribute_from_args
 from yolo import (YOLO_EPOCHS, ARGS_YOLO_DEVICE, ARGS_YOLO_INPUT_MODEL_PT, ARGS_YOLO_EPOCHS, ARGS_YOLO_IMAGE_SIZE,
                 ARGS_YOLO_INPUT_MODEL)
-from model.yolo import load
+from model.__init__ import load
 from yolo.args import (add_yolo_input_model_argument, add_yolo_input_model_pt_argument, add_yolo_device_argument,
     add_yolo_epochs_argument, add_yolo_image_size_argument)
 from yolo.files import get_model_local_data_path

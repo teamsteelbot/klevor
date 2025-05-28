@@ -2,7 +2,7 @@ import cv2
 import albumentations as A
 import os
 import time
-from files import move_file
+from files import Files
 from opencv import AUGMENTATION_SAMPLES
 
 
@@ -26,7 +26,7 @@ def augment_image(input_to_process_image_path: str, input_to_process_annotations
     start_time = time.time()
 
     # Read the image and convert it to RGB
-    image = cv2.imread(input_to_process_image_path)
+    image = Preprocessing.load_image(input_to_process_image_path)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
     # Read the annotations
@@ -98,11 +98,11 @@ def augment_image(input_to_process_image_path: str, input_to_process_annotations
 
             # Check if the output_processed_images_dir is not None
             if output_processed_images_dir is not None:
-                move_file(input_to_process_image_path, output_processed_images_dir)
+                Files.move_file(input_to_process_image_path, output_processed_images_dir)
 
             # Check if the output_processed_annotations_dir is not None
             if output_processed_annotations_dir is not None:
-                move_file(input_to_process_annotations_path, output_processed_annotations_dir)
+                Files.move_file(input_to_process_annotations_path, output_processed_annotations_dir)
 
     except Exception as e:
         print(f"Error: {e} for {input_to_process_image_path}")

@@ -1,44 +1,50 @@
 from argparse import ArgumentParser
 
-# Arguments
-ARGS_PREFIX = '--'
-
-def get_attribute_name(attribute: str) -> str:
+class Args:
     """
-    Get the attribute name.
-
-    Args:
-        attribute (str): The name of the attribute.
+    Class to handle command line arguments.
     """
-    return f'{ARGS_PREFIX}{attribute}'
+    ARGS_PREFIX = '--'
 
-def get_attribute_from_args(args: dict, attribute: str):
-    """
-    Get the attribute name from the args.
+    @classmethod
+    def get_attribute_name(cls, attribute: str) -> str:
+        """
+        Get the attribute name.
 
-    Args:
-        args (dict): The parsed arguments.
-        attribute (str): The name of the attribute.
-    """
-    # Substitute whitespaces with underscores
-    attribute = attribute.replace(' ', '_')
+        Args:
+            attribute (str): The name of the attribute.
+        """
+        return f'{cls.ARGS_PREFIX}{attribute}'
 
-    # Substitute dashes with underscores
-    attribute = attribute.replace('-', '_')
+    @staticmethod
+    def get_attribute_from_args(args: dict, attribute: str):
+        """
+        Get the attribute name from the args.
 
-    return args[attribute]
+        Args:
+            args (dict): The parsed arguments.
+            attribute (str): The name of the attribute.
+        """
+        # Substitute whitespaces with underscores
+        attribute = attribute.replace(' ', '_')
 
-def parse_args_as_dict(parser: ArgumentParser) -> dict:
-    """
-    Parse the arguments and return them as a dictionary.
+        # Substitute dashes with underscores
+        attribute = attribute.replace('-', '_')
 
-    Args:
-        parser (ArgumentParser): The argument parser instance.
-    Returns:
-        dict: A dictionary containing the parsed arguments.
-    """
-    # Parse the arguments
-    args = parser.parse_args()
+        return args[attribute]
 
-    # Get the arguments as a dictionary
-    return vars(args)
+    @staticmethod
+    def parse_args_as_dict(parser: ArgumentParser) -> dict:
+        """
+        Parse the arguments and return them as a dictionary.
+
+        Args:
+            parser (ArgumentParser): The argument parser instance.
+        Returns:
+            dict: A dictionary containing the parsed arguments.
+        """
+        # Parse the arguments
+        args = parser.parse_args()
+
+        # Get the arguments as a dictionary
+        return vars(args)

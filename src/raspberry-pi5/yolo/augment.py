@@ -4,7 +4,7 @@ import shutil
 
 from args import get_attribute_from_args, parse_args_as_dict
 from files import ensure_path_exists
-from opencv.image_augmentation import augment_image
+from opencv.augmentation import augment_image
 from yolo import (YOLO_NUM_AUGMENTATIONS, ARGS_YOLO_INPUT_MODEL,
                   YOLO_DATASET_LABELED, YOLO_DATASET_AUGMENTED, YOLO_DATASET_TO_PROCESS, YOLO_DATASET_PROCESSED,
                   YOLO_DATASET_IMAGES, YOLO_DATASET_LABELS, IMAGE_EXTENSIONS)

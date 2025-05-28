@@ -6,24 +6,15 @@ from camera import Camera
 from log import Logger
 from model.image_bounding_boxes import ImageBoundingBoxes
 from server import RealtimeTrackerServer
+from utils import check_type
 
 
 class ImagesQueue:
     """
     Queue for images to be processed.
     """
-    __imager_counter = 0
-    __lock = None
-    __log_tag = "ImagesQueue"
-    __logger = None
-    __camera = None
-    __server = None
-    __capture_image_event = None
-    __pending_input_image_event = None
-    __pending_output_inference_event = None
-    __input_images_queue = None
-    __output_inference_queue = None
-    __stop_event = None
+    # Logger configuration
+    LOG_TAG = "ImagesQueue"
 
     def __init__(self, stop_event: Event, logger: Logger, camera: Camera, server=RealtimeTrackerServer):
         """
@@ -38,27 +29,24 @@ class ImagesQueue:
         # Initialize the lock
         self.__lock = Lock()
 
-        # Check the type of the stop event
-        if not isinstance(stop_event, Event):
-            raise ValueError("stop_event must be an instance of Event")
+        # Check the type of stop event
+        check_type(stop_event, Event)
         self.__stop_event = stop_event
 
-        # Check the type of the camera
-        if not isinstance(camera, Camera):
-            raise ValueError("camera must be an instance of Camera")
+        # Check the type of camera
+        check_type(camera, Camera)
         self.__camera = camera
 
-        # Check the type of the server
-        if not isinstance(server, RealtimeTrackerServer):
-            raise ValueError("server must be an instance of RealtimeTrackerServer")
+        # Check the type of server
+        if server is not None:
+            check_type(server, RealtimeTrackerServer)
         self.__server = server
 
-        # Check the type of the logger
-        if not isinstance(logger, Logger):
-            raise ValueError("logger must be an instance of Logger")
+        # Check the type of logger
+        check_type(logger, Logger)
 
         # Get the sub-logger for this class
-        self.__logger = logger.get_sub_logger(self.__log_tag)
+        self.__logger = logger.get_sub_logger(self.LOG_TAG)
 
         # Initialize the events
         self.__capture_image_event = Event()
@@ -75,7 +63,7 @@ class ImagesQueue:
         """
         # Check the type of the image
         if not isinstance(image, Image):
-            raise ValueError("image must be an instance of PIL.Image.Image")
+            raise TypeError("image must be an instance of PIL.Image.Image")
 
         with self.__lock:
             # Put image in input images queue
@@ -261,7 +249,7 @@ def main(images_queue: ImagesQueue=None):
     """
     # Check the type of the images queue
     if not isinstance(images_queue, ImagesQueue):
-        raise ValueError("images_queue must be an instance of ImagesQueue")
+        raise TypeError("images_queue must be an instance of ImagesQueue")
 
     # Get the stop event
     stop_event = images_queue.get_stop_event()

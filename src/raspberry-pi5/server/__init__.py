@@ -7,64 +7,61 @@ import websockets
 from PIL.Image import Image
 
 from log import Logger
-
-# Server configuration
-HOST='localhost'
-PORT = 8765
-
-# Serial communication tags
-TAG_SERIAL_INCOMING_MESSAGE = "serial_incoming_message"
-TAG_SERIAL_OUTGOING_MESSAGE = "serial_outgoing_message"
-
-# Image tags
-TAG_IMAGE_ORIGINAL = "image_original"
-TAG_IMAGE_MODEL_G = "image_model_g"
-TAG_IMAGE_MODEL_M = "image_model_m"
-TAG_IMAGE_MODEL_R = "image_model_r"
-
-# Image format
-IMAGE_FORMAT = "JPEG"
+from utils import check_type
+from yolo import YOLO_MODEL_G, YOLO_MODEL_M, YOLO_MODEL_R
 
 class RealtimeTrackerServer:
     """
     A WebSocket server that handles real-time tracking updates.
     It allows clients to connect and receive messages about tracking events.
     """
-    __log_tag = "RealtimeTrackerServer"
-    __host = None
-    __port = None
-    __connected_clients = None
-    __started = None
-    __stop_event = None
+    # Logger configuration
+    LOG_TAG = "RealtimeTrackerServer"
+
+    # Server configuration
+    HOST = 'localhost'
+    PORT = 8765
+
+    # Serial communication tags
+    TAG_SERIAL_INCOMING_MESSAGE = "serial_incoming_message"
+    TAG_SERIAL_OUTGOING_MESSAGE = "serial_outgoing_message"
+
+    # Image tags
+    TAG_IMAGE_ORIGINAL = "image_original"
+    TAG_IMAGE_MODEL_G = "image_model_g"
+    TAG_IMAGE_MODEL_M = "image_model_m"
+    TAG_IMAGE_MODEL_R = "image_model_r"
+
+    # Image format
+    IMAGE_FORMAT = "JPEG"
 
     def __init__(self, stop_event:Event, logger: Logger, host=HOST, port=PORT):
         """
         Initializes the WebSocket server with the specified host and port.
         """
         # Check the type of stop event
-        if not isinstance(stop_event, Event):
-            raise ValueError("stop_event must be an instance of Event")
+        check_type(stop_event, Event)
         self.__stop_event = stop_event
 
         # Check the type of host
-        if not isinstance(host, str):
-            raise ValueError("host must be a string")
+        check_type(host, str)
         self.__host = host
 
         # Check the type of port
-        if not isinstance(port, int):
-            raise ValueError("port must be an integer")
+        check_type(port, int)
         self.__port = port
 
         # Check the type of logger
-        if not isinstance(logger, Logger):
-            raise ValueError("logger must be an instance of Logger")
+        check_type(logger, Logger)
 
         # Get the sub-logger for this class
-        self.__logger = logger.get_sub_logger(self.__log_tag)
+        self.__logger = logger.get_sub_logger(self.LOG_TAG)
 
         # Initialize the connected clients set
         self.__connected_clients = set()
+
+        # Initialize the started flag
+        self.__started = False
 
     async def __reactive_handler(self, connection) -> Awaitable[None]:
         """
@@ -109,7 +106,7 @@ class RealtimeTrackerServer:
         try:
             # Open the image and convert it to a binary stream
             img_stream = io.BytesIO()
-            img.save(img_stream, format=IMAGE_FORMAT)
+            img.save(img_stream, format=self.IMAGE_FORMAT)
             img_stream.seek(0)
             binary_data = img_stream.read()
 
@@ -126,35 +123,52 @@ class RealtimeTrackerServer:
         """
         Sends the original image to all connected clients.
         """
-        await self._send_image_with_tag(TAG_IMAGE_ORIGINAL, img)
+        await self._send_image_with_tag(self.TAG_IMAGE_ORIGINAL, img)
 
-    async def send_image_model_g(self, img: Image):
+    async def __send_image_model_g(self, img: Image):
         """
         Sends the image processed by model G to all connected clients.
         """
-        await self._send_image_with_tag(TAG_IMAGE_MODEL_G, img)
+        await self._send_image_with_tag(self.TAG_IMAGE_MODEL_G, img)
 
-    async def send_image_model_m(self, img: Image):
+    async def __send_image_model_m(self, img: Image):
         """
         Sends the image processed by model M to all connected clients.
         """
-        await self._send_image_with_tag(TAG_IMAGE_MODEL_M, img)
+        await self._send_image_with_tag(self.TAG_IMAGE_MODEL_M, img)
 
-    async def send_image_model_r(self, img: Image):
+    async def __send_image_model_r(self, img: Image):
         """
         Sends the image processed by model R to all connected clients.
         """
-        await self._send_image_with_tag(TAG_IMAGE_MODEL_R, img)
+        await self._send_image_with_tag(self.TAG_IMAGE_MODEL_R, img)
+
+    async def send_image_model(self, img: Image, model_name: str):
+        """
+        Sends the image processed by the specified model to all connected clients.
+
+        Args:
+            img (Image): The image to send.
+            model_name (str): The name of the model that processed the image.
+        """
+        if model_name == YOLO_MODEL_G:
+            await self.__send_image_model_g(img)
+        elif model_name == YOLO_MODEL_M:
+            await self.__send_image_model_m(img)
+        elif model_name == YOLO_MODEL_R:
+            await self.__send_image_model_r(img)
+        else:
+            raise ValueError(f"Unknown model name: {model_name}")
 
     async def send_serial_incoming_message(self, message: str):
         """
         Sends a serial incoming message to all connected clients.
         """
         if not isinstance(message, str):
-            raise ValueError("message must be a string")
+            raise TypeError("message must be a string")
 
         # Send a tagged message
-        tagged_message = f"{TAG_SERIAL_INCOMING_MESSAGE}:{message}"
+        tagged_message = f"{self.TAG_SERIAL_INCOMING_MESSAGE}:{message}"
         self._send_message(tagged_message)
 
         # Log
@@ -165,10 +179,10 @@ class RealtimeTrackerServer:
         Sends a serial outgoing message to all connected clients.
         """
         if not isinstance(message, str):
-            raise ValueError("message must be a string")
+            raise TypeError("message must be a string")
 
         # Send a tagged message
-        tagged_message = f"{TAG_SERIAL_OUTGOING_MESSAGE}:{message}"
+        tagged_message = f"{self.TAG_SERIAL_OUTGOING_MESSAGE}:{message}"
         self._send_message(tagged_message)
 
         # Log
@@ -198,9 +212,8 @@ async def main(realtime_tracker_server: RealtimeTrackerServer):
     """
     Starts the WebSocket server.
     """
-    # Check the type of the realtime tracker server
-    if not isinstance(realtime_tracker_server, RealtimeTrackerServer):
-        raise ValueError("realtime_tracker_server must be an instance of RealtimeTrackerServer")
+    # Check the type of realtime tracker server
+    check_type(realtime_tracker_server, RealtimeTrackerServer)
 
     # Start the WebSocket server
     await realtime_tracker_server.start()

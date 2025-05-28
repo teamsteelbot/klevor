@@ -1,50 +1,14 @@
 from time import time
 from multiprocessing import Lock, Event, Queue
 
-class Message:
-    """
-    Class to handle log messages.
-    """
-    __tag = None
-    __content = None
+from raspberry_pi_pico2 import Message
+from utils import check_type
 
-    def __init__(self, tag: str, content: str):
-        """
-        Initialize the LogMessage class.
-
-        Args:
-            tag (str): Tag of the log message.
-            content (str): Content of the log message.
-        """
-        # Check the type of tag
-        if not isinstance(tag, str):
-            raise ValueError("tag must be an instance of string")
-        self.__tag = tag
-
-        # Check the type of content
-        if not isinstance(content, str):
-            raise ValueError("content must be a string")
-        self.__content = content
-
-    def __str__(self):
-        """
-        String representation of the log message.
-
-        Returns:
-            str: The formatted log message.
-        """
-        return f"[{self.__tag}] {self.__content}"
 
 class Logger:
     """
     Class to handle logging functionality.
     """
-    __lock = None
-    __file_path = None
-    __messages_queue = None
-    __file = None
-    __stop_event = None
-    __write_log_event = None
 
     def __init__(self, file_path: str, stop_event:Event):
         """
@@ -54,19 +18,19 @@ class Logger:
             file_path (str): Path to the log file.
             stop_event (Event): Event to signal when to stop logging.
         """
-        # Set the file path
+        # Check the type of file_path
+        check_type(file_path, str)
         self.__file_path = file_path
+
+        # Check the type of stop_event
+        check_type(stop_event, Event)
+        self.__stop_event = stop_event
 
         # Initialize the lock
         self.__lock = Lock()
 
         # Initialize the messages queue
         self.__messages_queue = Queue()
-
-        # Check if the stop event is None
-        if not isinstance(stop_event, Event):
-            raise ValueError("stop_event must be an instance of Event")
-        self.__stop_event = stop_event
 
         # Initialize the write log event
         self.__write_log_event = Event()
@@ -79,9 +43,8 @@ class Logger:
             message (Message): Message to put in the queue.
         """
         with self.__lock:
-            # Check if the message is an instance of LogMessage
-            if not isinstance(message, Message):
-                raise ValueError("log_message must be an instance of LogMessage")
+            # Check the type of message
+            check_type(message, Message)
 
             # Put the message in the queue
             self.__messages_queue.put(str(message))
@@ -175,9 +138,8 @@ class Logger:
         Returns:
             SubLogger: An instance of SubLogger with the specified tag.
         """
-        # Check if the tag is a string
-        if not isinstance(tag, str):
-            raise ValueError("tag must be a string")
+        # Check the type of tag
+        check_type(tag, str)
 
         return SubLogger(self, tag)
 
@@ -187,51 +149,12 @@ class Logger:
         """
         self.close()
 
-class SubLogger:
-    """
-    Class to handle sub-logging functionality.
-    """
-    __logger = None
-    __tag = None
-
-    def __init__(self, logger: Logger, tag: str):
-        """
-        Initialize the SubLogger class.
-
-        Args:
-            logger (Logger): Logger instance to use for logging.
-            tag (str): Tag for the log messages.
-        """
-        # Check the types of logger
-        if not isinstance(logger, Logger):
-            raise ValueError("logger must be an instance of Logger")
-        self.__logger = logger
-
-        # Check the type of tag
-        if not isinstance(tag, str):
-            raise ValueError("tag must be a string")
-        self.__tag = tag
-
-    def log(self, content: str)-> None:
-        """
-        Log a message with the specified tag.
-
-        Args:
-            content (str): Content of the log message.
-        """
-        if not isinstance(content, str):
-            raise ValueError("content must be a string")
-
-        log_message = Message(self.__tag, content)
-        self.__logger.put_message(log_message)
-
-def main(logger:Logger) -> None:
+def main(logger: Logger) -> None:
     """
     Main function to run the script.
     """
-    # Check if the logger is None
-    if not isinstance(logger, Logger):
-        raise ValueError("logger must be an instance of Logger")
+    # Check the type of logger
+    check_type(logger, Logger)
 
     # Get the stop event
     stop_event = logger.get_stop_event()

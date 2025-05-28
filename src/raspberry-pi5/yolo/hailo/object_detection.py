@@ -1,4 +1,4 @@
-from typing import Optional, Tuple, Dict
+from typing import Optional
 from functools import partial
 from hailo_platform import (HEF, VDevice,
                             FormatType, HailoSchedulingAlgorithm)
@@ -17,148 +17,64 @@ import numpy as np
 from camera import WIDTH, HEIGHT
 from camera.images_queue import ImagesQueue
 from env import get_debug_mode
+from server import RealtimeTrackerServer
 from yolo import YOLO_MODEL_G, YOLO_MODEL_M, YOLO_MODEL_R, get_model_classes_color_palette
 from yolo.files import (get_model_hailo_suite_compiled_hef_file_path, get_hailo_labels_file_path)
-from yolo.hailo import IMAGE_PADDING_COLOR
+from yolo.hailo import IMAGE_PADDING_COLOR, IMAGE_LABEL_FONT
 
 # Currently models file paths
 MODELS_NAME = [YOLO_MODEL_G, YOLO_MODEL_M, YOLO_MODEL_R]
 NO_PARKING_MODELS_NAME = [YOLO_MODEL_G, YOLO_MODEL_R]
 PARKING_MODELS_NAME = [YOLO_MODEL_M]
 
-class ObjectDetectionUtils:
-    def __init__(self, labels_path: str, padding_color: tuple = (114, 114, 114),
-                 label_font: str = "LiberationSans-Regular.ttf"):
-        """
-        Initialize the ObjectDetectionUtils class.
+def get_labels(labels_path: str) -> list:
+    """
+    Load labels from a file.
 
-        Args:
-            labels_path (str): Path to the labels file.
-            padding_color (tuple): RGB color for padding. Defaults to (114, 114, 114).
-            label_font (str): Path to the font used for labeling. Defaults to "LiberationSans-Regular.ttf".
-        """
-        self.labels = self.get_labels(labels_path)
-        self.padding_color = padding_color
-        self.label_font = label_font
+    Args:
+        labels_path (str): Path to the labels file.
 
-    def get_labels(self, labels_path: str) -> list:
-        """
-        Load labels from a file.
-
-        Args:
-            labels_path (str): Path to the labels file.
-
-        Returns:
-            list: List of class names.
-        """
-        with open(labels_path, 'r', encoding="utf-8") as f:
-            class_names = f.read().splitlines()
-        return class_names
-
-    def draw_detection(self, image: np.ndarray, box: list, cls: int, score: float, color: tuple, scale_factor: float):
-        """
-        Draw box and label for one detection.
-
-        Args:
-            image (np.ndarray): Image to draw on.
-            box (list): Bounding box coordinates.
-            cls (int): Class index.
-            score (float): Detection score.
-            color (tuple): Color for the bounding box.
-            scale_factor (float): Scale factor for coordinates.
-        """
-        label = f"{self.labels[cls]}: {score:.2f}%"
-        ymin, xmin, ymax, xmax = box
-        ymin, xmin, ymax, xmax = int(ymin * scale_factor), int(xmin * scale_factor), int(ymax * scale_factor), int(
-            xmax * scale_factor)
-        cv2.rectangle(image, (xmin, ymin), (xmax, ymax), color, 2)
-        font = cv2.FONT_HERSHEY_SIMPLEX
-        cv2.putText(image, label, (xmin + 4, ymin + 20), font, 0.5, color, 1, cv2.LINE_AA)
-
-    def denormalize_and_rm_pad(self, box: list, size: int, padding_length: int, input_height: int,
-                               input_width: int) -> list:
-        """
-        Denormalize bounding box coordinates and remove padding.
-
-        Args:
-            box (list): Normalized bounding box coordinates.
-            size (int): Size to scale the coordinates.
-            padding_length (int): Length of padding to remove.
-            input_height (int): Height of the input image.
-            input_width (int): Width of the input image.
-
-        Returns:
-            list: Denormalized bounding box coordinates with padding removed.
-        """
-        for i, x in enumerate(box):
-            box[i] = int(x * size)
-            if (input_width != size) and (i % 2 != 0):
-                box[i] -= padding_length
-            if (input_height != size) and (i % 2 == 0):
-                box[i] -= padding_length
-
-        return box
-
-    def draw_detections(self, detections: dict, image: np.ndarray, min_score: float = 0.45, scale_factor: float = 1):
-        """
-        Draw detections on the image.
-
-        Args:
-            detections (dict): Detection results containing 'detection_boxes', 'detection_classes', 'detection_scores', and 'num_detections'.
-            image (np.ndarray): Image to draw on.
-            min_score (float): Minimum score threshold. Defaults to 0.45.
-            scale_factor (float): Scale factor for coordinates. Defaults to 1.
-
-        Returns:
-            np.ndarray: Image with detections drawn.
-        """
-        boxes = detections['detection_boxes']
-        classes = detections['detection_classes']
-        scores = detections['detection_scores']
-
-        # Values used for scaling coords and removing padding
-        img_height, img_width = image.shape[:2]
-        size = max(img_height, img_width)
-        padding_length = int(abs(img_height - img_width) / 2)
-
-        for idx in range(detections['num_detections']):
-            if scores[idx] >= min_score:
-                color = generate_color(classes[idx])
-                scaled_box = self.denormalize_and_rm_pad(boxes[idx], size, padding_length, img_height, img_width)
-                self.draw_detection(image, scaled_box, classes[idx], scores[idx] * 100.0, color, scale_factor)
-
-        return image
+    Returns:
+        list: List of class names.
+    """
+    with open(labels_path, 'r', encoding="utf-8") as f:
+        class_names = f.read().splitlines()
+    return class_names
 
 class HailoHandler:
     """
     Class to handle Hailo inference.
     """
     __debug = None
+    __model_name = None
     __hef_file_path = None
     __hef = None
     __labels_path = None
+    __labels = None
     __images_queue = None
     __class_colors = None
     __padding_color = None
+    __font = None
     __target = None
     __infer_model = None
     __output_type = None
     __send_original_frame = None
     __batch_size = None
+    __server = None
 
-    def __init__(self, debug: bool, hef_file_path:str, labels_path: str, images_queue:ImagesQueue,
+    def __init__(self, model_name:str, hef_file_path:str, labels_path: str, images_queue:ImagesQueue,
                  class_colors: dict[int, tuple[int,int,int]], padding_color:tuple = IMAGE_PADDING_COLOR,
-                 multi_threading: bool = True, multi_processing: bool = False, batch_size: int = 1,
-                 input_type: Optional[str] = None, output_type: Optional[Dict[str, str]] = None,
-                 send_original_frame: bool = False
+                 font: str = IMAGE_LABEL_FONT, multi_threading: bool = True, multi_processing: bool = False,
+                 batch_size: int = 1, input_type: Optional[str] = None, output_type: Optional[dict[str, str]] = None,
+                 send_original_frame: bool = False, server: RealtimeTrackerServer = None
                  ):
         """
         Initialize the Hailo handler class.
         """
-        # Check the debug mode
-        if not isinstance(debug, bool):
-            raise TypeError("debug must be a boolean")
-        self.__debug = debug
+        # Check the model name
+        if not isinstance(model_name, str):
+            raise TypeError("model_name must be a string")
+        self.__model_name = model_name
 
         # Check the HEF file path
         if not isinstance(hef_file_path, str):
@@ -173,6 +89,9 @@ class HailoHandler:
         if not os.path.exists(labels_path):
             raise ValueError(f"Labels file {labels_path} does not exist.")
         self.__labels_path = labels_path
+
+        # Load the labels
+        self.__labels = get_labels(self.__labels_path)
 
         # Check the images queue
         if not isinstance(images_queue, ImagesQueue):
@@ -191,12 +110,22 @@ class HailoHandler:
             raise ValueError("padding_color must be a tuple of length 3")
         self.__padding_color = padding_color
 
+        # Check the image label font
+        if not isinstance(font, tuple):
+            raise TypeError("font must be a str")
+        self.__font = font
+
         # Set the batch size
         if not isinstance(batch_size, int):
             raise TypeError("batch_size must be an integer")
         if batch_size < 1:
             raise ValueError("batch_size must be greater than 0")
         self.__batch_size = batch_size
+
+        # Check the type of the server
+        if server is not None and not isinstance(server, RealtimeTrackerServer):
+            raise TypeError("server must be an instance of RealtimeTrackerServer")
+        self.__server = server
 
         # Create the VDevice parameters
         params = VDevice.create_params()
@@ -240,7 +169,7 @@ class HailoHandler:
         """
         self.__infer_model.input().set_format_type(getattr(FormatType, input_type))
 
-    def _set_output_type(self, output_type_dict: Optional[Dict[str, str]] = None) -> None:
+    def _set_output_type(self, output_type_dict: Optional[dict[str, str]] = None) -> None:
         """
         Set the output type for the HEF model. If the model has multiple outputs,
         it will set the same type for all of them.
@@ -256,18 +185,21 @@ class HailoHandler:
     def _get_output_type_str(self, output_info) -> str | None:
         """
         Get the output type string for the HEF model.
+
+        Args:
+            output_info: Information about the output stream.
         """
         if self.__output_type is None:
             return str(output_info.format.type).split(".")[1].lower()
         else:
             self.__output_type[output_info.name].lower()
 
-    def get_input_shape(self) -> Tuple[int, ...]:
+    def get_input_shape(self) -> tuple[int, ...]:
         """
         Get the shape of the model's input layer.
 
         Returns:
-            Tuple[int, ...]: Shape of the model's input layer.
+            tuple[int, ...]: Shape of the model's input layer.
         """
         return self.__hef.get_input_vstream_infos()[0].shape  # Assumes one input
 
@@ -512,7 +444,7 @@ def main(images_queue: ImagesQueue, parking_event: Event, stop_event: Event) -> 
         model_class_colors = get_model_classes_color_palette(model_name)
 
         # Create the Hailo handler
-        hailo_handler = HailoHandler(debug, hef_file_path, labels_file_path, images_queue, model_class_colors)
+        hailo_handler = HailoHandler(model_name, hef_file_path, labels_file_path, images_queue, model_class_colors)
         hailo_handlers[model_name] = hailo_handler
 
         # Get the input shape of the model
@@ -574,3 +506,5 @@ def main(images_queue: ImagesQueue, parking_event: Event, stop_event: Event) -> 
 
                 # Add the result to the images queue
                 images_queue.put_output_inference(result)
+
+                # Chec

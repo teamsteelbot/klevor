@@ -6,120 +6,62 @@ import time
 
 from camera.images_queue import ImagesQueue
 from log import Logger
+from raspberry_pi_pico2.message import Message
 from server import RealtimeTrackerServer
+from utils import check_type
 
-# Message delay
-MESSAGE_DELAY = 0.01
-
-# Types of messages
-MESSAGE_TYPE_CAPTURE_IMAGE = 'capture_image'
-MESSAGE_TYPE_INFERENCE = 'inference'
-MESSAGE_TYPES = [MESSAGE_TYPE_INFERENCE, MESSAGE_TYPE_CAPTURE_IMAGE]
-
-# Message header separator
-MESSAGE_HEADER_SEPARATOR = ':'
-
-# Message end character
-MESSAGE_END = '\n'
-
-# Encode
-ENCODE='utf-8'
-
-class Message:
-    """
-    Class to handle the messages sent and received from the Raspberry Pi Pico.
-    """
-    __type = None
-    __content = None
-
-    def __init__(self, message_type: str, message_content: str):
-        """
-        Initialize the message class.
-
-        Args:
-            message_type (str): The type of the message. Must be one of MESSAGE_TYPES.
-            message_content (str): The content of the message.
-        """
-        # Check if the message type is valid
-        if message_type not in MESSAGE_TYPES:
-            raise ValueError(f"Invalid message type: {message_type}")
-        self.__type = message_type
-
-        # Set the message content
-        self.__content = message_content
-
-    def __str__(self) -> str:
-        """
-        String representation of the message.
-        """
-        return f"{self.__type}{MESSAGE_HEADER_SEPARATOR}{self.__content}{MESSAGE_END}"
-
-    def get_type(self) -> str:
-        """
-        Get the message type.
-
-        Returns:
-            str: The type of the message.
-        """
-        return self.__type
-
-    def get_content(self) -> str:
-        """
-        Get the message content.
-
-        Returns:
-            str: The content of the message.
-        """
-        return self.__content
 
 class SerialCommunication:
     """
     Class to handle the serial communication with the Raspberry Pi Pico.
     """
-    __lock = None
-    __log_tag = "SerialCommunication"
-    __serial = None
-    __parking_event = None
-    __stop_event = None
-    __logger = None
-    __images_queue = None
-    __port = None
-    __baudrate = None
-    __incoming_messages_queue = None
-    __pending_incoming_message_event = None
-    __outgoing_messages_queue = None
-    __pending_outgoing_message_event = None
-    __last_incoming_message = None
-    __server = None
+    # Logger configuration
+    LOG_TAG = "SerialCommunication"
+
+    # Message delay
+    DELAY = 0.01
+
+    # Encode
+    ENCODE = 'utf-8'
 
     def __init__(self, parking_event: Event, stop_event: Event, logger: Logger, images_queue: ImagesQueue, port='/dev/ttyACM0', baudrate=115200, server: RealtimeTrackerServer=None):
         """
         Initialize the serial communication class.
+
+        Args:
+            parking_event (Event): Event to indicate when to park.
+            stop_event (Event): Event to indicate when to stop the communication.
+            logger (Logger): Logger instance for logging messages.
+            images_queue (ImagesQueue): Images queue for handling images.
+            port (str): Serial port to use for communication. Default is '/dev/ttyACM0'.
+            baudrate (int): Baud rate for the serial communication. Default is 115200.
+            server (RealtimeTrackerServer): Server instance for sending messages to the server. Default is None.
         """
         # Create the lock
         self.__lock = Lock()
 
-        # Check the type of the parking event
-        if not isinstance(parking_event, Event):
-            raise ValueError("parking_event must be an instance of Event")
+        # Check the type of parking event
+        check_type(parking_event, Event)
         self.__parking_event = parking_event
 
-        # Check the type of the stop event
-        if not isinstance(stop_event, Event):
-            raise ValueError("stop_event must be an instance of Event")
+        # Check the type of stop event
+        check_type(stop_event, Event)
         self.__stop_event = stop_event
 
-        # Check the type of the images queue
-        if not isinstance(images_queue, ImagesQueue):
-            raise ValueError("images_queue must be an instance of ImagesQueue")
+        # Check the type of images queue
+        check_type(images_queue, ImagesQueue)
         self.__images_queue = images_queue
 
+        # Check the type of the server
+        if server is not None:
+            check_type(server, RealtimeTrackerServer)
+        self.__server = server
+
         # Check the type of the logger
-        if not isinstance(logger, Logger):
-            raise ValueError("logger must be an instance of Logger")
+        check_type(logger, Logger)
 
         # Get the sub-logger for this class
-        self.__logger = logger.get_sub_logger(self.__log_tag)
+        self.__logger = logger.get_sub_logger(self.LOG_TAG)
 
         # Get the capture image event
         self.__capture_image_event = self.__images_queue.get_capture_image_event()
@@ -134,10 +76,6 @@ class SerialCommunication:
         # Set the serial port and baud rate
         self.__port = port
         self.__baudrate = baudrate
-
-        # Set the server
-        if server is not None and isinstance(server, RealtimeTrackerServer):
-            self.__server = server
 
     def __clear_events(self)->None:
         """
@@ -284,9 +222,8 @@ class SerialCommunication:
         Args:
             message (Message): The message to put in the queue.
         """
-        # Check the type of the message
-        if not isinstance(message, Message):
-            raise ValueError("message must be an instance of Message")
+        # Check the type of message
+        check_type(message, Message)
 
         with self.__lock:
             if not self.__is_open():
@@ -305,6 +242,7 @@ class SerialCommunication:
         Returns:
             str|None: The message from the outgoing messages queue or None if no message is available.
         """
+        message = None
         if self.__is_open():
             # Check if there is a pending outgoing message
             if not self.__pending_outgoing_message_event.is_set():
@@ -342,10 +280,10 @@ class SerialCommunication:
             message = self.__get_outgoing_message()
 
             # Send the message to the serial port
-            self.__serial.write(str(message).encode(ENCODE))
+            self.__serial.write(str(message).encode(self.ENCODE))
 
             # Wait for the message to be sent
-            time.sleep(MESSAGE_DELAY)
+            time.sleep(self.DELAY)
 
     def receive_message(self)->None:
         """
@@ -360,10 +298,10 @@ class SerialCommunication:
                 return None
 
             # Read the message from the serial port
-            message_str = self.__serial.readline().decode(ENCODE).strip()
+            message_str = self.__serial.readline().decode(self.ENCODE).strip()
 
             # Split the message into type and content
-            message_separator_idx = message_str.find(MESSAGE_HEADER_SEPARATOR)
+            message_separator_idx = message_str.find(Message.HEADER_SEPARATOR)
 
             # Create the message object
             message = Message(
@@ -412,39 +350,36 @@ def receiving_thread(stop_event: Event, serial_communication: SerialCommunicatio
     """
     Thread to handle receiving messages from the serial port.
     """
-    # Check the stop event
-    if isinstance(stop_event, Event):
-        raise ValueError("stop_event must be an instance of Event")
+    # Check the type of stop event
+    check_type(stop_event, Event)
 
     while not stop_event.is_set():
         # Receive a message from the serial port
         serial_communication.receive_message()
 
         # Sleep for a short time to avoid busy waiting
-        time.sleep(MESSAGE_DELAY)
+        time.sleep(SerialCommunication.DELAY)
 
 def sending_thread(stop_event: Event, serial_communication: SerialCommunication) -> None:
     """
     Thread to handle sending messages to the serial port.
     """
-    # Check the stop event
-    if isinstance(stop_event, Event):
-        raise ValueError("stop_event must be an instance of Event")
+    # Check the type of stop event
+    check_type(stop_event, Event)
 
     while not stop_event.is_set():
         # Send a message to the serial port
         serial_communication.send_message()
 
         # Sleep for a short time to avoid busy waiting
-        time.sleep(MESSAGE_DELAY)
+        time.sleep(SerialCommunication.DELAY)
 
 def main(serial_communication: SerialCommunication) -> None:
     """
     Main function to run the script.
     """
-    # Check the type of the serial communication
-    if isinstance(serial_communication, SerialCommunication):
-        raise ValueError("serial_communication must be an instance of SerialCommunication")
+    # Check the type of serial communication
+    check_type(serial_communication, SerialCommunication)
 
     # Get the stop event
     stop_event = serial_communication.get_stop_event()

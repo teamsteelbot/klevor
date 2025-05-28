@@ -4,7 +4,7 @@ import random
 import numpy as np
 import cv2
 
-from files import ensure_path_exists
+from files import Files
 from opencv import DEFAULT_WIDTH, DEFAULT_HEIGHT, MAX_CALIB_SET_SAMPLES
 
 def preprocess_images_to_npy(input_folder, output_file, target_shape=(DEFAULT_WIDTH, DEFAULT_HEIGHT, 3))->None:
@@ -17,7 +17,7 @@ def preprocess_images_to_npy(input_folder, output_file, target_shape=(DEFAULT_WI
         target_shape (tuple): Desired shape of the images (height, width, channels).
     """
     # Ensure the output directory exists
-    ensure_path_exists(output_file)
+    Files.ensure_path_exists(output_file)
 
     # Get the images
     calib_size = len(os.listdir(input_folder))  # Number of images

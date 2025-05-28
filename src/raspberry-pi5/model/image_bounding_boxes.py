@@ -2,17 +2,10 @@ class ImageBoundingBoxes:
     """
     Custom class that represents the detected objects bounding boxes from a YOLO model on an image.
     """
-    __xywh = None
-    __xywhn = None
-    __xyxy = None
-    __xyxyn = None
-    __cls = None
-    __conf = None
-    __n = None
 
     def __init__(self, xwyhn=None, xyxy=None, xywh=None, xyxyn=None, cls=None, conf=None, n=None):
         """
-        Constructor.
+        Initialize the ImageBoundingBoxes instance with bounding box coordinates, classes, and confidences.
         """
         self.__xywh = xywh
         self.__xywhn = xwyhn
@@ -43,7 +36,7 @@ class ImageBoundingBoxes:
         Initialize a new ImageBoundingBoxes instances from a PyTorch CPU tensor.
 
         Args:
-            boxes (torch.Tensor): The bounding boxes tensor.
+            boxes (torch.Tensor): The bounding boxes' tensor.
 
         Returns:
             ImageBoundingBoxes: An instance containing the bounding boxes, classes, and confidences.

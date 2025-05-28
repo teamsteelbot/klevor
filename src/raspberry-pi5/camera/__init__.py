@@ -8,29 +8,21 @@ from picamera2.outputs import FileOutput
 from time import sleep
 
 from log import Logger
+from utils import check_type
 
-# Camera settings
-WIDTH=640
-HEIGHT=640
-FPS=30
-DEFAULT_CODEC= 'mjpeg'
-DEFAULT_FORMAT = 'jpeg'
-DEFAULT_ADJUST_DURATION=0.02
-
-# Server settings
-SERVER_PORT=8080
 
 class Camera:
     """
     Class that wraps the functionality required for the Raspberry Pi Camera.
     """
-    __log_tag = "Camera"
-    __logger = None
-    __lock = None
-    __picam2 = None
-    __started_preview = False
-    __config = None
-    __video_config = None
+    # Logger configuration
+    LOG_TAG = "Camera"
+
+    # Camera settings
+    WIDTH = 640
+    HEIGHT = 640
+    FORMAT = 'jpeg'
+    ADJUST_DURATION = 0.02
 
     def __init__(self, logger: Logger, width=WIDTH, height=HEIGHT, video_config=None):
         """
@@ -46,11 +38,10 @@ class Camera:
         self.__lock = Lock()
 
         # Check the type of logger
-        if not isinstance(logger, Logger):
-            raise ValueError("logger must be an instance of Logger")
+        check_type(logger, Logger)
 
         # Get the sub-logger for this class
-        self.__logger = logger.get_sub_logger(self.__log_tag)
+        self.__logger = logger.get_sub_logger(self.LOG_TAG)
 
         # Log
         self.__logger.log("Initializing camera...")
@@ -99,7 +90,7 @@ class Camera:
         # Log
         self.__logger.log(f"Video of {duration} seconds recording saved to {file_path}.")
 
-    def capture_image(self, adjust_duration=DEFAULT_ADJUST_DURATION, stop_preview=False) -> Image:
+    def capture_image(self, adjust_duration=ADJUST_DURATION, stop_preview=False) -> Image:
         """
         Capture an image with PiCamera2.
 
@@ -131,7 +122,7 @@ class Camera:
 
         return image
 
-    def capture_image_stream(self, adjust_duration=DEFAULT_ADJUST_DURATION, stop_preview=False, format=DEFAULT_FORMAT) -> io.BytesIO:
+    def capture_image_stream(self, adjust_duration=ADJUST_DURATION, stop_preview=False, format=FORMAT) -> io.BytesIO:
         """
         Capture an image stream.
 
@@ -165,7 +156,7 @@ class Camera:
 
         return image_stream
 
-    def capture_image_pil(self, adjust_duration=DEFAULT_ADJUST_DURATION, stop_preview=False) -> Image:
+    def capture_image_pil(self, adjust_duration=ADJUST_DURATION, stop_preview=False) -> Image:
         """
         Capture an image and return a PIL image.
 

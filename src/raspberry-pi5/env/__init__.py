@@ -1,24 +1,28 @@
 import os
 
-# Environment variables
-ENV_DEBUG = 'DEBUG'
-ENV_YOLO_VERSION = 'YOLO_VERSION'
-
-# Get debug mode from environment variable
-def get_debug_mode() -> bool:
+class Env:
     """
-    Get the debug mode from the environment variable.
+    Environment variables manager class.
 
-    Returns True if debug mode is enabled, otherwise False.
+    This class provides methods to get environment variables related to debug mode and YOLO version.
     """
-    return os.getenv(ENV_DEBUG).lower() == 'true'
+    DEBUG = 'DEBUG'
+    YOLO_VERSION = 'YOLO_VERSION'
 
+    @classmethod
+    def get_debug_mode(cls) -> bool:
+        """
+        Get the debug mode from the environment variable.
 
-# Get YOLO version from environment variable
-def get_yolo_version() -> str:
-    """
-    Get the YOLO version from the environment variable.
+        Returns True if debug mode is enabled, otherwise False.
+        """
+        return os.getenv(cls.DEBUG, 'false').lower() == 'true'
 
-    Returns the YOLO version as a string.
-    """
-    return os.getenv(ENV_YOLO_VERSION)
+    @classmethod
+    def get_yolo_version(cls) -> str:
+        """
+        Get the YOLO version from the environment variable.
+
+        Returns the YOLO version as a string.
+        """
+        return os.getenv(cls.YOLO_VERSION, 'unknown')

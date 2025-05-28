@@ -2,7 +2,7 @@ import argparse
 import random
 
 from args import get_attribute_from_args, parse_args_as_dict
-from opencv.image_display_detections import preprocess, display_detections
+from opencv.detections import preprocess, display_detections
 from model.image_bounding_boxes import ImageBoundingBoxes
 import os
 from opencv import DEFAULT_SIZE
@@ -10,7 +10,7 @@ from yolo import (YOLO_NUMBER_RANDOM_IMAGES, YOLO_FORMAT_PT, YOLO_GR_COLORS, YOL
                   ARGS_YOLO_FORMAT, ARGS_YOLO_VERSION, YOLO_DATASET_ORGANIZED, YOLO_MODEL_BGOR,
                   YOLO_MODEL_GR, YOLO_GMR_COLORS, YOLO_DATASET_TESTING, YOLO_DATASET_IMAGES,
                   YOLO_MODEL_GMR)
-from model.yolo import (load, get_class_names, run_inference)
+from model.__init__ import (load, get_class_names, run_inference)
 from yolo.args import (add_yolo_input_model_argument, add_yolo_format_argument, add_yolo_version_argument)
 from yolo.files import (get_dataset_model_dir_path, get_model_best_pt_path, get_model_weight_dir_path)
 
