@@ -15,6 +15,8 @@ class RealtimeTrackerServer:
     """
     A WebSocket server that handles real-time tracking updates.
     It allows clients to connect and receive messages about tracking events.
+
+    This is only used on practices, not in the competition, to test new features and models in real-time.
     """
     # Logger configuration
     LOG_TAG = "RealtimeTrackerServer"
@@ -33,16 +35,31 @@ class RealtimeTrackerServer:
     TAG_IMAGE_MODEL_M = "image_model_m"
     TAG_IMAGE_MODEL_R = "image_model_r"
 
+    # Event tags
+    TAG_STOP_EVENT = "stop_event"
+    TAG_PARKING_EVENT = "parking_event"
+
     # Image format
     IMAGE_FORMAT = "JPEG"
 
-    def __init__(self, stop_event: Event, logger: Logger, host=HOST, port=PORT):
+    def __init__(self, stop_event: Event, parking_event: Event, logger: Logger, host=HOST, port=PORT):
         """
         Initializes the WebSocket server with the specified host and port.
+
+        Args:
+            stop_event (Event): An event to signal when to stop the server.
+            parking_event (Event): An event to signal when the server should pause processing.
+            logger (Logger): Logger instance for logging messages.
+            host (str): The host address for the WebSocket server. Default is 'localhost'.
+            port (int): The port number for the WebSocket server. Default is 8765.
         """
         # Check the type of stop event
         check_type(stop_event, Event)
         self.__stop_event = stop_event
+
+        # Check the type of parking event
+        check_type(parking_event, Event)
+        self.__parking_event = parking_event
 
         # Check the type of host
         check_type(host, str)
@@ -73,9 +90,36 @@ class RealtimeTrackerServer:
         self.__logger.log(f"Client connected: {connection.remote_address}")
 
         try:
-            while True:
-                # Keep the connection alive
-                await asyncio.sleep(1)
+            async for message in connection:
+                # Log
+                self.__logger.log(f"Received message: {message}")
+
+                # Check if the message is a stop event
+                if message == self.TAG_STOP_EVENT:
+                    self.__logger.log("Stop event received. Stopping the server...")
+                    self.__stop_event.set()
+
+                # Check if the message is a parking event
+                elif message == self.TAG_PARKING_EVENT:
+                    if self.__parking_event.is_set():
+                        self.__logger.log("Parking event received. Resuming processing...")
+                        self.__parking_event.clear()
+                    else:
+                        self.__logger.log("Parking event received. Pausing processing...")
+                        self.__parking_event.set()
+
+                else:
+                    # Unknown message type
+                    self.__logger.log(f"Unknown message type: {message}")
+
+                    # Send an error message back to the client
+                    error_message = f"Unknown message type: {message}"
+
+                    await connection.send(error_message)
+                    continue
+
+                # Broadcast the received message to all connected clients
+                await self.__broadcast_message(message)
         except websockets.exceptions.ConnectionClosedOK:
             self.__logger.log(f"Client {connection.remote_address} disconnected gracefully.")
         except websockets.exceptions.ConnectionClosedError as e:
