@@ -110,3 +110,26 @@ class Yolo:
         print(f'Inference took {elapsed_time:.2f} seconds')
 
         return inferences
+
+    @staticmethod
+    def get_labels_from_txt(labels_path: str) -> list:
+        """
+        Load labels from a text file.
+
+        Args:
+            labels_path (str): Path to the labels file.
+
+        Returns:
+            list: List of class names.
+        """
+        # Ensure the labels file exists
+        Files.ensure_path_exists(labels_path)
+
+        # Check if it's a text file
+        if not labels_path.endswith('.txt'):
+            raise ValueError(f"Expected a .txt file, but got {labels_path}")
+
+        # Read the labels from the file
+        with open(labels_path, 'r', encoding="utf-8") as f:
+            class_names = f.read().splitlines()
+        return class_names

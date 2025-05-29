@@ -1,5 +1,6 @@
 from multiprocessing import Queue, Event, Lock
 
+import numpy as np
 from PIL.Image import Image
 
 from camera import Camera
@@ -7,6 +8,7 @@ from log import Logger
 from model.image_bounding_boxes import ImageBoundingBoxes
 from server import RealtimeTrackerServer
 from utils import check_type
+from yolo.hailo import Hailo
 
 
 class ImagesQueue:
@@ -54,6 +56,10 @@ class ImagesQueue:
         self.__pending_output_inference_event = Event()
         self.__stop_event = stop_event
 
+        # Set the queues to None
+        self.__input_images_queue = None
+        self.__output_inference_queue = None
+
     def put_input_image(self, image: Image) -> None:
         """
         Put image in input images queue.
@@ -78,12 +84,12 @@ class ImagesQueue:
         # Log
         self.__logger.log(f"Image {counter} added to input images queue.")
 
-    def get_input_image(self) -> Image | None:
+    def get_input_image(self) -> np.ndarray | None:
         """
         Get image from input images queue.
 
         Returns:
-            Image|None: Image from the input images queue or None if no image is available.
+            np.ndarray|None: Preprocessed image from the input images queue or None if no image is available.
         """
         with self.__lock:
             # Check if the pending input image event is set
@@ -92,6 +98,9 @@ class ImagesQueue:
 
             # Get the image from input images queue
             image = self.__input_images_queue.get()
+
+            # Preprocess the image
+            preprocessed_image = Hailo.preprocess(image)
 
             # Clear the pending input image event
             if self.__input_images_queue.empty():
@@ -104,26 +113,28 @@ class ImagesQueue:
         if self.__server:
             self.__server.send_image_original(image)
 
-        return image
+        return preprocessed_image
 
-    def put_output_inference(self, inference: ImageBoundingBoxes) -> None:
+    def put_output_inference(self, model_name: str, inference: ImageBoundingBoxes) -> None:
         """
         Put inference in output inference queue.
 
         Args:
+            model_name (str): Name of the model that produced the inference.
             inference (ImageBoundingBoxes): Inference to put in the output inference queue.
         """
         with self.__lock:
             # Put inference in output inference queue
-            self.__output_inference_queue.put(inference)
+            self.__output_inference_queue.put((model_name, inference))
+
 
             # Set the pending output inference event
             self.__pending_output_inference_event.set()
 
         # Log
-        self.__logger.log(f"Inference added to output inference queue.")
+        self.__logger.log(f"Inference added to output inference queue for model '{model_name}': {inference}")
 
-    def get_output_inference(self) -> ImageBoundingBoxes | None:
+    def get_output_inference(self) -> tuple[str, ImageBoundingBoxes] | None:
         """
         Get inference from output inference queue.
 
@@ -136,7 +147,7 @@ class ImagesQueue:
                 return None
 
             # Get the inference from output inference queue
-            inference = self.__output_inference_queue.get()
+            model_name, inference = self.__output_inference_queue.get()
 
             # Clear the pending output inference event
             if self.__output_inference_queue.empty():
@@ -145,7 +156,7 @@ class ImagesQueue:
         # Log
         self.__logger.log(f"Inference retrieved from output inference queue.")
 
-        return inference
+        return model_name, inference
 
     def capture_image(self):
         """

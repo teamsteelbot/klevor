@@ -2,7 +2,6 @@ import argparse
 from multiprocessing import Process, Manager, Event
 from threading import Thread
 
-from args import Args
 from camera.images_queue import main as images_queue_main, ImagesQueue
 from env import Env
 from log import main as log_main, Logger
@@ -10,9 +9,8 @@ from raspberry_pi_pico2 import SerialCommunication, main as serial_communication
 from server import RealtimeTrackerServer
 from server import main as server_main
 from utils import check_type
-from yolo import ARGS_YOLO_VERSION, ARGS_DEBUG
-from yolo.args import add_yolo_version_argument, add_debug_argument
-from yolo.files import get_log_file_path
+from yolo.args import Args
+from yolo.files import Files
 from yolo.hailo.object_detection import main as object_detection_main
 
 
@@ -79,15 +77,19 @@ def process_2_fn(images_queue: ImagesQueue, logger: Logger):
         thread.join()
 
 
-def process_3_fn(images_queue: ImagesQueue, parking_event: Event, stop_event: Event):
+def process_3_fn(logger: Logger, images_queue: ImagesQueue, parking_event: Event, stop_event: Event):
     """
     Process 3: Hailo object detection.
 
     Args:
+        logger (Logger): The logger object for logging messages.
         images_queue (ImagesQueue): The images queue object.
         parking_event (Event): The event signal for parking detection.
         stop_event (Event): The event signal to stop processing.
     """
+    # Check the type of logger
+    check_type(logger, Logger)
+
     # Check the type of images queue
     check_type(images_queue, ImagesQueue)
 
@@ -97,8 +99,7 @@ def process_3_fn(images_queue: ImagesQueue, parking_event: Event, stop_event: Ev
     # Check the type of stop event
     check_type(stop_event, Event)
 
-    object_detection_main(images_queue, parking_event, stop_event)
-
+    object_detection_main(logger, images_queue, parking_event, stop_event)
 
 def main():
     """
@@ -106,15 +107,15 @@ def main():
     """
     parser = argparse.ArgumentParser(
         description="Klevor - WRO 2025 - Future Engineers Car")
-    add_yolo_version_argument(parser)
-    add_debug_argument(parser)
+    Args.add_yolo_version_argument(parser)
+    Args.add_debug_argument(parser)
     args = Args.parse_args_as_dict(parser)
 
     # Get the YOLO version
-    arg_yolo_version = Args.get_attribute_from_args(args, ARGS_YOLO_VERSION)
+    arg_yolo_version = Args.get_attribute_from_args(args, Args.VERSION)
 
     # Get the debug mode
-    arg_debug = Args.get_attribute_from_args(args, ARGS_DEBUG)
+    arg_debug = Args.get_attribute_from_args(args, Args.DEBUG)
 
     # Set the debug mode and YOLO version as environment variables
     Env.set_yolo_version(arg_yolo_version)
@@ -129,7 +130,7 @@ def main():
         stop_event = manager.Event()
 
         # Get the log file path
-        log_file_path = get_log_file_path()
+        log_file_path = Files.get_log_file_path()
 
         # Create the logger object with multiprocessing safety
         logger = manager.Logger(log_file_path, stop_event)
@@ -157,7 +158,7 @@ def main():
         process_2 = Process(target=process_2_fn, args=(images_queue, logger))
 
         # Third process
-        process_3 = Process(target=process_3_fn, args=(images_queue, parking_event, stop_event))
+        process_3 = Process(target=process_3_fn, args=(logger, images_queue, parking_event, stop_event))
 
         # Start the processes
         processes = [process_1, process_2, process_3]
