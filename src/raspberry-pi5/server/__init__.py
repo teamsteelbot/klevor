@@ -38,6 +38,9 @@ class RealtimeTrackerServer:
     # Event tags
     TAG_STOP_EVENT = "stop_event"
     TAG_PARKING_EVENT = "parking_event"
+    
+    # Tag separator
+    TAG_SEPARATOR = ":"
 
     # Image format
     IMAGE_FORMAT = "JPEG"
@@ -156,7 +159,7 @@ class RealtimeTrackerServer:
             binary_data = img_stream.read()
 
             # Prepend the tag to the binary data
-            tagged_data = f"{tag}:".encode() + binary_data
+            tagged_data = f"{tag}{TAG_SEPARATOR}".encode() + binary_data
 
             # Send the tagged binary data to the clients
             self._send_message(tagged_data)
