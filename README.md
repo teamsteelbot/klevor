@@ -1,7 +1,11 @@
 <h1 id="index">Índice</h1>
 
-1. **[Introducción](#introduccion)**  
-2. **[Estructura de archivos](#estructura-de-archivos)**
+Nota: Este índice solo lista los contenidos de este README.md, revisa el listado adicional para los demás archivos
+
+1. **[Introducción](#introduccion)**
+3. **[Estructura de archivos](#estructura-de-archivos)**
+   1. [Información adicional](#informacion-adicional)
+
 3. **[Componentes](#componentes)**
    1. [Raspberry Pi 5](#componentes-raspberry-pi-5)
    2. [Raspberry Pi Camera Module 3 Wide](#componentes-raspberry-pi-camera-module-3-wide)
@@ -26,18 +30,7 @@
    4. [PyTorch](#pytorch)
    5. [PiCamera2](#picamera-2)
    6. [Hailo Platform](#hailo-platform)
-6. **[Modelos 3D](models/README.md)**
-7. **[Diagramas y esquemas](schemes/README.md)**
-   1. [Diagrama de conexiones](#schemes/Simplified-Connection-Diagram.png)
-   2. [Esquema de decisiones](#schemes/flowchart.jpg)
-8. **[Código](src/README.md)**
-   1. [Raspberry Pi 5](src/raspberry-pi5/README.md)
-      1. [YOLO](src/raspberry-pi5/yolo/README.md)
-   2. [Raspberry Pi Pico 2 WH](src/raspberry-pi-pico2/README.md)
-9. **[Fotos del equipo](t-photos/README.md)**
-10. **[Fotos de Klevor](v-photos/README.md)**
-11. **[Vídeos](video/README.md)**
-12. **[Recursos Externos](#recursos-externos)**
+6. **[Recursos Externos](#recursos-externos)**
 
 <h1 id="introduccion">Introducción</h1>
 
@@ -62,6 +55,19 @@ Actualmente, este equipo está conformado por 3 miembros:
 - `v-photos` contiene las fotos de Klevor.
 
 - `video` contiene los vídeos de Klevor en la pista, tanto en el Desafío Abierto como en el Desafío con Obstáculos (Desafío Cerrado).
+
+<h2 id="informacion-adicional">Información adicional</h2>
+Debido a que este repositorio contiene múltiples archivos README.md, aquí esta el listado de cada README.md con su información respectiva.
+
+1. **[Descripción de la Mecánica y Modelos 3D](models/README.md)**
+2. **[Diagrama de conexiones](#schemes/detailed-klevor-wiring-diagram.png)**
+3. Código
+   1. [Raspberry Pi 5](src/raspberry-pi5/README.md)
+      1. [YOLO](src/raspberry-pi5/yolo/README.md)
+   2. [Raspberry Pi Pico 2 WH](src/raspberry-pi-pico2/README.md)
+4. **[Fotos del equipo](t-photos/README.md)**
+5. **[Fotos de Klevor](v-photos/README.md)**
+6. **[Vídeos](video/README.md)**
 
 <h1 id="componentes">Componentes</h1>
 
