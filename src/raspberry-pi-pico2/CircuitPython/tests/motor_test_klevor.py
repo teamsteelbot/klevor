@@ -27,7 +27,7 @@ def arm_esc():
 
     if DEBUG_MODE == 1:
         print("Sending stop signal to complete arming...")
-    ESC.throttle = 0.0 # Return throttle to minimum/stop
+    ESC.throttle = 0.5 # Return throttle to minimum/stop
     time.sleep(1) # Give ESC time to arm
 
     if DEBUG_MODE == 1:

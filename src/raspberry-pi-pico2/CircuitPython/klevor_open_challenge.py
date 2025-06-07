@@ -19,16 +19,21 @@ I2C_BUS0 = busio.I2C(board.GP1, board.GP0)
 I2C_BUS1 = busio.I2C(board.GP27, board.GP26) # Used for Gyroscope
 
 # General configuration
-MOVEMENT_MODE = True
-DEBUG_MODE = False
+MOVEMENT_MODE = False
+DEBUG_MODE = True
 
 # Movement delay
-MOVEMENT_DELAY = 0.05
+MOVEMENT_DELAY = 0.01
 
 # Speed Values
-ROBOT_SPEED_FORWARD_NORMAL = 0.3
-ROBOT_SPEED_TURN = 0.2
+ROBOT_SPEED_NORMAL = 0.5
+ROBOT_SPEED_TURN = 0.3
 ROBOT_SPEED_STOP = 0
+"""
+ROBOT_SPEED_NORMAL = 50
+ROBOT_SPEED_TURN = 30
+ROBOT_SPEED_STOP = 0
+"""
 
 # Steering servo configuration
 TURNING_VALUE = 30 
@@ -48,7 +53,7 @@ TOF_SENSORS_XSHUT_PINS = [FRONT_SENSOR_XSHUT_PIN, DIAGONAL_LEFT_FRONT_SENSOR_XSH
 TOF_FRONT_SENSOR = 0
 TOF_LEFT_MIDDLE_SENSOR = 3
 TOF_RIGHT_MIDDLE_SENSOR = 4
-TOF_BACK_MIDDLE_SENSOR = 7
+TOF_BACK_SENSOR = 7
 TOF_SENSORS_NEW_I2C_ADDRESSES = [0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37]
 TOF_SENSOR_DELAY=0.1
 TOF_SENSOR_SHORT_DELAY=0.05
@@ -59,9 +64,11 @@ START_BUTTON_PIN_OUT = board.GP15
 START_BUTTON_DELAY = 0.1
 
 # Distance Thresholds
-TARGET_DISTANCE_FORWARD = 80 # When the front sensor distance measured is lower than this, the robot should be starting to approach a turning section
-SENSOR_DIFFERENCE_SIDEWAYS = 80 # One of the side sensors detects a distance lower than this value, it is usually compared to another sensor to confirm the distance
-TOO_FAR_SIDEWAYS = 200 # This value is pretty much explained above
+# TARGET_DISTANCE_FORWARD = 80 # When the front sensor distance measured is lower than this, the robot should be starting to approach a turning section
+# SENSOR_DIFFERENCE_SIDEWAYS = 80 # One of the side sensors detects a distance lower than this value, it is usually compared to another sensor to confirm the distance
+# TOO_FAR_SIDEWAYS = 200 # This value is pretty much explained above
+TARGET_DISTANCE_STOP_BACKWARD = 50  # When the front sensor distance measured is higher than this, the robot should be starting to go backward
+TARGET_DISTANCE_START_BACKWARD = 40 # When the front sensor distance measured is lower than this, the robot should be starting to go backward
 
 # Steering commands
 STEERING_LEFT_COMMAND = -1
@@ -72,19 +79,29 @@ STEERING_RIGHT_COMMAND = 1
 SERVO_PIN = board.GP20
 SERVO_PWM_CONFIGURATION = pwmio.PWMOut(SERVO_PIN, duty_cycle=0, frequency=50)
 SERVO_DIRECTION = servo.Servo(SERVO_PWM_CONFIGURATION, actuation_range=180, min_pulse=500, max_pulse=2500)
-SERVO_DIRECTION_CENTER = 82
-SERVO_DIRECTION.angle = SERVO_DIRECTION_CENTER #This angle actually takes our steering to go forward
+SERVO_DIRECTION_CENTER = 75
+SERVO_SETUP_DELAY = 0.1
 
 # Motor pins and configuration
 ESC_MOTOR_PIN = board.GP21
 ESC_PWM_Configuration = pwmio.PWMOut(ESC_MOTOR_PIN, duty_cycle=0, frequency=50)
 ESC = servo.ContinuousServo(ESC_PWM_Configuration, min_pulse=1000, max_pulse=2000)
+ESC_SETUP_DELAY = 0.3
+"""
+ESC_MOTOR_PIN = board.GP21
+ESC_PWM_Configuration = pwmio.PWMOut(ESC_MOTOR_PIN, duty_cycle=0, frequency=50)
+ESC = servo.Servo(ESC_PWM_Configuration, actuation_range=180, min_pulse=1000, max_pulse=2000)
+ESC_CENTER = 90
+"""
+
+# Motor commands
+MOTOR_FORWARD = 1
+MOTOR_BACKWARD = -1
 
 # ---------- VARIABLES ----------
 
 # Gyroscope state and turn counter (initialized to avoid issues)
-bno = None
-yaw_deg = 0.0 
+yaw_deg = 0.0
 roll_deg = 0.0
 pitch_deg = 0.0
 last_raw_yaw = None # Stores the raw yaw from previous reading for unwrapping
@@ -96,8 +113,10 @@ vl53l0x_xshut = []
 vl53l0x_sensors = []
 
 # Start button
-start_button_in = None
-start_button_out = None
+"""
+start_button_in = digitalio.DigitalInOut(START_BUTTON_PIN_IN)
+start_button_out = digitalio.DigitalInOut(START_BUTTON_PIN_OUT)
+"""
 
 # ToF sensors measures
 tof_sensors_measures = []
@@ -105,11 +124,38 @@ tof_sensors_measures = []
 # ---------- SETUP ----------
 
 def setup():
-    # Initialize Start button
-    start_button_out = digitalio.DigitalOut(START_BUTTON_PIN_OUT)
-    start_button_in = digitalio.DigitalOut(START_BUTTON_PIN_IN)
+    global bno
+    
+    #This angle actually takes our steering to go forward
+    SERVO_DIRECTION.angle = SERVO_DIRECTION_CENTER 
+    
+    if DEBUG_MODE == 1:
+        print("Arming ESC...")
+    ESC.throttle = ROBOT_SPEED_STOP # Set throttle to minimum
+    time.sleep(ESC_SETUP_DELAY) # Give ESC time to recognize minimum
+    
+    ESC.throttle = -ROBOT_SPEED_NORMAL # Send throttle to maximum
+    time.sleep(ESC_SETUP_DELAY) # Give ESC time to recognize maximum
+    
+    ESC.throttle = ROBOT_SPEED_STOP # Set throttle to minimum
+    time.sleep(ESC_SETUP_DELAY) # Give ESC time to recognize minimum
+
+    ESC.throttle = ROBOT_SPEED_NORMAL # Return throttle to minimum/stop
+    time.sleep(ESC_SETUP_DELAY) # Give ESC time to arm
+    
+    # Set throttle to minimum
+    ESC.throttle = ROBOT_SPEED_STOP
+    time.sleep(SERVO_SETUP_DELAY)
+
+    # Initialize start button
+    """
     start_button_out.direction = digitalio.Direction.OUTPUT
-    start_button_in.direction = digitalio.Direction.IN
+    start_button_out.value = True
+    start_button_in.direction = digitalio.Direction.INPUT
+    time.sleep(2)
+    if DEBUG_MODE:
+        print("Start button value: " + str(start_button_in.value))
+    """
     
     try:
         bno = BNO08X_I2C(I2C_BUS1, address=0x4B) # Normally you don't need to force and I2C address, but in our case we had to
@@ -239,7 +285,7 @@ async def gyro_reading():
     await asyncio.sleep(0) # Yield control to other tasks, non-blocking
 
 # ---------- Distance Reading Function ----------
-async def read_multiple_tof_sensors():    
+async def read_multiple_tof_sensors():
     # Iterate over the 'sensors' list which only contains successfully initialized sensors
     for i, sensor in enumerate(vl53l0x_sensors): 
         try:
@@ -248,7 +294,11 @@ async def read_multiple_tof_sensors():
                 distance_cm = float('inf')
             else:
                 distance_cm = distance_mm / 10 # Convert to centimeters
-            tof_sensors_measures[i] = distance_cm
+
+            if len(tof_sensors_measures) < len(vl53l0x_sensors):
+                tof_sensors_measures.append(distance_cm)
+            else:
+                tof_sensors_measures[i] = distance_cm
 
         except Exception as e:
             if DEBUG_MODE:
@@ -259,6 +309,7 @@ async def read_multiple_tof_sensors():
 def set_robot_speed(speed_throttle):
     # speed_throttle must be a value between -1.0 and 1.0
     ESC.throttle = speed_throttle
+    #ESC.angle = ESC_CENTER + speed_throttle
 
 def set_steering_angle(angle):
     # angle must be a value between 0 and 180
@@ -269,18 +320,24 @@ def stop_robot(): # Renamed from 'stop' for consistency
     set_robot_speed(ROBOT_SPEED_STOP) # Use ROBOT_SPEED_STOP
 
 # ---------- Main Robot Control Loop (ASYNC) ----------
-async def main_robot_loop(): # Renamed from Main_Loop for consistency and best practice
+async def main_robot_loop(): # Renamed from Main_Loop for consistency and best practice    
     # Set the initial steering command as middle
     steering_command = STEERING_MIDDLE_COMMAND
+    motor_command = MOTOR_FORWARD
+    going_backward = False
+    went_backward = False
+    initial_turns = 0
     
     # Call the setup function
     setup()
 
+    """
     while not start_button_in.value:
         if DEBUG_MODE:
             print("Waiting for start button press...")
         await asyncio.sleep(START_BUTTON_DELAY)
     print("Button press detected, starting program now")
+    """
 
     while True:
         # Read all the data asynchronously
@@ -289,15 +346,66 @@ async def main_robot_loop(): # Renamed from Main_Loop for consistency and best p
         front_dist = tof_sensors_measures[TOF_FRONT_SENSOR]
         right_middle_dist = tof_sensors_measures[TOF_RIGHT_MIDDLE_SENSOR]
         left_middle_dist = tof_sensors_measures[TOF_LEFT_MIDDLE_SENSOR]
-        back_dist = tof_sensors_measures[TOF_BACK_MIDDLE_SENSOR]
+        back_dist = tof_sensors_measures[TOF_BACK_SENSOR]
 
-        if front_dist<=TARGET_DISTANCE_FORWARD and right_middle_dist >= (left_middle_dist + SENSOR_DIFFERENCE_SIDEWAYS):
+        if turns == 12: # If robot has completed 12 turns
+            if MOVEMENT_MODE:
+                motor_command = MOTOR_FORWARD
+                steering_command = STEERING_MIDDLE_COMMAND
+                time.sleep(MOVEMENT_DELAY)
+            if DEBUG_MODE:
+                print("Done 12 turns, stopping now")
+            return
+        
+        if not going_backward and not went_backward and front_dist >= TARGET_DISTANCE_START_BACKWARD:
+            steering_command = STEERING_MIDDLE_COMMAND
+            motor_command = MOTOR_FORWARD
+        
+        elif not going_backward and not went_backward and front_dist < TARGET_DISTANCE_START_BACKWARD:
+            motor_command = MOTOR_BACKWARD
+            going_backward= True
+            
+        elif going_backward and front_dist >= TARGET_DISTANCE_STOP_BACKWARD:
+            motor_command = MOTOR_FORWARD
+            going_backward  = False
+            went_backward = True
+            initial_turns = turns
+            
+            if right_middle_dist == float('inf'):
+                steering_command = STEERING_RIGHT_COMMAND
+
+            elif left_middle_dist == float('inf'):
+                steering_command = STEERING_LEFT_COMMAND
+
+            elif right_middle_dist >= left_middle_dist:
+                steering_command = STEERING_RIGHT_COMMAND
+
+            elif left_middle_dist >= right_middle_dist:
+                steering_command = STEERING_LEFT_COMMAND
+            
+        elif went_backward and initial_turns != turns:
+            went_backward = False
+            steering_command = STEERING_MIDDLE_COMMAND
+                            
+        # Set the speed and angle
+        if MOVEMENT_MODE:
+            if steering_command == STEERING_MIDDLE_COMMAND:
+                set_robot_speed(ROBOT_SPEED_NORMAL * motor_command)
+                set_steering_angle(SERVO_DIRECTION_CENTER)
+                print("Speed " + str(ROBOT_SPEED_NORMAL * motor_command))
+            else:
+                set_robot_speed(ROBOT_SPEED_TURN * motor_command)
+                set_steering_angle(SERVO_DIRECTION_CENTER + steering_command * TURNING_VALUE)
+                print("Speed " + str(ROBOT_SPEED_TURN * motor_command))
+                
+        """
+        if front_dist <= TARGET_DISTANCE_FORWARD and right_middle_dist >= (left_middle_dist + SENSOR_DIFFERENCE_SIDEWAYS):
             steering_command = STEERING_RIGHT_COMMAND
             if MOVEMENT_MODE:
                 set_robot_speed(ROBOT_SPEED_TURN)
                 set_steering_angle(SERVO_DIRECTION_CENTER + TURNING_VALUE)
 
-        elif front_dist<=TARGET_DISTANCE_FORWARD and left_middle_dist >= (right_middle_dist + SENSOR_DIFFERENCE_SIDEWAYS) and steering_command>=0: #i need to organize what its gonna make them choose to go left
+        elif front_dist <= TARGET_DISTANCE_FORWARD and left_middle_dist >= (right_middle_dist + SENSOR_DIFFERENCE_SIDEWAYS) and steering_command >= 0:  # i need to organize what its gonna make them choose to go left
             steering_command = STEERING_LEFT_COMMAND
             if MOVEMENT_MODE:
                 set_robot_speed(ROBOT_SPEED_TURN)
@@ -306,24 +414,27 @@ async def main_robot_loop(): # Renamed from Main_Loop for consistency and best p
         else:
             steering_command = STEERING_MIDDLE_COMMAND
             if MOVEMENT_MODE:
-                set_robot_speed(ROBOT_SPEED_FORWARD_NORMAL)
+                set_robot_speed(ROBOT_SPEED_NORMAL)
                 set_steering_angle(SERVO_DIRECTION_CENTER)
 
-        if turns >= 12: # If robot has completed 12 turns
+        if turns >= 12:  # If robot has completed 12 turns
             if MOVEMENT_MODE:
                 if front_dist >= 100 and back_dist >= 100:
                     stop_robot()
-            if DEBUG_MODE:
-                print("Done 12 turns, stopping now")
+                if DEBUG_MODE:
+                    print("Done 12 turns, stopping now")
+        """
 
         if DEBUG_MODE:
             distances_str = ", ".join([f"ToF{i}: {d:.1f}cm" for i, d in enumerate(tof_sensors_measures)])
             print(f"Distancias ToF: [{distances_str}]")
-            # yaw_deg is now the continuously unwrapped angle
-            print(f"Angulo Z acumulado: {yaw_deg:.2f}°") 
+            print(f"Ángulo Z acumulado: {yaw_deg:.2f}°") 
             print(f"Cruces hechos (turns): {turns}")
-            print(f"Angulo de dirección del servo: {SERVO_DIRECTION.angle:.2f}°")
-            # Additional debug print for current movement state
+            print(f"Ángulo de dirección del servo: {SERVO_DIRECTION.angle:.2f}°")
+            if motor_command == MOTOR_FORWARD:
+                print("Yendo hacia adelante")
+            else:
+                print("Yendo hacia atrás")
 
         await asyncio.sleep(MOVEMENT_DELAY)
 

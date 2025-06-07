@@ -7,7 +7,7 @@ active range readings is about 19 mA per sensor).
 """
 import time
 import board
-from digitalio import DigitalOut
+from digitalio import DigitalInOut
 from adafruit_vl53l0x import VL53L0X
 
 # declare the singleton variable for the default I2C bus
