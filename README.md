@@ -59,15 +59,13 @@ Actualmente, este equipo está conformado por 3 miembros:
 <h2 id="informacion-adicional">Información adicional</h2>
 Debido a que este repositorio contiene múltiples archivos README.md, aquí esta el listado de cada README.md con su información respectiva.
 
-1. **[Descripción de la Mecánica y Modelos 3D](models/README.md)**
-2. **[Diagrama de conexiones](#schemes/detailed-klevor-wiring-diagram.png)**
-3. Código
+1. **[Descripción de la Mecánica y Fotos de Klevor](v-photos/prototype1/README.md)**
+2. Código
    1. [Raspberry Pi 5](src/raspberry-pi5/README.md)
       1. [YOLO](src/raspberry-pi5/yolo/README.md)
    2. [Raspberry Pi Pico 2 WH](src/raspberry-pi-pico2/README.md)
-4. **[Fotos del equipo](t-photos/README.md)**
-5. **[Fotos de Klevor](v-photos/README.md)**
-6. **[Vídeos](video/README.md)**
+3. **[Fotos del equipo](t-photos/README.md)**
+4. **[Vídeos](video/README.md)**
 
 <h1 id="componentes">Componentes</h1>
 
