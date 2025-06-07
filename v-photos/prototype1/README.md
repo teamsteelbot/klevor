@@ -15,6 +15,52 @@ En esta parte explicaremos el contenido y funcionamiento de componentes en cada 
 
 <h2 id="primera-capa">Primera Capa</h2>
 En esta primera capa hemos montado toda la parte motriz de nuestro robot. 
+
+<table>
+    <tr>
+        <td>
+            <p align="center">
+                <img src="./layer1-front-unconnected001.png" alt="Primera capa, vista delantera">
+            </p>
+            <p align="center">
+                <i>Primera capa, vista delantera</i>
+            </p>
+        </td>
+        <td>
+            <p align="center">
+                <img src="./layer1-back-unconnected001.png" alt="Primera capa, vista trasera">
+            </p>
+            <p align="center">
+                <i>Primera capa, vista trasera</i>
+            </p>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <p align="center">
+                <img src="./layer1-left-unconnected001.png" alt="Primera capa, vista izquierda">
+            </p>
+            <p align="center">
+                <i>Primera capa, vista izquierda</i>
+            </p>
+        </td>
+        <td>
+            <p align="center">
+                <img src="./layer1-right-unconnected001.png" alt="Primera capa, vista derecha">
+            </p>
+            <p align="center">
+                <i>Primera capa, vista derecha</i>
+            </p>
+        </td>
+    </tr>
+</table>
+
+<p align="center">
+    <img src="./layer1-top-unconnected001.png" alt="Primera capa, vista superior" width=400>
+</p>
+<p align="center">
+    <i>Primera capa, vista superior</i>
+</p>
  
 A continuación, explicaremos a detalle cómo funciona este 
 sistema motriz. Para lograrlo, nos basamos en el sistema mecánico de un automóvil; cuyo funcionamiento depende de un diferencial (una pieza formada por varios engranajes cubiertos por una carcasa) para el movimiento de dos ruedas, al usar cuatro ruedas, usamos dos diferenciales (uno para las delanteras, otro para las traseras) conectados mediante un eje transmisor para el movimiento uniforme de todas estas.
@@ -25,6 +71,51 @@ Otra parte fundamental para nuestro robot es su sistema de cruce, que consta de 
 Algunos componentes que también están en esta capa son el [giroscopio](../../README.md/#gyroscope-gy-bno085) y una batería de 7.4V y 3000mAh ([URGENEX 7.4 BATTERY](../../README.md/#componentes-urgenex-74v-battery)), y los ya mencionados INJORA 48T (motor) y el Microservo INJORA 7kg 2065.
 
 <h2 id="segunda-capa">Segunda Capa</h2>
+<table>
+    <tr>
+        <td>
+            <p align="center">
+                <img src="./layer2-front-unconnected001.png" alt="Segunda capa, vista delantera">
+            </p>
+            <p align="center">
+                <i>Segunda capa, vista delantera</i>
+            </p>
+        </td>
+        <td>
+            <p align="center">
+                <img src="./layer2-back-unconnected001.png" alt="Segunda capa, vista trasera">
+            </p>
+            <p align="center">
+                <i>Segunda capa, vista trasera</i>
+            </p>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <p align="center">
+                <img src="./layer2-left-unconnected001.png" alt="Segunda capa, vista izquierda">
+            </p>
+            <p align="center">
+                <i>Segunda capa, vista izquierda</i>
+            </p>
+        </td>
+        <td>
+            <p align="center">
+                <img src="./layer2-right-unconnected001.png" alt="Segunda capa, vista derecha">
+            </p>
+            <p align="center">
+                <i>Segunda capa, vista derecha</i>
+            </p>
+        </td>
+    </tr>
+</table>
+
+<p align="center">
+    <img src="./layer2-top-unconnected001.png" alt="Segunda capa, vista superior" width=400>
+</p>
+<p align="center">
+    <i>Segunda capa, vista superior</i>
+</p>
 
 Esta segunda capa está dedicada a la alimentación y los [sensores ToF](../../README.md/#sensor-tof-hiletgo) (Time of Flight) del robot.
 
@@ -35,6 +126,52 @@ A futuro queremos colocar un [RPLidar C1](../../README.md/#componentes-rplidar-c
 La parte de la alimentación cuenta con un Powerbank por el cual los componentes de la capa superior reciben electricidad.
 
 <h2 id="tercera-capa">Tercera Capa</h2>
+
+<table>
+    <tr>
+        <td>
+            <p align="center">
+                <img src="./layer3-front-unconnected001.png" alt="Tercera capa, vista delantera">
+            </p>
+            <p align="center">
+                <i>Tercera capa, vista delantera</i>
+            </p>
+        </td>
+        <td>
+            <p align="center">
+                <img src="./layer3-back-unconnected001.png" alt="Tercera capa, vista trasera">
+            </p>
+            <p align="center">
+                <i>Tercera capa, vista trasera</i>
+            </p>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <p align="center">
+                <img src="./layer3-left-unconnected001.png" alt="Tercera capa, vista izquierda">
+            </p>
+            <p align="center">
+                <i>Tercera capa, vista izquierda</i>
+            </p>
+        </td>
+        <td>
+            <p align="center">
+                <img src="./layer3-right-unconnected001.png" alt="Tercera capa, vista derecha">
+            </p>
+            <p align="center">
+                <i>Tercera capa, vista derecha</i>
+            </p>
+        </td>
+    </tr>
+</table>
+
+<p align="center">
+    <img src="./layer3-top-unconnected001.png" alt="Tercera capa, vista superior" width=400>
+</p>
+<p align="center">
+    <i>Tercera capa, vista superior</i>
+</p>
 
 La tercera capa de Klevor cuenta con todas las partes que contienen su programación y control, tales son la [Raspberry Pi 5](../../README.md/#componentes-raspberry-pi-5) y la [Raspberry Pi Pico 2](../../README.md/#componentes-raspberry-pi-pico-2-wh), la Raspberry Pi 5 está conectada por USB-C a la PowerBank que se encuentra en la segunda capa; esta se encargará de darle directrices a nuestra [Raspberry Cam Module 3 Wide](../../README.md/#componentes-raspberry-pi-camera-module-3-wide), que funciona mas eficientemente gracias a un AI Hat+ que funciona detectando las formas y colores de los obstaculos en pista. Se encuentra en la parte posterior del robot en un soporte que también fue diseñado e impreso por nosotros.
 
