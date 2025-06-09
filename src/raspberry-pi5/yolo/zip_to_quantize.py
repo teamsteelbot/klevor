@@ -1,4 +1,4 @@
-import argparse
+from argparse import ArgumentParser
 import os
 import zipfile
 from typing import LiteralString
@@ -54,7 +54,7 @@ def main() -> None:
     """
     Main function to run the script.
     """
-    parser = argparse.ArgumentParser(description='Script to zip files for YOLO model quantization')
+    parser = ArgumentParser(description='Script to zip files for YOLO model quantization')
     Args.add_yolo_input_model_argument(parser)
     Args.add_yolo_version_argument(parser)
     args = Args.parse_args_as_dict(parser)

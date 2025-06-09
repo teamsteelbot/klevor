@@ -1,4 +1,4 @@
-import argparse
+from argparse import ArgumentParser
 
 import torch
 
@@ -41,7 +41,7 @@ def main() -> None:
     """
     Main function to run the script.
     """
-    parser = argparse.ArgumentParser(description='Script to update YOLO model classes')
+    parser = ArgumentParser(description='Script to update YOLO model classes')
     Args.add_yolo_input_model_argument(parser)
     Args.add_yolo_version_argument(parser)
     Args.add_yolo_classes_argument(parser)

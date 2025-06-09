@@ -7,6 +7,9 @@ class Args:
     """
     ARGS_PREFIX = '--'
 
+    # Arguments
+    SERVER = 'server'
+
     @classmethod
     def get_attribute_name(cls, attribute: str) -> str:
         """
@@ -49,3 +52,14 @@ class Args:
 
         # Get the arguments as a dictionary
         return vars(args)
+
+    @classmethod
+    def add_server_argument(cls, parser, default: bool = False) -> None:
+        """
+        Add server argument to the parser.
+        """
+        parser.add_argument(f"--no-{cls.SERVER}", dest=cls.SERVER, action="store_false",
+                            help="Set server flag as 'False'")
+        parser.add_argument(f"--{cls.SERVER}", dest=cls.SERVER, action="store_true",
+                            help="Set server flag as 'True'")
+        parser.set_defaults(**{cls.SERVER: default})

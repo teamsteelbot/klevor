@@ -1,4 +1,4 @@
-import argparse
+from argparse import ArgumentParser
 import os
 import random
 
@@ -79,7 +79,7 @@ def main() -> None:
     """
     Main function to run the script.
     """
-    parser = argparse.ArgumentParser(description='Script to test YOLO model with a given format')
+    parser = ArgumentParser(description='Script to test YOLO model with a given format')
     Args.add_yolo_input_model_argument(parser)
     Args.add_yolo_format_argument(parser)
     Args.add_yolo_version_argument(parser)

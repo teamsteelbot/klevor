@@ -35,5 +35,4 @@ class SubLogger:
         check_type(content, str)
 
         # Create a Message instance and put it in the logger's message queue
-        log_message = Message(self.__tag, content)
-        self.__logger.put_message(log_message)
+        self.__logger.log(Message(content, self.__tag))

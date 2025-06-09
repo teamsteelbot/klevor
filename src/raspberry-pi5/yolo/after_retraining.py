@@ -1,4 +1,4 @@
-import argparse
+from argparse import ArgumentParser
 import os
 
 from yolo.args import Args
@@ -9,7 +9,7 @@ def main() -> None:
     """
     Main function to run the script.
     """
-    parser = argparse.ArgumentParser(description='Script to move YOLO model runs folder to old runs folder')
+    parser = ArgumentParser(description='Script to move YOLO model runs folder to old runs folder')
     Args.add_yolo_version_argument(parser)
     args = Args.parse_args_as_dict(parser)
 

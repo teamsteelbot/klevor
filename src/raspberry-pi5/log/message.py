@@ -1,12 +1,12 @@
 from utils import check_type
-
+from typing import Optional
 
 class Message:
     """
     Class to handle log messages.
     """
 
-    def __init__(self, tag: str, content: str):
+    def __init__(self, content: str, tag: Optional[str] = None):
         """
         Initialize the Message class.
 
@@ -14,13 +14,14 @@ class Message:
             tag (str): Tag of the log message.
             content (str): Content of the log message.
         """
-        # Check the type of ta
-        check_type(tag, str)
-        self.__tag = tag
-
         # Check the type of content
         check_type(content, str)
         self.__content = content
+
+        # Check the type of tag
+        if tag:
+            check_type(tag, str)
+        self.__tag = tag
 
     def __str__(self):
         """
@@ -29,4 +30,4 @@ class Message:
         Returns:
             str: The formatted log message.
         """
-        return f"[{self.__tag}] {self.__content}"
+        return f"[{self.__tag}] {self.__content}" if self.__tag else self.__content

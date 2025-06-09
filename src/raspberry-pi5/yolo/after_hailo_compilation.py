@@ -1,4 +1,4 @@
-import argparse
+from argparse import ArgumentParser
 import os
 import shutil
 
@@ -56,7 +56,7 @@ def main() -> None:
     """
     Main function to run the script.
     """
-    parser = argparse.ArgumentParser(
+    parser = ArgumentParser(
         description="Script to copy the generated '.har' and '.hef' files from the Hailo Suite folder")
     Args.add_yolo_input_model_argument(parser)
     Args.add_yolo_version_argument(parser)

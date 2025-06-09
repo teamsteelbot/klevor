@@ -1,4 +1,4 @@
-import argparse
+from argparse import ArgumentParser
 import os
 import shutil
 
@@ -70,7 +70,7 @@ def main():
     """
     Main function to run the script.
     """
-    parser = argparse.ArgumentParser(description='Script to augment YOLO model')
+    parser = ArgumentParser(description='Script to augment YOLO model')
     Args.add_yolo_input_model_argument(parser)
     args = Args.parse_args_as_dict(parser)
 

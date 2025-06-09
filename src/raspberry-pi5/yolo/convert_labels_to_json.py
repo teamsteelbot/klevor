@@ -1,4 +1,4 @@
-import argparse
+from argparse import ArgumentParser
 import json
 import os
 
@@ -42,7 +42,7 @@ def main() -> None:
     """
     Main function to run the script.
     """
-    parser = argparse.ArgumentParser(description='Script to convert YOLO labels to JSON format for Label Studio')
+    parser = ArgumentParser(description='Script to convert YOLO labels to JSON format for Label Studio')
     Args.add_yolo_input_model_argument(parser)
     args = Args.parse_args_as_dict(parser)
 

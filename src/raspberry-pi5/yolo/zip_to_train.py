@@ -1,4 +1,4 @@
-import argparse
+from argparse import ArgumentParser
 import os
 import zipfile
 
@@ -70,7 +70,7 @@ def main() -> None:
     """
     Main function to run the script.
     """
-    parser = argparse.ArgumentParser(description='Script to zip files for YOLO model training')
+    parser = ArgumentParser(description='Script to zip files for YOLO model training')
     Args.add_yolo_input_model_argument(parser)
     Args.add_yolo_version_argument(parser)
     Args.add_yolo_retraining_argument(parser)

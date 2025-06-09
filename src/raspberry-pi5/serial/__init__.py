@@ -236,6 +236,19 @@ class SerialCommunication:
             # Set the pending outgoing message event
             self.__pending_outgoing_message_event.set()
 
+    def put_outgoing_rplidar_measures(self, measures_str: str) -> None:
+        """
+        Put RPLIDAR measures in the outgoing messages queue.
+
+        Args:
+            measures_str (str): The measures string to put in the queue.
+        """
+        # Create a message with the RPLIDAR measures type
+        message = Message(Message.TYPE_RPLIDAR_MEASURES, measures_str)
+
+        # Put the message in the outgoing messages queue
+        self.put_outgoing_message(message)
+
     def __get_outgoing_message(self) -> str | None:
         """
         Get a message from the outgoing messages queue.

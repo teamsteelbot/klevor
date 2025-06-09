@@ -1,4 +1,4 @@
-import argparse
+from argparse import ArgumentParser
 import os
 import shutil
 
@@ -47,7 +47,7 @@ def main() -> None:
     """
     Main function to run the script.
     """
-    parser = argparse.ArgumentParser(
+    parser = ArgumentParser(
         description='Script to removed the unnecessary files and prepare the dataset for Hailo with calibration set')
     Args.add_yolo_input_model_argument(parser)
     Args.add_yolo_version_argument(parser)

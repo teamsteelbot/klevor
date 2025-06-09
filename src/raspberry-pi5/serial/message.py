@@ -5,7 +5,8 @@ class Message:
     # Types of messages
     TYPE_CAPTURE_IMAGE = 'capture_image'
     TYPE_INFERENCE = 'inference'
-    TYPES = [TYPE_INFERENCE, TYPE_CAPTURE_IMAGE]
+    TYPE_RPLIDAR_MEASURES = "rplidar_measures"
+    TYPES = [TYPE_INFERENCE, TYPE_CAPTURE_IMAGE, TYPE_RPLIDAR_MEASURES]
 
     # Message header separator
     HEADER_SEPARATOR = ':'
@@ -18,7 +19,7 @@ class Message:
         Initialize the message class.
 
         Args:
-            message_type (str): The type of the message. Must be one of MESSAGE_TYPES.
+            message_type (str): The type of the message. Must be one of TYPES.
             message_content (str): The content of the message.
         """
         # Check if the message type is valid

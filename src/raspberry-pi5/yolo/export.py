@@ -1,4 +1,4 @@
-import argparse
+from argparse import ArgumentParser
 
 from yolo import Yolo
 from yolo.args import Args
@@ -9,7 +9,7 @@ def main() -> None:
     """
     Main function to run the script.
     """
-    parser = argparse.ArgumentParser(description='Script to export YOLO model to a given format')
+    parser = ArgumentParser(description='Script to export YOLO model to a given format')
     Args.add_yolo_input_model_argument(parser)
     Args.add_yolo_format_argument(parser)
     Args.add_yolo_quantized_argument(parser)

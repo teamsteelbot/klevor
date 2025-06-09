@@ -11,11 +11,8 @@ class Files(F):
     """
     Files utility class.
     """
-    # Folders (executed from root folder)
-    CWD = os.getcwd()
-
     # YOLO folder
-    YOLO_DIR = os.path.join(CWD, 'yolo')
+    YOLO_DIR = os.path.join(F.CWD, 'yolo')
 
     # YOLO data
     DATA = 'data'
@@ -82,10 +79,6 @@ class Files(F):
 
     # Ignore lists
     ZIP_IGNORE = ('.git', '.venv', '.idea', 'raspberry-pi-pico2', 'scripts', 'yolo')
-
-    # Logs folders
-    LOG_DIR = os.path.join(CWD, 'logs')
-    LOGS_DIR = os.path.join(LOG_DIR, 'logs')
 
     @classmethod
     def check_dataset_status(cls, dataset_status: str | None) -> None:
@@ -535,16 +528,6 @@ class Files(F):
         Get the Hailo Model Zoo path
         """
         return os.path.join(cls.YOLO_DIR, cls.HAILO, cls.HAILO_SUITE, cls.HAILO_LIBS, cls.HAILO_MODEL_ZOO)
-
-    @classmethod
-    def get_log_file_path(cls) -> LiteralString | str | bytes:
-        """
-        Get the log file path.
-        """
-        # Get the UNIX timestamp
-        unix_timestamp = int(time())
-
-        return os.path.join(cls.LOGS_DIR, f'{unix_timestamp}.txt')
 
     @classmethod
     def get_hailo_labels_dir_path(cls) -> LiteralString | str | bytes:

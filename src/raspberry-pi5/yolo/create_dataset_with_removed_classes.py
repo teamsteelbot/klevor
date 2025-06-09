@@ -1,4 +1,4 @@
-import argparse
+from argparse import ArgumentParser
 import json
 import os
 import shutil
@@ -129,7 +129,7 @@ def main() -> None:
     """
     Main function to run the script.
     """
-    parser = argparse.ArgumentParser(description='Script to remove labeled classes from a given YOLO model dataset')
+    parser = ArgumentParser(description='Script to remove labeled classes from a given YOLO model dataset')
     Args.add_yolo_input_model_argument(parser)
     Args.add_yolo_output_model_argument(parser)
     Args.add_yolo_ignore_classes_argument(parser)

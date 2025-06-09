@@ -1,4 +1,4 @@
-import argparse
+from argparse import ArgumentParser
 
 from yolo import Yolo
 from yolo.args import Args
@@ -41,7 +41,7 @@ def main() -> None:
     """
     Main function to run the script.
     """
-    parser = argparse.ArgumentParser(description='Script to train YOLO model')
+    parser = ArgumentParser(description='Script to train YOLO model')
     Args.add_yolo_input_model_argument(parser)
     Args.add_yolo_input_model_pt_argument(parser)
     Args.add_yolo_epochs_argument(parser)

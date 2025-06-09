@@ -1,9 +1,9 @@
 import asyncio
 import io
 from multiprocessing import Event
-from typing import Awaitable
+from typing import Awaitable, Optional
 
-import websockets
+from websockets import serve, exceptions
 from PIL.Image import Image
 
 from log import Logger
@@ -47,14 +47,14 @@ class RealtimeTrackerServer:
     # Image format
     IMAGE_FORMAT = "JPEG"
 
-    def __init__(self, stop_event: Event, parking_event: Event, logger: Logger, host=HOST, port=PORT):
+    def __init__(self, stop_event: Event, parking_event: Optional[Event] = None, logger: Optional[Logger] = None, host=HOST, port=PORT):
         """
         Initializes the WebSocket server with the specified host and port.
 
         Args:
             stop_event (Event): An event to signal when to stop the server.
             parking_event (Event): An event to signal when the server should pause processing.
-            logger (Logger): Logger instance for logging messages.
+            logger (Logger|None): Logger instance for logging messages.
             host (str): The host address for the WebSocket server. Default is 'localhost'.
             port (int): The port number for the WebSocket server. Default is 8765.
         """
@@ -63,8 +63,18 @@ class RealtimeTrackerServer:
         self.__stop_event = stop_event
 
         # Check the type of parking event
-        check_type(parking_event, Event)
+        if parking_event:
+            check_type(parking_event, Event)
         self.__parking_event = parking_event
+
+        # Check the type of logger
+        if logger:
+            check_type(logger, Logger)
+
+            # Get the sub-logger for this class
+            self.__logger = logger.get_sub_logger(self.LOG_TAG)
+        else:
+            self.__logger = None
 
         # Check the type of host
         check_type(host, str)
@@ -74,17 +84,23 @@ class RealtimeTrackerServer:
         check_type(port, int)
         self.__port = port
 
-        # Check the type of logger
-        check_type(logger, Logger)
-
-        # Get the sub-logger for this class
-        self.__logger = logger.get_sub_logger(self.LOG_TAG)
-
         # Initialize the connected clients set
         self.__connected_clients = set()
 
         # Initialize the started flag
         self.__started = False
+
+    def __log(self, message: str):
+        """
+        Logs a message using the logger if available.
+        
+        Args:
+            message (str): The message to log.
+        """
+        if self.__logger:
+            self.__logger.put_message(message)
+        else:
+            print(f"{self.LOG_TAG}: {message}")
 
     async def __reactive_handler(self, connection) -> Awaitable[None]:
         """
@@ -92,30 +108,34 @@ class RealtimeTrackerServer:
         """
         # Add the client to the set of connected clients
         self.__connected_clients.add(connection)
-        self.__logger.log(f"Client connected: {connection.remote_address}")
+        self.__log(f"Client connected: {connection.remote_address}")
 
         try:
             async for message in connection:
                 # Log
-                self.__logger.log(f"Received message: {message}")
+                self.__log(f"Received message: {message}")
 
                 # Check if the message is a stop event
                 if message == self.TAG_STOP_EVENT:
-                    self.__logger.log("Stop event received. Stopping the server...")
+                    if self.__logger:
+                        self.__log("Stop event received. Stopping the server...")
                     self.__stop_event.set()
 
                 # Check if the message is a parking event
                 elif message == self.TAG_PARKING_EVENT:
+                    if not self.__parking_event:
+                        pass
+
                     if self.__parking_event.is_set():
-                        self.__logger.log("Parking event received. Resuming processing...")
+                        self.__log("Parking event received. Resuming processing...")
                         self.__parking_event.clear()
                     else:
-                        self.__logger.log("Parking event received. Pausing processing...")
+                        self.__log("Parking event received. Pausing processing...")
                         self.__parking_event.set()
 
                 else:
                     # Unknown message type
-                    self.__logger.log(f"Unknown message type: {message}")
+                    self.__log(f"Unknown message type: {message}")
 
                     # Send an error message back to the client
                     error_message = f"Unknown message type: {message}"
@@ -125,16 +145,16 @@ class RealtimeTrackerServer:
 
                 # Broadcast the received message to all connected clients
                 await self.__broadcast_message(message)
-        except websockets.exceptions.ConnectionClosedOK:
-            self.__logger.log(f"Client {connection.remote_address} disconnected gracefully.")
-        except websockets.exceptions.ConnectionClosedError as e:
-            self.__logger.log(f"Client {connection.remote_address} disconnected with error: {e}")
+        except exceptions.ConnectionClosedOK:
+            self.__log(f"Client {connection.remote_address} disconnected gracefully.")
+        except exceptions.ConnectionClosedError as e:
+            self.__log(f"Client {connection.remote_address} disconnected with error: {e}")
         except Exception as e:
-            self.__logger.log(f"An unexpected error occurred with {connection.remote_address}: {e}")
+            self.__log(f"An unexpected error occurred with {connection.remote_address}: {e}")
         finally:
             # Remove the client from the set of connected clients
             self.__connected_clients.remove(connection)
-            self.__logger.log(f"Client {connection.remote_address} removed.")
+            self.__log(f"Client {connection.remote_address} removed.")
 
     async def __broadcast_message(self, message):
         """
@@ -161,13 +181,13 @@ class RealtimeTrackerServer:
             binary_data = img_stream.read()
 
             # Prepend the tag to the binary data
-            tagged_data = f"{tag}{TAG_SEPARATOR}".encode() + binary_data
+            tagged_data = f"{tag}{self.TAG_SEPARATOR}".encode() + binary_data
 
             # Send the tagged binary data to the clients
             self._send_message(tagged_data)
-            self.__logger.log(f"Image with tag '{tag}' sent to the clients.")
+            self.__log(f"Image with tag '{tag}' sent to the clients.")
         except Exception as e:
-            self.__logger.log(f"Error sending image: {e}")
+            self.__log(f"Error sending image: {e}")
 
     async def send_image_original(self, img: Image):
         """
@@ -221,7 +241,7 @@ class RealtimeTrackerServer:
         self._send_message(tagged_message)
 
         # Log
-        self.__logger.log(f"Serial incoming message sent: {message}")
+        self.__log(f"Serial incoming message sent: {message}")
 
     async def send_serial_outgoing_message(self, message: str):
         """
@@ -234,7 +254,7 @@ class RealtimeTrackerServer:
         self._send_message(tagged_message)
 
         # Log
-        self.__logger.log(f"Serial outgoing message sent: {message}")
+        self.__log(f"Serial outgoing message sent: {message}")
 
     async def send_rplidar_measures(self, message: str):
         """
@@ -247,7 +267,7 @@ class RealtimeTrackerServer:
         self._send_message(tagged_message)
 
         # Log
-        self.__logger.log(f"RPLIDAR measures sent")
+        self.__log(f"RPLIDAR measures sent")
 
     async def start(self):
         """
@@ -261,12 +281,12 @@ class RealtimeTrackerServer:
         self.__started = True
 
         # Start the WebSocket server
-        self.__logger.log(f"Starting WebSocket server on ws://{self.__host}:{self.__port}")
-        async with websockets.serve(self.__reactive_handler, self.__host, self.__port):
-            self.__logger.log("WebSocket server started successfully.")
+        self.__log(f"Starting WebSocket server on ws://{self.__host}:{self.__port}")
+        async with serve(self.__reactive_handler, self.__host, self.__port):
+            self.__log("WebSocket server started successfully.")
             self.__stop_event.wait()
 
-        self.__logger.log("WebSocket server is stopping...")
+        self.__log("WebSocket server is stopping...")
         self.__started = False
 
 

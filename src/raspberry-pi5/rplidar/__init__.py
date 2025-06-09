@@ -8,6 +8,7 @@ from utils import check_type
 from log import Logger
 from log.sub_logger import SubLogger
 from server import RealtimeTrackerServer 
+from serial import SerialCommunication
 from rplidar.measure import Measure
 
 class RPLIDAR:
@@ -29,7 +30,15 @@ class RPLIDAR:
     # Get the absolute path of the ultra_simple executable
     ULTRA_SIMPLE_PATH = os.path.join(os.path.dirname(__file__), "ultra_simple")
 
-    def __init__(self, stop_event: Optional[Event] = None, logger: Optional[Logger] = None, server: Optional[RealtimeTrackerServer] = None, baudrate: int = RPLIDAR_C1_BAUDRATE, port: str = RPLIDAR_C1_PORT):
+    def __init__(
+            self,
+            stop_event: Optional[Event] = None,
+            logger: Optional[Logger] = None,
+            server: Optional[RealtimeTrackerServer] = None,
+            serial_communication: Optional[SerialCommunication] = None,
+            baudrate: int = RPLIDAR_C1_BAUDRATE,
+            port: str = RPLIDAR_C1_PORT
+        ):
         """
         Initialize the RPLIDAR.
 
@@ -37,6 +46,7 @@ class RPLIDAR:
             stop_event (Event|None): Event to signal when to stop processing.
             logger (Logger|None): Logger instance for logging messages.
             server (RealtimeTrackerServer|None): Server instance for real-time tracking updates.
+            serial_communication (SerialCommunication|None): Serial communication instance for RPLIDAR.
             baudrate (int): Baud rate for the serial communication.
             port (str): Serial port for the RPLIDAR.
         """
@@ -58,6 +68,11 @@ class RPLIDAR:
         if server:
             check_type(server, RealtimeTrackerServer)
         self.__server = server
+
+        # Check the type of serial communication
+        if serial_communication:
+            check_type(serial_communication, SerialCommunication)
+        self.__serial_communication = serial_communication
 
         # Check the type of baudrate
         check_type(baudrate, int)
@@ -88,7 +103,9 @@ class RPLIDAR:
         # Put the parsed line in the server
         if self.__server:
             self.__server.send_rplidar_measures(measures_str)
-        else:
+        if self.__serial_communication:
+            self.__serial_communication.put_outgoing_rplidar_measures(measures_str)
+        if not self.__server and not self.__serial_communication:
             # Log the output                
             print(f"Full rotation completed with {len(self.__distances_dict)} measures: {measures_str}")
 
@@ -219,13 +236,3 @@ class RPLIDAR:
             if self.__process.poll() is None:
                 self.__process.kill()
             self.__process.wait()
-
-def main(rplidar: RPLIDAR):
-    """
-    Main function to run the script.
-    """
-    # Check the type of the RPLIDAR instance
-    check_type(rplidar, RPLIDAR)
-
-    # Start the RPLIDAR
-    rplidar.start()

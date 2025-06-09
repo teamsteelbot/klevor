@@ -10,7 +10,6 @@ from server import RealtimeTrackerServer
 from server import main as server_main
 from utils import check_type
 from yolo.args import Args
-from yolo.files import Files
 from yolo.hailo.object_detection import main as object_detection_main
 
 
@@ -130,11 +129,8 @@ def main():
             # Create the stop event signal
             stop_event = manager.Event()
 
-            # Get the log file path
-            log_file_path = Files.get_log_file_path()
-
             # Create the logger object with multiprocessing safety
-            logger = manager.Logger(log_file_path, stop_event)
+            logger = manager.Logger(stop_event)
 
             # Create the websocket server
             server = manager.WebsocketServer(stop_event, logger) if arg_debug else None

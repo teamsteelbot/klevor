@@ -1,11 +1,15 @@
 import os
 import shutil
-
+from datetime import datetime
+from typing import LiteralString
 
 class Files:
     """
     Files utility class.
     """
+    # Folders (executed from root folder)
+    CWD = os.getcwd()
+
     # Environments
     ENVIRONMENT_LOCAL = "local"
     ENVIRONMENT_COLAB = "colab"
@@ -20,6 +24,10 @@ class Files:
 
     # Directories to ignore always
     IGNORE_DIRS = ('.git', '__pycache__', '.idea', '.vscode', '.venv', 'venv', 'env')
+
+    # Logs folders
+    LOG_DIR = os.path.join(CWD, 'log')
+    LOGS_DIR = os.path.join(LOG_DIR, 'logs')
 
     @staticmethod
     def move_file(input_path, output_dir) -> None:
@@ -118,3 +126,14 @@ class Files:
             bool: True if the path exists, False otherwise.
         """
         return os.path.exists(path)
+    
+
+    @classmethod
+    def get_log_file_path(cls) -> LiteralString | str | bytes:
+        """
+        Get the log file path.
+        """
+        # Get the current time formatted as a string
+        formatted_time = datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
+
+        return os.path.join(cls.LOGS_DIR, f'{formatted_time}.txt')
