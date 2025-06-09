@@ -74,7 +74,7 @@ class Zip:
             ignore_filenames_regex (list[Pattern], optional): List of regex patterns to ignore certain files.
         """
         # Added to ignore directories the list of directories that should be always ignored
-        if ignore_dirs is None:
+        if not ignore_dirs:
             ignore_dirs = []
         ignore_dirs += Files.IGNORE_DIRS
 

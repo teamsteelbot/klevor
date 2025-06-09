@@ -131,9 +131,9 @@ class Hailo:
         self.__infer_model.set_batch_size(batch_size)
 
         # Set the input and output types
-        if input_type is not None:
+        if not input_type:
             self._set_input_type(input_type)
-        if output_type is not None:
+        if not output_type:
             self._set_output_type(output_type)
         self.__output_type = output_type
 
@@ -176,7 +176,7 @@ class Hailo:
         Args:
             output_info: Information about the output stream.
         """
-        if self.__output_type is None:
+        if not self.__output_type:
             return str(output_info.format.type).split(".")[1].lower()
         else:
             self.__output_type[output_info.name].lower()
@@ -299,7 +299,7 @@ class Hailo:
         Returns:
             object: Bindings object with input and output buffers.
         """
-        if self.__output_type is None:
+        if not self.__output_type:
             output_buffers = {
                 output_info.name: np.empty(
                     self.__infer_model.output(output_info.name).shape,

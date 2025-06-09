@@ -46,5 +46,5 @@ def resize_image(input_to_process_dir: LiteralString, output_resized_to_process_
             print(f'Resized and saved {filename} to {output_resized_to_process_dir} in {elapsed_time:.2f} seconds')
 
             # Check if the output_processed_dir is not None
-            if output_processed_dir is not None:
+            if not output_processed_dir:
                 Files.move_file(image_path, os.path.join(output_processed_dir, filename))

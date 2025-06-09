@@ -40,7 +40,7 @@ class ImagesQueue:
         self.__camera = camera
 
         # Check the type of server
-        if server is not None:
+        if server:
             check_type(server, RealtimeTrackerServer)
         self.__server = server
 

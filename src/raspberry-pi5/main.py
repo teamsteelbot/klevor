@@ -137,10 +137,7 @@ def main():
             logger = manager.Logger(log_file_path, stop_event)
 
             # Create the websocket server
-            if not arg_debug:
-                server = None
-            else:
-                server = manager.WebsocketServer(stop_event, logger)
+            server = manager.WebsocketServer(stop_event, logger) if arg_debug else None
 
             # Create the camera object with multiprocessing safety
             camera = manager.Camera(logger)

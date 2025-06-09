@@ -73,7 +73,7 @@ class Logger:
         unix_time = int(time())
 
         # Check if the file is open
-        if self.__file is None:
+        if not self.__file:
             print(f"Log file {self.__file_path} is not open. Must open it first.")
             return
 
@@ -95,7 +95,7 @@ class Logger:
         Open the log file.
         """
         with self.__lock:
-            if self.__file is None:
+            if not self.__file:
                 self.__file = open(self.__file_path, 'a')
                 print(f"Log file {self.__file_path} opened.")
             else:

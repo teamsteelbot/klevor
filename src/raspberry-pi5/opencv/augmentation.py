@@ -99,11 +99,11 @@ def augment_image(input_to_process_image_path: str, input_to_process_annotations
             print(f"Augmented annotations saved to {output_annotations_path} in {elapsed_time:.2f} seconds")
 
             # Check if the output_processed_images_dir is not None
-            if output_processed_images_dir is not None:
+            if output_processed_images_dir:
                 Files.move_file(input_to_process_image_path, output_processed_images_dir)
 
             # Check if the output_processed_annotations_dir is not None
-            if output_processed_annotations_dir is not None:
+            if output_processed_annotations_dir:
                 Files.move_file(input_to_process_annotations_path, output_processed_annotations_dir)
 
     except Exception as e:

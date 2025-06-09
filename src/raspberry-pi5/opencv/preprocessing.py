@@ -31,7 +31,7 @@ class Preprocessing:
         Returns:
             np.ndarray: Resized image.
         """
-        if size is None:
+        if not size:
             return image
 
         return cv2.resize(image, size, interpolation=interpolation)

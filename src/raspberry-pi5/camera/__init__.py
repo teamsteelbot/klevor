@@ -72,7 +72,7 @@ class Camera:
                 self.__started_preview = False
 
             # Configure the camera for video recording
-            if self.__video_config is None:
+            if not self.__video_config:
                 self.__video_config = self.__picam2.create_video_configuration(main={"size": (width, height)},
                                                                                display="preview")
             self.__picam2.configure(self.__video_config)

@@ -99,7 +99,7 @@ class Detections:
                            image_bounding_boxes: ImageBoundingBoxes,
                            draw_labels_name=False, font=FONT,
                            font_x_diff=0, font_y_diff=-10, font_scale=0.9, thickness=2,
-                           rgb_colors: dict[int, tuple[int, int, int]] = None):
+                           rgb_colors: dict[int, tuple[int, int, int]] = None) -> None:
         """
         Function to display the preprocessed image and the image with detections.
 
