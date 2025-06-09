@@ -1,8 +1,7 @@
 from multiprocessing import Lock, Event, Queue
 from time import time
 
-from log.sub_logger import SubLogger
-from raspberry_pi_pico2 import Message
+from log.message import Message
 from utils import check_type
 
 
@@ -128,21 +127,6 @@ class Logger:
             Event: The write log event.
         """
         return self.__write_log_event
-
-    def get_sub_logger(self, tag: str) -> SubLogger:
-        """
-        Get a sub_logger with a specific tag.
-
-        Args:
-            tag (str): Tag for the log messages.
-
-        Returns:
-            SubLogger: An instance of SubLogger with the specified tag.
-        """
-        # Check the type of tag
-        check_type(tag, str)
-
-        return SubLogger(self, tag)
 
     def __del__(self):
         """

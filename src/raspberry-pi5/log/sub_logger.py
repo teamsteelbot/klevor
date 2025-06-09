@@ -1,5 +1,5 @@
 from log import Logger
-from raspberry_pi_pico2 import Message
+from log.message import Message
 from utils import check_type
 
 

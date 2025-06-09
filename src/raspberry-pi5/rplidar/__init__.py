@@ -1,0 +1,231 @@
+import subprocess
+import os
+from multiprocessing import Event
+from time import sleep
+from typing import Optional
+
+from utils import check_type
+from log import Logger
+from log.sub_logger import SubLogger
+from server import RealtimeTrackerServer 
+from rplidar.measure import Measure
+
+class RPLIDAR:
+    """
+    Class to handle RPLIDAR operations.
+    """
+    # Logger configuration
+    LOG_TAG = "RPLIDAR"
+
+    # RPLIDAR C1 baud rate
+    RPLIDAR_C1_BAUDRATE = 460800
+
+    # Default port
+    RPLIDAR_C1_PORT = "/dev/ttyUSB0"
+
+    # Reading delay
+    READING_DELAY = 0.0001  
+
+    # Get the absolute path of the ultra_simple executable
+    ULTRA_SIMPLE_PATH = os.path.join(os.path.dirname(__file__), "ultra_simple")
+
+    def __init__(self, stop_event: Optional[Event] = None, logger: Optional[Logger] = None, server: Optional[RealtimeTrackerServer] = None, baudrate: int = RPLIDAR_C1_BAUDRATE, port: str = RPLIDAR_C1_PORT):
+        """
+        Initialize the RPLIDAR.
+
+        Args:
+            stop_event (Event|None): Event to signal when to stop processing.
+            logger (Logger|None): Logger instance for logging messages.
+            server (RealtimeTrackerServer|None): Server instance for real-time tracking updates.
+            baudrate (int): Baud rate for the serial communication.
+            port (str): Serial port for the RPLIDAR.
+        """
+        # Check the type of stop event
+        if stop_event:
+            check_type(stop_event, Event)
+        self.__stop_event = stop_event
+
+        # Check the type of logger
+        if logger:
+            check_type(logger, Logger)
+
+            # Get the sub-logger for this class
+            self.__logger = SubLogger(logger, self.LOG_TAG)
+        else:
+            self.__logger = None
+
+        # Check the type of server
+        if server:
+            check_type(server, RealtimeTrackerServer)
+        self.__server = server
+
+        # Check the type of baudrate
+        check_type(baudrate, int)
+        self.__baudrate = baudrate
+
+        # Check the type of the port
+        check_type(port, str)
+        self.__port = port
+
+        # Set the start flag
+        self.__started = False
+
+        # Distances dictionary
+        self.__distances_dict = dict()
+
+        # Messages counter
+        self.__messages_counter = 0
+
+    def __after_a_full_rotation(self):
+        """
+        Handle actions after a full rotation.
+        This method can be overridden to implement custom behavior.
+        """
+        # Get the measures from the distances dictionary as a string
+        measures = list(self.__distances_dict.values())
+        measures_str = Measure.measures_to_string(measures)
+
+        # Put the parsed line in the server
+        if self.__server:
+            self.__server.send_rplidar_measures(measures_str)
+        else:
+            # Log the output                
+            print(f"Full rotation completed with {len(self.__distances_dict)} measures: {measures_str}")
+
+    def __read_output(self):
+        """
+        Read the output from the RPLIDAR process.
+        """
+        if not self.__process:
+            return
+
+        line = self.__process.stdout.readline()
+        if not line:
+            return 
+        
+        # Check if it's one of the first 6 messages
+        if self.__messages_counter < 6:
+            self.__messages_counter += 1
+            return
+        
+        # Strip the line to remove leading/trailing whitespace
+        parsed_line = line.strip()
+
+        # Split the line by spaces
+        parts = parsed_line.split()
+
+        # Check if it's the last measure of a full rotation
+        full_rotation = len(parts) == 7
+        if full_rotation:
+            parts = parts[1:]
+
+        # Get the angle, distance and quality
+        angle = float(parts[1])
+        distance = float(parts[3])
+        quality = int(parts[5])
+
+        # Check the quality
+        if quality == 0:
+            return
+        
+        # Floor the angle to a float with no decimal places
+        angle = round(angle, 0)
+
+        # Check if the angle is already in the distances dictionary
+        if angle in self.__distances_dict:
+            # If it is, update the distance and quality
+            self.__distances_dict[angle].distance = distance
+            self.__distances_dict[angle].quality = quality
+        else:
+            # If it is not, add the measure to the distances dictionary
+            self.__distances_dict[angle] = Measure(angle, distance, quality)
+
+        # If it's the last measure of a full rotation, handle the full rotation
+        if full_rotation:
+            # Call the method to handle actions after a full rotation
+            self.__after_a_full_rotation()
+        
+        # Increment the messages counter
+        self.__messages_counter += 1
+
+        # Add a small delay to avoid busy-waiting and yield CPU
+        sleep(self.READING_DELAY)
+
+    def start(self):
+        """
+        Start the RPLIDAR process.
+        """
+        if self.__started:
+            if self.__logger:
+                self.__logger.put_message("RPLIDAR is already started.")
+            return
+
+        command = [
+            self.ULTRA_SIMPLE_PATH,
+            "--channel",
+            "--serial",
+            self.__port,
+            str(self.__baudrate)
+        ]
+        try:
+            self.__process = subprocess.Popen(
+                command, 
+                stdout=subprocess.PIPE, 
+                stderr=subprocess.PIPE, 
+                text=True, # Decode output as text
+                bufsize=1, # Line-buffered output
+                universal_newlines=True # Handles different newline characters
+            )
+        except FileNotFoundError:
+            raise ValueError(f"The program '{command[0]}' was not found.")
+        finally:
+            self.stop()
+        
+        if self.__logger:
+            self.__logger.put_message(f"RPLIDAR started with command: {' '.join(command)}")
+
+        # Set the started flag to True
+        self.__started = True
+
+        # Read the output in a loop until the process ends or stop event is set
+        if not self.__stop_event:
+            try:
+                while self.__process.poll() is None:
+                    self.__read_output()
+            except KeyboardInterrupt:
+                self.stop()
+        else:
+            # Read the output in a loop until the process ends or stop event is set
+            while self.__process.poll() is None and not self.__stop_event.is_set():
+                self.__read_output()
+
+        # Set the started flag to False if the process ends
+        self.__started = False
+
+    def stop(self):
+        """
+        Stop the RPLIDAR process.
+        """
+        if not self.__started:
+            if self.__logger:
+                self.__logger.put_message("RPLIDAR is not started.")
+            return
+
+        # Ensure the process is cleaned up even if an error occurs
+        if self.__process and self.__process.poll() is None:
+            print("Ensuring process is terminated in finally block...")
+            self.__process.terminate()
+            self.__process.wait(timeout=5)
+            if self.__process.poll() is None:
+                self.__process.kill()
+            self.__process.wait()
+
+def main(rplidar: RPLIDAR):
+    """
+    Main function to run the script.
+    """
+    # Check the type of the RPLIDAR instance
+    check_type(rplidar, RPLIDAR)
+
+    # Start the RPLIDAR
+    rplidar.start()

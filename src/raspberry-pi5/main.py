@@ -5,7 +5,7 @@ from threading import Thread
 from camera.images_queue import main as images_queue_main, ImagesQueue
 from env import Env
 from log import main as log_main, Logger
-from raspberry_pi_pico2 import SerialCommunication, main as serial_communication_main
+from serial import SerialCommunication, main as serial_communication_main
 from server import RealtimeTrackerServer
 from server import main as server_main
 from utils import check_type
@@ -26,7 +26,7 @@ def process_1_fn(serial_communication: SerialCommunication, server: RealtimeTrac
     check_type(serial_communication, SerialCommunication)
 
     # Check the type of server
-    if server is not None:
+    if server:
         check_type(server, RealtimeTrackerServer)
 
     # Check if the server is None
@@ -123,51 +123,67 @@ def main():
 
     # Create a manager for shared objects
     with Manager() as manager:
-        # Create the parking event signal
-        parking_event = manager.Event()
+        try:
+            # Create the parking event signal
+            parking_event = manager.Event()
 
-        # Create the stop event signal
-        stop_event = manager.Event()
+            # Create the stop event signal
+            stop_event = manager.Event()
 
-        # Get the log file path
-        log_file_path = Files.get_log_file_path()
+            # Get the log file path
+            log_file_path = Files.get_log_file_path()
 
-        # Create the logger object with multiprocessing safety
-        logger = manager.Logger(log_file_path, stop_event)
+            # Create the logger object with multiprocessing safety
+            logger = manager.Logger(log_file_path, stop_event)
 
-        # Create the websocket server
-        if not arg_debug:
-            server = None
-        else:
-            server = manager.WebsocketServer(stop_event, logger)
+            # Create the websocket server
+            if not arg_debug:
+                server = None
+            else:
+                server = manager.WebsocketServer(stop_event, logger)
 
-        # Create the camera object with multiprocessing safety
-        camera = manager.Camera(logger)
+            # Create the camera object with multiprocessing safety
+            camera = manager.Camera(logger)
 
-        # Create the images queue with multiprocessing safety
-        images_queue = manager.ImagesQueue(stop_event, logger, camera, server=server)
+            # Create the images queue with multiprocessing safety
+            images_queue = manager.ImagesQueue(stop_event, logger, camera, server=server)
 
-        # Raspberry Pi Pico serial communication wrapper with multiprocessing safety
-        serial_communication = manager.SerialCommunication(parking_event, stop_event, logger, images_queue,
-                                                           server=server)
+            # Raspberry Pi Pico serial communication wrapper with multiprocessing safety
+            serial_communication = manager.SerialCommunication(parking_event, stop_event, logger, images_queue,
+                                                            server=server)
 
-        # First process
-        process_1 = Process(target=process_1_fn, args=(serial_communication, server))
+            # First process
+            process_1 = Process(target=process_1_fn, args=(serial_communication, server))
 
-        # Second process
-        process_2 = Process(target=process_2_fn, args=(images_queue, logger))
+            # Second process
+            process_2 = Process(target=process_2_fn, args=(images_queue, logger))
 
-        # Third process
-        process_3 = Process(target=process_3_fn, args=(logger, images_queue, parking_event, stop_event))
+            # Third process
+            process_3 = Process(target=process_3_fn, args=(logger, images_queue, parking_event, stop_event))
 
-        # Start the processes
-        processes = [process_1, process_2, process_3]
-        for process in processes:
-            process.start()
+            # Start the processes
+            processes = [process_1, process_2, process_3]
+            for process in processes:
+                process.start()
 
-        # Wait for the processes to finish
-        for process in processes:
-            process.join()
+            # Wait for the processes to finish
+            for process in processes:
+                process.join()
+        except KeyboardInterrupt:
+            # Handle keyboard interrupt to stop all processes gracefully
+            print("KeyboardInterrupt received. Stopping all processes...")
+            stop_event.set()
+
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            logger.put_message(f"An error occurred: {e}")
+            stop_event.set()
+        finally:
+            # Ensure all processes are terminated
+            for process in processes:
+                if process.is_alive():
+                    process.terminate()
+                    process.join()
 
 
 if __name__ == "__main__":

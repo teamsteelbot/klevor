@@ -6,7 +6,7 @@ import serial
 
 from camera.images_queue import ImagesQueue
 from log import Logger
-from raspberry_pi_pico2.message import Message
+from serial.message import Message
 from server import RealtimeTrackerServer
 from utils import check_type
 
@@ -54,7 +54,7 @@ class SerialCommunication:
         self.__images_queue = images_queue
 
         # Check the type of the server
-        if server is not None:
+        if server:
             check_type(server, RealtimeTrackerServer)
         self.__server = server
 
@@ -99,7 +99,7 @@ class SerialCommunication:
         Returns:
             bool: True if the serial port is open, False otherwise.
         """
-        return self.__serial is not None and self.__serial.is_open
+        return self.__serial and self.__serial.is_open
 
     def start(self) -> None:
         """
@@ -173,7 +173,7 @@ class SerialCommunication:
             self.__pending_incoming_message_event.set()
 
         # If the server is set, send the message to the server
-        if self.__server is not None:
+        if self.__server:
             self.__server.send_serial_incoming_message(str(message))
 
         # Log
@@ -260,7 +260,7 @@ class SerialCommunication:
         self.__logger.log(f"Sending message: {message}")
 
         # If the server is set, send the message to the server
-        if self.__server is not None:
+        if self.__server:
             self.__server.send_serial_outgoing_message(message)
 
         return message

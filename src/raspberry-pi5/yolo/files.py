@@ -92,7 +92,7 @@ class Files(F):
         """
         Check the validity of dataset status.
         """
-        if dataset_status is not None:
+        if dataset_status:
             if dataset_status not in [cls.DATASET_TO_PROCESS, cls.DATASET_PROCESSED]:
                 mapped_yolo_dataset_statuses = add_single_quotes_to_list_elements(cls.DATASET_STATUSES)
                 raise ValueError(
@@ -104,7 +104,7 @@ class Files(F):
         Check the validity of model dataset status.
         """
         # Check if the dataset name is split by dataset status
-        if dataset_status is not None:
+        if dataset_status:
             if dataset_name in [cls.DATASET_AUGMENTED, cls.DATASET_ORGANIZED]:
                 raise ValueError(
                     f"Invalid dataset path. The dataset name '{dataset_name}' should not be used with dataset status '{dataset_status}'.")
@@ -125,7 +125,7 @@ class Files(F):
         Check the validity of the model dataset name.
         """
         # Check if the dataset name is split by model name
-        if model_name is not None:
+        if model_name:
             if dataset_name in [cls.DATASET_ORIGINAL, cls.DATASET_RESIZED]:
                 raise ValueError(
                     f"Invalid dataset path. The dataset name '{dataset_name}' should not be used with model name '{model_name}'.")
@@ -142,11 +142,11 @@ class Files(F):
         Get the dataset model directory path.
         """
         # Check the validity of the model name
-        if model_name is not None:
+        if model_name:
             Yolo.check_model_name(model_name)
 
         # Check the validity of the dataset status
-        if dataset_status is not None:
+        if dataset_status:
             cls.check_dataset_status(dataset_status)
             cls.check_model_dataset_status(dataset_name, dataset_status)
 
@@ -155,13 +155,13 @@ class Files(F):
         cls.check_model_dataset_name(dataset_name, model_name)
 
         # Check if the dataset is split by model name
-        if dataset_status is not None and model_name is not None:
+        if dataset_status and model_name:
             return os.path.join(cls.DATASET_DIR, model_name, dataset_name, dataset_status)
 
-        if dataset_status is not None:
+        if dataset_status:
             return os.path.join(cls.DATASET_DIR, cls.DATASET_GENERAL, dataset_name, dataset_status)
 
-        if model_name is not None:
+        if model_name:
             return os.path.join(cls.DATASET_DIR, model_name, dataset_name)
 
         return os.path.join(cls.DATASET_DIR, cls.DATASET_GENERAL, dataset_name)

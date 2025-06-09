@@ -10,7 +10,6 @@ from log import Logger
 from utils import check_type
 from yolo import Yolo
 
-
 class RealtimeTrackerServer:
     """
     A WebSocket server that handles real-time tracking updates.
@@ -34,6 +33,9 @@ class RealtimeTrackerServer:
     TAG_IMAGE_MODEL_G = "image_model_g"
     TAG_IMAGE_MODEL_M = "image_model_m"
     TAG_IMAGE_MODEL_R = "image_model_r"
+
+    # RPLIDAR measures tag
+    TAG_RPLIDAR_MEASURES = "rplidar_measures"
 
     # Event tags
     TAG_STOP_EVENT = "stop_event"
@@ -233,6 +235,19 @@ class RealtimeTrackerServer:
 
         # Log
         self.__logger.log(f"Serial outgoing message sent: {message}")
+
+    async def send_rplidar_measures(self, message: str):
+        """
+        Sends RPLIDAR measures to all connected clients.
+        """
+        check_type(message, str)
+
+        # Send a tagged message
+        tagged_message = f"{self.TAG_RPLIDAR_MEASURES}:{message}"
+        self._send_message(tagged_message)
+
+        # Log
+        self.__logger.log(f"RPLIDAR measures sent")
 
     async def start(self):
         """

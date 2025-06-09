@@ -1,10 +1,10 @@
 from multiprocessing import Queue, Event, Lock
+from typing import Optional
 
 import numpy as np
 from PIL.Image import Image
 
 from camera import Camera
-from log import Logger
 from model.image_bounding_boxes import ImageBoundingBoxes
 from server import RealtimeTrackerServer
 from utils import check_type
@@ -18,7 +18,7 @@ class ImagesQueue:
     # Logger configuration
     LOG_TAG = "ImagesQueue"
 
-    def __init__(self, stop_event: Event, logger: Logger, camera: Camera, server=RealtimeTrackerServer):
+    def __init__(self, stop_event: Event, logger: Logger, camera: Camera, server: Optional[RealtimeTrackerServer]=None):
         """
         Initialize the images queue.
 
@@ -26,7 +26,7 @@ class ImagesQueue:
             stop_event (Event): Event to signal when to stop processing.
             logger (Logger): Logger instance for logging messages.
             camera (Camera): Camera instance for capturing images.
-            server (RealtimeTrackerServer): Server instance for real-time tracking updates.
+            server (RealtimeTrackerServer|None): Server instance for real-time tracking updates.
         """
         # Initialize the lock
         self.__lock = Lock()
