@@ -4,6 +4,12 @@ class Measure:
     """
     Represents a single measurement from the RPLIDAR.
     """
+    # Attributes separator
+    ATTRIBUTES_SEPARATOR = ","
+
+    # Measures separator
+    MEASURES_SEPARATOR = ";"
+
     def __init__(self, angle: float, distance: float, quality: int):
         """
         Initialize the Measure instance.
@@ -13,7 +19,7 @@ class Measure:
         self.quality = quality
 
     def __repr__(self):
-        return f"{self.angle},{self.distance},{self.quality}"
+        return self.ATTRIBUTES_SEPARATOR.join([str(self.angle), str(self.distance), str(self.quality)])
     
     @property
     def angle(self) -> float:
@@ -101,4 +107,4 @@ class Measure:
         check_type(measures, list)
         
         # Convert each measure to string and join them with spaces
-        return ";".join(str(measure) for measure in measures)
+        return cls.MEASURES_SEPARATOR.join(str(measure) for measure in measures)

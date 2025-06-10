@@ -11,6 +11,7 @@ from PIL.Image import Image
 from log import Logger
 from log.sub_logger import SubLogger
 from utils import check_type, get_local_ip
+from server.message import Message
 from yolo import Yolo
 
 class RealtimeTrackerServer:
@@ -26,6 +27,9 @@ class RealtimeTrackerServer:
     # Server configuration
     HOST = '0.0.0.0'
     PORT = 8765
+
+    # Connection status tag
+    TAG_CONNECTION_STATUS = "connection_status"
 
     # Serial communication tags
     TAG_SERIAL_INCOMING_MESSAGE = "serial_incoming_message"
@@ -46,6 +50,9 @@ class RealtimeTrackerServer:
     
     # Tag separator
     TAG_SEPARATOR = ":"
+
+    # Unknown message tag
+    TAG_UNKNOWN_TAG = "unknown_tag"
 
     # Image format
     IMAGE_FORMAT = "JPEG"
@@ -112,10 +119,12 @@ class RealtimeTrackerServer:
         self.__log(f"Client connected: {connection.remote_address}")
 
         # Send a welcome message immediately upon connection
-        await connection.send("Connected to RealtimeTrackerServer")
+        await self.__send_message(connection, Message(self.TAG_CONNECTION_STATUS, "Connected to RealtimeTrackerServer"))
 
         try:
-            async for message in connection:
+            while True:
+                message = await connection.recv()
+                
                 # Log
                 self.__log(f"Received message: {message}")
 
@@ -135,15 +144,12 @@ class RealtimeTrackerServer:
                     else:
                         self.__log("Parking event received. Pausing processing...")
                         self.__parking_event.set()
-
+                    
                 else:
                     # Unknown message type
                     self.__log(f"Unknown message type: {message}")
 
-                    # Send an error message back to the client
-                    error_message = f"Unknown message type: {message}"
-
-                    await connection.send(error_message)
+                    await self.__send_message(connection, Message(self.TAG_UNKNOWN_TAG, "Unknown message type received."))
                     continue
 
                 # Broadcast the received message to all connected clients
@@ -158,27 +164,40 @@ class RealtimeTrackerServer:
         except Exception as e:
             self.__log(f"An unexpected error occurred with {connection.remote_address}: {e}")
 
-        finally:
-            # Remove the client from the set of connected clients
-            self.__connected_clients.remove(connection)
-            self.__log(f"Client {connection.remote_address} removed.")
-
-    async def __broadcast_message(self, message):
+    async def __send_message(self, connection, message: Message):
         """
-        Sends a message to all connected clients.
-        """
-        if self.__connected_clients:  # Only broadcast if there are clients
-            await asyncio.gather(*(client.send(message) for client in self.__connected_clients))
+        Sends a message to a specific WebSocket connection.
 
-    def _send_message(self, message):
+        Args:
+            connection: The WebSocket connection to send the message to.
+            message (Message): The message to send.
+        """
+        try:
+            check_type(message, Message)
+            await connection.send(str(message))
+
+        except Exception as e:
+            self.__log(f"Error sending message to {connection.remote_address}: {e}")
+
+
+    async def __broadcast_message(self, message: Message):
         """
         Broadcasts a message to all connected clients.
-        """
-        asyncio.run_coroutine_threadsafe(self.__broadcast_message(message), asyncio.get_event_loop())
 
-    async def _send_image_with_tag(self, tag: str, img: Image):
+        Args:
+            message (Message): The message to broadcast.
         """
-        Sends an image with a tag to all the connected clients.
+        if self.__connected_clients:  # Only broadcast if there are clients
+            try:
+                check_type(message, Message)
+                await asyncio.gather(*(client.send(str(message)) for client in self.__connected_clients))
+            
+            except Exception as e:
+                self.__log(f"Unexpected error while broadcasting message: {e}")
+
+    async def _broadcast_image_with_tag(self, tag: str, img: Image):
+        """
+        Broadcasts an image with a tag to all the connected clients.
         """
         try:
             # Open the image and convert it to a binary stream
@@ -187,95 +206,92 @@ class RealtimeTrackerServer:
             img_stream.seek(0)
             binary_data = img_stream.read()
 
-            # Prepend the tag to the binary data
-            tagged_data = f"{tag}{self.TAG_SEPARATOR}".encode() + binary_data
-
             # Send the tagged binary data to the clients
-            self._send_message(tagged_data)
+            await self._broadcast_message(Message(tag, str(binary_data)))
             self.__log(f"Image with tag '{tag}' sent to the clients.")
 
         except Exception as e:
             self.__log(f"Error sending image: {e}")
 
-    async def send_image_original(self, img: Image):
+    async def broadcast_image_original(self, img: Image):
         """
-        Sends the original image to all connected clients.
+        Broadcasts the original image to all connected clients.
         """
-        await self._send_image_with_tag(self.TAG_IMAGE_ORIGINAL, img)
+        await self._broadcast_image_with_tag(self.TAG_IMAGE_ORIGINAL, img)
 
-    async def __send_image_model_g(self, img: Image):
+    async def __broadcast_image_model_g(self, img: Image):
         """
-        Sends the image processed by model G to all connected clients.
+        Broadcasts the image processed by model G to all connected clients.
         """
-        await self._send_image_with_tag(self.TAG_IMAGE_MODEL_G, img)
+        await self._broadcast_image_with_tag(self.TAG_IMAGE_MODEL_G, img)
 
-    async def __send_image_model_m(self, img: Image):
+    async def __broadcast_image_model_m(self, img: Image):
         """
-        Sends the image processed by model M to all connected clients.
+        Broadcasts the image processed by model M to all connected clients.
         """
-        await self._send_image_with_tag(self.TAG_IMAGE_MODEL_M, img)
+        await self._broadcast_image_with_tag(self.TAG_IMAGE_MODEL_M, img)
 
-    async def __send_image_model_r(self, img: Image):
+    async def __broadcast_image_model_r(self, img: Image):
         """
-        Sends the image processed by model R to all connected clients.
+        Broadcasts the image processed by model R to all connected clients.
         """
-        await self._send_image_with_tag(self.TAG_IMAGE_MODEL_R, img)
+        await self._broadcast_image_with_tag(self.TAG_IMAGE_MODEL_R, img)
 
-    async def send_image_model(self, img: Image, model_name: str):
+    async def broadcast_image_model(self, img: Image, model_name: str):
         """
-        Sends the image processed by the specified model to all connected clients.
+        Broadcasts the image processed by the specified model to all connected clients.
 
         Args:
-            img (Image): The image to send.
+            img (Image): The image to broadcast.
             model_name (str): The name of the model that processed the image.
         """
         if model_name == Yolo.MODEL_G:
-            await self.__send_image_model_g(img)
+            await self.__broadcast_image_model_g(img)
 
         elif model_name == Yolo.MODEL_M:
-            await self.__send_image_model_m(img)
+            await self.__broadcast_image_model_m(img)
 
         elif model_name == Yolo.MODEL_R:
-            await self.__send_image_model_r(img)
+            await self.__broadcast_image_model_r(img)
 
         else:
             raise ValueError(f"Unknown model name: {model_name}")
 
-    async def send_serial_incoming_message(self, message: str):
+    async def broadcast_serial_incoming_message(self, message: str):
         """
-        Sends a serial incoming message to all connected clients.
+        Broadcasts a serial incoming message to all connected clients.
         """
         check_type(message, str)
 
         # Send a tagged message
-        tagged_message = f"{self.TAG_SERIAL_INCOMING_MESSAGE}:{message}"
-        self._send_message(tagged_message)
+        await self._broadcast_message(Message(self.TAG_SERIAL_INCOMING_MESSAGE, message))
 
         # Log
         self.__log(f"Serial incoming message sent: {message}")
 
-    async def send_serial_outgoing_message(self, message: str):
+    async def broadcast_serial_outgoing_message(self, message: str):
         """
-        Sends a serial outgoing message to all connected clients.
+        Broadcasts a serial outgoing message to all connected clients.
         """
         check_type(message, str)
 
         # Send a tagged message
-        tagged_message = f"{self.TAG_SERIAL_OUTGOING_MESSAGE}:{message}"
-        self._send_message(tagged_message)
+        await self._broadcast_message(Message(self.TAG_SERIAL_OUTGOING_MESSAGE, message))
 
         # Log
         self.__log(f"Serial outgoing message sent: {message}")
 
-    async def send_rplidar_measures(self, message: str):
+    async def broadcast_rplidar_measures(self, message: str):
         """
-        Sends RPLIDAR measures to all connected clients.
+        Broadcasts RPLIDAR measures to all connected clients.
+
+        Args:
+            message (str): The RPLIDAR measures to broadcast.
         """
         check_type(message, str)
 
         # Send a tagged message
-        tagged_message = f"{self.TAG_RPLIDAR_MEASURES}:{message}"
-        self._send_message(tagged_message)
+        await self.__broadcast_message(Message(self.TAG_RPLIDAR_MEASURES, message))
 
         # Log
         self.__log(f"RPLIDAR measures sent")
@@ -288,7 +304,7 @@ class RealtimeTrackerServer:
         if self.__started:
             return
         
-        # Clear the stop event\
+        # Clear the stop event
         self.__stop_event.clear()
 
         # Set the started flag

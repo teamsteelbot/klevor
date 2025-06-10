@@ -4,6 +4,7 @@ from multiprocessing import Event, Lock
 from threading import Thread
 from time import sleep
 from typing import Optional
+import asyncio
 
 from utils import check_type
 from log import Logger
@@ -120,7 +121,7 @@ class RPLIDAR:
 
         # Put the parsed line in the server
         if self.__server and self.__server.is_running():
-            self.__server.send_rplidar_measures(measures_str)
+            asyncio.run(self.__server.broadcast_rplidar_measures(measures_str))
 
         if self.__serial_communication and self.__serial_communication.is_open():
             self.__serial_communication.put_outgoing_rplidar_measures(measures_str)
