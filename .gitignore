@@ -9,18 +9,18 @@
 /**/*/__pycache__/**/*
 
 # Logs
-/log/logs/**/*
+/**/*/log/logs/**/*
 
 # YOLO
-/yolo/**/*.yaml
-/yolo/dataset/original/**/*
-/yolo/dataset/resized/**/*
-/yolo/dataset/labeled_4c/**/*
-/yolo/dataset/labeled_2c/**/*
-/yolo/dataset/augmented_4c/**/*
-/yolo/dataset/augmented_2c/**/*
-/yolo/dataset/organized_4c/**/*
-/yolo/dataset/organized_2c/**/*
-/yolo/runs/**/*
-/yolo/zip/**/*
-/yolo/**/*.zip
+/**/*/yolo/**/*.yaml
+/**/*/yolo/dataset/original/**/*
+/**/*/yolo/dataset/resized/**/*
+/**/*/yolo/dataset/labeled_4c/**/*
+/**/*/yolo/dataset/labeled_2c/**/*
+/**/*/yolo/dataset/augmented_4c/**/*
+/**/*/yolo/dataset/augmented_2c/**/*
+/**/*/yolo/dataset/organized_4c/**/*
+/**/*/yolo/dataset/organized_2c/**/*
+/**/*/yolo/runs/**/*
+/**/*/yolo/zip/**/*
+/**/*/yolo/**/*.zip

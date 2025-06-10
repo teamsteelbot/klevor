@@ -1,4 +1,0 @@
-11:09:44: [RPLIDAR] RPLIDAR is not started.
-11:09:44: [RPLIDAR] RPLIDAR started with command: /home/ralva/Documents/teamsteelbot/klevor/src/raspberry-pi5/rplidar/ultra_simple --channel --serial /dev/ttyUSB0 460800
-11:09:55: KeyboardInterrupt received, stopping the server...
-11:09:55: [RPLIDAR] RPLIDAR is not started.

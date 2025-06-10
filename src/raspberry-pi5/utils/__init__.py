@@ -1,7 +1,7 @@
 from re import Pattern
 from types import UnionType
 from typing import Any
-
+import socket
 
 def check_type(obj: object, class_or_tuple: type | UnionType | tuple[Any, ...]) -> None:
     """
@@ -29,3 +29,15 @@ def add_single_quotes_to_list_elements(lst: list | tuple) -> list:
     Add single quotes to each element in a list or tuple.
     """
     return [f"'{item}'" for item in lst]
+
+def get_local_ip():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        # Doesn't need to be reachable
+        s.connect(('8.8.8.8', 80))
+        ip = s.getsockname()[0]
+    except Exception:
+        ip = '127.0.0.1'
+    finally:
+        s.close()
+    return ip

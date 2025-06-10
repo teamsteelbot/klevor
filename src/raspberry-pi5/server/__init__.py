@@ -10,7 +10,7 @@ from PIL.Image import Image
 
 from log import Logger
 from log.sub_logger import SubLogger
-from utils import check_type
+from utils import check_type, get_local_ip
 from yolo import Yolo
 
 class RealtimeTrackerServer:
@@ -24,7 +24,7 @@ class RealtimeTrackerServer:
     LOG_TAG = "RealtimeTrackerServer"
 
     # Server configuration
-    HOST = 'localhost'
+    HOST = '0.0.0.0'
     PORT = 8765
 
     # Serial communication tags
@@ -91,7 +91,7 @@ class RealtimeTrackerServer:
         # Initialize the started flag
         self.__started = False
 
-    def __log(self, message: str):
+    def __log(self, message: str, print_to_console: bool = True):
         """
         Logs a message using the logger if available.
         
@@ -100,7 +100,7 @@ class RealtimeTrackerServer:
         """
         if self.__logger:
             self.__logger.log(message)
-        else:
+        if print_to_console:
             print(f"{self.LOG_TAG}: {message}")
 
     async def __reactive_handler(self, connection) -> Awaitable[None]:
@@ -110,6 +110,9 @@ class RealtimeTrackerServer:
         # Add the client to the set of connected clients
         self.__connected_clients.add(connection)
         self.__log(f"Client connected: {connection.remote_address}")
+
+        # Send a welcome message immediately upon connection
+        await connection.send("Connected to RealtimeTrackerServer")
 
         try:
             async for message in connection:
@@ -291,11 +294,14 @@ class RealtimeTrackerServer:
         # Set the started flag
         self.__started = True
 
+        # Get the local IP address
+        local_ip = get_local_ip()
+
         # Start the WebSocket server
-        self.__log(f"Starting WebSocket server on ws://{self.__host}:{self.__port}")
+        self.__log(f"Starting WebSocket server on ws://{local_ip}:{self.__port}")
         async with serve(self.__reactive_handler, self.__host, self.__port):
             self.__log("WebSocket server started successfully.")
-            self.__stop_event.wait()
+            await asyncio.get_running_loop().run_in_executor(None, self.__stop_event.wait)
 
         self.__log("WebSocket server is stopping...")
         self.__started = False
