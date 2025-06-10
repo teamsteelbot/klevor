@@ -8,7 +8,10 @@
 # Python
 /**/*/__pycache__/**/*
 
- # YOLO
+# Logs
+/log/logs/**/*
+
+# YOLO
 /yolo/**/*.yaml
 /yolo/dataset/original/**/*
 /yolo/dataset/resized/**/*

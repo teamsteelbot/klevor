@@ -14,31 +14,22 @@ class Logger:
     Class to handle logging functionality.
     """
 
-    def __init__(self, stop_event: EventCls):
+    def __init__(self):
         """
         Initialize the Logger class.
-
-        Args:
-            stop_event (Event): Event to signal when to stop logging.
         """
-        # Check the type of stop_event
-        check_type(stop_event, EventCls)
-        self.__stop_event = stop_event
-
         # Initialize the lock
         self.__lock = Lock()
+
+        # Create the stop event
+        self.__stop_event = Event()
+        self.__stop_event.set()
 
         # Initialize the messages queue
         self.__messages_queue = Queue()
 
         # Initialize the write log event
         self.__write_log_event = Event()
-
-        # Initialize the thread stop event
-        self.__thread_stop_event = None
-
-        # Set the opened flag 
-        self.__opened = False
 
         # Set the thread flag
         self.__thread_started = False
@@ -90,6 +81,10 @@ class Logger:
         if not file:
             print(f"Log file is not open. Must open it first.")
             return
+        
+        if not message:
+            print(f"Message is empty. Cannot write to log file.")
+            return
 
         # Write the message to the log file
         file.write(f"{formatted_time}: {message}\n") 
@@ -115,22 +110,42 @@ class Logger:
         Open the log file.
         """
         with self.__lock:
-            if self.__opened:
+            if not self.__stop_event.is_set():
                 return
 
-            # Set the opened flag to True
-            self.__opened = True
+            # Clear the stop event
+            self.__stop_event.clear()  
+
+    def __is_open(self) -> bool:
+        """
+        Check if the log file is open.
+
+        Returns:
+            bool: True if the log file is open, False otherwise.
+        """
+        with self.__lock:
+            return not self.__stop_event.is_set()          
 
     def __close(self) -> None:
         """
         Close the log file.
         """
         with self.__lock:
-            if not self.__opened:
+            if self.__stop_event.is_set():
                 return
 
-            # Set the opened flag to False
-            self.__opened = False
+            # Set the stop event
+            self.__stop_event.set()
+
+    def __is_closed(self) -> bool:
+        """
+        Check if the log file is closed.
+
+        Returns:
+            bool: True if the log file is closed, False otherwise.
+        """
+        with self.__lock:
+            return self.__stop_event.is_set()
 
     def __loop(self, file_path: str = Files.get_log_file_path()) -> None:
         """
@@ -158,12 +173,19 @@ class Logger:
         # Open the log file in append mode
         try:
             with open(self.__file_path, 'a') as file:
-                while not self.__stop_event.is_set():
+                while self.__is_open():
                     # Wait for the write log event to be set
                     self.__write_log_event.wait()
 
-                    # Check if the thread stop event is set
-                    if self.__thread_stop_event and self.__thread_stop_event.is_set():
+                    # Check if the stop event is set
+                    if self.__stop_event and self.__stop_event.is_set():
+                        # Process any remaining messages in the queue
+                        while not self.__messages_queue.empty():
+                            message = self.__get_message()
+                            if message:
+                                self.__write(file, message)
+
+                        self.__write_log_event.clear()
                         break
 
                     # Write the last message to the log file
@@ -177,15 +199,6 @@ class Logger:
         finally:
             self.__close()
             self.__thread_started = False
-
-    def get_stop_event(self) -> EventCls:
-        """
-        Get the stop event status.
-
-        Returns:
-            Event: The stop event.
-        """
-        return self.__stop_event
     
     def create_thread(self) -> None:
         """
@@ -196,26 +209,17 @@ class Logger:
             thread = Thread(target=self.__loop)
             thread.start()
 
-            # Create the thread stop event
-            self.__thread_stop_event = Event() 
-
     def stop_thread(self) -> None:
         """
         Stop the logger thread.
         """
         with self.__lock:
-            if self.__thread_stop_event:
+            if self.__thread_started:
+                # Set the stop event
+                self.__stop_event.set()
+                
                 # Set the write log event to ensure the thread stops
                 self.__write_log_event.set()
-
-                # Set the thread stop event
-                self.__thread_stop_event.set()
-                
-                # Clear the write log event
-                self.__write_log_event.clear()
-
-                # Set the thread stop event to None
-                self.__thread_stop_event = None
 
     def __del__(self):
         """

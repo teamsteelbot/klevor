@@ -1,5 +1,6 @@
 from multiprocessing import Queue, Event, Lock
-from typing import Optional
+from multiprocessing.synchronize import Event as EventCls
+from typing import Optional, Callable
 
 import numpy as np
 from PIL.Image import Image
@@ -8,7 +9,7 @@ from camera import Camera
 from model.image_bounding_boxes import ImageBoundingBoxes
 from server import RealtimeTrackerServer
 from utils import check_type
-from yolo.hailo import Hailo
+from log import Logger
 
 
 class ImagesQueue:
@@ -18,7 +19,7 @@ class ImagesQueue:
     # Logger configuration
     LOG_TAG = "ImagesQueue"
 
-    def __init__(self, stop_event: Event, logger: Logger, camera: Camera, server: Optional[RealtimeTrackerServer]=None):
+    def __init__(self, stop_event: EventCls, logger: Logger, camera: Camera, server: Optional[RealtimeTrackerServer]=None):
         """
         Initialize the images queue.
 
@@ -84,7 +85,7 @@ class ImagesQueue:
         # Log
         self.__logger.log(f"Image {counter} added to input images queue.")
 
-    def get_input_image(self) -> np.ndarray | None:
+    def get_input_image(self, preprocess_fn: Callable[[Image, int, int], np.ndarray]) -> np.ndarray | None:
         """
         Get image from input images queue.
 
@@ -100,7 +101,7 @@ class ImagesQueue:
             image = self.__input_images_queue.get()
 
             # Preprocess the image
-            preprocessed_image = Hailo.preprocess(image)
+            preprocessed_image = preprocess_fn(image)
 
             # Clear the pending input image event
             if self.__input_images_queue.empty():
@@ -168,7 +169,7 @@ class ImagesQueue:
         # Put image in input images queue
         self.put_input_image(image_pil)
 
-    def get_capture_image_event(self) -> Event:
+    def get_capture_image_event(self) -> EventCls:
         """
         Get capture image event.
 
@@ -177,7 +178,7 @@ class ImagesQueue:
         """
         return self.__capture_image_event
 
-    def get_pending_image_event(self) -> Event:
+    def get_pending_image_event(self) -> EventCls:
         """
         Get pending input image event.
 
@@ -186,7 +187,7 @@ class ImagesQueue:
         """
         return self.__pending_input_image_event
 
-    def get_pending_inference_event(self) -> Event:
+    def get_pending_inference_event(self) -> EventCls:
         """
         Get pending output inference event.
 
@@ -195,7 +196,7 @@ class ImagesQueue:
         """
         return self.__pending_output_inference_event
 
-    def get_stop_event(self) -> Event:
+    def get_stop_event(self) -> EventCls:
         """
         Get stop event.
 

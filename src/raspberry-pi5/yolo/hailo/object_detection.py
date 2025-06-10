@@ -34,7 +34,7 @@ def listen_images_queue(images_queue: ImagesQueue, stop_event: Event, parking_ev
         pending_image_event.wait()
 
         # Get the image from the images queue
-        image = images_queue.get_input_image()
+        image = images_queue.get_input_image(Hailo.preprocess)
 
         # Check if the parking event is set
         if parking_event.is_set():

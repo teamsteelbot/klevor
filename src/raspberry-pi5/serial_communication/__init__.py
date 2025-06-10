@@ -1,12 +1,13 @@
 import time
 from multiprocessing import Event, Queue, Lock
+from multiprocessing.synchronize import Event as EventCls
 from threading import Thread
 
-import serial
+from serial import Serial, SerialException
 
 from camera.images_queue import ImagesQueue
 from log import Logger
-from serial.message import Message
+from serial_communication.message import Message
 from server import RealtimeTrackerServer
 from utils import check_type
 
@@ -16,7 +17,7 @@ class SerialCommunication:
     Class to handle the serial communication with the Raspberry Pi Pico.
     """
     # Logger configuration
-    LOG_TAG = "SerialCommunication"
+    LOG_TAG = "Serial"
 
     # Message delay
     DELAY = 0.01
@@ -24,14 +25,12 @@ class SerialCommunication:
     # Encode
     ENCODE = 'utf-8'
 
-    def __init__(self, parking_event: Event, stop_event: Event, logger: Logger, images_queue: ImagesQueue,
+    def __init__(self, logger: Logger, images_queue: ImagesQueue,
                  port='/dev/ttyACM0', baudrate=115200, server: RealtimeTrackerServer = None):
         """
         Initialize the serial communication class.
 
         Args:
-            parking_event (Event): Event to indicate when to park.
-            stop_event (Event): Event to indicate when to stop the communication.
             logger (Logger): Logger instance for logging messages.
             images_queue (ImagesQueue): Images queue for handling images.
             port (str): Serial port to use for communication. Default is '/dev/ttyACM0'.
@@ -41,13 +40,11 @@ class SerialCommunication:
         # Create the lock
         self.__lock = Lock()
 
-        # Check the type of parking event
-        check_type(parking_event, Event)
-        self.__parking_event = parking_event
+        # Create the parking event
+        self.__parking_event = Event()
 
-        # Check the type of stop event
-        check_type(stop_event, Event)
-        self.__stop_event = stop_event
+        # Create the stop event
+        self.__stop_event = Event()
 
         # Check the type of images queue
         check_type(images_queue, ImagesQueue)
@@ -122,8 +119,8 @@ class SerialCommunication:
 
             # Open the serial port
             try:
-                self.__serial = serial.Serial(self.__port, self.__baudrate)
-            except serial.SerialException as e:
+                self.__serial = Serial(self.__port, self.__baudrate)
+            except SerialException as e:
                 self.__logger.log(f"Error opening serial port: {e}")
                 return
 
@@ -326,7 +323,7 @@ class SerialCommunication:
             # Put the message in the incoming messages queue
             self.__put_incoming_message(message)
 
-    def get_stop_event(self) -> Event:
+    def get_stop_event(self) -> EventCls:
         """
         Get the stop event status.
 
@@ -334,8 +331,17 @@ class SerialCommunication:
             Event: The event that indicates when to stop the communication.
         """
         return self.__stop_event
+    
+    def get_parking_event(self) -> EventCls:
+        """
+        Get the parking event status.
 
-    def get_pending_incoming_message_event(self) -> Event:
+        Returns:
+            Event: The event that indicates when to park.
+        """
+        return self.__parking_event
+
+    def get_pending_incoming_message_event(self) -> EventCls:
         """
         Get the pending incoming message event status.
 
@@ -344,7 +350,7 @@ class SerialCommunication:
         """
         return self.__pending_incoming_message_event
 
-    def get_pending_outgoing_message_event(self) -> Event:
+    def get_pending_outgoing_message_event(self) -> EventCls:
         """
         Get the pending outgoing message event status.
 
@@ -352,6 +358,16 @@ class SerialCommunication:
             Event: The event that indicates when there is a pending outgoing message.
         """
         return self.__pending_outgoing_message_event
+    
+    def is_open(self) -> bool:
+        """
+        Check if the serial port is open.
+
+        Returns:
+            bool: True if the serial port is open, False otherwise.
+        """
+        with self.__lock:
+            return self.__is_open()
 
     def __del__(self):
         """
@@ -360,53 +376,45 @@ class SerialCommunication:
         # Close the communication
         self.close()
 
+    def __receiving_handler(self) -> None:
+        """
+        Handler to receive messages from the serial port.
+        """
+        while not self.stop_event.is_set():
+            # Receive a message from the serial port
+            self.receive_message()
 
-def receiving_thread(stop_event: Event, serial_communication: SerialCommunication) -> None:
-    """
-    Thread to handle receiving messages from the serial port.
-    """
-    # Check the type of stop event
-    check_type(stop_event, Event)
-
-    while not stop_event.is_set():
-        # Receive a message from the serial port
-        serial_communication.receive_message()
-
-        # Sleep for a short time to avoid busy waiting
-        time.sleep(SerialCommunication.DELAY)
+            # Sleep for a short time to avoid busy waiting
+            time.sleep(Serial.DELAY)
 
 
-def sending_thread(stop_event: Event, serial_communication: SerialCommunication) -> None:
-    """
-    Thread to handle sending messages to the serial port.
-    """
-    # Check the type of stop event
-    check_type(stop_event, Event)
+    def __sending_handler(self) -> None:
+        """
+        Handler to send messages to the serial port.
+        """
+        while not self.stop_event.is_set():
+            # Send a message to the serial port
+            self.send_message()
 
-    while not stop_event.is_set():
-        # Send a message to the serial port
-        serial_communication.send_message()
+            # Sleep for a short time to avoid busy waiting
+            time.sleep(Serial.DELAY)
 
-        # Sleep for a short time to avoid busy waiting
-        time.sleep(SerialCommunication.DELAY)
+    def create_sending_thread(self) -> Thread:
+        """
+        Create a thread to handle sending messages.
 
+        Returns:
+            Thread: The thread for sending messages.
+        """
+        thread = Thread(target=self.__sending_handler)
+        thread.join()
+    
+    def create_receiving_thread(self) -> Thread:
+        """
+        Create a thread to handle receiving messages.
 
-def main(serial_communication: SerialCommunication) -> None:
-    """
-    Main function to run the script.
-    """
-    # Check the type of serial communication
-    check_type(serial_communication, SerialCommunication)
-
-    # Get the stop event
-    stop_event = serial_communication.get_stop_event()
-
-    # Thread to handle receiving messages
-    thread_1 = Thread(target=serial_communication.receive_message, args=(stop_event, serial_communication))
-    thread_1.start()
-    thread_1.join()
-
-    # Thread to handle sending messages
-    thread_2 = Thread(target=serial_communication.send_message, args=(stop_event, serial_communication))
-    thread_2.start()
-    thread_2.join()
+        Returns:
+            Thread: The thread for receiving messages.
+        """
+        thread = Thread(target=self.__receiving_handler)
+        thread.join()

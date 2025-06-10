@@ -1,12 +1,15 @@
 import asyncio
 import io
+from threading import Thread
 from multiprocessing import Event
+from multiprocessing.synchronize import Event as EventCls
 from typing import Awaitable, Optional
 
 from websockets import serve, exceptions
 from PIL.Image import Image
 
 from log import Logger
+from log.sub_logger import SubLogger
 from utils import check_type
 from yolo import Yolo
 
@@ -47,20 +50,18 @@ class RealtimeTrackerServer:
     # Image format
     IMAGE_FORMAT = "JPEG"
 
-    def __init__(self, stop_event: Event, parking_event: Optional[Event] = None, logger: Optional[Logger] = None, host=HOST, port=PORT):
+    def __init__(self, parking_event: Optional[EventCls] = None, logger: Optional[Logger] = None, host=HOST, port=PORT):
         """
         Initializes the WebSocket server with the specified host and port.
 
         Args:
-            stop_event (Event): An event to signal when to stop the server.
-            parking_event (Event): An event to signal when the server should pause processing.
+            parking_event (Event|None): An event to signal when the server should pause processing.
             logger (Logger|None): Logger instance for logging messages.
             host (str): The host address for the WebSocket server. Default is 'localhost'.
             port (int): The port number for the WebSocket server. Default is 8765.
         """
-        # Check the type of stop event
-        check_type(stop_event, Event)
-        self.__stop_event = stop_event
+        # Create a stop event
+        self.__stop_event = Event()
 
         # Check the type of parking event
         if parking_event:
@@ -72,7 +73,7 @@ class RealtimeTrackerServer:
             check_type(logger, Logger)
 
             # Get the sub-logger for this class
-            self.__logger = logger.get_sub_logger(self.LOG_TAG)
+            self.__logger = SubLogger(logger, self.LOG_TAG)
         else:
             self.__logger = None
 
@@ -98,7 +99,7 @@ class RealtimeTrackerServer:
             message (str): The message to log.
         """
         if self.__logger:
-            self.__logger.put_message(message)
+            self.__logger.log(message)
         else:
             print(f"{self.LOG_TAG}: {message}")
 
@@ -117,8 +118,7 @@ class RealtimeTrackerServer:
 
                 # Check if the message is a stop event
                 if message == self.TAG_STOP_EVENT:
-                    if self.__logger:
-                        self.__log("Stop event received. Stopping the server...")
+                    self.__log("Stop event received. Stopping the server...")
                     self.__stop_event.set()
 
                 # Check if the message is a parking event
@@ -145,12 +145,16 @@ class RealtimeTrackerServer:
 
                 # Broadcast the received message to all connected clients
                 await self.__broadcast_message(message)
+
         except exceptions.ConnectionClosedOK:
             self.__log(f"Client {connection.remote_address} disconnected gracefully.")
+
         except exceptions.ConnectionClosedError as e:
             self.__log(f"Client {connection.remote_address} disconnected with error: {e}")
+
         except Exception as e:
             self.__log(f"An unexpected error occurred with {connection.remote_address}: {e}")
+
         finally:
             # Remove the client from the set of connected clients
             self.__connected_clients.remove(connection)
@@ -186,6 +190,7 @@ class RealtimeTrackerServer:
             # Send the tagged binary data to the clients
             self._send_message(tagged_data)
             self.__log(f"Image with tag '{tag}' sent to the clients.")
+
         except Exception as e:
             self.__log(f"Error sending image: {e}")
 
@@ -223,10 +228,13 @@ class RealtimeTrackerServer:
         """
         if model_name == Yolo.MODEL_G:
             await self.__send_image_model_g(img)
+
         elif model_name == Yolo.MODEL_M:
             await self.__send_image_model_m(img)
+
         elif model_name == Yolo.MODEL_R:
             await self.__send_image_model_r(img)
+
         else:
             raise ValueError(f"Unknown model name: {model_name}")
 
@@ -269,13 +277,16 @@ class RealtimeTrackerServer:
         # Log
         self.__log(f"RPLIDAR measures sent")
 
-    async def start(self):
+    async def __start(self):
         """
         Starts the WebSocket server.
         """
         # Check if it's already running
         if self.__started:
             return
+        
+        # Clear the stop event\
+        self.__stop_event.clear()
 
         # Set the started flag
         self.__started = True
@@ -289,13 +300,47 @@ class RealtimeTrackerServer:
         self.__log("WebSocket server is stopping...")
         self.__started = False
 
+    def stop(self):
+        """
+        Stops the WebSocket server.
+        """
+        if not self.__started:
+            return
+        
+        # Set the stop event
+        self.__stop_event.set()
 
-async def main(realtime_tracker_server: RealtimeTrackerServer):
-    """
-    Starts the WebSocket server.
-    """
-    # Check the type of realtime tracker server
-    check_type(realtime_tracker_server, RealtimeTrackerServer)
+    def create_thread(self):
+        """
+        Creates a thread to run the WebSocket server.
+        """
+        if self.__started:
+            return
+        
+        # Create a thread to run the WebSocket server
+        thread = Thread(target=lambda: asyncio.run(self.__start()))
+        thread.start()
+    
+    def stop_thread(self):
+        """
+        Stops the WebSocket server thread.
+        """
+        self.stop()
+        
+    def is_running(self) -> bool:
+        """
+        Checks if the WebSocket server is running.
 
-    # Start the WebSocket server
-    await realtime_tracker_server.start()
+        Returns:
+            bool: True if the server is running, False otherwise.
+        """
+        return self.__started
+    
+    def is_stopped(self) -> bool:
+        """
+        Checks if the WebSocket server is stopped.
+
+        Returns:
+            bool: True if the server is stopped, False otherwise.
+        """
+        return not self.__started

@@ -1,0 +1,3 @@
+11:05:40: [RealtimeTrackerServer] Starting WebSocket server on ws://localhost:8765
+11:05:40: [RealtimeTrackerServer] WebSocket server started successfully.
+11:05:48: KeyboardInterrupt received, stopping the server...

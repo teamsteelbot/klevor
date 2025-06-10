@@ -2,15 +2,12 @@ from argparse import ArgumentParser
 
 from args import Args
 from rplidar import RPLIDAR
-from utils import check_type
 from server import RealtimeTrackerServer
 from log import Logger
-from threading import Event
+from log.message import Message
+from time import sleep
 
-def main():
-    """
-    Main function to run the script.
-    """
+if __name__ == "__main__":
     parser = ArgumentParser(
         description="Script to test the RPLIDAR functionality and start it.")
     Args.add_server_argument(parser)
@@ -19,29 +16,48 @@ def main():
     # Get the server argument
     arg_server = Args.get_attribute_from_args(args, Args.SERVER)
 
-    # Create a stop event
-    stop_event = Event()
-
     # Create an instance of Logger
-    logger = Logger(stop_event)
+    logger = Logger()
+
+    # Create a thread for the logger
+    logger.create_thread()
 
     # Create an instance of the server
-    if arg_server:
+    if not arg_server:
+        server = None
+    else:
         server = RealtimeTrackerServer()
+
         # Start the server
-        server.start()
+        server.create_thread()
         print("Server started successfully.")
 
     # Create an instance of RPLIDAR
-    rplidar = RPLIDAR()
+    rplidar = RPLIDAR(logger, server)
 
     try:
         # Start the RPLIDAR
-        rplidar.start()
-        print("RPLIDAR started successfully.")
-    except Exception as e:
-        print(f"Error starting RPLIDAR: {e}")
-        return
+        rplidar.create_thread()
 
-if __name__ == "__main__":
-    main()
+        # Wait indefinitely to keep the RPLIDAR running
+        while True:
+            sleep(1)
+
+    except KeyboardInterrupt:
+        # Handle keyboard interrupt to stop the server gracefully
+        logger.log(Message("KeyboardInterrupt received, stopping the server..."))
+
+    except Exception as e:
+        # Log any exceptions that occur
+        logger.log(f"An error occurred: {e}")
+
+    finally:
+        # Stop the logger thread
+        logger.stop_thread()
+
+        # Stop the server thread
+        if arg_server:
+            server.stop_thread()
+
+        # Stop the RPLIDAR thread
+        rplidar.stop_thread()

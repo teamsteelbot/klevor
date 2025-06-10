@@ -6,11 +6,8 @@ from log.sub_logger import SubLogger
 from log.message import Message
     
 if __name__ == "__main__":
-    # Create an stop event
-    stop_event = Event()
-
     # Create an instance of Logger
-    logger = Logger(stop_event)
+    logger = Logger()
 
     # Create a sub-logger for this module
     sub_logger = SubLogger(logger, "Test")
@@ -31,6 +28,7 @@ if __name__ == "__main__":
     except Exception as e:
         # Log any exceptions that occur
         logger.log(f"An error occurred: {e}")
+
     finally:
         # Stop the logger thread
         logger.stop_thread()
