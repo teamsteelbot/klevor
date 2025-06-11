@@ -55,6 +55,9 @@ class SerialCommunication:
         # Create the stop event
         self.__stop_event = Event()
 
+        # Create the start event
+        self.__start_event = Event()
+
         # Check the type of images queue
         if images_queue:
             check_type(images_queue, ImagesQueue)
@@ -148,6 +151,16 @@ class SerialCommunication:
         """
         return not self.is_open()
 
+    def has_started(self) -> bool:
+        """
+        Check if the communication has started.
+
+        Returns:
+            bool: True if the communication has started, False otherwise.
+        """
+        with self.__rlock:
+            return self.__start_event.is_set()
+
     def __open(self) -> None:
         """
         Open the communication.
@@ -197,6 +210,9 @@ class SerialCommunication:
 
             # Close the serial port
             self.__serial.close()
+
+            # Clear the start event
+            self.__start_event.clear()
 
             # Log
             self.__log(f"Serial port {self.__port} closed.")
@@ -354,6 +370,9 @@ class SerialCommunication:
         """
         Handler to send messages to the serial port.
         """
+        # Wait for start event to be set
+        self.__start_event.wait()
+
         while not self.__stop_event.is_set():
             # Check if there is a message to send
             self.__pending_outgoing_message_event.wait()
@@ -403,7 +422,17 @@ class SerialCommunication:
             # Log
             self.__log("Communication threads created.")
 
-        
+    def start_threads(self) -> None:
+        """
+        Start the communication threads.
+        """
+        with self.__rlock:
+            # Set the start event
+            self.__start_event.set()
+
+            # Log
+            self.__log("Communication threads started.")
+
     def stop_threads(self) -> None:
         """
         Stop the communication threads.
@@ -447,6 +476,62 @@ class SerialCommunication:
             Event: The event that indicates when there is a pending outgoing message.
         """
         return self.__pending_outgoing_message_event
+
+    def wait_for_start_message(self, timeout: Optional[float] = None) -> bool:
+        """
+        Wait for the start message to be received.
+
+        Args:
+            timeout (float): The maximum time to wait for the start message. Default is None (wait indefinitely).
+
+        Returns:
+            bool: True if the start message is received, False if the timeout is reached.
+        """
+        with self.__rlock:
+            while True:
+                if self.__start_event.is_set():
+                    return True
+
+                # Wait for the pending incoming message event to be set
+                self.__pending_incoming_message_event.wait(timeout)
+
+                # Peek the last incoming message
+                last_message = self.receive_message()
+                if last_message is None:
+                    continue
+
+                if last_message.type == Message.TYPE_STATUS and last_message.content == Message.TYPE_STATUS_ON:
+                    # Set the start event
+                    self.__start_event.set()
+                    return True
+
+    def wait_for_stop_message(self, timeout: Optional[float] = None) -> bool:
+        """
+        Wait for the stop message to be received.
+
+        Args:
+            timeout (float): The maximum time to wait for the stop message. Default is None (wait indefinitely).
+
+        Returns:
+            bool: True if the stop message is received, False if the timeout is reached.
+        """
+        with self.__rlock:
+            while True:
+                if self.__stop_event.is_set():
+                    return True
+
+                # Wait for the pending incoming message event to be set
+                self.__pending_incoming_message_event.wait(timeout)
+
+                # Peek the last incoming message
+                last_message = self.receive_message()
+                if last_message is None:
+                    continue
+
+                if last_message.type == Message.TYPE_STATUS and last_message.content == Message.TYPE_STATUS_OFF:
+                    # Set the stop event
+                    self.__stop_event.set()
+                    return True
 
     def __del__(self):
         """

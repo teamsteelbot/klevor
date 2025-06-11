@@ -20,21 +20,18 @@ class Logger:
         # Create the reentrant lock
         self.__rlock = RLock()
 
+        # Create the opened event
+        self.__opened_event = Event()
+
         # Create the stop event
         self.__stop_event = Event()
         self.__stop_event.set()
-
-        # Create the start event
-        self.__start_event = Event()
 
         # Initialize the messages queue
         self.__messages_queue = None
 
         # Initialize the write log event
         self.__write_log_event = Event()
-
-        # Initialize logger opened event
-        self.__logger_opened_event = Event()
 
     def log(self, message: Message) -> None:
         """
@@ -44,9 +41,9 @@ class Logger:
             message (Message): Message to put in the queue.
         """
         with self.__rlock:
-            # If the logger opened event is not set, wait for it to be set
-            if not self.__logger_opened_event.is_set():
-                self.__logger_opened_event.wait()
+            # If the opened event is not set, wait for it to be set
+            if not self.__opened_event.is_set():
+                self.__opened_event.wait()
 
             # Check the type of message
             check_type(message, Message)
@@ -147,8 +144,8 @@ class Logger:
             # Set the stop event
             self.__stop_event.set()
 
-            # Clear the start event
-            self.__start_event.clear()
+            # Clear the opened event
+            self.__opened_event.clear()
 
     def __is_closed(self) -> bool:
         """
@@ -181,12 +178,9 @@ class Logger:
 
         # Open the log file in append mode
         with open(self.__file_path, 'a') as file:
-            # Set the logger opened event
-            self.__logger_opened_event.set()
+            # Set the opened event
+            self.__opened_event.set()
             self.log(Message(f"Logger opened at {self.__file_path}."))
-
-            # Wait for the start event to be set
-            self.__start_event.wait()
 
             while self.__is_open():
                 # Wait for the write log event to be set
@@ -239,17 +233,6 @@ class Logger:
             
             # Call the close method to stop the thread
             self.__close()
-
-            # Clear the logger opened event
-            self.__logger_opened_event.clear()
-
-    def start_thread(self) -> None:
-        """
-        Start the logger thread.
-        """
-        with self.__rlock:
-            if not self.__start_event.is_set():
-                self.__start_event.set()
 
     def __del__(self):
         """

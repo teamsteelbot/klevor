@@ -16,9 +16,6 @@ if __name__ == "__main__":
         # Create a thread for the logger
         logger.create_thread()
 
-        # Start the logger thread
-        logger.start_thread()
-
         # Log a message using the sub-logger
         sub_logger.log("This is a test log message.")
 

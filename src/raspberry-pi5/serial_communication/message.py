@@ -12,6 +12,10 @@ class Message:
     TYPE_STATUS = 'status'
     TYPES = [TYPE_INFERENCE, TYPE_CAPTURE_IMAGE, TYPE_RPLIDAR_MEASURES, TYPE_DEBUG, TYPE_STATUS]
 
+    # Types of Status
+    TYPE_STATUS_ON = 'on'
+    TYPE_STATUS_OFF = 'off'
+
     # Message header separator
     HEADER_SEPARATOR = ':'
 

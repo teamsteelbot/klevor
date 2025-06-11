@@ -21,6 +21,12 @@ if __name__ == "__main__":
     # Get the serial argument
     arg_serial = Args.get_attribute_from_args(args, Args.SERIAL)
 
+    # Initialize variables for logger, server, serial communication, and RPLIDAR
+    logger = None
+    server = None
+    serial = None
+    rplidar = None
+
     try:
         # Create an instance of Logger
         logger = Logger()
@@ -52,9 +58,15 @@ if __name__ == "__main__":
         # Start the RPLIDAR
         rplidar.create_thread()
 
-        # Wait indefinitely to keep the RPLIDAR running
-        while True:
-            sleep(1)
+        if not serial:
+            while True:
+                sleep(1)  # Sleep to prevent busy-waiting
+
+        # Wait for the start message from SerialCommunication
+        serial.wait_for_start_message()
+
+        # Wait for the stop message from SerialCommunication
+        serial.wait_for_stop_message()
 
     except KeyboardInterrupt:
         # Handle keyboard interrupt to stop the server gracefully

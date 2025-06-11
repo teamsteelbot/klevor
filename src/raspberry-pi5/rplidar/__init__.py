@@ -126,7 +126,7 @@ class RPLIDAR:
         if self.__server and self.__server.is_running():
             asyncio.run(self.__server.broadcast_rplidar_measures(measures_str))
 
-        if self.__serial_communication and self.__serial_communication.is_open():
+        if self.__serial_communication and self.__serial_communication.is_open() and self.__serial_communication.has_started():
             self.__serial_communication.send_rplidar_measures(measures_str)
 
         if not self.__server and not self.__serial_communication:
