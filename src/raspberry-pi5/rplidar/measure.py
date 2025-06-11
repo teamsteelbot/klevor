@@ -22,8 +22,14 @@ class Measure:
         """
         String representation of the Measure object.
         """
-        # return self.ATTRIBUTES_SEPARATOR.join([str(self.angle), str(self.distance), str(self.quality)])
-        return self.ATTRIBUTES_SEPARATOR.join([str(self.angle), str(self.distance)])
+        return self.ATTRIBUTES_SEPARATOR.join([str(self.angle), str(self.distance), str(self.quality)])
+        #return self.ATTRIBUTES_SEPARATOR.join([str(self.angle), str(self.distance)])
+
+    def __repr__(self):
+        """
+        String representation of the Measure object for debugging.
+        """
+        return f"Measure(angle={self.angle}, distance={self.distance}, quality={self.quality})"
     
     @property
     def angle(self) -> float:
@@ -95,6 +101,35 @@ class Measure:
         """
         check_type(value, int)
         self.__quality = value
+
+    @classmethod
+    def from_string(cls, measure_str: str) -> 'Measure':
+        """
+        Create a Measure object from a string representation.
+
+        Args:
+            measure_str (str): String representation of the measure.
+
+        Returns:
+            Measure: Measure object created from the string.
+        """
+        # Check the type of measure_str
+        check_type(measure_str, str)
+
+        # Split the string by the attributes separator
+        parts = measure_str.split(cls.ATTRIBUTES_SEPARATOR)
+
+        if len(parts) < 2:
+            raise ValueError("Invalid measure string: {}".format(measure_str))
+
+        # Convert parts to appropriate types
+        angle = float(parts[0])
+        distance = float(parts[1])
+
+        # Quality is optional, default to 0 if not provided
+        quality = int(parts[2]) if len(parts) > 2 else 0
+
+        return cls(angle, distance, quality)
     
     @classmethod
     def measures_to_string(cls, measures: list) -> str:
@@ -112,3 +147,20 @@ class Measure:
         
         # Convert each measure to string and join them with spaces
         return cls.MEASURES_SEPARATOR.join(str(measure) for measure in measures)
+
+    @classmethod
+    def from_string_to_measures(cls, measures_str: str) -> list:
+        """
+        Convert a string representation of measures back to a list of Measure objects.
+
+        Args:
+            measures_str (str): String representation of measures.
+
+        Returns:
+            list: List of Measure objects.
+        """
+        # Check the type of measures_str
+        check_type(measures_str, str)
+
+        # Split the string by the measures separator and convert each part to Measure
+        return [cls.from_string(measure_str) for measure_str in measures_str.split(cls.MEASURES_SEPARATOR) if measure_str]

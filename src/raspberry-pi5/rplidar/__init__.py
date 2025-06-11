@@ -26,6 +26,9 @@ class RPLIDAR:
     # Default port
     RPLIDAR_C1_PORT = "/dev/ttyUSB0"
 
+    # Max distance limit
+    MAX_DISTANCE_LIMIT = 3000
+
     # Reading delay
     READING_DELAY = 0.0001  
 
@@ -168,6 +171,10 @@ class RPLIDAR:
         # Check the quality
         if quality == 0:
             return
+
+        # Check if the distance is within the maximum limit
+        # if distance < 0 or distance > self.MAX_DISTANCE_LIMIT:
+        #    return
         
         # Floor the angle to a float with no decimal places
         angle = round(angle, 0)
