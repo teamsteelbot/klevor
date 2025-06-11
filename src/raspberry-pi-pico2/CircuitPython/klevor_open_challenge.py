@@ -19,24 +19,19 @@ I2C_BUS0 = busio.I2C(board.GP1, board.GP0)
 I2C_BUS1 = busio.I2C(board.GP27, board.GP26) # Used for Gyroscope
 
 # General configuration
-MOVEMENT_MODE = False
+MOVEMENT_MODE = True
 DEBUG_MODE = True
 
 # Movement delay
 MOVEMENT_DELAY = 0.01
 
 # Speed Values
-ROBOT_SPEED_NORMAL = 0.5
-ROBOT_SPEED_TURN = 0.3
+ROBOT_SPEED_NORMAL = -0.3
+ROBOT_SPEED_TURN = -0.25
 ROBOT_SPEED_STOP = 0
-"""
-ROBOT_SPEED_NORMAL = 50
-ROBOT_SPEED_TURN = 30
-ROBOT_SPEED_STOP = 0
-"""
 
 # Steering servo configuration
-TURNING_VALUE = 30 
+TURNING_VALUE = 20
 
 # ToF Sensors pins and configuration
 FRONT_SENSOR_XSHUT_PIN = board.GP5
@@ -44,12 +39,10 @@ DIAGONAL_LEFT_FRONT_SENSOR_XSHUT_PIN = board.GP4
 DIAGONAL_RIGHT_FRONT_SENSOR_XSHUT_PIN = board.GP22
 LEFT_MIDDLE_SENSOR_XSHUT_PIN = board.GP7
 RIGHT_MIDDLE_SENSOR_XSHUT_PIN = board.GP28
-LEFT_REAR_SENSOR_XSHUT_PIN = board.GP12
+LEFT_REAR_SENSOR_XSHUT_PIN = board.GP13
 RIGHT_REAR_SENSOR_XSHUT_PIN = board.GP16
 BACK_SENSOR_XSHUT_PIN = board.GP17
-TOF_SENSORS_XSHUT_PINS = [FRONT_SENSOR_XSHUT_PIN, DIAGONAL_LEFT_FRONT_SENSOR_XSHUT_PIN, DIAGONAL_RIGHT_FRONT_SENSOR_XSHUT_PIN,
-              LEFT_MIDDLE_SENSOR_XSHUT_PIN, RIGHT_MIDDLE_SENSOR_XSHUT_PIN, LEFT_REAR_SENSOR_XSHUT_PIN,
-              RIGHT_REAR_SENSOR_XSHUT_PIN, BACK_SENSOR_XSHUT_PIN]
+TOF_SENSORS_XSHUT_PINS = [FRONT_SENSOR_XSHUT_PIN, DIAGONAL_LEFT_FRONT_SENSOR_XSHUT_PIN, DIAGONAL_RIGHT_FRONT_SENSOR_XSHUT_PIN, LEFT_MIDDLE_SENSOR_XSHUT_PIN, RIGHT_MIDDLE_SENSOR_XSHUT_PIN, LEFT_REAR_SENSOR_XSHUT_PIN, RIGHT_REAR_SENSOR_XSHUT_PIN, BACK_SENSOR_XSHUT_PIN]
 TOF_FRONT_SENSOR = 0
 TOF_LEFT_MIDDLE_SENSOR = 3
 TOF_RIGHT_MIDDLE_SENSOR = 4
@@ -58,17 +51,17 @@ TOF_SENSORS_NEW_I2C_ADDRESSES = [0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37]
 TOF_SENSOR_DELAY=0.1
 TOF_SENSOR_SHORT_DELAY=0.05
 
+# Desired Gyroscope update rate
+GYRO_READ_INTERVAL = 0.05 # 50 ms for 20 Hz updates
+
 # Start button pins and delay
 START_BUTTON_PIN_IN = board.GP14
 START_BUTTON_PIN_OUT = board.GP15 
 START_BUTTON_DELAY = 0.1
 
 # Distance Thresholds
-# TARGET_DISTANCE_FORWARD = 80 # When the front sensor distance measured is lower than this, the robot should be starting to approach a turning section
-# SENSOR_DIFFERENCE_SIDEWAYS = 80 # One of the side sensors detects a distance lower than this value, it is usually compared to another sensor to confirm the distance
-# TOO_FAR_SIDEWAYS = 200 # This value is pretty much explained above
-TARGET_DISTANCE_STOP_BACKWARD = 50  # When the front sensor distance measured is higher than this, the robot should be starting to go backward
-TARGET_DISTANCE_START_BACKWARD = 40 # When the front sensor distance measured is lower than this, the robot should be starting to go backward
+TARGET_DISTANCE_STOP_BACKWARD = 40 
+TARGET_DISTANCE_START_BACKWARD = 20
 
 # Steering commands
 STEERING_LEFT_COMMAND = -1
@@ -76,23 +69,17 @@ STEERING_MIDDLE_COMMAND = 0
 STEERING_RIGHT_COMMAND = 1
 
 # Servo pins and configuration
-SERVO_PIN = board.GP20
+SERVO_PIN = board.GP18
 SERVO_PWM_CONFIGURATION = pwmio.PWMOut(SERVO_PIN, duty_cycle=0, frequency=50)
 SERVO_DIRECTION = servo.Servo(SERVO_PWM_CONFIGURATION, actuation_range=180, min_pulse=500, max_pulse=2500)
 SERVO_DIRECTION_CENTER = 75
 SERVO_SETUP_DELAY = 0.1
 
 # Motor pins and configuration
-ESC_MOTOR_PIN = board.GP21
+ESC_MOTOR_PIN = board.GP19
 ESC_PWM_Configuration = pwmio.PWMOut(ESC_MOTOR_PIN, duty_cycle=0, frequency=50)
 ESC = servo.ContinuousServo(ESC_PWM_Configuration, min_pulse=1000, max_pulse=2000)
-ESC_SETUP_DELAY = 0.3
-"""
-ESC_MOTOR_PIN = board.GP21
-ESC_PWM_Configuration = pwmio.PWMOut(ESC_MOTOR_PIN, duty_cycle=0, frequency=50)
-ESC = servo.Servo(ESC_PWM_Configuration, actuation_range=180, min_pulse=1000, max_pulse=2000)
-ESC_CENTER = 90
-"""
+ESC_SETUP_DELAY = 0.5
 
 # Motor commands
 MOTOR_FORWARD = 1
@@ -101,12 +88,11 @@ MOTOR_BACKWARD = -1
 # ---------- VARIABLES ----------
 
 # Gyroscope state and turn counter (initialized to avoid issues)
+last_raw_yaw = None
 yaw_deg = 0.0
-roll_deg = 0.0
-pitch_deg = 0.0
-last_raw_yaw = None # Stores the raw yaw from previous reading for unwrapping
-turns = 0 #Counts each time the robot successfully does a 90-degree turn
-last_segment_count = 0 # Helper for counting turns
+turns = 0
+last_segment_count = 0
+initial_yaw = None
 
 # List of DigitalInOut objects for XSHUT pins and ToF sensors
 vl53l0x_xshut = []
@@ -124,12 +110,12 @@ tof_sensors_measures = []
 # ---------- SETUP ----------
 
 def setup():
-    global bno
+    global bno, initial_yaw
     
     #This angle actually takes our steering to go forward
     SERVO_DIRECTION.angle = SERVO_DIRECTION_CENTER 
     
-    if DEBUG_MODE == 1:
+    if DEBUG_MODE: # Changed from 1 to direct boolean check
         print("Arming ESC...")
     ESC.throttle = ROBOT_SPEED_STOP # Set throttle to minimum
     time.sleep(ESC_SETUP_DELAY) # Give ESC time to recognize minimum
@@ -147,7 +133,7 @@ def setup():
     ESC.throttle = ROBOT_SPEED_STOP
     time.sleep(SERVO_SETUP_DELAY)
 
-    # Initialize start button
+    # Initialize start button (SCRAPPED)
     """
     start_button_out.direction = digitalio.Direction.OUTPUT
     start_button_out.value = True
@@ -197,6 +183,8 @@ def setup():
             # Change the I2C address of the current sensor to a new unique address
             sensor.set_address(TOF_SENSORS_NEW_I2C_ADDRESSES[i])
             vl53l0x_sensors.append(sensor)
+            
+            sensor.measurement_timing_budget = 50000
     
             if DEBUG_MODE:
                 print(f"Sensor {i} successfully re-addressed to {hex(TOF_SENSORS_NEW_I2C_ADDRESSES[i])} and ACTIVE.")
@@ -210,9 +198,24 @@ def setup():
     
     if len(vl53l0x_sensors) != len(TOF_SENSORS_XSHUT_PINS):
         if DEBUG_MODE:
-            print("Error: At least one ToF sensor faield to initialize")
+            print("Error: At least one ToF sensor failed to initialize")
         while True:
             time.sleep(1)
+            
+    time.sleep(1)
+    
+    #Gathering multiple samples to fix errors
+    N = 10
+    for _ in range(N):
+        quat = bno.quaternion
+        time.sleep(0.05)
+        
+    #Saving the orientation, this makesthe turns variables much smoother to handle
+    quat = bno.quaternion
+    _, _, initial_yaw_val = quaternion_to_euler_degrees(*quat)
+    initial_yaw = initial_yaw_val
+    if DEBUG_MODE:
+        print(f"Initial yaw captured: {initial_yaw:.2f} degrees")
     
     if DEBUG_MODE:
         print("Started successful")
@@ -238,59 +241,54 @@ def quaternion_to_euler_degrees(x, y, z, w):
 
     return math.degrees(roll_rad), math.degrees(pitch_rad), math.degrees(yaw_rad)
 
-# Gyroscope Reading Function 
+# Gyroscope Reading Function (now runs as a background task)
 async def gyro_reading():
-    global roll_deg, pitch_deg, yaw_deg, last_raw_yaw, turns, last_segment_count
+    global initial_yaw, last_raw_yaw, yaw_deg, turns, last_segment_count
+    while True: # Keep reading indefinitely in the background
+        try:
+            quat_x, quat_y, quat_z, quat_w = bno.quaternion
+            roll_deg, pitch_deg, raw_yaw_deg = quaternion_to_euler_degrees(quat_x, quat_y, quat_z, quat_w)
 
-    try:
-        quat_x, quat_y, quat_z, quat_w = bno.quaternion
-        # raw_yaw_deg will be between -180 and 180 from the quaternion_to_euler_degrees function
-        roll_deg, pitch_deg, raw_yaw_deg = quaternion_to_euler_degrees(quat_x, quat_y, quat_z, quat_w)
+            # Compute relative yaw
+            relative_yaw = raw_yaw_deg - initial_yaw
+            if relative_yaw > 180:
+                relative_yaw -= 360
+            elif relative_yaw < -180:
+                relative_yaw += 360
 
-        if last_raw_yaw is None:
-            # Initialize continuous yaw_deg and last_raw_yaw on the first read
-            yaw_deg = raw_yaw_deg 
-            last_raw_yaw = raw_yaw_deg
-            last_segment_count = int(yaw_deg / 90) # Initialize segment count based on continuous yaw
-        else:
-            # 1. Calculate the change in raw yaw, handling the -180/180 wrap-around
-            # This is essential for a truly continuous (unwrapped) yaw
-            delta_raw_yaw = raw_yaw_deg - last_raw_yaw
-            if delta_raw_yaw > 180:
-                delta_raw_yaw -= 360
-            elif delta_raw_yaw < -180:
-                delta_raw_yaw += 360
+            if last_raw_yaw is None:
+                yaw_deg = relative_yaw
+                last_raw_yaw = relative_yaw
+                last_segment_count = int(yaw_deg / 90)
+            else:
+                delta_raw_yaw = relative_yaw - last_raw_yaw
+                if delta_raw_yaw > 180:
+                    delta_raw_yaw -= 360
+                elif delta_raw_yaw < -180:
+                    delta_raw_yaw += 360
 
-            # 2. Add the adjusted delta to the continuous yaw_deg
-            yaw_deg += delta_raw_yaw
+                yaw_deg += delta_raw_yaw
 
-            # 3. Update 'turns' based on crossing 90-degree boundaries in the continuous yaw_deg
-            # This ensures it increments for both directions and only once per 90-degree segment crossing.
-            current_segment_count = int(yaw_deg / 90) # Get the current 90-degree segment (e.g., 0, 1, -1, -2)
+                current_segment_count = int(yaw_deg / 90)
+                if current_segment_count != last_segment_count:
+                    turns += current_segment_count - last_segment_count
+                    last_segment_count = current_segment_count
 
-            if current_segment_count != last_segment_count:
-                # Increment 'turns' by the absolute number of 90-degree segments crossed
-                turns += abs(current_segment_count - last_segment_count)
-                if DEBUG_MODE:
-                    print(f"CRUCE: Segmento Anterior={last_segment_count}, Actual={current_segment_count}. Turns={turns}")
+                last_raw_yaw = relative_yaw
 
-            # 4. Update last_raw_yaw and last_segment_count for the next iteration
-            last_raw_yaw = raw_yaw_deg
-            last_segment_count = current_segment_count
+        except Exception as e:
+            if DEBUG_MODE:
+                print(f"ERROR reading gyro/quaternion: {e}")
 
-    except Exception as e:
-        if DEBUG_MODE:
-            print(f"ERROR reading gyro/quaternion: {e}")
+        await asyncio.sleep(GYRO_READ_INTERVAL) # Ensures 50ms update rate
     
-    await asyncio.sleep(0) # Yield control to other tasks, non-blocking
-
 # ---------- Distance Reading Function ----------
 async def read_multiple_tof_sensors():
     # Iterate over the 'sensors' list which only contains successfully initialized sensors
     for i, sensor in enumerate(vl53l0x_sensors): 
         try:
             distance_mm = sensor.range
-            if distance_mm is None or distance_mm >= 3000 or distance_mm < 0: # Handle None or invalid values
+            if distance_mm is None or distance_mm >= 500 or distance_mm < 0: # Handle None or invalid values
                 distance_cm = float('inf')
             else:
                 distance_cm = distance_mm / 10 # Convert to centimeters
@@ -304,6 +302,8 @@ async def read_multiple_tof_sensors():
             if DEBUG_MODE:
                 print(f"Error al leer ToF sensor {i}: {e}") # Specific error message for ToF
 
+    await asyncio.sleep(0) # Yield control
+    
 # ---------- Movement Functions ----------
 
 def set_robot_speed(speed_throttle):
@@ -328,6 +328,9 @@ async def main_robot_loop(): # Renamed from Main_Loop for consistency and best p
     went_backward = False
     initial_turns = 0
     
+    # New variable to track the previous 'turns' count for centering logic
+    last_known_turns = 0 
+
     # Call the setup function
     setup()
 
@@ -338,17 +341,45 @@ async def main_robot_loop(): # Renamed from Main_Loop for consistency and best p
         await asyncio.sleep(START_BUTTON_DELAY)
     print("Button press detected, starting program now")
     """
+    
+    # Start the gyroscope reading as a separate background task
+    asyncio.create_task(gyro_reading())
+    
+    # Give the gyro task a moment to update 'turns' before initializing last_known_turns
+    await asyncio.sleep(GYRO_READ_INTERVAL * 2) 
+    global turns # Ensure we can access the global 'turns'
+    last_known_turns = turns # Initialize with the current global turns value
 
     while True:
-        # Read all the data asynchronously
-        await gyro_reading() 
+        # Read all the data asynchronously (ToF remains awaited here)
+        # gyro_reading() is now a background task, so no 'await' here
         await read_multiple_tof_sensors()
+        
+        # Ensure tof_sensors_measures has been populated before trying to access elements
+        if not tof_sensors_measures:
+            if DEBUG_MODE:
+                print("WARNING: ToF sensor data not yet available. Waiting for first update...")
+            await asyncio.sleep(MOVEMENT_DELAY)
+            continue
+
         front_dist = tof_sensors_measures[TOF_FRONT_SENSOR]
         right_middle_dist = tof_sensors_measures[TOF_RIGHT_MIDDLE_SENSOR]
         left_middle_dist = tof_sensors_measures[TOF_LEFT_MIDDLE_SENSOR]
         back_dist = tof_sensors_measures[TOF_BACK_SENSOR]
 
-        if turns == 12: # If robot has completed 12 turns
+        # --- Check for Gyro Turn and Center Servo Immediately ---
+        # This logic takes precedence for centering the servo upon a new 'turn' detection
+        if turns != last_known_turns:
+            if DEBUG_MODE:
+                print(f"**GIRO DETECTADO: {turns} (antes {last_known_turns}) - CENTRANDO SERVO**")
+            set_steering_angle(SERVO_DIRECTION_CENTER)
+            steering_command = STEERING_MIDDLE_COMMAND # Override command to center for this cycle
+            last_known_turns = turns # Update for the next check
+            # No need to set motor speed here, as the regular navigation logic will handle it below.
+            # We just ensure the servo is centered and the steering command is reset.
+
+        # --- Overall Mission Completion Check ---
+        if abs(turns) == 12: # If robot has completed 12 turns
             if MOVEMENT_MODE:
                 motor_command = MOTOR_FORWARD
                 steering_command = STEERING_MIDDLE_COMMAND
@@ -356,11 +387,16 @@ async def main_robot_loop(): # Renamed from Main_Loop for consistency and best p
             if DEBUG_MODE:
                 print("Done 12 turns, stopping now")
             return
-        
+            
+        # --- Navigation Logic ---
+        # This logic determines the steering_command for the *next* cycle,
+        # unless overridden by the turn detection above.
         if not going_backward and not went_backward and front_dist >= TARGET_DISTANCE_START_BACKWARD:
-            steering_command = STEERING_MIDDLE_COMMAND
+            # Only set if not already forced to middle by turn detection
+            if steering_command != STEERING_MIDDLE_COMMAND: # Avoid overwriting if a turn was just detected
+                steering_command = STEERING_MIDDLE_COMMAND
             motor_command = MOTOR_FORWARD
-        
+            
         elif not going_backward and not went_backward and front_dist < TARGET_DISTANCE_START_BACKWARD:
             motor_command = MOTOR_BACKWARD
             going_backward= True
@@ -369,7 +405,7 @@ async def main_robot_loop(): # Renamed from Main_Loop for consistency and best p
             motor_command = MOTOR_FORWARD
             going_backward  = False
             went_backward = True
-            initial_turns = turns
+            initial_turns = turns # Store turns for recovery logic
             
             if right_middle_dist == float('inf'):
                 steering_command = STEERING_RIGHT_COMMAND
@@ -383,22 +419,26 @@ async def main_robot_loop(): # Renamed from Main_Loop for consistency and best p
             elif left_middle_dist >= right_middle_dist:
                 steering_command = STEERING_LEFT_COMMAND
             
-        elif went_backward and initial_turns != turns:
+        elif went_backward and initial_turns != turns: # If robot has turned after backing up
             went_backward = False
             steering_command = STEERING_MIDDLE_COMMAND
-                            
-        # Set the speed and angle
+                                
+        # Set the speed and angle based on the determined steering_command
+        # Note: If a turn was just detected and the servo was centered, this might
+        # immediately set it back to a turning angle if the navigation logic dictates so.
+        # This is expected behavior with immediate centering.
         if MOVEMENT_MODE:
             if steering_command == STEERING_MIDDLE_COMMAND:
                 set_robot_speed(ROBOT_SPEED_NORMAL * motor_command)
-                set_steering_angle(SERVO_DIRECTION_CENTER)
-                print("Speed " + str(ROBOT_SPEED_NORMAL * motor_command))
+                set_steering_angle(SERVO_DIRECTION_CENTER) # Ensure it's centered if command is middle
+                if DEBUG_MODE: print("Speed " + str(ROBOT_SPEED_NORMAL * motor_command))
             else:
                 set_robot_speed(ROBOT_SPEED_TURN * motor_command)
-                set_steering_angle(SERVO_DIRECTION_CENTER + steering_command * TURNING_VALUE)
-                print("Speed " + str(ROBOT_SPEED_TURN * motor_command))
-                
+                set_steering_angle(SERVO_DIRECTION_CENTER - steering_command * TURNING_VALUE)
+                if DEBUG_MODE: print("Speed " + str(ROBOT_SPEED_TURN * motor_command))
+            
         """
+        Original commented out navigation logic
         if front_dist <= TARGET_DISTANCE_FORWARD and right_middle_dist >= (left_middle_dist + SENSOR_DIFFERENCE_SIDEWAYS):
             steering_command = STEERING_RIGHT_COMMAND
             if MOVEMENT_MODE:
@@ -435,6 +475,7 @@ async def main_robot_loop(): # Renamed from Main_Loop for consistency and best p
                 print("Yendo hacia adelante")
             else:
                 print("Yendo hacia atrás")
+            print("-" * 40) # Separador para facilitar la lectura
 
         await asyncio.sleep(MOVEMENT_DELAY)
 
