@@ -1,6 +1,6 @@
 import subprocess
 import os
-from multiprocessing import Event, Lock
+from multiprocessing import Event, RLock
 from threading import Thread
 from time import sleep
 from typing import Optional
@@ -10,7 +10,7 @@ from utils import check_type
 from log import Logger
 from log.sub_logger import SubLogger
 from server import RealtimeTrackerServer 
-from serial import Serial
+from serial_communication import SerialCommunication
 from rplidar.measure import Measure
 
 class RPLIDAR:
@@ -39,7 +39,7 @@ class RPLIDAR:
             self,
             logger: Optional[Logger] = None,
             server: Optional[RealtimeTrackerServer] = None,
-            serial: Optional[Serial] = None,
+            serial: Optional[SerialCommunication] = None,
             baudrate: int = RPLIDAR_C1_BAUDRATE,
             port: str = RPLIDAR_C1_PORT
         ):
@@ -49,12 +49,12 @@ class RPLIDAR:
         Args:
             logger (Logger|None): Logger instance for logging messages.
             server (RealtimeTrackerServer|None): Server instance for real-time tracking updates.
-            serial (Serial|None): Serial instance for RPLIDAR.
+            serial (SerialCommunication|None): SerialCommunication instance for RPLIDAR.
             baudrate (int): Baud rate for the serial communication.
-            port (str): Serial port for the RPLIDAR.
+            port (str): SerialCommunication port for the RPLIDAR.
         """
-        # Initialize the lock
-        self.__lock = Lock()
+        # Create the reentrant lock
+        self.__rlock = RLock()
 
         # Create a stop event
         self.__stop_event = Event()
@@ -75,7 +75,7 @@ class RPLIDAR:
 
         # Check the type of serial communication
         if serial:
-            check_type(serial, Serial)
+            check_type(serial, SerialCommunication)
         self.__serial_communication = serial
 
         # Check the type of baudrate
@@ -192,13 +192,14 @@ class RPLIDAR:
         # Add a small delay to avoid busy-waiting and yield CPU
         sleep(self.READING_DELAY)
 
-    def __start(self):
+    def __loop(self):
         """
-        Start the RPLIDAR process.
+        Loop to read the output from the RPLIDAR process.
         """
-        if self.__started:
-            self.__log("RPLIDAR is already started.")
-            return
+        with self.__rlock:
+            if self.__started:
+                self.__log("RPLIDAR is already started.")
+                return
 
         command = [
             self.ULTRA_SIMPLE_PATH,
@@ -233,7 +234,7 @@ class RPLIDAR:
                     self.__read_output()
 
             except KeyboardInterrupt:
-                self.stop()
+                self.__stop()
         else:
             # Read the output in a loop until the process ends or stop event is set
             while self.__process.poll() is None and not self.__stop_event.is_set():
@@ -247,8 +248,11 @@ class RPLIDAR:
         Stop the RPLIDAR process.
         """
         if not self.__started:
-            self.__log("RPLIDAR is not started.")
+            self.__log("RPLIDAR has not started.")
             return
+
+        # Set the stop event
+        self.__stop_event.set()
 
         # Ensure the process is cleaned up even if an error occurs
         if self.__process and self.__process.poll() is None:
@@ -263,22 +267,24 @@ class RPLIDAR:
         """
         Create a thread for the RPLIDAR.
         """
-        with self.__lock:
+        with self.__rlock:
             # Start the RPLIDAR in a separate thread
-            thread = Thread(target=self.__start)
+            thread = Thread(target=self.__loop)
             thread.start()
 
     def stop_thread(self):
         """
         Stop the RPLIDAR thread.
         """
-        with self.__lock:
+        with self.__rlock:
             # Stop the RPLIDAR process
             self.__stop()
+            
+            # Log
+            self.__log("RPLIDAR thread stopped successfully.")
 
-            # Set the stop event
-            self.__stop_event.set()
-
-            # Wait for the thread to finish
-            if self.__process:
-                self.__process.wait(timeout=self.PROCESS_WAIT_TIMEOUT)
+    def __del__(self):
+        """
+        Destructor to close the thread if it's started.
+        """
+        self.__stop()

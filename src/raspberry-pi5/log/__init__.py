@@ -1,6 +1,5 @@
 from threading import Thread
-from multiprocessing import Event, Lock, Queue
-from multiprocessing.synchronize import Event as EventCls
+from multiprocessing import Event, RLock, Queue
 from io import TextIOWrapper
 from datetime import datetime
 
@@ -18,8 +17,8 @@ class Logger:
         """
         Initialize the Logger class.
         """
-        # Initialize the lock
-        self.__lock = Lock()
+        # Create the reentrant lock
+        self.__rlock = RLock()
 
         # Create the stop event
         self.__stop_event = Event()
@@ -31,9 +30,6 @@ class Logger:
         # Initialize the write log event
         self.__write_log_event = Event()
 
-        # Set the thread flag
-        self.__thread_started = False
-
     def log(self, message: Message) -> None:
         """
         Put a log message in the queue.
@@ -41,7 +37,7 @@ class Logger:
         Args:
             message (Message): Message to put in the queue.
         """
-        with self.__lock:
+        with self.__rlock:
             # Check the type of message
             check_type(message, Message)
 
@@ -59,14 +55,15 @@ class Logger:
             str|None: Message from the queue.
         """
         # Get the message from the queue
-        with self.__lock:
+        with self.__rlock:
             if self.__messages_queue.empty():
                 return None
             
             # Return the message from the queue
             return self.__messages_queue.get()
-        
-    def __write(self, file: TextIOWrapper, message: str) -> None:
+
+    @staticmethod
+    def __write(file: TextIOWrapper, message: str) -> None:
         """
         Write a message to the log file.
 
@@ -81,16 +78,16 @@ class Logger:
         if not file:
             print(f"Log file is not open. Must open it first.")
             return
-        
+
         if not message:
             print(f"Message is empty. Cannot write to log file.")
             return
 
         # Write the message to the log file
-        file.write(f"{formatted_time}: {message}\n") 
-        
+        file.write(f"{formatted_time}: {message}\n")
+
         # Ensure immediate write
-        file.flush() 
+        file.flush()
 
     def __write_last_message(self, file: TextIOWrapper) -> None:
         """
@@ -109,7 +106,7 @@ class Logger:
         """
         Open the log file.
         """
-        with self.__lock:
+        with self.__rlock:
             if not self.__stop_event.is_set():
                 return
 
@@ -123,14 +120,14 @@ class Logger:
         Returns:
             bool: True if the log file is open, False otherwise.
         """
-        with self.__lock:
+        with self.__rlock:
             return not self.__stop_event.is_set()          
 
     def __close(self) -> None:
         """
         Close the log file.
         """
-        with self.__lock:
+        with self.__rlock:
             if self.__stop_event.is_set():
                 return
 
@@ -144,8 +141,7 @@ class Logger:
         Returns:
             bool: True if the log file is closed, False otherwise.
         """
-        with self.__lock:
-            return self.__stop_event.is_set()
+        return not self.__is_open()
 
     def __loop(self, file_path: str = Files.get_log_file_path()) -> None:
         """
@@ -154,14 +150,10 @@ class Logger:
         Args:
             file_path (str): Path to the log file.
         """
-        if self.__thread_started:
-            return
-        
-        # Set the thread started flag
-        self.__thread_started = True
-        
-        # Open the log file
-        self.__open()
+        with self.__rlock:
+            if self.__is_open():
+                self.log(Message("Logger is already running."))
+                return
 
         # Check the type of file_path
         check_type(file_path, str)
@@ -194,17 +186,21 @@ class Logger:
                     if self.__messages_queue.empty():
                         # If the queue is empty, clear the write log event
                         self.__write_log_event.clear()
-                        continue
-        
+
         finally:
             self.__close()
-            self.__thread_started = False
-    
+
     def create_thread(self) -> None:
         """
         Create thread for the logger.
         """
-        with self.__lock:
+        with self.__rlock:
+            if self.__is_open():
+                return
+
+            # Open the logger
+            self.__open()
+
             # Create a thread for the logger
             thread = Thread(target=self.__loop)
             thread.start()
@@ -213,19 +209,15 @@ class Logger:
         """
         Stop the logger thread.
         """
-        with self.__lock:
-            if self.__thread_started:
-                # Set the stop event
-                self.__stop_event.set()
-                
-                # Set the write log event to ensure the thread stops
-                self.__write_log_event.set()
+        with self.__rlock:
+            if self.__is_closed():
+                return
+
+            # Call the close method to stop the thread
+            self.__close()
 
     def __del__(self):
         """
-        Destructor to close the log file if it is open.
+        Destructor to close the thread if it's started.
         """
-        if self.__thread_started:
-            self.stop_thread()
-        else:
-            self.__close()
+        self.stop_thread()

@@ -1,24 +1,27 @@
-from serial import Serial
+from time import sleep
+
+from log import Logger
+from serial_communication import SerialCommunication
 
 if __name__ == "__main__":
+    # Create an instance of Logger
+    logger = Logger()
+
     # Create an instance of SerialCommunication
-    serial = Serial(
-        port="/dev/ttyUSB0",  # Replace with your actual serial port
-        baudrate=115200,      # Replace with your actual baud rate
-        timeout=1             # Optional timeout for read operations
-    )
-    # Check the type of serial communication
-    check_type(serial_communication, SerialCommunication)
+    serial = SerialCommunication(logger=logger)
 
-    # Get the stop event
-    stop_event = serial_communication.get_stop_event()
+    try:
+        # Create thread to handle receiving messages
+        serial.create_receiving_thread()
 
-    # Thread to handle receiving messages
-    thread_1 = Thread(target=serial_communication.receive_message, args=(stop_event, serial_communication))
-    thread_1.start()
-    thread_1.join()
+        # Create thread to handle sending messages
+        serial.create_sending_thread()
 
-    # Thread to handle sending messages
-    thread_2 = Thread(target=serial_communication.send_message, args=(stop_event, serial_communication))
-    thread_2.start()
-    thread_2.join()
+        # Wait indefinitely to keep the serial communication running
+        while True:
+            sleep(1)
+
+    except KeyboardInterrupt as e:
+        # Handle keyboard interrupt to stop the serial communication gracefully
+        logger.log(f"KeyboardInterrupt received: {e}")
+

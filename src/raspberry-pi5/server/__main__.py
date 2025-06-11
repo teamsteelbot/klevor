@@ -33,10 +33,3 @@ if __name__ == "__main__":
     except Exception as e:
         # Log any exceptions that occur
         logger.log(f"An error occurred: {e}")
-
-    finally:
-        # Stop the logger thread
-        logger.stop_thread()
-
-        # Stop the server thread
-        realtime_tracker_server.stop_thread()

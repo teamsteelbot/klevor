@@ -32,5 +32,45 @@ class Message:
         This is useful for logging or debugging purposes.
         """
         return f"{self.__tag}{self.TAG_SEPARATOR}{self.__content}"
-        
 
+    @property
+    def content(self) -> str:
+        """
+        Get the content of the message.
+
+        Returns:
+            str: The content of the message.
+        """
+        return self.__content
+
+    @content.setter
+    def content(self, value: str):
+        """
+        Set the content of the message.
+
+        Args:
+            value (str): The new content for the message.
+        """
+        check_type(value, str)
+        self.__content = value
+
+    @property
+    def tag(self) -> str:
+        """
+        Get the tag of the message.
+
+        Returns:
+            str: The tag of the message.
+        """
+        return self.__tag
+        
+    @tag.setter
+    def tag(self, value: str):
+        """
+        Set the tag of the message.
+
+        Args:
+            value (str): The new tag for the message.
+        """
+        check_type(value, str)
+        self.__tag = value

@@ -18,7 +18,10 @@ class Measure:
         self.distance = distance
         self.quality = quality
 
-    def __repr__(self):
+    def __str__(self):
+        """
+        String representation of the Measure object.
+        """
         return self.ATTRIBUTES_SEPARATOR.join([str(self.angle), str(self.distance), str(self.quality)])
     
     @property

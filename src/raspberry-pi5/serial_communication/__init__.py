@@ -3,6 +3,7 @@ from multiprocessing import Event, Queue, RLock
 from multiprocessing.synchronize import Event as EventCls
 from threading import Thread
 from typing import Optional
+from time import sleep
 
 from serial import Serial, SerialException
 
@@ -137,9 +138,18 @@ class SerialCommunication:
         with self.__rlock:
             return self.__serial and self.__serial.is_open
 
-    def start(self) -> None:
+    def is_closed(self) -> bool:
         """
-        Start the communication.
+        Check if the serial port is closed.
+
+        Returns:
+            bool: True if the serial port is closed, False otherwise.
+        """
+        return not self.is_open()
+
+    def __open(self) -> None:
+        """
+        Open the communication.
         """
         with self.__rlock:
             # Check if the serial port is already open
@@ -166,13 +176,13 @@ class SerialCommunication:
         # Log
         self.__log(f"Serial port {self.__port} opened with baudrate {self.__baudrate}.")
 
-    def close(self) -> None:
+    def __close(self) -> None:
         """
         Close the communication.
         """
         with self.__rlock:
             # Check if the serial port is already closed
-            if not self.is_open():
+            if self.is_closed():
                 return
 
             # Clear the events
@@ -199,7 +209,7 @@ class SerialCommunication:
             message (Message): The message to put in the queue.
         """
         with self.__rlock:
-            if not self.is_open():
+            if self.is_closed():
                 return
                 
             # Put the message in the queue
@@ -226,7 +236,7 @@ class SerialCommunication:
             Message|None: The message from the incoming messages queue or None if no message is available.
         """
         with self.__rlock:
-            if not self.is_open():
+            if self.is_closed():
                 return None
 
             # Check if there is a pending incoming message
@@ -262,7 +272,7 @@ class SerialCommunication:
         check_type(message, Message)
 
         with self.__rlock:
-            if not self.is_open():
+            if self.is_closed():
                 return
 
             # Put the message in the queue
@@ -318,9 +328,6 @@ class SerialCommunication:
         Handler to receive messages from the serial port.
         """
         while not self.__stop_event.is_set():
-            if not self.is_open():
-                return
-
             # Check if there is a message to read
             if not self.__serial.in_waiting > 0:
                 return None
@@ -341,16 +348,13 @@ class SerialCommunication:
             self.__put_incoming_message(message)
 
             # Sleep for a short time to avoid busy waiting
-            time.sleep(self.DELAY)
+            sleep(self.DELAY)
 
     def __sending_message_handler(self) -> None:
         """
         Handler to send messages to the serial port.
         """
         while not self.__stop_event.is_set():
-            if not self.is_open():
-                return
-
             # Check if there is a message to send
             if not self.__pending_outgoing_message_event.is_set():
                 return
@@ -362,21 +366,36 @@ class SerialCommunication:
             self.__serial.write(str(message).encode(self.ENCODE))
 
             # Wait for the message to be sent
-            time.sleep(self.DELAY)
+            sleep(self.DELAY)
 
     def create_sending_thread(self) -> None:
         """
         Create a thread to handle sending messages.
         """
-        thread = Thread(target=self.__sending_message_handler)
-        thread.join()
+        with self.__rlock:
+            self.__open()
+            thread = Thread(target=self.__sending_message_handler)
+            thread.join()
 
     def create_receiving_thread(self) -> None:
         """
         Create a thread to handle receiving messages.
         """
-        thread = Thread(target=self.__receiving_message_handler)
-        thread.join()
+        with self.__rlock:
+            self.__open()
+            thread = Thread(target=self.__receiving_message_handler)
+            thread.join()
+        
+    def stop_threads(self) -> None:
+        """
+        Stop the communication threads.
+        """
+        with self.__rlock:
+            # Close the serial port
+            self.__close()
+
+            # Log
+            self.__log("Communication threads stopped.")
 
     def get_stop_event(self) -> EventCls:
         """
@@ -418,5 +437,4 @@ class SerialCommunication:
         """
         Destructor for the serial communication.
         """
-        # Close the communication
-        self.close()
+        self.stop_threads()

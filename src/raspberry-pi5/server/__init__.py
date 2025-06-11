@@ -1,9 +1,9 @@
 import asyncio
 import io
 from threading import Thread
-from multiprocessing import Event
+from multiprocessing import Event, RLock
 from multiprocessing.synchronize import Event as EventCls
-from typing import Awaitable, Optional, Any, Coroutine
+from typing import Optional
 
 from websockets import serve, exceptions
 from PIL.Image import Image
@@ -73,6 +73,9 @@ class RealtimeTrackerServer:
             host (str): The host address for the WebSocket server. Default is 'localhost'.
             port (int): The port number for the WebSocket server. Default is 8765.
         """
+        # Create a reentrant lock
+        self.__rlock = RLock()
+        
         # Create a stop event
         self.__stop_event = Event()
 
@@ -305,14 +308,16 @@ class RealtimeTrackerServer:
         # Log
         self.__log(f"RPLIDAR measures sent")
 
-    async def __start(self):
+    async def __loop(self):
         """
-        Starts the WebSocket server.
+        The main loop for the WebSocket server.
         """
-        # Check if it's already running
-        if self.__started:
-            return
-        
+        # Check if the server is already started
+        with self.__rlock:
+            if self.__started:
+                self.__log("WebSocket server is already running.")
+                return
+
         # Clear the stop event
         self.__stop_event.clear()
 
@@ -328,35 +333,41 @@ class RealtimeTrackerServer:
             self.__log("WebSocket server started successfully.")
             await asyncio.get_running_loop().run_in_executor(None, self.__stop_event.wait)
 
+        # Log the stopping of the server
         self.__log("WebSocket server is stopping...")
+
+        # Clear the started flag
         self.__started = False
 
-    def stop(self):
+    def __stop(self):
         """
         Stops the WebSocket server.
         """
-        if not self.__started:
-            return
-        
-        # Set the stop event
-        self.__stop_event.set()
+        with self.__rlock:
+            if not self.__stop_event.is_set():
+                return
+
+            # Set the stop event
+            self.__stop_event.set()
 
     def create_thread(self):
         """
         Creates a thread to run the WebSocket server.
         """
-        if self.__started:
-            return
-        
-        # Create a thread to run the WebSocket server
-        thread = Thread(target=lambda: asyncio.run(self.__start()))
-        thread.start()
+        with self.__rlock:
+            if not self.__stop_event.is_set():
+                return
+
+            # Create a thread to run the WebSocket server
+            thread = Thread(target=lambda: asyncio.run(self.__loop()))
+            thread.start()
     
     def stop_thread(self):
         """
         Stops the WebSocket server thread.
         """
-        self.stop()
+        with self.__rlock:
+            self.__stop()
         
     def is_running(self) -> bool:
         """
@@ -365,7 +376,8 @@ class RealtimeTrackerServer:
         Returns:
             bool: True if the server is running, False otherwise.
         """
-        return self.__started
+        with self.__rlock:
+            return self.__started
     
     def is_stopped(self) -> bool:
         """
@@ -374,4 +386,11 @@ class RealtimeTrackerServer:
         Returns:
             bool: True if the server is stopped, False otherwise.
         """
-        return not self.__started
+        with self.__rlock:
+            return not self.__started
+
+    def __del__(self):
+        """
+        Destructor to ensure the server is thread stopped when the object is deleted.
+        """
+        self.stop_thread()
