@@ -9,6 +9,7 @@ from serial import Serial, SerialException
 
 from camera.images_queue import ImagesQueue
 from log import Logger
+from log.sub_logger import SubLogger
 from serial_communication.message import Message
 from server import RealtimeTrackerServer
 from utils import check_type
@@ -69,7 +70,7 @@ class SerialCommunication:
             check_type(logger, Logger)
 
             # Get the sub-logger for this class
-            self.__logger = logger.get_sub_logger(self.LOG_TAG)
+            self.__logger = SubLogger(logger, self.LOG_TAG)
         else:
             self.__logger = None
 
@@ -198,8 +199,8 @@ class SerialCommunication:
             # Close the serial port
             self.__serial.close()
 
-        # Log
-        self.__log(f"Serial port {self.__port} closed.")
+            # Log
+            self.__log(f"Serial port {self.__port} closed.")
 
     def __put_incoming_message(self, message: Message) -> None:
         """
@@ -277,6 +278,8 @@ class SerialCommunication:
 
             # Put the message in the queue
             self.__outgoing_messages_queue.put(message)
+
+            print(f"Message sent: {message}")
 
             # Set the pending outgoing message event
             self.__pending_outgoing_message_event.set()
@@ -368,23 +371,38 @@ class SerialCommunication:
             # Wait for the message to be sent
             sleep(self.DELAY)
 
-    def create_sending_thread(self) -> None:
+    def __create_sending_thread(self) -> None:
         """
         Create a thread to handle sending messages.
         """
         with self.__rlock:
             self.__open()
             thread = Thread(target=self.__sending_message_handler)
-            thread.join()
+            thread.start()
 
-    def create_receiving_thread(self) -> None:
+    def __create_receiving_thread(self) -> None:
         """
         Create a thread to handle receiving messages.
         """
         with self.__rlock:
             self.__open()
             thread = Thread(target=self.__receiving_message_handler)
-            thread.join()
+            thread.start()
+
+    def create_threads(self) -> None:
+        """
+        Create threads for receiving and sending messages.
+        """
+        with self.__rlock:
+            # Create the receiving thread
+            self.__create_receiving_thread()
+
+            # Create the sending thread
+            self.__create_sending_thread()
+
+            # Log
+            self.__log("Communication threads created.")
+
         
     def stop_threads(self) -> None:
         """
@@ -393,9 +411,6 @@ class SerialCommunication:
         with self.__rlock:
             # Close the serial port
             self.__close()
-
-            # Log
-            self.__log("Communication threads stopped.")
 
     def get_stop_event(self) -> EventCls:
         """

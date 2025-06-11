@@ -24,7 +24,7 @@ if __name__ == "__main__":
 
         # Wait indefinitely to keep the server running
         while True:
-            sleep(1)  # Sleep to prevent busy-waiting
+            sleep(1) # Sleep to prevent busy-waiting
 
     except KeyboardInterrupt:
         # Handle keyboard interrupt to stop the server gracefully
@@ -33,3 +33,10 @@ if __name__ == "__main__":
     except Exception as e:
         # Log any exceptions that occur
         logger.log(f"An error occurred: {e}")
+
+    finally:
+        # Stop the server thread
+        realtime_tracker_server.stop_thread()
+
+        # Stop the logger thread
+        logger.stop_thread()

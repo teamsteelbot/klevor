@@ -78,6 +78,7 @@ class RealtimeTrackerServer:
         
         # Create a stop event
         self.__stop_event = Event()
+        self.__stop_event.set()
 
         # Check the type of parking event
         if parking_event:
@@ -331,7 +332,7 @@ class RealtimeTrackerServer:
         self.__log(f"Starting WebSocket server on ws://{local_ip}:{self.__port}")
         async with serve(self.__reactive_handler, self.__host, self.__port):
             self.__log("WebSocket server started successfully.")
-            await asyncio.get_running_loop().run_in_executor(None, self.__stop_event.wait)
+            self.__stop_event.wait()
 
         # Log the stopping of the server
         self.__log("WebSocket server is stopping...")
@@ -344,18 +345,20 @@ class RealtimeTrackerServer:
         Stops the WebSocket server.
         """
         with self.__rlock:
-            if not self.__stop_event.is_set():
+            if self.__stop_event.is_set():
                 return
 
             # Set the stop event
             self.__stop_event.set()
+
+            self.__log("WebSocket server stop event set. Stopping the server...")
 
     def create_thread(self):
         """
         Creates a thread to run the WebSocket server.
         """
         with self.__rlock:
-            if not self.__stop_event.is_set():
+            if self.is_running():
                 return
 
             # Create a thread to run the WebSocket server

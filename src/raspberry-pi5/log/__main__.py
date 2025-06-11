@@ -23,8 +23,17 @@ if __name__ == "__main__":
         logger.log(Message("This is a test log message from the main logger."))
 
         # Wait for a while to ensure the log messages are processed
-        sleep(2)  
+        while True:
+            sleep(1)
+            
+    except KeyboardInterrupt:
+        # Handle keyboard interrupt to stop the logger thread gracefully
+        logger.log(Message("KeyboardInterrupt received. Stopping logger thread."))
 
     except Exception as e:
         # Log any exceptions that occur
         logger.log(f"An error occurred: {e}")
+
+    finally:
+        # Stop the logger thread gracefully
+        logger.stop_thread()

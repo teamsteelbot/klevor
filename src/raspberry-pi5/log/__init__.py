@@ -25,10 +25,16 @@ class Logger:
         self.__stop_event.set()
 
         # Initialize the messages queue
-        self.__messages_queue = Queue()
+        self.__messages_queue = None
 
         # Initialize the write log event
         self.__write_log_event = Event()
+
+        # Initialize logger opened event
+        self.__logger_opened_event = Event()
+
+        # Initialize thread started flag
+        self.__thread_started = False
 
     def log(self, message: Message) -> None:
         """
@@ -38,6 +44,10 @@ class Logger:
             message (Message): Message to put in the queue.
         """
         with self.__rlock:
+            # If the logger opened event is not set, wait for it to be set
+            if not self.__logger_opened_event.is_set():
+                self.__logger_opened_event.wait()
+
             # Check the type of message
             check_type(message, Message)
 
@@ -104,42 +114,46 @@ class Logger:
 
     def __open(self) -> None:
         """
-        Open the log file.
+        Set the stop event to allow logging to start.
         """
         with self.__rlock:
             if not self.__stop_event.is_set():
                 return
 
             # Clear the stop event
-            self.__stop_event.clear()  
+            self.__stop_event.clear() 
 
     def __is_open(self) -> bool:
         """
-        Check if the log file is open.
-
+        Check if the stop even is not set, indicating that's allowed to log messages.
+        
         Returns:
-            bool: True if the log file is open, False otherwise.
+            bool: True if the stop event is not set, False otherwise.
         """
         with self.__rlock:
             return not self.__stop_event.is_set()          
 
     def __close(self) -> None:
         """
-        Close the log file.
+        Set the stop event to stop logging messages.
         """
         with self.__rlock:
+            # Check if the logger is already closed
             if self.__stop_event.is_set():
                 return
+            
+            # Log the closing message
+            self.log(Message("Logger is closing."))
 
             # Set the stop event
             self.__stop_event.set()
 
     def __is_closed(self) -> bool:
         """
-        Check if the log file is closed.
+        Check if the logger is closed by checking if the stop event is set.
 
         Returns:
-            bool: True if the log file is closed, False otherwise.
+            bool: True if the stop event is set (indicating the logger is closed), False otherwise.
         """
         return not self.__is_open()
 
@@ -151,9 +165,12 @@ class Logger:
             file_path (str): Path to the log file.
         """
         with self.__rlock:
-            if self.__is_open():
+            if self.__thread_started:
                 self.log(Message("Logger is already running."))
                 return
+            
+        # Set the thread started flag
+        self.__thread_started = True
 
         # Check the type of file_path
         check_type(file_path, str)
@@ -162,33 +179,39 @@ class Logger:
         # Ensure the file path exists
         Files.ensure_path_exists(self.__file_path)
 
+        # Initialize the messages queue
+        self.__messages_queue = Queue()
+
         # Open the log file in append mode
-        try:
-            with open(self.__file_path, 'a') as file:
-                while self.__is_open():
-                    # Wait for the write log event to be set
-                    self.__write_log_event.wait()
+        with open(self.__file_path, 'a') as file:
+            # Set the logger opened event
+            self.__logger_opened_event.set()
+            self.log(Message(f"Logger opened at {self.__file_path}."))
 
-                    # Check if the stop event is set
-                    if self.__stop_event and self.__stop_event.is_set():
-                        # Process any remaining messages in the queue
-                        while not self.__messages_queue.empty():
-                            message = self.__get_message()
-                            if message:
-                                self.__write(file, message)
+            while self.__is_open():
+                # Wait for the write log event to be set
+                self.__write_log_event.wait()
 
-                        self.__write_log_event.clear()
-                        break
+                # Check if the stop event is set
+                if self.__stop_event and self.__stop_event.is_set():
+                    # Process any remaining messages in the queue
+                    while not self.__messages_queue.empty():
+                        message = self.__get_message()
+                        if message:
+                            self.__write(file, message)
 
-                    # Write the last message to the log file
-                    self.__write_last_message(file)
+                    self.__write_log_event.clear()
+                    break
 
-                    if self.__messages_queue.empty():
-                        # If the queue is empty, clear the write log event
-                        self.__write_log_event.clear()
+                # Write the last message to the log file
+                self.__write_last_message(file)
 
-        finally:
-            self.__close()
+                if self.__messages_queue.empty():
+                    # If the queue is empty, clear the write log event
+                    self.__write_log_event.clear()
+
+        # Close queue
+        self.__messages_queue.close()
 
     def create_thread(self) -> None:
         """
@@ -196,6 +219,7 @@ class Logger:
         """
         with self.__rlock:
             if self.__is_open():
+                self.log(Message("Logger thread is already running."))
                 return
 
             # Open the logger
@@ -215,6 +239,12 @@ class Logger:
 
             # Call the close method to stop the thread
             self.__close()
+
+            # Clear the logger opened event
+            self.__logger_opened_event.clear()
+
+            # Set the thread started flag to False
+            self.__thread_started = False
 
     def __del__(self):
         """

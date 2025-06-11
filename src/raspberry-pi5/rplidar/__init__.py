@@ -127,7 +127,7 @@ class RPLIDAR:
             asyncio.run(self.__server.broadcast_rplidar_measures(measures_str))
 
         if self.__serial_communication and self.__serial_communication.is_open():
-            self.__serial_communication.put_outgoing_rplidar_measures(measures_str)
+            self.__serial_communication.send_rplidar_measures(measures_str)
 
         if not self.__server and not self.__serial_communication:
             # Log the output                
@@ -201,6 +201,9 @@ class RPLIDAR:
                 self.__log("RPLIDAR is already started.")
                 return
 
+        # Log the start of the RPLIDAR process
+        self.__log("Starting RPLIDAR process...")
+
         command = [
             self.ULTRA_SIMPLE_PATH,
             "--channel",
@@ -219,11 +222,11 @@ class RPLIDAR:
             )
 
         except FileNotFoundError:
-            raise ValueError(f"The program '{command[0]}' was not found.")
+            raise ValueError(f"The RPLIDAR ultra_simple executable was not found at {self.ULTRA_SIMPLE_PATH}. Please ensure it is installed correctly.")
         
-        finally:
-            self.__stop()
-
+        except Exception as e:
+            raise RuntimeError(f"An error occurred while starting the RPLIDAR process: {e}")
+        
         # Set the started flag to True
         self.__started = True
 
@@ -248,7 +251,6 @@ class RPLIDAR:
         Stop the RPLIDAR process.
         """
         if not self.__started:
-            self.__log("RPLIDAR has not started.")
             return
 
         # Set the stop event
@@ -262,6 +264,9 @@ class RPLIDAR:
             if self.__process.poll() is None:
                 self.__process.kill()
             self.__process.wait()
+
+        # Log the stop message
+        self.__log("RPLIDAR process stopped.")
 
     def create_thread(self):
         """
@@ -279,9 +284,6 @@ class RPLIDAR:
         with self.__rlock:
             # Stop the RPLIDAR process
             self.__stop()
-            
-            # Log
-            self.__log("RPLIDAR thread stopped successfully.")
 
     def __del__(self):
         """
