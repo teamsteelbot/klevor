@@ -98,16 +98,19 @@ class RPLIDAR:
         # Initialize the process
         self.__process = None
 
-    def __log(self, message: str):
+    def __log(self, message: str, log_to_file = True, print_to_console = True):
         """
         Log a message using the logger if available.
         
         Args:
             message (str): The message to log.
+            log_to_file (bool): Whether to log to file using the logger.
+            print_to_console (bool): Whether to print the message to console.
         """
-        if self.__logger:
+        if self.__logger and log_to_file:
             self.__logger.log(message)
-        else:
+
+        if print_to_console:
             print(f"{self.LOG_TAG}: {message}")
 
     def __after_a_full_rotation(self):
@@ -128,7 +131,7 @@ class RPLIDAR:
 
         if not self.__server and not self.__serial_communication:
             # Log the output                
-            print(f"Full rotation completed with {len(self.__distances_dict)} measures: {measures_str}")
+            self.__log(f"Full rotation completed with {len(self.__distances_dict)} measures: {measures_str}.", log_to_file=False)
 
     def __read_output(self):
         """
@@ -219,8 +222,6 @@ class RPLIDAR:
         
         finally:
             self.__stop()
-        
-        self.__log(f"RPLIDAR started with command: {' '.join(command)}")
 
         # Set the started flag to True
         self.__started = True
@@ -251,7 +252,7 @@ class RPLIDAR:
 
         # Ensure the process is cleaned up even if an error occurs
         if self.__process and self.__process.poll() is None:
-            print("Ensuring process is terminated in finally block...")
+            self.__log("Ensuring process is terminated in finally block...")
             self.__process.terminate()
             self.__process.wait(timeout=self.PROCESS_WAIT_TIMEOUT)
             if self.__process.poll() is None:

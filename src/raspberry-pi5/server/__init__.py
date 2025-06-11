@@ -3,7 +3,7 @@ import io
 from threading import Thread
 from multiprocessing import Event
 from multiprocessing.synchronize import Event as EventCls
-from typing import Awaitable, Optional
+from typing import Awaitable, Optional, Any, Coroutine
 
 from websockets import serve, exceptions
 from PIL.Image import Image
@@ -57,7 +57,13 @@ class RealtimeTrackerServer:
     # Image format
     IMAGE_FORMAT = "JPEG"
 
-    def __init__(self, parking_event: Optional[EventCls] = None, logger: Optional[Logger] = None, host=HOST, port=PORT):
+    def __init__(
+        self,
+        parking_event: Optional[EventCls] = None,
+        logger: Optional[Logger] = None,
+        host: str = HOST,
+        port: int = PORT
+    ):
         """
         Initializes the WebSocket server with the specified host and port.
 
@@ -98,19 +104,22 @@ class RealtimeTrackerServer:
         # Initialize the started flag
         self.__started = False
 
-    def __log(self, message: str, print_to_console: bool = True):
+    def __log(self, message: str, log_to_file: bool = True, print_to_console: bool = True):
         """
         Logs a message using the logger if available.
         
         Args:
             message (str): The message to log.
+            log_to_file (bool): Whether to log to file using the logger.
+            print_to_console (bool): Whether to print the message to console.
         """
-        if self.__logger:
+        if self.__logger and log_to_file:
             self.__logger.log(message)
+
         if print_to_console:
             print(f"{self.LOG_TAG}: {message}")
 
-    async def __reactive_handler(self, connection) -> Awaitable[None]:
+    async def __reactive_handler(self, connection) -> None:
         """
         Handles WebSocket connections and broadcasts messages to all clients.
         """
@@ -126,7 +135,7 @@ class RealtimeTrackerServer:
                 message = await connection.recv()
                 
                 # Log
-                self.__log(f"Received message: {message}")
+                self.__log(f"Received message: {message}", log_to_file=False)
 
                 # Check if the message is a stop event
                 if message == self.TAG_STOP_EVENT:
@@ -153,7 +162,7 @@ class RealtimeTrackerServer:
                     continue
 
                 # Broadcast the received message to all connected clients
-                await self.__broadcast_message(message)
+                await self._broadcast_message(message)
 
         except exceptions.ConnectionClosedOK:
             self.__log(f"Client {connection.remote_address} disconnected gracefully.")
@@ -180,7 +189,7 @@ class RealtimeTrackerServer:
             self.__log(f"Error sending message to {connection.remote_address}: {e}")
 
 
-    async def __broadcast_message(self, message: Message):
+    async def _broadcast_message(self, message: Message):
         """
         Broadcasts a message to all connected clients.
 
@@ -291,7 +300,7 @@ class RealtimeTrackerServer:
         check_type(message, str)
 
         # Send a tagged message
-        await self.__broadcast_message(Message(self.TAG_RPLIDAR_MEASURES, message))
+        await self._broadcast_message(Message(self.TAG_RPLIDAR_MEASURES, message))
 
         # Log
         self.__log(f"RPLIDAR measures sent")
