@@ -11,11 +11,8 @@ if __name__ == "__main__":
     serial = SerialCommunication(logger=logger)
 
     try:
-        # Create thread to handle receiving messages
-        serial.create_receiving_thread()
-
-        # Create thread to handle sending messages
-        serial.create_sending_thread()
+        # Create threads to handle receiving and sending messages
+        serial.create_threads()
 
         # Wait indefinitely to keep the serial communication running
         while True:
@@ -25,3 +22,11 @@ if __name__ == "__main__":
         # Handle keyboard interrupt to stop the serial communication gracefully
         logger.log(f"KeyboardInterrupt received: {e}")
 
+    finally:
+        # Stop the serial communication threads gracefully
+        if serial:
+            serial.stop_threads()
+
+        # Stop the logger thread gracefully
+        if logger:
+            logger.stop_thread()

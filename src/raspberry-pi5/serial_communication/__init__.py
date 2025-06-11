@@ -171,8 +171,7 @@ class SerialCommunication:
             try:
                 self.__serial = Serial(self.__port, self.__baudrate)
             except SerialException as e:
-                self.__log(f"Error opening serial port: {e}")
-                return
+                raise RuntimeError(f"Error opening serial port: {e}")
 
         # Log
         self.__log(f"Serial port {self.__port} opened with baudrate {self.__baudrate}.")
@@ -227,7 +226,7 @@ class SerialCommunication:
                 self.__server.send_serial_incoming_message(str(message))
     
             # Log
-            self.__log(f"Received message: {message}")
+            self.__log(f"Received message: {message}", print_to_console=False)
 
     def receive_message(self) -> Message | None:
         """
@@ -279,8 +278,6 @@ class SerialCommunication:
             # Put the message in the queue
             self.__outgoing_messages_queue.put(message)
 
-            print(f"Message sent: {message}")
-
             # Set the pending outgoing message event
             self.__pending_outgoing_message_event.set()
 
@@ -318,7 +315,7 @@ class SerialCommunication:
                 self.__pending_outgoing_message_event.clear()
 
         # Log
-        self.__log(f"Sending message: {message}")
+        self.__log(f"Sending message: {message}", print_to_console=False)
 
         # If the server is set, send the message to the server
         if self.__server:
@@ -333,7 +330,7 @@ class SerialCommunication:
         while not self.__stop_event.is_set():
             # Check if there is a message to read
             if not self.__serial.in_waiting > 0:
-                return None
+                sleep(self.DELAY)
 
             # Read the message from the serial port
             message_str = self.__serial.readline().decode(self.ENCODE).strip()
@@ -359,11 +356,14 @@ class SerialCommunication:
         """
         while not self.__stop_event.is_set():
             # Check if there is a message to send
-            if not self.__pending_outgoing_message_event.is_set():
-                return
+            self.__pending_outgoing_message_event.wait()
 
             # Get the message from the queue
             message = self.__get_outgoing_message()
+            if message is None:
+                # If there is no message, wait for a short time
+                sleep(self.DELAY)
+                continue
 
             # Send the message to the serial port
             self.__serial.write(str(message).encode(self.ENCODE))

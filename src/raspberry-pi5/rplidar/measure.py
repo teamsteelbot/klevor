@@ -22,7 +22,8 @@ class Measure:
         """
         String representation of the Measure object.
         """
-        return self.ATTRIBUTES_SEPARATOR.join([str(self.angle), str(self.distance), str(self.quality)])
+        # return self.ATTRIBUTES_SEPARATOR.join([str(self.angle), str(self.distance), str(self.quality)])
+        return self.ATTRIBUTES_SEPARATOR.join([str(self.angle), str(self.distance)])
     
     @property
     def angle(self) -> float:

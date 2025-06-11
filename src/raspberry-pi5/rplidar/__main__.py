@@ -39,7 +39,7 @@ if __name__ == "__main__":
 
         # Create an instance of SerialCommunication if serial argument is provided
         if arg_serial:
-            serial = SerialCommunication(logger=logger, server=server)
+            serial = SerialCommunication(logger=logger, server=server, port='/dev/ttyACM1')
 
             # Start the serial communication
             serial.create_threads()
@@ -66,15 +66,17 @@ if __name__ == "__main__":
 
     finally:
         # Stop the RPLIDAR thread
-        rplidar.stop_thread()
+        if rplidar:
+            rplidar.stop_thread()
 
         # Stop the server thread
-        if arg_server:
+        if arg_server and server:
             server.stop_thread()
 
         # Stop the serial communication thread
-        if arg_serial:
+        if arg_serial and serial:
             serial.stop_threads()
 
         # Stop the logger thread
-        logger.stop_thread()
+        if logger:
+            logger.stop_thread()

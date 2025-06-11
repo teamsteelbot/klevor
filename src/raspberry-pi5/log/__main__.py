@@ -16,6 +16,9 @@ if __name__ == "__main__":
         # Create a thread for the logger
         logger.create_thread()
 
+        # Start the logger thread
+        logger.start_thread()
+
         # Log a message using the sub-logger
         sub_logger.log("This is a test log message.")
 
@@ -25,7 +28,7 @@ if __name__ == "__main__":
         # Wait for a while to ensure the log messages are processed
         while True:
             sleep(1)
-            
+
     except KeyboardInterrupt:
         # Handle keyboard interrupt to stop the logger thread gracefully
         logger.log(Message("KeyboardInterrupt received. Stopping logger thread."))
@@ -36,4 +39,5 @@ if __name__ == "__main__":
 
     finally:
         # Stop the logger thread gracefully
-        logger.stop_thread()
+        if logger:
+            logger.stop_thread()

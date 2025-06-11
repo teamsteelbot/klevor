@@ -24,6 +24,9 @@ class Logger:
         self.__stop_event = Event()
         self.__stop_event.set()
 
+        # Create the start event
+        self.__start_event = Event()
+
         # Initialize the messages queue
         self.__messages_queue = None
 
@@ -32,9 +35,6 @@ class Logger:
 
         # Initialize logger opened event
         self.__logger_opened_event = Event()
-
-        # Initialize thread started flag
-        self.__thread_started = False
 
     def log(self, message: Message) -> None:
         """
@@ -90,7 +90,6 @@ class Logger:
             return
 
         if not message:
-            print(f"Message is empty. Cannot write to log file.")
             return
 
         # Write the message to the log file
@@ -117,7 +116,7 @@ class Logger:
         Set the stop event to allow logging to start.
         """
         with self.__rlock:
-            if not self.__stop_event.is_set():
+            if self.__is_open():
                 return
 
             # Clear the stop event
@@ -139,7 +138,7 @@ class Logger:
         """
         with self.__rlock:
             # Check if the logger is already closed
-            if self.__stop_event.is_set():
+            if self.__is_closed():
                 return
             
             # Log the closing message
@@ -147,6 +146,9 @@ class Logger:
 
             # Set the stop event
             self.__stop_event.set()
+
+            # Clear the start event
+            self.__start_event.clear()
 
     def __is_closed(self) -> bool:
         """
@@ -163,14 +165,9 @@ class Logger:
 
         Args:
             file_path (str): Path to the log file.
-        """
-        with self.__rlock:
-            if self.__thread_started:
-                self.log(Message("Logger is already running."))
-                return
-            
-        # Set the thread started flag
-        self.__thread_started = True
+        """            
+        # Open the logger
+        self.__open()
 
         # Check the type of file_path
         check_type(file_path, str)
@@ -187,6 +184,9 @@ class Logger:
             # Set the logger opened event
             self.__logger_opened_event.set()
             self.log(Message(f"Logger opened at {self.__file_path}."))
+
+            # Wait for the start event to be set
+            self.__start_event.wait()
 
             while self.__is_open():
                 # Wait for the write log event to be set
@@ -213,6 +213,9 @@ class Logger:
         # Close queue
         self.__messages_queue.close()
 
+        # Call the close method to stop the thread
+        self.__close()
+
     def create_thread(self) -> None:
         """
         Create thread for the logger.
@@ -222,12 +225,9 @@ class Logger:
                 self.log(Message("Logger thread is already running."))
                 return
 
-            # Open the logger
-            self.__open()
-
             # Create a thread for the logger
-            thread = Thread(target=self.__loop)
-            thread.start()
+            self.__thread = Thread(target=self.__loop)
+            self.__thread.start()
 
     def stop_thread(self) -> None:
         """
@@ -236,15 +236,20 @@ class Logger:
         with self.__rlock:
             if self.__is_closed():
                 return
-
+            
             # Call the close method to stop the thread
             self.__close()
 
             # Clear the logger opened event
             self.__logger_opened_event.clear()
 
-            # Set the thread started flag to False
-            self.__thread_started = False
+    def start_thread(self) -> None:
+        """
+        Start the logger thread.
+        """
+        with self.__rlock:
+            if not self.__start_event.is_set():
+                self.__start_event.set()
 
     def __del__(self):
         """

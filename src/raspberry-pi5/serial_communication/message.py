@@ -8,7 +8,9 @@ class Message:
     TYPE_CAPTURE_IMAGE = 'capture_image'
     TYPE_INFERENCE = 'inference'
     TYPE_RPLIDAR_MEASURES = "rplidar_measures"
-    TYPES = [TYPE_INFERENCE, TYPE_CAPTURE_IMAGE, TYPE_RPLIDAR_MEASURES]
+    TYPE_DEBUG = 'debug'
+    TYPE_STATUS = 'status'
+    TYPES = [TYPE_INFERENCE, TYPE_CAPTURE_IMAGE, TYPE_RPLIDAR_MEASURES, TYPE_DEBUG, TYPE_STATUS]
 
     # Message header separator
     HEADER_SEPARATOR = ':'
