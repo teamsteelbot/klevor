@@ -6,6 +6,7 @@ from server import RealtimeTrackerServer
 from log import Logger
 from log.message import Message
 from time import sleep
+from serial_communication import SerialCommunication
 
 if __name__ == "__main__":
     parser = ArgumentParser(
@@ -15,6 +16,9 @@ if __name__ == "__main__":
 
     # Get the server argument
     arg_server = Args.get_attribute_from_args(args, Args.SERVER)
+
+    # Get the serial argument
+    arg_serial = Args.get_attribute_from_args(args, Args.SERIAL)
 
     # Create an instance of Logger
     logger = Logger()
@@ -32,8 +36,14 @@ if __name__ == "__main__":
         server.create_thread()
         print("Server started successfully.")
 
+    # Create an instance of SerialCommunication if serial argument is provided
+    if arg_serial:
+        serial = SerialCommunication(logger=logger, server=server)
+    else:
+        serial = None
+
     # Create an instance of RPLIDAR
-    rplidar = RPLIDAR(logger, server)
+    rplidar = RPLIDAR(logger, server, serial)
 
     try:
         # Start the RPLIDAR

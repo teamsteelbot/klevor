@@ -9,6 +9,7 @@ class Args:
 
     # Arguments
     SERVER = 'server'
+    SERIAL = 'serial'
 
     @classmethod
     def get_attribute_name(cls, attribute: str) -> str:
@@ -63,3 +64,14 @@ class Args:
         parser.add_argument(f"--{cls.SERVER}", dest=cls.SERVER, action="store_true",
                             help="Set server flag as 'True'")
         parser.set_defaults(**{cls.SERVER: default})
+
+    @classmethod
+    def add_serial_argument(cls, parser, default: bool = False) -> None:
+        """
+        Add serial argument to the parser.
+        """
+        parser.add_argument(f"--no-{cls.SERIAL}", dest=cls.SERIAL, action="store_false",
+                            help="Set serial flag as 'False'")
+        parser.add_argument(f"--{cls.SERIAL}", dest=cls.SERIAL, action="store_true",
+                            help="Set serial flag as 'True'")
+        parser.set_defaults(**{cls.SERIAL: default})
