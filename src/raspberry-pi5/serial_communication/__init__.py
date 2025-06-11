@@ -350,6 +350,7 @@ class SerialCommunication:
 
             # Read the message from the serial port
             message_str = self.__serial.readline().decode(self.ENCODE).strip()
+            print(f"Received raw message: {message_str}")
 
             # Split the message into type and content
             message_separator_idx = message_str.find(Message.HEADER_SEPARATOR)
@@ -501,6 +502,9 @@ class SerialCommunication:
                     continue
 
                 if last_message.type == Message.TYPE_STATUS and last_message.content == Message.TYPE_STATUS_ON:
+                    # Send start message confirmation
+                    self.send_message(Message(Message.TYPE_STATUS, Message.TYPE_STATUS_ON))
+
                     # Set the start event
                     self.__start_event.set()
                     return True
@@ -529,6 +533,9 @@ class SerialCommunication:
                     continue
 
                 if last_message.type == Message.TYPE_STATUS and last_message.content == Message.TYPE_STATUS_OFF:
+                    # Send stop message confirmation
+                    self.send_message(Message(Message.TYPE_STATUS, Message.TYPE_STATUS_OFF))
+                    
                     # Set the stop event
                     self.__stop_event.set()
                     return True

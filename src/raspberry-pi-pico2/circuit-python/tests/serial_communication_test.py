@@ -5,7 +5,7 @@ from time import sleep
 READ_TIMES_LIMIT = 100
 
 # Send start message to the device
-usb_cdc.data.write(b"start:on\n")
+usb_cdc.data.write(b"status:on\n")
 
 read_times = 0
 while read_times < READ_TIMES_LIMIT:
@@ -18,4 +18,4 @@ while read_times < READ_TIMES_LIMIT:
     sleep(0.05)
 
 # Send stop message to the device
-usb_cdc.data.write(b"start:off\n")
+usb_cdc.data.write(b"status:off\n")

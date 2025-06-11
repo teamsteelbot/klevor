@@ -45,7 +45,7 @@ if __name__ == "__main__":
 
         # Create an instance of SerialCommunication if serial argument is provided
         if arg_serial:
-            serial = SerialCommunication(logger=logger, server=server, port='/dev/ttyACM1')
+            serial = SerialCommunication(logger=logger, server=server, port='/dev/ttyACM0')
 
             # Start the serial communication
             serial.create_threads()
@@ -63,10 +63,16 @@ if __name__ == "__main__":
                 sleep(1)  # Sleep to prevent busy-waiting
 
         # Wait for the start message from SerialCommunication
+        logger.log(Message("Waiting for start message from SerialCommunication..."))
         serial.wait_for_start_message()
+
+        # Start the RPLIDAR thread
+        rplidar.start_thread()
+        logger.log(Message("RPLIDAR started successfully."))
 
         # Wait for the stop message from SerialCommunication
         serial.wait_for_stop_message()
+        logger.log(Message("Received stop message from SerialCommunication, stopping RPLIDAR..."))
 
     except KeyboardInterrupt:
         # Handle keyboard interrupt to stop the server gracefully
