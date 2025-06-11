@@ -51,10 +51,9 @@ class Measure:
         """
         check_type(value, float)
 
-        if not (0 <= value <= 360):
-            raise ValueError("Angle must be between 0 and 360 degrees, received: {}".format(value))
-
-        self.__angle = value
+        if not (0 <= value):
+            raise ValueError("Angle must be a non-negative float, received: {}".format(value))
+        self.__angle = 360.0 if value > 360.0 else value
 
     @property
     def distance(self) -> float:

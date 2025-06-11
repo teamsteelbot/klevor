@@ -332,7 +332,7 @@ class RealtimeTrackerServer:
         self.__log(f"Starting WebSocket server on ws://{local_ip}:{self.__port}")
         async with serve(self.__reactive_handler, self.__host, self.__port):
             self.__log("WebSocket server started successfully.")
-            self.__stop_event.wait()
+            await asyncio.get_running_loop().run_in_executor(None, self.__stop_event.wait)
 
         # Log the stopping of the server
         self.__log("WebSocket server is stopping...")
