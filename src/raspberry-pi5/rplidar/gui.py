@@ -161,7 +161,7 @@ class App:
                 msg = await ws.recv()
                 parts = msg.split(RealtimeTrackerServer.TAG_SEPARATOR)
                 if parts[0] == RealtimeTrackerServer.TAG_RPLIDAR_MEASURES:
-                    self.__measures = Measure.from_string_to___measures(parts[1])
+                    self.__measures = Measure.from_string_to_measures(parts[1])
 
 if __name__ == "__main__":
     parser = ArgumentParser(

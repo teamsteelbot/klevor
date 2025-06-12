@@ -26,11 +26,11 @@ if __name__ == "__main__":
 
     except KeyboardInterrupt:
         # Handle keyboard interrupt to stop the server gracefully
-        logger.log(Message("KeyboardInterrupt received, stopping the server..."))
+        logger.log(Message("KeyboardInterrupt received. Stopping the server..."))
 
     except Exception as e:
         # Log any exceptions that occur
-        logger.log(f"An error occurred: {e}")
+        logger.log(Message(f"An error occurred: {e}"))
 
     finally:
         # Stop the server thread

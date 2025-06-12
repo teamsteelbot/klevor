@@ -93,6 +93,9 @@ class SerialCommunication:
         self.__pending_incoming_message_event = Event()
         self.__pending_outgoing_message_event = Event()
 
+        # Create the queues closed event
+        self.__queues_closed_event = Event()
+
         # Initialize the incoming and outgoing messages queues
         self.__incoming_messages_queue = None
         self.__outgoing_messages_queue = None
@@ -121,25 +124,6 @@ class SerialCommunication:
 
         if print_to_console:
             print(f"{self.LOG_TAG}: {message}")
-
-    def __clear_events(self) -> None:
-        """
-        Clear the events.
-        """
-        with self.__rlock:
-            # Clear the stop event
-            self.__stop_event.clear()
-
-            # Clear the capture image event
-            if self.__capture_image_event:
-                self.__capture_image_event.clear()
-
-            # Clear the pending incoming and outgoing message event
-            self.__pending_incoming_message_event.clear()
-            self.__pending_outgoing_message_event.clear()
-
-            # Clear the start event
-            self.__start_event.clear()
 
     def is_open(self) -> bool:
         """
@@ -179,8 +163,19 @@ class SerialCommunication:
             if self.is_open():
                 return
 
-            # Clear the events
-            self.__clear_events()
+            # Clear the stop event
+            self.__stop_event.clear()
+
+            # Clear the capture image event
+            if self.__capture_image_event:
+                self.__capture_image_event.clear()
+
+            # Clear the pending incoming and outgoing message event
+            self.__pending_incoming_message_event.clear()
+            self.__pending_outgoing_message_event.clear()
+
+            # Clear the start event
+            self.__start_event.clear()
 
             # Clear the last incoming message
             self.__last_incoming_message = None
@@ -189,9 +184,13 @@ class SerialCommunication:
             self.__incoming_messages_queue = Queue()
             self.__outgoing_messages_queue = Queue()
 
+            # Clear queues closed event
+            self.__queues_closed_event.clear()
+
             # Open the serial port
             try:
                 self.__serial = Serial(self.__port, self.__baudrate)
+
             except SerialException as e:
                 raise RuntimeError(f"Error opening serial port: {e}")
 
@@ -207,8 +206,21 @@ class SerialCommunication:
             if self.is_closed():
                 return
 
-            # Clear the events
-            self.__clear_events()
+            # Clear the stop event
+            self.__stop_event.clear()
+
+            # Clear the capture image event
+            if self.__capture_image_event:
+                self.__capture_image_event.clear()
+
+            # Clear the pending incoming message event
+            self.__pending_incoming_message_event.clear()
+
+            # Set the pending outgoing message event to ensure no messages are left to send
+            self.__pending_outgoing_message_event.set()
+
+            # Clear the start event
+            self.__start_event.clear()
 
             # Clear the last incoming message
             self.__last_incoming_message = None
@@ -217,8 +229,15 @@ class SerialCommunication:
             self.__incoming_messages_queue.close()
             self.__outgoing_messages_queue.close()
 
+            # Set the queues closed event
+            self.__queues_closed_event.set()
+
             # Close the serial port
-            self.__serial.close()
+            if self.__serial and self.__serial.is_open:
+                try:
+                    self.__serial.close()
+                except SerialException as e:
+                    raise RuntimeError(f"Error closing serial port: {e}")
 
         # Log
         self.__log(f"Serial port {self.__port} closed.")
@@ -244,7 +263,8 @@ class SerialCommunication:
             self.__pending_incoming_message_event.set()
     
         # Log
-        self.__log(f"Received message: {message}", print_to_console=False)
+        first_line = str(message).split('\n')[0]
+        self.__log(f"Received message: {first_line}", print_to_console=False)
 
         # If the server is set, send the message to the server
         if self.__server:
@@ -327,10 +347,17 @@ class SerialCommunication:
         Returns:
             str|None: The message from the outgoing messages queue or None if no message is available.
         """
-        message = None
-        if self.is_open():
+        with self.__rlock:
+            message = None
+            if not self.is_open():
+                return None
+            
             # Check if there is a pending outgoing message
             if not self.__pending_outgoing_message_event.is_set():
+                return None
+                
+            # Check if the queue is closed or empty
+            if self.__queues_closed_event.is_set() or self.__outgoing_messages_queue.empty():
                 return None
 
             # Get the message from the queue
@@ -341,7 +368,8 @@ class SerialCommunication:
                 self.__pending_outgoing_message_event.clear()
 
         # Log
-        self.__log(f"Sending message: {message}", print_to_console=False)
+        first_line = str(message).split('\n')[0]
+        self.__log(f"Sending message: {first_line}", print_to_console=False)
 
         # If the server is set, send the message to the server
         if self.__server:
@@ -353,12 +381,24 @@ class SerialCommunication:
         """
         Handler to receive messages from the serial port.
         """
-        while not self.__stop_event.is_set():
-            # Check if there is a message to read
+        # Wait for start event to be set
+        self.__start_event.wait()
+
+        # Check if there is a initialization message received
+        if self.is_open() and self.__serial.in_waiting > 0:
+            data = self.__serial.read(self.__serial.in_waiting)
+
+            # Read the initialization message
+            self.__log(f"Initialization message received: {data}")
+            self.__serial.reset_input_buffer()
+            self.__serial.reset_output_buffer()
+            self.__log("Input and output buffers reset.")
+
+        while self.is_open():
             if not self.__serial.in_waiting > 0:
                 sleep(self.DELAY)
+                continue
 
-            # Read the message from the serial port
             message_str = self.__serial.readline().decode(self.ENCODE).strip()
 
             # Split the message into type and content
@@ -376,6 +416,8 @@ class SerialCommunication:
             # Sleep for a short time to avoid busy waiting
             sleep(self.DELAY)
 
+        self.__log(f"Serial port receiving handler stopped for port {self.__port}.")
+
     def __sending_message_handler(self) -> None:
         """
         Handler to send messages to the serial port.
@@ -383,7 +425,7 @@ class SerialCommunication:
         # Wait for start event to be set
         self.__start_event.wait()
 
-        while not self.__stop_event.is_set():
+        while self.is_open():
             # Check if there is a message to send
             self.__pending_outgoing_message_event.wait()
 
@@ -399,6 +441,8 @@ class SerialCommunication:
 
             # Wait for the message to be sent
             sleep(self.DELAY)
+
+        self.__log(f"Serial port sending handler stopped for port {self.__port}.")
 
     def __create_sending_thread(self) -> None:
         """

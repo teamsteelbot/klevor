@@ -12,6 +12,8 @@ class Logger:
     """
     Class to handle logging functionality.
     """
+    # Get message from queue timeout
+    GET_MESSAGE_FROM_QUEUE_TIMEOUT = 0.1
 
     def __init__(self):
         """
@@ -44,6 +46,17 @@ class Logger:
             message (Message): Message to put in the queue.
         """
         with self.__rlock:
+            # Check if the stop event is set
+            if self.__stop_event.is_set():
+                # Write the message to the latest log file
+                if not self.__file_path:
+                    print("Logger is closed. Cannot log messages.")
+                    return
+                
+                with open(self.__file_path, 'a') as file:
+                    self.__write(file, str(message))
+                return
+
             # If the opened event is not set, wait for it to be set
             if not self.__opened_event.is_set():
                 self.__opened_event.wait()
@@ -70,7 +83,7 @@ class Logger:
                 return None
             
             # Return the message from the queue
-            return self.__messages_queue.get()
+            return self.__messages_queue.get(timeout=self.GET_MESSAGE_FROM_QUEUE_TIMEOUT)
 
     @staticmethod
     def __write(file: TextIOWrapper, message: str) -> None:
@@ -122,6 +135,9 @@ class Logger:
             # Clear the stop event
             self.__stop_event.clear()
 
+            # Clear the write log event
+            self.__write_log_event.clear()
+
     def __is_open(self) -> bool:
         """
         Check if the stop even is not set, indicating that's allowed to log messages.
@@ -149,6 +165,9 @@ class Logger:
 
             # Clear the opened event
             self.__opened_event.clear()
+
+            # Set the write log event
+            self.__write_log_event.set()
 
     def __is_closed(self) -> bool:
         """
@@ -187,14 +206,11 @@ class Logger:
                 self.__write_log_event.wait()
 
                 # Check if the stop event is set
-                if self.__stop_event and self.__stop_event.is_set():
+                if self.__stop_event.is_set():
                     # Process any remaining messages in the queue
                     while not self.__messages_queue.empty():
-                        message = self.__get_message()
-                        if message:
-                            self.__write(file, message)
-
-                    self.__write_log_event.clear()
+                        # Write the last message to the log file
+                        self.__write_last_message(file)
                     break
 
                 # Write the last message to the log file
@@ -202,7 +218,11 @@ class Logger:
 
                 if self.__messages_queue.empty():
                     # If the queue is empty, clear the write log event
-                    self.__write_log_event.clear()
+                    with self.__rlock:
+                        if self.__stop_event.is_set():
+                            break
+
+                        self.__write_log_event.clear()
 
         # Close queue
         self.__messages_queue.close()

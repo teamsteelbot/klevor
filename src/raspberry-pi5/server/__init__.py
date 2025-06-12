@@ -105,6 +105,9 @@ class RealtimeTrackerServer:
         # Initialize the connected clients set
         self.__connected_clients = set()
 
+        # Initialize the thread
+        self.__thread = None
+
     def __log(self, message: str, log_to_file: bool = True, print_to_console: bool = True):
         """
         Logs a message using the logger if available.
@@ -132,7 +135,7 @@ class RealtimeTrackerServer:
         await self._send_message(connection, Message(self.TAG_CONNECTION_STATUS, "Connected to RealtimeTrackerServer"))
 
         try:
-            while True:
+            while not self.__stop_event.is_set():
                 message = await connection.recv()
                 
                 # Log
@@ -173,6 +176,14 @@ class RealtimeTrackerServer:
 
         except Exception as e:
             self.__log(f"An unexpected error occurred with {connection.remote_address}: {e}")
+
+        finally:
+            # Remove the client from the set of connected clients
+            self.__connected_clients.discard(connection)
+            self.__log(f"Client {connection.remote_address} disconnected.")
+
+            # Close the connection
+            await connection.close()
 
     async def _send_message(self, connection, message: Message):
         """
@@ -314,9 +325,8 @@ class RealtimeTrackerServer:
         local_ip = get_local_ip()
 
         # Start the WebSocket server
-        self.__log(f"Starting WebSocket server on ws://{local_ip}:{self.__port}")
         async with serve(self.__reactive_handler, self.__host, self.__port):
-            self.__log("WebSocket server started successfully.")
+            self.__log(f"WebSocket server started successfully on ws://{local_ip}:{self.__port}")
             await asyncio.get_running_loop().run_in_executor(None, self.__stop_event.wait)
 
         # Log the stopping of the server
@@ -332,6 +342,9 @@ class RealtimeTrackerServer:
 
             # Set the stop event
             self.__stop_event.set()
+
+            # Set the thread to None
+            self.__thread = None
 
             # Log the stopping event
             self.__log("WebSocket server stop event set. Stopping the server...")
@@ -349,8 +362,8 @@ class RealtimeTrackerServer:
             self.__stop_event.clear()
 
             # Create a thread to run the WebSocket server
-            thread = Thread(target=lambda: asyncio.run(self.__loop()))
-            thread.start()
+            self.__thread = Thread(target=lambda: asyncio.run(self.__loop()))
+            self.__thread.start()
     
     def stop_thread(self):
         """

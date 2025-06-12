@@ -33,7 +33,7 @@ if __name__ == "__main__":
 
     except Exception as e:
         # Log any exceptions that occur
-        logger.log(f"An error occurred: {e}")
+        logger.log(Message(f"An error occurred: {e}"))
 
     finally:
         # Stop the logger thread gracefully
