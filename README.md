@@ -1,12 +1,10 @@
 <h1 id="index">Índice</h1>
 
-Nota: Este índice solo lista los contenidos de este README.md, revisa el listado adicional para los demás archivos
+Nota: Este listado contiene todo el contenido respectivo al desarollo de Klevor, sin embargo no todo está presente en este README.md, asegurese de hacer click para poder ser redireccionado si es necesario.
 
 1. **[Introducción](#introduccion)**
-3. **[Estructura de archivos](#estructura-de-archivos)**
-   1. [Información adicional](#informacion-adicional)
-
-3. **[Componentes](#componentes)**
+2. **[Descripción de la Mecánica](v-photos/prototype1/README.md)**
+3. **[Lista de Componentes](#componentes)**
    1. [Raspberry Pi 5](#componentes-raspberry-pi-5)
    2. [Raspberry Pi Camera Module 3 Wide](#componentes-raspberry-pi-camera-module-3-wide)
    3. [Raspberry Pi AI HAT+ (26 TOPS)](#componentes-raspberry-pi-ai-hat-26-tops)
@@ -19,20 +17,35 @@ Nota: Este índice solo lista los contenidos de este README.md, revisa el listad
    10. [INJORA 7KG 2065 Micro Servo](#componentes-injora-7kg-2065-micro-servo) 
    11. [HiLetgo Time-of-Flight Sensor VL53L0X](#sensor-tof-hiletgo)
    12. [9-Axis IMU Gyroscope GY-BNO085](#gyroscope-gy-bno085)
-4. **[Lenguajes de Programación](#lenguajes-de-programacion)**
+4. **[Esquemas y Diagramas](#esquemas)**
+   1. [Esquemas de Conexiones](schemes/detailed-klevor-wiring-diagram.png)
+   2. [Diagrama de Flujo](schemes/open_challenge_flowchart.png)
+5. **[Lenguajes de Programación](#lenguajes-de-programacion)**
    1. [Python](#python)
    2. [MicroPython](#micropython)
    3. [CircuitPython](#circuitpython)
-5. **[Librerías](#librerias)**
+6. Código
+   1. [Raspberry Pi 5](src/raspberry-pi5/README.md)
+      1. [YOLO](src/raspberry-pi5/yolo/README.md)
+   2. [Raspberry Pi Pico 2 WH](src/raspberry-pi-pico2/README.md)
+      1. [CircuitPython](src/raspberry-pi-pico2-circuitpython/README.md)
+      2. [MicroPython](src/raspberry-pi-pico2-micropython/README.md)
+7. **[Librerías](#librerias)**
    1. [Ultralytics YOLO](#ultralytics-yolo)
    2. [OpenCV](#opencv)
    3. [NumPy](#numpy)
    4. [PyTorch](#pytorch)
    5. [PiCamera2](#picamera-2)
    6. [Hailo Platform](#hailo-platform)
-6. **[Recursos Externos](#recursos-externos)**
+8. **[Recursos Externos](#recursos-externos)**
+9. **[Fotos del equipo](t-photos/README.md)**
+10. **[Vídeos](video/README.md)**
 
 <h1 id="introduccion">Introducción</h1>
+
+<p align="center">
+    <img src="other/Team_Logo.svg" alt="Logo del Equipo" width=500>
+</p>
 
 Este es el repositorio del Team Steelbot, compitiendo en la World Robot Olympiad 2025, en la categoría Futuros Ingenieros. Representando al Colegio Salto Ángel en Maracaibo, Estado Zulia, Venezuela. 
 
@@ -55,17 +68,6 @@ Actualmente, este equipo está conformado por 3 miembros:
 - `v-photos` contiene las fotos de Klevor.
 
 - `video` contiene los vídeos de Klevor en la pista, tanto en el Desafío Abierto como en el Desafío con Obstáculos (Desafío Cerrado).
-
-<h2 id="informacion-adicional">Información adicional</h2>
-Debido a que este repositorio contiene múltiples archivos README.md, aquí esta el listado de cada README.md con su información respectiva.
-
-1. **[Descripción de la Mecánica y Fotos de Klevor](v-photos/prototype1/README.md)**
-2. Código
-   1. [Raspberry Pi 5](src/raspberry-pi5/README.md)
-      1. [YOLO](src/raspberry-pi5/yolo/README.md)
-   2. [Raspberry Pi Pico 2 WH](src/raspberry-pi-pico2/README.md)
-3. **[Fotos del equipo](t-photos/README.md)**
-4. **[Vídeos](video/README.md)**
 
 <h1 id="componentes">Componentes</h1>
 
