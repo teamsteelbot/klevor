@@ -14,7 +14,7 @@ from log.sub_logger import SubLogger
 from serial_communication.message import Message
 from server import RealtimeTrackerServer
 from utils import check_type
-
+from env import Env
 
 class SerialCommunication:
     """
@@ -131,6 +131,9 @@ class SerialCommunication:
         # Initialize the serial port
         self.__serial = None
 
+        # Get the debug environment variable
+        self.__debug = Env.get_debug_mode()
+
     def __log(self, message: str, log_to_file: bool = True, print_to_console: bool = True):
         """
         Logs a message using the logger if available.
@@ -236,7 +239,7 @@ class SerialCommunication:
                 return
 
             # Clear the stop event
-            self.__stop_event.clear()
+            self.__stop_event.set()
 
             # Clear the capture image event
             if self.__capture_image_event:
@@ -248,8 +251,8 @@ class SerialCommunication:
             # Set the pending outgoing message event to ensure no messages are left to send
             self.__pending_outgoing_message_event.set()
 
-            # Clear the start event
-            self.__start_event.clear()
+            # Set the start event
+            self.__start_event.set()
 
             # Clear the last incoming message
             self.__last_incoming_message = None
@@ -260,13 +263,6 @@ class SerialCommunication:
 
             # Set the queues closed event
             self.__queues_closed_event.set()
-
-            # Close the serial port
-            if self.__serial and self.__serial.is_open:
-                try:
-                    self.__serial.close()
-                except SerialException as e:
-                    raise RuntimeError(f"Error closing serial port: {e}")
 
         # Log
         self.__log(f"Serial port {self.__port} closed.")
@@ -293,7 +289,7 @@ class SerialCommunication:
     
         # Log
         first_line = str(message).split('\n')[0]
-        self.__log(f"Received message: {first_line}", print_to_console=False)
+        self.__log(f"Received message: {first_line}", print_to_console=self.__debug)
 
         # If the server is set, send the message to the server
         if self.__server:
@@ -399,7 +395,7 @@ class SerialCommunication:
         # Log
         message_str = str(message)
         first_line = message_str.split('\n')[0]
-        self.__log(f"Sending message: {first_line}", print_to_console=False)
+        self.__log(f"Sending message: {first_line}", print_to_console=self.__debug)
 
         # If the server is set, send the message to the server
         if self.__server:
@@ -453,7 +449,7 @@ class SerialCommunication:
         Handler to send messages to the serial port.
         """
         # Wait for start event to be set
-        #self.__start_event.wait()
+        self.__start_event.wait()
 
         while self.is_open():
             # Check if there is a message to send
