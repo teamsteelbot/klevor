@@ -29,7 +29,7 @@ def after_training(input_dir, hailo_suite_dir, model_hailo_suite_dir, best_onnx_
             print(f'{folder} folder does not exist in {input_dir}')
 
     # Copy the best ONNX weights to the model Hailo Suite folder
-    Files.ensure_path_exists(model_hailo_suite_dir)
+    Files.ensure_directory_exists(model_hailo_suite_dir)
     if os.path.exists(best_onnx_weights_path):
         shutil.copy(best_onnx_weights_path, model_hailo_suite_dir)
         print(f'Copied {best_onnx_weights_path} to {model_hailo_suite_dir} folder')

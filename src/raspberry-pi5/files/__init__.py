@@ -64,7 +64,7 @@ class Files:
         """
         if os.path.exists(input_dir):
             # Check if the output directory exists, if not create it
-            cls.ensure_path_exists(output_dir)
+            cls.ensure_directory_exists(output_dir)
 
             # Get all files and folders in the input directory
             for item in os.listdir(input_dir):
@@ -99,9 +99,9 @@ class Files:
             shutil.copy(input_path, output_path)
 
     @staticmethod
-    def ensure_path_exists(path: str) -> None:
+    def ensure_directory_exists(path: str) -> None:
         """
-        Ensure the path exists, if not create it.
+        Ensure the directory exists, if not create it.
 
         Args:
             path (str): The path to check and create if it doesn't exist.
@@ -114,6 +114,23 @@ class Files:
 
         # Ensure the output directory exists
         os.makedirs(output_dir, exist_ok=True)
+
+    @staticmethod
+    def ensure_file_exists(file_path: str) -> None:
+        """
+        Ensure the file exists, if not create it.
+
+        Args:
+            file_path (str): The path of the file to check and create if it doesn't exist.
+        """
+        # Ensure the directory exists
+        Files.ensure_directory_exists(os.path.dirname(file_path))
+
+        # Create the file if it does not exist
+        if not os.path.exists(file_path):
+            with open(file_path, 'w') as f:
+                pass
+
 
     @staticmethod
     def check_path_exists(path: str) -> bool:
@@ -134,6 +151,6 @@ class Files:
         Get the log file path.
         """
         # Get the current time formatted as a string
-        formatted_time = datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
+        formatted_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
 
         return os.path.join(cls.LOGS_DIR, f'{formatted_time}.txt')

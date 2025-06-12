@@ -23,6 +23,7 @@ if __name__ == "__main__":
         logger.log(Message("This is a test log message from the main logger."))
 
         # Wait for a while to ensure the log messages are processed
+        print("Logger is running. Press Ctrl+C to stop.")
         while True:
             sleep(1)
 

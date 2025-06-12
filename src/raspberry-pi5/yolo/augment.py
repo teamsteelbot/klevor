@@ -37,7 +37,7 @@ def augment_dataset(input_to_process_dir: str, output_augmented_dir: str, num_au
                    output_augmented_dir, output_augmented_images_dir,
                    output_augmented_annotations_dir,
                    output_processed_images_dir, output_processed_annotations_dir]:
-        Files.ensure_path_exists(io_dir)
+        Files.ensure_directory_exists(io_dir)
 
     # Get the image files
     image_filenames = [f for f in os.listdir(input_to_process_images_dir) if

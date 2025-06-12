@@ -17,10 +17,16 @@ from utils import check_type
 
 class SerialCommunication:
     """
-    Class to handle the serial communication with the Raspberry Pi Pico.
+    Class to handle the serial communication through USB.
     """
     # Logger configuration
     LOG_TAG = "Serial"
+
+    # Raspberry Pi Pico baud rate
+    RASPBERRY_PI_PICO_BAUDRATE = 115200
+
+    # Raspberry PI Pico default port
+    RASPBERRY_PI_PICO_PORT = '/dev/ttyACM0'
 
     # Message delay
     DELAY = 0.01
@@ -33,8 +39,8 @@ class SerialCommunication:
         logger: Optional[Logger] = None,
         images_queue: Optional[ImagesQueue] = None,
         server: Optional[RealtimeTrackerServer] = None,
-        port: str = '/dev/ttyACM0',
-        baudrate: int = 115200
+        port: str = RASPBERRY_PI_PICO_PORT,
+        baudrate: int = RASPBERRY_PI_PICO_BAUDRATE
     ):
         """
         Initialize the serial communication class.
@@ -132,6 +138,9 @@ class SerialCommunication:
             self.__pending_incoming_message_event.clear()
             self.__pending_outgoing_message_event.clear()
 
+            # Clear the start event
+            self.__start_event.clear()
+
     def is_open(self) -> bool:
         """
         Check if the serial port is open.
@@ -139,8 +148,8 @@ class SerialCommunication:
         Returns:
             bool: True if the serial port is open, False otherwise.
         """
-        with self.__rlock:
-            return self.__serial and self.__serial.is_open
+        with (self.__rlock):
+            return not self.__stop_event.is_set() and self.__serial and self.__serial.is_open
 
     def is_closed(self) -> bool:
         """
@@ -211,11 +220,8 @@ class SerialCommunication:
             # Close the serial port
             self.__serial.close()
 
-            # Clear the start event
-            self.__start_event.clear()
-
-            # Log
-            self.__log(f"Serial port {self.__port} closed.")
+        # Log
+        self.__log(f"Serial port {self.__port} closed.")
 
     def __put_incoming_message(self, message: Message) -> None:
         """
@@ -237,12 +243,12 @@ class SerialCommunication:
             # Set the pending incoming message event
             self.__pending_incoming_message_event.set()
     
-            # If the server is set, send the message to the server
-            if self.__server:
-                self.__server.send_serial_incoming_message(str(message))
-    
-            # Log
-            self.__log(f"Received message: {message}", print_to_console=False)
+        # Log
+        self.__log(f"Received message: {message}", print_to_console=False)
+
+        # If the server is set, send the message to the server
+        if self.__server:
+            self.__server.send_serial_incoming_message(str(message))
 
     def receive_message(self) -> Message | None:
         """
@@ -275,9 +281,10 @@ class SerialCommunication:
         Returns:
             Message|None: The last incoming message or None if no message is available.
         """
-        return self.__last_incoming_message
+        with self.__rlock:
+            return self.__last_incoming_message
 
-    def send_message(self, message: Message) -> None:
+    def _send_message(self, message: Message) -> None:
         """
         Put a message in the outgoing messages queue.
 
@@ -297,6 +304,9 @@ class SerialCommunication:
             # Set the pending outgoing message event
             self.__pending_outgoing_message_event.set()
 
+        # Log
+        self.__log(f"Sending message: {message}", print_to_console=False)
+
     def send_rplidar_measures(self, measures_str: str) -> None:
         """
         Put RPLIDAR measures in the outgoing messages queue.
@@ -308,7 +318,7 @@ class SerialCommunication:
         message = Message(Message.TYPE_RPLIDAR_MEASURES, measures_str)
 
         # Put the message in the outgoing messages queue
-        self.send_message(message)
+        self._send_message(message)
 
     def __get_outgoing_message(self) -> str | None:
         """
@@ -350,7 +360,6 @@ class SerialCommunication:
 
             # Read the message from the serial port
             message_str = self.__serial.readline().decode(self.ENCODE).strip()
-            print(f"Received raw message: {message_str}")
 
             # Split the message into type and content
             message_separator_idx = message_str.find(Message.HEADER_SEPARATOR)
@@ -478,7 +487,7 @@ class SerialCommunication:
         """
         return self.__pending_outgoing_message_event
 
-    def wait_for_start_message(self, timeout: Optional[float] = None) -> bool:
+    def wait_for_start_message(self, timeout: Optional[float] = None) -> bool | None:
         """
         Wait for the start message to be received.
 
@@ -486,7 +495,7 @@ class SerialCommunication:
             timeout (float): The maximum time to wait for the start message. Default is None (wait indefinitely).
 
         Returns:
-            bool: True if the start message is received, False if the timeout is reached.
+            bool|None: True if the start message is received, False if the timeout is reached.
         """
         with self.__rlock:
             while True:
@@ -503,13 +512,13 @@ class SerialCommunication:
 
                 if last_message.type == Message.TYPE_STATUS and last_message.content == Message.TYPE_STATUS_ON:
                     # Send start message confirmation
-                    self.send_message(Message(Message.TYPE_STATUS, Message.TYPE_STATUS_ON))
+                    self._send_message(Message(Message.TYPE_STATUS, Message.TYPE_STATUS_ON))
 
                     # Set the start event
                     self.__start_event.set()
                     return True
 
-    def wait_for_stop_message(self, timeout: Optional[float] = None) -> bool:
+    def wait_for_stop_message(self, timeout: Optional[float] = None) -> bool | None:
         """
         Wait for the stop message to be received.
 
@@ -517,7 +526,7 @@ class SerialCommunication:
             timeout (float): The maximum time to wait for the stop message. Default is None (wait indefinitely).
 
         Returns:
-            bool: True if the stop message is received, False if the timeout is reached.
+            bool|None: True if the stop message is received, False if the timeout is reached.
         """
         with self.__rlock:
             while True:
@@ -534,7 +543,7 @@ class SerialCommunication:
 
                 if last_message.type == Message.TYPE_STATUS and last_message.content == Message.TYPE_STATUS_OFF:
                     # Send stop message confirmation
-                    self.send_message(Message(Message.TYPE_STATUS, Message.TYPE_STATUS_OFF))
+                    self._send_message(Message(Message.TYPE_STATUS, Message.TYPE_STATUS_OFF))
                     
                     # Set the stop event
                     self.__stop_event.set()

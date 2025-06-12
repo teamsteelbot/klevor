@@ -61,6 +61,7 @@ class RPLIDAR:
 
         # Create a stop event
         self.__stop_event = Event()
+        self.__stop_event.set()
 
         # Check the type of logger
         if logger:
@@ -88,9 +89,6 @@ class RPLIDAR:
         # Check the type of the port
         check_type(port, str)
         self.__port = port
-
-        # Set the start flag
-        self.__started = False
 
         # Distances dictionary
         self.__distances_dict = dict()
@@ -133,7 +131,6 @@ class RPLIDAR:
             self.__serial_communication.send_rplidar_measures(measures_str)
 
         if not self.__server and not self.__serial_communication:
-            # Log the output                
             self.__log(f"Full rotation completed with {len(self.__distances_dict)} measures: {measures_str}.", log_to_file=False)
 
     def __read_output(self):
@@ -203,11 +200,6 @@ class RPLIDAR:
         """
         Loop to read the output from the RPLIDAR process.
         """
-        with self.__rlock:
-            if self.__started:
-                self.__log("RPLIDAR is already started.")
-                return
-
         # Log the start of the RPLIDAR process
         self.__log("Starting RPLIDAR process...")
 
@@ -233,44 +225,30 @@ class RPLIDAR:
         
         except Exception as e:
             raise RuntimeError(f"An error occurred while starting the RPLIDAR process: {e}")
-        
-        # Set the started flag to True
-        self.__started = True
 
         # Read the output in a loop until the process ends or stop event is set
-        if not self.__stop_event:
-            try:
-                while self.__process.poll() is None:
-                    self.__read_output()
-
-            except KeyboardInterrupt:
-                self.__stop()
-        else:
-            # Read the output in a loop until the process ends or stop event is set
-            while self.__process.poll() is None and not self.__stop_event.is_set():
-                self.__read_output()
-
-        # Set the started flag to False if the process ends
-        self.__started = False
+        while self.__process.poll() is None and not self.__stop_event.is_set():
+            self.__read_output()
 
     def __stop(self):
         """
         Stop the RPLIDAR process.
         """
-        if not self.__started:
-            return
+        with self.__rlock:
+            if self.is_stopped():
+                return
 
-        # Set the stop event
-        self.__stop_event.set()
+            # Set the stop event
+            self.__stop_event.set()
 
-        # Ensure the process is cleaned up even if an error occurs
-        if self.__process and self.__process.poll() is None:
-            self.__log("Ensuring process is terminated in finally block...")
-            self.__process.terminate()
-            self.__process.wait(timeout=self.PROCESS_WAIT_TIMEOUT)
-            if self.__process.poll() is None:
-                self.__process.kill()
-            self.__process.wait()
+            # Ensure the process is cleaned up even if an error occurs
+            if self.__process and self.__process.poll() is None:
+                self.__log("Ensuring process is terminated in finally block...")
+                self.__process.terminate()
+                self.__process.wait(timeout=self.PROCESS_WAIT_TIMEOUT)
+                if self.__process.poll() is None:
+                    self.__process.kill()
+                self.__process.wait()
 
         # Log the stop message
         self.__log("RPLIDAR process stopped.")
@@ -280,6 +258,13 @@ class RPLIDAR:
         Create a thread for the RPLIDAR.
         """
         with self.__rlock:
+            if self.is_running():
+                self.__log("RPLIDAR thread is already running.")
+                return
+
+            # Clear the stop event
+            self.__stop_event.clear()
+
             # Start the RPLIDAR in a separate thread
             thread = Thread(target=self.__loop)
             thread.start()
@@ -289,8 +274,27 @@ class RPLIDAR:
         Stop the RPLIDAR thread.
         """
         with self.__rlock:
-            # Stop the RPLIDAR process
             self.__stop()
+
+    def is_running(self) -> bool:
+        """
+        Check if the RPLIDAR is running.
+
+        Returns:
+            bool: True if the RPLIDAR is running, False otherwise.
+        """
+        with self.__rlock:
+            return not self.__stop_event.is_set()
+
+    def is_stopped(self) -> bool:
+        """
+        Check if the RPLIDAR is stopped.
+
+        Returns:
+            bool: True if the RPLIDAR is stopped, False otherwise.
+        """
+        with self.__rlock:
+            return not self.is_running()
 
     def __del__(self):
         """

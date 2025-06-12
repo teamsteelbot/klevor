@@ -13,7 +13,7 @@ def create_dataset_with_removed_classes(input_dir, input_to_process_dir, output_
     Create a new dataset with the labeled classes removed.
     """
     # Create the output directory if it doesn't exist
-    Files.ensure_path_exists(output_dir)
+    Files.ensure_directory_exists(output_dir)
 
     # Get the input directory for images and labels
     input_annotations_dir = os.path.join(input_to_process_dir, Files.DATASET_LABELS)
@@ -28,7 +28,7 @@ def create_dataset_with_removed_classes(input_dir, input_to_process_dir, output_
     output_images_dir = os.path.join(output_to_process_dir, Files.DATASET_IMAGES)
 
     for dir_path in [output_annotations_dir, output_images_dir]:
-        Files.ensure_path_exists(dir_path)
+        Files.ensure_directory_exists(dir_path)
 
     # Get the output classes and notes file paths
     output_classes_path = os.path.join(output_dir, Files.DATASET_CLASSES_TXT)

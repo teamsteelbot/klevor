@@ -19,7 +19,7 @@ def preprocess_images_to_npy(input_folder, output_file, target_shape=Preprocessi
         target_shape (tuple): Desired shape of the images (height, width, channels).
     """
     # Ensure the output directory exists
-    Files.ensure_path_exists(output_file)
+    Files.ensure_directory_exists(output_file)
 
     # Get the images
     calib_size = len(os.listdir(input_folder))  # Number of images

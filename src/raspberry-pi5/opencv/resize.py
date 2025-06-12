@@ -22,7 +22,7 @@ def resize_image(input_to_process_dir: LiteralString, output_resized_to_process_
         interpolation: Interpolation method used for resizing.
     """
     # Check if the path exists, if not it creates it
-    Files.ensure_path_exists(output_resized_to_process_dir)
+    Files.ensure_directory_exists(output_resized_to_process_dir)
 
     # Iterate over the files in the given path
     for filename in os.listdir(input_to_process_dir):

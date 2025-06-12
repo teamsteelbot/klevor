@@ -14,14 +14,8 @@ class Message:
             tag (str): Tag of the log message.
             content (str): Content of the log message.
         """
-        # Check the type of content
-        check_type(content, str)
-        self.__content = content
-
-        # Check the type of tag
-        if tag:
-            check_type(tag, str)
-        self.__tag = tag
+        self.content = content
+        self.tag = tag
 
     def __str__(self):
         """
@@ -31,3 +25,47 @@ class Message:
             str: The formatted log message.
         """
         return f"[{self.__tag}] {self.__content}" if self.__tag else self.__content
+
+    @property
+    def content(self) -> str:
+        """
+        Get the content of the log message.
+
+        Returns:
+            str: The content of the log message.
+        """
+        return self.__content
+
+
+    @content.setter
+    def content(self, value: str):
+        """
+        Set the content of the log message.
+
+        Args:
+            value (str): The new content for the log message.
+        """
+        check_type(value, str)
+        self.__content = value
+
+    @property
+    def tag(self) -> Optional[str]:
+        """
+        Get the tag of the log message.
+
+        Returns:
+            Optional[str]: The tag of the log message, or None if not set.
+        """
+        return self.__tag
+
+    @tag.setter
+    def tag(self, value: Optional[str]):
+        """
+        Set the tag of the log message.
+
+        Args:
+            value (Optional[str]): The new tag for the log message.
+        """
+        if value is not None:
+            check_type(value, str)
+        self.__tag = value

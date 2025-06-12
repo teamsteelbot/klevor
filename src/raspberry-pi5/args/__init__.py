@@ -10,6 +10,8 @@ class Args:
     # Arguments
     SERVER = 'server'
     SERIAL = 'serial'
+    IP = 'ip'
+    PORT = 'port'
 
     @classmethod
     def get_attribute_name(cls, attribute: str) -> str:
@@ -75,3 +77,19 @@ class Args:
         parser.add_argument(f"--{cls.SERIAL}", dest=cls.SERIAL, action="store_true",
                             help="Set serial flag as 'True'")
         parser.set_defaults(**{cls.SERIAL: default})
+
+    @classmethod
+    def add_ip_argument(cls, parser, default: str = '0.0.0.0') -> None:
+        """
+        Add IP argument to the parser.
+        """
+        parser.add_argument(f"--{cls.IP}", dest=cls.IP, type=str, default=default,
+                            help="Set the IP address for the server")
+
+    @classmethod
+    def add_port_argument(cls, parser, default: int = 8765) -> None:
+        """
+        Add port argument to the parser.
+        """
+        parser.add_argument(f"--{cls.PORT}", dest=cls.PORT, type=int, default=default,
+                            help="Set the port for the server")

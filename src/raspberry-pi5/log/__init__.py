@@ -33,6 +33,9 @@ class Logger:
         # Initialize the write log event
         self.__write_log_event = Event()
 
+        # Initialize the thread
+        self.__thread = None
+
     def log(self, message: Message) -> None:
         """
         Put a log message in the queue.
@@ -117,7 +120,7 @@ class Logger:
                 return
 
             # Clear the stop event
-            self.__stop_event.clear() 
+            self.__stop_event.clear()
 
     def __is_open(self) -> bool:
         """
@@ -162,19 +165,16 @@ class Logger:
 
         Args:
             file_path (str): Path to the log file.
-        """            
-        # Open the logger
-        self.__open()
+        """
+        # Initialize the messages queue
+        self.__messages_queue = Queue()
 
         # Check the type of file_path
         check_type(file_path, str)
         self.__file_path = file_path
 
-        # Ensure the file path exists
-        Files.ensure_path_exists(self.__file_path)
-
-        # Initialize the messages queue
-        self.__messages_queue = Queue()
+        # Ensure the file exists
+        Files.ensure_file_exists(self.__file_path)
 
         # Open the log file in append mode
         with open(self.__file_path, 'a') as file:
@@ -207,9 +207,6 @@ class Logger:
         # Close queue
         self.__messages_queue.close()
 
-        # Call the close method to stop the thread
-        self.__close()
-
     def create_thread(self) -> None:
         """
         Create thread for the logger.
@@ -218,6 +215,9 @@ class Logger:
             if self.__is_open():
                 self.log(Message("Logger thread is already running."))
                 return
+
+            # Open the logger
+            self.__open()
 
             # Create a thread for the logger
             self.__thread = Thread(target=self.__loop)
@@ -228,10 +228,7 @@ class Logger:
         Stop the logger thread.
         """
         with self.__rlock:
-            if self.__is_closed():
-                return
-            
-            # Call the close method to stop the thread
+            # Close the logger
             self.__close()
 
     def __del__(self):

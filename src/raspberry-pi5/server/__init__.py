@@ -105,9 +105,6 @@ class RealtimeTrackerServer:
         # Initialize the connected clients set
         self.__connected_clients = set()
 
-        # Initialize the started flag
-        self.__started = False
-
     def __log(self, message: str, log_to_file: bool = True, print_to_console: bool = True):
         """
         Logs a message using the logger if available.
@@ -132,7 +129,7 @@ class RealtimeTrackerServer:
         self.__log(f"Client connected: {connection.remote_address}")
 
         # Send a welcome message immediately upon connection
-        await self.__send_message(connection, Message(self.TAG_CONNECTION_STATUS, "Connected to RealtimeTrackerServer"))
+        await self._send_message(connection, Message(self.TAG_CONNECTION_STATUS, "Connected to RealtimeTrackerServer"))
 
         try:
             while True:
@@ -162,7 +159,7 @@ class RealtimeTrackerServer:
                     # Unknown message type
                     self.__log(f"Unknown message type: {message}")
 
-                    await self.__send_message(connection, Message(self.TAG_UNKNOWN_TAG, "Unknown message type received."))
+                    await self._send_message(connection, Message(self.TAG_UNKNOWN_TAG, "Unknown message type received."))
                     continue
 
                 # Broadcast the received message to all connected clients
@@ -177,7 +174,7 @@ class RealtimeTrackerServer:
         except Exception as e:
             self.__log(f"An unexpected error occurred with {connection.remote_address}: {e}")
 
-    async def __send_message(self, connection, message: Message):
+    async def _send_message(self, connection, message: Message):
         """
         Sends a message to a specific WebSocket connection.
 
@@ -313,18 +310,6 @@ class RealtimeTrackerServer:
         """
         The main loop for the WebSocket server.
         """
-        # Check if the server is already started
-        with self.__rlock:
-            if self.__started:
-                self.__log("WebSocket server is already running.")
-                return
-
-        # Clear the stop event
-        self.__stop_event.clear()
-
-        # Set the started flag
-        self.__started = True
-
         # Get the local IP address
         local_ip = get_local_ip()
 
@@ -337,9 +322,6 @@ class RealtimeTrackerServer:
         # Log the stopping of the server
         self.__log("WebSocket server is stopping...")
 
-        # Clear the started flag
-        self.__started = False
-
     def __stop(self):
         """
         Stops the WebSocket server.
@@ -351,6 +333,7 @@ class RealtimeTrackerServer:
             # Set the stop event
             self.__stop_event.set()
 
+            # Log the stopping event
             self.__log("WebSocket server stop event set. Stopping the server...")
 
     def create_thread(self):
@@ -359,7 +342,11 @@ class RealtimeTrackerServer:
         """
         with self.__rlock:
             if self.is_running():
+                self.__log("WebSocket server is already running.")
                 return
+
+            # Clear the stop event
+            self.__stop_event.clear()
 
             # Create a thread to run the WebSocket server
             thread = Thread(target=lambda: asyncio.run(self.__loop()))
@@ -380,7 +367,7 @@ class RealtimeTrackerServer:
             bool: True if the server is running, False otherwise.
         """
         with self.__rlock:
-            return self.__started
+            return not self.__stop_event.is_set()
     
     def is_stopped(self) -> bool:
         """
@@ -390,7 +377,7 @@ class RealtimeTrackerServer:
             bool: True if the server is stopped, False otherwise.
         """
         with self.__rlock:
-            return not self.__started
+            return not self.is_running()
 
     def __del__(self):
         """

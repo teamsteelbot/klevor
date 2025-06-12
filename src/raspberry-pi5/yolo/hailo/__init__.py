@@ -71,12 +71,12 @@ class Hailo:
 
         # Check the HEF file path
         check_type(hef_file_path, str)
-        Files.ensure_path_exists(hef_file_path)
+        Files.ensure_directory_exists(hef_file_path)
         self.__hef_file_path = hef_file_path
 
         # Check the labels path
         check_type(labels_path, str)
-        Files.ensure_path_exists(labels_path)
+        Files.ensure_directory_exists(labels_path)
         self.__labels_path = labels_path
 
         # Load the labels

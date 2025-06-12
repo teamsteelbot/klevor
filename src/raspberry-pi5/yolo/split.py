@@ -45,7 +45,7 @@ def split_dataset(input_dir: LiteralString, output_dir: LiteralString,
                    output_validations_images_dir, output_testing_images_dir,
                    output_training_annotations_dir, output_validations_annotations_dir,
                    output_testing_annotations_dir]:
-        Files.ensure_path_exists(io_dir)
+        Files.ensure_directory_exists(io_dir)
 
     # Get the list of files
     image_filenames = os.listdir(input_images_dir)

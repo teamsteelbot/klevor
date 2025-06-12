@@ -12,9 +12,6 @@ if __name__ == "__main__":
     # Create an instance of RealtimeTrackerServer
     realtime_tracker_server = RealtimeTrackerServer(logger=logger)
 
-    # Start the WebSocket server
-    realtime_tracker_server.create_thread()
-
     try:
         # Create a thread for the logger
         logger.create_thread()
@@ -23,6 +20,7 @@ if __name__ == "__main__":
         realtime_tracker_server.create_thread()
 
         # Wait indefinitely to keep the server running
+        print("Realtime Tracker Server is running. Press Ctrl+C to stop.")
         while True:
             sleep(1) # Sleep to prevent busy-waiting
 

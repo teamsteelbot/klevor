@@ -20,7 +20,7 @@ def create_tfrecord(output_path: str, image_dir: str, label_dir: str):
         None
     """
     # Check if the output directory exists, if not create it
-    Files.ensure_path_exists(output_path)
+    Files.ensure_directory_exists(output_path)
     writer = tf.io.TFRecordWriter(output_path)
 
     for image_name in os.listdir(image_dir):

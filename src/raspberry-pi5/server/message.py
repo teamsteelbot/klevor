@@ -17,13 +17,8 @@ class Message:
             tag (str): A tag associated with the message, used for categorization or filtering.
             content (str): The content of the message.
         """
-        # Check the type of content
-        check_type(content, str)
-        self.__content = content
-
-        # Check the type of tag
-        check_type(tag, str)
-        self.__tag = tag
+        self.content = content
+        self.tag = tag
 
     
     def __str__(self):

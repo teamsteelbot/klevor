@@ -102,7 +102,7 @@ class Zip:
             batch_size (int): Number of files to extract in each batch.
         """
         # Check if the path exists, if not it creates it
-        Files.ensure_path_exists(output_dir)
+        Files.ensure_directory_exists(output_dir)
 
         with zipfile.ZipFile(zip_path, "r") as zip_ref:
             files = zip_ref.namelist()
@@ -116,7 +116,7 @@ class Zip:
 
                     # Extract the file to the output directory
                     file_path = os.path.join(output_dir, file)
-                    Files.ensure_path_exists(file_path)
+                    Files.ensure_directory_exists(file_path)
                     zip_ref.extract(file, output_dir)
 
                     if environment == Files.ENVIRONMENT_LOCAL:

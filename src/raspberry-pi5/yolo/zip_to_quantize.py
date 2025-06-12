@@ -30,7 +30,7 @@ def zip_to_quantize(input_dir: LiteralString, input_yolo_dir: LiteralString, inp
     output_zip_path = os.path.join(output_zip_dir, output_zip_filename)
 
     # Check if the folder exists, if not create it
-    Files.ensure_path_exists(output_zip_dir)
+    Files.ensure_directory_exists(output_zip_dir)
 
     with (zipfile.ZipFile(output_zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf):
         # Zip the folders except the YOLO folder

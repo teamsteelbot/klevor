@@ -26,7 +26,7 @@ class Yolo:
             YOLO: Loaded YOLO model.
         """
         # Check if the model path exists
-        Files.ensure_path_exists(model_path)
+        Files.ensure_directory_exists(model_path)
 
         # Load the model
         model = YOLO(model_path, task=task, verbose=True)
@@ -123,7 +123,7 @@ class Yolo:
             list: List of class names.
         """
         # Ensure the labels file exists
-        Files.ensure_path_exists(labels_path)
+        Files.ensure_directory_exists(labels_path)
 
         # Check if it's a text file
         if not labels_path.endswith('.txt'):
