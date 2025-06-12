@@ -1,9 +1,8 @@
-from websockets import connect
-import asyncio
-import tkinter as tk
+import pygame
 import math
+import asyncio
 from threading import Thread
-from time import sleep
+from websockets import connect
 
 from server import RealtimeTrackerServer
 from rplidar import RPLIDAR
@@ -13,157 +12,142 @@ from rplidar.measure import Measure
 IP = "0.0.0.0"
 PORT = 8765
 
-# Constants for the RPLIDAR GUI
+# Application size and scaling factors
 APP_SIZE = 800
-
-# Canvas and center point
-SIZE_FACTOR = APP_SIZE / RPLIDAR.MAX_DISTANCE_LIMIT
+MAX_DISTANCE_RADIUS = RPLIDAR.MAX_DISTANCE_LIMIT
+MAX_DISTANCE_RADIUS_FACTOR = APP_SIZE / (2*MAX_DISTANCE_RADIUS)
 RADIUS = APP_SIZE // 2
 CENTER_X = APP_SIZE // 2
 CENTER_Y = APP_SIZE // 2
+BACKGROUND_COLOR = (255, 255, 255)
 
-# Static circle padding
-STATIC_CIRCLE_PADDING = 1000 * SIZE_FACTOR
+# Point properties
+POINT_RADIUS = 3
+POINT_COLOR = (255, 0, 0)  # Red
+POINT_BORDER_COLOR = (0, 0, 0)  # Black
+POINT_BORDER_WIDTH = 1
 
-# Internal static circle color
-INTERNAL_STATIC_CIRCLE_COLOR = "lightgray"
+# Central point properties
+CENTRAL_POINT_RADIUS = 5
+CENTRAL_POINT_COLOR = (0, 0, 255)  # Blue
 
-# Internal static circle width
-INTERNAL_STATIC_CIRCLE_WIDTH = 1
-
-# External static circle color
-EXTERNAL_STATIC_CIRCLE_COLOR = "black"
-
-# External static circle width
+# Static circle properties
+STATIC_CIRCLE_RADIUS = 1000
+INTERNAL_STATIC_CIRCLE_COLOR = (0, 0, 0)  # Black
+INTERNAL_STATIC_CIRCLE_WIDTH = 2
+EXTERNAL_STATIC_CIRCLE_COLOR = (0, 0, 0)  # Black
 EXTERNAL_STATIC_CIRCLE_WIDTH = 3
 
-# Central point radius
-CENTRAL_POINT_RADIUS = 5
+# Update properties
+UPDATE_DELAY = 50  # ms
+DISTANCE_MINIMUM_DIFFERENCE = 50
 
-# Point radius
-POINT_RADIUS = 2
-
-# Central point color
-CENTRAL_POINT_COLOR = "blue"
-
-# Point color
-POINT_COLOR = "red"
-
-# Canvas update delay
-UPDATE_DELAY = 1000
-
-# Distance minimum difference to consider a point as new
-DISTANCE_MINIMUM_DIFFERENCE = 10
-
-class App():
-    """
-    A simple Tkinter application to visualize RPLIDAR measures.
-    """
+class App:
     def __init__(self):
-        # Tkinter setup
-        self.root = tk.Tk()
-        self.root.title("Klevor RPLIDAR GUI")
+        pygame.init()
+        self.screen = pygame.display.set_mode((APP_SIZE, APP_SIZE))
+        pygame.display.set_caption("Klevor RPLIDAR GUI")
+        self.clock = pygame.time.Clock()
+        self.running = True
 
-        self.canvas = tk.Canvas(self.root, width=APP_SIZE, height=APP_SIZE, bg="white")
-        self.canvas.pack()
-
-        # Initialize measures list
         self.measures = []
-
-        # Initialize previous measures map to track changes
         self.previous_measures = {}
+        self.point_positions = {}
 
-        # Create points IDs map
-        self.point_ids = {}
+    def draw_static(self):
+        """
+        Draws the static elements of the GUI, including circles and central point.
+        """
+        # Draw static circles
+        n = int(MAX_DISTANCE_RADIUS / STATIC_CIRCLE_RADIUS)
+        is_exact = MAX_DISTANCE_RADIUS % STATIC_CIRCLE_RADIUS == 0
+        for i in range(1, n+1):
+            radius = i * STATIC_CIRCLE_RADIUS * MAX_DISTANCE_RADIUS_FACTOR
+            color = INTERNAL_STATIC_CIRCLE_COLOR if not is_exact or i < n else EXTERNAL_STATIC_CIRCLE_COLOR
+            width = INTERNAL_STATIC_CIRCLE_WIDTH if not is_exact or i < n else EXTERNAL_STATIC_CIRCLE_WIDTH
+            pygame.draw.circle(self.screen, color, (CENTER_X, CENTER_Y), radius, width)
+            print(f"Drawing circle {i} with radius {radius}, color {color}, width {width}")
+
+        # Draw external static circle
+        if not is_exact:
+            pygame.draw.circle(self.screen, EXTERNAL_STATIC_CIRCLE_COLOR, (CENTER_X, CENTER_Y), RADIUS, EXTERNAL_STATIC_CIRCLE_WIDTH)
 
         # Draw central point
-        self.canvas.create_oval(CENTER_X - CENTRAL_POINT_RADIUS, CENTER_Y - CENTRAL_POINT_RADIUS, CENTER_X + CENTRAL_POINT_RADIUS, CENTER_Y + CENTRAL_POINT_RADIUS, fill=CENTRAL_POINT_COLOR)
-
-        # Draw static circles
-        n = int(APP_SIZE / STATIC_CIRCLE_PADDING)
-        is_exact = APP_SIZE % STATIC_CIRCLE_PADDING == 0
-        for i in range(1, n):
-            radius = i * STATIC_CIRCLE_PADDING
-            color = INTERNAL_STATIC_CIRCLE_COLOR if i == n and is_exact else EXTERNAL_STATIC_CIRCLE_COLOR
-            width = INTERNAL_STATIC_CIRCLE_WIDTH if i == n and is_exact else EXTERNAL_STATIC_CIRCLE_WIDTH
-            self.canvas.create_oval(
-                CENTER_X - radius, CENTER_Y - radius,
-                CENTER_X + radius, CENTER_Y + radius,
-                outline=color, width=width
-            )
-        
-        self.canvas.create_oval(
-            CENTER_X - RADIUS, CENTER_Y - RADIUS,
-            CENTER_X + RADIUS, CENTER_Y + RADIUS,
-            outline=EXTERNAL_STATIC_CIRCLE_COLOR, width=EXTERNAL_STATIC_CIRCLE_WIDTH
-        )
-
-        self.root.after(UPDATE_DELAY, self.update_canvas)
+        pygame.draw.circle(self.screen, CENTRAL_POINT_COLOR, (CENTER_X, CENTER_Y), CENTRAL_POINT_RADIUS)
 
     def update_points(self):
-        # Update or create points based on angle
+        """
+        Updates the positions of the points based on the current measures.
+        This method calculates the positions of the points based on the angle and distance
+        of each measure, and stores them in the point_positions dictionary.
+        """
         for measure in self.measures:
-            # Check if the measure is new or has changed significantly
-            if measure in self.previous_measures:
-                previous_measure = self.previous_measures.get(measure.angle)
-                if previous_measure and abs(previous_measure.distance - measure.distance) < DISTANCE_MINIMUM_DIFFERENCE:
-                    # Skip if the distance hasn't changed significantly
-                    continue
-
-            # Update the previous measure
+            prev = self.previous_measures.get(measure.angle)
+            if prev and abs(prev.distance - measure.distance) < DISTANCE_MINIMUM_DIFFERENCE:
+                continue
             self.previous_measures[measure.angle] = measure
 
-            # Calculate the position of the point based on the angle and distance
             radian_angle = math.radians(measure.angle)
-            x = CENTER_X + measure.distance * math.cos(radian_angle) * SIZE_FACTOR
-            y = CENTER_Y + measure.distance * math.sin(radian_angle) * SIZE_FACTOR
-
-            if measure.angle in self.point_ids:
-                # Move existing point
-                point_id = self.point_ids.get(measure.angle)
-                self.canvas.coords(point_id, x - POINT_RADIUS, y - POINT_RADIUS, x + POINT_RADIUS, y + POINT_RADIUS)
-            else:
-                # Create new point
-                point_id = self.canvas.create_oval(
-                    x - POINT_RADIUS, y - POINT_RADIUS, x + POINT_RADIUS, y + POINT_RADIUS,
-                    fill=POINT_COLOR
-                )
-                self.point_ids[measure.angle] = point_id
+            x = int(CENTER_X + measure.distance * math.cos(radian_angle) * MAX_DISTANCE_RADIUS_FACTOR)
+            y = int(CENTER_Y + measure.distance * math.sin(radian_angle) * MAX_DISTANCE_RADIUS_FACTOR)
+            self.point_positions[measure.angle] = (x, y)
 
         """
-        # Remove points for angles not in the new measures
-        current_angles = set(m.angle for m in measures)
-        for angle in list(self.point_ids):
+        # Optionally, remove old points
+        current_angles = set(m.angle for m in self.measures)
+        for angle in list(self.point_positions):
             if angle not in current_angles:
-                self.canvas.delete(self.point_ids[angle])
-                del self.point_ids[angle]
+                del self.point_positions[angle]
         """
 
-    def update_canvas(self):
-        if self.measures:
+    def draw_points(self):
+        """
+        Draws the points on the screen based on the current measures.
+        """
+        for pos in self.point_positions.values():
+            # Draw the point
+            pygame.draw.circle(self.screen, POINT_COLOR, pos, POINT_RADIUS)
+
+            # Draw border around the point
+            pygame.draw.circle(self.screen, POINT_BORDER_COLOR, pos, POINT_RADIUS, POINT_BORDER_WIDTH)
+
+    def run(self):
+        """
+        Main loop of the application that handles events, updates the display, and draws the GUI.
+        This method runs until the application is closed.
+        """
+        while self.running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.running = False
+
+            self.screen.fill(BACKGROUND_COLOR)
+            self.draw_static()
             self.update_points()
-        self.root.after(UPDATE_DELAY, self.update_canvas)
+            self.draw_points()
+            pygame.display.flip()
+            self.clock.tick(1000 // UPDATE_DELAY)
+
+        pygame.quit()
 
     async def ws_listener(self):
+        """
+        Asynchronously listens for messages from the WebSocket server and updates the measures.
+        This method connects to the WebSocket server and processes incoming messages,
+        updating the measures accordingly.
+        """
+
         url = f'ws://{IP}:{PORT}'
         print(f"Connecting to WebSocket server at {url}...")
         async with connect(url) as ws:
-            # Stay alive forever, listen to incoming msgs
             while True:
                 msg = await ws.recv()
-
-                # Check if it's a message containing RPLIDAR measures
                 parts = msg.split(RealtimeTrackerServer.TAG_SEPARATOR)
-
                 if parts[0] == RealtimeTrackerServer.TAG_RPLIDAR_MEASURES:
                     self.measures = Measure.from_string_to_measures(parts[1])
 
 if __name__ == "__main__":
     app = App()
-
-    # Create a thread for the WebSocket listener
-    ws_thread = Thread(target=asyncio.run, args=(app.ws_listener(),))
+    ws_thread = Thread(target=asyncio.run, args=(app.ws_listener(),), daemon=True)
     ws_thread.start()
-
-    # Start the Tkinter main loop
-    app.root.mainloop()
+    app.run()
