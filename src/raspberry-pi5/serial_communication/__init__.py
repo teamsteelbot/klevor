@@ -4,6 +4,7 @@ from multiprocessing.synchronize import Event as EventCls
 from threading import Thread
 from typing import Optional
 from time import sleep
+import asyncio
 
 from serial import Serial, SerialException
 
@@ -28,19 +29,34 @@ class SerialCommunication:
     # Raspberry PI Pico default port
     RASPBERRY_PI_PICO_PORT = '/dev/ttyACM0'
 
+    # Raspberry PI Pico alternative port
+    RASPBERRY_PI_PICO_ALT_PORT = '/dev/ttyACM1'
+
     # Message delay
     DELAY = 0.01
 
     # Encode
     ENCODE = 'utf-8'
 
+    # Types of messages
+    TYPE_CAPTURE_IMAGE = 'capture_image'
+    TYPE_INFERENCE = 'inference'
+    TYPE_RPLIDAR_MEASURES = "rplidar_measures"
+    TYPE_DEBUG = 'debug'
+    TYPE_STATUS = 'status'
+
+    # Types of Status
+    TYPE_STATUS_ON = 'on'
+    TYPE_STATUS_OFF = 'off'
+
     def __init__(
         self,
         logger: Optional[Logger] = None,
         images_queue: Optional[ImagesQueue] = None,
         server: Optional[RealtimeTrackerServer] = None,
-        port: str = RASPBERRY_PI_PICO_PORT,
-        baudrate: int = RASPBERRY_PI_PICO_BAUDRATE
+        port: Optional[str] = RASPBERRY_PI_PICO_PORT,
+        alt_port: Optional[str] = RASPBERRY_PI_PICO_ALT_PORT,
+        baudrate: Optional[int] = RASPBERRY_PI_PICO_BAUDRATE
     ):
         """
         Initialize the serial communication class.
@@ -49,6 +65,7 @@ class SerialCommunication:
             logger (Logger): Logger instance for logging messages.
             images_queue (ImagesQueue): Images queue for handling images.
             port (str): Serial port to use for communication. Default is '/dev/ttyACM0'.
+            alt_port (str): Alternative serial port to use for communication. Default is None.
             baudrate (int): Baud rate for the serial communication. Default is 115200.
             server (RealtimeTrackerServer): Server instance for sending messages to the server. Default is None.
         """
@@ -103,8 +120,12 @@ class SerialCommunication:
         # Initialize the last incoming message
         self.__last_incoming_message = None
 
-        # Set the serial port and baud rate
+        # Set the serial port, alternative serial port and baud rate
+        check_type(port, str)
         self.__port = port
+        check_type(alt_port, str)
+        self.__alt_port = alt_port
+        check_type(baudrate, int)
         self.__baudrate = baudrate
 
         # Initialize the serial port
@@ -192,7 +213,15 @@ class SerialCommunication:
                 self.__serial = Serial(self.__port, self.__baudrate)
 
             except SerialException as e:
-                raise RuntimeError(f"Error opening serial port: {e}")
+                if not self.__alt_port:
+                   raise RuntimeError(f"Error opening serial port: {e}")
+                else:
+                    # Try to open the alternative port
+                    try:
+                        self.__serial = Serial(self.__alt_port, self.__baudrate)
+
+                    except SerialException as alt_e:
+                        raise RuntimeError(f"Error opening serial port: {alt_e}")
 
         # Log
         self.__log(f"Serial port {self.__port} opened with baudrate {self.__baudrate}.")
@@ -325,7 +354,7 @@ class SerialCommunication:
             self.__pending_outgoing_message_event.set()
 
         # Log
-        self.__log(f"Sending message: {message}", print_to_console=False)
+        # self.__log(f"Sending message: {message}", print_to_console=False)
 
     def send_rplidar_measures(self, measures_str: str) -> None:
         """
@@ -335,7 +364,7 @@ class SerialCommunication:
             measures_str (str): The measures string to put in the queue.
         """
         # Create a message with the RPLIDAR measures type
-        message = Message(Message.TYPE_RPLIDAR_MEASURES, measures_str)
+        message = Message(self.TYPE_RPLIDAR_MEASURES, measures_str)
 
         # Put the message in the outgoing messages queue
         self._send_message(message)
@@ -368,12 +397,13 @@ class SerialCommunication:
                 self.__pending_outgoing_message_event.clear()
 
         # Log
-        first_line = str(message).split('\n')[0]
+        message_str = str(message)
+        first_line = message_str.split('\n')[0]
         self.__log(f"Sending message: {first_line}", print_to_console=False)
 
         # If the server is set, send the message to the server
         if self.__server:
-            self.__server.send_serial_outgoing_message(message)
+            asyncio.run(self.__server.broadcast_serial_outgoing_message(message_str))
 
         return message
 
@@ -423,7 +453,7 @@ class SerialCommunication:
         Handler to send messages to the serial port.
         """
         # Wait for start event to be set
-        self.__start_event.wait()
+        #self.__start_event.wait()
 
         while self.is_open():
             # Check if there is a message to send
@@ -431,7 +461,7 @@ class SerialCommunication:
 
             # Get the message from the queue
             message = self.__get_outgoing_message()
-            if message is None:
+            if not message:
                 # If there is no message, wait for a short time
                 sleep(self.DELAY)
                 continue

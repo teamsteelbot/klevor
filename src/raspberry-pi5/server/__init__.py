@@ -182,9 +182,6 @@ class RealtimeTrackerServer:
             self.__connected_clients.discard(connection)
             self.__log(f"Client {connection.remote_address} disconnected.")
 
-            # Close the connection
-            await connection.close()
-
     async def _send_message(self, connection, message: Message):
         """
         Sends a message to a specific WebSocket connection.
@@ -211,7 +208,10 @@ class RealtimeTrackerServer:
         if self.__connected_clients:  # Only broadcast if there are clients
             try:
                 check_type(message, Message)
-                await asyncio.gather(*(client.send(str(message)) for client in self.__connected_clients))
+                await asyncio.gather(
+                    *(client.send(str(message)) for client in self.__connected_clients),
+                    return_exceptions=True
+                )
             
             except Exception as e:
                 self.__log(f"Unexpected error while broadcasting message: {e}")
@@ -229,7 +229,6 @@ class RealtimeTrackerServer:
 
             # Send the tagged binary data to the clients
             await self._broadcast_message(Message(tag, str(binary_data)))
-            self.__log(f"Image with tag '{tag}' sent to the clients.")
 
         except Exception as e:
             self.__log(f"Error sending image: {e}")
@@ -287,9 +286,6 @@ class RealtimeTrackerServer:
         # Send a tagged message
         await self._broadcast_message(Message(self.TAG_SERIAL_INCOMING_MESSAGE, message))
 
-        # Log
-        self.__log(f"Serial incoming message sent: {message}")
-
     async def broadcast_serial_outgoing_message(self, message: str):
         """
         Broadcasts a serial outgoing message to all connected clients.
@@ -298,9 +294,6 @@ class RealtimeTrackerServer:
 
         # Send a tagged message
         await self._broadcast_message(Message(self.TAG_SERIAL_OUTGOING_MESSAGE, message))
-
-        # Log
-        self.__log(f"Serial outgoing message sent: {message}")
 
     async def broadcast_rplidar_measures(self, message: str):
         """
@@ -313,9 +306,6 @@ class RealtimeTrackerServer:
 
         # Send a tagged message
         await self._broadcast_message(Message(self.TAG_RPLIDAR_MEASURES, message))
-
-        # Log
-        self.__log(f"RPLIDAR measures sent")
 
     async def __loop(self):
         """

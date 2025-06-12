@@ -4,18 +4,6 @@ class Message:
     """
     Class to handle the messages sent and received from the Raspberry Pi Pico.
     """
-    # Types of messages
-    TYPE_CAPTURE_IMAGE = 'capture_image'
-    TYPE_INFERENCE = 'inference'
-    TYPE_RPLIDAR_MEASURES = "rplidar_measures"
-    TYPE_DEBUG = 'debug'
-    TYPE_STATUS = 'status'
-    TYPES = [TYPE_INFERENCE, TYPE_CAPTURE_IMAGE, TYPE_RPLIDAR_MEASURES, TYPE_DEBUG, TYPE_STATUS]
-
-    # Types of Status
-    TYPE_STATUS_ON = 'on'
-    TYPE_STATUS_OFF = 'off'
-
     # Message header separator
     HEADER_SEPARATOR = ':'
 
@@ -62,10 +50,6 @@ class Message:
         """
         # Check the type of message
         check_type(message_type, str)
-
-        # Check if the message type is valid
-        if message_type not in self.TYPES:
-            raise ValueError(f"Invalid message type: {message_type}")
         self.__type = message_type
 
     @property

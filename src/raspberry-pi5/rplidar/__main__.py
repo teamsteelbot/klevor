@@ -38,14 +38,14 @@ if __name__ == "__main__":
         if not arg_server:
             server = None
         else:
-            server = RealtimeTrackerServer()
+            server = RealtimeTrackerServer(logger=logger)
 
             # Start the server
             server.create_thread()
 
         # Create an instance of SerialCommunication if serial argument is provided
         if arg_serial:
-            serial = SerialCommunication(logger=logger, server=server, port='/dev/ttyACM0')
+            serial = SerialCommunication(logger=logger, server=server)
 
             # Start the serial communication
             serial.create_threads()
@@ -57,22 +57,23 @@ if __name__ == "__main__":
 
         # Start the RPLIDAR
         rplidar.create_thread()
+        logger.log(Message("RPLIDAR started successfully."))
 
         if not serial:
             while True:
                 sleep(1)  # Sleep to prevent busy-waiting
 
         # Wait for the start message from SerialCommunication
-        logger.log(Message("Waiting for start message from SerialCommunication..."))
-        serial.wait_for_start_message()
+        #logger.log(Message("Waiting for start message from SerialCommunication..."))
+        #serial.wait_for_start_message()
 
         # Start the RPLIDAR thread
-        rplidar.start_thread()
-        logger.log(Message("RPLIDAR started successfully."))
+        while True:
+            sleep(1)
 
         # Wait for the stop message from SerialCommunication
-        serial.wait_for_stop_message()
-        logger.log(Message("Received stop message from SerialCommunication, stopping RPLIDAR..."))
+        #serial.wait_for_stop_message()
+        #logger.log(Message("Received stop message from SerialCommunication, stopping RPLIDAR..."))
 
     except KeyboardInterrupt:
         # Handle keyboard interrupt to stop the server gracefully

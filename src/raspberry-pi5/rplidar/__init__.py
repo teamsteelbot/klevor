@@ -30,7 +30,7 @@ class RPLIDAR:
     MAX_DISTANCE_LIMIT = 3000
 
     # Reading delay
-    READING_DELAY = 0.0001  
+    # READING_DELAY = 0.0001  
 
     # Get the absolute path of the ultra_simple executable
     ULTRA_SIMPLE_PATH = os.path.join(os.path.dirname(__file__), "ultra_simple")
@@ -114,25 +114,6 @@ class RPLIDAR:
         if print_to_console:
             print(f"{self.LOG_TAG}: {message}")
 
-    def __after_a_full_rotation(self):
-        """
-        Handle actions after a full rotation.
-        This method can be overridden to implement custom behavior.
-        """
-        # Get the measures from the distances dictionary as a string
-        measures = list(self.__distances_dict.values())
-        measures_str = Measure.measures_to_string(measures)
-
-        # Put the parsed line in the server
-        if self.__server and self.__server.is_running():
-            asyncio.run(self.__server.broadcast_rplidar_measures(measures_str))
-
-        if self.__serial_communication and self.__serial_communication.is_open() and self.__serial_communication.has_started():
-            self.__serial_communication.send_rplidar_measures(measures_str)
-
-        if not self.__server and not self.__serial_communication:
-            self.__log(f"Full rotation completed with {len(self.__distances_dict)} measures: {measures_str}.", log_to_file=False)
-
     def __read_output(self):
         """
         Read the output from the RPLIDAR process.
@@ -154,6 +135,10 @@ class RPLIDAR:
 
         # Split the line by spaces
         parts = parsed_line.split()
+
+        # Ignore if there are not enough parts
+        if len(parts) < 6:
+            return
 
         # Check if it's the last measure of a full rotation
         full_rotation = len(parts) == 7
@@ -185,16 +170,22 @@ class RPLIDAR:
             # If it is not, add the measure to the distances dictionary
             self.__distances_dict[angle] = Measure(angle, distance, quality)
 
-        # If it's the last measure of a full rotation, handle the full rotation
-        if full_rotation:
-            # Call the method to handle actions after a full rotation
-            self.__after_a_full_rotation()
+        # Get the measure string representation
+        measure_str = str(self.__distances_dict[angle])
+
+        # Put the parsed line in the server
+        if self.__server and self.__server.is_running():
+            asyncio.run(self.__server.broadcast_rplidar_measures(measure_str))
+
+        # if self.__serial_communication and self.__serial_communication.is_open() and self.__serial_communication.has_started():
+        if self.__serial_communication and self.__serial_communication.is_open():
+            self.__serial_communication.send_rplidar_measures(measure_str)
         
         # Increment the messages counter
         self.__messages_counter += 1
 
         # Add a small delay to avoid busy-waiting and yield CPU
-        sleep(self.READING_DELAY)
+        # sleep(self.READING_DELAY)
 
     def __loop(self):
         """

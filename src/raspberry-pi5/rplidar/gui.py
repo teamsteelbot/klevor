@@ -64,10 +64,10 @@ class App:
         self.__running = True
 
         # Initialize the measures and points-related objects
-        self.__measures = []
+        self.__measures = [Measure(angle*1.0, 0.0, 0) for angle in range(361)]
         self.__previous_measures = {}
         self.__point_positions = {}
-        
+
         # Initialize the WebSocket server connection parameters
         self.__ip = ip
         self.__port = port
@@ -99,13 +99,14 @@ class App:
         This method calculates the positions of the points based on the angle and distance
         of each measure, and stores them in the __point_positions dictionary.
         """
-        for measure in self.__measures:
+        for measure in self.__measures:  
             prev = self.__previous_measures.get(measure.angle)
             if prev and abs(prev.distance - measure.distance) < self.DISTANCE_MINIMUM_DIFFERENCE:
                 continue
             self.__previous_measures[measure.angle] = measure
 
-            radian_angle = math.radians(measure.angle)
+            # Adjust angle to match the coordinate system
+            radian_angle = math.radians(int(measure.angle + 270) % 360)
             x = int(self.CENTER_X + measure.distance * math.cos(radian_angle) * self.MAX_DISTANCE_RADIUS_FACTOR)
             y = int(self.CENTER_Y + measure.distance * math.sin(radian_angle) * self.MAX_DISTANCE_RADIUS_FACTOR)
             self.__point_positions[measure.angle] = (x, y)
@@ -161,7 +162,9 @@ class App:
                 msg = await ws.recv()
                 parts = msg.split(RealtimeTrackerServer.TAG_SEPARATOR)
                 if parts[0] == RealtimeTrackerServer.TAG_RPLIDAR_MEASURES:
-                    self.__measures = Measure.from_string_to_measures(parts[1])
+                    measure = Measure.from_string(parts[1])
+                    angle_idx = int(measure.angle)
+                    self.__measures[angle_idx] = measure
 
 if __name__ == "__main__":
     parser = ArgumentParser(

@@ -78,8 +78,11 @@ def wait_for_confirmation(message_to_compare: str):
         
         sleep(READ_DELAY)
 
+setup()
+
 # Send start message to the device
 send_message(START_MESSAGE)
+print("Sent: " + START_MESSAGE)
 wait_for_confirmation(START_MESSAGE)
 
 # Read N times
@@ -93,5 +96,6 @@ while read_times < READ_TIMES_LIMIT:
     sleep(READ_DELAY)
 
 # Send stop message to the device
-send_message("status:off")
+send_message(STOP_MESSAGE)
+print("Sent: " + STOP_MESSAGE)
 wait_for_confirmation(STOP_MESSAGE)

@@ -22,8 +22,8 @@ class Measure:
         """
         String representation of the Measure object.
         """
-        return self.ATTRIBUTES_SEPARATOR.join([str(self.angle), str(self.distance), str(self.quality)])
-        #return self.ATTRIBUTES_SEPARATOR.join([str(self.angle), str(self.distance)])
+        #return self.ATTRIBUTES_SEPARATOR.join([str(self.angle), str(self.distance), str(self.quality)])
+        return self.ATTRIBUTES_SEPARATOR.join([str(self.angle), str(self.distance)])
 
     def __repr__(self):
         """
@@ -163,3 +163,30 @@ class Measure:
 
         # Split the string by the measures separator and convert each part to Measure
         return [cls.from_string(measure_str) for measure_str in measures_str.split(cls.MEASURES_SEPARATOR) if measure_str]
+
+    @classmethod
+    def get_properties_from_string(cls, measure_str: str) -> tuple:
+        """
+        Get the properties of a Measure object from its string representation.
+
+        Args:
+            measure_str (str): String representation of the measure.
+
+        Returns:
+            tuple: A tuple containing the angle, distance, and quality of the measure.
+        """
+        # Check the type of measure_str
+        check_type(measure_str, str)
+
+        # Split the string by the attributes separator
+        parts = measure_str.split(cls.ATTRIBUTES_SEPARATOR)
+
+        if len(parts) < 2:
+            raise ValueError("Invalid measure string: {}".format(measure_str))
+
+        return (
+            float(parts[0]),
+            float(parts[1]),
+            int(parts[2]) if len(parts) > 2 else 0  # Quality, default to 0 if not provided
+        )
+    
