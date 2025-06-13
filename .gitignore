@@ -24,7 +24,7 @@
 /**/*/yolo/dataset/augmented_2c/**/*
 /**/*/yolo/dataset/organized_4c/**/*
 /**/*/yolo/dataset/organized_2c/**/*
-/**/*/yolo/runs/**/*
-/**/*/yolo/zip/**/*
+/**/*/yolo/**/*/runs/**/*
+/**/*/yolo/**/*/zip/**/*
 /**/*/yolo/**/*.zip
 

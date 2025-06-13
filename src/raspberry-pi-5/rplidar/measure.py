@@ -1,3 +1,5 @@
+from typing import Optional
+
 from utils import check_type
 
 class Measure:
@@ -102,7 +104,7 @@ class Measure:
         self.__quality = value
 
     @classmethod
-    def from_string(cls, measure_str: str) -> 'Measure':
+    def from_string(cls, measure_str: str) -> Optional['Measure']:
         """
         Create a Measure object from a string representation.
 
@@ -112,21 +114,25 @@ class Measure:
         Returns:
             Measure: Measure object created from the string.
         """
-        # Check the type of measure_str
-        check_type(measure_str, str)
+        try:
+            # Check the type of measure_str
+            check_type(measure_str, str)
 
-        # Split the string by the attributes separator
-        parts = measure_str.split(cls.ATTRIBUTES_SEPARATOR)
+            # Split the string by the attributes separator
+            parts = measure_str.split(cls.ATTRIBUTES_SEPARATOR)
 
-        if len(parts) < 2:
-            raise ValueError("Invalid measure string: {}".format(measure_str))
+            if len(parts) < 2:
+                raise ValueError("Invalid measure string: {}".format(measure_str))
 
-        # Convert parts to appropriate types
-        angle = float(parts[0])
-        distance = float(parts[1])
+            # Convert parts to appropriate types
+            angle = float(parts[0])
+            distance = float(parts[1])
 
-        # Quality is optional, default to 0 if not provided
-        quality = int(parts[2]) if len(parts) > 2 else 0
+            # Quality is optional, default to 0 if not provided
+            quality = int(parts[2]) if len(parts) > 2 else 0
+
+        except ValueError as e:
+            return None
 
         return cls(angle, distance, quality)
     

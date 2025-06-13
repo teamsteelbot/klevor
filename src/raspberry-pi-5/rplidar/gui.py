@@ -163,6 +163,9 @@ class App:
                 parts = msg.split(RealtimeTrackerServer.TAG_SEPARATOR)
                 if parts[0] == RealtimeTrackerServer.TAG_RPLIDAR_MEASURES:
                     measure = Measure.from_string(parts[1])
+                    if not measure:
+                        print(f"Invalid measure received: {parts[1]}")
+                        continue
                     angle_idx = int(measure.angle)
                     self.__measures[angle_idx] = measure
 
