@@ -1,1 +1,0 @@
-Esta carpeta contiene todo el código desarrollado para MicroPython para el desarollo de Klevor. Actualmente esta carpeta sólo tiene unos códigos de prueba para utilizarlos en una Raspberry Pi Pico ya que gran parte del desarrollo de Klevor está hecho en CircuitPython.

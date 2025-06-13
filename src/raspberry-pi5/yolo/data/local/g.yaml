@@ -1,5 +1,0 @@
-train: C:/Users/ralva/Documents/private/projects/uncompleted/teamsteelbot/klevor/raspberry-pi5/yolo/dataset/g/organized/train/images
-val: C:/Users/ralva/Documents/private/projects/uncompleted/teamsteelbot/klevor/raspberry-pi5/yolo/dataset/g/organized/val/images
-
-nc: 1  # number of classes
-names: [ 'green rectangular prism' ]  # class names

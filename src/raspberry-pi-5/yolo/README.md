@@ -12,6 +12,7 @@
 3. **[Montaje del Modelo de Detección de Objetos](#montaje-del-modelo-de-deteccion-de-objetos)**
    1. [Creación del Conjunto de Datos](#creacion-del-conjunto-de-datos)
    2. [Entrenamiento del Modelo](#entrenamiento-del-modelo)
+   2. [Entrenamiento del Modelo](#entrenamiento-del-modelo)
    3. [Instalación de Hailo AI HAT+](#instalacion-de-hailo-ai-hat)
    4. [Conversión del Modelo](#conversion-del-modelo)
       1. [Docker](#que-es-docker)

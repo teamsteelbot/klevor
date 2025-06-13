@@ -8,6 +8,9 @@
 # Python
 /**/*/__pycache__/**/*
 
+# Circuit Python settings.toml
+/**/*/settings.toml
+
 # Logs
 /**/*/log/logs/**/*
 
@@ -24,3 +27,4 @@
 /**/*/yolo/runs/**/*
 /**/*/yolo/zip/**/*
 /**/*/yolo/**/*.zip
+

@@ -1,7 +1,5 @@
 <h1 id="index">Índice</h1>
 
-Nota: Este listado contiene todo el contenido respectivo al desarollo de Klevor, sin embargo no todo está presente en este README.md, asegurese de hacer click para poder ser redireccionado si es necesario.
-
 1. **[Introducción](#introduccion)**
 2. **[Descripción de la Mecánica](v-photos/prototype1/README.md)**
 3. **[Lista de Componentes](#componentes)**
@@ -37,17 +35,18 @@ Nota: Este listado contiene todo el contenido respectivo al desarollo de Klevor,
    4. [PyTorch](#pytorch)
    5. [PiCamera2](#picamera-2)
    6. [Hailo Platform](#hailo-platform)
-8. **[Recursos Externos](#recursos-externos)**
-9. **[Fotos del equipo](t-photos/README.md)**
-10. **[Vídeos](video/README.md)**
+8. **[Fotos del equipo](t-photos/README.md)**
+9. **[Vídeos](video/README.md)**
+10. **[Recursos Externos](#recursos-externos)**
 
+*NOTA: Este listado contiene todo el contenido respectivo al desarollo de Klevor, sin embargo no todo está presente en este README.md, asegurese de hacer click para poder ser redireccionado si es necesario.*
 <h1 id="introduccion">Introducción</h1>
 
 <p align="center">
-    <img src="other/Team_Logo.svg" alt="Logo del Equipo" width=500>
+    <img src="other/team_logo.svg" alt="Logo del Equipo" width=500>
 </p>
 
-Este es el repositorio del Team Steelbot, compitiendo en la World Robot Olympiad 2025, en la categoría Futuros Ingenieros. Representando al Colegio Salto Ángel en Maracaibo, Estado Zulia, Venezuela. 
+Este es el repositorio del Team Steel Bot, compitiendo en la World Robot Olympiad 2025, en la categoría Futuros Ingenieros. Representando al Colegio Salto Ángel en Maracaibo, Estado Zulia, Venezuela. 
 
 Actualmente, este equipo está conformado por 3 miembros:
 
