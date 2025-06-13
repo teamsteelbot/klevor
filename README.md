@@ -131,9 +131,11 @@ El Raspberry Pi AI HAT+ tiene dos versiones, una de 13 Trillones de Operaciones 
   <img src="https://i.postimg.cc/JzvDmp2r/raspberry-pi-pico-2-w-raspberry-pi-sc1634-1146616007-removebg-preview.png" alt="Raspberry Pi Pico 2 WH" width="300">
 </p>
 
-Construido sobre el chip RP235x, [[8](#raspberry-pi-pico-2-2w-2h-2wh-kubii)][[9](#raspberry-pi-pico-2-wh-datasheet)] la Raspberry Pi Pico 2 es el microcontrolador de motores por excelencia de Klevor, además de ser un microcontrolador ligero y pequeño, este chip permite una fácil integración con el resto de los componentes Raspberry.
+Construido sobre el chip RP2350, [[8](#raspberry-pi-pico-2-2w-2h-2wh-kubii)][[9](#raspberry-pi-pico-2-wh-datasheet)] la Raspberry Pi Pico 2W es el microcontrolador de Klevor, además de ser un microcontrolador ligero y pequeño, este chip permite una fácil integración con el resto de los componentes Raspberry, debido a que establecer una comunicación serial con una Raspberry Pi 5 es mucho más fácil de hacer con una Raspberry Pi Pico que con algún otro microcontrolador de distinto fabricante.
 
 Además de ofrecer una frecuencia de procesamiento de 150 Mhz, superior a varios microcontroladores de similar tamaño, como, por ejemplo, el Arduino Nano el cual cuenta con una frecuencia de procesamiento de 20 Mhz.
+
+Y, la versión con el módulo de WiFi integrado ofrece una gran ventaja a la hora de poder practicar, ya que nos permite ver exactamente qué está procesando Klevor en el momento, sin necesidad de utilizar, por ejemplo, LEDs de distintos colores para poder señalizar distintas decisiones, logrando que el producto final sea mucho más limpio.
 
 | **Medida** | **Valor** |
 |------------|-----------|
@@ -226,6 +228,8 @@ El INJORA MB100 20A mini ESC es un controlador de velocidad [[15](#injora-mb100-
 
 Gracias a este dispositivo, podemos asegurar una conexión segura y efectiva entre el motor y la Pico 2, sin necesitar componentes más grandes (como un puente H L298N) para cumplir la misma función. Además que, este mini controlador de velocidad es capaz de soportar el alto amperaje que pueda consumir el motor INJORA 180.
 
+Además de todo esto, es una parte del código bastante fáciles de configurar gracias a librerías como `adafruit_motor` que permite configurar al motor principal como un servo de rotación continua gracias al módulo `servo`
+
 | **Medida** | **Valor** |
 |------------|-----------|
 | Largo      | 37 mm     |
@@ -286,6 +290,8 @@ El sensor VL53L0X en sí mismo es un pequeño sensor de distancia muy popular qu
 
 Estos sensores son una buena alternativa a los sensores ultrasónicos como el HC-SR04, además de ser más pequeños y confiables[[18](#sensor-tof)].
 
+Al inicio, queríamos utilizar varios de estos sensores para poder cubrir los puntos ciegos del RPLiDAR C1 con mayor facilidad, sin embargo mientras más probábamos múltiples de estos sensores a la vez, notábamos que eran mucho menos confiables y con menor rango (estos problemas se especifican mejor [aqui](/src/raspberry-pi-pico-2w/circuit-python/README.md)) por lo tanto, en vez de utilizar los 8 sensores que pensábamos utilizar como guía para el Desafío Abierto, decidimos que era mejor tener sencillamente sólo un sensor ToF en la aprte trasera de Klevor.
+
 | **Medida** | **Valor** |
 |------------|-----------|
 | Largo      | 25 mm     |
@@ -301,6 +307,10 @@ Estos sensores son una buena alternativa a los sensores ultrasónicos como el HC
 </p>
 
 El GY-BNO085 es un sensor de orientación inercial (IMU) de 9 Grados de Libertad (9DOF), ampliamente utilizado en aplicaciones que requieren un seguimiento de movimiento preciso. En el caso de Klevor, optamos por utilizar este sensor para poder lograr una mayor autonomía del robot en los cruces, ya que este sensor le permite alinearse casi perfectamente y poder ajustarse.
+
+Además de todo esto, el poder utilizar un giroscopio le permite a Klevor contar las vueltas que ha dado tanto en el Desafío Abierto como el Desafío Cerrado de la forma más segura, ya que, a pesar de algún problema mecánico que impida que el robot sea capaz de ir completamente derecho, el giroscopio le puede hacer saber que tanto se está desvíando, siendo éste uno de los componentes indispensables para poder completar este desafío.
+
+La forma en la que lo implementamos es bastante sencilla, el giroscopio siempre está actualizando los datos de manera asíncrona cada 50 milisegundos, y Klevor maneja dos variables, `yaw_deg` (la diferencia en grados en su orientación desde que inició en la pista hasta dónde está ubicado ahora mismo), y `relative_yaw` la cual utiliza el mismo `yaw_deg` para asignarse un valor pero, en vez de reiniciarse cada vez que pasa de los -180 grados ó 180 grados, simplemente le resta o suma (dependiendo del caso) 360 grados a `relative_yaw`, luego dividimos este número entre 90, y redondeamos hacia abajo (es decir, 10.57 para a ser simplemente 10), y si la división es igual a -12 o 12, sabemos que ya está casi en su zona de estacionamiento y Klevor simplemente avanza un poquito y se detiene (en el caso del Desafío Abierto)
 
 | **Medida** | **Valor** |
 |------------|-----------|
