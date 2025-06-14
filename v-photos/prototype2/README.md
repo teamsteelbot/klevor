@@ -68,3 +68,60 @@ La parte superior cambió drásticamnete en cuanto a diseño, los cambios que hi
 
 Decidimos eliminar también la tercera capa que tenía el primer prototipo ya que pudimos resumir todos los componentes en una única superficie. 
  
+
+ <table>
+     <tr>
+         <td>
+             <p align="center">
+                 <img src="./klevor-front.png" alt="Vista delantera">
+             </p>
+             <p align="center">
+                 <i>Vista delantera</i>
+             </p>
+         </td>
+         <td>
+             <p align="center">
+                 <img src="./klevor-back.png" alt="Vista Trasera">
+             </p>
+             <p align="center">
+                 <i>Vista trasera</i>
+             </p>
+         </td>
+     </tr>
+     <tr>
+         <td>
+             <p align="center">
+                 <img src="./klevor-right.png" alt="Vista derecha">
+             </p>
+             <p align="center">
+                 <i>Vista derecha</i>
+             </p>
+         </td>
+         <td>
+             <p align="center">
+                 <img src="./klevor-left.png" alt="Vista izquierda">
+             </p>
+             <p align="center">
+                 <i>Vista izquierda</i>
+             </p>
+         </td>
+     </tr>
+     <tr>
+       <td>
+             <p align="center">
+                 <img src="./klevor-top.png" alt="Vista superior">
+             </p>
+             <p align="center">
+                 <i>Vista superior</i>
+             </p>
+         </td>
+         <td>
+             <p align="center">
+                 <img src="./klevor-bottom.png" alt="Vista inferior">
+             </p>
+             <p align="center">
+                 <i>Vista inferior</i>
+             </p>
+         </td>
+     </tr>
+ </table>
