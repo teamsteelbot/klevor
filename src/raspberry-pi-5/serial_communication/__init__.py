@@ -26,11 +26,11 @@ class SerialCommunication:
     # Raspberry Pi Pico baud rate
     RASPBERRY_PI_PICO_BAUDRATE = 115200
 
-    # Raspberry PI Pico default port
-    RASPBERRY_PI_PICO_PORT = '/dev/ttyACM0'
+    # Raspberry PI Pico console port
+    RASPBERRY_PI_PICO_CONSOLE_PORT = '/dev/ttyACM0'
 
-    # Raspberry PI Pico alternative port
-    RASPBERRY_PI_PICO_ALT_PORT = '/dev/ttyACM1'
+    # Raspberry PI Pico data port
+    RASPBERRY_PI_PICO_DATA_PORT = '/dev/ttyACM1'
 
     # Message delay
     DELAY = 0.01
@@ -54,8 +54,8 @@ class SerialCommunication:
         logger: Optional[Logger] = None,
         images_queue: Optional[ImagesQueue] = None,
         server: Optional[RealtimeTrackerServer] = None,
-        port: Optional[str] = RASPBERRY_PI_PICO_PORT,
-        alt_port: Optional[str] = RASPBERRY_PI_PICO_ALT_PORT,
+        data_port: Optional[str] = RASPBERRY_PI_PICO_DATA_PORT,
+        console_port: Optional[str] = RASPBERRY_PI_PICO_CONSOLE_PORT,
         baudrate: Optional[int] = RASPBERRY_PI_PICO_BAUDRATE
     ):
         """
@@ -64,8 +64,8 @@ class SerialCommunication:
         Args:
             logger (Logger): Logger instance for logging messages.
             images_queue (ImagesQueue): Images queue for handling images.
-            port (str): Serial port to use for communication. Default is '/dev/ttyACM0'.
-            alt_port (str): Alternative serial port to use for communication. Default is None.
+            data_port (str): Serial port used for sending data to Pico
+            console_port (str): Serial port used for receiving data from Pico.
             baudrate (int): Baud rate for the serial communication. Default is 115200.
             server (RealtimeTrackerServer): Server instance for sending messages to the server. Default is None.
         """
@@ -121,15 +121,16 @@ class SerialCommunication:
         self.__last_incoming_message = None
 
         # Set the serial port, alternative serial port and baud rate
-        check_type(port, str)
-        self.__port = port
-        check_type(alt_port, str)
-        self.__alt_port = alt_port
+        check_type(data_port, str)
+        self.__data_port = data_port
+        check_type(console_port, str)
+        self.__console_port = console_port
         check_type(baudrate, int)
         self.__baudrate = baudrate
 
-        # Initialize the serial port
-        self.__serial = None
+        # Initialize the console and data serial ports
+        self.__console_serial = None
+        self.__data_serial = None
 
         # Get the debug environment variable
         self.__debug = Env.get_debug_mode()
@@ -157,7 +158,7 @@ class SerialCommunication:
             bool: True if the serial port is open, False otherwise.
         """
         with (self.__rlock):
-            return not self.__stop_event.is_set() and self.__serial and self.__serial.is_open
+            return not self.__stop_event.is_set() and self.__console_serial and self.__console_serial.is_open and self.__data_serial and self.__data_serial.is_open
 
     def is_closed(self) -> bool:
         """
@@ -211,23 +212,21 @@ class SerialCommunication:
             # Clear queues closed event
             self.__queues_closed_event.clear()
 
-            # Open the serial port
+            # Open the data and console ports
             try:
-                self.__serial = Serial(self.__port, self.__baudrate)
+                self.__console_serial = Serial(self.__console_port, self.__baudrate)
 
             except SerialException as e:
-                if not self.__alt_port:
-                   raise RuntimeError(f"Error opening serial port: {e}")
-                else:
-                    # Try to open the alternative port
-                    try:
-                        self.__serial = Serial(self.__alt_port, self.__baudrate)
+                raise RuntimeError(f"Error opening serial console port: {e}")
+            
+            try:
+                self.__data_serial = Serial(self.__data_port, self.__baudrate)
 
-                    except SerialException as alt_e:
-                        raise RuntimeError(f"Error opening serial port: {alt_e}")
+            except SerialException as alt_e:
+                raise RuntimeError(f"Error opening serial data port: {alt_e}")
 
         # Log
-        self.__log(f"Serial port {self.__port} opened with baudrate {self.__baudrate}.")
+        self.__log(f"Serial console port '{self.__console_port}' and data port '{self.__data_port}' opened with baudrate {self.__baudrate}.")
 
     def __close(self) -> None:
         """
@@ -265,7 +264,7 @@ class SerialCommunication:
             self.__queues_closed_event.set()
 
         # Log
-        self.__log(f"Serial port {self.__port} closed.")
+        self.__log(f"Serial console port '{self.__console_port}' and data port '{self.__data_port}' closed.")
 
     def __put_incoming_message(self, message: Message) -> None:
         """
@@ -408,17 +407,17 @@ class SerialCommunication:
         Handler to receive messages from the serial port.
         """
         # Log
-        self.__log(f"Serial port receiving handler started for port {self.__port}.")
+        self.__log(f"Serial port receiving handler started for port {self.__console_port}.")
 
         # Check if there is a initialization message received
         while True:
-            if self.is_open() and self.__serial.in_waiting > 0:
-                print(self.__serial.in_waiting)
-                data = self.__serial.read(self.__serial.in_waiting)
-                self.__log("Received initialization message: " + str(data))
+            if self.is_open() and self.__console_serial.in_waiting > 0:
+                print(self.__console_serial.in_waiting)
+                data = self.__console_serial.read(self.__console_serial.in_waiting).decode(self.ENCODE).strip()
+                self.__log("Received initialization message: " + data)
 
                 # Check if it's a start message
-                parts = str(data).split(Message.HEADER_SEPARATOR)
+                parts = data.split(Message.HEADER_SEPARATOR)
                 if len(parts) < 2:
                     continue
 
@@ -433,21 +432,21 @@ class SerialCommunication:
                 """
                 # Read the initialization message
                 self.__log(f"Initialization message received: {data}")
-                self.__serial.reset_input_buffer()
-                self.__serial.reset_output_buffer()
+                self.__console_serial.reset_input_buffer()
+                self.__console_serial.reset_output_buffer()
                 self.__log("Input and output buffers reset.")
                 """
         
         while self.is_open():
-            if not self.__serial.in_waiting > 0:
+            if not self.__console_serial.in_waiting > 0:
                 sleep(self.DELAY)
                 continue
 
-            message_str = self.__serial.readline().decode(self.ENCODE).strip()
+            message_str = self.__console_serial.readline().decode(self.ENCODE).strip()
 
             # Split the message into type and content
             message_parts = message_str.split(Message.HEADER_SEPARATOR)
-            if len(message_parts < 2):
+            if len(message_parts) < 2:
                 continue
 
             if message_parts[0].type == self.TYPE_STATUS and message_parts[1].content == self.TYPE_STATUS_OFF:
@@ -462,13 +461,13 @@ class SerialCommunication:
             )
 
             # Put the message in the incoming messages queue
-            self.__log("Received message: " +str(message))
+            #self.__log("Received message: " +str(message))
             self.__put_incoming_message(message)
 
             # Sleep for a short time to avoid busy waiting
             sleep(self.DELAY)
 
-        self.__log(f"Serial port receiving handler stopped for port {self.__port}.")
+        self.__log(f"Serial port receiving handler stopped for port {self.__console_port}.")
 
     def __sending_message_handler(self) -> None:
         """
@@ -481,11 +480,10 @@ class SerialCommunication:
         self.__start_event.wait()
 
         # Log
-        self.__log(f"Serial port sending handler started for port {self.__port}.")
+        self.__log(f"Serial port sending handler started for port {self.__data_port}.")
 
         while self.is_open():
             # Check if there is a message to send
-            self.__log("Waiting message to send...")
             self.__pending_outgoing_message_event.wait()
 
             # Get the message from the queue
@@ -496,13 +494,12 @@ class SerialCommunication:
                 continue
 
             # Send the message to the serial port
-            self.__log("Sent message: " +str(message))
-            self.__serial.write(str(message).encode(self.ENCODE))
+            self.__data_serial.write(str(message).encode(self.ENCODE))
 
             # Wait for the message to be sent
             # sleep(self.DELAY)
 
-        self.__log(f"Serial port sending handler stopped for port {self.__port}.")
+        self.__log(f"Serial port sending handler stopped for port {self.__data_port}.")
 
     def __create_sending_thread(self) -> None:
         """
