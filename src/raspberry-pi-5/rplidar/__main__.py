@@ -64,16 +64,12 @@ if __name__ == "__main__":
                 sleep(1)  # Sleep to prevent busy-waiting
 
         # Wait for the start message from SerialCommunication
-        #logger.log(Message("Waiting for start message from SerialCommunication..."))
-        #serial.wait_for_start_message()
-
-        # Start the RPLIDAR thread
-        while True:
-            sleep(1)
+        logger.log(Message("Waiting for start message from SerialCommunication..."))
+        serial.wait_for_start_message()
 
         # Wait for the stop message from SerialCommunication
-        #serial.wait_for_stop_message()
-        #logger.log(Message("Received stop message from SerialCommunication, stopping RPLIDAR..."))
+        serial.wait_for_stop_message()
+        logger.log(Message("Received stop message from SerialCommunication, stopping RPLIDAR..."))
 
     except KeyboardInterrupt:
         # Handle keyboard interrupt to stop the server gracefully

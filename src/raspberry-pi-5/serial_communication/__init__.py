@@ -41,7 +41,7 @@ class SerialCommunication:
     # Types of messages
     TYPE_CAPTURE_IMAGE = 'capture_image'
     TYPE_INFERENCE = 'inference'
-    TYPE_RPLIDAR_MEASURES = "rplidar_measures"
+    TYPE_RPLIDAR = "rplidar"
     TYPE_DEBUG = 'debug'
     TYPE_STATUS = 'status'
 
@@ -360,7 +360,7 @@ class SerialCommunication:
             measures_str (str): The measures string to put in the queue.
         """
         # Create a message with the RPLIDAR measures type
-        message = Message(self.TYPE_RPLIDAR_MEASURES, measures_str)
+        message = Message(self.TYPE_RPLIDAR, measures_str)
 
         # Put the message in the outgoing messages queue
         self._send_message(message)
@@ -408,7 +408,7 @@ class SerialCommunication:
         Handler to receive messages from the serial port.
         """
         # Wait for start event to be set
-        #self.__start_event.wait()
+        self.__start_event.wait()
 
         # Check if there is a initialization message received
         if self.is_open() and self.__serial.in_waiting > 0:
@@ -449,7 +449,7 @@ class SerialCommunication:
         Handler to send messages to the serial port.
         """
         # Wait for start event to be set
-        #self.__start_event.wait()
+        self.__start_event.wait()
 
         while self.is_open():
             # Check if there is a message to send
