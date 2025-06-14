@@ -5,6 +5,8 @@ from digitalio import DigitalInOut, Direction
 import asyncio
 import os
 import ipaddress
+import wifi
+import socketpool
 
 # Setup LED delay
 SETUP_LED_DELAY = 1
@@ -245,7 +247,7 @@ while read_times < READ_TIMES_LIMIT:
     if message_received:
         print("Received: " + str(message_received))
     
-    read_times += 1
+    #read_times += 1
     sleep(READ_DELAY)
 
 # Send stop message to the device

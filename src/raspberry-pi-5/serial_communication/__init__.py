@@ -246,7 +246,7 @@ class SerialCommunication:
                 self.__capture_image_event.clear()
 
             # Clear the pending incoming message event
-            self.__pending_incoming_message_event.clear()
+            self.__pending_incoming_message_event.set()
 
             # Set the pending outgoing message event to ensure no messages are left to send
             self.__pending_outgoing_message_event.set()
@@ -408,7 +408,7 @@ class SerialCommunication:
         Handler to receive messages from the serial port.
         """
         # Wait for start event to be set
-        self.__start_event.wait()
+        #self.__start_event.wait()
 
         # Check if there is a initialization message received
         if self.is_open() and self.__serial.in_waiting > 0:
@@ -449,7 +449,7 @@ class SerialCommunication:
         Handler to send messages to the serial port.
         """
         # Wait for start event to be set
-        self.__start_event.wait()
+        #self.__start_event.wait()
 
         while self.is_open():
             # Check if there is a message to send

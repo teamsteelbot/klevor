@@ -4,6 +4,7 @@
 
 # Virtual environment
 /**/*/.venv/**/*
+/**/*/.openchallenge/**/*
 
 # Python
 /**/*/__pycache__/**/*
