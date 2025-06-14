@@ -54,7 +54,7 @@ GYRO_READ_INTERVAL = 0.05 # 50 ms for 20 Hz updates
 SWITCH_PIN = board.GP11
 SWITCH_DELAY = 0.1
 
-# Distance Thresholds
+# Distance Thresholds (Note: These distances are measured in milimeters)
 FRONT_DISTANCE_THRESHOLD = 500
 SIDE_DISTANCE_THRESHOLD = 1500
 TARGET_DISTANCE_STOP_START = 2000
@@ -179,7 +179,7 @@ def setup():
     led_pin.direction = digitalio.Direction.OUTPUT
 
     try:
-        bno = BNO08X_I2C(I2C_BUS, address=0x4B) # Normally you shouldn't have the need to force and I2C address, but in our case we had to
+        bno = BNO08X_I2C(I2C_BUS, address=0x4B) # Normally you shouldn't have the need to force an I2C address, but in our case we had to
    
     except Exception as e:
         raise e
@@ -195,7 +195,7 @@ def setup():
         quat = bno.quaternion
         time.sleep(0.05)
         
-    # Saving the orientation, this makesthe turns variables much smoother to handle
+    # Saving the orientation, this makes the turns variables much smoother to handle
     quat = bno.quaternion
     _, _, initial_yaw_val = quaternion_to_euler_degrees(*quat)
     initial_yaw = initial_yaw_val

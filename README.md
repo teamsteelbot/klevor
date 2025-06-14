@@ -2,7 +2,7 @@
 
 1. **[Introducción](#introduccion)**
 2. **[Descripción de la Mecánica](v-photos/prototype1/README.md)**
-3. **[Lista de Componentes](#componentes)**
+3. **[Lista de Componentes](#lista-de-componentes)**
    1. [Raspberry Pi 5](#componentes-raspberry-pi-5)
    2. [Raspberry Pi Camera Module 3 Wide](#componentes-raspberry-pi-camera-module-3-wide)
    3. [Raspberry Pi AI HAT+ (26 TOPS)](#componentes-raspberry-pi-ai-hat-26-tops)
@@ -23,8 +23,8 @@
    2. [MicroPython](#micropython)
    3. [CircuitPython](#circuitpython)
 6. Código
-   1. [Raspberry Pi 5](src/raspberry-pi5/README.md)
-      1. [YOLO](src/raspberry-pi5/yolo/README.md)
+   1. [Raspberry Pi 5](src/raspberry-pi-5/README.md)
+      1. [YOLO](src/raspberry-pi-5/yolo/README.md)
    2. [Raspberry Pi Pico 2 WH](src/raspberry-pi-pico-2w/README.md)
       1. [CircuitPython](src/raspberry-pi-pico-2w/circuit-python/README.md)
       2. [MicroPython](src/raspberry-pi-pico-2w/micro-python/README.md)
@@ -68,7 +68,7 @@ Actualmente, este equipo está conformado por 3 miembros:
 
 - `video` contiene los vídeos de Klevor en la pista, tanto en el Desafío Abierto como en el Desafío con Obstáculos (Desafío Cerrado).
 
-<h1 id="componentes">Componentes</h1>
+<h1 id="lista-de-componentes">Lista de Componentes</h1>
 
 A continuación, está la descripción de todos los componentes principales de Klevor (mencionados en el índice).
 
