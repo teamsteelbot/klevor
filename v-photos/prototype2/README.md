@@ -47,3 +47,24 @@ Seguiremos explicando esta primera capa de nuestro robot. De componentes tiene u
 <h3 id="por-que">¿Por qué diseñamos así nuestro chasis?</h3>
 
 Este chasis es una modificación de la primera capa del primer prototipo de Klevor. Decidimos modificarla por el peso, reduciendo el espacio por componentes que ya no están, esta primera capa también está diseñada con esa forma debido a las piezas de kits que no son modificables, como lo son los diferenciales, los muñones de dirección y el eje transmisor. Así hicimos un espacio a medida para cada componente. Esta también es la razón por la que diseñamos toda la parte de conexión de las ruedas (Ruedas, Semiejes y cajas de diferenciales).
+
+<h2 id="segunda-capa">Segunda Capa</h2>
+
+Esta es la capa donde más cambios se hicieron, anteriormente aquí teníamos los sensores ToF (Time of Flight), pero fueron reemplazados por el [RPLidar C1](../../README.md/#componentes-rplidar-c1) un sensor que mediante un láser infrarrojo nos permite detectar distancias de hasta 12 metros en los 360 grados, cosa que corrige el mal funcionamiento de los anteriores sensores, que daban lecturas erróneas y tenían un rango de detección muchísimo mas corto. Decidimos colocarlo al revés para que evitar que tenga lecturas erróneas debido a que su láser pasaría por encima de la pared de la pista.
+
+En esta parte superior también está el microcontrolador ([Raspberry Pi Pico 2](../../README.md/#componentes-raspberry-pi-pico-2-wh)) y el microprocesador ([Raspberry Pi 5](../../README.md/#componentes-raspberry-pi-5)), además de la alimentación de los mismos, que es un powerbank marca Harvic® de 10000 mAh y 22.5W, este se conecta a la Raspberry Pi 5 y a su vez, envía parte del voltaje a el RPlidar; la Raspberry Pi Pico 2 y la [Raspberry Cam Module 3 Wide](../../README.md/#componentes-raspberry-pi-camera-module-3-wide), que es la cámara que nos ayudará a detectar los colores de los bloques en el desafío cerrado. 
+
+<h3 id="por-que">¿Por qué diseñamos así la parte superior?</h3>
+
+La parte superior cambió drásticamnete en cuanto a diseño, los cambios que hicimos fueron:
+
+**Crear un espacio en la parte frontal**: Esto lo hicimos para colocar el RPlidar con el mayor ángulo de visión posible
+
+**Recortar bordes**: Para reducir peso y espacio innecesario 
+
+**Orificios**: Con el fin de poder conectar cables con la parte de abajo, esto nos da más facilidad a la hora de ensamblar a Klevor
+
+**Soporte Raspberry Pi Cam 3**: Luego de probar qué ángulo de colocación era el mejor para la cámara decidimos hacer un soporte completamente fijo. Aunque pensamos cambiarlo más adelante.
+
+Decidimos eliminar también la tercera capa que tenía el primer prototipo ya que pudimos resumir todos los componentes en una única superficie. 
+ 
