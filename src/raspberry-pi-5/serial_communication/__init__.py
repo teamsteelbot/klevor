@@ -412,7 +412,6 @@ class SerialCommunication:
         # Check if there is a initialization message received
         while True:
             if self.is_open() and self.__console_serial.in_waiting > 0:
-                print(self.__console_serial.in_waiting)
                 data = self.__console_serial.read(self.__console_serial.in_waiting).decode(self.ENCODE).strip()
                 self.__log("Received initialization message: " + data)
 
@@ -449,10 +448,13 @@ class SerialCommunication:
             if len(message_parts) < 2:
                 continue
 
-            if message_parts[0].type == self.TYPE_STATUS and message_parts[1].content == self.TYPE_STATUS_OFF:
-                # Set the stop event
-                self.__stop_event.set()
-                break
+            if message_parts[0] == self.TYPE_STATUS:
+                if message_parts[1] == self.TYPE_STATUS_OFF:
+                    # Set the stop event
+                    self.__stop_event.set()
+                    break
+                else:
+                    self.__log("Received status message: " + message_str)
 
             # Create the message object
             message = Message(
@@ -494,6 +496,7 @@ class SerialCommunication:
                 continue
 
             # Send the message to the serial port
+            #print(f"Sending message: {str(message).encode(self.ENCODE)}")
             self.__data_serial.write(str(message).encode(self.ENCODE))
 
             # Wait for the message to be sent

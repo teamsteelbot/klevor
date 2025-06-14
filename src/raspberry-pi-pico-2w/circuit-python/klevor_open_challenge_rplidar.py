@@ -18,14 +18,14 @@ I2C_BUS = busio.I2C(board.GP1, board.GP0)
 
 # General configuration
 MOVEMENT_MODE = True
-DEBUG = True
+DEBUG = False
 
 # Movement delay
-MOVEMENT_DELAY = 0.2
+MOVEMENT_DELAY = 0.1
 
 # Speed Values
-SPEED_NORMAL = -0.3
-SPEED_TURN = -0.25
+SPEED_NORMAL = -0.5
+SPEED_TURN = -0.35
 SPEED_STOP = 0
 
 # Steering servo configuration
@@ -40,12 +40,13 @@ SIDE_DIFFERENCE_PERCENTAGE = 0.2
 
 # USB CDC headers
 USB_CDC_HEADER_RPLIDAR = "rplidar"
+USB_CDC_HEADER_STATUS = "status"
 USB_CDC_HEADER_SEPARATOR = ":"
 USB_CDC_RPLIDAR_CONTENT_SEPARATOR = ","
 
 # RPLIDAR Data Configuration
 RPLIDAR_MAX_DISTANCE = 3000
-RPLIDAR_DISTANCE_TOGGLE_LED_DELAY = 0.0015
+RPLIDAR_DISTANCE_TOGGLE_LED_DELAY = 0.00015
 
 # Desired Gyroscope update rate
 GYRO_READ_INTERVAL = 0.05 # 50 ms for 20 Hz updates
@@ -64,7 +65,7 @@ TARGET_DISTANCE_STOP_END = 1000
 SERVO_PIN = board.GP13
 SERVO_PWM_CONFIGURATION = pwmio.PWMOut(SERVO_PIN, duty_cycle=0, frequency=50)
 STEERING_SERVO = servo.Servo(SERVO_PWM_CONFIGURATION, actuation_range=180, min_pulse=500, max_pulse=2500)
-STEERING_SERVO_CENTER = 90
+STEERING_SERVO_CENTER = 88
 SERVO_SETUP_DELAY = 0.1
 
 # Motor pins and configuration
@@ -74,8 +75,8 @@ ESC = servo.ContinuousServo(ESC_PWM_Configuration, min_pulse=1000, max_pulse=200
 ESC_SETUP_DELAY = 0.2
 
 # Start and stop message
-START_MESSAGE = "status:on"
-STOP_MESSAGE = "status:off"
+START_MESSAGE = f"{USB_CDC_HEADER_STATUS}{USB_CDC_HEADER_SEPARATOR}on"
+STOP_MESSAGE = f"{USB_CDC_HEADER_STATUS}{USB_CDC_HEADER_SEPARATOR}off"
 
 # Turn on delay
 TURN_ON_DELAY = 2
@@ -97,8 +98,15 @@ data_port = usb_cdc.data
 data_port.reset_input_buffer()
 data_port.reset_output_buffer()
 
+# Console port
+console_port = usb_cdc.console
+
 # RPLIDAR distances
-RPLIDAR_DISTANCES = [RPLIDAR_MAX_DISTANCE for i in range(360)]
+rplidar_distances = [RPLIDAR_MAX_DISTANCE for i in range(360)]
+
+# Last motor speed and servo angle
+last_motor_speed = SPEED_STOP
+last_servo_angle = STEERING_SERVO_CENTER
 
 # ---------- USB CDC Setup ----------
 
@@ -111,11 +119,12 @@ def receive_message() -> str|None:
     if data_port.in_waiting > 0:
         return data_port.readline().strip().decode("utf-8")
 
-async def receive_message_handler():
+def receive_360_rplidar_measures():
     """
-    Receive messages from the USB CDC data stream in a non-blocking way.
+    Receive messages 360 RPLIDAR measures from the USB CDC data stream.
     """
-    while True:
+    measures_counter = 0
+    while measures_counter < 360:
         if data_port.in_waiting > 0:
             # Turn on the LED fast to indicate data reception
             if DEBUG:
@@ -125,7 +134,9 @@ async def receive_message_handler():
                 time.sleep(RPLIDAR_DISTANCE_TOGGLE_LED_DELAY)
 
             # Read the message from the data port
-            message = data_port.readline().strip().decode("utf-8")
+            message = data_port.readline().decode("utf-8")
+            if DEBUG:
+                send_message(f"{USB_CDC_HEADER_STATUS}:received_message,{message}")
             parts = message.split(USB_CDC_HEADER_SEPARATOR)
 
             # Check if it's a RPLIDAR message
@@ -134,17 +145,21 @@ async def receive_message_handler():
 
             if parts[0] == USB_CDC_HEADER_RPLIDAR:
                 rplidar_content = parts[1].split(USB_CDC_RPLIDAR_CONTENT_SEPARATOR)
-                if len(rplidar_content) < 3:
+                if len(rplidar_content) < 2:
                     continue
                 
                 # Parse the RPLIDAR content
                 angle = int(float(rplidar_content[0]))
                 distance = int(float(rplidar_content[1]))
-                quality = int(rplidar_content[2])
+                
+                if DEBUG:
+                    send_message(f"{USB_CDC_HEADER_STATUS}:received_message,{angle},{distance}")
 
                 # Check the distance and quality
-                if quality > 0 and distance < RPLIDAR_MAX_DISTANCE and 0 <= angle < 360:
-                    RPLIDAR_DISTANCES[angle] = distance
+                if distance < RPLIDAR_MAX_DISTANCE and 0 <= angle < 360:
+                    rplidar_distances[angle] = distance
+                    
+            measures_counter += 1
 
 def send_message(message: str):
     """
@@ -154,7 +169,7 @@ def send_message(message: str):
         message (str): The message to send.
     """
     try:
-        data_port.write((message + "\n").encode("utf-8"))
+        console_port.write((message + "\n").encode("utf-8"))
     except Exception as e:
         pass
 
@@ -228,44 +243,42 @@ def quaternion_to_euler_degrees(x, y, z, w):
     return math.degrees(roll_rad), math.degrees(pitch_rad), math.degrees(yaw_rad)
 
 # Gyroscope Reading Function (now runs as a background task)
-async def gyro_reading():
-    global initial_yaw, last_raw_yaw, yaw_deg, turns, last_segment_count
-    while True: # Keep reading indefinitely in the background
-        try:
-            quat_x, quat_y, quat_z, quat_w = bno.quaternion
-            roll_deg, pitch_deg, raw_yaw_deg = quaternion_to_euler_degrees(quat_x, quat_y, quat_z, quat_w)
+def gyro_reading():
+    try:
+        quat_x, quat_y, quat_z, quat_w = bno.quaternion
+        roll_deg, pitch_deg, raw_yaw_deg = quaternion_to_euler_degrees(quat_x, quat_y, quat_z, quat_w)
 
-            # Compute relative yaw
-            relative_yaw = raw_yaw_deg - initial_yaw
-            if relative_yaw > 180:
-                relative_yaw -= 360
-            elif relative_yaw < -180:
-                relative_yaw += 360
+        # Compute relative yaw
+        relative_yaw = raw_yaw_deg - initial_yaw
+        if relative_yaw > 180:
+            relative_yaw -= 360
+        elif relative_yaw < -180:
+            relative_yaw += 360
 
-            if last_raw_yaw is None:
-                yaw_deg = relative_yaw
-                last_raw_yaw = relative_yaw
-                last_segment_count = int(yaw_deg / 90)
-            else:
-                delta_raw_yaw = relative_yaw - last_raw_yaw
-                if delta_raw_yaw > 180:
-                    delta_raw_yaw -= 360
-                elif delta_raw_yaw < -180:
-                    delta_raw_yaw += 360
+        if last_raw_yaw is None:
+            yaw_deg = relative_yaw
+            last_raw_yaw = relative_yaw
+            last_segment_count = int(yaw_deg / 90)
+        else:
+            delta_raw_yaw = relative_yaw - last_raw_yaw
+            if delta_raw_yaw > 180:
+                delta_raw_yaw -= 360
+            elif delta_raw_yaw < -180:
+                delta_raw_yaw += 360
 
-                yaw_deg += delta_raw_yaw
+            yaw_deg += delta_raw_yaw
 
-                current_segment_count = int(yaw_deg / 90)
-                if current_segment_count != last_segment_count:
-                    turns += current_segment_count - last_segment_count
-                    last_segment_count = current_segment_count
+            current_segment_count = int(yaw_deg / 90)
+            if current_segment_count != last_segment_count:
+                turns += current_segment_count - last_segment_count
+                last_segment_count = current_segment_count
 
-                last_raw_yaw = relative_yaw
+            last_raw_yaw = relative_yaw
 
-        except Exception as e:
-            pass
+    except Exception as e:
+        pass
 
-        await asyncio.sleep(GYRO_READ_INTERVAL) # Ensures 50ms update rate
+    #await asyncio.sleep(GYRO_READ_INTERVAL) # Ensures 50ms update rate
     
 # ---------- Movement Functions ----------
 
@@ -275,7 +288,14 @@ def set_robot_speed(speed_throttle):
     Args:
         speed_throttle (float): The desired speed throttle value, must be between -1.0 and 1.0.
     """
+    global last_motor_speed
+
+    if last_motor_speed == speed_throttle:
+        return
+    
     ESC.throttle = speed_throttle
+    last_motor_speed = speed_throttle
+    send_message(f"{USB_CDC_HEADER_STATUS}:motor,{speed_throttle}")
 
 def set_steering_angle(angle):
     """
@@ -283,7 +303,14 @@ def set_steering_angle(angle):
     Args:
         angle (int): The desired steering angle in degrees, must be between 0 and 180.
     """
+    global last_servo_angle
+
+    if last_servo_angle == angle:
+        return
+    
     STEERING_SERVO.angle = max(0, min(180, angle)) # Clamp angle to valid range
+    last_servo_angle = angle
+    send_message(f"{USB_CDC_HEADER_STATUS}:servo,{angle}")
 
 def stop_robot(): # Renamed from 'stop' for consistency
     set_steering_angle(STEERING_SERVO_CENTER)
@@ -292,7 +319,7 @@ def stop_robot(): # Renamed from 'stop' for consistency
 # ---------- Main Robot Control Loop ----------
 
 async def main_robot_loop():  
-    global turns 
+    global turns, initial_yaw, last_raw_yaw, yaw_deg, turns, last_segment_count
 
     # Initialize the robot state
     setup()
@@ -309,7 +336,7 @@ async def main_robot_loop():
         time.sleep(SWITCH_DELAY)  # Pequeña pausa para debouncing y eficiencia (ajusta si es necesario)
 
     # Send start message
-    #send_message(START_MESSAGE)
+    send_message(START_MESSAGE)
 
     #  Turn on built-in LED two times to show that the start message has been sent
     if DEBUG:
@@ -318,21 +345,29 @@ async def main_robot_loop():
             time.sleep(SENT_START_MESSAGE_DELAY)
             led_pin.value = False
             time.sleep(SENT_START_MESSAGE_DELAY)
-
-    # Start the gyroscope reading as a separate background task
-    asyncio.create_task(gyro_reading())
     
     # Create a receiving message handler task
-    asyncio.create_task(receive_message_handler())
+    #asyncio.create_task(receive_message_handler())
+
+    # Start the gyroscope reading as a separate background task
+    #asyncio.create_task(gyro_reading())
     
     # Give the gyro task a moment to update 'turns' before initializing last_known_turns
-    await asyncio.sleep(GYRO_READ_INTERVAL * 2)
+    time.sleep(GYRO_READ_INTERVAL * 2)
 
     # Initialize with the current global turns value
     last_known_turns = turns 
     turning = False
+    if DEBUG:
+        send_message(f"{USB_CDC_HEADER_STATUS}:starting main algorithm")
 
     while True:
+        # Update RPLIDAR measures
+        receive_360_rplidar_measures()
+        
+        # Update gyro
+        gyro_reading()
+        
         # Check for Gyro Turn and Center Servo Immediately
         if turning:
             if turns != last_known_turns:
@@ -346,10 +381,15 @@ async def main_robot_loop():
                 time.sleep(TURNING_DELAY)  
                 continue
 
-        # Calculate average distances from RPLIDAR data
-        avg_front_dist = (sum(RPLIDAR_DISTANCES[-5:]) + sum(RPLIDAR_DISTANCES[:5])) / 10.0
-        avg_left_dist = sum(RPLIDAR_DISTANCES[265:275]) / 10.0
-        avg_right_dist = sum(RPLIDAR_DISTANCES[85:95]) / 10.0
+        # Calculate average distances from RPLIDAR data. I interchange the left side witht he right side because the RPLIDAR is upside-down
+        avg_front_dist = (sum(rplidar_distances[-5:]) + sum(rplidar_distances[:5])) / 10.0
+        avg_right_dist = sum(rplidar_distances[265:275]) / 10.0
+        avg_left_dist = sum(rplidar_distances[85:95]) / 10.0
+        
+        if DEBUG:
+            send_message(f"{USB_CDC_HEADER_STATUS}:avg_front_dist,{avg_front_dist}")
+            send_message(f"{USB_CDC_HEADER_STATUS}:avg_right_dist,{avg_right_dist}")
+            send_message(f"{USB_CDC_HEADER_STATUS}:avg_left_dist,{avg_left_dist}")
 
         # Overall Mission Completion Check
         if abs(turns) == 12:
@@ -386,7 +426,7 @@ async def main_robot_loop():
             elif avg_left_dist >= SIDE_DISTANCE_THRESHOLD:
                 set_steering_angle(STEERING_SERVO_CENTER + TURNING_VALUE)
 
-        await asyncio.sleep(MOVEMENT_DELAY)
+        time.sleep(MOVEMENT_DELAY)
 
 # Start the asyncio event loop
 asyncio.run(main_robot_loop())
