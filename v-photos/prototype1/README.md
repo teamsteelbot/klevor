@@ -3,9 +3,10 @@
 
 1. **[Introducción](#introduccion)**
 2. **[Capas](#capas)**
-    1. **[Primera Capa](#primera-capa)**
-    1. **[Segunda Capa](#segunda-capa)**
-    1. **[Tercera Capa](#tercera-capa)**
+    1. [Primera Capa](#primera-capa)
+    1. [Segunda Capa](#segunda-capa)
+    1. [Tercera Capa](#tercera-capa)
+3. **[Lista de Materiales](#lista-de-materiales)**
 
 <h1 id="introduccion">Introducción</h1> 
 En esta sección detallaremos los componentes y su funcionalidad dentro de cada capa del robot. Explicaremos el propósito de cada pieza y cómo su integración contribuye al rendimiento general de “Klevor” en el recorrido de pista.

@@ -152,7 +152,7 @@ Y, la versión con el módulo de WiFi integrado ofrece una gran ventaja a la hor
 
 El RPLiDAR C1 es un escáner de rango láser de 360 grados, el cual puede detectar superficies que están hasta 12 metros de distancia, su punto ciego es de tan solo 5 centímetros alrededor del mismo [[10](#rplidar-c1-robot-shop)][[11](#rplidar-c1-datasheet)], todos estos factores hacen que el RPLiDAR C1 sea una gran opción para poder guíar a Klevor por la pista.
 
-Este RPLiDAR C1 permite a Klevor poder identificar que tan cerca o que tan lejos está de las paredes de la pista, además de poder identificar la ubicación de los obstáculos mucho antes que la cámara y poder ajustarse a tiempo.
+Este RPLiDAR C1 permite a Klevor poder identificar exactamente dónde está ubicado en la pista, gracias a la gran cantidad de datos que este LiDAR ofrece.
 
 | **Medida** | **Valor** |
 |------------|-----------|
@@ -185,7 +185,7 @@ El Shargeek Storm 2 es un Power Bank, con múltiples características interesant
 
 Todos estos factores hacen que sea una opción perfecta para alimentar un controlador potente como lo es la Raspberry Pi 5.
 
-Sin embargo, sus características físicas, hacen que sea un componente un tanto difícil de incorporar a Klevor; sin embargo, hay maneras de navegar a través de estos problemas, con un manejo óptimo de peso y medidas.
+Sin embargo, debido a su gran peso, es un componente un tanto díficil de poder incorporar
 
 | **Medida** | **Valor** |
 |------------|-----------|
@@ -200,9 +200,9 @@ Sin embargo, sus características físicas, hacen que sea un componente un tanto
   <img src="https://i.postimg.cc/fyTjX3K8/IMG-4570-1800x1800-removebg-preview.png" alt="INJORA 180 Motor 48T" width="250">
 </p>
 
-El INJORA 180 Motor 48T es un motor diseñado para carros controlados por radio, ya que estos carros suelen tener un peso y medidas similares a las de Klevor, decidimos que este motor sería una buena incorporación. Debido a su tamaño compacto, bajo voltaje (necesitando apenas 7.4V), y bajo peso. [[14](#injora-180-48t-amazon)].
+El INJORA 180 Motor 48T es un motor diseñado para carros controlados por radio, ya que estos carros suelen tener un peso y medidas similares a las de Klevor, decidimos que este motor sería una buena incorporación. Debido a su tamaño compacto, bajo voltaje (necesitando apenas 7.4V, llegamos a considerar motores de 12V hasta, incluso de 24V para Klevor), y bajo peso. [[14](#injora-180-48t-amazon)].
 
-A pesar de todas estas ventajas, un motor DC con Encoder podría ser mejor para tener una mayor cantidad de datos a la hora de trabajar en la programación, ya que este tipo de motores son capaces de controlar completamente sus vueltas, algo que en una competencia como la categoría Futuros Ingenieros es increíblemente ventajoso.
+A pesar de todas estas ventajas, un motor DC con capacidades de Encoder (es decir, que pueda contar sus vueltas) puede ser de mayor ventaja debido a que permite regular perfectamente los movimientos de Klevor, gracias a que, en vez de asignarle al motor que se mueva por cierto tiempo (lo cual puede hacer que, debido al mas mínimo problema de rendimiento) sea suceptible a fallar, en cambio, con un motor con encoder, es mucho más sencillo debido a que, en vez de mover por tiempo, puedes mover por distancia lo que a pesar de algún problema de rendimiento, Klevor sepa perfectamente cuánta distancia recorrió, aligerando un poco la carga en la necesidad de conocer la distancia a sus alrededores 
 
 | **Medida** | **Valor** |
 |------------|-----------|
@@ -224,11 +224,13 @@ Especificaciones mecánicas:
   <img src="https://i.postimg.cc/4yq7dnF7/DSC07300-1-1800x1800-3a89d5de-363f-4693-9ab8-815393072006-removebg-preview.png" alt="INJORA MB100 20A Mini ESC" width="250">
 </p>
 
-El INJORA MB100 20A mini ESC es un controlador de velocidad [[15](#injora-mb100-r80-amazon)], normalmente este se usa en conjunto con el INJORA 180 Motor 48T, este permite la conexión entre el INJORA 180 Motor 48T y la Raspberry Pi Pico 2.
+El INJORA MB100 20A mini ESC es un controlador de velocidad electrónico [[15](#injora-mb100-r80-amazon)], normalmente (en carros RC) este se usa en conjunto con algún motor de la marca INJORA, este permite la conexión entre el INJORA 180 Motor 48T y la Raspberry Pi Pico 2.
 
-Gracias a este dispositivo, podemos asegurar una conexión segura y efectiva entre el motor y la Pico 2, sin necesitar componentes más grandes (como un puente H L298N) para cumplir la misma función. Además que, este mini controlador de velocidad es capaz de soportar el alto amperaje que pueda consumir el motor INJORA 180.
+Gracias a este dispositivo, podemos asegurar una conexión segura y efectiva entre el motor y la Pico 2, sin necesitar componentes más grandes (como un puente H L298N) para cumplir la misma función. Además que, este mini controlador de velocidad es capaz de soportar el alto amperaje (este puede superar hasta picos de 100A) que pueda consumir el motor INJORA 180.
 
-Además de todo esto, es una parte del código bastante fáciles de configurar gracias a librerías como `adafruit_motor` que permite configurar al motor principal como un servo de rotación continua gracias al módulo `servo`
+Además de todo esto, es una parte del código bastante fáciles de configurar gracias a librerías como `adafruit_motor` que permite configurar al motor principal como un servo de rotación continua gracias al módulo `servo`.
+
+A su vez, gracias a que incorpora un BEC (Battery Eliminator Circuit) podemos alimentar al [INJORA 7Kg 2065 Micro Servo](#componentes-injora-7kg-2065-micro-servo), sin necesidad de proporcionar una tercera batería o una alimentación secundaria de la misma batería.
 
 | **Medida** | **Valor** |
 |------------|-----------|
@@ -269,9 +271,11 @@ Además de esto, esta batería ofrece una alta capacidad comparada con el resto 
   <img src="https://i.postimg.cc/Qt5MXsWS/61d-MNIVpk-YL-AC-SX300-SY300-QL70-FMwebp-removebg-preview.png" alt="INJORA Micro Servo" width="200">
 </p>
 
-El INJORA 7KG 2065 Micro Servo es el motor encargado de controlar la dirección de Klevor, decidimos utilizar este modelo debido a su reducido tamaño y peso, además de una precisión más que suficiente para poder manejar a Klevor [[17](#injora-7kg-2065-amazon)].
+El INJORA 7KG 2065 Micro Servo es el servomotor encargado de controlar la dirección de Klevor, decidimos utilizar este modelo debido a su reducido tamaño y peso, además de una precisión más que suficiente para poder manejar a Klevor. [[17](#injora-7kg-2065-amazon)].
 
 No sólo estos aspectos definieron la elección, el INJORA 7KG 2065 ofrece también una gran precisión a pesar de su reducido tamaño, algo esencialmente vital en esta competencia.
+
+Gracias a la librería antes mencionada, la `adafruit_motor` con el módulo `servo`, nos permiten configurar el servo a nuestra elección, conviertiendo el uso de funciones para controlar el servo previamente establecidos mucho más fácil de leer sin arriesgar el rendimiento del programa.
 
 | **Medida** | **Valor** |
 |------------|-----------|
