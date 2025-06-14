@@ -125,3 +125,7 @@ Decidimos eliminar también la tercera capa que tenía el primer prototipo ya qu
          </td>
      </tr>
  </table>
+
+ Cabe destacar que todos nuestros diseños 3D fueron hechos en el programa "Fusion360". Fusion360 es una programa de Autodesk, que se utiliza para el diseño y la fabricación de productos. Es muy vérsatil para dibujantes, ingenieros, fabricantes y para la creación de equipos ya que tiene funciones de renderizado, diseño, pesaje de componentes, diseño de PCB, Simulaciones, modelado de forma libre... etc.
+
+Elegimos este programa porque es una solución "todo en uno" que combina el diseño, la fabricación, la ingeniería y el diseño de PCBs, todo esto asistido por computadora, lo que hace todo mucho más cómodo.
