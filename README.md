@@ -25,9 +25,9 @@
 6. Código
    1. [Raspberry Pi 5](src/raspberry-pi5/README.md)
       1. [YOLO](src/raspberry-pi5/yolo/README.md)
-   2. [Raspberry Pi Pico 2 WH](src/raspberry-pi-pico2/README.md)
-      1. [CircuitPython](src/raspberry-pi-pico2-circuitpython/README.md)
-      2. [MicroPython](src/raspberry-pi-pico2-micropython/README.md)
+   2. [Raspberry Pi Pico 2 WH](src/raspberry-pi-pico-2w/README.md)
+      1. [CircuitPython](src/raspberry-pi-pico-2w/circuit-python/README.md)
+      2. [MicroPython](src/raspberry-pi-pico-2w/micro-python/README.md)
 7. **[Librerías](#librerias)**
    1. [Ultralytics YOLO](#ultralytics-yolo)
    2. [OpenCV](#opencv)
