@@ -10,10 +10,6 @@
 <h1 id="introduccion">Introducción</h1> 
 En esta sección detallaremos los componentes y su funcionalidad dentro de cada capa del robot. Explicaremos el propósito de cada pieza y cómo su integración contribuye al rendimiento general de “Klevor” en el recorrido de pista.
 
-
-<h1 id="capas">Capas</h1>
-
-<h2 id="primera-capa">Primera Capa</h2>
 En esta primera capa toda la parte motriz de nuestro robot. 
 
 <table>
