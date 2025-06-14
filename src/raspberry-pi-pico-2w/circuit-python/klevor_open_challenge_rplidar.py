@@ -52,7 +52,7 @@ GYRO_READ_INTERVAL = 0.05 # 50 ms for 20 Hz updates
 
 # Switch configuration
 SWITCH_PIN = board.GP11
-SWITCH_DELAY = 0.1
+SWITCH_DELAY = 1
 
 # Distance Thresholds (Note: These distances are measured in milimeters)
 FRONT_DISTANCE_THRESHOLD = 500
@@ -76,6 +76,12 @@ ESC_SETUP_DELAY = 0.2
 # Start and stop message
 START_MESSAGE = "status:on"
 STOP_MESSAGE = "status:off"
+
+# Turn on delay
+TURN_ON_DELAY = 2
+
+# Sent start message delay
+SENT_START_MESSAGE_DELAY = 0.5
 
 # ---------- VARIABLES ----------
 
@@ -290,10 +296,28 @@ async def main_robot_loop():
 
     # Initialize the robot state
     setup()
-    
+
+    # Turn on built-in LED to show that it's ready
+    if DEBUG:
+        led_pin.value = True
+        time.sleep(TURN_ON_DELAY)
+        led_pin.value = False
+        time.sleep(TURN_ON_DELAY)
+        
     # Wait for the switch to be pressed to start the robot
-    while not switch_pin.value:
+    while switch_pin.value:
         time.sleep(SWITCH_DELAY)  # Pequeña pausa para debouncing y eficiencia (ajusta si es necesario)
+
+    # Send start message
+    #send_message(START_MESSAGE)
+
+    #  Turn on built-in LED two times to show that the start message has been sent
+    if DEBUG:
+        for i in range(2):
+            led_pin.value = True
+            time.sleep(SENT_START_MESSAGE_DELAY)
+            led_pin.value = False
+            time.sleep(SENT_START_MESSAGE_DELAY)
 
     # Start the gyroscope reading as a separate background task
     asyncio.create_task(gyro_reading())

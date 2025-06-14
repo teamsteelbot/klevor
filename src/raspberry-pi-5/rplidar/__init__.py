@@ -32,6 +32,9 @@ class RPLIDAR:
     # Reading delay
     # READING_DELAY = 0.0001  
 
+    # Distance difference 
+    DISTANCE_DIFF = 25
+
     # Get the absolute path of the ultra_simple executable
     ULTRA_SIMPLE_PATH = os.path.join(os.path.dirname(__file__), "ultra_simple")
 
@@ -163,6 +166,10 @@ class RPLIDAR:
 
         # Check if the angle is already in the distances dictionary
         if angle in self.__distances_dict:
+            # Check if the distance is negible
+            if self.__distances_dict[angle].distance > distance - self.DISTANCE_DIFF and self.__distances_dict[angle].distance < distance + self.DISTANCE_DIFF:
+                return
+
             # If it is, update the distance and quality
             self.__distances_dict[angle].distance = distance
             self.__distances_dict[angle].quality = quality
@@ -173,12 +180,16 @@ class RPLIDAR:
         # Get the measure string representation
         measure_str = str(self.__distances_dict[angle])
 
+        # Log
+        # self.__log("RPLIDAR measure: " + measure_str)
+
         # Put the parsed line in the server
         if self.__server and self.__server.is_running():
             asyncio.run(self.__server.broadcast_rplidar_measures(measure_str))
 
         if self.__serial_communication and self.__serial_communication.is_open() and self.__serial_communication.has_started():
-        # if self.__serial_communication and self.__serial_communication.is_open():
+        #if self.__serial_communication and self.__serial_communication.is_open():
+            # self.__log("Trying to send message...")
             self.__serial_communication.send_rplidar_measures(measure_str)
         
         # Increment the messages counter

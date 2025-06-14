@@ -55,21 +55,18 @@ if __name__ == "__main__":
         # Create an instance of RPLIDAR
         rplidar = RPLIDAR(logger, server, serial)
 
-        # Start the RPLIDAR
-        rplidar.create_thread()
-        logger.log(Message("RPLIDAR started successfully."))
-
         if not serial:
             while True:
                 sleep(1)  # Sleep to prevent busy-waiting
+        else:
+            # Wait for the start event
+            serial.get_start_event().wait()
 
-        # Wait for the start message from SerialCommunication
-        logger.log(Message("Waiting for start message from SerialCommunication..."))
-        serial.wait_for_start_message()
+            # Create the RPLIDAR thread
+            rplidar.create_thread()
 
-        # Wait for the stop message from SerialCommunication
-        serial.wait_for_stop_message()
-        logger.log(Message("Received stop message from SerialCommunication, stopping RPLIDAR..."))
+            # Wait for the stop event
+            serial.get_stop_event().wait()
 
     except KeyboardInterrupt:
         # Handle keyboard interrupt to stop the server gracefully

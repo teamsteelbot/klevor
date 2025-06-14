@@ -407,19 +407,37 @@ class SerialCommunication:
         """
         Handler to receive messages from the serial port.
         """
-        # Wait for start event to be set
-        self.__start_event.wait()
+        # Log
+        self.__log(f"Serial port receiving handler started for port {self.__port}.")
 
         # Check if there is a initialization message received
-        if self.is_open() and self.__serial.in_waiting > 0:
-            data = self.__serial.read(self.__serial.in_waiting)
+        while True:
+            if self.is_open() and self.__serial.in_waiting > 0:
+                print(self.__serial.in_waiting)
+                data = self.__serial.read(self.__serial.in_waiting)
+                self.__log("Received initialization message: " + str(data))
 
-            # Read the initialization message
-            self.__log(f"Initialization message received: {data}")
-            self.__serial.reset_input_buffer()
-            self.__serial.reset_output_buffer()
-            self.__log("Input and output buffers reset.")
+                # Check if it's a start message
+                parts = str(data).split(Message.HEADER_SEPARATOR)
+                if len(parts) < 2:
+                    continue
 
+                if parts[0] == self.TYPE_STATUS and parts[1] == self.TYPE_STATUS_ON:
+                   # Set the start event
+                    self.__start_event.set()
+
+                    # Log
+                    self.__log("Received start event.")
+                    break
+
+                """
+                # Read the initialization message
+                self.__log(f"Initialization message received: {data}")
+                self.__serial.reset_input_buffer()
+                self.__serial.reset_output_buffer()
+                self.__log("Input and output buffers reset.")
+                """
+        
         while self.is_open():
             if not self.__serial.in_waiting > 0:
                 sleep(self.DELAY)
@@ -428,15 +446,23 @@ class SerialCommunication:
             message_str = self.__serial.readline().decode(self.ENCODE).strip()
 
             # Split the message into type and content
-            message_separator_idx = message_str.find(Message.HEADER_SEPARATOR)
+            message_parts = message_str.split(Message.HEADER_SEPARATOR)
+            if len(message_parts < 2):
+                continue
+
+            if message_parts[0].type == self.TYPE_STATUS and message_parts[1].content == self.TYPE_STATUS_OFF:
+                # Set the stop event
+                self.__stop_event.set()
+                break
 
             # Create the message object
             message = Message(
-                message_str[:message_separator_idx],
-                message_str[message_separator_idx + 1:],
+                message_parts[0],
+                message_parts[1],
             )
 
             # Put the message in the incoming messages queue
+            self.__log("Received message: " +str(message))
             self.__put_incoming_message(message)
 
             # Sleep for a short time to avoid busy waiting
@@ -448,11 +474,18 @@ class SerialCommunication:
         """
         Handler to send messages to the serial port.
         """
+        # Log 
+        self.__log("Waiting for start event on receiving handler...")
+
         # Wait for start event to be set
         self.__start_event.wait()
 
+        # Log
+        self.__log(f"Serial port sending handler started for port {self.__port}.")
+
         while self.is_open():
             # Check if there is a message to send
+            self.__log("Waiting message to send...")
             self.__pending_outgoing_message_event.wait()
 
             # Get the message from the queue
@@ -463,10 +496,11 @@ class SerialCommunication:
                 continue
 
             # Send the message to the serial port
+            self.__log("Sent message: " +str(message))
             self.__serial.write(str(message).encode(self.ENCODE))
 
             # Wait for the message to be sent
-            sleep(self.DELAY)
+            # sleep(self.DELAY)
 
         self.__log(f"Serial port sending handler stopped for port {self.__port}.")
 
@@ -530,6 +564,15 @@ class SerialCommunication:
         """
         return self.__stop_event
     
+    def get_start_event(self) -> EventCls:
+        """
+        Get the start event status.
+
+        Returns:
+            Event: The event that indicates when to start the communication.
+        """
+        return self.__start_event
+    
     def get_parking_event(self) -> EventCls:
         """
         Get the parking event status.
@@ -555,69 +598,7 @@ class SerialCommunication:
         Returns:
             Event: The event that indicates when there is a pending outgoing message.
         """
-        return self.__pending_outgoing_message_event
-
-    def wait_for_start_message(self, timeout: Optional[float] = None) -> bool | None:
-        """
-        Wait for the start message to be received.
-
-        Args:
-            timeout (float): The maximum time to wait for the start message. Default is None (wait indefinitely).
-
-        Returns:
-            bool|None: True if the start message is received, False if the timeout is reached.
-        """
-        with self.__rlock:
-            while True:
-                if self.__start_event.is_set():
-                    return True
-
-                # Wait for the pending incoming message event to be set
-                self.__pending_incoming_message_event.wait(timeout)
-
-                # Peek the last incoming message
-                last_message = self.receive_message()
-                if last_message is None:
-                    continue
-
-                if last_message.type == Message.TYPE_STATUS and last_message.content == Message.TYPE_STATUS_ON:
-                    # Send start message confirmation
-                    self._send_message(Message(Message.TYPE_STATUS, Message.TYPE_STATUS_ON))
-
-                    # Set the start event
-                    self.__start_event.set()
-                    return True
-
-    def wait_for_stop_message(self, timeout: Optional[float] = None) -> bool | None:
-        """
-        Wait for the stop message to be received.
-
-        Args:
-            timeout (float): The maximum time to wait for the stop message. Default is None (wait indefinitely).
-
-        Returns:
-            bool|None: True if the stop message is received, False if the timeout is reached.
-        """
-        with self.__rlock:
-            while True:
-                if self.__stop_event.is_set():
-                    return True
-
-                # Wait for the pending incoming message event to be set
-                self.__pending_incoming_message_event.wait(timeout)
-
-                # Peek the last incoming message
-                last_message = self.receive_message()
-                if last_message is None:
-                    continue
-
-                if last_message.type == Message.TYPE_STATUS and last_message.content == Message.TYPE_STATUS_OFF:
-                    # Send stop message confirmation
-                    self._send_message(Message(Message.TYPE_STATUS, Message.TYPE_STATUS_OFF))
-                    
-                    # Set the stop event
-                    self.__stop_event.set()
-                    return True
+        return self.__pending_outgoing_message_event                
 
     def __del__(self):
         """
