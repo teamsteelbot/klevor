@@ -17,7 +17,7 @@ En esta primera capa toda la parte motriz de nuestro robot.
     <tr>
         <td>
             <p align="center">
-                <img src="./layer1-front-unconnected001.png" alt="Primera capa, vista delantera">
+                <img src="layer1-front--not-wired.png" alt="Primera capa, vista delantera">
             </p>
             <p align="center">
                 <i>Primera capa, vista delantera</i>
@@ -25,7 +25,7 @@ En esta primera capa toda la parte motriz de nuestro robot.
         </td>
         <td>
             <p align="center">
-                <img src="./layer1-back-unconnected001.png" alt="Primera capa, vista trasera">
+                <img src="layer1-back--not-wired.png" alt="Primera capa, vista trasera">
             </p>
             <p align="center">
                 <i>Primera capa, vista trasera</i>
@@ -35,7 +35,7 @@ En esta primera capa toda la parte motriz de nuestro robot.
     <tr>
         <td>
             <p align="center">
-                <img src="./layer1-left-unconnected001.png" alt="Primera capa, vista izquierda">
+                <img src="layer1-left--not-wired.png" alt="Primera capa, vista izquierda">
             </p>
             <p align="center">
                 <i>Primera capa, vista izquierda</i>
@@ -43,7 +43,7 @@ En esta primera capa toda la parte motriz de nuestro robot.
         </td>
         <td>
             <p align="center">
-                <img src="./layer1-right-unconnected001.png" alt="Primera capa, vista derecha">
+                <img src="layer1-right--not-wired.png" alt="Primera capa, vista derecha">
             </p>
             <p align="center">
                 <i>Primera capa, vista derecha</i>
@@ -53,7 +53,7 @@ En esta primera capa toda la parte motriz de nuestro robot.
 </table>
 
 <p align="center">
-    <img src="./layer1-top-unconnected001.png" alt="Primera capa, vista superior" width=400>
+    <img src="layer1-top--not-wired.png" alt="Primera capa, vista superior" width=400>
 </p>
 <p align="center">
     <i>Primera capa, vista superior</i>
@@ -76,7 +76,7 @@ Esta capa fue 100% diseñada e impresa por nosotros. Al tener múltiples piezas 
     <tr>
         <td>
             <p align="center">
-                <img src="./layer2-front-unconnected001.png" alt="Segunda capa, vista delantera">
+                <img src="layer2-front--not-wired.png" alt="Segunda capa, vista delantera">
             </p>
             <p align="center">
                 <i>Segunda capa, vista delantera</i>
@@ -84,7 +84,7 @@ Esta capa fue 100% diseñada e impresa por nosotros. Al tener múltiples piezas 
         </td>
         <td>
             <p align="center">
-                <img src="./layer2-back-unconnected001.png" alt="Segunda capa, vista trasera">
+                <img src="layer2-back--not-wired.png" alt="Segunda capa, vista trasera">
             </p>
             <p align="center">
                 <i>Segunda capa, vista trasera</i>
@@ -94,7 +94,7 @@ Esta capa fue 100% diseñada e impresa por nosotros. Al tener múltiples piezas 
     <tr>
         <td>
             <p align="center">
-                <img src="./layer2-left-unconnected001.png" alt="Segunda capa, vista izquierda">
+                <img src="layer2-left--not-wired.png" alt="Segunda capa, vista izquierda">
             </p>
             <p align="center">
                 <i>Segunda capa, vista izquierda</i>
@@ -102,7 +102,7 @@ Esta capa fue 100% diseñada e impresa por nosotros. Al tener múltiples piezas 
         </td>
         <td>
             <p align="center">
-                <img src="./layer2-right-unconnected001.png" alt="Segunda capa, vista derecha">
+                <img src="layer2-right--not-wired.png" alt="Segunda capa, vista derecha">
             </p>
             <p align="center">
                 <i>Segunda capa, vista derecha</i>
@@ -112,7 +112,7 @@ Esta capa fue 100% diseñada e impresa por nosotros. Al tener múltiples piezas 
 </table>
 
 <p align="center">
-    <img src="./layer2-top-unconnected001.png" alt="Segunda capa, vista superior" width=400>
+    <img src="layer2-top--not-wired.png" alt="Segunda capa, vista superior" width=400>
 </p>
 <p align="center">
     <i>Segunda capa, vista superior</i>
@@ -134,7 +134,7 @@ Nuestra segunda capa también fue diseñada en 3D para que el powerbank pudiera 
     <tr>
         <td>
             <p align="center">
-                <img src="./layer3-front-unconnected001.png" alt="Tercera capa, vista delantera">
+                <img src="layer3-front--not-wired.png" alt="Tercera capa, vista delantera">
             </p>
             <p align="center">
                 <i>Tercera capa, vista delantera</i>
@@ -142,7 +142,7 @@ Nuestra segunda capa también fue diseñada en 3D para que el powerbank pudiera 
         </td>
         <td>
             <p align="center">
-                <img src="./layer3-back-unconnected001.png" alt="Tercera capa, vista trasera">
+                <img src="layer3-back--not-wired.png" alt="Tercera capa, vista trasera">
             </p>
             <p align="center">
                 <i>Tercera capa, vista trasera</i>
@@ -152,7 +152,7 @@ Nuestra segunda capa también fue diseñada en 3D para que el powerbank pudiera 
     <tr>
         <td>
             <p align="center">
-                <img src="./layer3-left-unconnected001.png" alt="Tercera capa, vista izquierda">
+                <img src="layer3-left--not-wired.png" alt="Tercera capa, vista izquierda">
             </p>
             <p align="center">
                 <i>Tercera capa, vista izquierda</i>
@@ -160,7 +160,7 @@ Nuestra segunda capa también fue diseñada en 3D para que el powerbank pudiera 
         </td>
         <td>
             <p align="center">
-                <img src="./layer3-right-unconnected001.png" alt="Tercera capa, vista derecha">
+                <img src="layer3-right--not-wired.png" alt="Tercera capa, vista derecha">
             </p>
             <p align="center">
                 <i>Tercera capa, vista derecha</i>
@@ -170,7 +170,7 @@ Nuestra segunda capa también fue diseñada en 3D para que el powerbank pudiera 
 </table>
 
 <p align="center">
-    <img src="./layer3-top-unconnected001.png" alt="Tercera capa, vista superior" width=400>
+    <img src="layer3-top--not-wired.png" alt="Tercera capa, vista superior" width=400>
 </p>
 <p align="center">
     <i>Tercera capa, vista superior</i>

@@ -17,7 +17,7 @@
    12. [9-Axis IMU Gyroscope GY-BNO085](#gyroscope-gy-bno085)
 4. **[Esquemas y Diagramas](#esquemas)**
    1. [Esquemas de Conexiones](schemes/detailed-klevor-wiring-diagram.png)
-   2. [Diagrama de Flujo](schemes/open_challenge_flowchart.png)
+   2. [Diagrama de Flujo](schemes/open-challenge-flowchart.png)
 5. **[Lenguajes de Programación](#lenguajes-de-programacion)**
    1. [Python](#python)
    2. [MicroPython](#micropython)
@@ -43,7 +43,7 @@
 <h1 id="introduccion">Introducción</h1>
 
 <p align="center">
-    <img src="other/team_logo.svg" alt="Logo del Equipo" width=500>
+    <img src="other/team-logo.svg" alt="Logo del Equipo" width=500>
 </p>
 
 Este es el repositorio del Team Steel Bot, compitiendo en la World Robot Olympiad 2025, en la categoría Futuros Ingenieros. Representando al Colegio Salto Ángel en Maracaibo, Estado Zulia, Venezuela. 

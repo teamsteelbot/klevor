@@ -21,7 +21,7 @@ MOVEMENT_MODE = True
 DEBUG = True
 
 # Movement delay
-MOVEMENT_DELAY = 0.01
+MOVEMENT_DELAY = 0.2
 
 # Speed Values
 SPEED_NORMAL = -0.3
@@ -50,10 +50,9 @@ RPLIDAR_DISTANCE_TOGGLE_LED_DELAY = 0.0015
 # Desired Gyroscope update rate
 GYRO_READ_INTERVAL = 0.05 # 50 ms for 20 Hz updates
 
-# Start button pins and delay
-START_BUTTON_PIN_IN = board.GP14
-START_BUTTON_PIN_OUT = board.GP15 
-START_BUTTON_DELAY = 0.1
+# Switch configuration
+SWITCH_PIN = board.GP11
+SWITCH_DELAY = 0.1
 
 # Distance Thresholds
 FRONT_DISTANCE_THRESHOLD = 500
@@ -162,21 +161,18 @@ def wait_for_confirmation(message_to_compare: str):
 # ---------- SETUP ----------
 
 def setup():
-    global bno, initial_yaw, start_button_out, start_button_in, led_pin
+    global bno, initial_yaw, led_pin, switch_pin
     
     STEERING_SERVO.angle = STEERING_SERVO_CENTER 
-    
-    ESC.throttle = SPEED_STOP # Set throttle to minimum
-    time.sleep(ESC_SETUP_DELAY) # Give ESC time to recognize minimum
+
+    # Initialize the ESC
+    ESC.throttle = SPEED_STOP
+    time.sleep(ESC_SETUP_DELAY)
 
     # Start button
-    start_button_in = digitalio.DigitalInOut(START_BUTTON_PIN_IN)
-    start_button_out = digitalio.DigitalInOut(START_BUTTON_PIN_OUT)
-
-    # Initialize start button
-    start_button_out.direction = digitalio.Direction.OUTPUT
-    start_button_out.value = True
-    start_button_in.direction = digitalio.Direction.INPUT
+    switch_pin = digitalio.DigitalInOut(SWITCH_PIN)
+    switch_pin.direction = digitalio.Direction.INPUT
+    switch_pin.pull = digitalio.Pull.UP
 
     # LED pin
     led_pin = digitalio.DigitalInOut(board.LED)
@@ -295,10 +291,10 @@ async def main_robot_loop():
     # Initialize the robot state
     setup()
     
-    # Wait for the start button to be pressed
-    while not start_button_in.value:
-        await asyncio.sleep(START_BUTTON_DELAY)
-    
+    # Wait for the switch to be pressed to start the robot
+    while not switch_pin.value:
+        time.sleep(SWITCH_DELAY)  # Pequeña pausa para debouncing y eficiencia (ajusta si es necesario)
+
     # Start the gyroscope reading as a separate background task
     asyncio.create_task(gyro_reading())
     
@@ -367,7 +363,6 @@ async def main_robot_loop():
                 set_steering_angle(STEERING_SERVO_CENTER + TURNING_VALUE)
 
         await asyncio.sleep(MOVEMENT_DELAY)
-
 
 # Start the asyncio event loop
 asyncio.run(main_robot_loop())

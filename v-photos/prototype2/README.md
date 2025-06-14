@@ -73,7 +73,7 @@ Decidimos eliminar también la tercera capa que tenía el primer prototipo ya qu
      <tr>
          <td>
              <p align="center">
-                 <img src="./klevor-front.png" alt="Vista delantera">
+                 <img src="front--wired.png" alt="Vista delantera">
              </p>
              <p align="center">
                  <i>Vista delantera</i>
@@ -81,7 +81,7 @@ Decidimos eliminar también la tercera capa que tenía el primer prototipo ya qu
          </td>
          <td>
              <p align="center">
-                 <img src="./klevor-back.png" alt="Vista Trasera">
+                 <img src="back--wired.png" alt="Vista Trasera">
              </p>
              <p align="center">
                  <i>Vista trasera</i>
@@ -91,7 +91,7 @@ Decidimos eliminar también la tercera capa que tenía el primer prototipo ya qu
      <tr>
          <td>
              <p align="center">
-                 <img src="./klevor-right.png" alt="Vista derecha">
+                 <img src="right--wired.png" alt="Vista derecha">
              </p>
              <p align="center">
                  <i>Vista derecha</i>
@@ -99,7 +99,7 @@ Decidimos eliminar también la tercera capa que tenía el primer prototipo ya qu
          </td>
          <td>
              <p align="center">
-                 <img src="./klevor-left.png" alt="Vista izquierda">
+                 <img src="left--wired.png" alt="Vista izquierda">
              </p>
              <p align="center">
                  <i>Vista izquierda</i>
@@ -109,7 +109,7 @@ Decidimos eliminar también la tercera capa que tenía el primer prototipo ya qu
      <tr>
        <td>
              <p align="center">
-                 <img src="./klevor-top.png" alt="Vista superior">
+                 <img src="top--wired.png" alt="Vista superior">
              </p>
              <p align="center">
                  <i>Vista superior</i>
@@ -117,7 +117,7 @@ Decidimos eliminar también la tercera capa que tenía el primer prototipo ya qu
          </td>
          <td>
              <p align="center">
-                 <img src="./klevor-bottom.png" alt="Vista inferior">
+                 <img src="bottom--wired.png" alt="Vista inferior">
              </p>
              <p align="center">
                  <i>Vista inferior</i>

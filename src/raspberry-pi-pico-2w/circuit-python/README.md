@@ -2,10 +2,10 @@ Esta carpeta tiene todo el código hecho en CircuitPython para el desarrollo de 
 
 <h2 id="open-challenge-explanation">Cómo funciona Klevor durante el Desafío Abierto?</h2>
 
-Durante el Desafío Abierto, Klevor prioriza cumplir una serie de pasos antes de dar una vuelta, esto está mejor definido en el [Diagrama de Flujo](../../../schemes/open_challenge_flowchart.png) (click aquí para poder hacer zoom).
+Durante el Desafío Abierto, Klevor prioriza cumplir una serie de pasos antes de dar una vuelta, esto está mejor definido en el [Diagrama de Flujo](../../../schemes/open-challenge-flowchart.png) (click aquí para poder hacer zoom).
 
 <p align="center">
-    <img src="../../../schemes/open_challenge_flowchart.png" alt="Diagrama de Flujo" width=5000>
+    <img src="../../../schemes/prototype2/open-challenge-flowchart.png" alt="Diagrama de Flujo" width=5000>
 </p>
 
 Como se puede apreciar, Klevor siempre intenta cumplir una serie de pasos:
