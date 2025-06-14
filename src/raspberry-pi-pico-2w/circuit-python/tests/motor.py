@@ -1,10 +1,6 @@
 import board
 import pwmio
-import busio
-import math
 import time
-import adafruit_vl53l0x
-import digitalio
 from adafruit_motor import servo
 
 DEBUG_MODE = 1

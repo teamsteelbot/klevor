@@ -5,6 +5,7 @@ HOST = '0.0.0.0' # Listen on all available network interfaces
 PORT = 8080      # The same port used by the Pico W client
 
 # --- UDP Server Setup ---
+print("Starting UDP Server...")
 udp_server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 udp_server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 # Set the socket to non-blocking mode for receive operations

@@ -21,8 +21,10 @@ except Exception as e:
 bno.enable_feature(BNO_REPORT_GYROSCOPE)
 bno.enable_feature(BNO_REPORT_ROTATION_VECTOR)
 
-# This function receives the 4 components of the quaternion and calculates the orientation
 def quaternion_to_euler_degrees(x, y, z, w):
+    """
+    This function receives the 4 components of the quaternion and calculates the orientation
+    """
     # Roll
     sinr_cosp = 2 * (w * x + y * z)
     cosr_cosp = 1 - 2 * (x * x + y * y)
