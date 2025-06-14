@@ -1,1 +1,1 @@
-Esta carpeta contiene todas las fotos del equipo de Klevor.
+Esta carpeta contiene todas las fotos del equipo.
