@@ -1,4 +1,4 @@
 import usb_cdc
 
-# Enable USB CDC for data communication
-usb_cdc.enable(data=True)
+# Enable USB CDC for console and data communication
+usb_cdc.enable(console=True, data=True)

@@ -2,12 +2,12 @@
 
 1. **[Introducción](#introduccion)**
 2. **[Capas](#capas)**
-    1. **[Primera Capa](#primera-capa)**
-    1. **[Segunda Capa](#segunda-capa)**
+   1. **[Primera Capa](#primera-capa)**
+   2. **[Segunda Capa](#segunda-capa)**
 
- <h1 id="introduccion">Introducción</h1> 
+<h1 id="introduccion">Introducción</h1> 
+
 Este es un segundo prototipo de Klevor, donde se le hicieron correcciones esenciales y se agregaron nuevos componentes que explicaremos detalladamente.
-
 
 <h1 id="capas">Capas</h1>
 

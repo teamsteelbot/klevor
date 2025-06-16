@@ -1,34 +1,28 @@
-import board
-import busio
-import time
+from board import GP0, GP1
+from busio import I2C
 
-# --- Configura el Bus I2C ---
-# Para la Raspberry Pi Pico, el bus I2C0 de hardware usa los pines:
-# SCL (Reloj) = GP1 (Pin físico 2 del Pico)
-# SDA (Datos) = GP0 (Pin físico 1 del Pico)
-# Si estás usando el Bus I2C1, sería: busio.I2C(board.GP3, board.GP2)
-i2c = busio.I2C(board.GP1, board.GP0)
+# For the Raspberry Pi Pico, the hardware I2C0 bus uses the pins:
+# SCL (Clock) = GP1 (Physical pin 2 on the Pico)
+# SDA (Data) = GP0 (Physical pin 1 on the Pico)
+# If you're using the I2C1 Bus, it would be: I2C(GP3, GP2)
+i2c = I2C(GP1, GP0)
 
-print("Iniciando escaneo I2C...")
-
-# Intenta bloquear el bus I2C. Esto asegura que ningún otro proceso lo use mientras escaneamos.
+# Try to lock the I2C bus. This ensures no other process uses it while scanning.
+print("Starting I2C scan...")
 while not i2c.try_lock():
-    pass # Espera activa hasta que el bus esté disponible
+    pass  # Active wait until the bus is available
 
 try:
-    # Realiza el escaneo del bus I2C
+    # Perform the I2C bus scan
     found_devices = i2c.scan()
 
     if not found_devices:
-        print("No se encontraron dispositivos I2C en el bus. Revisa tus conexiones.")
+        print("No I2C devices found on the bus. Check your connections.")
+
     else:
-        print("¡Dispositivos I2C encontrados en las direcciones (hexadecimal):")
+        print("I2C devices found at the following addresses (hexadecimal):")
         for address in found_devices:
-            print(f"  - 0x{address:x}") # Imprime la dirección en formato hexadecimal
+            print(f"  - 0x{address:x}")  # Print the address in hexadecimal format
 
 finally:
-    # ¡Importante! Siempre desbloquea el bus I2C cuando hayas terminado.
     i2c.unlock()
-
-print("Escaneo I2C completado. Reiniciando en 5 segundos...")
-time.sleep(5) # Pausa para que puedas ver la salida antes de que el Pico se reinicie
