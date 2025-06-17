@@ -23,11 +23,11 @@
    2. [MicroPython](#micropython)
    3. [CircuitPython](#circuitpython)
 6. Código
-   1. [Raspberry Pi 5](src/raspberry-pi-5/README.md)
-      1. [YOLO](src/raspberry-pi-5/yolo/README.md)
-   2. [Raspberry Pi Pico 2 WH](src/raspberry-pi-pico-2w/README.md)
-      1. [CircuitPython](src/raspberry-pi-pico-2w/circuit-python/README.md)
-      2. [MicroPython](src/raspberry-pi-pico-2w/micro-python/README.md)
+   1. [Raspberry Pi 5](devices/raspberry-pi-5/README.md)
+      1. [YOLO](devices/raspberry-pi-5/src/yolo/README.md)
+   2. [Raspberry Pi Pico 2 WH](devices/raspberry-pi-pico-2w/README.md)
+      1. [CircuitPython](devices/raspberry-pi-pico-2w/src/circuit-python/README.md)
+      2. [MicroPython](devices/raspberry-pi-pico-2w/src/micro-python/README.md)
 7. **[Librerías](#librerias)**
    1. [Ultralytics YOLO](#ultralytics-yolo)
    2. [OpenCV](#opencv)
@@ -39,7 +39,8 @@
 9. **[Vídeos](video/README.md)**
 10. **[Recursos Externos](#recursos-externos)**
 
-*NOTA: Este listado contiene todo el contenido respectivo al desarollo de Klevor, sin embargo no todo está presente en este README.md, asegurese de hacer click para poder ser redireccionado si es necesario.*
+*NOTA: Este listado contiene todo el contenido respectivo al desarrollo de Klevor; sin embargo, no todo está presente en este README.md, asegúrese de hacer clic para poder ser redireccionado si es necesario.*
+   
 <h1 id="introduccion">Introducción</h1>
 
 <p align="center">
@@ -80,11 +81,11 @@ A continuación, está la descripción de todos los componentes principales de K
 
 Equipada con un procesador ARM Cortex-A76 de 64 bits a 2.4 Ghz. [[1](#raspberry-pi-5-16gb-8gb-4gb-2gb-tiendatec)][[2](#raspberry-pi-16gb-ram)][[3](#raspberry-pi-5-datasheet)] La Raspberry Pi 5 es nuestro controlador principal de elección, decidimos usar a la Raspberry Pi 5 debido a múltiples factores, entre ellos:
 
-- **Compatibilidad**: Existen muchos componentes de Klevor (como el Camera Module 3 Wide) que a su vez pertenecen al ecosistema Raspberry, lo que hace que implementarlos a la Raspberry Pi 5 no requiera tanto esfuerzo.
+- **Compatibilidad**: Existen muchos componentes de Klevor (como la Camera Module 3 Wide) que a su vez pertenecen al ecosistema Raspberry, lo que hace que implementarlos a la Raspberry Pi 5 no requiera tanto esfuerzo.
 
 - **Potencia**: La Raspberry Pi 5 es uno de los controladores más potentes actualmente, gracias a esto, funciones demandantes como lo es el procesamiento de imágenes en tiempo real, son fácilmente realizables por una Raspberry Pi 5.
 
-- **Portabilidad**: La Raspberry Pi 5 destaca entre los controladores, ya que no es una computadora bastante pesada, apenas llegando a los 60g, hace que incorporarlo a Klevor sea una opción prácticamente segura.
+- **Portabilidad**: La Raspberry Pi 5 destaca entre los controladores, ya que no es una computadora bastante pesada, apenas llegando a los 60 g, hace que incorporarlo a Klevor sea una opción prácticamente segura.
 
 | **Medida** | **Valor** |
 |------------|-----------|
@@ -114,7 +115,7 @@ La Raspberry Pi Camera Module 3 Wide es nuestra elección de preferencia, como l
   <img src="https://i.postimg.cc/6399NRt6/raspberry-pi-ai-hat-raspberry-pi-71328528531841-removebg-preview.png" alt="Raspberry Pi AI HAT+ 26 TOPS" width="400">
 </p>
 
-Si bien la Raspberry Pi 5 es capaz de procesar imágenes en tiempo real, tuvimos en cuenta que necesitaba un poco más de poder, por lo cual decidimos incorporar el AI HAT+ a la Raspberry Pi 5 para poder alcanzar el nivel de procesamiento necesario. 
+Si bien la Raspberry Pi 5 es capaz de procesar imágenes en tiempo real, tuvimos en cuenta que necesitaba un poco más de poder, por lo cual decidimos incorporar la AI HAT+ a la Raspberry Pi 5 para poder alcanzar el nivel de procesamiento necesario. 
 
 El Raspberry Pi AI HAT+ tiene dos versiones, una de 13 Trillones de Operaciones por Segundo (TOPS) y otra de 26 TOPS. [[6](#kit-ai-ai-hat-plus-raspberry-pi-kubii)][[7](#raspberry-pi-ai-hat-documentation)] Como se menciona en el índice, Klevor posee un Raspberry Pi AI HAT+ de 26 TOPS, gracias a este procesador de imágenes, Klevor puede analizar hasta 30 imágenes por segundo con una resolución de 640 px × 640 px.
 
@@ -131,11 +132,11 @@ El Raspberry Pi AI HAT+ tiene dos versiones, una de 13 Trillones de Operaciones 
   <img src="https://i.postimg.cc/JzvDmp2r/raspberry-pi-pico-2-w-raspberry-pi-sc1634-1146616007-removebg-preview.png" alt="Raspberry Pi Pico 2 WH" width="300">
 </p>
 
-Construido sobre el chip RP2350, [[8](#raspberry-pi-pico-2-2w-2h-2wh-kubii)][[9](#raspberry-pi-pico-2-wh-datasheet)] la Raspberry Pi Pico 2W es el microcontrolador de Klevor, además de ser un microcontrolador ligero y pequeño, este chip permite una fácil integración con el resto de los componentes Raspberry, debido a que establecer una comunicación serial con una Raspberry Pi 5 es mucho más fácil de hacer con una Raspberry Pi Pico que con algún otro microcontrolador de distinto fabricante.
+Construido sobre el chip RP2350, [[8](#raspberry-pi-pico-2-2w-2h-2wh-kubii)][[9](#raspberry-pi-pico-2-wh-datasheet)] la Raspberry Pi Pico 2 W es el microcontrolador de Klevor, además de ser un microcontrolador ligero y pequeño, este chip permite una fácil integración con el resto de los componentes Raspberry, debido a que establecer una comunicación serial con una Raspberry Pi 5 es mucho más fácil de hacer con una Raspberry Pi Pico que con algún otro microcontrolador de distinto fabricante.
 
 Además de ofrecer una frecuencia de procesamiento de 150 Mhz, superior a varios microcontroladores de similar tamaño, como, por ejemplo, el Arduino Nano el cual cuenta con una frecuencia de procesamiento de 20 Mhz.
 
-Y, la versión con el módulo de WiFi integrado ofrece una gran ventaja a la hora de poder practicar, ya que nos permite ver exactamente qué está procesando Klevor en el momento, sin necesidad de utilizar, por ejemplo, LEDs de distintos colores para poder señalizar distintas decisiones, logrando que el producto final sea mucho más limpio.
+Y, la versión con el módulo de WiFi integrado ofrece una gran ventaja a la hora de poder practicar, ya que nos permite ver exactamente qué está procesando Klevor en el momento, sin necesidad de utilizar, por ejemplo, LED de distintos colores para poder señalizar distintas decisiones, logrando que el producto final sea mucho más limpio.
 
 | **Medida** | **Valor** |
 |------------|-----------|
@@ -176,7 +177,7 @@ Especificaciones técnicas:
   <img src="https://i.postimg.cc/fTcgYXDv/shargeek-100-power-bank-removebg-preview.png" alt="Shargeek Storm 2" width="400">
 </p>
 
-El Shargeek Storm 2 es un Power Bank, con múltiples características interesantes [[12](#shargeek-storm-2-amazon)][[13](#shargeek-storm-2-100w-power-bank)]como:
+El Shargeek Storm 2 es un Power Bank, con múltiples características interesantes [[12](#shargeek-storm-2-amazon)] [[13](#shargeek-storm-2-100w-power-bank)] como:
 
 - 25600 mAh de almacenamiento.
 - Salida ajustable de hasta 100 W.
@@ -185,7 +186,7 @@ El Shargeek Storm 2 es un Power Bank, con múltiples características interesant
 
 Todos estos factores hacen que sea una opción perfecta para alimentar un controlador potente como lo es la Raspberry Pi 5.
 
-Sin embargo, debido a su gran peso, es un componente un tanto díficil de poder incorporar
+Sin embargo, debido a su gran peso, es un componente un tanto difícil de poder incorporar
 
 | **Medida** | **Valor** |
 |------------|-----------|
@@ -200,9 +201,9 @@ Sin embargo, debido a su gran peso, es un componente un tanto díficil de poder 
   <img src="https://i.postimg.cc/fyTjX3K8/IMG-4570-1800x1800-removebg-preview.png" alt="INJORA 180 Motor 48T" width="250">
 </p>
 
-El INJORA 180 Motor 48T es un motor diseñado para carros controlados por radio, ya que estos carros suelen tener un peso y medidas similares a las de Klevor, decidimos que este motor sería una buena incorporación. Debido a su tamaño compacto, bajo voltaje (necesitando apenas 7.4V, llegamos a considerar motores de 12V hasta, incluso de 24V para Klevor), y bajo peso. [[14](#injora-180-48t-amazon)].
+El INJORA 180 Motor 48T es un motor diseñado para carros controlados por radio, ya que estos carros suelen tener un peso y medidas similares a las de Klevor, decidimos que este motor sería una buena incorporación. Debido a su tamaño compacto, bajo voltaje (necesitando apenas 7.4 V, llegamos a considerar motores de 12 V hasta, incluso de 24 V para Klevor), y bajo peso. [[14](#injora-180-48t-amazon)].
 
-A pesar de todas estas ventajas, un motor DC con capacidades de Encoder (es decir, que pueda contar sus vueltas) puede ser de mayor ventaja debido a que permite regular perfectamente los movimientos de Klevor, gracias a que, en vez de asignarle al motor que se mueva por cierto tiempo (lo cual puede hacer que, debido al mas mínimo problema de rendimiento) sea suceptible a fallar, en cambio, con un motor con encoder, es mucho más sencillo debido a que, en vez de mover por tiempo, puedes mover por distancia lo que a pesar de algún problema de rendimiento, Klevor sepa perfectamente cuánta distancia recorrió, aligerando un poco la carga en la necesidad de conocer la distancia a sus alrededores 
+A pesar de todas estas ventajas, un motor DC con capacidades de Encoder (es decir, que pueda contar sus vueltas) puede ser de mayor ventaja debido a que permite regular perfectamente los movimientos de Klevor, gracias a que, en vez de asignarle al motor que se mueva por cierto tiempo (lo cual puede hacer que, debido al más mínimo problema de rendimiento) sea susceptible a fallar, en cambio, con un motor con encoder, es mucho más sencillo debido a que, en vez de mover por tiempo, puedes mover por distancia lo que a pesar de algún problema de rendimiento, Klevor sepa perfectamente cuánta distancia recorrió, aligerando un poco la carga en la necesidad de conocer la distancia a sus alrededores 
 
 | **Medida** | **Valor** |
 |------------|-----------|
@@ -228,7 +229,7 @@ El INJORA MB100 20A mini ESC es un controlador de velocidad electrónico [[15](#
 
 Gracias a este dispositivo, podemos asegurar una conexión segura y efectiva entre el motor y la Pico 2, sin necesitar componentes más grandes (como un puente H L298N) para cumplir la misma función. Además que, este mini controlador de velocidad es capaz de soportar el alto amperaje (este puede superar hasta picos de 100A) que pueda consumir el motor INJORA 180.
 
-Además de todo esto, es una parte del código bastante fáciles de configurar gracias a librerías como `adafruit_motor` que permite configurar al motor principal como un servo de rotación continua gracias al módulo `servo`.
+Además de todo esto, es una parte del código bastante fácil de configurar gracias a librerías como `adafruit_motor` que permite configurar al motor principal como un servo de rotación continua gracias al módulo `servo`.
 
 A su vez, gracias a que incorpora un BEC (Battery Eliminator Circuit) podemos alimentar al [INJORA 7Kg 2065 Micro Servo](#componentes-injora-7kg-2065-micro-servo), sin necesidad de proporcionar una tercera batería o una alimentación secundaria de la misma batería.
 
@@ -256,7 +257,7 @@ La URGENEX 7.4 V Battery es nuestra segunda batería la cual cumple la única fu
 
 Si bien cualquier batería de 7.4 V funcionaría perfectamente para poder utilizar al INJORA 180 Motor 48T, decidimos utilizar a la URGENEX 7.4v Battery por su alta calidad, ya que, el motor INJORA 180, en casos extremos puede llegar a consumir 100A, lo que podría causarle problemas a la Shargeek Storm 2, por lo cual decidimos irnos por la ruta más segura y utilizar al motor con su batería propia.
 
-Además de esto, esta batería ofrece una alta capacidad comparada con el resto del mercado, pues que esta alcanza los 3000mAh [[16](#urgenex-3000-mah-amazon)].
+Además de esto, esta batería ofrece una alta capacidad comparada con el resto del mercado, pues que esta alcanza los 3000 mAh [[16](#urgenex-3000-mah-amazon)].
 
 | **Medida** | **Valor** |
 |------------|-----------|
@@ -273,9 +274,9 @@ Además de esto, esta batería ofrece una alta capacidad comparada con el resto 
 
 El INJORA 7KG 2065 Micro Servo es el servomotor encargado de controlar la dirección de Klevor, decidimos utilizar este modelo debido a su reducido tamaño y peso, además de una precisión más que suficiente para poder manejar a Klevor. [[17](#injora-7kg-2065-amazon)].
 
-No sólo estos aspectos definieron la elección, el INJORA 7KG 2065 ofrece también una gran precisión a pesar de su reducido tamaño, algo esencialmente vital en esta competencia.
+No solo estos aspectos definieron la elección, el INJORA 7KG 2065 ofrece también una gran precisión a pesar de su reducido tamaño, algo esencialmente vital en esta competencia.
 
-Gracias a la librería antes mencionada, la `adafruit_motor` con el módulo `servo`, nos permiten configurar el servo a nuestra elección, conviertiendo el uso de funciones para controlar el servo previamente establecidos mucho más fácil de leer sin arriesgar el rendimiento del programa.
+Gracias a la librería antes mencionada, la `adafruit_motor` con el módulo `servo`, nos permiten configurar el servo a nuestra elección, convirtiendo el uso de funciones para controlar el servo previamente establecido mucho más fácil de leer sin arriesgar el rendimiento del programa.
 
 | **Medida** | **Valor** |
 |------------|-----------|
@@ -294,7 +295,7 @@ El sensor VL53L0X en sí mismo es un pequeño sensor de distancia muy popular qu
 
 Estos sensores son una buena alternativa a los sensores ultrasónicos como el HC-SR04, además de ser más pequeños y confiables[[18](#sensor-tof)].
 
-Al inicio, queríamos utilizar varios de estos sensores para poder cubrir los puntos ciegos del RPLiDAR C1 con mayor facilidad, sin embargo mientras más probábamos múltiples de estos sensores a la vez, notábamos que eran mucho menos confiables y con menor rango (estos problemas se especifican mejor [aqui](/src/raspberry-pi-pico-2w/circuit-python/README.md)) por lo tanto, en vez de utilizar los 8 sensores que pensábamos utilizar como guía para el Desafío Abierto, decidimos que era mejor tener sencillamente sólo un sensor ToF en la aprte trasera de Klevor.
+Al inicio, queríamos utilizar varios de estos sensores para poder cubrir los puntos ciegos del RPLiDAR C1 con mayor facilidad; sin embargo, mientras más probábamos múltiples de estos sensores a la vez, notábamos que eran mucho menos confiables y con menor rango (estos problemas se especifican mejor [aquí](/devices/raspberry-pi-pico-2w/src/circuit-python/README.md)) por lo tanto, en vez de utilizar los 8 sensores que pensábamos utilizar como guía para el Desafío Abierto, decidimos que era mejor tener sencillamente solo un sensor ToF en la parte trasera de Klevor.
 
 | **Medida** | **Valor** |
 |------------|-----------|
@@ -312,9 +313,9 @@ Al inicio, queríamos utilizar varios de estos sensores para poder cubrir los pu
 
 El GY-BNO085 es un sensor de orientación inercial (IMU) de 9 Grados de Libertad (9DOF), ampliamente utilizado en aplicaciones que requieren un seguimiento de movimiento preciso. En el caso de Klevor, optamos por utilizar este sensor para poder lograr una mayor autonomía del robot en los cruces, ya que este sensor le permite alinearse casi perfectamente y poder ajustarse.
 
-Además de todo esto, el poder utilizar un giroscopio le permite a Klevor contar las vueltas que ha dado tanto en el Desafío Abierto como el Desafío Cerrado de la forma más segura, ya que, a pesar de algún problema mecánico que impida que el robot sea capaz de ir completamente derecho, el giroscopio le puede hacer saber que tanto se está desvíando, siendo éste uno de los componentes indispensables para poder completar este desafío.
+Además de todo esto, el poder utilizar un giroscopio le permite a Klevor contar las vueltas que ha dado tanto en el Desafío Abierto como el Desafío Cerrado de la forma más segura, ya que, a pesar de algún problema mecánico que impida que el robot sea capaz de ir completamente derecho, el giroscopio le puede hacer saber que tanto se está desvíando, siendo este uno de los componentes indispensables para poder completar este desafío.
 
-La forma en la que lo implementamos es bastante sencilla, el giroscopio siempre está actualizando los datos de manera asíncrona cada 50 milisegundos, y Klevor maneja dos variables, `yaw_deg` (la diferencia en grados en su orientación desde que inició en la pista hasta dónde está ubicado ahora mismo), y `relative_yaw` la cual utiliza el mismo `yaw_deg` para asignarse un valor pero, en vez de reiniciarse cada vez que pasa de los -180 grados ó 180 grados, simplemente le resta o suma (dependiendo del caso) 360 grados a `relative_yaw`, luego dividimos este número entre 90, y redondeamos hacia abajo (es decir, 10.57 para a ser simplemente 10), y si la división es igual a -12 o 12, sabemos que ya está casi en su zona de estacionamiento y Klevor simplemente avanza un poquito y se detiene (en el caso del Desafío Abierto)
+La forma en la que lo implementamos es bastante sencilla, el giroscopio siempre está actualizando los datos de manera asíncrona cada 50 milisegundos, y Klevor maneja dos variables, `yaw_deg` (la diferencia en grados en su orientación desde que inició en la pista hasta dónde está ubicado ahora mismo), y `relative_yaw` la cual utiliza el mismo `yaw_deg` para asignarse un valor, pero, en vez de reiniciarse cada vez que pasa de los -180 grados o 180 grados, simplemente le resta o suma (dependiendo del caso) 360 grados a `relative_yaw`, luego dividimos este número entre 90, y redondeamos hacia abajo (es decir, 10.57 para a ser simplemente 10), y si la división es igual a -12 o 12, sabemos que ya está casi en su zona de estacionamiento y Klevor simplemente avanza un poquito y se detiene (en el caso del Desafío Abierto)
 
 | **Medida** | **Valor** |
 |------------|-----------|
@@ -333,7 +334,7 @@ Muchos robots autónomos necesitan de un lenguaje de programación para poder ll
   <img src= "https://i.postimg.cc/9MGx4R3B/5848152fcef1014c0b5e4967.webp" alt="Python" width="100">
 </p>
 
-Python es un lenguaje de programación de alto nivel, este lenguaje es cumple muchísimas funciones en general y es uno de los más vérsatiles en general. Klevor utiliza Python como lenguaje de programación para tareas como la detección de los obstáculos y el estacionamiento, escaneo 2D de los datos del RPLidar C1 y el control de los dos motores. 
+Python es un lenguaje de programación de alto nivel, este lenguaje es cumple muchísimas funciones en general y es uno de los más versátiles en general. Klevor utiliza Python como lenguaje de programación para tareas como la detección de los obstáculos y el estacionamiento, escaneo 2D de los datos del RPLidar C1 y el control de los dos motores. 
 
 La ventaja principal de Python es la versatilidad, pues no necesitamos administrar cada tarea en su lenguaje de programación distinto. [[18](#lenguaje-python)]
 
@@ -343,7 +344,7 @@ La ventaja principal de Python es la versatilidad, pues no necesitamos administr
   <img src= "https://i.postimg.cc/GmjdDQY4/image-1.png" alt="MicroPython" width="100">
 </p>
 
-MicroPython es una implementación de Python en microcontroladores, a pesar de estar escrito en en el lenguaje de programación C, éste replica todas las funciones de Python en microcontroladores como la ESP32 y ESP8266.
+MicroPython es una implementación de Python en microcontroladores, a pesar de estar escrito en el lenguaje de programación C, este replica todas las funciones de Python en microcontroladores como la ESP32 y ESP8266.
 
 En el caso de Klevor, utilizamos MicroPython en la Raspberry Pi Pico 2 WH, para permitir una comunicación más eficiente entre la Raspberry Pi 5 y la Raspberry Pi Pico 2 WH. [[19](#lenguaje-micropython)]
 
@@ -355,26 +356,26 @@ En el caso de Klevor, utilizamos MicroPython en la Raspberry Pi Pico 2 WH, para 
 
 CircuitPython es una ramificación de MicroPython diseñada para ser compatibles con microcontroladores pequeños y baratos. [[21](#circuit-python)]
 
-Debido a unos problemas de compatibilidad con la librería del giroscopio GY-BNO085 de Adafruit, ya que ésta estaba diseñada para ser utilizada con CircuitPython, decidimos utilizar CircuitPython en la Raspberry Pi Pico para evitar estos problemas de compatibilidad y no tener que modificar la librería casi en su totalidad.
+Debido a unos problemas de compatibilidad con la librería del giroscopio GY-BNO085 de Adafruit, ya que esta estaba diseñada para ser utilizada con CircuitPython, decidimos utilizar CircuitPython en la Raspberry Pi Pico para evitar estos problemas de compatibilidad y no tener que modificar la librería casi en su totalidad.
 
 <h1 id="librerias">Librerías</h1> 
 
 <h2 id="ultralytics-yolo">Ultralytics YOLO</h2>
 
 <p align="center">
-    <img src="https://i.postimg.cc/8cW6ZZSV/26833451.png" alt="ultralytics-yolo" width="200">
+    <img src="https://i.postimg.cc/8cW6ZZSV/26833451.png" alt="Ultralytics" width="200">
 </p>
 
 La librería Ultralytics YOLO está construida sobre PyTorch y se caracteriza por su modularidad y su enfoque en la eficiencia y la facilidad de uso. Todo gira en torno a la clase YOLO, que encapsula todas las funcionalidades clave. En su núcleo se basa en los modelos YOLO (You Only Look Once) originales, que, a diferencia de los algoritmos de dos etapas (primero proponen regiones y luego la clasifica) los modelos YOLO se caracterizan por su detección de objetos de una pasada en la red neuronal, dándole una gran velocidad de detección.
 
-Clase YOLO: Es la interfaz principal para interactuar con los modelos. Permite cargar modelos pre-entrenados, construir nuevos modelos desde cero, entrenar, validar, realizar inferencias, exportar y rastrear objetos. Además de la clase,la librería contiene múltiples modos para  poder organizar todas sus funciones (como `train`, `val`, `predict` o `export`)
+**Clase YOLO**: Es la interfaz principal para interactuar con los modelos. Permite cargar modelos preentrenados, construir nuevos modelos desde cero, entrenar, validar, realizar inferencias, exportar y rastrear objetos. Además de la clase, la librería contiene múltiples modos para poder organizar todas sus funciones (como `train`, `val`, `predict` o `export`)
 
 Detección de Objetos: La tarea central de YOLO. Identifica la ubicación de objetos en una imagen/video mediante cajas delimitadoras (bounding boxes) y asigna una clase a cada objeto. Los modelos están disponibles en diferentes tamaños (Nano `n`, Small `s`, Medium `m`, Large `l`, XLarge `x`) para escalar según las necesidades de rendimiento y precisión. Si bien la librería contiene múltiples usos, en el caso de Klevor utilizamos la Detección de Objetos para poder detectar e identificar los obstáculos. [[22](#ultralytics-yolo-docs)]
 
 <h2 id="opencv">OpenCV</h2>
 
 <p align="center">
-    <img src="https://i.postimg.cc/CKzdvcG6/Open-CV-logo-black-svg-removebg-preview.png" alt="opencv" width="200">
+    <img src="https://i.postimg.cc/CKzdvcG6/Open-CV-logo-black-svg-removebg-preview.png" alt="OpenCV" width="200">
 </p>
 
 OpenCV (Open Source Computer Vision Library) es una de las librerías de software más populares y potentes del mundo para la visión por computadora y el aprendizaje automático (Machine Learning). Fue desarrollada inicialmente por Intel y ahora es mantenida por una comunidad global activa. En su esencia, OpenCV es una colección masiva de algoritmos y funciones que te permiten procesar imágenes y videos, extraer información de ellos y hacer que las computadoras "vean" y "entiendan" el mundo visual de una manera similar a como lo hacen los humanos.
@@ -384,17 +385,17 @@ Su propósito principal es proporcionar una infraestructura común para aplicaci
 <h2 id="numpy">NumPy</h2>
 
 <p align="center">
-    <img src="https://i.postimg.cc/wTLX2jqs/Num-Py-logo-2020-svg.png" alt="numpy" width="200">
+    <img src="https://i.postimg.cc/wTLX2jqs/Num-Py-logo-2020-svg.png" alt="Numpy" width="200">
 </p>
 
 La librería NumPy o Numerical Python es una librería la cual contiene muchísimas funciones utilizadas ampliamente en el ecosistema de Python, gracias a esta librería, otras más populares y más flexibles como TensorFlow y PyTorch pudieron ser construidas. Esta librería se basa en la computación numérica y científica en Python.
 
-El propósito general es permitir operaciones numéricas rápidas y eficientes en grandes cantidades de datos.[[24](#numpy-documentation)]Estos cálculos tan extensos, se utilizan para el procesamiento de imágenes de Klevor, aunque también tiene usos como el análisis de datos.
+El propósito general es permitir operaciones numéricas rápidas y eficientes en grandes cantidades de datos [[24](#numpy-documentation)]. Estos cálculos tan extensos, se utilizan para el procesamiento de imágenes de Klevor, aunque también tiene usos como el análisis de datos.
 
 <h2 id="pytorch">Pytorch</h2>
 
 <p align="center">
-    <img src="https://i.postimg.cc/mkGDgR00/Py-Torch-logo-black-svg-removebg-preview.png" alt="pytorch" width="200">
+    <img src="https://i.postimg.cc/mkGDgR00/Py-Torch-logo-black-svg-removebg-preview.png" alt="PyTorch" width="200">
 </p>
 
 PyTorch es una librería de software de código abierto diseñada en el Aprendizaje Automático (Machine Learning), y, en particular para el Aprendizaje Profundo (Deep Learning). PyTorch se ha convertido en uno de los frameworks más populares para el desarrollo de las IA. [[25](#pytorch-documentation)]
@@ -404,7 +405,7 @@ Al igual que muchas de las librerías ya mencionadas, PyTorch es bastante útil 
 <h2 id="picamera-2">PiCamera 2</h2>
 
 <p align="center">
-    <img src="https://i.postimg.cc/jjwd6LTp/Raspberry-Pi-Logo-svg.png" alt="picamera-2" width="200">
+    <img src="https://i.postimg.cc/jjwd6LTp/Raspberry-Pi-Logo-svg.png" alt="Picamera 2" width="200">
 </p>
 
 La librería PiCamera 2 es la sucesora de la `picamera` original, desarrollada por Raspberry Pi Foundation. [[26](#the-picamera2-library)] Esta librería permite la conexión entre la RPi Camera Module 3 y el Modelo de Detección de Obstáculos. Entre sus múltiples funciones se encuentran:
@@ -417,7 +418,7 @@ Además de, obviamente, permitir la toma de imágenes y videos
 <h2 id="hailo-platform">Hailo Platform</h2>
 
 <p align="center">
-    <img src="https://i.postimg.cc/WbNNW9j6/104fa2e233ff6083d630584510405aba146e9471-1.png" alt="hailo'platform" width="200">
+    <img src="https://i.postimg.cc/WbNNW9j6/104fa2e233ff6083d630584510405aba146e9471-1.png" alt="Hailo Platform" width="200">
 </p>
 
 Hailo Platform es un ecosistema tanto de hardware y software desarrollado por la empresa Hailo, este ecosistema está diseñado para llevar un modelo de Deep Learning desde su entrenamiento hasta su aplicación en tiempo real en periféricos. [[27](#hailo-ai-software-suite)]
@@ -463,7 +464,7 @@ Además de esto, la Hailo Platform también incluye múltiples librerías, el ob
 
 18. *VL53L0X*. (2025). STMicroElectronics. <a id="sensor-tof">https://www.st.com/en/imaging-and-photonics-solutions/vl53l0x.html</a>
 
-19. *El tutorial de Python*. (2025). Python Software Fundation. <a id="lenguaje-python">https://docs.python.org/es/3/tutorial/</a>
+19. *El tutorial de Python*. (2025). Python Software Foundation. <a id="lenguaje-python">https://docs.python.org/es/3/tutorial/</a>
 
 20. *Qué es MicroPython, el lenguaje de programación que ya puedes usar en tu Arduino.* (2022). GenBeta. <a id="lenguaje-micropython">https://www.genbeta.com/desarrollo/que-micropython-lenguaje-programacion-que-puedes-usar-tu-arduino-probar-tu-navegador</a>
 

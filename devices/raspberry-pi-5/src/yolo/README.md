@@ -88,21 +88,21 @@ Una unidad de procesamiento neuronal (NPU) es un microprocesador especializado d
    <i>Raspberry Pi AI HAT+ 26 TOPS</i>
 </p>
 
-A diferencia de las unidades de procesamiento gráfico (GPU) y las unidades de procesamiento central (CPU), que son procesadores de propósito general, las NPUs están diseñadas para acelerar tareas y cargas de trabajo de IA, como el cálculo de capas de redes neuronales compuestas por matemáticas escalares, vectoriales y tensoriales [[3](#npu-ibm)].
+A diferencia de las unidades de procesamiento gráfico (GPU) y las unidades de procesamiento central (CPU), que son procesadores de propósito general, las NPU están diseñadas para acelerar tareas y cargas de trabajo de IA, como el cálculo de capas de redes neuronales compuestas por matemáticas escalares, vectoriales y tensoriales [[3](#npu-ibm)].
 
 <h3 id="npu-caracteristicas-clave">Características Clave de las NPU</h3>
 
-Las NPUs están diseñadas para realizar tareas que requieran una baja latencia y un alto rendimiento en paralelo, lo que las hace ideales para aplicaciones de inteligencia artificial. Estas tareas incluyen el procesamiento de algoritmos de aprendizaje profundo, reconocimiento de voz, procesamiento de lenguaje natural, procesamiento de fotos y videos, y detección de objetos [[3](#npu-ibm)].
+Las NPU están diseñadas para realizar tareas que requieran una baja latencia y un alto rendimiento en paralelo, lo que las hace ideales para aplicaciones de inteligencia artificial. Estas tareas incluyen el procesamiento de algoritmos de aprendizaje profundo, reconocimiento de voz, procesamiento de lenguaje natural, procesamiento de fotos y videos, y detección de objetos [[3](#npu-ibm)].
 
-Entre las características clave de las NPUs se encuentran:
+Entre las características clave de las NPU se encuentran:
 
-- **Procesamiento paralelo**: Las NPUs están diseñadas para realizar cálculos en paralelo, lo que les permite procesar múltiples operaciones simultáneamente. Esto es especialmente útil para tareas de aprendizaje profundo, donde se requieren grandes cantidades de cálculos en matrices y tensores.
+- **Procesamiento paralelo**: Las NPU están diseñadas para realizar cálculos en paralelo, lo que les permite procesar múltiples operaciones simultáneamente. Esto es especialmente útil para tareas de aprendizaje profundo, donde se requieren grandes cantidades de cálculos en matrices y tensores.
 
-- **Baja precisión aritmética**: Las NPUs a menudo admiten operaciones de 8 bits (o menos) para reducir la complejidad computacional y aumentar la eficiencia energética.
+- **Baja precisión aritmética**: Las NPU a menudo admiten operaciones de 8 bits (o menos) para reducir la complejidad computacional y aumentar la eficiencia energética.
 
-- **Memoria de alto ancho de banda**: Muchas NPUs cuentan con memoria de alto ancho de banda en el chip para realizar eficientemente tareas de procesamiento de IA que requieren grandes conjuntos de datos.
+- **Memoria de alto ancho de banda**: Muchas NPU cuentan con memoria de alto ancho de banda en el chip para realizar eficientemente tareas de procesamiento de IA que requieren grandes conjuntos de datos.
 
-- **Aceleración por hardware**: Los avances en el diseño de NPUs han llevado a la incorporación de técnicas de aceleración por hardware, como arquitecturas de matriz sistólica o procesamiento tensorial mejorado para optimizar el rendimiento de las cargas de trabajo de IA.
+- **Aceleración por hardware**: Los avances en el diseño de NPU han llevado a la incorporación de técnicas de aceleración por hardware, como arquitecturas de matriz sistólica o procesamiento tensorial mejorado para optimizar el rendimiento de las cargas de trabajo de IA.
 
 <h1 id="montaje-del-modelo-de-deteccion-de-objetos">Montaje del Modelo de Detección de Objetos</h1>
 
@@ -166,8 +166,8 @@ Existen dos maneras de entrenar el modelo dependiendo del equipo disponible en e
    1. En este caso, debemos ejecutar primero el script [```zip_to_train.py```](zip_to_train.py), el cual se encargará de crear un archivo comprimido con el conjunto de datos, el cual se guardará en la carpeta [```v11/zip```](v11/zip).
    2. Luego, tenemos dos opciones:
       1. Podemos descomprimir este archivo de forma local y subir dicha carpeta al Google Drive, considerando que Google Drive no tiene funciones para comprimir/descomprimir de forma nativa (al momento de realizar esta guía), en la carpeta ```Colab Files```. 
-      2. Otra opción es subir el archivo comprimido a la carpeta ```Colab Files``` de Google Drive, y resubimos el Jupyter Notebook correspondiente, en este caso [```v11/notebooks/colab/gr_train.ipynb```](v11/notebooks/colab/gr_train.ipynb), ya que este contiene una sección que tiene la lógica para descomprimir el archivo comprimido. Ejecutamos la sección correspondiente a la conexión con Google Drive y ejecutamos la sección correspondiente a la descompresión del archivo comprimido.
-   3. Seleccionamos el entorno de ejecución acorde a nuestra disponibilidad. Puedes utilizar de forma gratuita una GPU Tesla T4 de NVIDIA por alrededor de 5 h diarias, o comprar 100 créditos (que cuestan $10 al momento de redactar esta guía) de la plataforma para poder usarlo por más tiempo y/o utilizar mejores GPUs. En nuestro caso, empleamos una GPU Tesla L4 de NVIDIA, la cual consumió alrededor de 6 créditos por entrenar un modelo completo.
+      2. Otra opción es subir el archivo comprimido a la carpeta ```Colab Files``` de Google Drive, y subimos de nuevo el Jupyter Notebook correspondiente, en este caso [```v11/notebooks/colab/gr_train.ipynb```](v11/notebooks/colab/gr_train.ipynb), ya que este contiene una sección que tiene la lógica para descomprimir el archivo comprimido. Ejecutamos la sección correspondiente a la conexión con Google Drive y ejecutamos la sección correspondiente a la descompresión del archivo comprimido.
+   3. Seleccionamos el entorno de ejecución acorde a nuestra disponibilidad. Puedes utilizar de forma gratuita una GPU Tesla T4 de NVIDIA por alrededor de 5 h diarias, o comprar 100 créditos (que cuestan $10 al momento de redactar esta guía) de la plataforma para poder usarlo por más tiempo y/o utilizar mejores GPU. En nuestro caso, empleamos una GPU Tesla L4 de NVIDIA, la cual consumió alrededor de 6 créditos por entrenar un modelo completo.
    4. Ejecutamos las secciones del Jupyter Notebook [```v11/notebooks/colab/gr_train.ipynb```](v11/notebooks/colab/gr_train.ipynb), omitiendo la sección antes mencionada relacionada con la descompresión del archivo comprimido. Este Jupyter Notebook utiliza la biblioteca ```ultralytics``` para realizar el entrenamiento del modelo y guarda los pesos en la carpeta [```v11/runs/gr```](v11/runs/gr).
    5. Una vez finalizado el entrenamiento, se puede descargar el archivo comprimido con los pesos del modelo desde Google Drive y descomprimirlo en la carpeta [```v11/runs/gr```](v11/runs/gr) de forma local.
 3. **Inferencia**: Ejecutamos el script [```test.py```](test.py) para realizar la inferencia del modelo entrenado y evaluar el rendimiento del modelo con imágenes que no ha visualizado con anterioridad. Este script genera imágenes con las inferencias realizadas por el modelo, donde se muestran los cuadros delimitadores y las etiquetas de los objetos detectados.
@@ -185,7 +185,7 @@ Existen dos maneras de entrenar el modelo dependiendo del equipo disponible en e
     <i>Vista frontal de la GPU Tesla L4 de NVIDIA</i>
 </p>
 
-*NOTA: Durante esta sección se menciona la versión 11 de YOLO, pero, de la misma forma que se menciona el dataset **GR** a fines didáctivos, se puede utilizar cualquier versión de YOLO, así como cualquier dataset, ya que el proceso es el mismo. Sin embargo, se recomienda utilizar la versión 11 de YOLO, ya que es la más reciente y cuenta con mejoras significativas en comparación con versiones anteriores.*
+*NOTA: Durante esta sección se menciona la versión 11 de YOLO, pero, de la misma forma que se menciona el dataset **GR** a fines didácticos, se puede utilizar cualquier versión de YOLO, así como cualquier dataset, ya que el proceso es el mismo. Sin embargo, se recomienda utilizar la versión 11 de YOLO, debido a que es la más reciente y cuenta con mejoras significativas en comparación con versiones anteriores.*
 
 <h1 id="instalacion-de-hailo-ai-hat">Instalación de Hailo AI HAT+</h1>
 
@@ -204,9 +204,9 @@ Para la instalación, empleamos las dos guías de la documentación oficial de R
 3. Ejecutamos el siguiente comando para actualizar el firmware: `sudo rpi-eeprom-update -a`
 4. Reiniciamos la Raspberry Pi 5 con el siguiente comando: `sudo reboot`
 5. Desconectamos la Raspberry Pi 5 de la corriente y desconectamos todos los dispositivos conectados a ella.
-6. Instalamos los espaciadores de la Raspberry Pi 5 utilizando los cuatro tornillos proporcionados. Presionamos firmemente el conector GPIO apilado sobre los pines GPIO de la Raspberry Pi. Desconectamos el cable plano del AI HAT+ y conectamos el otro extremo al puerto PCIe de la Raspberry Pi. Levantamos el soporte del cable plano desde ambos lados, luego insertamos el cable con los puntos de contacto de cobre hacia adentro, hacia los puertos USB. Con el cable plano completamente insertado en el puerto PCIe, empujamos el soporte del cable hacia abajo desde ambos lados para asegurar el cable plano firmemente en su lugar.
-7. Colocamos el AI HAT+ sobre los espaciadores y utilizamos los cuatro tornillos restantes para asegurarla en su lugar.
-8. Conectamos el cable plano al AI HAT+ y lo aseguramos en su lugar. Para ello, levantamos el soporte del cable plano desde ambos lados, luego insertamos el cable con los puntos de contacto de cobre hacia arriba. Con el cable plano completamente insertado en el puerto PCIe, empujamos el soporte del cable hacia abajo desde ambos lados para asegurar el cable plano firmemente en su lugar.
+6. Instalamos los espaciadores de la Raspberry Pi 5 utilizando los cuatro tornillos proporcionados. Presionamos firmemente el conector GPIO apilado sobre los pines GPIO de la Raspberry Pi. Desconectamos el cable plano de la AI HAT+ y conectamos el otro extremo al puerto PCIe de la Raspberry Pi. Levantamos el soporte del cable plano desde ambos lados, luego insertamos el cable con los puntos de contacto de cobre hacia adentro, hacia los puertos USB. Con el cable plano completamente insertado en el puerto PCIe, empujamos el soporte del cable hacia abajo desde ambos lados para asegurar el cable plano firmemente en su lugar.
+7. Colocamos la AI HAT+ sobre los espaciadores y utilizamos los cuatro tornillos restantes para asegurarla en su lugar.
+8. Conectamos el cable plano a la AI HAT+ y lo aseguramos en su lugar. Para ello, levantamos el soporte del cable plano desde ambos lados, luego insertamos el cable con los puntos de contacto de cobre hacia arriba. Con el cable plano completamente insertado en el puerto PCIe, empujamos el soporte del cable hacia abajo desde ambos lados para asegurar el cable plano firmemente en su lugar.
 9. Conectamos la Raspberry Pi 5 a la corriente y encendemos el dispositivo.
 10. Para habilitar velocidades PCIe Gen 3.0 [[7](#computers-raspberry-pi)], ejecutamos el siguiente comando: `sudo raspi-config`
     1. En el menú de configuración, seleccionamos la opción ```Advanced Options``` y luego ```PCIe Speed```. Elegimos la opción ```Yes``` para habilitar el modo PCIe Gen 3.0.
@@ -262,7 +262,7 @@ Un contenedor Docker es una instancia *runtime* de una imagen Docker [[12](#que-
 
 <h2 id="como-convertir-el-modelo-a-un-formato-compatible-al-hailo-8l">Cómo Convertir el Modelo a un Formato Compatible al Hailo 8</h2>
 
-Al momento de la instalación del AI HAT+, ejecutamos el comando `hailortcli fw-control identify`, donde pudimos notar la siguiente línea:
+Al momento de la instalación de la AI HAT+, ejecutamos el comando `hailortcli fw-control identify`, donde pudimos notar la siguiente línea:
 ```
 Firmware Version: 4.20.0 (release,app,extended context switch buffer)
 ```

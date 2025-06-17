@@ -4,7 +4,7 @@
    1. [Instalación de Raspberry Pi OS](#instalacion-de-raspberry-pi-os) 
    2. [Instalación de la cámara](#instalacion-de-la-camara)
 2. [Multiprocesamiento](#multiprocesamiento)
-3. [YOLO](yolo/README.md)
+3. [YOLO](src/yolo/README.md)
 4. [Recursos Externos](#recursos-externos)
 
 <h1 id="configuracion-basica-de-la-raspberry-pi">Configuración Básica de la Raspberry Pi</h1>
@@ -14,7 +14,7 @@
 1. Descargar la imagen de Raspberry Pi OS desde el sitio oficial: [Raspberry Pi OS](https://www.raspberrypi.com/software/).
 2. Grabar la imagen en una tarjeta microSD utilizando un software como Balena Etcher o Raspberry Pi Imager.
 3. Insertar la tarjeta microSD en la Raspberry Pi y encenderla.
-4. Configurar la Raspberry Pi siguiendo las instrucciones en pantalla, incluyendo la conexión a una red Wi-Fi y la creación de un usuario.
+4. Configurar la Raspberry Pi siguiendo las instrucciones en pantalla, incluyendo la conexión a una red wifi y la creación de un usuario.
 5. Actualizar el sistema operativo ejecutando los siguientes comandos en la terminal:
    ```bash
    sudo apt update
@@ -27,7 +27,7 @@
     <i>Raspberry Pi OS</i>
 </p>
 
-*TIP: Por experiencia propia, recomendamos la configuración de la aplicación oficial de Raspberry Pi para conexión remota, Raspberry Pi Connect, que permite acceder a la Raspberry Pi desde cualquier lugar y sin necesidad de estar conectado a la misma red Wi-Fi [[3](#raspberry-pi-connect)]. En nuestro caso, en reiteradas ocasiones nos permitió de forma remota, a través del modo Remote Shell, eliminar procesos que han producido un crash o han limitado la repuesta de la Raspberry Pi.* 
+*TIP: Por experiencia propia, recomendamos la configuración de la aplicación oficial de Raspberry Pi para conexión remota, Raspberry Pi Connect, que permite acceder a la Raspberry Pi desde cualquier lugar y sin necesidad de estar conectado a la misma red wifi [[3](#raspberry-pi-connect)]. En nuestro caso, en reiteradas ocasiones nos permitió de forma remota, a través del modo Remote Shell, eliminar procesos que han producido un crash o han limitado la repuesta de la Raspberry Pi.* 
 
 <h1 id="instalacion-de-la-camara">Instalación de la cámara</h1>
 
