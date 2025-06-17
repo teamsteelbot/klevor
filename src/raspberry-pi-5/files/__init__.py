@@ -14,14 +14,6 @@ class Files:
     ENVIRONMENT_LOCAL = "local"
     ENVIRONMENT_COLAB = "colab"
 
-    # Google Drive API calls limit
-    GOOGLE_DRIVE_API_LIMIT_PERIOD = 100
-    GOOGLE_DRIVE_API_LIMIT_CALLS = 20000
-    GOOGLE_DRIVE_API_CALL_DELAY = GOOGLE_DRIVE_API_LIMIT_PERIOD / GOOGLE_DRIVE_API_LIMIT_CALLS * 2
-
-    # Batch size
-    BATCH_SIZE = 1000
-
     # Directories to ignore always
     IGNORE_DIRS = ('.git', '__pycache__', '.idea', '.vscode', '.venv', 'venv', 'env')
 

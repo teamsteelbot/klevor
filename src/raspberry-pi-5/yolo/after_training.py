@@ -2,8 +2,8 @@ from argparse import ArgumentParser
 import os
 import shutil
 
-from yolo.args import Args
-from yolo.files import Files
+from .args import Args
+from .files import Files
 
 
 def after_training(input_dir, hailo_suite_dir, model_hailo_suite_dir, best_onnx_weights_path):

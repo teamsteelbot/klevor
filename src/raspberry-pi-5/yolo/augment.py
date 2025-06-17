@@ -2,10 +2,10 @@ from argparse import ArgumentParser
 import os
 import shutil
 
-from opencv.augmentation import augment_image
-from yolo import Yolo
-from yolo.args import Args
-from yolo.files import Files
+from ..opencv.augmentation import augment_image
+from . import Yolo
+from .args import Args
+from .files import Files
 
 
 def augment_dataset(input_to_process_dir: str, output_augmented_dir: str, num_augmentations=Yolo.NUM_AUGMENTATIONS,

@@ -1,7 +1,7 @@
 from websockets import connect
 import asyncio
 
-from server import RealtimeTrackerServer
+from . import RealtimeTrackerServer
  
 async def ws_client():
     """

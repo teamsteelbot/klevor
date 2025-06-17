@@ -2,8 +2,8 @@ from argparse import ArgumentParser
 import os
 import shutil
 
-from yolo.args import Args
-from yolo.files import Files
+from .args import Args
+from .files import Files
 
 
 def after_compilation(model_name, yolo_version, hailo_suite_dir):

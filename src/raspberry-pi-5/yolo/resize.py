@@ -1,5 +1,5 @@
-from opencv.resize import resize_image
-from yolo.files import Files
+from ..opencv.resize import resize_image
+from .files import Files
 
 
 def main() -> None:

@@ -2,16 +2,15 @@ import subprocess
 import os
 from multiprocessing import Event, RLock
 from threading import Thread
-from time import sleep
 from typing import Optional
 import asyncio
 
-from utils import check_type
-from log import Logger
-from log.sub_logger import SubLogger
-from server import RealtimeTrackerServer 
-from serial_communication import SerialCommunication
-from rplidar.measure import Measure
+from ..utils import check_type
+from ..log import Logger
+from ..log.sub_logger import SubLogger
+from ..server import RealtimeTrackerServer
+from ..serial_communication import SerialCommunication
+from .measure import Measure
 
 class RPLIDAR:
     """

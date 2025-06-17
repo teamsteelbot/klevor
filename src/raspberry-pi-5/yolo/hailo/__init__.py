@@ -9,13 +9,13 @@ from PIL.Image import Image
 import cv2
 import numpy as np
 
-from camera.images_queue import ImagesQueue
-from log import Logger
-from model.image_bounding_boxes import ImageBoundingBoxes
-from opencv.preprocessing import Preprocessing
-from utils import check_type
-from yolo import Yolo
-from yolo.files import Files
+from ...camera.images_queue import ImagesQueue
+from ...log import Logger
+from ...model.image_bounding_boxes import ImageBoundingBoxes
+from ...opencv.preprocessing import Preprocessing
+from ...utils import check_type
+from .. import Yolo
+from ..files import Files
 
 class Hailo:
     """

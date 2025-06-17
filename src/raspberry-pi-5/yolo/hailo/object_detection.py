@@ -1,13 +1,13 @@
 import threading
 from multiprocessing import Queue, Event
 
-from camera.images_queue import ImagesQueue
-from env import Env
-from log import Logger
-from utils import check_type
-from yolo import Yolo
-from yolo.files import Files
-from yolo.hailo import Hailo
+from ...camera.images_queue import ImagesQueue
+from ...env import Env
+from ...log import Logger
+from ...utils import check_type
+from .. import Yolo
+from ..files import Files
+from ..hailo import Hailo
 
 def listen_images_queue(images_queue: ImagesQueue, stop_event: Event, parking_event: Event,
                         hailo_handlers: dict[str, Hailo],

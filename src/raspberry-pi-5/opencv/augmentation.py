@@ -4,9 +4,9 @@ import time
 import albumentations as A
 import cv2
 
-from files import Files
-from opencv import AUGMENTATION_SAMPLES
-from opencv.preprocessing import Preprocessing
+from ..files import Files
+from . import AUGMENTATION_SAMPLES
+from .preprocessing import Preprocessing
 
 
 def augment_image(input_to_process_image_path: str, input_to_process_annotations_path: str,

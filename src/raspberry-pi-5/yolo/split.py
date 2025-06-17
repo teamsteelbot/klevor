@@ -4,9 +4,9 @@ import random
 import shutil
 from typing import LiteralString
 
-from yolo import Yolo
-from yolo.args import Args
-from yolo.files import Files
+from . import Yolo
+from .args import Args
+from .files import Files
 
 
 def split_dataset(input_dir: LiteralString, output_dir: LiteralString,

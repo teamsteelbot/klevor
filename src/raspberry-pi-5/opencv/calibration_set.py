@@ -4,9 +4,9 @@ import random
 import cv2
 import numpy as np
 
-from files import Files
-from opencv import MAX_CALIB_SET_SAMPLES
-from opencv.preprocessing import Preprocessing
+from ..files import Files
+from . import MAX_CALIB_SET_SAMPLES
+from .preprocessing import Preprocessing
 
 
 def preprocess_images_to_npy(input_folder, output_file, target_shape=Preprocessing.SHAPE) -> None:

@@ -1,12 +1,12 @@
 from argparse import ArgumentParser
 
-from args import Args
-from rplidar import RPLIDAR
-from server import RealtimeTrackerServer
-from log import Logger
-from log.message import Message
+from ..args import Args
+from . import RPLIDAR
+from ..server import RealtimeTrackerServer
+from ..log import Logger
+from ..log.message import Message
 from time import sleep
-from serial_communication import SerialCommunication
+from ..serial_communication import SerialCommunication
 
 if __name__ == "__main__":
     parser = ArgumentParser(

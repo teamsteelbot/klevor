@@ -5,10 +5,10 @@ import asyncio
 from threading import Thread
 from websockets import connect
 
-from args import Args
-from server import RealtimeTrackerServer
-from rplidar import RPLIDAR
-from rplidar.measure import Measure
+from ..args import Args
+from ..server import RealtimeTrackerServer
+from . import RPLIDAR
+from .measure import Measure
 
 class App:
     """

@@ -3,8 +3,8 @@ import json
 import os
 import shutil
 
-from yolo.args import Args
-from yolo.files import Files
+from .args import Args
+from .files import Files
 
 
 def create_dataset_with_removed_classes(input_dir, input_to_process_dir, output_dir, output_to_process_dir,

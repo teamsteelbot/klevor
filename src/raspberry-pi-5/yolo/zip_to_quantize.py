@@ -3,9 +3,9 @@ import os
 import zipfile
 from typing import LiteralString
 
-from files.zip import Zip
-from yolo.args import Args
-from yolo.files import Files
+from ..files.zip import Zip
+from .args import Args
+from .files import Files
 
 
 def zip_to_quantize(input_dir: LiteralString, input_yolo_dir: LiteralString, input_yolo_runs_dir: LiteralString,

@@ -1,6 +1,6 @@
-from log import Logger
-from log.message import Message, Category
-from utils import check_type
+from . import Logger
+from .message import Category
+from ..utils import check_type
 
 
 class SubLogger:

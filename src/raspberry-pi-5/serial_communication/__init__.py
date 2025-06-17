@@ -8,13 +8,13 @@ import asyncio
 
 from serial import Serial, SerialException
 
-from camera.images_queue import ImagesQueue
-from log import Logger
-from log.sub_logger import SubLogger
-from serial_communication.message import Message
-from server import RealtimeTrackerServer
-from utils import check_type
-from env import Env
+from ..camera.images_queue import ImagesQueue
+from ..log import Logger
+from ..log.sub_logger import SubLogger
+from .message import Message
+from ..server import RealtimeTrackerServer
+from ..utils import check_type
+from ..env import Env
 
 class SerialCommunication:
     """

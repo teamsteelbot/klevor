@@ -4,8 +4,8 @@ from typing import LiteralString
 
 import cv2
 
-from files import Files
-from opencv.preprocessing import Preprocessing
+from ..files import Files
+from .preprocessing import Preprocessing
 
 
 def resize_image(input_to_process_dir: LiteralString, output_resized_to_process_dir: LiteralString,

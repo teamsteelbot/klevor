@@ -2,8 +2,8 @@ from argparse import ArgumentParser
 import json
 import os
 
-from yolo.args import Args
-from yolo.files import Files
+from .args import Args
+from .files import Files
 
 
 def convert_yolo_labels_to_json(annotations_dir, images_dir, output_json):

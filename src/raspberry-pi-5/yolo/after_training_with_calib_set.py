@@ -2,9 +2,9 @@ from argparse import ArgumentParser
 import os
 import shutil
 
-from opencv.calibration_set import preprocess_images_to_npy
-from yolo.args import Args
-from yolo.files import Files
+from ..opencv.calibration_set import preprocess_images_to_npy
+from .args import Args
+from .files import Files
 
 
 def after_training(input_dir: str, calib_set_file_path: str, model_hailo_suite_dir: str, best_onnx_weights_path: str):

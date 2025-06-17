@@ -1,4 +1,4 @@
-from yolo.files import Files
+from .files import Files
 
 
 def main() -> None:

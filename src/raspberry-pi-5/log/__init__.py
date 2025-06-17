@@ -2,9 +2,9 @@ from threading import Thread
 from multiprocessing import Event, RLock, Queue
 from typing import Optional, TextIO
 
-from log.message import Message, Category
-from utils import check_type
-from files import Files
+from .message import Message, Category
+from ..utils import check_type
+from ..files import Files
 
 
 class Logger:

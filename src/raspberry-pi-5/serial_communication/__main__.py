@@ -1,8 +1,8 @@
 from time import sleep
 
-from log import Logger
-from log.message import Message
-from serial_communication import SerialCommunication
+from ..log import Logger
+from ..log.message import Message
+from . import SerialCommunication
 
 if __name__ == "__main__":
     # Create an instance of Logger

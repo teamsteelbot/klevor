@@ -1,8 +1,8 @@
 from argparse import ArgumentParser
 import os
 
-from yolo.args import Args
-from yolo.files import Files
+from .args import Args
+from .files import Files
 
 
 def main() -> None:

@@ -5,7 +5,7 @@ from threading import Thread
 from camera.images_queue import main as images_queue_main, ImagesQueue
 from env import Env
 from log import main as log_main, Logger
-from serial import SerialCommunication, main as serial_communication_main
+from serial_communication import SerialCommunication, main as serial_communication_main
 from server import RealtimeTrackerServer
 from server import main as server_main
 from utils import check_type

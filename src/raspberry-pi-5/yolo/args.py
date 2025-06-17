@@ -1,5 +1,5 @@
-from args import Args as A
-from yolo import Yolo
+from ..args import Args as A
+from . import Yolo
 
 
 class Args(A):

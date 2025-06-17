@@ -2,7 +2,7 @@ from enum import Enum
 from typing import Optional
 from datetime import datetime as dt
 
-from utils import check_type
+from ..utils import check_type
 
 class Category(Enum):
     """

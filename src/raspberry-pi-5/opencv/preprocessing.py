@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-from utils import check_type
+from ..utils import check_type
 
 
 class Preprocessing:

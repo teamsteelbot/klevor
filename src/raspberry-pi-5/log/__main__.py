@@ -1,9 +1,8 @@
 from time import sleep
 
-from log import Logger
-from log.sub_logger import SubLogger
-from log.message import Message, Category
-    
+from . import Logger
+from .sub_logger import SubLogger
+
 if __name__ == "__main__":
     # Create an instance of Logger
     logger = Logger()

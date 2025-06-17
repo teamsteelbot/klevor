@@ -1,6 +1,6 @@
 from typing import Optional
 
-from utils import check_type
+from ..utils import check_type
 
 class Measure:
     """

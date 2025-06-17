@@ -8,11 +8,11 @@ from typing import Optional
 from websockets import serve, exceptions
 from PIL.Image import Image
 
-from log import Logger
-from log.sub_logger import SubLogger
-from utils import check_type, get_local_ip
-from server.message import Message
-from yolo import Yolo
+from ..log import Logger
+from ..log.sub_logger import SubLogger
+from ..utils import check_type, get_local_ip
+from .message import Message
+from ..yolo import Yolo
 
 class RealtimeTrackerServer:
     """

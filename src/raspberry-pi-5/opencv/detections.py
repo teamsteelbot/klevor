@@ -2,9 +2,9 @@ import cv2
 import numpy as np
 from matplotlib import pyplot as plt
 
-from model.image_bounding_boxes import ImageBoundingBoxes
-from opencv import UNUSED_COLOR
-from opencv.preprocessing import Preprocessing
+from ..model.image_bounding_boxes import ImageBoundingBoxes
+from . import UNUSED_COLOR
+from .preprocessing import Preprocessing
 
 
 class Detections:

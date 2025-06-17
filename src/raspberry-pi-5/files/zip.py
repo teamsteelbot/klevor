@@ -4,8 +4,8 @@ from zipfile import ZipFile
 from re import Pattern
 from typing import Optional
 
-from files import Files
-from utils import match_any
+from . import Files
+from ..utils import match_any
 
 
 class Zip:
@@ -92,15 +92,13 @@ class Zip:
         print(f'Zipped folder: {input_folder_rel_path}')
 
     @staticmethod
-    def extract_all(zip_path: str, output_dir: str, environment: str = Files.ENVIRONMENT_LOCAL, batch_size: int = Files.BATCH_SIZE) -> None:
+    def extract_all(zip_path: str, output_dir: str) -> None:
         """
         Extract all files from a zip file by batches.
 
         Args:
             zip_path (str): Path to the zip file.
             output_dir (str): Directory where files will be extracted.
-            environment (str): Environment type, either 'local' or 'colab'.
-            batch_size (int): Number of files to extract in each batch.
         """
         # Check if the path exists, if not it creates it
         Files.ensure_directory_exists(output_dir)
@@ -108,21 +106,10 @@ class Zip:
         with ZipFile(zip_path, "r") as zip_ref:
             files = zip_ref.namelist()
 
-            for i in range(0, len(files), batch_size):
-                # Extract a batch of files
-                batch_files = files[i:i + batch_size]
+            for file in files:
+                print(f"Extracting {file}...")
 
-                for file in batch_files:
-                    print(f"Extracting {file}...")
-
-                    # Extract the file to the output directory
-                    file_path = os.path.join(output_dir, file)
-                    Files.ensure_directory_exists(file_path)
-                    zip_ref.extract(file, output_dir)
-
-                    if environment == Files.ENVIRONMENT_LOCAL:
-                        continue
-
-                    # Sleep to avoid Google Drive API call limit
-                    if environment == Files.ENVIRONMENT_COLAB:
-                        sleep(Files.GOOGLE_DRIVE_API_CALL_DELAY)
+                # Extract the file to the output directory
+                file_path = os.path.join(output_dir, file)
+                Files.ensure_directory_exists(file_path)
+                zip_ref.extract(file, output_dir)

@@ -1,4 +1,4 @@
-from utils import check_type
+from ..utils import check_type
 
 class Message:
     """

@@ -3,8 +3,8 @@ import os
 
 import tensorflow as tf
 
-from yolo.args import Args
-from yolo.files import Files
+from .args import Args
+from .files import Files
 
 
 def create_tfrecord(output_path: str, image_dir: str, label_dir: str):

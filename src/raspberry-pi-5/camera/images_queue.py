@@ -5,12 +5,12 @@ from typing import Optional, Callable
 import numpy as np
 from PIL.Image import Image
 
-from camera import Camera
-from model.image_bounding_boxes import ImageBoundingBoxes
-from server import RealtimeTrackerServer
-from utils import check_type
-from log import Logger
-from log.sub_logger import SubLogger
+from . import Camera
+from ..model.image_bounding_boxes import ImageBoundingBoxes
+from ..server import RealtimeTrackerServer
+from ..utils import check_type
+from ..log import Logger
+from ..log.sub_logger import SubLogger
 
 
 class ImagesQueue:

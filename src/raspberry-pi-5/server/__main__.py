@@ -1,9 +1,8 @@
-from multiprocessing import Event
 from time import sleep
 
-from server import RealtimeTrackerServer
-from log import Logger
-from log.message import Message
+from . import RealtimeTrackerServer
+from ..log import Logger
+from ..log.message import Message
 
 if __name__ == "__main__":
     # Create an instance of Logger

@@ -9,9 +9,9 @@ from picamera2 import Picamera2
 from picamera2.encoders import H264Encoder
 from picamera2.outputs import FileOutput
 
-from log import Logger
-from log.sub_logger import SubLogger
-from utils import check_type
+from ..log import Logger
+from ..log.sub_logger import SubLogger
+from ..utils import check_type
 
 
 class Camera:

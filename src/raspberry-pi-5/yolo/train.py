@@ -1,8 +1,8 @@
 from argparse import ArgumentParser
 
-from yolo import Yolo
-from yolo.args import Args
-from yolo.files import Files
+from . import Yolo
+from .args import Args
+from .files import Files
 
 
 def train_model(model='yolo11n.pt', device='cpu', data='data.yaml', epochs=Yolo.EPOCHS, imgsz=Yolo.IMAGE_SIZE,

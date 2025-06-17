@@ -1,5 +1,5 @@
-from model import Yolo as Y
-from utils import add_single_quotes_to_list_elements
+from ..model import Yolo as Y
+from ..utils import add_single_quotes_to_list_elements
 
 
 class Yolo(Y):

@@ -2,9 +2,9 @@ import os
 from time import time
 from typing import LiteralString
 
-from files import Files as F
-from utils import add_single_quotes_to_list_elements
-from yolo import Yolo
+from ..files import Files as F
+from ..utils import add_single_quotes_to_list_elements
+from . import Yolo
 
 
 class Files(F):

@@ -3,7 +3,7 @@ import time
 import torch
 from ultralytics import YOLO
 
-from files import Files
+from ..files import Files
 
 
 class Yolo:

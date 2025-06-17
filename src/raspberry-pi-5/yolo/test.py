@@ -2,12 +2,12 @@ from argparse import ArgumentParser
 import os
 import random
 
-from model.image_bounding_boxes import ImageBoundingBoxes
-from opencv.detections import Detections
-from opencv.preprocessing import Preprocessing
-from yolo import Yolo
-from yolo.args import Args
-from yolo.files import Files
+from ..model.image_bounding_boxes import ImageBoundingBoxes
+from ..opencv.detections import Detections
+from ..opencv.preprocessing import Preprocessing
+from . import Yolo
+from .args import Args
+from .files import Files
 
 
 def test_random_images(model, model_class_names: dict, run_inference_fn, input_organized_dir: str,
