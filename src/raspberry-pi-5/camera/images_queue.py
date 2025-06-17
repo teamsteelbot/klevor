@@ -1,4 +1,4 @@
-from multiprocessing import Queue, Event, Lock
+from multiprocessing import Queue, Event, RLock
 from multiprocessing.synchronize import Event as EventCls
 from typing import Optional, Callable
 
@@ -10,6 +10,7 @@ from model.image_bounding_boxes import ImageBoundingBoxes
 from server import RealtimeTrackerServer
 from utils import check_type
 from log import Logger
+from log.sub_logger import SubLogger
 
 
 class ImagesQueue:
@@ -19,47 +20,50 @@ class ImagesQueue:
     # Logger configuration
     LOG_TAG = "ImagesQueue"
 
-    def __init__(self, stop_event: EventCls, logger: Logger, camera: Camera, server: Optional[RealtimeTrackerServer]=None):
+    def __init__(self, camera: Camera, logger: Optional[Logger] = None, server: Optional[RealtimeTrackerServer]=None):
         """
         Initialize the images queue.
 
         Args:
-            stop_event (Event): Event to signal when to stop processing.
-            logger (Logger): Logger instance for logging messages.
             camera (Camera): Camera instance for capturing images.
-            server (RealtimeTrackerServer|None): Server instance for real-time tracking updates.
+            logger (Optional[Logger]): Logger instance for logging messages.
+            server (Optional[RealtimeTrackerServer]): Server instance for real-time tracking updates.
         """
-        # Initialize the lock
-        self.__lock = Lock()
+        # Initialize the reentrant lock
+        self.__rlock = RLock()
 
-        # Check the type of stop event
-        check_type(stop_event, Event)
-        self.__stop_event = stop_event
+        # Initialize the stop event
+        self.__stop_event = Event()
+        self.__stop_event.set()
 
         # Check the type of camera
         check_type(camera, Camera)
         self.__camera = camera
 
         # Check the type of server
-        if server:
-            check_type(server, RealtimeTrackerServer)
+        check_type(server, RealtimeTrackerServer) if server else None
         self.__server = server
 
         # Check the type of logger
-        check_type(logger, Logger)
+        check_type(logger, Logger) if logger else None
 
         # Get the sub-logger for this class
-        self.__logger = logger.get_sub_logger(self.LOG_TAG)
+        self.__logger = SubLogger(logger, self.LOG_TAG) if logger else None
 
         # Initialize the events
         self.__capture_image_event = Event()
         self.__pending_input_image_event = Event()
         self.__pending_output_inference_event = Event()
-        self.__stop_event = stop_event
 
         # Set the queues to None
-        self.__input_images_queue = None
-        self.__output_inference_queue = None
+        self.__input_images_queue: Queue[Image] | None = None
+        self.__output_inference_queue: Queue[tuple[str, ImageBoundingBoxes]] | None = None
+
+        # Initialize the image counter
+        self.__imager_counter = 0
+
+        # Initialize the thread
+        self.__thread = None
 
     def put_input_image(self, image: Image) -> None:
         """
@@ -71,7 +75,11 @@ class ImagesQueue:
         # Check the type of the image
         check_type(image, Image)
 
-        with self.__lock:
+        with self.__rlock:
+            if self.is_stopped():
+                self.__logger.warning("Images queue has been stopped. Cannot put image in input images queue.") if self.__logger else None
+                return
+            
             # Put image in input images queue
             self.__input_images_queue.put(image)
 
@@ -83,18 +91,18 @@ class ImagesQueue:
             self.__imager_counter += 1
 
         # Log
-        self.__logger.log(f"Image {counter} added to input images queue.")
+        self.__logger.info(f"Image {counter} added to input images queue.") if self.__logger else None
 
-    def get_input_image(self, preprocess_fn: Callable[[Image, int, int], np.ndarray]) -> np.ndarray | None:
+    def get_input_image(self, preprocess_fn: Callable[[Image], np.ndarray]) -> np.ndarray | None:
         """
         Get image from input images queue.
 
         Returns:
             np.ndarray|None: Preprocessed image from the input images queue or None if no image is available.
         """
-        with self.__lock:
+        with self.__rlock:
             # Check if the pending input image event is set
-            if self.__pending_input_image_event.is_set():
+            if not self.__pending_input_image_event.is_set():
                 return None
 
             # Get the image from input images queue
@@ -108,11 +116,10 @@ class ImagesQueue:
                 self.__pending_input_image_event.clear()
 
         # Log
-        self.__logger.log(f"Image retrieved from input images queue.")
+        self.__logger.debug(f"Image retrieved from input images queue.") if self.__logger else None
 
         # Send image to server
-        if self.__server:
-            self.__server.send_image_original(image)
+        self.__server.send_image_original(image) if self.__server else None
 
         return preprocessed_image
 
@@ -124,27 +131,30 @@ class ImagesQueue:
             model_name (str): Name of the model that produced the inference.
             inference (ImageBoundingBoxes): Inference to put in the output inference queue.
         """
-        with self.__lock:
+        with self.__rlock:
+            if self.is_stopped():
+                self.__logger.warning("Images queue has been stopped. Cannot put inference in output inference queue.") if self.__logger else None
+                return
+
             # Put inference in output inference queue
             self.__output_inference_queue.put((model_name, inference))
-
 
             # Set the pending output inference event
             self.__pending_output_inference_event.set()
 
         # Log
-        self.__logger.log(f"Inference added to output inference queue for model '{model_name}': {inference}")
+        self.__logger.info(f"Inference added to output inference queue for model '{model_name}': {inference}") if self.__logger else None
 
     def get_output_inference(self) -> tuple[str, ImageBoundingBoxes] | None:
         """
         Get inference from output inference queue.
 
         Returns:
-            ImageBoundingBoxes|None: Inference from the output inference queue or None if no inference is available.
+            tuple[str, ImageBoundingBoxes]|None: Tuple containing model name and inference from the output inference queue or None if no inference is available.
         """
-        with self.__lock:
+        with self.__rlock:
             # Check if the pending output inference event is set
-            if self.__pending_output_inference_event.is_set():
+            if not self.__pending_output_inference_event.is_set():
                 return None
 
             # Get the inference from output inference queue
@@ -155,11 +165,11 @@ class ImagesQueue:
                 self.__pending_output_inference_event.clear()
 
         # Log
-        self.__logger.log(f"Inference retrieved from output inference queue.")
+        self.__logger.debug(f"Inference retrieved from output inference queue.") if self.__logger else None
 
         return model_name, inference
 
-    def capture_image(self):
+    def capture_image(self) -> None:
         """
         Capture image from camera.
         """
@@ -187,99 +197,110 @@ class ImagesQueue:
         """
         return self.__pending_input_image_event
 
-    def get_pending_inference_event(self) -> EventCls:
+    def __loop(self):
         """
-        Get pending output inference event.
+        Loop to capture images and put them in the input images queue.
+        """
+        while self.is_running():
+            # Wait for the capture image event
+            self.__capture_image_event.wait()
 
-        Returns:
-            Event: Event to signal when an inference is pending in the output inference queue.
-        """
-        return self.__pending_output_inference_event
+            # Capture image from camera
+            self.capture_image()
 
-    def get_stop_event(self) -> EventCls:
-        """
-        Get stop event.
+            # Clear the capture image event
+            self.__capture_image_event.clear()
 
-        Returns:
-            Event: Event to signal when to stop processing.
-        """
-        return self.__stop_event
+        # Log
+        self.__logger.info("Images queue loop stopped.") if self.__logger else None
 
-    def __clear_events(self):
-        """
-        Clear the events.
-        """
-        # Clear the events
-        self.__capture_image_event.clear()
-        self.__pending_input_image_event.clear()
-        self.__pending_output_inference_event.clear()
-
-    def start(self):
+    def __start(self) -> None:
         """
         Start the images queue.
         """
-        with self.__lock:
+        with self.__rlock:
+            # Check if it has already been started
+            if self.is_running():
+                self.__logger.warning("Images queue already started.") if self.__logger else None
+                return
+
             # Initialize the queues
             self.__input_images_queue = Queue()
             self.__output_inference_queue = Queue()
 
-            # Clear the events
-            self.__clear_events()
+            # Clear the stop event
+            self.__stop_event.clear()
 
         # Log
-        self.__logger.log("Images queue started.")
+        self.__logger.info("Images queue started.") if self.__logger else None
 
-    def close(self):
+    def is_running(self) -> bool:
         """
-        Close the images queue.
+        Check if the images queue is running.
+
+        Returns:
+            bool: True if the images queue is running, False otherwise.
         """
-        with self.__lock:
+        with self.__rlock:
+            return not self.__stop_event.is_set()
+
+    def __stop(self):
+        """
+        Stop the images queue.
+        """
+        with self.__rlock:
+            # Set the stop event
+            self.__stop_event.set()
+
             # Close the queues
             self.__input_images_queue.close()
             self.__output_inference_queue.close()
 
             # Clear the events
-            self.__clear_events()
+            self.__capture_image_event.clear()
+            self.__pending_input_image_event.clear()
+            self.__pending_output_inference_event.clear()
 
             # Reset the image counter
             self.__imager_counter = 0
 
         # Log
-        self.__logger.log("Images queue closed.")
+        self.__logger.info("Images queue closed.") if self.__logger else None
+
+    def is_stopped(self) -> bool:
+        """
+        Check if the images queue is stopped.
+
+        Returns:
+            bool: True if the images queue is not running, False otherwise.
+        """
+        with self.__rlock:
+            return self.__stop_event.is_set()
+
+    def start_thread(self, thread: Optional[Callable[[], None]] = None) -> None:
+        """
+        Start the images queue thread.
+
+        Args:
+            thread (Optional[Callable[[], None]]): Thread function to run.
+        """
+        with self.__rlock:
+            # Check if the images queue is already running
+            if self.is_running():
+                self.__logger.warning("Images queue already running.") if self.__logger else None
+                return
+
+            # Start the images queue
+            self.__start()
+
+            # Start the thread if provided
+            if thread:
+                self.__thread = thread()
+                self.__logger.info("Images queue thread started.") if self.__logger else None
 
     def __del__(self):
         """
         Destructor for the images queue.
         """
-        # Close the images queue
-        self.close()
-
-
-def main(images_queue: ImagesQueue = None):
-    """
-    Main function to run the script.
-    """
-    # Check the type of the images queue
-    check_type(images_queue, ImagesQueue)
-
-    # Get the stop event
-    stop_event = images_queue.get_stop_event()
-
-    # Get the capture image event
-    capture_image_event = images_queue.get_capture_image_event()
-
-    # Start the images queue
-    images_queue.start()
-
-    while not stop_event.is_set():
-        # Wait for capture image event
-        capture_image_event.wait()
-
-        # Capture image from camera
-        images_queue.capture_image()
-
-        # Clear the capture image event
-        capture_image_event.clear()
-
-    # Close the images queue
-    images_queue.close()
+        # Stop the images queue
+        self.__stop()

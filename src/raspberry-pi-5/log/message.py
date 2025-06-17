@@ -1,21 +1,38 @@
-from utils import check_type
+from enum import Enum
 from typing import Optional
+from datetime import datetime as dt
+
+from utils import check_type
+
+class Category(Enum):
+    """
+    Enum to define the category of log message.
+    """
+    INFO = "INFO"
+    WARNING = "WARNING"
+    ERROR = "ERROR"
+    DEBUG = "DEBUG"
 
 class Message:
     """
     Class to handle log messages.
     """
 
-    def __init__(self, content: str, tag: Optional[str] = None):
+    def __init__(self, content: str, category: Category = Category.INFO, tag: Optional[str] = None):
         """
         Initialize the Message class.
 
         Args:
-            tag (str): Tag of the log message.
             content (str): Content of the log message.
+            category (Category): Category of the log message.
+            tag (Optional[str]): Optional tag for the log message.
         """
         self.content = content
+        self.category = category
         self.tag = tag
+
+        # Get the formatted time
+        self.__formatted_time = dt.now().strftime('%H:%M:%S')
 
     def __str__(self):
         """
@@ -24,7 +41,18 @@ class Message:
         Returns:
             str: The formatted log message.
         """
-        return f"[{self.__tag}] {self.__content}" if self.__tag else self.__content
+        if self.tag:
+            return f"[{self.__formatted_time}] [{self.tag}] {self.category.value}: {self.content}"
+        return f"[{self.__formatted_time}] {self.category.value}: {self.content}"
+
+    def __repr__(self):
+        """
+        Representation of the log message.
+
+        Returns:
+            str: The formatted log message.
+        """
+        return f"Message(category={self.category}, tag={self.tag}, content={self.content})"
 
     @property
     def content(self) -> str:
@@ -38,15 +66,36 @@ class Message:
 
 
     @content.setter
-    def content(self, value: str):
+    def content(self, content: str):
         """
         Set the content of the log message.
 
         Args:
-            value (str): The new content for the log message.
+            content (str): The new content for the log message.
         """
-        check_type(value, str)
-        self.__content = value
+        check_type(content, str)
+        self.__content = content
+
+    @property
+    def category(self) -> Category:
+        """
+        Get the category of the log message.
+
+        Returns:
+            Category: The category of the log message.
+        """
+        return self.__category
+
+    @category.setter
+    def category(self, category: Category):
+        """
+        Set the category of the log message.
+
+        Args:
+            category (Category): The new category for the log message.
+        """
+        check_type(category, Category)
+        self.__category = category
 
     @property
     def tag(self) -> Optional[str]:
@@ -59,13 +108,13 @@ class Message:
         return self.__tag
 
     @tag.setter
-    def tag(self, value: Optional[str]):
+    def tag(self, tag: Optional[str]):
         """
         Set the tag of the log message.
 
         Args:
-            value (Optional[str]): The new tag for the log message.
+            tag (Optional[str]): The new tag for the log message.
         """
-        if value is not None:
-            check_type(value, str)
-        self.__tag = value
+        if tag:
+            check_type(tag, str)
+        self.__tag = tag

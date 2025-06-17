@@ -1,3 +1,4 @@
+DEBUG = "false"
 CHALLENGE = "example"
 ENABLE_WIFI = "false"
 WIFI_SSID = "wifi"

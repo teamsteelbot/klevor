@@ -35,7 +35,8 @@ class Env:
         """
         Get the debug mode from the environment variable.
 
-        Returns True if debug mode is enabled, otherwise False.
+        Returns:
+            bool: True if debug mode is enabled, otherwise False.
         """
         return os.getenv(cls.DEBUG, 'false').lower() == 'true'
 

@@ -1,6 +1,6 @@
 import os
 import shutil
-from datetime import datetime
+from datetime import datetime as dt
 from typing import LiteralString
 
 class Files:
@@ -30,7 +30,7 @@ class Files:
     LOGS_DIR = os.path.join(LOG_DIR, 'logs')
 
     @staticmethod
-    def move_file(input_path, output_dir) -> None:
+    def move_file(input_path: str, output_dir: str) -> None:
         """
         Move file between folders.
 
@@ -42,7 +42,7 @@ class Files:
             shutil.move(input_path, output_dir)
 
     @staticmethod
-    def move_folder(input_dir, output_dir) -> None:
+    def move_folder(input_dir: str, output_dir: str) -> None:
         """
         Move folder between folders.
 
@@ -54,7 +54,7 @@ class Files:
             shutil.move(input_dir, output_dir)
 
     @classmethod
-    def move_folder_content(cls, input_dir, output_dir) -> None:
+    def move_folder_content(cls, input_dir: str, output_dir: str) -> None:
         """
         Move folder content to another folder.
 
@@ -71,23 +71,16 @@ class Files:
                 item_input_path = os.path.join(input_dir, item)
                 item_output_path = os.path.join(output_dir, item)
 
-                # Check if it's a file or folder
-                if os.path.isdir(item_input_path):
-                    pass
-
-                # Check if the item already exists in the output directory
-                elif not os.path.exists(item_output_path):
-                    pass
-
-                # Delete the item if it already exists in the output directory
-                else:
+                # Check if it's a file and the item already exists in the output directory
+                if not os.path.isdir(item_input_path) and os.path.exists(item_output_path):
+                    # Delete the item if it already exists in the output directory
                     os.remove(item_output_path)
 
                 # Move each item to the output directory
                 shutil.move(item_input_path, output_dir)
 
     @staticmethod
-    def copy_file(input_path, output_path) -> None:
+    def copy_file(input_path: str, output_path: str) -> None:
         """
         Copy a file from input path to output path.
 
@@ -107,10 +100,7 @@ class Files:
             path (str): The path to check and create if it doesn't exist.
         """
         # Check if it contains an extension
-        if os.path.splitext(path)[1]:
-            output_dir = os.path.dirname(path)
-        else:
-            output_dir = path
+        output_dir = os.path.dirname(path) if os.path.splitext(path)[1] else path
 
         # Ensure the output directory exists
         os.makedirs(output_dir, exist_ok=True)
@@ -149,8 +139,11 @@ class Files:
     def get_log_file_path(cls) -> LiteralString | str | bytes:
         """
         Get the log file path.
+
+        Returns:
+            LiteralString | str | bytes: The path to the log file with the current timestamp.
         """
         # Get the current time formatted as a string
-        formatted_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        formatted_time = dt.now().strftime('%Y-%m-%d_%H-%M-%S')
 
         return os.path.join(cls.LOGS_DIR, f'{formatted_time}.txt')

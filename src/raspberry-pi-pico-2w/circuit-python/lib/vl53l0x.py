@@ -1,0 +1,94 @@
+from board import (GP0, GP1, GP4, GP5, GP7, GP13, GP16, GP17, GP22, GP28)
+from busio import I2C
+from adafruit_vl53l0x import VL53L0X
+from digitalio import DigitalInOut, Direction
+from time import sleep
+
+class VL53L0XError(Exception):
+    """
+    Custom exception class for VL53L0X errors.
+    """
+    def __init__(self, message):
+        """
+        Initializes the VL53L0XError with a custom message.
+        """
+        super().__init__(message)
+        self.message = message
+
+    def __str__(self):
+        """
+        Returns a string representation of the VL53L0XError.
+        """
+        return f"VL53L0X Error: {self.message}"
+
+class VL53L0XHandler:
+    """
+    This class handles the initialization and reading of multiple VL53L0X ToF sensors.
+    """
+    # Default configuration
+    I2C_SCL_PIN = GP1
+    I2C_SDA_PIN = GP0
+    XSHUT_PINS = (GP4, GP5, GP22, GP7, GP28, GP13, GP16, GP17)
+    SHORT_SETUP_DELAY = 0.05  # Short delay for sensor power-up
+    SETUP_DELAY = 0.1  # Delay to ensure all sensors are off before starting
+    MEASUREMENT_LIMIT_MM = 3000  # Maximum distance for ToF measurement in mm
+    MEASUREMENT_TIMING_BUDGET = 100000  # Timing budget for ToF measurement in microseconds
+    SENSOR_DELAY = 0.05
+    START_NEW_I2C_ADDRESS = 0x30
+
+    def __init__(self, i2c: I2C = I2C(I2C_SCL_PIN, I2C_SDA_PIN), xshut_pins: tuple = XSHUT_PINS):
+        """
+        Initializes the VL53L0XHandler with default settings.
+        """
+        # Initialize XSHUT list, sensors and measures list
+        self.__xshut = []
+        self.__sensors = []
+        self.__sensors_measures = [None for _ in range(len(xshut_pins))]
+
+        # Fill the XSHUT list with DigitalInOut objects for each pin
+        for i, pin in enumerate(xshut_pins):
+            xshut = DigitalInOut(pin)
+            xshut.direction = Direction.OUTPUT
+            xshut.value = False
+            self.__xshut.append(xshut)
+            sleep(self.SETUP_DELAY)
+
+            try:
+                # Initialize the sensor, should be at 0x29
+                sensor = VL53L0X(i2c)
+
+                # Change the I2C address of the current sensor to a new unique address
+                sensor.set_address(self.START_NEW_I2C_ADDRESS + i)
+                self.__sensors.append(sensor)
+
+                # Set the ToF measurement timing budget
+                sensor.measurement_timing_budget = self.MEASUREMENT_TIMING_BUDGET
+
+                # Small synchronous pause before activating next sensor
+                sleep(self.SHORT_SETUP_DELAY)
+
+            except ValueError as e:
+                raise VL53L0XError(f"Failed to initialize sensor on pin {pin}: {e}")
+
+    async def multiple_tof_sensors_reading(self):
+        """
+        Asynchronously reads the distance from multiple VL53L0X ToF sensors.
+        """
+        for i, sensor in enumerate(self.__sensors):
+            try:
+                # Read the distance from the sensor
+                distance_mm = sensor.range
+                if distance_mm is None or distance_mm < 0:
+                    pass
+                if distance_mm >= self.MEASUREMENT_LIMIT_MM:
+                    distance_cm = float('inf')
+                else:
+                    distance_cm = distance_mm // 10  # Convert to centimeters
+
+                # Store the distance in the measures list
+                self.__sensors_measures[i] = distance_cm
+
+                sleep(self.SENSOR_DELAY)
+
+            except Exception as e:
+                raise VL53L0XError(f"Error reading sensor on pin {self.__xshut[i].pin}: {e}")

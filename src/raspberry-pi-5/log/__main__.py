@@ -1,9 +1,8 @@
-from multiprocessing import Event
 from time import sleep
 
 from log import Logger
 from log.sub_logger import SubLogger
-from log.message import Message
+from log.message import Message, Category
     
 if __name__ == "__main__":
     # Create an instance of Logger
@@ -17,10 +16,10 @@ if __name__ == "__main__":
         logger.create_thread()
 
         # Log a message using the sub-logger
-        sub_logger.log("This is a test log message.")
+        sub_logger.info("This is a test log message.")
 
         # Log a message using the main logger
-        logger.log(Message("This is a test log message from the main logger."))
+        logger.info("This is a test log message from the main logger.")
 
         # Wait for a while to ensure the log messages are processed
         print("Logger is running. Press Ctrl+C to stop.")
@@ -29,11 +28,11 @@ if __name__ == "__main__":
 
     except KeyboardInterrupt:
         # Handle keyboard interrupt to stop the logger thread gracefully
-        logger.log(Message("KeyboardInterrupt received. Stopping logger thread."))
+        logger.warning("KeyboardInterrupt received. Stopping logger thread.")
 
     except Exception as e:
         # Log any exceptions that occur
-        logger.log(Message(f"An error occurred: {e}"))
+        logger.error(f"An error occurred: {e}")
 
     finally:
         # Stop the logger thread gracefully

@@ -20,17 +20,21 @@ class Args:
 
         Args:
             attribute (str): The name of the attribute.
+        Returns:
+            str: The attribute name with the prefix.
         """
         return f'{cls.ARGS_PREFIX}{attribute}'
 
     @staticmethod
-    def get_attribute_from_args(args: dict, attribute: str):
+    def get_attribute_from_args(args: dict, attribute: str) -> str:
         """
         Get the attribute name from the args.
 
         Args:
             args (dict): The parsed arguments.
             attribute (str): The name of the attribute.
+        Returns:
+            str: The value of the attribute from the args.
         """
         # Substitute whitespaces with underscores
         attribute = attribute.replace(' ', '_')
@@ -57,9 +61,13 @@ class Args:
         return vars(args)
 
     @classmethod
-    def add_server_argument(cls, parser, default: bool = False) -> None:
+    def add_server_argument(cls, parser: ArgumentParser, default: bool = False) -> None:
         """
         Add server argument to the parser.
+
+        Args:
+            parser (ArgumentParser): The argument parser instance.
+            default (bool): Default value for the server argument.
         """
         parser.add_argument(f"--no-{cls.SERVER}", dest=cls.SERVER, action="store_false",
                             help="Set server flag as 'False'")
@@ -68,9 +76,13 @@ class Args:
         parser.set_defaults(**{cls.SERVER: default})
 
     @classmethod
-    def add_serial_argument(cls, parser, default: bool = False) -> None:
+    def add_serial_argument(cls, parser: ArgumentParser, default: bool = False) -> None:
         """
         Add serial argument to the parser.
+
+        Args:
+            parser (ArgumentParser): The argument parser instance.
+            default (bool): Default value for the serial argument.
         """
         parser.add_argument(f"--no-{cls.SERIAL}", dest=cls.SERIAL, action="store_false",
                             help="Set serial flag as 'False'")
@@ -79,17 +91,25 @@ class Args:
         parser.set_defaults(**{cls.SERIAL: default})
 
     @classmethod
-    def add_ip_argument(cls, parser, default: str = '0.0.0.0') -> None:
+    def add_ip_argument(cls, parser: ArgumentParser, default: str = '0.0.0.0') -> None:
         """
         Add IP argument to the parser.
+
+        Args:
+            parser (ArgumentParser): The argument parser instance.
+            default (str): Default IP address for the server.
         """
         parser.add_argument(f"--{cls.IP}", dest=cls.IP, type=str, default=default,
                             help="Set the IP address for the server")
 
     @classmethod
-    def add_port_argument(cls, parser, default: int = 8765) -> None:
+    def add_port_argument(cls, parser: ArgumentParser, default: int = 8765) -> None:
         """
         Add port argument to the parser.
+
+        Args:
+            parser (ArgumentParser): The argument parser instance.
+            default (int): Default port number for the server.
         """
         parser.add_argument(f"--{cls.PORT}", dest=cls.PORT, type=int, default=default,
                             help="Set the port for the server")

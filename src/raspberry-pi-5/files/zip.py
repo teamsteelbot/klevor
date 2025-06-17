@@ -1,7 +1,8 @@
 import os
-import time
-import zipfile
+from time import sleep
+from zipfile import ZipFile
 from re import Pattern
+from typing import Optional
 
 from files import Files
 from utils import match_any
@@ -13,13 +14,13 @@ class Zip:
     """
 
     @staticmethod
-    def zip_files(zipf, filenames, input_file_base_path: str, input_base_path: str,
-                  ignore_filenames_regex: list[Pattern] = None) -> None:
+    def zip_files(zipf: ZipFile, filenames: list, input_file_base_path: str, input_base_path: str,
+                  ignore_filenames_regex: Optional[list[Pattern]] = None) -> None:
         """
         Define the function to zip the files in a folder.
 
         Args:
-            zipf: ZipFile object to write to.
+            zipf (ZipFile): ZipFile object to write to.
             filenames (list): List of filenames to zip.
             input_file_base_path (str): Base path of the files to be zipped.
             input_base_path (str): Base path for relative file paths in the zip.
@@ -39,13 +40,13 @@ class Zip:
             print(f'Zipped file: {file_rel_path}')
 
     @classmethod
-    def zip_not_nested_folder(cls, zipf, input_base_path: str, input_folder_path: str,
+    def zip_not_nested_folder(cls, zipf: ZipFile, input_base_path: str, input_folder_path: str,
                               ignore_filenames_regex: list = None) -> None:
         """
         Define the function to zip a folder, this ignores nested folders.
 
         Args:
-            zipf: ZipFile object to write to.
+            zipf (ZipFile): ZipFile object to write to.
             input_base_path (str): Base path for relative file paths in the zip.
             input_folder_path (str): Path of the folder to be zipped.
             ignore_filenames_regex (list[Pattern], optional): List of regex patterns to ignore certain files.
@@ -61,13 +62,13 @@ class Zip:
         print(f'Zipped folder: {input_folder_rel_path}')
 
     @classmethod
-    def zip_nested_folder(cls, zipf, input_base_path: str, input_folder_path: str, ignore_dirs: list[str] = None,
+    def zip_nested_folder(cls, zipf: ZipFile, input_base_path: str, input_folder_path: str, ignore_dirs: list[str] = None,
                           ignore_filenames_regex: list[Pattern] = None) -> None:
         """
         Define the function to zip a folder, this includes nested folders.
 
         Args:
-            zipf: ZipFile object to write to.
+            zipf (ZipFile): ZipFile object to write to.
             input_base_path (str): Base path for relative file paths in the zip.
             input_folder_path (str): Path of the folder to be zipped.
             ignore_dirs (list[str], optional): List of directories to ignore.
@@ -91,7 +92,7 @@ class Zip:
         print(f'Zipped folder: {input_folder_rel_path}')
 
     @staticmethod
-    def extract_all(zip_path, output_dir, environment=Files.ENVIRONMENT_LOCAL, batch_size=Files.BATCH_SIZE) -> None:
+    def extract_all(zip_path: str, output_dir: str, environment: str = Files.ENVIRONMENT_LOCAL, batch_size: int = Files.BATCH_SIZE) -> None:
         """
         Extract all files from a zip file by batches.
 
@@ -104,7 +105,7 @@ class Zip:
         # Check if the path exists, if not it creates it
         Files.ensure_directory_exists(output_dir)
 
-        with zipfile.ZipFile(zip_path, "r") as zip_ref:
+        with ZipFile(zip_path, "r") as zip_ref:
             files = zip_ref.namelist()
 
             for i in range(0, len(files), batch_size):
@@ -124,4 +125,4 @@ class Zip:
 
                     # Sleep to avoid Google Drive API call limit
                     if environment == Files.ENVIRONMENT_COLAB:
-                        time.sleep(Files.GOOGLE_DRIVE_API_CALL_DELAY)
+                        sleep(Files.GOOGLE_DRIVE_API_CALL_DELAY)
