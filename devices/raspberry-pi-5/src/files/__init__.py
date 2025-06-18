@@ -110,7 +110,7 @@ class Files:
 
         # Create the file if it does not exist
         if not os.path.exists(file_path):
-            with open(file_path, 'w') as f:
+            with open(file_path, 'w'):
                 pass
 
 

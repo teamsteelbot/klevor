@@ -29,8 +29,7 @@ class Yolo:
         Files.ensure_directory_exists(model_path)
 
         # Load the model
-        model = YOLO(model_path, task=task, verbose=True)
-        return model
+        return YOLO(model_path, task=task, verbose=True)
 
     @staticmethod
     def get_class_names(model: YOLO) -> dict[int, str]:
@@ -42,9 +41,6 @@ class Yolo:
         Returns:
             dict[int, str]: Dictionary mapping class indices to class names.
         """
-        # Detected PyTorch model class names
-        print(f'Classes: {model.names}')
-
         return model.names
 
     @staticmethod
@@ -86,7 +82,7 @@ class Yolo:
         return model.export(format="tflite", int8=quantized)
 
     @staticmethod
-    def run_inference(model: YOLO, preprocessed_image: torch.Tensor) -> list:
+    def run_inference(model: YOLO, preprocessed_image: torch.Tensor) -> tuple[list, float]:
         """
         Run inference from PyTorch model.
 
@@ -94,7 +90,7 @@ class Yolo:
             model (YOLO): Loaded YOLO model.
             preprocessed_image (torch.Tensor): Preprocessed image tensor.
         Returns:
-            list: Inference outputs from the model.
+            tuple(list, float): Inferences and elapsed time in seconds.
         """
         # Get time
         start_time = time.time()
@@ -106,10 +102,7 @@ class Yolo:
         end_time = time.time()
         elapsed_time = end_time - start_time
 
-        # Log
-        print(f'Inference took {elapsed_time:.2f} seconds')
-
-        return inferences
+        return inferences, elapsed_time
 
     @staticmethod
     def get_labels_from_txt(labels_path: str) -> list:

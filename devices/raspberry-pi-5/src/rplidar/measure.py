@@ -54,7 +54,7 @@ class Measure:
         check_type(value, float)
 
         if not (0 <= value):
-            raise ValueError("Angle must be a non-negative float, received: {}".format(value))
+            raise ValueError(f"Angle must be a non-negative float, received: {value}")
         self.__angle = 0.0 if value >= 360.0 else value
 
     @property
@@ -101,6 +101,9 @@ class Measure:
             value (int): Quality to set.
         """
         check_type(value, int)
+
+        if value < 0:
+            raise ValueError(f"Quality must be a non-negative integer, received: {value}")
         self.__quality = value
 
     @classmethod
@@ -122,7 +125,7 @@ class Measure:
             parts = measure_str.split(cls.ATTRIBUTES_SEPARATOR)
 
             if len(parts) < 2:
-                raise ValueError("Invalid measure string: {}".format(measure_str))
+                raise ValueError(f"Invalid measure string: {measure_str}")
 
             # Convert parts to appropriate types
             angle = float(parts[0])

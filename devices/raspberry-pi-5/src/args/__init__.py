@@ -1,17 +1,30 @@
 from argparse import ArgumentParser
+from enum import Enum, unique
 
+@unique
+class Flags(Enum):
+    """
+    Enum to represent command line flags.
+    """
+    SERVER = 1
+    SERIAL = 2
+    IP = 3
+    PORT = 4
+
+    def get_flag_name(self) -> str:
+        """
+        Get the flag name with the prefix.
+
+        Returns:
+            str: The flag name with the prefix.
+        """
+        return self.name.lower()
 
 class Args:
     """
     Class to handle command line arguments.
     """
     ARGS_PREFIX = '--'
-
-    # Arguments
-    SERVER = 'server'
-    SERIAL = 'serial'
-    IP = 'ip'
-    PORT = 'port'
 
     @classmethod
     def get_attribute_name(cls, attribute: str) -> str:
@@ -60,8 +73,8 @@ class Args:
         # Get the arguments as a dictionary
         return vars(args)
 
-    @classmethod
-    def add_server_argument(cls, parser: ArgumentParser, default: bool = False) -> None:
+    @staticmethod
+    def add_server_argument(parser: ArgumentParser, default: bool = False) -> None:
         """
         Add server argument to the parser.
 
@@ -69,14 +82,15 @@ class Args:
             parser (ArgumentParser): The argument parser instance.
             default (bool): Default value for the server argument.
         """
-        parser.add_argument(f"--no-{cls.SERVER}", dest=cls.SERVER, action="store_false",
+        flag = Flags.SERVER.get_flag_name()
+        parser.add_argument(f"--no-{flag}", dest=flag, action="store_false",
                             help="Set server flag as 'False'")
-        parser.add_argument(f"--{cls.SERVER}", dest=cls.SERVER, action="store_true",
+        parser.add_argument(f"--{flag}", dest=flag, action="store_true",
                             help="Set server flag as 'True'")
-        parser.set_defaults(**{cls.SERVER: default})
+        parser.set_defaults(**{flag: default})
 
-    @classmethod
-    def add_serial_argument(cls, parser: ArgumentParser, default: bool = False) -> None:
+    @staticmethod
+    def add_serial_argument(parser: ArgumentParser, default: bool = False) -> None:
         """
         Add serial argument to the parser.
 
@@ -84,14 +98,15 @@ class Args:
             parser (ArgumentParser): The argument parser instance.
             default (bool): Default value for the serial argument.
         """
-        parser.add_argument(f"--no-{cls.SERIAL}", dest=cls.SERIAL, action="store_false",
+        flag = Flags.SERIAL.get_flag_name()
+        parser.add_argument(f"--no-{flag}", dest=flag, action="store_false",
                             help="Set serial flag as 'False'")
-        parser.add_argument(f"--{cls.SERIAL}", dest=cls.SERIAL, action="store_true",
+        parser.add_argument(f"--{flag}", dest=flag, action="store_true",
                             help="Set serial flag as 'True'")
-        parser.set_defaults(**{cls.SERIAL: default})
+        parser.set_defaults(**{flag: default})
 
-    @classmethod
-    def add_ip_argument(cls, parser: ArgumentParser, default: str = '0.0.0.0') -> None:
+    @staticmethod
+    def add_ip_argument(parser: ArgumentParser, default: str = '0.0.0.0') -> None:
         """
         Add IP argument to the parser.
 
@@ -99,11 +114,12 @@ class Args:
             parser (ArgumentParser): The argument parser instance.
             default (str): Default IP address for the server.
         """
-        parser.add_argument(f"--{cls.IP}", dest=cls.IP, type=str, default=default,
+        flag = Flags.IP.get_flag_name()
+        parser.add_argument(f"--{flag}", dest=flag, type=str, default=default,
                             help="Set the IP address for the server")
 
-    @classmethod
-    def add_port_argument(cls, parser: ArgumentParser, default: int = 8765) -> None:
+    @staticmethod
+    def add_port_argument(parser: ArgumentParser, default: int = 8765) -> None:
         """
         Add port argument to the parser.
 
@@ -111,5 +127,6 @@ class Args:
             parser (ArgumentParser): The argument parser instance.
             default (int): Default port number for the server.
         """
-        parser.add_argument(f"--{cls.PORT}", dest=cls.PORT, type=int, default=default,
+        flag = Flags.PORT.get_flag_name()
+        parser.add_argument(f"--{flag}", dest=flag, type=int, default=default,
                             help="Set the port for the server")

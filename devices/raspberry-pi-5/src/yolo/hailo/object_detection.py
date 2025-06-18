@@ -1,7 +1,7 @@
 import threading
 from multiprocessing import Queue, Event
 
-from ...camera.images_queue import ImagesQueue
+from ...camera.image_processing_queue import ImageProcessingQueue
 from ...env import Env
 from ...log import Logger
 from ...utils import check_type
@@ -9,14 +9,14 @@ from .. import Yolo
 from ..files import Files
 from ..hailo import Hailo
 
-def listen_images_queue(images_queue: ImagesQueue, stop_event: Event, parking_event: Event,
+def listen_images_queue(images_queue: ImageProcessingQueue, stop_event: Event, parking_event: Event,
                         hailo_handlers: dict[str, Hailo],
                         )-> None:
     """
     Listen to the images queue and process the images based on the parking event.
     """
     # Check the type of images queue
-    check_type(images_queue, ImagesQueue)
+    check_type(images_queue, ImageProcessingQueue)
 
     # Check the type of stop event
     check_type(stop_event, Event)
@@ -34,7 +34,7 @@ def listen_images_queue(images_queue: ImagesQueue, stop_event: Event, parking_ev
         pending_image_event.wait()
 
         # Get the image from the images queue
-        image = images_queue.get_input_image(Hailo.preprocess)
+        image = images_queue.get_image(Hailo.preprocess)
 
         # Check if the parking event is set
         if parking_event.is_set():
@@ -53,7 +53,7 @@ def listen_images_queue(images_queue: ImagesQueue, stop_event: Event, parking_ev
             hailo_handlers[Yolo.MODEL_G].put_image(image)
             hailo_handlers[Yolo.MODEL_R].put_image(image)
 
-def main(logger: Logger, images_queue: ImagesQueue, parking_event: Event, stop_event: Event) -> None:
+def main(logger: Logger, images_queue: ImageProcessingQueue, parking_event: Event, stop_event: Event) -> None:
     """
     Main function to run the script.
     """
@@ -61,7 +61,7 @@ def main(logger: Logger, images_queue: ImagesQueue, parking_event: Event, stop_e
     check_type(logger, Logger)
 
     # Check the type of images queue
-    check_type(images_queue, ImagesQueue)
+    check_type(images_queue, ImageProcessingQueue)
 
     # Check the type of stop event
     check_type(stop_event, Event)
@@ -104,7 +104,7 @@ def main(logger: Logger, images_queue: ImagesQueue, parking_event: Event, stop_e
         # Create the Hailo handler
         hailo_handler = Hailo(model_name, hef_file_path, labels_file_path, model_class_colors,
                               images_queue=images_queue, logger=logger, input_queue=input_queue,
-                              put_output_inference_fn=images_queue.put_output_inference)
+                              put_output_inference_fn=images_queue.add_inference)
         hailo_handlers[model_name] = hailo_handler
 
         # Get the input shape of the model

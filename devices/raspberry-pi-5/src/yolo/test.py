@@ -1,6 +1,10 @@
 from argparse import ArgumentParser
 import os
 import random
+from typing import Callable
+
+import torch
+from ultralytics import YOLO
 
 from ..model.image_bounding_boxes import ImageBoundingBoxes
 from ..opencv.detections import Detections
@@ -10,7 +14,7 @@ from .args import Args
 from .files import Files
 
 
-def test_random_images(model, model_class_names: dict, run_inference_fn, input_organized_dir: str,
+def test_random_images(model, model_class_names: dict, run_inference_fn: Callable[[YOLO, torch.Tensor], tuple[list, float]], input_organized_dir: str,
                        draw_labels_name: bool, rgb_colors: dict[int, tuple[int, int, int]] = None,
                        image_size: tuple[int, int] = Preprocessing.SIZE):
     """
@@ -19,7 +23,7 @@ def test_random_images(model, model_class_names: dict, run_inference_fn, input_o
     Args:
         model: The YOLO model to use for inference.
         model_class_names (dict): Dictionary mapping class indices to class names.
-        run_inference_fn: Function to run inference on the preprocessed image.
+        run_inference_fn (Callable): Function to run inference on the model.
         input_organized_dir (str): Directory containing organized dataset images.
         draw_labels_name (bool): Whether to draw labels on the detections.
         rgb_colors (dict[int, tuple[int, int, int]]): Dictionary mapping class indices to RGB colors.

@@ -1,5 +1,13 @@
 import os
+from enum import Enum, unique
 
+@unique
+class Keys(Enum):
+    """
+    Enum for environment variable keys.
+    """
+    DEBUG = 1
+    YOLO_VERSION = 2
 
 class Env:
     """
@@ -7,44 +15,42 @@ class Env:
 
     This class provides methods to get environment variables related to debug mode and YOLO version.
     """
-    DEBUG = 'DEBUG'
-    YOLO_VERSION = 'YOLO_VERSION'
 
-    @classmethod
-    def set_debug_mode(cls, debug: bool) -> None:
+    @staticmethod
+    def set_debug_mode(debug: bool) -> None:
         """
         Set the debug mode in the environment variable.
 
         Args:
             debug (bool): True to enable debug mode, False to disable.
         """
-        os.environ[cls.DEBUG] = str(debug).lower()
+        os.environ[Keys.DEBUG.name] = str(debug).lower()
 
-    @classmethod
-    def set_yolo_version(cls, version: str) -> None:
+    @staticmethod
+    def set_yolo_version(version: str) -> None:
         """
         Set the YOLO version in the environment variable.
 
         Args:
             version (str): The YOLO version to set.
         """
-        os.environ[cls.YOLO_VERSION] = version
+        os.environ[Keys.YOLO_VERSION.name] = version
 
-    @classmethod
-    def get_debug_mode(cls) -> bool:
+    @staticmethod
+    def get_debug_mode() -> bool:
         """
         Get the debug mode from the environment variable.
 
         Returns:
             bool: True if debug mode is enabled, otherwise False.
         """
-        return os.getenv(cls.DEBUG, 'false').lower() == 'true'
+        return os.getenv(Keys.DEBUG.name, 'false').lower() == 'true'
 
-    @classmethod
-    def get_yolo_version(cls) -> str:
+    @staticmethod
+    def get_yolo_version() -> str:
         """
         Get the YOLO version from the environment variable.
 
         Returns the YOLO version as a string.
         """
-        return os.getenv(cls.YOLO_VERSION, 'unknown')
+        return os.getenv(Keys.YOLO_VERSION.name, 'unknown')

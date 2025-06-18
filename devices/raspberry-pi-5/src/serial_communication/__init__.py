@@ -8,7 +8,7 @@ import asyncio
 
 from serial import Serial, SerialException
 
-from ..camera.images_queue import ImagesQueue
+from ..camera.image_processing_queue import ImageProcessingQueue
 from ..log import Logger
 from ..log.sub_logger import SubLogger
 from .message import Message
@@ -52,7 +52,7 @@ class SerialCommunication:
     def __init__(
         self,
         logger: Optional[Logger] = None,
-        images_queue: Optional[ImagesQueue] = None,
+        images_queue: Optional[ImageProcessingQueue] = None,
         server: Optional[RealtimeTrackerServer] = None,
         data_port: Optional[str] = RASPBERRY_PI_PICO_DATA_PORT,
         console_port: Optional[str] = RASPBERRY_PI_PICO_CONSOLE_PORT,
@@ -63,7 +63,7 @@ class SerialCommunication:
 
         Args:
             logger (Logger): Logger instance for logging messages.
-            images_queue (ImagesQueue): Images queue for handling images.
+            images_queue (ImageProcessingQueue): Images queue for handling images.
             data_port (str): Serial port used for sending data to Pico
             console_port (str): Serial port used for receiving data from Pico.
             baudrate (int): Baud rate for the serial communication. Default is 115200.
@@ -83,7 +83,7 @@ class SerialCommunication:
 
         # Check the type of images queue
         if images_queue:
-            check_type(images_queue, ImagesQueue)
+            check_type(images_queue, ImageProcessingQueue)
         self.__images_queue = images_queue
 
         # Check the type of the server

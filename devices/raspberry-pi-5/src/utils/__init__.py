@@ -20,6 +20,8 @@ def match_any(regex_list: list[Pattern], string: str) -> bool:
     Args:
         regex_list (list[Pattern]): List of compiled regex patterns.
         string (str): String to match against the regex patterns.
+    Returns:
+        bool: True if any regex matches the string, False otherwise.
     """
     return any(regex.match(string) for regex in regex_list)
 
@@ -27,10 +29,21 @@ def match_any(regex_list: list[Pattern], string: str) -> bool:
 def add_single_quotes_to_list_elements(lst: list | tuple) -> list:
     """
     Add single quotes to each element in a list or tuple.
+
+    Args:
+        lst (list | tuple): List or tuple of elements to be quoted.
+    Returns:
+        list: List of elements with single quotes added.
     """
     return [f"'{item}'" for item in lst]
 
-def get_local_ip():
+def get_local_ip() -> str | None | Any:
+    """
+    Get the local IP address of the machine.
+
+    Returns:
+        str: Local IP address as a string.
+    """
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
         # Doesn't need to be reachable

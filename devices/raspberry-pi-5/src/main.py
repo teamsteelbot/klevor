@@ -2,7 +2,7 @@ import argparse
 from multiprocessing import Process, Manager, Event
 from threading import Thread
 
-from camera.images_queue import main as images_queue_main, ImagesQueue
+from camera.image_processing_queue import main as images_queue_main, ImageProcessingQueue
 from env import Env
 from log import main as log_main, Logger
 from serial_communication import SerialCommunication, main as serial_communication_main
@@ -47,16 +47,16 @@ def process_1_fn(serial_communication: SerialCommunication, server: RealtimeTrac
             thread.join()
 
 
-def process_2_fn(images_queue: ImagesQueue, logger: Logger):
+def process_2_fn(images_queue: ImageProcessingQueue, logger: Logger):
     """
     Process 2: Images queue for camera and logging.
 
     Args:
-        images_queue (ImagesQueue): The images queue object.
+        images_queue (ImageProcessingQueue): The images queue object.
         logger (Logger): The logger object for logging messages.
     """
     # Check the type of images queue
-    check_type(images_queue, ImagesQueue)
+    check_type(images_queue, ImageProcessingQueue)
 
     # Check the type of logger
     check_type(logger, Logger)
@@ -76,13 +76,13 @@ def process_2_fn(images_queue: ImagesQueue, logger: Logger):
         thread.join()
 
 
-def process_3_fn(logger: Logger, images_queue: ImagesQueue, parking_event: Event, stop_event: Event):
+def process_3_fn(logger: Logger, images_queue: ImageProcessingQueue, parking_event: Event, stop_event: Event):
     """
     Process 3: Hailo object detection.
 
     Args:
         logger (Logger): The logger object for logging messages.
-        images_queue (ImagesQueue): The images queue object.
+        images_queue (ImageProcessingQueue): The images queue object.
         parking_event (Event): The event signal for parking detection.
         stop_event (Event): The event signal to stop processing.
     """
@@ -90,7 +90,7 @@ def process_3_fn(logger: Logger, images_queue: ImagesQueue, parking_event: Event
     check_type(logger, Logger)
 
     # Check the type of images queue
-    check_type(images_queue, ImagesQueue)
+    check_type(images_queue, ImageProcessingQueue)
 
     # Check the type of parking event
     check_type(parking_event, Event)
@@ -139,7 +139,7 @@ def main():
             camera = manager.Camera(logger)
 
             # Create the images queue with multiprocessing safety
-            images_queue = manager.ImagesQueue(stop_event, logger, camera, server=server)
+            images_queue = manager.ImageProcessingQueue(stop_event, logger, camera, server=server)
 
             # Raspberry Pi Pico serial communication wrapper with multiprocessing safety
             serial_communication = manager.SerialCommunication(parking_event, stop_event, logger, images_queue,

@@ -1,5 +1,4 @@
 import os
-from time import sleep
 from zipfile import ZipFile
 from re import Pattern
 from typing import Optional

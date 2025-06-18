@@ -9,7 +9,7 @@ from PIL.Image import Image
 import cv2
 import numpy as np
 
-from ...camera.images_queue import ImagesQueue
+from ...camera.image_processing_queue import ImageProcessingQueue
 from ...log import Logger
 from ...model.image_bounding_boxes import ImageBoundingBoxes
 from ...opencv.preprocessing import Preprocessing
@@ -42,7 +42,7 @@ class Hailo:
     TIMEOUT = 10000
 
     def __init__(self, model_name:str, hef_file_path:str, labels_path: str, class_colors: dict[int, tuple[int,int,int]],
-                 multi_threading: bool = True, multi_processing: bool = False, images_queue: ImagesQueue = None,
+                 multi_threading: bool = True, multi_processing: bool = False, images_queue: ImageProcessingQueue = None,
                  logger: Logger = None, batch_size: int = BATCH_SIZE, input_type: Optional[str] = None,
                  output_type: Optional[dict[str, str]] = None, input_queue: queue.Queue = None,
                  put_output_inference_fn = None,
@@ -57,7 +57,7 @@ class Hailo:
             class_colors (dict[int, tuple[int, int, int]]): Dictionary mapping class IDs to RGB colors.
             multi_threading (bool): Whether to enable multi-threading. Defaults to True.
             multi_processing (bool): Whether to enable multi-processing. Defaults to False.
-            images_queue (ImagesQueue): Queue for images. Defaults to None.
+            images_queue (ImageProcessingQueue): Queue for images. Defaults to None.
             logger (Logger): Logger instance for logging messages. Defaults to None.
             batch_size (int): Batch size for inference. Defaults to BATCH_SIZE.
             input_type (Optional[str]): Format type of the input stream. Defaults to None.
@@ -83,7 +83,7 @@ class Hailo:
         self.__labels = Yolo.get_labels_from_txt(self.__labels_path)
 
         # Check the type of images queue
-        check_type(images_queue, ImagesQueue)
+        check_type(images_queue, ImageProcessingQueue)
         self.__images_queue = images_queue
 
         # Check the type of logger
