@@ -3,7 +3,7 @@ import json
 import os
 import shutil
 
-from .args import Args
+from .args import Args, Flags
 from .files import Files
 
 
@@ -125,10 +125,7 @@ def create_dataset_with_removed_classes(input_dir, input_to_process_dir, output_
         print(f"Copied {input_label_path} to {output_label_path}")
 
 
-def main() -> None:
-    """
-    Main function to run the script.
-    """
+if __name__ == '__main__':
     parser = ArgumentParser(description='Script to remove labeled classes from a given YOLO model dataset')
     Args.add_yolo_input_model_argument(parser)
     Args.add_yolo_output_model_argument(parser)
@@ -136,13 +133,13 @@ def main() -> None:
     args = Args.parse_args_as_dict(parser)
 
     # Get the YOLO input model
-    arg_yolo_input_model = Args.get_attribute_from_args(args, Args.INPUT_MODEL)
+    arg_yolo_input_model = Args.get_attribute_from_args_dict(args, Flags.INPUT_MODEL)
 
     # Get the YOLO output model
-    arg_yolo_output_model = Args.get_attribute_from_args(args, Args.OUTPUT_MODEL)
+    arg_yolo_output_model = Args.get_attribute_from_args_dict(args, Flags.OUTPUT_MODEL)
 
     # Get the YOLO ignore classes
-    arg_yolo_ignore_classes = Args.get_attribute_from_args(args, Args.IGNORE_CLASSES)
+    arg_yolo_ignore_classes = Args.get_attribute_from_args_dict(args, Flags.IGNORE_CLASSES)
 
     # Get the dataset paths
     input_labeled_dir = Files.get_dataset_model_dir_path(Files.DATASET_LABELED, None, arg_yolo_input_model)
@@ -155,7 +152,3 @@ def main() -> None:
     # Create the dataset with removed classes
     create_dataset_with_removed_classes(input_labeled_dir, input_labeled_to_process_dir, output_labeled_dir,
                                         output_labeled_to_process_dir, arg_yolo_ignore_classes)
-
-
-if __name__ == '__main__':
-    main()

@@ -2,7 +2,7 @@ from argparse import ArgumentParser
 import json
 import os
 
-from .args import Args
+from .args import Args, Flags
 from .files import Files
 
 
@@ -37,17 +37,13 @@ def convert_yolo_labels_to_json(annotations_dir, images_dir, output_json):
     with open(output_json, "w") as f:
         json.dump(annotations, f, indent=4)
 
-
-def main() -> None:
-    """
-    Main function to run the script.
-    """
+if __name__ == "__main__":
     parser = ArgumentParser(description='Script to convert YOLO labels to JSON format for Label Studio')
     Args.add_yolo_input_model_argument(parser)
     args = Args.parse_args_as_dict(parser)
 
     # Get the YOLO input model
-    arg_yolo_input_model = Args.get_attribute_from_args(args, Args.INPUT_MODEL)
+    arg_yolo_input_model = Args.get_attribute_from_args_dict(args, Flags.INPUT_MODEL)
 
     # Get the dataset paths
     labeled_to_process_dir = Files.get_dataset_model_dir_path(Files.DATASET_LABELED, Files.DATASET_TO_PROCESS,
@@ -63,7 +59,3 @@ def main() -> None:
     # Convert YOLO labels to JSON format
     convert_yolo_labels_to_json(labeled_to_process_annotations_dir, labeled_to_process_images_dir,
                                 labeled_annotations_json)
-
-
-if __name__ == "__main__":
-    main()

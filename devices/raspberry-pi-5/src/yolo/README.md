@@ -136,13 +136,13 @@ Posteriormente, se realizó la anotación de las imágenes, donde se etiquetaron
 
 Durante el proceso, manejamos conjunto de datos de 1 (**G**, **M**, **R**), 2 (**GR**), 3 (**GMR**), 4 (**BGOR**) clases, las cuales fuimos variando a lo largo del desarrollo del proyecto, donde **M** proviene de ```magenta rectangular prism```, **G** de ```green rectangular prism```, **R** de ```red rectangular prism```, **B** de ```blue line``` y **O** de ```orange line```. Primeramente, desarrollamos un modelo de 4 clases, sin embargo, no logró un buen rendimiento para todas las clases, ya que incluía, además del prisma rojo y verde, la línea naranja y la línea azul, que finalmente, debido a nuestros componentes, se podían inferir mediante el RPLIDAR C1. Posteriormente, se decidió omitir las clases relacionadas con las líneas de la pista, las cuales no eran necesarias para la detección de los prismas. Luego, se optó por un modelo de 2 clases, el cual fue capaz de detectar los prismas rojo y verde. Seguidamente, se optó por un conjunto de datos de 3 clases, ya que añadimos una clase adicional, el prisma magenta, para poder realizar la detección del estacionamiento. Después, se optó por dos modelos, uno con dos clases (**GR**), para poder detectar los obstáculos de la pista, y otro de una sola clase (**M**) para la detección del estacionamiento después de haber recorrido toda la pista. Finalmente, debido a ciertas complicaciones por la optimización de los modelos para el NPU Hailo 8, se optó por tres modelos de 1 clase (**G**, **M**, **R**), donde cada uno de estos modelos fue capaz de detectar los prismas de un color específico, acorde a lo requerido en la pista.
 
-Ahora, vamos a explicar los pasos necesarios para continuar con el montaje del modelo de detección de objetos, donde se utilizará como ejemplo el modelo de 2 clases (**GR**). Sin embargo, los pasos son los mismos para los demás modelos, donde solo se debe cambiar la ruta de las imágenes y el número de clases.
+Ahora, vamos a explicar los pasos necesarios para continuar con el montaje del modelo de detección de objetos, donde se utilizará como ejemplo el modelo de 1 clase (**G**). Sin embargo, los pasos son los mismos para los demás modelos, donde solo se debe cambiar la ruta de las imágenes y el número de clases.
 
 Cabe destacar que, así como variamos el número de clases, también variamos el número de imágenes por clase, desde un dataset de alrededor de 350 imágenes antes de realizar el *data augmentation*, hasta un dataset de alrededor de 1300 imágenes antes de realizar el *data augmentation*, donde cada una fue anotada por algún integrante del equipo de forma manual para entrenar el modelo de la forma más precisa posible.
 
-Después de haber anotado las imágenes con la plataforma Label Studio, se exportaron las anotaciones en formato YOLO y se guardaron en la carpeta [```dataset/gr/labeled/to_process```](dataset/gr/labeled/to_process). Posteriormente, se ejecutó el script [```augment.py```](augment.py) para generar alrededor de 10 imágenes por cada imagen del conjunto de datos, utilizando la biblioteca OpenCV. Este script aplica distintas transformaciones a las imágenes, como rotación, escalado, traslación y cambio de brillo y contraste, para aumentar la variabilidad del conjunto de datos y mejorar el rendimiento del modelo. Las imágenes generadas se guardaron en la carpeta [```dataset/gr/augmented```](dataset/gr/augmented). Finalmente, ejecutamos el script [```after_labeling.py```](after_labeling.py) para mover las imágenes de la carpeta [```dataset/gr/labeled/to_process```](dataset/gr/labeled/to_process) a la carpeta [```dataset/gr/labeled/processed```](dataset/gr/labeled/processed). 
+Después de haber anotado las imágenes con la plataforma Label Studio, se exportaron las anotaciones en formato YOLO y se guardaron en la carpeta [```dataset/g/labeled/to_process```](dataset/g/labeled/to_process). Posteriormente, se ejecutó el script [```augment.py```](augment.py) para generar alrededor de 10 imágenes por cada imagen del conjunto de datos, utilizando la biblioteca OpenCV. Este script aplica distintas transformaciones a las imágenes, como rotación, escalado, traslación y cambio de brillo y contraste, para aumentar la variabilidad del conjunto de datos y mejorar el rendimiento del modelo. Las imágenes generadas se guardaron en la carpeta [```dataset/g/augmented```](dataset/g/augmented). Finalmente, ejecutamos el script [```after_labeling.py```](after_labeling.py) para mover las imágenes de la carpeta [```dataset/g/labeled/to_process```](dataset/g/labeled/to_process) a la carpeta [```dataset/g/labeled/processed```](dataset/g/labeled/processed). 
 
-Luego, se ejecutó el script [```split.py```](split.py) para dividir el conjunto de datos en un conjunto de entrenamiento [```dataset/gr/organized/train```](dataset/gr/organized/train), un conjunto de validación [```dataset/gr/organized/val```](dataset/gr/organized/val) y un conjunto de testing [```dataset/gr/organized/test```](dataset/gr/organized/test), con una distribución del 70%, 20% y 10%, respectivamente. Este script utiliza la biblioteca ```os``` para crear las carpetas necesarias y mover las imágenes a las carpetas correspondientes. Además, este script eliminará las imágenes de la carpeta [```dataset/gr/augmented```](dataset/gr/augmented), mas no modificará o eliminará las carpetas [```dataset/gr/labeledto_process```](dataset/gr/labeled/to_process) y [```dataset/gr/labeled/processed```](dataset/gr/labeled/processed).
+Luego, se ejecutó el script [```split.py```](split.py) para dividir el conjunto de datos en un conjunto de entrenamiento [```dataset/g/organized/train```](dataset/g/organized/train), un conjunto de validación [```dataset/g/organized/val```](dataset/g/organized/val) y un conjunto de testing [```dataset/g/organized/test```](dataset/g/organized/test), con una distribución del 70%, 20% y 10%, respectivamente. Este script utiliza la biblioteca ```os``` para crear las carpetas necesarias y mover las imágenes a las carpetas correspondientes. Además, este script eliminará las imágenes de la carpeta [```dataset/g/augmented```](dataset/g/augmented), mas no modificará o eliminará las carpetas [```dataset/g/labeledto_process```](dataset/g/labeled/to_process) y [```dataset/g/labeled/processed```](dataset/g/labeled/processed).
 
 *NOTA: Se puede observar, que en cada una de las rutas, se encuentra la carpeta ```to_process```, la cual es una carpeta temporal, que se utiliza para guardar las imágenes que se están procesando. Una vez que se han procesado las imágenes, los archivos dentro de las mismas se mueven a una carpeta ```processed``` correspondiente, la cual se encuentra en la misma ruta. De esta forma, se evita que las imágenes procesadas se mezclen con las imágenes por procesar, así como permite a futuro seguir entrenando el mismo modelo, sin necesidad de volver a procesar las mismas imágenes. Así mismo, se puede observar que tanto para ```augmented``` y ```organized```, no existe la carpeta ```to_process```, ya que, después de ser procesadas estas imágenes, son eliminadas debido al gran número de estas al momento de realizar el ```data augmentation```.*
 
@@ -154,30 +154,28 @@ Luego, se ejecutó el script [```split.py```](split.py) para dividir el conjunto
    <i>Imagen con distintas inferencias realizadas (modelo GMR)</i>
 </p>
 
-Primeramente, dependiendo del modelo y la forma en la que se vaya a entrenar el mismo, se debe modificar un archivo ```.yaml```, los cuales se encuentran dentro de la carpeta ````yolo/data````, donde se debe modificar la ruta de las imágenes y las etiquetas a las rutas correspondientes. En este caso, se debe modificar el archivo [```gr.yaml```](yolo/data/colab/gr.yaml) para el modelo de 2 clases y el archivo [```m.yaml```](data/colab/m.yaml) para el modelo de 1 clase, cuya carpeta padre variará entre ```colab``` y ```local``` dependiendo del entorno.
+Primeramente, dependiendo del modelo y la forma en la que se vaya a entrenar el mismo, se debe modificar un archivo ```.yaml```, los cuales se encuentran dentro de la carpeta ````yolo/data````, donde se debe modificar la ruta de las imágenes y las etiquetas a las rutas correspondientes. En este caso, se debe modificar el archivo [```g.yaml```](yolo/data/colab/g.yaml) para el modelo de 2 clases y el archivo [```m.yaml```](data/colab/m.yaml) para el modelo de 1 clase, cuya carpeta padre variará entre ```colab``` y ```local``` dependiendo del entorno.
 
 *NOTA: Al momento de clonar este repositorio, se suministran archivos plantilla para los ```.yaml```, los cuales terminan en ```.yaml.example```. A los cuales posterior a su modificación, se les debe cambiar la extensión a ```.yaml```.*
 
 Existen dos maneras de entrenar el modelo dependiendo del equipo disponible en el momento:
 
 1. **Entrenamiento de forma local**: Para ello, se debe contar con una GPU dedicada para el entrenamiento.   
-   1. En este caso, debemos ejecutar el script [```train.py```](train.py) para entrenar el modelo YOLOv11. Este script utiliza la biblioteca ```ultralytics``` para realizar el entrenamiento del modelo y guardar los pesos en la carpeta [```v11/runs/gr```](v11/runs/gr).
+   1. En este caso, debemos ejecutar el script [```train.py```](train.py) para entrenar el modelo YOLOv11. Este script utiliza la biblioteca ```ultralytics``` para realizar el entrenamiento del modelo y guardar los pesos en la carpeta [```v11/runs/g```](v11/runs/g).
 2. **Entrenamiento de forma remota**: Para ello, se puede utilizar Google Colab [[10](#google-colab)], donde se puede utilizar una GPU de forma gratuita o de paga, dependiendo del tiempo requerido para el entrenamiento y la velocidad en la que se quiere completar dicho entrenamiento.
    1. En este caso, debemos ejecutar primero el script [```zip_to_train.py```](zip_to_train.py), el cual se encargará de crear un archivo comprimido con el conjunto de datos, el cual se guardará en la carpeta [```v11/zip```](v11/zip).
-   2. Luego, tenemos dos opciones:
-      1. Podemos descomprimir este archivo de forma local y subir dicha carpeta al Google Drive, considerando que Google Drive no tiene funciones para comprimir/descomprimir de forma nativa (al momento de realizar esta guía), en la carpeta ```Colab Files```. 
-      2. Otra opción es subir el archivo comprimido a la carpeta ```Colab Files``` de Google Drive, y subimos de nuevo el Jupyter Notebook correspondiente, en este caso [```v11/notebooks/colab/gr_train.ipynb```](v11/notebooks/colab/gr_train.ipynb), ya que este contiene una sección que tiene la lógica para descomprimir el archivo comprimido. Ejecutamos la sección correspondiente a la conexión con Google Drive y ejecutamos la sección correspondiente a la descompresión del archivo comprimido.
+   2. Luego, subimos el archivo a Google Drive, le cambiamos la visibilidad a ```Anyone with the link can view``` y copiamos el ID del archivo comprimido, el cual se encuentra en la URL del mismo. Este enlace lo pegamos en la sección correspondiente del Jupyter Notebook [```v11/notebooks/colab/g_train.ipynb```](v11/notebooks/colab/g_train.ipynb) para poder descargar el archivo comprimido en Google Colab.
    3. Seleccionamos el entorno de ejecución acorde a nuestra disponibilidad. Puedes utilizar de forma gratuita una GPU Tesla T4 de NVIDIA por alrededor de 5 h diarias, o comprar 100 créditos (que cuestan $10 al momento de redactar esta guía) de la plataforma para poder usarlo por más tiempo y/o utilizar mejores GPU. En nuestro caso, empleamos una GPU Tesla L4 de NVIDIA, la cual consumió alrededor de 6 créditos por entrenar un modelo completo.
-   4. Ejecutamos las secciones del Jupyter Notebook [```v11/notebooks/colab/gr_train.ipynb```](v11/notebooks/colab/gr_train.ipynb), omitiendo la sección antes mencionada relacionada con la descompresión del archivo comprimido. Este Jupyter Notebook utiliza la biblioteca ```ultralytics``` para realizar el entrenamiento del modelo y guarda los pesos en la carpeta [```v11/runs/gr```](v11/runs/gr).
-   5. Una vez finalizado el entrenamiento, se puede descargar el archivo comprimido con los pesos del modelo desde Google Drive y descomprimirlo en la carpeta [```v11/runs/gr```](v11/runs/gr) de forma local.
+   4. Ejecutamos las secciones del Jupyter Notebook [```v11/notebooks/colab/g_train.ipynb```](v11/notebooks/colab/g_train.ipynb), omitiendo la sección antes mencionada relacionada con la descompresión del archivo comprimido. Este Jupyter Notebook utiliza la biblioteca ```ultralytics``` para realizar el entrenamiento del modelo y guarda los pesos en la carpeta [```v11/runs/g```](v11/runs/g).
+   5. Una vez finalizado el entrenamiento, se puede descargar el archivo comprimido con los pesos del modelo desde Google Drive y descomprimirlo en la carpeta [```v11/runs/g```](v11/runs/g) de forma local.
 3. **Inferencia**: Ejecutamos el script [```test.py```](test.py) para realizar la inferencia del modelo entrenado y evaluar el rendimiento del modelo con imágenes que no ha visualizado con anterioridad. Este script genera imágenes con las inferencias realizadas por el modelo, donde se muestran los cuadros delimitadores y las etiquetas de los objetos detectados.
 4. **ONNX**: Ejecutamos el script [```export.py```](export.py), y pasamos como formato del modelo ```onnx```, el cual es un formato abierto empleado para representar modelos de Machine Learning de forma interoperable entre distintos frameworks, herramientas, entre otros [[13](#onnx)].
-5. **Limpieza**: Finalmente, ejecutamos el script [```after_training.py```](after_training.py) para eliminar la carpeta [```dataset/gr/organized/val```](dataset/gr/organized/val), ya que esta no serán necesaria para los próximos pasos. Además, moverá el contenido de la carpeta [```dataset/gr/organized/train/images```](dataset/gr/organized/train/images) al subdirectorio en [```hailo/suite/train```](hailo/suite/train), para posteriormente ser eliminada la primera. Así mismo, para que el modelo pueda ser convertido a un formato compatible con el Hailo 8, moverá los pesos de formato ```ONNX``` con mejor resultado correspondiente al modelo. 
+5. **Limpieza**: Finalmente, ejecutamos el script [```after_training.py```](after_training.py) para eliminar la carpeta [```dataset/g/organized/val```](dataset/g/organized/val), ya que esta no serán necesaria para los próximos pasos. Además, moverá el contenido de la carpeta [```dataset/g/organized/train/images```](dataset/g/organized/train/images) al subdirectorio en [```hailo/suite/train```](hailo/suite/train), para posteriormente ser eliminada la primera. Así mismo, para que el modelo pueda ser convertido a un formato compatible con el Hailo 8, moverá los pesos de formato ```ONNX``` con mejor resultado correspondiente al modelo. 
 <!--  
-5. **Limpieza**: Finalmente, ejecutamos el script [```after_training_with_calib_set.py```](after_training_with_calib_set.py) para crear un set de calibración en la carpeta [```hailo/suite/calib```](hailo/suite/calib), para eliminar la carpeta [```dataset/gr/organized/train```](dataset/gr/organized/train) y [```dataset/gr/organized/val```](dataset/gr/organized/val), ya que estas no serán necesarias para los próximos pasos, así como moverá los pesos de formato ```ONNX``` con mejor resultado correspondiente al modelo. 
+5. **Limpieza**: Finalmente, ejecutamos el script [```after_training_with_calib_set.py```](after_training_with_calib_set.py) para crear un set de calibración en la carpeta [```hailo/suite/calib```](hailo/suite/calib), para eliminar la carpeta [```dataset/g/organized/train```](dataset/g/organized/train) y [```dataset/g/organized/val```](dataset/g/organized/val), ya que estas no serán necesarias para los próximos pasos, así como moverá los pesos de formato ```ONNX``` con mejor resultado correspondiente al modelo. 
 -->
 
-*TIP: En el caso de emplear Google Colab y que se desconecte la sesión del entorno de ejecución durante el entrenamiento del modelo, se puede retomar el mismo, al modificar la ruta del modelo o el nombre del modelo a emplear en la función ```train_model``` del Notebook, por la ruta donde se guardó los mejores pesos del entrenamiento, en nuestro caso: ```gr_to_train/yolo/v11/runs/m/weights/best.pt```.*
+*TIP: En el caso de emplear Google Colab y que se desconecte la sesión del entorno de ejecución durante el entrenamiento del modelo, se puede retomar el mismo, al modificar la ruta del modelo o el nombre del modelo a emplear en la función ```train_model``` del Notebook, por la ruta donde se guardó los mejores pesos del entrenamiento, en nuestro caso: ```g_to_train/yolo/v11/runs/m/weights/best.pt```.*
 
 <p align="center">
    <img src="https://mediasysdubai.com/wp-content/uploads/2023/12/L4_Front.png" alt="Vista frontal de la GPU Tesla L4 de NVIDIA" width="400">
@@ -185,7 +183,7 @@ Existen dos maneras de entrenar el modelo dependiendo del equipo disponible en e
     <i>Vista frontal de la GPU Tesla L4 de NVIDIA</i>
 </p>
 
-*NOTA: Durante esta sección se menciona la versión 11 de YOLO, pero, de la misma forma que se menciona el dataset **GR** a fines didácticos, se puede utilizar cualquier versión de YOLO, así como cualquier dataset, ya que el proceso es el mismo. Sin embargo, se recomienda utilizar la versión 11 de YOLO, debido a que es la más reciente y cuenta con mejoras significativas en comparación con versiones anteriores.*
+*NOTA: Durante esta sección se menciona la versión 11 de YOLO, pero, de la misma forma que se menciona el dataset **G** a fines didácticos, se puede utilizar cualquier versión de YOLO, así como cualquier dataset, ya que el proceso es el mismo. Sin embargo, se recomienda utilizar la versión 11 de YOLO, debido a que es la más reciente y cuenta con mejoras significativas en comparación con versiones anteriores.*
 
 <h1 id="instalacion-de-hailo-ai-hat">Instalación de Hailo AI HAT+</h1>
 
@@ -197,7 +195,7 @@ Existen dos maneras de entrenar el modelo dependiendo del equipo disponible en e
 
 Para la instalación, empleamos las dos guías de la documentación oficial de Raspberry Pi, donde se explica cómo instalar el Hailo AI HAT+ y cómo instalar el software necesario para su funcionamiento [[5](#getting-started-raspberry-pi)][[6](#ai-hat-plus-raspberry-pi)].
 
-1. Verificamos que la Raspberry Pi 5 esté actualizada, sino la actualizamos con el siguiente comando: `sudo apt update && sudo apt full-upgrade`
+1. Verificamos que la Raspberry Pi 5 esté actualizada, sino la actualizamos con el siguiente comando: `sudo apt update && sudo apt full-upgade`
 2. Revisamos la versión actual del firmware instalado en la Raspberry Pi con el siguiente comando: `sudo rpi-eeprom-update`
    1. Si dicho comando imprime una fecha anterior al 6 de diciembre de 2023, entonces debemos actualizar el firmware de la Raspberry Pi 5. Para ello, ejecutamos el siguiente comando: `sudo raspi-config`
    2. En el menú de configuración, seleccionamos la opción ```Advanced Options``` y luego ```Bootloader Version```. Elegimos la opción ```Latest``` y salimos del menú de configuración.
@@ -329,7 +327,7 @@ hailo-dataflow-compiler 3.30.0 requires numpy==1.23.3, but you have numpy 2.2.6 
 
 Evaluamos si los paquetes se han instalado correctamente con el siguiente comando: ```hailomz --version```
 
-Ahora modificamos el archivo de configuración del modelo, en el campo ```classes```, estableciendo el número de clases con el que se ha entrenado el mismo (para el modelo **GR** serían 2):
+Ahora modificamos el archivo de configuración del modelo, en el campo ```classes```, estableciendo el número de clases con el que se ha entrenado el mismo (para el modelo **G** sería 1):
 ```
 sudo nano hailo_model_zoo/cfg/postprocess_config/yolov11n_nms_config.json
 ```
@@ -342,33 +340,33 @@ export USER=hailo
 Ahora, para convertir el modelo a un formato compatible con el Hailo 8, ejecutamos los siguientes comandos:
 - Primero, parseamos el modelo:
 ```
-hailomz parse --ckpt ~hailo/shared/v11/gr/best.onnx --hw-arch hailo8 yolov11n
-mv yolov11n.har gr_parsed.har
+hailomz parse --ckpt ~hailo/shared/v11/g/best.onnx --hw-arch hailo8 yolov11n
+mv yolov11n.har g_parsed.har
 ```
 - Segundo, optimizamos el modelo:
 ```
-hailomz optimize --har gr_parsed.har --classes 2 --calib-path ~hailo/shared/train --hw-arch hailo8 yolov11n
-mv yolov11n.har gr_optimized.har
+hailomz optimize --har g_parsed.har --classes 2 --calib-path ~hailo/shared/train --hw-arch hailo8 yolov11n
+mv yolov11n.har g_optimized.har
 ```
 - Finalmente, compilamos el modelo:
 ```
-hailomz compile --har gr_optimized.har --hw-arch hailo8 yolov11n
-mv yolov11n.hef gr_compiled.hef
+hailomz compile --har g_optimized.har --hw-arch hailo8 yolov11n
+mv yolov11n.hef g_compiled.hef
 ```
 <!--
 Ahora, para convertir el modelo a un formato compatible con el Hailo 8, ejecutamos los siguientes comandos:
 - Primero, parseamos el modelo:
 ```
-hailo parser onnx --net-name yolov11n --hw-arch hailo8l --har-path ~hailo/shared/v11/gr/best_parsed.har ~hailo/shared/v11/gr/best.onnx
+hailo parser onnx --net-name yolov11n --hw-arch hailo8l --har-path ~hailo/shared/v11/g/best_parsed.har ~hailo/shared/v11/g/best.onnx
 ```
 - Optimizamos el modelo:
 ```
-hailo optimize --hw-arch hailo8l --calib-set-path ~hailo/shared/calib/calib.npy --output-har-path ~hailo/shared/v11/gr/best_optimized.har ~hailo/shared/v11/gr/best_parsed.har
+hailo optimize --hw-arch hailo8l --calib-set-path ~hailo/shared/calib/calib.npy --output-har-path ~hailo/shared/v11/g/best_optimized.har ~hailo/shared/v11/g/best_parsed.har
 ```
 - Finalmente, compilamos el modelo:
 ```
-hailo compiler --hw-arch hailo8l --output-dir ~hailo/shared/v11/gr --output-har-path ~hailo/shared/v11/gr/best_compiled.har ~hailo/shared/v11/gr/best_optimized.har
-mv ./yolov11n.hef ./gr_compiled.hef
+hailo compiler --hw-arch hailo8l --output-dir ~hailo/shared/v11/g --output-har-path ~hailo/shared/v11/g/best_compiled.har ~hailo/shared/v11/g/best_optimized.har
+mv ./yolov11n.hef ./g_compiled.hef
 ```
 -->
 
@@ -396,11 +394,11 @@ En este momento, ya podemos probar tanto que todo esté funcionando correctament
 
 - Si contamos con una cámara con puerto CSI compatible con la Raspberry Pi, después de conectarlo, ejecutamos el siguiente comando:
 ```
-python basic_pipelines/detection.py --input rpi --labels-json ../labels/gr.json --hef-path ../../v11/runs/gr/weights/compiled.hef
+python basic_pipelines/detection.py --input rpi --labels-json ../labels/g.json --hef-path ../../v11/runs/g/weights/compiled.hef
 ```
 - Si no contamos con una cámara, podemos utilizar el siguiente comando para probar el modelo con una imagen de prueba:
 ```
-python basic_pipelines/detection.py --input {imagen} --labels-json ../labels/gr.json --hef-path ../../v11/runs/gr/weights/compiled.hef
+python basic_pipelines/detection.py --input {imagen} --labels-json ../labels/g.json --hef-path ../../v11/runs/g/weights/compiled.hef
 ```
 
 *NOTA: Sustituimos ```imagen``` por la ruta de la imagen a probar.*

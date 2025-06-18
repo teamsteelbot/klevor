@@ -3,7 +3,7 @@ import os
 import shutil
 from typing import LiteralString
 
-from .args import Args
+from .args import Args, Flags
 from .files import Files
 
 
@@ -53,10 +53,10 @@ if __name__ == '__main__':
     args = Args.parse_args_as_dict(parser)
 
     # Get the YOLO input model
-    arg_yolo_input_model = Args.get_attribute_from_args(args, Args.INPUT_MODEL)
+    arg_yolo_input_model = Args.get_attribute_from_args_dict(args, Flags.INPUT_MODEL)
 
     # Get the YOLO version
-    arg_yolo_version = Args.get_attribute_from_args(args, Args.VERSION)
+    arg_yolo_version = Args.get_attribute_from_args_dict(args, Flags.VERSION)
 
     # Get the dataset paths
     organized_dir = Files.get_dataset_model_dir_path(Files.DATASET_ORGANIZED, None, arg_yolo_input_model)

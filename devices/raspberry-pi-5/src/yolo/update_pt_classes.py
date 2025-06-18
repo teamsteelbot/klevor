@@ -2,7 +2,7 @@ from argparse import ArgumentParser
 
 import torch
 
-from .args import Args
+from .args import Args, Flags
 from .files import Files
 
 
@@ -37,10 +37,7 @@ def update_classes(model_name: str, model_version: str, new_classes: list[str]):
     torch.save(model, model_path)
 
 
-def main() -> None:
-    """
-    Main function to run the script.
-    """
+if __name__ == "__main__":
     parser = ArgumentParser(description='Script to update YOLO model classes')
     Args.add_yolo_input_model_argument(parser)
     Args.add_yolo_version_argument(parser)
@@ -48,17 +45,13 @@ def main() -> None:
     args = Args.parse_args_as_dict(parser)
 
     # Get the YOLO input model
-    arg_yolo_input_model = Args.get_attribute_from_args(args, Args.INPUT_MODEL)
+    arg_yolo_input_model = Args.get_attribute_from_args_dict(args, Flags.INPUT_MODEL)
 
     # Get the YOLO version
-    arg_yolo_version = Args.get_attribute_from_args(args, Args.VERSION)
+    arg_yolo_version = Args.get_attribute_from_args_dict(args, Flags.VERSION)
 
     # Get the YOLO classes
-    arg_yolo_classes = Args.get_attribute_from_args(args, Args.CLASSES)
+    arg_yolo_classes = Args.get_attribute_from_args_dict(args, Flags.CLASSES)
 
     # Update the classes
     update_classes(arg_yolo_input_model, arg_yolo_version, arg_yolo_classes)
-
-
-if __name__ == "__main__":
-    main()

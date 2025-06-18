@@ -1,20 +1,20 @@
 from argparse import ArgumentParser
+from typing import LiteralString
 
 from . import Yolo
-from .args import Args
+from .args import Args, Flags
 from .files import Files
 
 
-def train_model(model='yolo11n.pt', device='cpu', data='data.yaml', epochs=Yolo.EPOCHS, imgsz=Yolo.IMAGE_SIZE,
-                project='yolo',
-                name='model'):
+def train_model(model: str = 'yolo11n.pt', device: str = 'cpu', data: LiteralString | str | bytes = 'data.yaml', epochs: int = Yolo.EPOCHS,
+                imgsz: int = Yolo.IMAGE_SIZE, project: str = 'yolo', name: str = 'model'):
     """
     Train model.
 
     Args:
         model (str): Path to the YOLO model file.
         device (str): Device to use for training (e.g., 'cpu', 'cuda').
-        data (str): Path to the dataset configuration file.
+        data (LiteralString|str|bytes): Path to the dataset configuration file.
         epochs (int): Number of training epochs.
         imgsz (int): Image size for training.
         project (str): Project name for saving results.
@@ -50,19 +50,19 @@ def main() -> None:
     args = Args.parse_args_as_dict(parser)
 
     # Get the YOLO input model
-    arg_yolo_input_model = Args.get_attribute_from_args(args, Args.INPUT_MODEL)
+    arg_yolo_input_model = Args.get_attribute_from_args_dict(args, Flags.INPUT_MODEL)
 
     # Get the YOLO input PyTorch model
-    arg_yolo_input_model_pt = Args.get_attribute_from_args(args, Args.INPUT_MODEL_PT)
+    arg_yolo_input_model_pt = Args.get_attribute_from_args_dict(args, Flags.INPUT_MODEL_PT)
 
     # Get the YOLO epochs
-    arg_yolo_epochs = Args.get_attribute_from_args(args, Args.EPOCHS)
+    arg_yolo_epochs = Args.get_attribute_from_args_dict(args, Flags.EPOCHS)
 
     # Get the YOLO device
-    arg_yolo_device = Args.get_attribute_from_args(args, Args.DEVICE)
+    arg_yolo_device = Args.get_attribute_from_args_dict(args, Flags.DEVICE)
 
     # Get the YOLO image size
-    arg_yolo_image_size = Args.get_attribute_from_args(args, Args.IMAGE_SIZE)
+    arg_yolo_image_size = Args.get_attribute_from_args_dict(args, Flags.IMAGE_SIZE)
 
     # Get model local data path
     model_local_data_path = Files.get_model_local_data_path(arg_yolo_input_model)

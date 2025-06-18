@@ -2,9 +2,9 @@ from argparse import ArgumentParser
 import os
 import shutil
 
-from ..opencv.augmentation import augment_image
+from ..opencv import OpenCV
 from . import Yolo
-from .args import Args
+from .args import Args, Flags
 from .files import Files
 
 
@@ -53,7 +53,7 @@ def augment_dataset(input_to_process_dir: str, output_augmented_dir: str, num_au
         input_to_process_annotations_path = os.path.join(input_to_process_annotations_dir, annotations_filename)
 
         if os.path.exists(input_to_process_annotations_dir):
-            augment_image(input_to_process_image_path, input_to_process_annotations_path,
+            OpenCV.augment_image(input_to_process_image_path, input_to_process_annotations_path,
                           output_augmented_images_dir,
                           output_augmented_annotations_dir, output_processed_images_dir,
                           output_processed_annotations_dir)
@@ -66,16 +66,13 @@ def augment_dataset(input_to_process_dir: str, output_augmented_dir: str, num_au
     shutil.rmtree(input_to_process_annotations_dir)
 
 
-def main():
-    """
-    Main function to run the script.
-    """
+if __name__ == '__main__':
     parser = ArgumentParser(description='Script to augment YOLO model')
     Args.add_yolo_input_model_argument(parser)
     args = Args.parse_args_as_dict(parser)
 
     # Get the YOLO input model
-    arg_yolo_input_model = Args.get_attribute_from_args(args, Args.INPUT_MODEL)
+    arg_yolo_input_model = Args.get_attribute_from_args_dict(args, Flags.INPUT_MODEL)
 
     # Get the dataset paths
     labeled_to_process_dir = Files.get_dataset_model_dir_path(Files.DATASET_LABELED, Files.DATASET_TO_PROCESS,
@@ -87,6 +84,3 @@ def main():
     # Augment the dataset
     augment_dataset(labeled_to_process_dir, augmented_dir, Yolo.NUM_AUGMENTATIONS, labeled_processed_dir)
 
-
-if __name__ == '__main__':
-    main()

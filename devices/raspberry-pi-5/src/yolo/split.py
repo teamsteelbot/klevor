@@ -5,7 +5,7 @@ import shutil
 from typing import LiteralString
 
 from . import Yolo
-from .args import Args
+from .args import Args, Flags
 from .files import Files
 
 
@@ -20,9 +20,6 @@ def split_dataset(input_dir: LiteralString, output_dir: LiteralString,
         output_dir (str): Directory where the split datasets will be saved.
         train_ratio (float): Ratio of the dataset to be used for training.
         val_ratio (float): Ratio of the dataset to be used for validation.
-
-    Returns:
-        None
     """
     # Get the input images and annotations directories
     input_images_dir = os.path.join(input_dir, Files.DATASET_IMAGES)
@@ -84,16 +81,13 @@ def split_dataset(input_dir: LiteralString, output_dir: LiteralString,
     shutil.rmtree(input_annotations_dir)
 
 
-def main() -> None:
-    """
-    Main function to run the script.
-    """
+if __name__ == '__main__':
     parser = ArgumentParser(description='Script to split YOLO dataset images and labels')
     Args.add_yolo_input_model_argument(parser)
     args = Args.parse_args_as_dict(parser)
 
     # Get the YOLO input model
-    arg_yolo_input_model = Args.get_attribute_from_args(args, Args.INPUT_MODEL)
+    arg_yolo_input_model = Args.get_attribute_from_args_dict(args, Flags.INPUT_MODEL)
 
     # Get the dataset paths
     augmented_dir = Files.get_dataset_model_dir_path(Files.DATASET_AUGMENTED, None, arg_yolo_input_model)
@@ -101,7 +95,3 @@ def main() -> None:
 
     # Split the images
     split_dataset(augmented_dir, organized_dir)
-
-
-if __name__ == '__main__':
-    main()

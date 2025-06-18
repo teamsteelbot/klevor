@@ -41,15 +41,15 @@ class Args:
         return f'{cls.ARGS_PREFIX}{attribute}' if not disabled else f'{cls.ARGS_PREFIX}no-{attribute}'
 
     @staticmethod
-    def get_attribute_from_args(args: dict, attribute: str) -> str:
+    def get_attribute_from_args_dict(args: dict, attribute: str) -> Any:
         """
-        Get the attribute name from the args.
+        Get the attribute name from the args dictionary.
 
         Args:
             args (dict): The parsed arguments.
             attribute (str): The name of the attribute.
         Returns:
-            str: The value of the attribute from the args.
+            Any: The value of the attribute from the args.
         """
         # Substitute whitespaces with underscores
         attribute = attribute.replace(' ', '_')

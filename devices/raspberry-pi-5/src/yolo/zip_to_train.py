@@ -5,7 +5,7 @@ import zipfile
 from typing_extensions import LiteralString
 
 from ..files.zip import Zip
-from .args import Args
+from .args import Args, Flags
 from .files import Files
 
 
@@ -66,10 +66,7 @@ def zip_to_train(input_dir: LiteralString, input_yolo_dir: LiteralString,
             print('Zip the YOLO model weights folder')
 
 
-def main() -> None:
-    """
-    Main function to run the script.
-    """
+if __name__ == '__main__':
     parser = ArgumentParser(description='Script to zip files for YOLO model training')
     Args.add_yolo_input_model_argument(parser)
     Args.add_yolo_version_argument(parser)
@@ -77,13 +74,13 @@ def main() -> None:
     args = Args.parse_args_as_dict(parser)
 
     # Get the YOLO input model
-    arg_yolo_input_model = Args.get_attribute_from_args(args, Args.INPUT_MODEL)
+    arg_yolo_input_model = Args.get_attribute_from_args_dict(args, Flags.INPUT_MODEL)
 
     # Get the YOLO version
-    arg_yolo_version = Args.get_attribute_from_args(args, Args.VERSION)
+    arg_yolo_version = Args.get_attribute_from_args_dict(args, Flags.VERSION)
 
     # Get the YOLO retraining
-    arg_yolo_retraining = Args.get_attribute_from_args(args, Args.RETRAINING)
+    arg_yolo_retraining = Args.get_attribute_from_args_dict(args, Flags.RETRAINING)
 
     # Get the dataset paths
     organized_dir = Files.get_dataset_model_dir_path(Files.DATASET_ORGANIZED, None, arg_yolo_input_model)
@@ -103,7 +100,3 @@ def main() -> None:
     # Zip files
     zip_to_train(Files.CWD, Files.YOLO_DIR, organized_dir, yolo_version_dir, yolo_data_dir, yolo_weights_dir,
                  yolo_zip_dir, arg_yolo_input_model, arg_yolo_retraining)
-
-
-if __name__ == '__main__':
-    main()

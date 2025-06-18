@@ -16,7 +16,7 @@
 /**/*/log/logs/**/*
 
 # YOLO
-/**/*/yolo/**/*.yaml
+/**/*/yolo/data/local/*.yaml
 /**/*/yolo/dataset/original/**/*
 /**/*/yolo/dataset/resized/**/*
 /**/*/yolo/dataset/labeled_4c/**/*

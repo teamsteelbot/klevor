@@ -1,11 +1,21 @@
 class ImageBoundingBoxes:
     """
-    Custom class that represents the detected objects bounding boxes from a YOLO model on an image.
+    Class that represents the detected objects bounding boxes from a YOLO model on an image.
     """
 
-    def __init__(self, xwyhn=None, xyxy=None, xywh=None, xyxyn=None, cls=None, conf=None, n=None):
+    def __init__(self, xwyhn: list = None, xyxy: list = None, xywh: list = None, xyxyn: list = None,
+                 cls: list = None, conf: list =None, n: int = None):
         """
         Initialize the ImageBoundingBoxes instance with bounding box coordinates, classes, and confidences.
+
+        Args:
+            xywh (list): Bounding box coordinates in the format (x_center, y_center, width, height).
+            xywhn (list): Normalized bounding box coordinates in the format (x_center, y_center, width, height).
+            xyxy (list): Bounding box coordinates in the format (x1, y1, x2, y2).
+            xyxyn (list): Normalized bounding box coordinates in the format (x1, y1, x2, y2).
+            cls (list): Class indices for each detected object.
+            conf (list): Confidence scores for each detected object.
+            n (int): Number of detected objects.
         """
         self.__xywh = xywh
         self.__xywhn = xwyhn
@@ -18,6 +28,9 @@ class ImageBoundingBoxes:
     def __str__(self) -> str:
         """
         String representation of the objects detected in the image.
+
+        Returns:
+            str: A formatted string containing the bounding boxes, classes, and confidences.
         """
         bounding_boxes = []
         for i in range(self.__n):
@@ -31,7 +44,7 @@ class ImageBoundingBoxes:
         return "\n".join(bounding_boxes)
 
     @staticmethod
-    def from_pt_cpu_boxes(boxes):
+    def from_pt_cpu_boxes(boxes) -> 'ImageBoundingBoxes':
         """
         Initialize a new ImageBoundingBoxes instances from a PyTorch CPU tensor.
 
@@ -52,7 +65,7 @@ class ImageBoundingBoxes:
         )
 
     @staticmethod
-    def from_pt_cpu(input_data: list):
+    def from_pt_cpu(input_data: list) -> 'ImageBoundingBoxes':
         """
         Extract detections from the input data.
 
@@ -65,7 +78,7 @@ class ImageBoundingBoxes:
         return ImageBoundingBoxes.from_pt_cpu_boxes(input_data[0].boxes)
 
     @staticmethod
-    def from_hailo(input_data: list, threshold: float = 0.5):
+    def from_hailo(input_data: list, threshold: float = 0.5) -> 'ImageBoundingBoxes':
         """
         Extract detections from the input data.
 
@@ -94,7 +107,7 @@ class ImageBoundingBoxes:
 
         return ImageBoundingBoxes(n=num_detections, xyxy=boxes, cls=classes, conf=scores)
 
-    def get_number_of_objects(self):
+    def get_number_of_objects(self) -> int:
         """
         Get the number of detected objects.
 
@@ -103,7 +116,7 @@ class ImageBoundingBoxes:
         """
         return self.__n
 
-    def get_xyxy(self):
+    def get_xyxy(self) -> list:
         """
         Get the bounding box coordinates in the format (x1, y1, x2, y2).
 
@@ -112,7 +125,7 @@ class ImageBoundingBoxes:
         """
         return self.__xyxy
 
-    def get_xywh(self):
+    def get_xywh(self) -> list:
         """
         Get the bounding box coordinates in the format (x_center, y_center, width, height).
 
@@ -121,7 +134,7 @@ class ImageBoundingBoxes:
         """
         return self.__xywh
 
-    def get_xywhn(self):
+    def get_xywhn(self) -> list:
         """
         Get the bounding box coordinates in the format (x_center, y_center, width, height) normalized.
 
@@ -130,7 +143,7 @@ class ImageBoundingBoxes:
         """
         return self.__xywhn
 
-    def get_xyxyn(self):
+    def get_xyxyn(self) -> list:
         """
         Get the bounding box coordinates in the format (x1, y1, x2, y2) normalized.
 
@@ -139,7 +152,7 @@ class ImageBoundingBoxes:
         """
         return self.__xyxyn
 
-    def get_classes(self):
+    def get_classes(self) -> list:
         """
         Get the classes of the detected objects.
 

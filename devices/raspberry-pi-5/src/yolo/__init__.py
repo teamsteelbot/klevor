@@ -26,8 +26,6 @@ class Yolo:
     GREEN_COLOR = (68, 214, 44)
     MAGENTA_COLOR = (255, 0, 255)
     RED_COLOR = (238, 39, 55)
-    BLUE_COLOR = (0, 51, 255)
-    ORANGE_COLOR = (255, 102, 0)
 
     # Epochs
     EPOCHS = 100
@@ -39,31 +37,21 @@ class Yolo:
     MODEL_M = 'm'
     MODEL_G = 'g'
     MODEL_R = 'r'
-    MODEL_GR = 'gr'
-    MODEL_GMR = 'gmr'
-    MODEL_BGOR = 'bgor'
-    MODELS_NAME = (MODEL_M, MODEL_G, MODEL_R, MODEL_GR, MODEL_GMR, MODEL_BGOR)
+    MODELS_NAME = (MODEL_M, MODEL_G, MODEL_R)
 
     # YOLO class colors
     MODEL_G_COLORS = (GREEN_COLOR,)
     MODEL_M_COLORS = (MAGENTA_COLOR,)
     MODEL_R_COLORS = (RED_COLOR,)
-    MODEL_GR_COLORS = (GREEN_COLOR, RED_COLOR)
-    MODEL_GMR_COLORS = (GREEN_COLOR, MAGENTA_COLOR, RED_COLOR)
-    MODEL_BGOR_COLORS = (BLUE_COLOR, GREEN_COLOR, ORANGE_COLOR, RED_COLOR)
     MODELS_COLORS = {
         MODEL_G: MODEL_G_COLORS,
         MODEL_M: MODEL_M_COLORS,
         MODEL_R: MODEL_R_COLORS,
-        MODEL_GR: MODEL_GR_COLORS,
-        MODEL_GMR: MODEL_GMR_COLORS,
-        MODEL_BGOR: MODEL_BGOR_COLORS
     }
 
     # YOLO model versions
-    VERSION_5 = 'v5'
     VERSION_11 = 'v11'
-    VERSIONS = (VERSION_5, VERSION_11)
+    VERSIONS = (VERSION_11)
 
     # Minimum confidence level and number of random images to test
     MINIMUM_CONFIDENCE_LEVEL = 0.70
@@ -222,14 +210,14 @@ class Yolo:
                 f"Invalid yolo version: {yolo_version}. Must be one of the following: {', '.join(mapped_yolo_versions)}.")
 
     @classmethod
-    def get_model_classes_color_palette(cls, model_name: str) -> dict[int, tuple[int, int, int]] | None:
+    def get_model_classes_color_palette(cls, model_name: str) -> tuple[[int, int, int]] | None:
         """
         Get the model classes color palette.
 
         Args:
             model_name (str): Name of the YOLO model.
         Returns:
-            dict[int, tuple[int, int, int]] | None: Dictionary mapping class indices to RGB color tuples.
+            tuple[tuple[int, int, int]] | None: Dictionary mapping class indices to RGB color tuples.
         """
         # Check the validity of the model name
         cls.check_model_name(model_name)

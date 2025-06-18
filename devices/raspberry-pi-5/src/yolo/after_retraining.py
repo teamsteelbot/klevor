@@ -1,7 +1,7 @@
 from argparse import ArgumentParser
 import os
 
-from .args import Args
+from .args import Args, Flags
 from .files import Files
 
 if __name__ == '__main__':
@@ -10,7 +10,7 @@ if __name__ == '__main__':
     args = Args.parse_args_as_dict(parser)
 
     # Get the YOLO version
-    arg_yolo_version = Args.get_attribute_from_args(args, Args.VERSION)
+    arg_yolo_version = Args.get_attribute_from_args_dict(args, Flags.VERSION)
 
     # Get the runs folder path
     yolo_runs_dir = Files.get_yolo_runs_dir_path(arg_yolo_version)

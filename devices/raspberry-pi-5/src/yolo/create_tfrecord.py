@@ -3,7 +3,7 @@ import os
 
 import tensorflow as tf
 
-from .args import Args
+from .args import Args, Flags
 from .files import Files
 
 
@@ -50,23 +50,20 @@ def create_tfrecord(output_path: str, image_dir: str, label_dir: str):
     writer.close()
 
 
-def main() -> None:
-    """
-    Main function to run the script.
-    """
+if __name__ == "__main__":
     parser = ArgumentParser(description='Script to create TFRecord from images and labels')
     Args.add_yolo_input_model_argument(parser)
     Args.add_yolo_version_argument(parser)
     args = Args.parse_args_as_dict(parser)
 
     # Get the YOLO input model
-    arg_yolo_input_model = Args.get_attribute_from_args(args, Args.INPUT_MODEL)
+    arg_yolo_input_model = Args.get_attribute_from_args_dict(args, Flags.INPUT_MODEL)
 
     # Get the YOLO version
-    arg_yolo_version = Args.get_attribute_from_args(args, Args.VERSION)
+    arg_yolo_version = Args.get_attribute_from_args_dict(args, Flags.VERSION)
 
     # Get the dataset paths
-    organized_to_process_dir = Args.get_dataset_model_dir_path(Files.DATASET_ORGANIZED, Files.DATASET_TO_PROCESS,
+    organized_to_process_dir = Files.get_dataset_model_dir_path(Files.DATASET_ORGANIZED, Files.DATASET_TO_PROCESS,
                                                                arg_yolo_input_model)
 
     # Get the images and labels directories
@@ -79,7 +76,3 @@ def main() -> None:
 
     # Create TFRecord
     create_tfrecord(output_tfrecord, testing_images_dir, testing_labels_dir)
-
-
-if __name__ == "__main__":
-    main()

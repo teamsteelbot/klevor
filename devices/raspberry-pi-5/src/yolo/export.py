@@ -1,14 +1,11 @@
 from argparse import ArgumentParser
 
 from . import Yolo
-from .args import Args
+from .args import Args, Flags
 from .files import Files
 
 
-def main() -> None:
-    """
-    Main function to run the script.
-    """
+if __name__ == '__main__':
     parser = ArgumentParser(description='Script to export YOLO model to a given format')
     Args.add_yolo_input_model_argument(parser)
     Args.add_yolo_format_argument(parser)
@@ -17,16 +14,16 @@ def main() -> None:
     args = Args.parse_args_as_dict(parser)
 
     # Get the YOLO input model
-    arg_yolo_input_model = Args.get_attribute_from_args(args, Args.INPUT_MODEL)
+    arg_yolo_input_model = Args.get_attribute_from_args_dict(args, Flags.INPUT_MODEL)
 
     # Get the YOLO format
-    arg_yolo_format = Args.get_attribute_from_args(args, Args.FORMAT)
+    arg_yolo_format = Args.get_attribute_from_args_dict(args, Flags.FORMAT)
 
     # Get the YOLO quantization
-    arg_yolo_quantized = Args.get_attribute_from_args(args, Args.QUANTIZED)
+    arg_yolo_quantized = Args.get_attribute_from_args_dict(args, Flags.QUANTIZED)
 
     # Get the YOLO version
-    arg_yolo_version = Args.get_attribute_from_args(args, Args.VERSION)
+    arg_yolo_version = Args.get_attribute_from_args_dict(args, Flags.VERSION)
 
     # Load a model
     model_path = Files.get_model_best_pt_path(arg_yolo_input_model, arg_yolo_version)
@@ -45,7 +42,3 @@ def main() -> None:
 
     # Log
     print(f"Model exported to {path}")
-
-
-if __name__ == '__main__':
-    main()
