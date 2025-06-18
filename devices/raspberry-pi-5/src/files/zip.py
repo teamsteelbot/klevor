@@ -36,7 +36,7 @@ class Zip:
             zipf.write(file_path, file_rel_path)
 
             # Log
-            print(f'Zipped file: {file_rel_path}')
+            # print(f'Zipped file: {file_rel_path}')
 
     @classmethod
     def zip_not_nested_folder(cls, zipf: ZipFile, input_base_path: str, input_folder_path: str,
@@ -57,8 +57,8 @@ class Zip:
         cls.zip_files(zipf, filenames, input_folder_path, input_base_path, ignore_filenames_regex)
 
         # Log
-        input_folder_rel_path = os.path.relpath(input_folder_path, input_base_path)
-        print(f'Zipped folder: {input_folder_rel_path}')
+        # input_folder_rel_path = os.path.relpath(input_folder_path, input_base_path)
+        # print(f'Zipped folder: {input_folder_rel_path}')
 
     @classmethod
     def zip_nested_folder(cls, zipf: ZipFile, input_base_path: str, input_folder_path: str, ignore_dirs: list[str] = None,
@@ -87,8 +87,8 @@ class Zip:
             cls.zip_files(zipf, filenames, root, input_base_path, ignore_filenames_regex)
 
         # Log
-        input_folder_rel_path = os.path.relpath(input_folder_path, input_base_path)
-        print(f'Zipped folder: {input_folder_rel_path}')
+        # input_folder_rel_path = os.path.relpath(input_folder_path, input_base_path)
+        # print(f'Zipped folder: {input_folder_rel_path}')
 
     @staticmethod
     def extract_all(zip_path: str, output_dir: str) -> None:
@@ -106,7 +106,7 @@ class Zip:
             files = zip_ref.namelist()
 
             for file in files:
-                print(f"Extracting {file}...")
+                # print(f"Extracting {file}...")
 
                 # Extract the file to the output directory
                 file_path = os.path.join(output_dir, file)

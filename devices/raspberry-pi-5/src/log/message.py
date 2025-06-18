@@ -1,17 +1,18 @@
-from enum import Enum
+from enum import Enum, unique
 from typing import Optional
 from datetime import datetime as dt
 
 from ..utils import check_type
 
+@unique
 class Category(Enum):
     """
     Enum to define the category of log message.
     """
-    INFO = "INFO"
-    WARNING = "WARNING"
-    ERROR = "ERROR"
-    DEBUG = "DEBUG"
+    INFO = 1
+    WARNING = 2
+    ERROR = 3
+    DEBUG = 4
 
 class Message:
     """
@@ -42,8 +43,8 @@ class Message:
             str: The formatted log message.
         """
         if self.tag:
-            return f"[{self.__formatted_time}] [{self.tag}] {self.category.value}: {self.content}"
-        return f"[{self.__formatted_time}] {self.category.value}: {self.content}"
+            return f"[{self.__formatted_time}] [{self.tag}] {self.category.name}: {self.content}"
+        return f"[{self.__formatted_time}] {self.category.name}: {self.content}"
 
     def __repr__(self):
         """

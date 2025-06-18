@@ -33,6 +33,40 @@ class CameraABC(ABC):
         pass
 
     @abstractmethod
+    def is_running(self) -> bool:
+        """
+        Check if the image processing queue is running.
+
+        Returns:
+            bool: True if the image processing queue is running, False otherwise.
+        """
+        pass
+
+    @abstractmethod
+    def is_stopped(self) -> bool:
+        """
+        Check if the image processing queue is stopped.
+
+        Returns:
+            bool: True if the image processing queue is not running, False otherwise.
+        """
+        pass
+
+    @abstractmethod
+    def start_thread(self) -> None:
+        """
+        Start the image processing queue thread.
+        """
+        pass
+
+    @abstractmethod
+    def stop_thread(self) -> None:
+        """
+        Stop the image processing queue thread.
+        """
+        pass
+
+    @abstractmethod
     def capture_image_pil(self, adjust_duration: float = ADJUST_DURATION) -> Image:
         """
         Capture an image and return a PIL image.
@@ -155,39 +189,5 @@ class ImageProcessingQueueABC(ABC):
     def wait_pending_output_inference_event(self) -> None:
         """
         Wait for the pending output inference event to be set.
-        """
-        pass
-
-    @abstractmethod
-    def is_running(self) -> bool:
-        """
-        Check if the image processing queue is running.
-
-        Returns:
-            bool: True if the image processing queue is running, False otherwise.
-        """
-        pass
-
-    @abstractmethod
-    def is_stopped(self) -> bool:
-        """
-        Check if the image processing queue is stopped.
-
-        Returns:
-            bool: True if the image processing queue is not running, False otherwise.
-        """
-        pass
-
-    @abstractmethod
-    def start_thread(self) -> None:
-        """
-        Start the image processing queue thread.
-        """
-        pass
-
-    @abstractmethod
-    def stop_thread(self) -> None:
-        """
-        Stop the image processing queue thread.
         """
         pass

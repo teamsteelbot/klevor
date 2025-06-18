@@ -1,16 +1,18 @@
 from threading import Thread
 from multiprocessing import Event, RLock, Queue
-from typing import Optional, TextIO
+from typing import Optional, TextIO, final
 
+from .abstracts import LoggerABC
 from .message import Message, Category
 from ..utils import check_type
 from ..files import Files
 
 
-class Logger:
+class Logger(LoggerABC):
     """
     Class to handle logging functionality.
     """
+
     # Get message from queue timeout
     GET_MESSAGE_FROM_QUEUE_TIMEOUT = 0.01
 
@@ -37,15 +39,8 @@ class Logger:
         # Initialize the thread
         self.__thread = None
 
+    @final
     def log(self, content: str, category: Category = Category.INFO, tag: Optional[str] = None) -> None:
-        """
-        Put a log message in the queue.
-
-        Args:
-            content (str): Content of the log message.
-            category (Category): Category of the log message.
-            tag (Optional[str]): Optional tag for the log message.
-        """
         with self.__rlock:
             # Check the type of content
             check_type(content, str)
@@ -57,7 +52,7 @@ class Logger:
             check_type(tag, str) if tag else None
 
             # Create a message object
-            message = Message(content, category, tag)
+            msg = Message(content, category, tag)
 
             # Check if the logger has stopped
             if self.is_stopped():
@@ -67,7 +62,7 @@ class Logger:
                     return
                 
                 with open(self.__file_path, 'a') as file:
-                    self.__write(file, str(message))
+                    self._write(file, msg)
                 return
 
             # If the opened event is not set, wait for it to be set
@@ -75,58 +70,29 @@ class Logger:
                 self.__opened_event.wait()
 
             # Put the message in the queue
-            self.__messages_queue.put(message)
+            self.__messages_queue.put(msg)
 
             # Set the write log event
             self.__write_log_event.set()
 
+    @final
     def info(self, content: str, tag: Optional[str] = None) -> None:
-        """
-        Log an informational message.
-
-        Args:
-            content (str): Content of the log message.
-            tag (Optional[str]): Optional tag for the log message.
-        """
         self.log(content, Category.INFO, tag)
 
+    @final
     def error(self, content: str, tag: Optional[str] = None) -> None:
-        """
-        Log an error message.
-
-        Args:
-            content (str): Content of the log message.
-            tag (Optional[str]): Optional tag for the log message.
-        """
         self.log(content, Category.ERROR, tag)
 
+    @final
     def warning(self, content: str, tag: Optional[str] = None) -> None:
-        """
-        Log a warning message.
-
-        Args:
-            content (str): Content of the log message.
-            tag (Optional[str]): Optional tag for the log message.
-        """
         self.log(content, Category.WARNING, tag)
 
+    @final
     def debug(self, content: str, tag: Optional[str] = None) -> None:
-        """
-        Log a debug message.
-
-        Args:
-            content (str): Content of the log message.
-            tag (Optional[str]): Optional tag for the log message.
-        """
         self.log(content, Category.DEBUG, tag)
 
-    def __get_message(self) -> Message|None:
-        """
-        Get a message from the queue.
-
-        Returns:
-            Message|None: Message from the queue.
-        """
+    @final
+    def _get_message(self) -> Message|None:
         # Get the message from the queue
         with self.__rlock:
             if self.__messages_queue.empty():
@@ -135,42 +101,13 @@ class Logger:
             # Return the message from the queue
             return self.__messages_queue.get(timeout=self.GET_MESSAGE_FROM_QUEUE_TIMEOUT)
 
-    @staticmethod
-    def __write(file: TextIO, message: Message) -> None:
-        """
-        Write a message to the log file.
-
-        Args:
-            file (TextIO): The file to write the message to.
-            message (Message): Message to log.
-        """
-        # Check if the file is open
-        if not file:
-            print(f"Log file is not open. Must open it first.")
-            return
-
-        if not message:
-            print("No message to log.")
-            return
-
-        # Write the message to the log file
-        file.write(message + "\n")
-
-        # Ensure immediate write
-        file.flush()
-
-    def __write_last_message(self, file: TextIO) -> None:
-        """
-        Write the last message to the log file.
-
-        Args:
-            file (TextIO): The file to write the message to.
-        """
+    @final
+    def _write_last_message(self, file: TextIO) -> None:
         # Get the last message from the queue
-        message = self.__get_message()
+        msg = self._get_message()
 
         # Log the message
-        self.__write(file, message)
+        self._write(file, msg)
 
     def __loop(self, file_path: str = Files.get_log_file_path()) -> None:
         """
@@ -204,11 +141,11 @@ class Logger:
                     # Process any remaining messages in the queue
                     while not self.__messages_queue.empty():
                         # Write the last message to the log file
-                        self.__write_last_message(file)
+                        self._write_last_message(file)
                     break
 
                 # Write the last message to the log file
-                self.__write_last_message(file)
+                self._write_last_message(file)
 
                 # If the queue is empty, clear the write log event
                 if self.__messages_queue.empty():
@@ -223,6 +160,7 @@ class Logger:
         """
         with self.__rlock:
             if self.is_running():
+                self.warning("Logger is already running. Cannot start again.")
                 return
 
             # Clear the stop event
@@ -231,13 +169,8 @@ class Logger:
             # Clear the write log event
             self.__write_log_event.clear()
 
+    @final
     def is_running(self) -> bool:
-        """
-        Check if the stop event is not set, indicating that's allowed to log messages.
-
-        Returns:
-            bool: True if the stop event is not set, False otherwise.
-        """
         with self.__rlock:
             return not self.__stop_event.is_set()
 
@@ -262,19 +195,12 @@ class Logger:
             # Set the write log event
             self.__write_log_event.set()
 
+    @final
     def is_stopped(self) -> bool:
-        """
-        Check if the logger is stopped by checking if the stop event is set.
-
-        Returns:
-            bool: True if the stop event is set (indicating the logger is stopped), False otherwise.
-        """
         return not self.is_running()
 
+    @final
     def create_thread(self) -> None:
-        """
-        Create thread for the logger.
-        """
         with self.__rlock:
             # Start the logger
             self.__start()
@@ -283,10 +209,8 @@ class Logger:
             self.__thread = Thread(target=self.__loop)
             self.__thread.start()
 
+    @final
     def stop_thread(self) -> None:
-        """
-        Stop the logger thread.
-        """
         with self.__rlock:
             # Stop the logger
             self.__stop()
@@ -298,6 +222,6 @@ class Logger:
 
     def __del__(self):
         """
-        Destructor to stop the thread if it's started.
+        Destructor to ensure the logger thread is stopped when the object is deleted.
         """
         self.stop_thread() if self.__thread else None

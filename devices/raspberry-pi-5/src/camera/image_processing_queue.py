@@ -186,7 +186,6 @@ class ImageProcessingQueue(ImageProcessingQueueABC):
         # Log
         self.__logger.info("Image processing queue loop stopped.") if self.__logger else None
 
-    @final
     def __start(self) -> None:
         """
         Start the image processing queue.
@@ -212,7 +211,6 @@ class ImageProcessingQueue(ImageProcessingQueueABC):
         with self.__rlock:
             return not self.__stop_event.is_set()
 
-    @final
     def __stop(self):
         """
         Stop the image processing queue.

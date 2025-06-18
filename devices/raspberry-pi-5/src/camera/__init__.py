@@ -170,7 +170,7 @@ class Camera(CameraABC):
 
     def __del__(self):
         """
-        Delete the camera object.
+        Destructor to clean up resources when the camera is no longer needed.
         """
         # Stop the camera preview
         self._stop_preview()

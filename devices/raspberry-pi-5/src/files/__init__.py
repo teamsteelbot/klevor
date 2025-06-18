@@ -7,19 +7,13 @@ class Files:
     """
     Files utility class.
     """
-    # Folders (executed from root folder)
+    # Logs folders
     CWD = os.getcwd()
-
-    # Environments
-    ENVIRONMENT_LOCAL = "local"
-    ENVIRONMENT_COLAB = "colab"
+    LOG_DIR = os.path.join(CWD, 'log')
+    LOGS_DIR = os.path.join(LOG_DIR, 'logs')
 
     # Directories to ignore always
     IGNORE_DIRS = ('.git', '__pycache__', '.idea', '.vscode', '.venv', 'venv', 'env')
-
-    # Logs folders
-    LOG_DIR = os.path.join(CWD, 'log')
-    LOGS_DIR = os.path.join(LOG_DIR, 'logs')
 
     @staticmethod
     def move_file(input_path: str, output_dir: str) -> None:
