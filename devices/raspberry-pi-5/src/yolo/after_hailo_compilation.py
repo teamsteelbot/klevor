@@ -1,20 +1,19 @@
 from argparse import ArgumentParser
 import os
 import shutil
-from typing import LiteralString
 
 from .args import Args, Flags
 from .files import Files
 
 
-def after_compilation(model_name: str, yolo_version: str, hailo_suite_dir: LiteralString | str | bytes) -> None:
+def after_compilation(model_name: str, yolo_version: str, hailo_suite_dir: str | os.PathLike[str]) -> None:
     """
     Copy files from the Hailo Model Zoo folder and remove the training folder from the model Hailo Suite folder.
 
     Args:
         model_name (str): Name of the YOLO model.
         yolo_version (str): Version of the YOLO model.
-        hailo_suite_dir (LiteralString|str|bytes): Path to the Hailo Suite directory.
+        hailo_suite_dir (str | os.PathLike[str]): Path to the Hailo Suite directory.
     """
     # Get the parsed, optimized, and compiled file paths
     model_hailo_suite_parsed_file_path = Files.get_model_hailo_suite_parsed_har_file_path(model_name, yolo_version)

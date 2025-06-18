@@ -2,22 +2,21 @@ from argparse import ArgumentParser
 import os
 import random
 import shutil
-from typing import LiteralString
 
 from . import Yolo
 from .args import Args, Flags
 from .files import Files
 
 
-def split_dataset(input_dir: LiteralString, output_dir: LiteralString,
-                  train_ratio=Yolo.TRAINING_RATIO,
-                  val_ratio=Yolo.VALIDATION_RATIO) -> None:
+def split_dataset(input_dir: str | os.PathLike[str], output_dir: str | os.PathLike[str],
+                  train_ratio: float = Yolo.TRAINING_RATIO,
+                  val_ratio: float = Yolo.VALIDATION_RATIO) -> None:
     """
     Split the dataset into training, validation, and testing sets.
 
     Args:
-        input_dir (str): Directory containing the input images and annotations.
-        output_dir (str): Directory where the split datasets will be saved.
+        input_dir (str | os.PathLike[str]): Directory containing the input images and annotations.
+        output_dir (str | os.PathLike[str]): Directory where the split datasets will be saved.
         train_ratio (float): Ratio of the dataset to be used for training.
         val_ratio (float): Ratio of the dataset to be used for validation.
     """

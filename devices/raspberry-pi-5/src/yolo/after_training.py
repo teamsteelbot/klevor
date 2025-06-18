@@ -1,22 +1,21 @@
 from argparse import ArgumentParser
 import os
 import shutil
-from typing import LiteralString
 
 from .args import Args, Flags
 from .files import Files
 
 
-def after_training(input_dir: LiteralString | str | bytes, hailo_suite_dir: LiteralString | str | bytes,
-                   model_hailo_suite_dir: LiteralString | str | bytes, best_onnx_weights_path: LiteralString | str | bytes) -> None:
+def after_training(input_dir: str | os.PathLike[str], hailo_suite_dir: str | os.PathLike[str],
+                   model_hailo_suite_dir: str | os.PathLike[str], best_onnx_weights_path: str | os.PathLike[str]) -> None:
     """
     Remove the YOLO training and validation folders from the dataset, move the training folder and copy the best ONNX weights to the Hailo Suite folder.
 
     Args:
-        input_dir (LiteralString|str|bytes): The path to the input directory containing the YOLO dataset.
-        hailo_suite_dir (LiteralString|str|bytes): The path to the Hailo Suite directory.
-        model_hailo_suite_dir (LiteralString|str|bytes): The path to the model Hailo Suite directory.
-        best_onnx_weights_path (LiteralString|str|bytes): The path to the best ONNX weights file.
+        input_dir (str | os.PathLike[str]): The path to the input directory containing the YOLO dataset.
+        hailo_suite_dir (str | os.PathLike[str]): The path to the Hailo Suite directory.
+        model_hailo_suite_dir (str | os.PathLike[str]): The path to the model Hailo Suite directory.
+        best_onnx_weights_path (str | os.PathLike[str]): The path to the best ONNX weights file.
     """
     # Move the training folder to the Hailo Suite folder
     input_training_images_path = os.path.join(input_dir, Files.DATASET_TRAINING, Files.DATASET_IMAGES)

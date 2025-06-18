@@ -7,6 +7,7 @@ class StreamingServer(BaseHTTPRequestHandler):
     """
     Streaming server for live video feed.
     """
+
     # Server configuration
     HOST = '0.0.0.0'
     PORT = 8080

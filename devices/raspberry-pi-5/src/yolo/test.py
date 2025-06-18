@@ -1,7 +1,7 @@
 from argparse import ArgumentParser
 import os
 import random
-from typing import Callable
+from typing import Callable, Optional
 
 import torch
 from ultralytics import YOLO
@@ -14,9 +14,10 @@ from .args import Args, Flags
 from .files import Files
 
 
-def test_random_images(model, model_class_names: dict, run_inference_fn: Callable[[YOLO, torch.Tensor], tuple[list, float]], input_organized_dir: str,
-                       draw_labels_name: bool, rgb_colors: tuple[tuple[int, int, int]] = None,
-                       image_size: tuple[int, int] = OpenCV.SIZE):
+def test_random_images(model, model_class_names: dict, run_inference_fn: Callable[[YOLO, torch.Tensor], tuple[list, float]],
+                       input_organized_dir: str | os.PathLike[str], draw_labels_name: bool,
+                       rgb_colors: Optional[tuple[tuple[int, int, int]]] = None,
+                       image_size: tuple[int, int] = OpenCV.SIZE) -> None:
     """
     Test random images from the given directory.
 
@@ -24,13 +25,10 @@ def test_random_images(model, model_class_names: dict, run_inference_fn: Callabl
         model: The YOLO model to use for inference.
         model_class_names (dict): Dictionary mapping class indices to class names.
         run_inference_fn (Callable): Function to run inference on the model.
-        input_organized_dir (str): Directory containing organized dataset images.
+        input_organized_dir (str | os.PathLike[str]): Directory containing organized dataset images.
         draw_labels_name (bool): Whether to draw labels on the detections.
-        rgb_colors (tuple[tuple[int, int, int]]): Tuple mapping class indices to RGB colors.
+        rgb_colors (Optional[tuple[tuple[int, int, int]]]): Tuple mapping class indices to RGB colors.
         image_size (tuple[int, int]): Size of the images to preprocess.
-
-    Returns:
-        None.
     """
     # Get testing folder
     input_images_testing_dir = os.path.join(input_organized_dir, Files.DATASET_TESTING, Files.DATASET_IMAGES)
@@ -59,19 +57,16 @@ def test_random_images(model, model_class_names: dict, run_inference_fn: Callabl
                                       draw_labels_name=draw_labels_name, rgb_colors=rgb_colors)
 
 
-def test_random_images_pt(input_model_path: str, output_organized_dir: str, colors: dict[int, tuple[int, int, int]],
-                          image_size: tuple[int, int] = OpenCV.SIZE):
+def test_random_images_pt(input_model_path: str | os.PathLike[str], output_organized_dir: str | os.PathLike[str],
+                          colors: Optional[tuple[tuple[int, int, int]]], image_size: tuple[int, int] = OpenCV.SIZE) -> None:
     """
     Test random images from the given directory using the given PyTorch model.
 
     Args:
-        input_model_path (str): Path to the PyTorch model file.
-        output_organized_dir (str): Directory containing organized dataset images.
-        colors (dict[int, tuple[int, int, int]]): Dictionary mapping class indices to RGB colors.
+        input_model_path (str | os.PathLike[str]): Path to the PyTorch model file.
+        output_organized_dir (str | os.PathLike[str]): Directory containing organized dataset images.
+        colors (Optional[tuple[tuple[int, int, int]]]): Tuple mapping class indices to RGB colors.
         image_size (tuple[int, int]): Size of the images to preprocess.
-
-    Returns:
-        None.
     """
     model = Yolo.load(input_model_path)
     model_class_names = Yolo.get_class_names(model)

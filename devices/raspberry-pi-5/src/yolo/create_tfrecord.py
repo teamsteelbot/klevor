@@ -7,17 +7,15 @@ from .args import Args, Flags
 from .files import Files
 
 
-def create_tfrecord(output_path: str, image_dir: str, label_dir: str):
+def create_tfrecord(output_path: str | os.PathLike[str], image_dir: str | os.PathLike[str],
+                    label_dir: str | os.PathLike[str]):
     """
     This script creates a TFRecord file from images and their labels.
 
     Args:
-        output_path (str): The path where the TFRecord file will be saved.
-        image_dir (str): The directory containing the images.
-        label_dir (str): The directory containing the label files.
-
-    Returns:
-        None
+        output_path (str | os.PathLike[str]): The path where the TFRecord file will be saved.
+        image_dir (str | os.PathLike[str]): The directory containing the images.
+        label_dir (str | os.PathLike[str]): The directory containing the label files.
     """
     # Check if the output directory exists, if not create it
     Files.ensure_directory_exists(output_path)

@@ -1,5 +1,5 @@
 from argparse import ArgumentParser
-import os
+from os import path, PathLike
 import zipfile
 
 from typing_extensions import LiteralString
@@ -9,22 +9,22 @@ from .args import Args, Flags
 from .files import Files
 
 
-def zip_to_train(input_dir: LiteralString, input_yolo_dir: LiteralString,
-                 input_yolo_dataset_organized_dir: LiteralString,
-                 input_yolo_version_dir: LiteralString, input_yolo_data_dir: LiteralString,
-                 input_yolo_weights_dir: LiteralString, output_zip_dir: LiteralString,
+def zip_to_train(input_dir: str | PathLike[str], input_yolo_dir: str | PathLike[str],
+                 input_yolo_dataset_organized_dir: str | PathLike[str],
+                 input_yolo_version_dir: str | PathLike[str], input_yolo_data_dir: str | PathLike[str],
+                 input_yolo_weights_dir: str | PathLike[str], output_zip_dir: str | PathLike[str],
                  model_name: str, retraining: str) -> None:
     """
     Define the function to zip the required files for model training.
 
     Args:
-        input_dir (str): The base input directory where the YOLO files are located.
-        input_yolo_dir (str): The directory containing the YOLO files.
-        input_yolo_dataset_organized_dir (str): The directory containing the organized dataset files.
-        input_yolo_version_dir (str): The directory for the specific YOLO version.
-        input_yolo_data_dir (str): The directory containing the YOLO data files.
-        input_yolo_weights_dir (str): The directory containing the YOLO model weights.
-        output_zip_dir (str): The directory where the output zip file will be saved.
+        input_dir (str | os.PathLike[str]): The base input directory where the YOLO files are located.
+        input_yolo_dir (str | os.PathLike[str]): The directory containing the YOLO files.
+        input_yolo_dataset_organized_dir (str | os.PathLike[str]): The directory containing the organized dataset files.
+        input_yolo_version_dir (str | os.PathLike[str]): The directory for the specific YOLO version.
+        input_yolo_data_dir (str | os.PathLike[str]): The directory containing the YOLO data files.
+        input_yolo_weights_dir (str | os.PathLike[str]): The directory containing the YOLO model weights.
+        output_zip_dir (str | os.PathLike[str]): The directory where the output zip file will be saved.
         model_name (str): The name of the model to be used in the zip filename.
         retraining (bool): Flag indicating if this is a retraining operation.
 
@@ -33,7 +33,7 @@ def zip_to_train(input_dir: LiteralString, input_yolo_dir: LiteralString,
     """
     # Define the output zip filename
     output_zip_filename = model_name + '_to_train.zip'
-    output_zip_path = os.path.join(output_zip_dir, output_zip_filename)
+    output_zip_path = path.join(output_zip_dir, output_zip_filename)
 
     # Check if the folder exists, if not create it
     Files.ensure_directory_exists(output_zip_dir)

@@ -7,6 +7,7 @@ class Flags(Enum):
     """
     Enum to represent command line flags.
     """
+
     SERVER = 1
     SERIAL = 2
     IP = 3
@@ -25,6 +26,8 @@ class Args:
     """
     Class to handle command line arguments.
     """
+
+    # Prefix for command line arguments
     ARGS_PREFIX = '--'
 
     @classmethod

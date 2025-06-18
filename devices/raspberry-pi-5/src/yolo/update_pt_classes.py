@@ -14,9 +14,6 @@ def update_classes(model_name: str, model_version: str, new_classes: list[str]):
         model_name (str): Name of the YOLO model.
         model_version (str): Version of the YOLO model.
         new_classes (list): List of new class names to update in the model.
-
-    Returns:
-        None
     """
     # Get the model path
     model_path = Files.get_model_best_pt_path(model_name, model_version)

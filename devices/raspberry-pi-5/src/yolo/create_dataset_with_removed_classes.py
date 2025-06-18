@@ -7,10 +7,18 @@ from .args import Args, Flags
 from .files import Files
 
 
-def create_dataset_with_removed_classes(input_dir, input_to_process_dir, output_dir, output_to_process_dir,
-                                        ignore_classes):
+def create_dataset_with_removed_classes(input_dir: str | os.PathLike[str], input_to_process_dir: str | os.PathLike[str],
+                                        output_dir: str | os.PathLike[str], output_to_process_dir: str | os.PathLike[str],
+                                        ignore_classes: list):
     """
     Create a new dataset with the labeled classes removed.
+
+    Args:
+        input_dir (str | os.PathLike[str]): The path to the input dataset directory.
+        input_to_process_dir (str | os.PathLike[str]): The path to the input dataset directory to process.
+        output_dir (str | os.PathLike[str]): The path to the output dataset directory.
+        output_to_process_dir (str | os.PathLike[str]): The path to the output dataset directory to process.
+        ignore_classes (list): List of class names to ignore from the dataset.
     """
     # Create the output directory if it doesn't exist
     Files.ensure_directory_exists(output_dir)

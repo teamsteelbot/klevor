@@ -1,52 +1,57 @@
 import os
 import shutil
 from datetime import datetime as dt
-from typing import LiteralString
 
 class Files:
     """
     Files utility class.
     """
+
+    # Files folder
+    FILES_DIR = os.path.dirname(os.path.abspath(__file__))
+
+    # Root directory
+    ROOT_DIR = os.path.abspath(os.path.join(FILES_DIR, '../'))
+
     # Logs folders
-    CWD = os.getcwd()
-    LOG_DIR = os.path.join(CWD, 'log')
-    LOGS_DIR = os.path.join(LOG_DIR, 'logs')
+    LOG_DIR = os.path.abspath(os.path.join(ROOT_DIR, 'log'))
+    LOGS_DIR = os.path.abspath(os.path.join(LOG_DIR, 'logs'))
 
     # Directories to ignore always
     IGNORE_DIRS = ('.git', '__pycache__', '.idea', '.vscode', '.venv', 'venv', 'env')
 
     @staticmethod
-    def move_file(input_path: str, output_dir: str) -> None:
+    def move_file(input_path: str | os.PathLike[str], output_dir: str | os.PathLike[str]) -> None:
         """
         Move file between folders.
 
         Args:
-            input_path (str): The path of the file to be moved.
-            output_dir (str): The directory where the file should be moved.
+            input_path (str | os.PathLike[str]): The path of the file to be moved.
+            output_dir (str | os.PathLike[str]): The directory where the file should be moved.
         """
         if os.path.exists(input_path):
             shutil.move(input_path, output_dir)
 
     @staticmethod
-    def move_folder(input_dir: str, output_dir: str) -> None:
+    def move_folder(input_dir: str | os.PathLike[str], output_dir: str | os.PathLike[str]) -> None:
         """
         Move folder between folders.
 
         Args:
-            input_dir (str): The path of the folder to be moved.
-            output_dir (str): The directory where the folder should be moved.
+            input_dir (str | os.PathLike[str]): The path of the folder to be moved.
+            output_dir (str | os.PathLike[str]): The directory where the folder should be moved.
         """
         if os.path.exists(input_dir):
             shutil.move(input_dir, output_dir)
 
     @classmethod
-    def move_folder_content(cls, input_dir: str, output_dir: str) -> None:
+    def move_folder_content(cls, input_dir: str | os.PathLike[str], output_dir: str | os.PathLike[str]) -> None:
         """
         Move folder content to another folder.
 
         Args:
-            input_dir (str): The path of the folder whose content will be moved.
-            output_dir (str): The directory where the content should be moved.
+            input_dir (str | os.PathLike[str]): The path of the folder whose content will be moved.
+            output_dir (str | os.PathLike[str]): The directory where the content should be moved.
         """
         if os.path.exists(input_dir):
             # Check if the output directory exists, if not create it
@@ -66,24 +71,24 @@ class Files:
                 shutil.move(item_input_path, output_dir)
 
     @staticmethod
-    def copy_file(input_path: str, output_path: str) -> None:
+    def copy_file(input_path: str | os.PathLike[str], output_path: str | os.PathLike[str]) -> None:
         """
         Copy a file from input path to output path.
 
         Args:
-            input_path (str): The path of the file to be copied.
-            output_path (str): The path where the file should be copied.
+            input_path (str | os.PathLike[str]): The path of the file to be copied.
+            output_path (str | os.PathLike[str]): The path where the file should be copied.
         """
         if os.path.exists(input_path):
             shutil.copy(input_path, output_path)
 
     @staticmethod
-    def ensure_directory_exists(path: str) -> None:
+    def ensure_directory_exists(path: str | os.PathLike[str]) -> None:
         """
         Ensure the directory exists, if not create it.
 
         Args:
-            path (str): The path to check and create if it doesn't exist.
+            path (str | os.PathLike[str]): The path to check and create if it doesn't exist.
         """
         # Check if it contains an extension
         output_dir = os.path.dirname(path) if os.path.splitext(path)[1] else path
@@ -92,12 +97,12 @@ class Files:
         os.makedirs(output_dir, exist_ok=True)
 
     @staticmethod
-    def ensure_file_exists(file_path: str) -> None:
+    def ensure_file_exists(file_path: str | os.PathLike[str]) -> None:
         """
         Ensure the file exists, if not create it.
 
         Args:
-            file_path (str): The path of the file to check and create if it doesn't exist.
+            file_path (str | os.PathLike[str]): The path of the file to check and create if it doesn't exist.
         """
         # Ensure the directory exists
         Files.ensure_directory_exists(os.path.dirname(file_path))
@@ -109,12 +114,12 @@ class Files:
 
 
     @staticmethod
-    def check_path_exists(path: str) -> bool:
+    def check_path_exists(path: str | os.PathLike[str]) -> bool:
         """
         Check if the path exists.
 
         Args:
-            path (str): The path to check.
+            path (str | os.PathLike[str]): The path to check.
         Returns:
             bool: True if the path exists, False otherwise.
         """
@@ -122,12 +127,12 @@ class Files:
     
 
     @classmethod
-    def get_log_file_path(cls) -> LiteralString | str | bytes:
+    def get_log_file_path(cls) -> str | os.PathLike[str]:
         """
         Get the log file path.
 
         Returns:
-            LiteralString | str | bytes: The path to the log file with the current timestamp.
+            str | os.PathLike[str]: The path to the log file with the current timestamp.
         """
         # Get the current time formatted as a string
         formatted_time = dt.now().strftime('%Y-%m-%d_%H-%M-%S')

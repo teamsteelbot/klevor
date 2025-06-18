@@ -18,6 +18,7 @@ class Camera(CameraABC):
     """
     Class implementation that wraps the functionality required for the Raspberry Pi Camera.
     """
+
     # Logger configuration
     LOG_TAG = "Camera"
 

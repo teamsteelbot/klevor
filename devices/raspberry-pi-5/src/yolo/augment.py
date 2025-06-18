@@ -1,6 +1,7 @@
 from argparse import ArgumentParser
 import os
 import shutil
+from typing import Optional
 
 from ..opencv import OpenCV
 from . import Yolo
@@ -8,19 +9,17 @@ from .args import Args, Flags
 from .files import Files
 
 
-def augment_dataset(input_to_process_dir: str, output_augmented_dir: str, num_augmentations=Yolo.NUM_AUGMENTATIONS,
-                    output_processed_dir: str = None):
+def augment_dataset(input_to_process_dir: str | os.PathLike[str], output_augmented_dir: str | os.PathLike[str],
+                    num_augmentations: int = Yolo.NUM_AUGMENTATIONS,
+                    output_processed_dir: Optional[str | os.PathLike[str]] = None):
     """
     Augment a dataset.
 
     Args:
-        input_to_process_dir (str): Directory containing the images and annotations to be augmented.
-        output_augmented_dir (str): Directory where the augmented images and annotations will be saved.
+        input_to_process_dir (str | os.PathLike[str]): Directory containing the images and annotations to be augmented.
+        output_augmented_dir (str | os.PathLike[str]): Directory where the augmented images and annotations will be saved.
         num_augmentations (int): Number of augmentations to perform on each image.
-        output_processed_dir (str, optional): Directory where the original images and annotations will be moved after processing.
-
-    Returns:
-        None
+        output_processed_dir (Optional[str | os.PathLike[str]]): Directory where the original images and annotations will be moved after processing.
     """
     # Get the input images and annotations directories
     input_to_process_images_dir = os.path.join(input_to_process_dir, Files.DATASET_IMAGES)
@@ -56,7 +55,7 @@ def augment_dataset(input_to_process_dir: str, output_augmented_dir: str, num_au
             OpenCV.augment_image(input_to_process_image_path, input_to_process_annotations_path,
                           output_augmented_images_dir,
                           output_augmented_annotations_dir, output_processed_images_dir,
-                          output_processed_annotations_dir)
+                          output_processed_annotations_dir, num_augmentations=num_augmentations)
         else:
             print(
                 f"Warning: Annotation file not found for {input_to_process_image_path}, annotation file should be at {input_to_process_annotations_path}")

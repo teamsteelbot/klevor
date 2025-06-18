@@ -17,6 +17,7 @@ class ImageProcessingQueue(ImageProcessingQueueABC):
     """
     Class for managing a queue of images for processing in a real-time tracking system.
     """
+
     # Logger configuration
     LOG_TAG = "ImagesQueue"
 

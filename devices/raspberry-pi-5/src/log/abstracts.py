@@ -181,6 +181,7 @@ class SubLoggerABC(ABC):
         pass
 
     @logger.setter
+    @abstractmethod
     def logger(self, logger: LoggerABC) -> None:
         """
         Set the logger instance.

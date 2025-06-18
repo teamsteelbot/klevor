@@ -15,7 +15,7 @@ class Plot:
 
     @classmethod
     def draw_detection(cls, image: np.ndarray, box: list, class_name: str, score: float, color: tuple,
-                       scale_factor: float):
+                       scale_factor: float) -> None:
         """
         Draw box and label for one detection.
 
@@ -47,7 +47,6 @@ class Plot:
             padding_length (int): Length of padding to remove.
             input_height (int): Height of the input image.
             input_width (int): Width of the input image.
-
         Returns:
             list: Denormalized bounding box coordinates with padding removed.
         """
@@ -73,7 +72,6 @@ class Plot:
             image (np.ndarray): Image to draw on.
             min_score (float): Minimum score threshold. Defaults to 0.45.
             scale_factor (float): Scale factor for coordinates. Defaults to 1.
-
         Returns:
             np.ndarray: Image with detections drawn.
         """
@@ -116,7 +114,6 @@ class Plot:
             font_scale (float): Scale factor for text size. Defaults to 0.9.
             thickness (int): Thickness of bounding box and text. Defaults to 2.
             rgb_colors (tuple[tuple[int, int, int]]): Tuple mapping class indices to RGB colors. Defaults to None.
-
         Returns:
             None: Displays the preprocessed image and the image with detections using matplotlib.
         """

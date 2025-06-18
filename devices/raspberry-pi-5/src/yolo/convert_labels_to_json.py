@@ -6,9 +6,15 @@ from .args import Args, Flags
 from .files import Files
 
 
-def convert_yolo_labels_to_json(annotations_dir, images_dir, output_json):
+def convert_yolo_labels_to_json(annotations_dir: str | os.PathLike[str],
+                                images_dir: str | os.PathLike[str], output_json: str | os.PathLike[str]):
     """
     Convert YOLO labels to JSON format for Label Studio.
+
+    Args:
+        annotations_dir (str | os.PathLike[str]): Directory containing YOLO label files.
+        images_dir (str | os.PathLike[str]): Directory containing the corresponding images.
+        output_json (str | os.PathLike[str]): Path to save the output JSON file.
     """
     annotations = []
 

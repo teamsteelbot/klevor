@@ -1,23 +1,22 @@
 from argparse import ArgumentParser
 import os
 import shutil
-from typing import LiteralString
 
 from ..opencv import OpenCV
 from .args import Args, Flags
 from .files import Files
 
 
-def after_training(input_dir: LiteralString | str | bytes, calib_set_file_path: LiteralString | str | bytes,
-                   model_hailo_suite_dir: LiteralString | str | bytes, best_onnx_weights_path: LiteralString | str | bytes):
+def after_training(input_dir: str | os.PathLike[str], calib_set_file_path: str | os.PathLike[str],
+                   model_hailo_suite_dir: str | os.PathLike[str], best_onnx_weights_path: str | os.PathLike[str]):
     """
     Remove the YOLO training and validations folders from the dataset, create the calibration set and copy the best ONNX weights to the Hailo Suite folder.
 
     Args:
-        input_dir (LiteralString|str|bytes): Path to the input directory containing the YOLO dataset.
-        calib_set_file_path (LiteralString|str|bytes): Path to save the calibration set .npy file.
-        model_hailo_suite_dir (LiteralString|str|bytes): Path to the Hailo Suite folder for the model.
-        best_onnx_weights_path (LiteralString|str|bytes): Path to the best ONNX weights file.
+        input_dir (str | os.PathLike[str]): Path to the input directory containing the YOLO dataset.
+        calib_set_file_path (str | os.PathLike[str]): Path to save the calibration set .npy file.
+        model_hailo_suite_dir (str | os.PathLike[str]): Path to the Hailo Suite folder for the model.
+        best_onnx_weights_path (str | os.PathLike[str]): Path to the best ONNX weights file.
 
     Returns:
         None.

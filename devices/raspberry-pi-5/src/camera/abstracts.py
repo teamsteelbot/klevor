@@ -12,6 +12,7 @@ class CameraABC(ABC):
     """
     Abstract class that wraps the functionality required for the Raspberry Pi Camera.
     """
+
     # Camera settings
     WIDTH = 640
     HEIGHT = 640
@@ -29,26 +30,6 @@ class CameraABC(ABC):
     def _stop_preview(self) -> None:
         """
         Stop the camera preview.
-        """
-        pass
-
-    @abstractmethod
-    def is_running(self) -> bool:
-        """
-        Check if the image processing queue is running.
-
-        Returns:
-            bool: True if the image processing queue is running, False otherwise.
-        """
-        pass
-
-    @abstractmethod
-    def is_stopped(self) -> bool:
-        """
-        Check if the image processing queue is stopped.
-
-        Returns:
-            bool: True if the image processing queue is not running, False otherwise.
         """
         pass
 
@@ -122,6 +103,26 @@ class ImageProcessingQueueABC(ABC):
     """
     Abstract class for managing a queue of images for processing in a real-time tracking system.
     """
+
+    @abstractmethod
+    def is_running(self) -> bool:
+        """
+        Check if the image processing queue is running.
+
+        Returns:
+            bool: True if the image processing queue is running, False otherwise.
+        """
+        pass
+
+    @abstractmethod
+    def is_stopped(self) -> bool:
+        """
+        Check if the image processing queue is stopped.
+
+        Returns:
+            bool: True if the image processing queue is not running, False otherwise.
+        """
+        pass
 
     @abstractmethod
     def add_image(self, image: Image) -> None:

@@ -13,17 +13,18 @@ class Zip:
     """
 
     @staticmethod
-    def zip_files(zipf: ZipFile, filenames: list, input_file_base_path: str, input_base_path: str,
-                  ignore_filenames_regex: Optional[list[Pattern]] = None, debug: bool = False) -> None:
+    def zip_files(zipf: ZipFile, filenames: list, input_file_base_path: str | os.PathLike[str],
+                  input_base_path: str | os.PathLike[str], ignore_filenames_regex: Optional[list[Pattern]] = None,
+                  debug: bool = False) -> None:
         """
         Define the function to zip the files in a folder.
 
         Args:
             zipf (ZipFile): ZipFile object to write to.
             filenames (list): List of filenames to zip.
-            input_file_base_path (str): Base path of the files to be zipped.
-            input_base_path (str): Base path for relative file paths in the zip.
-            ignore_filenames_regex (list[Pattern], optional): List of regex patterns to ignore certain files.
+            input_file_base_path (str | os.PathLike[str]): Base path of the files to be zipped.
+            input_base_path (str | os.PathLike[str]): Base path for relative file paths in the zip.
+            ignore_filenames_regex (Optional[list[Pattern]]): List of regex patterns to ignore certain files.
             debug (bool): If True, prints debug information.
         """
         for filename in filenames:
@@ -40,16 +41,17 @@ class Zip:
             print(f'Zipped file: {file_rel_path}') if debug else None
 
     @classmethod
-    def zip_not_nested_folder(cls, zipf: ZipFile, input_base_path: str, input_folder_path: str,
-                              ignore_filenames_regex: list = None, debug: bool = False) -> None:
+    def zip_not_nested_folder(cls, zipf: ZipFile, input_base_path: str | os.PathLike[str],
+                              input_folder_path: str | os.PathLike[str], ignore_filenames_regex: list = None,
+                              debug: bool = False) -> None:
         """
         Define the function to zip a folder, this ignores nested folders.
 
         Args:
             zipf (ZipFile): ZipFile object to write to.
-            input_base_path (str): Base path for relative file paths in the zip.
-            input_folder_path (str): Path of the folder to be zipped.
-            ignore_filenames_regex (list[Pattern], optional): List of regex patterns to ignore certain files.
+            input_base_path (str | os.PathLike[str]): Base path for relative file paths in the zip.
+            input_folder_path (str | os.PathLike[str]): Path of the folder to be zipped.
+            ignore_filenames_regex (Optional[list[Pattern]]): List of regex patterns to ignore certain files.
             debug (bool): If True, prints debug information.
         """
         # Get the list of files in the specified folder
@@ -64,17 +66,18 @@ class Zip:
             print(f'Zipped folder: {input_folder_rel_path}')
 
     @classmethod
-    def zip_nested_folder(cls, zipf: ZipFile, input_base_path: str, input_folder_path: str, ignore_dirs: list[str] = None,
+    def zip_nested_folder(cls, zipf: ZipFile, input_base_path: str | os.PathLike[str],
+                          input_folder_path: str | os.PathLike[str], ignore_dirs: list[str] = None,
                           ignore_filenames_regex: list[Pattern] = None, debug: bool = False) -> None:
         """
         Define the function to zip a folder, this includes nested folders.
 
         Args:
             zipf (ZipFile): ZipFile object to write to.
-            input_base_path (str): Base path for relative file paths in the zip.
-            input_folder_path (str): Path of the folder to be zipped.
-            ignore_dirs (list[str], optional): List of directories to ignore.
-            ignore_filenames_regex (list[Pattern], optional): List of regex patterns to ignore certain files.
+            input_base_path (str | os.PathLike[str]): Base path for relative file paths in the zip.
+            input_folder_path (str | os.PathLike[str]): Path of the folder to be zipped.
+            ignore_dirs (Optional[list[str]]): List of directories to ignore.
+            ignore_filenames_regex (Optional[list[Pattern]]): List of regex patterns to ignore certain files.
             debug (bool): If True, prints debug information.
         """
         # Added to ignore directories the list of directories that should be always ignored
@@ -96,13 +99,14 @@ class Zip:
             print(f'Zipped folder: {input_folder_rel_path}')
 
     @staticmethod
-    def extract_all(zip_path: str, output_dir: str, debug: bool = False) -> None:
+    def extract_all(zip_path: str | os.PathLike[str], output_dir: str | os.PathLike[str],
+                    debug: bool = False) -> None:
         """
         Extract all files from a zip file by batches.
 
         Args:
-            zip_path (str): Path to the zip file.
-            output_dir (str): Directory where files will be extracted.
+            zip_path (str | os.PathLike[str]): Path to the zip file.
+            output_dir (str | os.PathLike[str]): Directory where files will be extracted.
             debug (bool): If True, prints debug information.
         """
         # Check if the path exists, if not it creates it

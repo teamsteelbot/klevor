@@ -1,27 +1,25 @@
+import os
 from argparse import ArgumentParser
-from typing import LiteralString
 
 from . import Yolo
 from .args import Args, Flags
 from .files import Files
 
 
-def train_model(model: str = 'yolo11n.pt', device: str = 'cpu', data: LiteralString | str | bytes = 'data.yaml', epochs: int = Yolo.EPOCHS,
-                imgsz: int = Yolo.IMAGE_SIZE, project: str = 'yolo', name: str = 'model'):
+def train_model(model: str = 'yolo11n.pt', device: str = 'cpu', data: str | os.PathLike[str] = 'data.yaml',
+                epochs: int = Yolo.EPOCHS, imgsz: int = Yolo.IMAGE_SIZE, project: str = 'yolo',
+                name: str = 'model') -> None:
     """
     Train model.
 
     Args:
         model (str): Path to the YOLO model file.
         device (str): Device to use for training (e.g., 'cpu', 'cuda').
-        data (LiteralString|str|bytes): Path to the dataset configuration file.
+        data (str | os.PathLike[str]): Path to the dataset configuration file.
         epochs (int): Number of training epochs.
         imgsz (int): Image size for training.
         project (str): Project name for saving results.
         name (str): Name of the model.
-
-    Returns:
-        None
     """
     # Load a model
     model = Yolo.load(model)
@@ -37,10 +35,7 @@ def train_model(model: str = 'yolo11n.pt', device: str = 'cpu', data: LiteralStr
     )
 
 
-def main() -> None:
-    """
-    Main function to run the script.
-    """
+if __name__ == '__main__':
     parser = ArgumentParser(description='Script to train YOLO model')
     Args.add_yolo_input_model_argument(parser)
     Args.add_yolo_input_model_pt_argument(parser)
@@ -71,7 +66,3 @@ def main() -> None:
     train_model(model=arg_yolo_input_model_pt, data=model_local_data_path, epochs=arg_yolo_epochs,
                 imgsz=arg_yolo_image_size, project=arg_yolo_input_model, name=arg_yolo_input_model,
                 device=arg_yolo_device)
-
-
-if __name__ == '__main__':
-    main()

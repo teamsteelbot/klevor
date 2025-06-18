@@ -1,7 +1,7 @@
 import random
 import os
 import time
-from typing import LiteralString, Optional
+from typing import Optional
 
 import matplotlib as plt
 import cv2
@@ -10,7 +10,6 @@ import albumentations as A
 
 from ..files import Files
 from ..utils import check_type
-from ..yolo.image_bounding_boxes import ImageBoundingBoxes
 
 class OpenCV:
     # Image dimensions
@@ -140,17 +139,17 @@ class OpenCV:
         return image, image_expanded
 
     @classmethod
-    def resize_images(cls, input_to_process_dir: LiteralString | str | bytes, output_resized_to_process_dir: LiteralString | str | bytes,
-                     output_processed_dir: Optional[LiteralString | str | bytes] = None, new_image_size: tuple[int, int] = SIZE,
+    def resize_images(cls, input_to_process_dir: str | os.PathLike[str], output_resized_to_process_dir: str | os.PathLike[str],
+                     output_processed_dir: Optional[str | os.PathLike[str]] = None, new_image_size: tuple[int, int] = SIZE,
                      interpolation=cv2.INTER_LINEAR) -> None:
         """
         Resize images function.
 
         Args:
-            input_to_process_dir (LiteralString|str|bytes): Directory containing images to be resized.
-            output_resized_to_process_dir (LiteralString|str|bytes): Directory where resized images will be saved.
+            input_to_process_dir (str|os.PathLike[str]): Directory containing images to be resized.
+            output_resized_to_process_dir (str|os.PathLike[str]): Directory where resized images will be saved.
             new_image_size (tuple[int, int]): New size for the images as (width, height).
-            output_processed_dir (Optional[LiteralString|str|bytes]): Directory where original images will be moved after processing.
+            output_processed_dir (Optional[str|os.PathLike[str]]): Directory where original images will be moved after processing.
             interpolation: Interpolation method used for resizing.
         """
         # Check if the path exists, if not it creates it
@@ -182,21 +181,21 @@ class OpenCV:
                     Files.move_file(image_path, os.path.join(output_processed_dir, filename))
 
     @classmethod
-    def augment_image(cls, input_to_process_image_path: LiteralString | str | bytes, input_to_process_annotations_path: LiteralString | str | bytes,
-                      output_augmented_images_dir: LiteralString | str | bytes, output_augmented_annotations_dir: LiteralString | str | bytes,
-                      output_processed_images_dir: Optional[LiteralString | str | bytes] = None,
-                      output_processed_annotations_dir: Optional[LiteralString | str | bytes] = None, num_augmentations=AUGMENTATION_SAMPLES) -> None:
+    def augment_image(cls, input_to_process_image_path: str | os.PathLike[str], input_to_process_annotations_path: str | os.PathLike[str],
+                      output_augmented_images_dir: str | os.PathLike[str], output_augmented_annotations_dir: str | os.PathLike[str],
+                      output_processed_images_dir: Optional[str | os.PathLike[str]] = None,
+                      output_processed_annotations_dir: Optional[str | os.PathLike[str]] = None, num_augmentations=AUGMENTATION_SAMPLES) -> None:
         """
         Augment to process image.
 
         Args:
-            input_to_process_image_path (LiteralString|str|bytes): Path to the image to be augmented.
-            input_to_process_annotations_path (LiteralString|str|bytes): Path to the annotations for the image.
-            output_augmented_images_dir (LiteralString|str|bytes): Directory where the augmented images will be saved.
-            output_augmented_annotations_dir (LiteralString|str|bytes): Directory where the augmented annotations will be saved.
+            input_to_process_image_path (str|os.PathLike[str]): Path to the image to be augmented.
+            input_to_process_annotations_path (str|os.PathLike[str]): Path to the annotations for the image.
+            output_augmented_images_dir (str|os.PathLike[str]): Directory where the augmented images will be saved.
+            output_augmented_annotations_dir (str|os.PathLike[str]): Directory where the augmented annotations will be saved.
             num_augmentations (int): Number of augmentations to perform on the image.
-            output_processed_images_dir (Optional[LiteralString|str|bytes]): Directory where the original image will be moved after processing.
-            output_processed_annotations_dir (Optional[LiteralString|str|bytes]): Directory where the original annotations will be moved after processing.
+            output_processed_images_dir (Optional[str|os.PathLike[str]]): Directory where the original image will be moved after processing.
+            output_processed_annotations_dir (Optional[str|os.PathLike[str]]): Directory where the original annotations will be moved after processing.
         """
         # Get current time
         start_time = time.time()
@@ -285,14 +284,14 @@ class OpenCV:
 
 
     @classmethod
-    def preprocess_images_to_npy(cls, input_folder: LiteralString | str | bytes,
-                                 output_file: LiteralString | str | bytes, target_shape: tuple = SHAPE) -> None:
+    def preprocess_images_to_npy(cls, input_folder: str | os.PathLike[str],
+                                 output_file: str | os.PathLike[str], target_shape: tuple = SHAPE) -> None:
         """
         Preprocess images from a folder and save them as a .npy file.
 
         Args:
-            input_folder (LiteralString|str|bytes): Path to the folder containing images.
-            output_file (LiteralString|str|bytes): Path where the .npy file will be saved.
+            input_folder (str|os.PathLike[str]): Path to the folder containing images.
+            output_file (str|os.PathLike[str]): Path where the .npy file will be saved.
             target_shape (tuple): Desired shape of the images (height, width, channels).
         """
         # Ensure the output directory exists

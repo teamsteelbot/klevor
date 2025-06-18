@@ -1,3 +1,4 @@
+import os
 import time
 
 import torch
@@ -51,7 +52,7 @@ class Yolo:
 
     # YOLO model versions
     VERSION_11 = 'v11'
-    VERSIONS = (VERSION_11)
+    VERSIONS = (VERSION_11,)
 
     # Minimum confidence level and number of random images to test
     MINIMUM_CONFIDENCE_LEVEL = 0.70
@@ -72,12 +73,12 @@ class Yolo:
     VALIDATION_RATIO = 0.2
 
     @staticmethod
-    def load(model_path: str, task='detect') -> YOLO:
+    def load(model_path: str | os.PathLike[str], task='detect') -> YOLO:
         """
         Load YOLO PyTorch model.
 
         Args:
-            model_path (str): Path to the YOLO model file.
+            model_path (str | os.PathLike[str]): Path to the YOLO model file.
             task (str): Task type, default is 'detect'.
         Returns:
             YOLO: Loaded YOLO model.
@@ -162,12 +163,12 @@ class Yolo:
         return inferences, elapsed_time
 
     @staticmethod
-    def get_labels_from_txt(labels_path: str) -> list:
+    def get_labels_from_txt(labels_path: str | os.PathLike[str]) -> list:
         """
         Load labels from a text file.
 
         Args:
-            labels_path (str): Path to the labels file.
+            labels_path (str | os.PathLike[str]): Path to the labels file.
         Returns:
             list: List of class names.
         """
@@ -210,15 +211,18 @@ class Yolo:
                 f"Invalid yolo version: {yolo_version}. Must be one of the following: {', '.join(mapped_yolo_versions)}.")
 
     @classmethod
-    def get_model_classes_color_palette(cls, model_name: str) -> tuple[[int, int, int]] | None:
+    def get_model_classes_color_palette(cls, model_name: str) -> tuple[tuple[int, int, int]]:
         """
         Get the model classes color palette.
 
         Args:
             model_name (str): Name of the YOLO model.
         Returns:
-            tuple[tuple[int, int, int]] | None: Dictionary mapping class indices to RGB color tuples.
+            tuple[tuple[int, int, int]]: Tuple mapping class indices to RGB color tuples.
         """
         # Check the validity of the model name
         cls.check_model_name(model_name)
+
+        if not model_name in cls.MODELS_COLORS:
+            raise ValueError(f"Model name '{model_name}' does not have a defined color palette.")
         return cls.MODELS_COLORS[model_name]
