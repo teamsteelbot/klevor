@@ -1,14 +1,22 @@
 from argparse import ArgumentParser
 import os
 import shutil
+from typing import LiteralString
 
 from .args import Args
 from .files import Files
 
 
-def after_training(input_dir, hailo_suite_dir, model_hailo_suite_dir, best_onnx_weights_path):
+def after_training(input_dir: LiteralString | str | bytes, hailo_suite_dir: LiteralString | str | bytes,
+                   model_hailo_suite_dir: LiteralString | str | bytes, best_onnx_weights_path: LiteralString | str | bytes) -> None:
     """
     Remove the YOLO training and validation folders from the dataset, move the training folder and copy the best ONNX weights to the Hailo Suite folder.
+
+    Args:
+        input_dir (LiteralString|str|bytes): The path to the input directory containing the YOLO dataset.
+        hailo_suite_dir (LiteralString|str|bytes): The path to the Hailo Suite directory.
+        model_hailo_suite_dir (LiteralString|str|bytes): The path to the model Hailo Suite directory.
+        best_onnx_weights_path (LiteralString|str|bytes): The path to the best ONNX weights file.
     """
     # Move the training folder to the Hailo Suite folder
     input_training_images_path = os.path.join(input_dir, Files.DATASET_TRAINING, Files.DATASET_IMAGES)
@@ -37,10 +45,7 @@ def after_training(input_dir, hailo_suite_dir, model_hailo_suite_dir, best_onnx_
         print(f'{best_onnx_weights_path} does not exist')
 
 
-def main() -> None:
-    """
-    Main function to run the script.
-    """
+if __name__ == '__main__':
     parser = ArgumentParser(
         description='Script to removed the unnecessary files and prepare the dataset for Hailo')
     Args.add_yolo_input_model_argument(parser)
@@ -68,6 +73,3 @@ def main() -> None:
     # Move the folders
     after_training(organized_dir, hailo_suite_dir, model_hailo_suite_dir, best_onnx_weights_path)
 
-
-if __name__ == '__main__':
-    main()

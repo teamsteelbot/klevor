@@ -1,5 +1,6 @@
-from argparse import ArgumentParser
+from argparse import ArgumentParser, FileType
 from enum import Enum, unique
+from typing import Any, Callable, Optional
 
 @unique
 class Flags(Enum):
@@ -27,16 +28,17 @@ class Args:
     ARGS_PREFIX = '--'
 
     @classmethod
-    def get_attribute_name(cls, attribute: str) -> str:
+    def get_attribute_name(cls, attribute: str, disabled: bool = False) -> str:
         """
         Get the attribute name.
 
         Args:
             attribute (str): The name of the attribute.
+            disabled (bool): If True, the attribute will be prefixed with 'no-' to indicate it is disabled.
         Returns:
             str: The attribute name with the prefix.
         """
-        return f'{cls.ARGS_PREFIX}{attribute}'
+        return f'{cls.ARGS_PREFIX}{attribute}' if not disabled else f'{cls.ARGS_PREFIX}no-{attribute}'
 
     @staticmethod
     def get_attribute_from_args(args: dict, attribute: str) -> str:
@@ -73,8 +75,48 @@ class Args:
         # Get the arguments as a dictionary
         return vars(args)
 
-    @staticmethod
-    def add_server_argument(parser: ArgumentParser, default: bool = False) -> None:
+    @classmethod
+    def _add_boolean_argument(cls, parser: ArgumentParser, flag: Flags, default: bool = False) -> None:
+        """
+        Add a boolean argument to the parser.
+
+        Args:
+            parser (ArgumentParser): The argument parser instance.
+            flag (Flags): The flag to be added.
+            default (bool): Default value for the boolean argument.
+        """
+        name = flag.get_flag_name()
+        parser.add_argument(cls.get_attribute_name(name, disabled=True), dest=name,
+                            action="store_false", help=f"Set {name.lower()} flag as 'False'")
+        parser.add_argument(cls.get_attribute_name(name), dest=name,
+                            action="store_true", help=f"Set {name.lower()} flag as 'True'")
+        parser.set_defaults(**{name: default})
+
+    @classmethod
+    def _add_non_boolean_argument(cls, parser: ArgumentParser, flag: Flags, type: Callable[[str], Any] | FileType | str,
+                                  default: Optional[Any] = None, required: bool = False,
+                                  choices: Optional[list[Any]] = None, help: Optional[str] = None,
+                                  nargs: Optional[str] = None) -> None:
+        """
+        Add a non-boolean argument to the parser.
+
+        Args:
+            parser (ArgumentParser): The argument parser instance.
+            flag (Flags): The flag to be added.
+            type (Callable[[str], Any] | FileType | str): The type of the argument.
+            default (Optional[Any]): Default value for the argument.
+            required (bool): If True, the argument is required.
+            choices (Optional[list[Any]]): List of valid choices for the argument.
+            help (Optional[str]): Help text for the argument.
+            nargs (Optional[str]): Number of arguments expected.
+        """
+        name = flag.get_flag_name()
+        parser.add_argument(cls.get_attribute_name(name), dest=name, type=type, default=default,
+                            required=required, choices=choices, nargs=nargs,
+                            help=f"Set {name.lower()} argument" if not help else help)
+
+    @classmethod
+    def add_server_argument(cls, parser: ArgumentParser, default: bool = False) -> None:
         """
         Add server argument to the parser.
 
@@ -82,15 +124,10 @@ class Args:
             parser (ArgumentParser): The argument parser instance.
             default (bool): Default value for the server argument.
         """
-        flag = Flags.SERVER.get_flag_name()
-        parser.add_argument(f"--no-{flag}", dest=flag, action="store_false",
-                            help="Set server flag as 'False'")
-        parser.add_argument(f"--{flag}", dest=flag, action="store_true",
-                            help="Set server flag as 'True'")
-        parser.set_defaults(**{flag: default})
+        cls._add_boolean_argument(parser, Flags.SERVER, default)
 
-    @staticmethod
-    def add_serial_argument(parser: ArgumentParser, default: bool = False) -> None:
+    @classmethod
+    def add_serial_argument(cls, parser: ArgumentParser, default: bool = False) -> None:
         """
         Add serial argument to the parser.
 
@@ -98,15 +135,10 @@ class Args:
             parser (ArgumentParser): The argument parser instance.
             default (bool): Default value for the serial argument.
         """
-        flag = Flags.SERIAL.get_flag_name()
-        parser.add_argument(f"--no-{flag}", dest=flag, action="store_false",
-                            help="Set serial flag as 'False'")
-        parser.add_argument(f"--{flag}", dest=flag, action="store_true",
-                            help="Set serial flag as 'True'")
-        parser.set_defaults(**{flag: default})
+        cls._add_boolean_argument(parser, Flags.SERIAL, default)
 
-    @staticmethod
-    def add_ip_argument(parser: ArgumentParser, default: str = '0.0.0.0') -> None:
+    @classmethod
+    def add_ip_argument(cls, parser: ArgumentParser, default: str = '0.0.0.0') -> None:
         """
         Add IP argument to the parser.
 
@@ -114,12 +146,11 @@ class Args:
             parser (ArgumentParser): The argument parser instance.
             default (str): Default IP address for the server.
         """
-        flag = Flags.IP.get_flag_name()
-        parser.add_argument(f"--{flag}", dest=flag, type=str, default=default,
-                            help="Set the IP address for the server")
+        cls._add_non_boolean_argument(parser, Flags.IP, type=str, default=default,
+                                      help="Set the IP address for the server")
 
-    @staticmethod
-    def add_port_argument(parser: ArgumentParser, default: int = 8765) -> None:
+    @classmethod
+    def add_port_argument(cls, parser: ArgumentParser, default: int = 8765) -> None:
         """
         Add port argument to the parser.
 
@@ -127,6 +158,5 @@ class Args:
             parser (ArgumentParser): The argument parser instance.
             default (int): Default port number for the server.
         """
-        flag = Flags.PORT.get_flag_name()
-        parser.add_argument(f"--{flag}", dest=flag, type=int, default=default,
-                            help="Set the port for the server")
+        cls._add_non_boolean_argument(parser, Flags.PORT, type=int, default=default,
+                                  choices=[*range(1, 65536)], help="Set the port number for the server")

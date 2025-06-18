@@ -1,14 +1,20 @@
 from argparse import ArgumentParser
 import os
 import shutil
+from typing import LiteralString
 
 from .args import Args
 from .files import Files
 
 
-def after_compilation(model_name, yolo_version, hailo_suite_dir):
+def after_compilation(model_name: str, yolo_version: str, hailo_suite_dir: LiteralString | str | bytes) -> None:
     """
     Copy files from the Hailo Model Zoo folder and remove the training folder from the model Hailo Suite folder.
+
+    Args:
+        model_name (str): Name of the YOLO model.
+        yolo_version (str): Version of the YOLO model.
+        hailo_suite_dir (LiteralString|str|bytes): Path to the Hailo Suite directory.
     """
     # Get the parsed, optimized, and compiled file paths
     model_hailo_suite_parsed_file_path = Files.get_model_hailo_suite_parsed_har_file_path(model_name, yolo_version)
@@ -51,11 +57,7 @@ def after_compilation(model_name, yolo_version, hailo_suite_dir):
         else:
             print(f'{src} does not exist')
 
-
-def main() -> None:
-    """
-    Main function to run the script.
-    """
+if __name__ == '__main__':
     parser = ArgumentParser(
         description="Script to copy the generated '.har' and '.hef' files from the Hailo Suite folder")
     Args.add_yolo_input_model_argument(parser)
@@ -73,7 +75,3 @@ def main() -> None:
 
     # Copy the files from the Hailo Model Zoo folder
     after_compilation(arg_yolo_input_model, arg_yolo_version, hailo_suite_dir)
-
-
-if __name__ == '__main__':
-    main()

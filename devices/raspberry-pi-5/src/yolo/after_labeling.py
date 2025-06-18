@@ -1,10 +1,6 @@
 from .files import Files
 
-
-def main() -> None:
-    """
-    Main function to run the script.
-    """
+if __name__ == '__main__':
     # Get the resized to process folder
     resized_to_process_dir = Files.get_dataset_model_dir_path(Files.DATASET_RESIZED, Files.DATASET_TO_PROCESS, None)
 
@@ -13,7 +9,3 @@ def main() -> None:
 
     # Move the folder content
     Files.move_folder_content(resized_to_process_dir, resized_processed_dir)
-
-
-if __name__ == '__main__':
-    main()

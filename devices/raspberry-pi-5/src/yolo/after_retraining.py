@@ -4,11 +4,7 @@ import os
 from .args import Args
 from .files import Files
 
-
-def main() -> None:
-    """
-    Main function to run the script.
-    """
+if __name__ == '__main__':
     parser = ArgumentParser(description='Script to move YOLO model runs folder to old runs folder')
     Args.add_yolo_version_argument(parser)
     args = Args.parse_args_as_dict(parser)
@@ -40,7 +36,3 @@ def main() -> None:
 
     # Move the folder
     Files.move_folder(yolo_runs_new_name_dir, yolo_old_runs_dir)
-
-
-if __name__ == '__main__':
-    main()

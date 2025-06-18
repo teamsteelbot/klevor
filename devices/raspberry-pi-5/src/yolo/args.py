@@ -1,131 +1,187 @@
+from argparse import ArgumentParser
+from enum import Enum, unique
+
 from ..args import Args as A
 from . import Yolo
 
+@unique
+class Flags(Enum):
+    """
+    Enum to represent command line flags.
+    """
+    DEBUG = 1
+    FORMAT = 2
+    QUANTIZED = 3
+    INPUT_MODEL = 4
+    INPUT_MODEL_PT = 5
+    OUTPUT_MODEL = 6
+    VERSION = 7
+    RETRAINING = 8
+    CLASSES = 9
+    IGNORE_CLASSES = 10
+    EPOCHS = 11
+    DEVICE = 12
+    IMAGE_SIZE = 13
+
+    def get_flag_name(self) -> str:
+        """
+        Get the flag name with the prefix.
+
+        Returns:
+            str: The flag name with the prefix.
+        """
+        return self.name.lower().replace("_", "-")
 
 class Args(A):
     """
     Class to handle command line arguments.
     """
-    # Arguments
-    DEBUG = 'debug'
-    FORMAT = 'format'
-    QUANTIZED = 'quantized'
-    INPUT_MODEL = 'input-model'
-    INPUT_MODEL_PT = 'input-model-pt'
-    OUTPUT_MODEL = 'output-model'
-    VERSION = 'version'
-    RETRAINING = 'retraining'
-    CLASSES = 'classes'
-    IGNORE_CLASSES = 'ignore-classes'
-    EPOCHS = 'epochs'
-    DEVICE = 'device'
-    IMAGE_SIZE = 'imgsz'
 
     @classmethod
-    def add_yolo_input_model_argument(cls, parser) -> None:
+    def add_yolo_input_model_argument(cls, parser: ArgumentParser) -> None:
         """
         Add YOLO input model argument to the parser.
+
+        Args:
+            parser (ArgumentParser): The argument parser to which the argument will be added.
         """
-        parser.add_argument(cls.get_attribute_name(cls.INPUT_MODEL), type=str, required=True, help='YOLO input model',
+        cls._add_non_boolean_argument(parser, Flags.INPUT_MODEL, type=str, required=True, help='YOLO input model',
                             choices=Yolo.MODELS_NAME)
 
     @classmethod
-    def add_yolo_input_model_pt_argument(cls, parser) -> None:
+    def add_yolo_input_model_pt_argument(cls, parser: ArgumentParser) -> None:
         """
         Add YOLO input PyTorch model argument to the parser.
+
+        Args:
+            parser (ArgumentParser): The argument parser to which the argument will be added.
         """
-        parser.add_argument(cls.get_attribute_name(cls.INPUT_MODEL_PT), type=str, required=True,
-                            help='YOLO input PyTorch model')
+        cls._add_non_boolean_argument(parser, Flags.INPUT_MODEL_PT, type=str, required=True,
+                                      help='YOLO input PyTorch model',)
 
     @classmethod
-    def add_yolo_output_model_argument(cls, parser) -> None:
+    def add_yolo_output_model_argument(cls, parser: ArgumentParser) -> None:
         """
         Add YOLO output model argument to the parser.
+
+        Args:
+            parser (ArgumentParser): The argument parser to which the argument will be added.
         """
-        parser.add_argument(cls.get_attribute_name(cls.OUTPUT_MODEL), type=str, required=True, help='YOLO output model',
+        cls._add_non_boolean_argument(parser, Flags.OUTPUT_MODEL, type=str, required=True, help='YOLO output model',
                             choices=Yolo.MODELS_NAME)
 
     @classmethod
-    def add_yolo_format_argument(cls, parser, required: bool = False) -> None:
+    def add_yolo_format_argument(cls, parser: ArgumentParser, required: bool = False) -> None:
         """
         Add YOLO format argument to the parser.
+
+        Args:
+            parser (ArgumentParser): The argument parser to which the argument will be added.
+            required (bool): Whether the argument is required or not. Defaults to False.
         """
-        parser.add_argument(cls.get_attribute_name(cls.FORMAT), type=str, required=required, help='YOLO format',
-                            choices=Yolo.FORMATS, default=Yolo.FORMAT_PT)
+        cls._add_non_boolean_argument(parser, Flags.FORMAT, type=str, required=required, help='YOLO format',
+                                     choices=Yolo.FORMATS, default=Yolo.FORMAT_PT)
 
     @classmethod
-    def add_yolo_quantized_argument(cls, parser, default: bool = False) -> None:
+    def add_yolo_quantized_argument(cls, parser: ArgumentParser, default: bool = False) -> None:
         """
         Add YOLO quantized argument to the parser.
+
+        Args:
+            parser (ArgumentParser): The argument parser to which the argument will be added.
+            default (bool): Default value for the quantized argument. Defaults to False.
         """
-        parser.add_argument(f"--no-{cls.QUANTIZED}", dest=cls.QUANTIZED, action="store_false", help="Disable quantized")
-        parser.add_argument(f"--{cls.QUANTIZED}", dest=cls.QUANTIZED, action="store_true", help="Enable quantized")
-        parser.set_defaults(**{cls.QUANTIZED: default})
+        cls._add_boolean_argument(parser, Flags.QUANTIZED, default=default)
 
     @classmethod
-    def add_yolo_version_argument(cls, parser) -> None:
+    def add_yolo_version_argument(cls, parser: ArgumentParser) -> None:
         """
         Add YOLO version argument to the parser.
+
+        Args:
+            parser (ArgumentParser): The argument parser to which the argument will be added.
         """
-        parser.add_argument(cls.get_attribute_name(cls.VERSION), type=str, required=True, help='YOLO model version',
-                            choices=Yolo.VERSIONS)
+        cls._add_non_boolean_argument(parser, Flags.VERSION, type=str, required=True, help='YOLO model version',
+                                      choices=Yolo.VERSIONS)
 
     @classmethod
-    def add_yolo_retraining_argument(cls, parser, default: bool = False) -> None:
+    def add_yolo_retraining_argument(cls, parser: ArgumentParser, default: bool = False) -> None:
         """
         Add YOLO retraining argument to the parser.
+
+        Args:
+            parser (ArgumentParser): The argument parser to which the argument will be added.
+            default (bool): Default value for the retraining argument. Defaults to False.
         """
-        parser.add_argument(f"--no-{cls.RETRAINING}", dest=cls.RETRAINING, action="store_false",
-                            help="Set retraining flag as 'False'")
-        parser.add_argument(f"--{cls.RETRAINING}", dest=cls.RETRAINING, action="store_true",
-                            help="Set retraining flag as 'True'")
-        parser.set_defaults(**{cls.RETRAINING: default})
+        cls._add_boolean_argument(parser, Flags.RETRAINING, default=default)
 
     @classmethod
-    def add_yolo_classes_argument(cls, parser, required: bool = True) -> None:
+    def add_yolo_classes_argument(cls, parser: ArgumentParser, required: bool = True) -> None:
         """
         Add YOLO classes argument to the parser.
+
+        Args:
+            parser (ArgumentParser): The argument parser to which the argument will be added.
+            required (bool): Whether the argument is required or not. Defaults to True.
         """
-        parser.add_argument(cls.get_attribute_name(cls.CLASSES), type=str, required=required, help='YOLO classes',
-                            nargs="*")
+        cls._add_non_boolean_argument(parser, Flags.CLASSES, type=str, required=required, help='YOLO classes',
+                                      nargs="*")
 
     @classmethod
-    def add_yolo_ignore_classes_argument(cls, parser, required: bool = True) -> None:
+    def add_yolo_ignore_classes_argument(cls, parser: ArgumentParser, required: bool = True) -> None:
         """
         Add YOLO ignore classes argument to the parser.
+
+        Args:
+            parser (ArgumentParser): The argument parser to which the argument will be added.
+            required (bool): Whether the argument is required or not. Defaults to True.
         """
-        parser.add_argument(cls.get_attribute_name(cls.IGNORE_CLASSES), type=str, required=required,
-                            help='YOLO ignore classes', nargs="*")
+        cls._add_non_boolean_argument(parser, Flags.IGNORE_CLASSES, type=str, required=required,
+                                      help='YOLO ignore classes', nargs="*")
 
     @classmethod
-    def add_yolo_epochs_argument(cls, parser, required: bool = True) -> None:
+    def add_yolo_epochs_argument(cls, parser: ArgumentParser, required: bool = True) -> None:
         """
         Add YOLO epochs argument to the parser.
+
+        Args:
+            parser (ArgumentParser): The argument parser to which the argument will be added.
+            required (bool): Whether the argument is required or not. Defaults to True.
         """
-        parser.add_argument(cls.get_attribute_name(cls.EPOCHS), type=int, required=required, help='YOLO epochs',
-                            default=100)
+        cls._add_non_boolean_argument(parser, Flags.EPOCHS, type=int, required=required,
+                                      help='YOLO epochs', default=100)
 
     @classmethod
-    def add_yolo_device_argument(cls, parser, required: bool = True) -> None:
+    def add_yolo_device_argument(cls, parser: ArgumentParser, required: bool = True) -> None:
         """
         Add YOLO device argument to the parser.
+
+        Args:
+            parser (ArgumentParser): The argument parser to which the argument will be added.
+            required (bool): Whether the argument is required or not. Defaults to True.
         """
-        parser.add_argument(cls.get_attribute_name(cls.DEVICE), type=str, required=required, help='YOLO device',
-                            default='0')
+        cls._add_non_boolean_argument(parser, Flags.DEVICE, type=str, required=required,
+                                      help='YOLO device', choices=['0', 'cpu', 'cuda'], default='0')
 
     @classmethod
-    def add_yolo_image_size_argument(cls, parser, required: bool = True) -> None:
+    def add_yolo_image_size_argument(cls, parser: ArgumentParser, required: bool = True) -> None:
         """
         Add YOLO image size argument to the parser.
+
+        Args:
+            parser (ArgumentParser): The argument parser to which the argument will be added.
+            required (bool): Whether the argument is required or not. Defaults to True.
         """
-        parser.add_argument(cls.get_attribute_name(cls.IMAGE_SIZE), type=int, required=required, help='YOLO image size',
-                            default=640)
+        cls._add_non_boolean_argument(parser, Flags.IMAGE_SIZE, type=int, required=required,
+                                      help='YOLO image size', default=640)
 
     @classmethod
-    def add_debug_argument(cls, parser, default: bool = False) -> None:
+    def add_debug_argument(cls, parser: ArgumentParser, default: bool = False) -> None:
         """
         Add debug argument to the parser.
+
+        Args:
+            parser (ArgumentParser): The argument parser to which the argument will be added.
+            default (bool): Default value for the debug argument. Defaults to False.
         """
-        parser.add_argument(f"--no-{cls.DEBUG}", dest=cls.DEBUG, action="store_false", help="Set debug flag as 'False'")
-        parser.add_argument(f"--{cls.DEBUG}", dest=cls.DEBUG, action="store_true", help="Set debug flag as 'True'")
-        parser.set_defaults(**{cls.DEBUG: default})
+        cls._add_boolean_argument(parser, Flags.DEBUG, default=default)
