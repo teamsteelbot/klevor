@@ -226,3 +226,4 @@ class Logger(LoggerABC):
         Destructor to ensure the logger thread is stopped when the object is deleted.
         """
         self.stop_thread() if self.__thread else None
+        print("Logger thread stopped and resources cleaned up.")

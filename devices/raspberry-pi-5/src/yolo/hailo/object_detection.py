@@ -184,3 +184,10 @@ class ObjectDetection(ObjectDetectionABC):
 
         # Log
         self.__logger.info('Object detection threads stopped.') if self.__logger else None
+
+    def __del__(self):
+        """
+        Destructor to ensure the thread is stopped when the object is deleted.
+        """
+        self.stop_thread() if self.is_running() else None
+        self.__logger.info('ObjectDetection instance deleted.') if self.__logger else None

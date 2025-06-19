@@ -110,7 +110,7 @@ class ImageProcessingQueue(ImageProcessingQueueABC):
         self.__logger.debug(f"Image retrieved from input image processing queue.") if self.__logger else None
 
         # Send image to server
-        self.__server.send_original_image(image) if self.__server else None
+        self.__server.broadcast_original_image(image) if self.__server else None
 
         return preprocessed_image
 
@@ -275,5 +275,5 @@ class ImageProcessingQueue(ImageProcessingQueueABC):
         """
         Destructor for the image processing queue.
         """
-        # Stop the image processing queue thread
         self.stop_thread() if self.__thread else None
+        self.__logger.info("Image processing queue destroyed.") if self.__logger else None

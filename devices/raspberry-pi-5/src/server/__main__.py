@@ -1,15 +1,14 @@
 from time import sleep
 
-from . import RealtimeTrackerServer
+from . import WebsocketServer
 from ..log import Logger
-from ..log.message import Message
 
 if __name__ == "__main__":
     # Create an instance of Logger
     logger = Logger()
 
-    # Create an instance of RealtimeTrackerServer
-    realtime_tracker_server = RealtimeTrackerServer(logger=logger)
+    # Create an instance of WebsocketServer
+    realtime_tracker_server = WebsocketServer(logger=logger)
 
     try:
         # Create a thread for the logger
@@ -25,11 +24,11 @@ if __name__ == "__main__":
 
     except KeyboardInterrupt:
         # Handle keyboard interrupt to stop the server gracefully
-        logger.log(Message("KeyboardInterrupt received. Stopping the server..."))
+        logger.warning("KeyboardInterrupt received. Stopping the server...")
 
     except Exception as e:
         # Log any exceptions that occur
-        logger.log(Message(f"An error occurred: {e}"))
+        logger.error(f"An error occurred: {e}")
 
     finally:
         # Stop the server thread

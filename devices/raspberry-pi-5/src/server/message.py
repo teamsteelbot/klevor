@@ -19,7 +19,6 @@ class Message:
         """
         self.content = content
         self.tag = tag
-
     
     def __str__(self):
         """

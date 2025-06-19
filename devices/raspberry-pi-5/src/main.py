@@ -6,27 +6,27 @@ from camera.image_processing_queue import main as images_queue_main, ImageProces
 from env import Env
 from log import main as log_main, Logger
 from serial_communication import SerialCommunication, main as serial_communication_main
-from server import RealtimeTrackerServer
+from server import WebsocketServer
 from server import main as server_main
 from utils import check_type
 from yolo.args import Args
 from yolo.hailo.object_detection import main as object_detection_main
 
 
-def process_1_fn(serial_communication: SerialCommunication, server: RealtimeTrackerServer | None):
+def process_1_fn(serial_communication: SerialCommunication, server: WebsocketServer | None):
     """
     Process 1: Serial communication with Raspberry Pi Pico.
 
     Args:
         serial_communication (SerialCommunication): The serial communication object.
-        server (RealtimeTrackerServer|None): The WebSocket server for real-time tracking updates.
+        server (WebsocketServer|None): The WebSocket server for real-time tracking updates.
     """
     # Check the type of serial communication
     check_type(serial_communication, SerialCommunication)
 
     # Check the type of server
     if server:
-        check_type(server, RealtimeTrackerServer)
+        check_type(server, WebsocketServer)
 
     # Check if the server is None
     if server is None:

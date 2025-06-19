@@ -1,7 +1,7 @@
 from websockets import connect
 import asyncio
 
-from . import RealtimeTrackerServer
+from . import WebsocketServer
  
 async def ws_client():
     """
@@ -10,7 +10,7 @@ async def ws_client():
     and listen for incoming messages indefinitely.
     """
     # Connect to the server
-    url = f'ws://{RealtimeTrackerServer.HOST}:{RealtimeTrackerServer.PORT}'
+    url = f'ws://{WebsocketServer.HOST}:{WebsocketServer.PORT}'
     print(f"Connecting to WebSocket server at {url}...")
     async with connect(url) as ws: 
         # Stay alive forever, listen to incoming msgs

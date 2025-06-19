@@ -6,7 +6,7 @@ from threading import Thread
 from websockets import connect
 
 from ..args import Args
-from ..server import RealtimeTrackerServer
+from ..server import WebsocketServer
 from . import RPLIDAR
 from .measure import Measure
 
@@ -160,8 +160,8 @@ class App:
         async with connect(self.__url) as ws:
             while True:
                 msg = await ws.recv()
-                parts = msg.split(RealtimeTrackerServer.TAG_SEPARATOR)
-                if parts[0] == RealtimeTrackerServer.TAG_RPLIDAR_MEASURES:
+                parts = msg.split(WebsocketServer.TAG_SEPARATOR)
+                if parts[0] == WebsocketServer.TAG_RPLIDAR_MEASURES:
                     measure = Measure.from_string(parts[1])
                     if not measure:
                         print(f"Invalid measure received: {parts[1]}")

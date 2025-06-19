@@ -2,7 +2,7 @@ from argparse import ArgumentParser
 
 from ..args import Args
 from . import RPLIDAR
-from ..server import RealtimeTrackerServer
+from ..server import WebsocketServer
 from ..log import Logger
 from ..log.message import Message
 from time import sleep
@@ -38,7 +38,7 @@ if __name__ == "__main__":
         if not arg_server:
             server = None
         else:
-            server = RealtimeTrackerServer(logger=logger)
+            server = WebsocketServer(logger=logger)
 
             # Start the server
             server.create_thread()

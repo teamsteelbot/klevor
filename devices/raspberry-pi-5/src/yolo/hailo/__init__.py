@@ -297,3 +297,11 @@ class Hailo(HailoABC):
 
         # Log
         self.__logger.info("Hailo handler thread stopped.") if self.__logger else None
+
+    def __del__(self):
+        """
+        Destructor to ensure the thread is stopped when the object is deleted.
+        """
+        # Stop the thread if it is running
+        self.stop_thread() if self.is_running() else None
+        self.__logger.info("Hailo handler object deleted.") if self.__logger else None

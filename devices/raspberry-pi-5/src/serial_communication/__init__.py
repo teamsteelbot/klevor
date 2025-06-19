@@ -12,7 +12,7 @@ from ..camera.image_processing_queue import ImageProcessingQueue
 from ..log import Logger
 from ..log.sub_logger import SubLogger
 from .message import Message
-from ..server import RealtimeTrackerServer
+from ..server import WebsocketServer
 from ..utils import check_type
 from ..env import Env
 
@@ -53,7 +53,7 @@ class SerialCommunication:
         self,
         logger: Optional[Logger] = None,
         images_queue: Optional[ImageProcessingQueue] = None,
-        server: Optional[RealtimeTrackerServer] = None,
+        server: Optional[WebsocketServer] = None,
         data_port: Optional[str] = RASPBERRY_PI_PICO_DATA_PORT,
         console_port: Optional[str] = RASPBERRY_PI_PICO_CONSOLE_PORT,
         baudrate: Optional[int] = RASPBERRY_PI_PICO_BAUDRATE
@@ -67,7 +67,7 @@ class SerialCommunication:
             data_port (str): Serial port used for sending data to Pico
             console_port (str): Serial port used for receiving data from Pico.
             baudrate (int): Baud rate for the serial communication. Default is 115200.
-            server (RealtimeTrackerServer): Server instance for sending messages to the server. Default is None.
+            server (WebsocketServer): Server instance for sending messages to the server. Default is None.
         """
         # Create the reentrant lock
         self.__rlock = RLock()
@@ -88,7 +88,7 @@ class SerialCommunication:
 
         # Check the type of the server
         if server:
-            check_type(server, RealtimeTrackerServer)
+            check_type(server, WebsocketServer)
         self.__server = server
 
         # Check the type of the logger

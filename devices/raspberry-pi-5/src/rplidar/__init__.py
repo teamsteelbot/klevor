@@ -8,7 +8,7 @@ import asyncio
 from ..utils import check_type
 from ..log.abstracts import LoggerABC
 from ..log.sub_logger import SubLogger
-from ..server import RealtimeTrackerServer
+from ..server import WebsocketServer
 from ..serial_communication import SerialCommunication
 from .measure import Measure
 
@@ -43,7 +43,7 @@ class RPLIDAR:
     def __init__(
             self,
             logger: Optional[Logger] = None,
-            server: Optional[RealtimeTrackerServer] = None,
+            server: Optional[WebsocketServer] = None,
             serial: Optional[SerialCommunication] = None,
             baudrate: int = RPLIDAR_C1_BAUDRATE,
             port: str = RPLIDAR_C1_PORT
@@ -53,7 +53,7 @@ class RPLIDAR:
 
         Args:
             logger (Logger|None): Logger instance for logging messages.
-            server (RealtimeTrackerServer|None): Server instance for real-time tracking updates.
+            server (WebsocketServer|None): Server instance for real-time tracking updates.
             serial (SerialCommunication|None): SerialCommunication instance for RPLIDAR.
             baudrate (int): Baud rate for the serial communication.
             port (str): SerialCommunication port for the RPLIDAR.
@@ -76,7 +76,7 @@ class RPLIDAR:
 
         # Check the type of server
         if server:
-            check_type(server, RealtimeTrackerServer)
+            check_type(server, WebsocketServer)
         self.__server = server
 
         # Check the type of serial communication
