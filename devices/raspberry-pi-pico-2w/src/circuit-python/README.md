@@ -2,10 +2,10 @@ Esta carpeta tiene todo el código hecho en CircuitPython para el desarrollo de 
 
 <h2 id="open-challenge-explanation">Cómo funciona Klevor durante el Desafío Abierto?</h2>
 
-Durante el Desafío Abierto, Klevor prioriza cumplir una serie de pasos antes de dar una vuelta, esto está mejor definido en el [Diagrama de Flujo](../../../schemes/open-challenge-flowchart.png) (click aquí para poder hacer zoom).
+Durante el Desafío Abierto, Klevor prioriza cumplir una serie de pasos antes de dar una vuelta, esto está mejor definido en el [Diagrama de Flujo](../../../../schemes/prototype2/open-challenge-flowchart.png) (click aquí para poder hacer zoom).
 
 <p align="center">
-    <img src="../../../schemes/prototype2/open-challenge-flowchart.png" alt="Diagrama de Flujo" width=5000>
+    <img src="../../../../schemes/prototype2/open-challenge-flowchart.png" alt="Diagrama de Flujo" width=5000>
 </p>
 
 Como se puede apreciar, Klevor siempre intenta cumplir una serie de pasos:
@@ -17,4 +17,4 @@ Como se puede apreciar, Klevor siempre intenta cumplir una serie de pasos:
 - Mientras está girando, empieza a leer los datos del giroscopio, cuando detecte un cambio de al menos 90°, empieza a avanzar hacia adelante, sumándole 1 a su contador de giros, en caso contrario, simplemente sigue girando.
 - Tras completar sus 12 giros, Klevor simplemente avanza por un breve momento (para asegurar que esté en la zona de salida) y se detiene, completando así el Desafío Abierto. 
 
-Ahora bien, este es el caso de nuestro primer prototipo, con respecto a nuestro segundo prototipo, gran parte de la lógica se mantiene intacta, realmente lo único que cambia es la forma en la obtenemos los datos de la distancia, gracias a la forma en la que Klevor está diseñado el [RPLiDAR C1](../../../README.md/#componentes-rplidar-c1) tiene un rango de visión de más o menos 200 grados, además de que sus mediciones son mucho más confiables que utilizar múltiples sensores ToF a la vez, y sus mediciones son mucho más rápidas, ya que cada sensor ToF necesita de alrededor de 50ms para poder dar una medición lo suficientemente precisa, tras ese cambio, el resto de la lógica en el Desafío Abierto es casi exactamente lo mismo.
+Ahora bien, este es el caso de nuestro primer prototipo, con respecto a nuestro segundo prototipo, gran parte de la lógica se mantiene intacta, realmente lo único que cambia es la forma en la obtenemos los datos de la distancia, gracias a la forma en la que Klevor está diseñado el [RPLiDAR C1](../../../../README.md/#componentes-rplidar-c1) tiene un rango de visión de más o menos 200 grados, además de que sus mediciones son mucho más confiables que utilizar múltiples sensores ToF a la vez, y sus mediciones son mucho más rápidas, ya que cada sensor ToF necesita de alrededor de 50ms para poder dar una medición lo suficientemente precisa, tras ese cambio, el resto de la lógica en el Desafío Abierto es casi exactamente lo mismo.
