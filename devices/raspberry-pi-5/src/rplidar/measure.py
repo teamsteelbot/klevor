@@ -4,8 +4,9 @@ from ..utils import check_type
 
 class Measure:
     """
-    Represents a single measurement from the RPLIDAR.
+    Class that represents a single measurement from the RPLIDAR.
     """
+
     # Attributes separator
     ATTRIBUTES_SEPARATOR = ","
 

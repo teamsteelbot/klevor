@@ -1,4 +1,45 @@
+from enum import Enum, unique
+
 from ..utils import check_type
+
+
+@unique
+class Category(Enum):
+    """
+    Enum to represent the categories of messages sent and received from the Raspberry Pi Pico.
+    """
+    CAPTURE_IMAGE = 1
+    INFERENCE = 2
+    RPLIDAR = 3
+    DEBUG = 4
+    STATUS = 5
+
+    def get_category_name(self) -> str:
+        """
+        Get the category name in lowercase.
+
+        Returns:
+            str: The category name in lowercase.
+        """
+        return self.name.lower()
+
+@unique
+class Status(Enum):
+    """
+    Enum to represent the status messages sent and received from the Raspberry Pi Pico.
+    """
+    START = 1
+    STOP = 2
+    OK = 3
+
+    def get_status_name(self) -> str:
+        """
+        Get the status name in lowercase.
+
+        Returns:
+            str: The status name in lowercase.
+        """
+        return self.name.lower()
 
 class Message:
     """
@@ -10,47 +51,73 @@ class Message:
     # Message end character
     END = '\n'
 
-    def __init__(self, message_type: str, message_content: str):
+    def __init__(self, category: Category, content: str):
         """
         Initialize the message class.
 
         Args:
-            message_type (str): The type of the message. Must be one of TYPES.
-            message_content (str): The content of the message.
+            category (str): The category of the message.
+            content (str): The content of the message.
         """
-        # Set the message type
-        self.type = message_type
-
-        # Set the message content
-        self.content = message_content
+        self.category = category
+        self.content = content
 
     def __str__(self) -> str:
         """
         String representation of the message.
         """
-        return f"{self.__type}{self.HEADER_SEPARATOR}{self.__content}{self.END}"
+        return f"{self.__category}{self.HEADER_SEPARATOR}{self.__content}{self.END}"
 
-    @property
-    def type(self) -> str:
+    @staticmethod
+    def from_string(message_str: str) -> 'Message':
         """
-        Property to get the message type.
-
-        Returns:
-            str: The type of the message.
-        """
-        return self.__type
-
-    @type.setter
-    def type(self, message_type: str):
-        """
-        Setter for the message type.
+        Create a Message object from a string.
 
         Args:
-            message_type (str): The type of the message. Must be one of TYPES.
+            message_str (str): The string representation of the message.
+
+        Returns:
+            Message: The Message object created from the string.
+        """
+        # Remove the end character if present
+        if message_str.endswith(Message.END):
+            message_str = message_str[:-1]
+
+        # Split the string into category and content
+        parts = message_str.strip().split(Message.HEADER_SEPARATOR, 1)
+        if len(parts) != 2:
+            raise ValueError("Invalid message format")
+
+        # Convert the category string to a Category enum value
+        category_name = parts[0].upper()
+        if category_name not in Category.__members__:
+            raise ValueError(f"Invalid category: {parts[0]}")
+        category = Category[category_name]
+
+        # Create and return the Message object
+        return Message(category, parts[1])
+
+    @property
+    def category(self) -> Category:
+        """
+        Property to get the message category.
+
+        Returns:
+            Category: The category of the message.
+        """
+        return self.__category
+
+    @category.setter
+    def category(self, category: Category):
+        """
+        Setter for the message category.
+
+        Args:
+            category (str): The category of the message.
         """
         # Check the type of message
-        check_type(message_type, str)
-        self.__type = message_type
+        check_type(category, Category)
+        self.__category = category
 
     @property
     def content(self) -> str:
@@ -63,13 +130,31 @@ class Message:
         return self.__content
 
     @content.setter
-    def content(self, message_content: str):
+    def content(self, content: str):
         """
         Setter for the message content.
 
         Args:
-            message_content (str): The content of the message.
+            content (str): The content of the message.
         """
         # Check the type of content
-        check_type(message_content, str)
-        self.__content = message_content
+        check_type(content, str)
+        self.__content = content
+
+    def is_start(self) -> bool:
+        """
+        Check if the message is a start message.
+
+        Returns:
+            bool: True if the message is a start message, False otherwise.
+        """
+        return self.category == Category.STATUS and self.content == Status.START.get_status_name()
+
+    def is_stop(self) -> bool:
+        """
+        Check if the message is a stop message.
+
+        Returns:
+            bool: True if the message is a stop message, False otherwise.
+        """
+        return self.category == Category.STATUS and self.content == Status.STOP.get_status_name()

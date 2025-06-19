@@ -1,4 +1,24 @@
+from enum import Enum, unique
+
 from ..utils import check_type
+
+@unique
+class Tag(Enum):
+    """
+    Enum to represent the tags of messages sent and received from the server.
+    This is used for categorizing or filtering messages based on their type.
+    """
+    CONNECTION_STATUS = 1
+    SERIAL_INCOMING_MESSAGE = 2
+    SERIAL_OUTGOING_MESSAGE = 3
+    IMAGE_ORIGINAL = 4
+    IMAGE_MODEL_G = 5
+    IMAGE_MODEL_M = 6
+    IMAGE_MODEL_R = 7
+    RPLIDAR_MEASURES = 8
+    STOP_EVENT = 9
+    PARKING_EVENT = 10
+
 
 class Message:
     """
@@ -9,12 +29,12 @@ class Message:
     # Tag separator used to separate the tag from the content in the message string
     TAG_SEPARATOR = ":"
 
-    def __init__(self, tag: str, content: str):
+    def __init__(self, tag: Tag, content: str):
         """
         Initialize the Message instance.
 
         Args:
-            tag (str): A tag associated with the message, used for categorization or filtering.
+            tag (Tag): A tag associated with the message, used for categorization or filtering.
             content (str): The content of the message.
         """
         self.content = content
@@ -49,22 +69,22 @@ class Message:
         self.__content = value
 
     @property
-    def tag(self) -> str:
+    def tag(self) -> Tag:
         """
         Get the tag of the message.
 
         Returns:
-            str: The tag of the message.
+            Tag: The tag of the message.
         """
         return self.__tag
         
     @tag.setter
-    def tag(self, value: str):
+    def tag(self, value: Tag):
         """
         Set the tag of the message.
 
         Args:
-            value (str): The new tag for the message.
+            value (Tag): The new tag for the message.
         """
-        check_type(value, str)
+        check_type(value, Tag)
         self.__tag = value

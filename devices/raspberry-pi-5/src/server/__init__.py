@@ -12,7 +12,7 @@ from .abstracts import WebsocketsServerABC
 from ..log import LoggerABC
 from ..log.sub_logger import SubLogger
 from ..utils import check_type, get_local_ip
-from .message import Message
+from .message import Message, Tag
 from ..yolo import Yolo
 
 class WebsocketsServer(WebsocketsServerABC):
@@ -29,29 +29,6 @@ class WebsocketsServer(WebsocketsServerABC):
     # Server configuration
     HOST = '0.0.0.0'
     PORT = 8765
-
-    # Connection status tag
-    TAG_CONNECTION_STATUS = "connection_status"
-
-    # Serial communication tags
-    TAG_SERIAL_INCOMING_MESSAGE = "serial_incoming_message"
-    TAG_SERIAL_OUTGOING_MESSAGE = "serial_outgoing_message"
-
-    # Image tags
-    TAG_IMAGE_ORIGINAL = "image_original"
-    TAG_IMAGE_MODEL_G = "image_model_g"
-    TAG_IMAGE_MODEL_M = "image_model_m"
-    TAG_IMAGE_MODEL_R = "image_model_r"
-
-    # RPLIDAR measures tag
-    TAG_RPLIDAR_MEASURES = "rplidar_measures"
-
-    # Event tags
-    TAG_STOP_EVENT = "stop_event"
-    TAG_PARKING_EVENT = "parking_event"
-    
-    # Tag separator
-    TAG_SEPARATOR = ":"
 
     # Unknown message tag
     TAG_UNKNOWN_TAG = "unknown_tag"
@@ -116,7 +93,7 @@ class WebsocketsServer(WebsocketsServerABC):
         self.__logger.debug(f"Client connected: {connection.remote_address}") if self.__logger else None
 
         # Send a welcome message immediately upon connection
-        await self._send_message(connection, Message(self.TAG_CONNECTION_STATUS, "Connected to WebsocketServer"))
+        await self._send_message(connection, Message(Tag.CONNECTION_STATUS, "Connected to WebsocketServer"))
 
         try:
             while not self.__stop_event.is_set():
@@ -126,12 +103,12 @@ class WebsocketsServer(WebsocketsServerABC):
                 self.__logger.debug(f"Received message: {msg}") if self.__logger else None
 
                 # Check if the message is a stop event
-                if msg == self.TAG_STOP_EVENT:
+                if msg == Tag.STOP_EVENT:
                     self.__logger.debug("Stop event received. Stopping the server...") if self.__logger else None
                     self.__stop_event.set()
 
                 # Check if the message is a parking event
-                elif msg == self.TAG_PARKING_EVENT:
+                elif msg == Tag.PARKING_EVENT:
                     if not self.__parking_event:
                         pass
 
@@ -146,7 +123,7 @@ class WebsocketsServer(WebsocketsServerABC):
                     # Unknown message type
                     self.__logger.warning(f"Unknown message type: {msg}") if self.__logger else None
 
-                    await self._send_message(connection, Message(self.TAG_UNKNOWN_TAG, "Unknown message type received."))
+                    await self._send_message(connection, Message(Tag.UNKNOWN_TAG, "Unknown message type received."))
                     continue
 
                 # Broadcast the received message to all connected clients
@@ -189,7 +166,7 @@ class WebsocketsServer(WebsocketsServerABC):
                 self.__logger.error(f"Unexpected error while broadcasting message: {e}") if self.__logger else None
 
     @final
-    async def _broadcast_image_with_tag(self, tag: str, img: Image):
+    async def _broadcast_image_with_tag(self, tag: Tag, img: Image):
         try:
             # Open the image and convert it to a binary stream
             img_stream = io.BytesIO()
@@ -208,25 +185,25 @@ class WebsocketsServer(WebsocketsServerABC):
         """
         Broadcasts the original image to all connected clients.
         """
-        await self._broadcast_image_with_tag(self.TAG_IMAGE_ORIGINAL, img)
+        await self._broadcast_image_with_tag(Tag.IMAGE_ORIGINAL, img)
 
     async def __broadcast_model_g_image(self, img: Image):
         """
         Broadcasts the image processed by model G to all connected clients.
         """
-        await self._broadcast_image_with_tag(self.TAG_IMAGE_MODEL_G, img)
+        await self._broadcast_image_with_tag(Tag.IMAGE_MODEL_G, img)
 
     async def __broadcast_model_m_image(self, img: Image):
         """
         Broadcasts the image processed by model M to all connected clients.
         """
-        await self._broadcast_image_with_tag(self.TAG_IMAGE_MODEL_M, img)
+        await self._broadcast_image_with_tag(Tag.IMAGE_MODEL_M, img)
 
     async def __broadcast_model_r_image(self, img: Image):
         """
         Broadcasts the image processed by model R to all connected clients.
         """
-        await self._broadcast_image_with_tag(self.TAG_IMAGE_MODEL_R, img)
+        await self._broadcast_image_with_tag(Tag.IMAGE_MODEL_R, img)
 
     @final
     async def broadcast_model_image(self, img: Image, model_name: str):
@@ -247,21 +224,21 @@ class WebsocketsServer(WebsocketsServerABC):
         check_type(msg, str)
 
         # Send a tagged message
-        await self._broadcast_message(Message(self.TAG_SERIAL_INCOMING_MESSAGE, msg))
+        await self._broadcast_message(Message(Tag.SERIAL_INCOMING_MESSAGE, msg))
 
     @final
     async def broadcast_serial_outgoing_message(self, msg: str):
         check_type(msg, str)
 
         # Send a tagged message
-        await self._broadcast_message(Message(self.TAG_SERIAL_OUTGOING_MESSAGE, msg))
+        await self._broadcast_message(Message(Tag.SERIAL_OUTGOING_MESSAGE, msg))
 
     @final
     async def broadcast_rplidar_measures(self, msg: str):
         check_type(msg, str)
 
         # Send a tagged message
-        await self._broadcast_message(Message(self.TAG_RPLIDAR_MEASURES, msg))
+        await self._broadcast_message(Message(Tag.RPLIDAR_MEASURES, msg))
 
     @final
     async def _loop(self):

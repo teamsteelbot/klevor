@@ -149,7 +149,7 @@ class HailoABC(ABC):
         """
         pass
 
-class ObjectDetectionABC:
+class ObjectDetectionABC(ABC):
     """
     Abstract class to handle object detection using Hailo handlers.
     """

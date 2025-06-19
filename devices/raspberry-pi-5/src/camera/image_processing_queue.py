@@ -162,6 +162,10 @@ class ImageProcessingQueue(ImageProcessingQueueABC):
         self.__capture_image_event.wait()
 
     @final
+    def set_capture_image_event(self) -> None:
+        self.__capture_image_event.set()
+
+    @final
     def wait_pending_input_image_event(self) -> None:
         self.__pending_input_image_event.wait()
 
@@ -170,10 +174,7 @@ class ImageProcessingQueue(ImageProcessingQueueABC):
         self.__pending_output_inference_event.wait()
 
     @final
-    def __loop(self):
-        """
-        Loop to capture images and put them in the input image processing queue.
-        """
+    def _loop(self):
         while self.is_running():
             # Wait for the capture image event
             self.__capture_image_event.wait()
@@ -247,7 +248,7 @@ class ImageProcessingQueue(ImageProcessingQueueABC):
             self.__start()
 
             # Create a thread for the image processing queue loop
-            self.__thread = Thread(target=self.__loop)
+            self.__thread = Thread(target=self._loop)
             self.__thread.start()
 
         # Log

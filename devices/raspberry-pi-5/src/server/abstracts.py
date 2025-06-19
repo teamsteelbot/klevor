@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 from PIL.Image import Image
 
-from .message import Message
+from .message import Message, Tag
 
 class WebsocketsServerABC(ABC):
     """
@@ -31,9 +31,13 @@ class WebsocketsServerABC(ABC):
         pass
 
     @abstractmethod
-    async def _broadcast_image_with_tag(self, tag: str, img: Image):
+    async def _broadcast_image_with_tag(self, tag: Tag, img: Image):
         """
         Broadcasts an image with a tag to all the connected clients.
+
+        Args:
+            tag (Tag): The tag associated with the image.
+            img (Image): The image to broadcast.
         """
         pass
 
@@ -41,6 +45,9 @@ class WebsocketsServerABC(ABC):
     def broadcast_original_image(self, img: Image):
         """
         Broadcasts the original image to all connected clients.
+
+        Args:
+            img (Image): The original image to broadcast.
         """
         pass
 
@@ -59,6 +66,9 @@ class WebsocketsServerABC(ABC):
     async def broadcast_serial_incoming_message(self, msg: str):
         """
         Broadcasts a serial incoming message to all connected clients.
+
+        Args:
+            msg (str): The serial incoming message to broadcast.
         """
         pass
 
@@ -66,6 +76,9 @@ class WebsocketsServerABC(ABC):
     async def broadcast_serial_outgoing_message(self, msg: str):
         """
         Broadcasts a serial outgoing message to all connected clients.
+
+        Args:
+            msg (str): The serial outgoing message to broadcast.
         """
         pass
 

@@ -180,6 +180,13 @@ class ImageProcessingQueueABC(ABC):
         pass
 
     @abstractmethod
+    def set_capture_image_event(self) -> None:
+        """
+        Set the capture image event.
+        """
+        pass
+
+    @abstractmethod
     def wait_pending_input_image_event(self) -> None:
         """
         Wait for the pending input image event to be set.
@@ -190,5 +197,12 @@ class ImageProcessingQueueABC(ABC):
     def wait_pending_output_inference_event(self) -> None:
         """
         Wait for the pending output inference event to be set.
+        """
+        pass
+
+    @abstractmethod
+    def _loop(self):
+        """
+        Loop to capture images and put them in the input image processing queue.
         """
         pass

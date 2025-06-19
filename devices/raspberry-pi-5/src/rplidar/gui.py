@@ -1,12 +1,13 @@
 from argparse import ArgumentParser
-import pygame
 import math
 import asyncio
 from threading import Thread
+
+import pygame
 from websockets import connect
 
-from ..args import Args
-from ..server import WebsocketServer
+from ..args import Args, Flags
+from ..server import WebsocketsServer
 from . import RPLIDAR
 from .measure import Measure
 
@@ -160,8 +161,8 @@ class App:
         async with connect(self.__url) as ws:
             while True:
                 msg = await ws.recv()
-                parts = msg.split(WebsocketServer.TAG_SEPARATOR)
-                if parts[0] == WebsocketServer.TAG_RPLIDAR_MEASURES:
+                parts = msg.split(WebsocketsServer.TAG_SEPARATOR)
+                if parts[0] == WebsocketsServer.TAG_RPLIDAR_MEASURES:
                     measure = Measure.from_string(parts[1])
                     if not measure:
                         print(f"Invalid measure received: {parts[1]}")
@@ -178,10 +179,10 @@ if __name__ == "__main__":
     args = Args.parse_args_as_dict(parser)
 
     # Get the IP address from the arguments
-    ip = Args.get_attribute_from_args(args, Args.IP)
+    ip = Args.get_attribute_from_args_dict(args, Flags.IP)
     
     # Get the port from the arguments
-    port = Args.get_attribute_from_args(args, Args.PORT)
+    port = Args.get_attribute_from_args_dict(args, Flags.PORT)
 
     app = App(ip, port)
     ws_thread = Thread(target=asyncio.run, args=(app.ws_listener(),), daemon=True)

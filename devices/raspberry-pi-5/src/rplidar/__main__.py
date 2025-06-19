@@ -1,10 +1,9 @@
 from argparse import ArgumentParser
 
-from ..args import Args
+from ..args import Args, Flags
 from . import RPLIDAR
-from ..server import WebsocketServer
+from ..server import WebsocketsServer
 from ..log import Logger
-from ..log.message import Message
 from time import sleep
 from ..serial_communication import SerialCommunication
 
@@ -16,10 +15,10 @@ if __name__ == "__main__":
     args = Args.parse_args_as_dict(parser)
 
     # Get the server argument
-    arg_server = Args.get_attribute_from_args(args, Args.SERVER)
+    arg_server = Args.get_attribute_from_args_dict(args, Flags.SERVER)
 
     # Get the serial argument
-    arg_serial = Args.get_attribute_from_args(args, Args.SERIAL)
+    arg_serial = Args.get_attribute_from_args_dict(args, Flags.SERIAL)
 
     # Initialize variables for logger, server, serial communication, and RPLIDAR
     logger = None
@@ -38,7 +37,7 @@ if __name__ == "__main__":
         if not arg_server:
             server = None
         else:
-            server = WebsocketServer(logger=logger)
+            server = WebsocketsServer(logger=logger)
 
             # Start the server
             server.create_thread()
@@ -70,11 +69,11 @@ if __name__ == "__main__":
 
     except KeyboardInterrupt:
         # Handle keyboard interrupt to stop the server gracefully
-        logger.log(Message("KeyboardInterrupt received. Stopping the server..."))
+        logger.warning("KeyboardInterrupt received. Stopping the server...")
 
     except Exception as e:
         # Log any exceptions that occur
-        logger.log(Message(f"An error occurred: {e}"))
+        logger.error(f"An error occurred: {e}")
 
     finally:
         # Stop the RPLIDAR thread
