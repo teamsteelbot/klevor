@@ -3,11 +3,42 @@ from typing import Optional
 
 from PIL.Image import Image
 import numpy as np
+import cv2
+
+from ...opencv import OpenCV
 
 class HailoABC(ABC):
     """
     Abstract base class for Hailo handlers.
     """
+
+    @staticmethod
+    def preprocess(image: Image, width: int = OpenCV.WIDTH, height: int = OpenCV.HEIGHT) -> np.ndarray:
+        """
+        Resize image with unchanged aspect ratio using padding.
+
+        Args:
+            image (Image): Input image.
+            width (int): Model input width.
+            height (int): Model input height.
+        Returns:
+            np.ndarray: Preprocessed and padded image.
+        """
+        # Convert image to numpy array
+        image = np.array(image)
+
+        # Resize image with unchanged aspect ratio using padding
+        img_height, img_width, _ = image.shape[:3]
+        scale = min(width / img_width, height / img_height)
+        new_img_width, new_img_height = int(img_width * scale), int(img_height * scale)
+        image = cv2.resize(image, (new_img_width, new_img_height), interpolation=cv2.INTER_CUBIC)
+
+        # Calculate padding and create padded image
+        padded_image = np.full((height, width, 3), OpenCV.PADDING_COLOR, dtype=np.uint8)
+        x_offset = (height - new_img_width) // 2
+        y_offset = (height - new_img_height) // 2
+        padded_image[y_offset:y_offset + new_img_height, x_offset:x_offset + new_img_width] = image
+        return padded_image
 
     @abstractmethod
     def _set_input_type(self, input_type: Optional[str] = None) -> None:
@@ -51,55 +82,13 @@ class HailoABC(ABC):
         """
         pass
 
-    @classmethod
     @abstractmethod
-    def preprocess(cls, image: Image, width: int = Preprocessing.WIDTH, height: int = Preprocessing.HEIGHT) -> np.ndarray:
-        """
-        Resize image with unchanged aspect ratio using padding.
-
-        Args:
-            image (Image): Input image.
-            width (int): Model input width.
-            height (int): Model input height.
-
-        Returns:
-            np.ndarray: Preprocessed and padded image.
-        """
-        pass
-
-    @abstractmethod
-    def put_image(self, preprocessed_image: np.ndarray) -> None:
+    def add_image(self, preprocessed_image: np.ndarray) -> None:
         """
         Put a preprocessed image into the input queue.
 
         Args:
             preprocessed_image (np.ndarray): Preprocessed image to be put into the queue.
-        """
-        pass
-
-    @abstractmethod
-    def callback(
-            self, completion_info, bindings, preprocessed_image: np.ndarray
-    ) -> None:
-        """
-        Callback function for handling inference results.
-
-        Args:
-            completion_info: Information about the completion of the
-                             inference task.
-            bindings: Binding objects containing input
-                                  and output buffers.
-            preprocessed_image (np.ndarray): Preprocessed image used for inference.
-        """
-        pass
-
-    @abstractmethod
-    def run(self) -> None:
-        """
-        Run the inference loop.
-
-        This method continuously retrieves batches of images from the input queue,
-        preprocesses them, and runs inference using the configured infer model.
         """
         pass
 
@@ -117,15 +106,45 @@ class HailoABC(ABC):
         pass
 
     @abstractmethod
-    def start(self) -> None:
+    def _callback(
+            self, completion_info, bindings, preprocessed_image: np.ndarray
+    ) -> None:
         """
-        Start the Hailo handler by setting the stop event to False
+        Callback function for handling inference results.
+
+        Args:
+            completion_info: Information about the completion of the inference task.
+            bindings: Binding objects containing input and output buffers.
+            preprocessed_image (np.ndarray): Preprocessed image used for inference.
         """
         pass
 
     @abstractmethod
-    def stop(self) -> None:
+    def _run(self) -> None:
         """
-        Stop the Hailo handler by setting the stop event.
+        Run the inference loop.
+
+        This method continuously retrieves batches of images from the input queue,
+        preprocesses them, and runs inference using the configured infer model.
+        """
+        pass
+
+    @abstractmethod
+    def is_running(self) -> bool:
+        """
+        Check if the Hailo handler is running.
+
+        Returns:
+            True if the handler is running, False otherwise.
+        """
+        pass
+
+    @abstractmethod
+    def is_stopped(self) -> bool:
+        """
+        Check if the Hailo handler is stopped.
+
+        Returns:
+            True if the handler is stopped, False otherwise.
         """
         pass

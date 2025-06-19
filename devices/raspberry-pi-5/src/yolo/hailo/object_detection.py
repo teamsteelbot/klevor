@@ -39,7 +39,7 @@ def listen_images_queue(images_queue: ImageProcessingQueue, stop_event: Event, p
         # Check if the parking event is set
         if parking_event.is_set():
             # Put the model M image in the Hailo handler input queue
-            hailo_handlers[Yolo.MODEL_M].put_image(image)
+            hailo_handlers[Yolo.MODEL_M].add_image(image)
 
             if stopped_hailo_handlers:
                 continue
@@ -50,8 +50,8 @@ def listen_images_queue(images_queue: ImageProcessingQueue, stop_event: Event, p
             stopped_hailo_handlers = True
         else:
             # Put the model G and R images in the Hailo handler input queues
-            hailo_handlers[Yolo.MODEL_G].put_image(image)
-            hailo_handlers[Yolo.MODEL_R].put_image(image)
+            hailo_handlers[Yolo.MODEL_G].add_image(image)
+            hailo_handlers[Yolo.MODEL_R].add_image(image)
 
 def main(logger: Logger, images_queue: ImageProcessingQueue, parking_event: Event, stop_event: Event) -> None:
     """
