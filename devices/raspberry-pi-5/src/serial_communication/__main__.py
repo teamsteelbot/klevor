@@ -18,14 +18,14 @@ if __name__ == "__main__":
         serial.create_threads()
 
         # Start the serial communication
-        serial.start_threads()
+        serial.start()
 
         # Wait for the start message from SerialCommunication
         logger.log("Waiting for start message from SerialCommunication...")
-        serial.wait_for_start_message()
+        serial.wait_start_event()
 
         # Wait for the stop message from SerialCommunication
-        serial.wait_for_stop_message()
+        serial.wait_stop_event()
         logger.log("Received stop message from SerialCommunication, stopping RPLIDAR...")
 
         # Wait indefinitely to keep the serial communication running

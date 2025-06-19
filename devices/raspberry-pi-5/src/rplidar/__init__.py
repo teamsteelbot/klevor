@@ -2,20 +2,23 @@ import subprocess
 import os
 from multiprocessing import Event, RLock
 from threading import Thread
-from typing import Optional
+from typing import Optional, final
 import asyncio
 
+from ..env import Env
 from ..utils import check_type
 from ..log.abstracts import LoggerABC
 from ..log.sub_logger import SubLogger
-from ..server import WebsocketServer
-from ..serial_communication import SerialCommunication
+from ..server import WebsocketsServerABC
+from ..serial_communication import SerialCommunicationABC
+from .abstracts import RPLIDARABC
 from .measure import Measure
 
-class RPLIDAR:
+class RPLIDAR(RPLIDARABC):
     """
     Class to handle RPLIDAR operations.
     """
+
     # Logger configuration
     LOG_TAG = "RPLIDAR"
 
@@ -28,9 +31,6 @@ class RPLIDAR:
     # Max distance limit
     MAX_DISTANCE_LIMIT = 3000
 
-    # Reading delay
-    # READING_DELAY = 0.0001  
-
     # Distance difference 
     DISTANCE_DIFF = 25
 
@@ -42,9 +42,9 @@ class RPLIDAR:
 
     def __init__(
             self,
-            logger: Optional[Logger] = None,
-            server: Optional[WebsocketServer] = None,
-            serial: Optional[SerialCommunication] = None,
+            logger: Optional[LoggerABC] = None,
+            server: Optional[WebsocketsServerABC] = None,
+            serial: Optional[SerialCommunicationABC] = None,
             baudrate: int = RPLIDAR_C1_BAUDRATE,
             port: str = RPLIDAR_C1_PORT
         ):
@@ -52,9 +52,9 @@ class RPLIDAR:
         Initialize the RPLIDAR.
 
         Args:
-            logger (Logger|None): Logger instance for logging messages.
-            server (WebsocketServer|None): Server instance for real-time tracking updates.
-            serial (SerialCommunication|None): SerialCommunication instance for RPLIDAR.
+            logger (Optional[LoggerABC]): Logger instance for logging messages.
+            server (Optional[WebsocketServerABC]): Server instance for real-time tracking updates.
+            serial (Optional[SerialCommunicationABC]): SerialCommunication instance for RPLIDAR.
             baudrate (int): Baud rate for the serial communication.
             port (str): SerialCommunication port for the RPLIDAR.
         """
@@ -65,23 +65,21 @@ class RPLIDAR:
         self.__stop_event = Event()
         self.__stop_event.set()
 
-        # Check the type of logger
-        if logger:
-            check_type(logger, Logger)
+        # Create a start event
+        self.__start_event = Event()
 
-            # Get the sub-logger for this class
-            self.__logger = SubLogger(logger, self.LOG_TAG)
-        else:
-            self.__logger = None
+        # Check the type of logger
+        check_type(logger, LoggerABC) if logger else None
+
+        # Get the sub-logger for this class
+        self.__logger = SubLogger(logger, self.LOG_TAG) if logger else None
 
         # Check the type of server
-        if server:
-            check_type(server, WebsocketServer)
+        check_type(server, WebsocketsServerABC) if server else None
         self.__server = server
 
         # Check the type of serial communication
-        if serial:
-            check_type(serial, SerialCommunication)
+        check_type(serial, SerialCommunicationABC) if serial else None
         self.__serial_communication = serial
 
         # Check the type of baudrate
@@ -101,28 +99,18 @@ class RPLIDAR:
         # Initialize the process
         self.__process = None
 
-    def __log(self, message: str, log_to_file = True, print_to_console = True):
-        """
-        Log a message using the logger if available.
-        
-        Args:
-            message (str): The message to log.
-            log_to_file (bool): Whether to log to file using the logger.
-            print_to_console (bool): Whether to print the message to console.
-        """
-        if self.__logger and log_to_file:
-            self.__logger.log(message)
+        # Initialize the thread
+        self.__thread = None
 
-        if print_to_console:
-            print(f"{self.LOG_TAG}: {message}")
+        # Get the debug environment variable
+        self.__debug = Env.get_debug_mode()
 
-    def __read_output(self):
-        """
-        Read the output from the RPLIDAR process.
-        """
+    @final
+    def _read_output(self):
         if not self.__process:
             return
 
+        # Read a line from the process output
         line = self.__process.stdout.readline()
         if not line:
             return 
@@ -164,45 +152,39 @@ class RPLIDAR:
         angle = round(angle, 0)
 
         # Check if the angle is already in the distances dictionary
-        if angle in self.__distances_dict:
-            # Check if the distance is negible
+        if not angle in self.__distances_dict:
+            self.__distances_dict[angle] = Measure(angle, distance, quality)
+        else:
+            # Check if the distance is negligible
             if self.__distances_dict[angle].distance > distance - self.DISTANCE_DIFF and self.__distances_dict[angle].distance < distance + self.DISTANCE_DIFF:
                 return
 
             # If it is, update the distance and quality
             self.__distances_dict[angle].distance = distance
             self.__distances_dict[angle].quality = quality
-        else:
-            # If it is not, add the measure to the distances dictionary
-            self.__distances_dict[angle] = Measure(angle, distance, quality)
 
         # Get the measure string representation
         measure_str = str(self.__distances_dict[angle])
 
         # Log
-        # self.__log("RPLIDAR measure: " + measure_str)
+        self.__logger.debug("RPLIDAR measure: " + measure_str) if self.__logger and self.__debug else None
 
         # Put the parsed line in the server
-        if self.__server and self.__server.is_running():
-            asyncio.run(self.__server.broadcast_rplidar_measures(measure_str))
+        asyncio.run(self.__server.broadcast_rplidar_measures(measure_str)) if self.__server else None
 
-        if self.__serial_communication and self.__serial_communication.is_open() and self.__serial_communication.has_started():
-        #if self.__serial_communication and self.__serial_communication.is_open():
-            # self.__log("Trying to send message...")
-            self.__serial_communication.send_rplidar_measures(measure_str)
+        # Send the measure string to the serial communication
+        self.__serial_communication.send_rplidar_measures(measure_str) if self.__serial_communication else None
         
         # Increment the messages counter
         self.__messages_counter += 1
 
-        # Add a small delay to avoid busy-waiting and yield CPU
-        # sleep(self.READING_DELAY)
+    @final
+    def _loop(self):
+        # Wait for the start event to be set
+        self.__start_event.wait()
 
-    def __loop(self):
-        """
-        Loop to read the output from the RPLIDAR process.
-        """
         # Log the start of the RPLIDAR process
-        self.__log("Starting RPLIDAR process...")
+        self.__logger.info("Starting RPLIDAR process...") if self.__logger else None
 
         command = [
             self.ULTRA_SIMPLE_PATH,
@@ -228,31 +210,54 @@ class RPLIDAR:
             raise RuntimeError(f"An error occurred while starting the RPLIDAR process: {e}")
 
         # Read the output in a loop until the process ends or stop event is set
-        while self.__process.poll() is None and not self.__stop_event.is_set():
-            self.__read_output()
+        while self.__process.poll() is None and self.is_running():
+            self._read_output()
 
-    def __stop(self):
-        """
-        Stop the RPLIDAR process.
-        """
+    @final
+    def _start(self):
         with self.__rlock:
-            if self.is_stopped():
-                return
+            # Clear the stop event
+            self.__stop_event.clear()
 
+    def start(self):
+        with self.__rlock:
+            # Set the start event to indicate that the RPLIDAR is starting
+            self.__start_event.set()
+
+        # Log
+        self.__logger.info("RPLIDAR starting...") if self.__logger else None
+
+    @final
+    def is_running(self) -> bool:
+        with self.__rlock:
+            return not self.__stop_event.is_set() and (self.__process is not None and self.__process.poll() is None)
+
+    @final
+    def _stop(self):
+        with self.__rlock:
             # Set the stop event
             self.__stop_event.set()
 
+            # Clear the start event
+            self.__start_event.clear()
+
             # Ensure the process is cleaned up even if an error occurs
             if self.__process and self.__process.poll() is None:
-                self.__log("Ensuring process is terminated in finally block...")
+                self.__logger.info("Ensuring process is terminated in finally block...") if self.__logger else None
                 self.__process.terminate()
                 self.__process.wait(timeout=self.PROCESS_WAIT_TIMEOUT)
                 if self.__process.poll() is None:
                     self.__process.kill()
                 self.__process.wait()
+            self.__process = None
 
         # Log the stop message
-        self.__log("RPLIDAR process stopped.")
+        self.__logger.info("RPLIDAR process stopped.") if self.__logger else None
+
+    @final
+    def is_stopped(self) -> bool:
+        with self.__rlock:
+            return not self.is_running()
 
     def create_thread(self):
         """
@@ -260,45 +265,36 @@ class RPLIDAR:
         """
         with self.__rlock:
             if self.is_running():
-                self.__log("RPLIDAR thread is already running.")
+                self.__logger.warning("RPLIDAR thread is already running.") if self.__logger else None
                 return
 
-            # Clear the stop event
-            self.__stop_event.clear()
+            # Start the RPLIDAR
+            self._start()
 
             # Start the RPLIDAR in a separate thread
-            thread = Thread(target=self.__loop)
-            thread.start()
+            self.__thread = Thread(target=self._loop)
+            self.__thread.start()
 
     def stop_thread(self):
         """
         Stop the RPLIDAR thread.
         """
         with self.__rlock:
-            self.__stop()
+            if not self.is_running():
+                self.__logger.warning("RPLIDAR thread is not running.") if self.__logger else None
+                return
 
-    def is_running(self) -> bool:
-        """
-        Check if the RPLIDAR is running.
+            # Stop the RPLIDAR
+            self._stop()
 
-        Returns:
-            bool: True if the RPLIDAR is running, False otherwise.
-        """
-        with self.__rlock:
-            return not self.__stop_event.is_set()
-
-    def is_stopped(self) -> bool:
-        """
-        Check if the RPLIDAR is stopped.
-
-        Returns:
-            bool: True if the RPLIDAR is stopped, False otherwise.
-        """
-        with self.__rlock:
-            return not self.is_running()
+            # Wait for the thread to finish
+            if self.__thread:
+                self.__thread.join()
+                self.__thread = None
 
     def __del__(self):
         """
-        Destructor to close the thread if it's started.
+        Destructor to clean up the RPLIDAR object.
         """
-        self.__stop()
+        self.stop_thread() if self.__thread else None
+        self.__logger.info("RPLIDAR object deleted.") if self.__logger else None

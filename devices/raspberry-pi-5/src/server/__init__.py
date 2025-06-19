@@ -2,7 +2,6 @@ import asyncio
 import io
 from threading import Thread
 from multiprocessing import Event, RLock
-from multiprocessing.synchronize import Event as EventCls
 from typing import Optional, final
 
 from websockets import serve, exceptions
@@ -38,7 +37,6 @@ class WebsocketsServer(WebsocketsServerABC):
 
     def __init__(
         self,
-        parking_event: Optional[EventCls] = None,
         logger: Optional[LoggerABC] = None,
         host: str = HOST,
         port: int = PORT
@@ -47,7 +45,6 @@ class WebsocketsServer(WebsocketsServerABC):
         Initializes the WebSocket server with the specified host and port.
 
         Args:
-            parking_event (Optional[EventCls]): An event to signal when the server should pause processing.
             logger (Optional[LoggerABC]): Logger instance for logging messages.
             host (str): The host address for the WebSocket server. Default is 'localhost'.
             port (int): The port number for the WebSocket server. Default is 8765.
@@ -59,10 +56,8 @@ class WebsocketsServer(WebsocketsServerABC):
         self.__stop_event = Event()
         self.__stop_event.set()
 
-        # Check the type of parking event
-        if parking_event:
-            check_type(parking_event, Event)
-        self.__parking_event = parking_event
+        # Create the parking event
+        self.__parking_event = Event()
 
         # Check the type of logger
         check_type(logger, LoggerABC) if logger else None
@@ -109,9 +104,6 @@ class WebsocketsServer(WebsocketsServerABC):
 
                 # Check if the message is a parking event
                 elif msg == Tag.PARKING_EVENT:
-                    if not self.__parking_event:
-                        pass
-
                     if self.__parking_event.is_set():
                         self.__logger.debug("Parking event received. Resuming processing...") if self.__logger else None
                         self.__parking_event.clear()
@@ -321,6 +313,16 @@ class WebsocketsServer(WebsocketsServerABC):
 
         # Log
         self.__logger.info("WebSocket server thread stopped.") if self.__logger else None
+
+    @final
+    def wait_stop_event(self):
+        with self.__rlock:
+            self.__stop_event.wait()
+
+    @final
+    def wait_parking_event(self):
+        with self.__rlock:
+            self.__parking_event.wait()
 
     def __del__(self):
         """

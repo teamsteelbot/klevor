@@ -118,3 +118,17 @@ class WebsocketsServerABC(ABC):
         The main loop for the WebSocket server.
         """
         pass
+
+    @abstractmethod
+    def wait_stop_event(self):
+        """
+        Waits for the stop event to be set.
+        """
+        pass
+
+    @abstractmethod
+    def wait_parking_event(self):
+        """
+        Waits for the parking event to be set.
+        """
+        pass

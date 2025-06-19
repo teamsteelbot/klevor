@@ -7,7 +7,7 @@ import pygame
 from websockets import connect
 
 from ..args import Args, Flags
-from ..server import WebsocketsServer
+from ..server.message import Tag, Message
 from . import RPLIDAR
 from .measure import Measure
 
@@ -160,15 +160,27 @@ class App:
         print(f"Connecting to WebSocket server at {self.__url}...")
         async with connect(self.__url) as ws:
             while True:
-                msg = await ws.recv()
-                parts = msg.split(WebsocketsServer.TAG_SEPARATOR)
-                if parts[0] == WebsocketsServer.TAG_RPLIDAR_MEASURES:
-                    measure = Measure.from_string(parts[1])
-                    if not measure:
-                        print(f"Invalid measure received: {parts[1]}")
+                try:
+                    # Get the message from the WebSocket server
+                    msg_str = await ws.recv()
+                    msg = Message.from_string(msg_str)
+
+                    # Check if the message is a valid RPLIDAR message
+                    if not msg.tag == Tag.RPLIDAR_MEASURES:
                         continue
+
+                    # Parse the measures from the message content
+                    measure = Measure.from_string(msg.content)
+                    if not measure:
+                        print(f"Invalid measure received: {msg.content}")
+                        continue
+
                     angle_idx = int(measure.angle)
                     self.__measures[angle_idx] = measure
+
+                except Exception as e:
+                    print(f"Error receiving message: {e}")
+                    continue
 
 if __name__ == "__main__":
     parser = ArgumentParser(

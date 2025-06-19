@@ -137,10 +137,8 @@ class Hailo(HailoABC):
         self.__infer_model.set_batch_size(batch_size)
 
         # Set the input and output types
-        if not input_type:
-            self._set_input_type(input_type)
-        if not output_type:
-            self._set_output_type(output_type)
+        self._set_input_type(input_type) if input_type else None
+        self._set_output_type(output_type) if output_type else None
         self.__output_type = output_type
 
     @final

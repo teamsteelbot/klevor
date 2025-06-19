@@ -69,7 +69,7 @@ class Message:
         return f"{self.__category}{self.HEADER_SEPARATOR}{self.__content}{self.END}"
 
     @staticmethod
-    def from_string(message_str: str) -> 'Message':
+    def from_string(msg_str: str) -> 'Message':
         """
         Create a Message object from a string.
 
@@ -80,11 +80,11 @@ class Message:
             Message: The Message object created from the string.
         """
         # Remove the end character if present
-        if message_str.endswith(Message.END):
-            message_str = message_str[:-1]
+        if msg_str.endswith(Message.END):
+            msg_str = msg_str[:-1]
 
         # Split the string into category and content
-        parts = message_str.strip().split(Message.HEADER_SEPARATOR, 1)
+        parts = msg_str.strip().split(Message.HEADER_SEPARATOR, 1)
         if len(parts) != 2:
             raise ValueError("Invalid message format")
 

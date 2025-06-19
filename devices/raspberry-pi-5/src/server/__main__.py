@@ -1,6 +1,6 @@
 from time import sleep
 
-from . import WebsocketServer
+from . import WebsocketsServer
 from ..log import Logger
 
 if __name__ == "__main__":
@@ -8,14 +8,14 @@ if __name__ == "__main__":
     logger = Logger()
 
     # Create an instance of WebsocketServer
-    realtime_tracker_server = WebsocketServer(logger=logger)
+    server = WebsocketsServer(logger=logger)
 
     try:
         # Create a thread for the logger
         logger.create_thread()
 
         # Create a thread for the server
-        realtime_tracker_server.create_thread()
+        server.create_thread()
 
         # Wait indefinitely to keep the server running
         print("Realtime Tracker Server is running. Press Ctrl+C to stop.")
@@ -32,7 +32,7 @@ if __name__ == "__main__":
 
     finally:
         # Stop the server thread
-        realtime_tracker_server.stop_thread()
+        server.stop_thread()
 
         # Stop the logger thread
         logger.stop_thread()

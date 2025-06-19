@@ -33,39 +33,45 @@ if __name__ == "__main__":
         # Create a thread for the logger
         logger.create_thread()
 
-        # Create an instance of the server
         if not arg_server:
             server = None
         else:
+            # Create an instance of the server
             server = WebsocketsServer(logger=logger)
 
             # Start the server
             server.create_thread()
 
-        # Create an instance of SerialCommunication if serial argument is provided
-        if arg_serial:
+        if not arg_serial:
+            serial = None
+        else:
+            # Create an instance of SerialCommunication if serial argument is provided
             serial = SerialCommunication(logger=logger, server=server)
 
             # Start the serial communication
             serial.create_threads()
-        else:
-            serial = None
 
         # Create an instance of RPLIDAR
         rplidar = RPLIDAR(logger, server, serial)
 
+        # Create the RPLIDAR thread
+        rplidar.create_thread()
+
         if not serial:
+            # Start the RPLIDAR
+            rplidar.start()
+
             while True:
                 sleep(1)  # Sleep to prevent busy-waiting
         else:
             # Wait for the start event
-            serial.get_start_event().wait()
+            serial.wait_start_event()
 
-            # Create the RPLIDAR thread
-            rplidar.create_thread()
+            # Start the RPLIDAR
+            rplidar.start()
 
             # Wait for the stop event
-            serial.get_stop_event().wait()
+            serial.wait_stop_event()
 
     except KeyboardInterrupt:
         # Handle keyboard interrupt to stop the server gracefully

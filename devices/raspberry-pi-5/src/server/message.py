@@ -40,6 +40,31 @@ class Message:
         self.content = content
         self.tag = tag
     
+    @staticmethod
+    def from_string(msg_str: str) -> "Message":
+        """
+        Create a Message instance from a string representation.
+
+        Args:
+            msg_str (str): The string representation of the message.
+
+        Returns:
+            Message: A new Message instance created from the string.
+        """
+        # Split the string into category and content
+        parts = msg_str.strip().split(Message.TAG_SEPARATOR, 1)
+        if len(parts) != 2:
+            raise ValueError("Invalid message format")
+
+        # Convert the tag string to a Tag enum value
+        tag_name = parts[0].upper()
+        if tag_name not in Tag.__members__:
+            raise ValueError(f"Invalid tag: {parts[0]}")
+        tag = Tag[tag_name]
+
+        # Create and return the Message object
+        return Message(tag, parts[1])
+
     def __str__(self):
         """
         Return a string representation of the Message instance.
@@ -67,7 +92,7 @@ class Message:
         """
         check_type(value, str)
         self.__content = value
-
+        
     @property
     def tag(self) -> Tag:
         """
