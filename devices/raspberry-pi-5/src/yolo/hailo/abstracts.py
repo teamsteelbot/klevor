@@ -148,3 +148,42 @@ class HailoABC(ABC):
             True if the handler is stopped, False otherwise.
         """
         pass
+
+class ObjectDetectionABC:
+    """
+    Abstract class to handle object detection using Hailo handlers.
+    """
+
+    @abstractmethod
+    def is_running(self) -> bool:
+        """
+        Check if the object detection is running.
+
+        Returns:
+            bool: True if running, False otherwise.
+        """
+        pass
+
+    @abstractmethod
+    def is_stopped(self) -> bool:
+        """
+        Check if the object detection is stopped.
+
+        Returns:
+            bool: True if stopped, False otherwise.
+        """
+        pass
+
+    @abstractmethod
+    def set_parking_event(self) -> None:
+        """
+        Set the parking event to indicate that the object detection is searching for a parking spot.
+        """
+        pass
+
+    @abstractmethod
+    def _loop(self)-> None:
+        """
+        The main loop to run the object detection using Hailo handlers.
+        """
+        pass

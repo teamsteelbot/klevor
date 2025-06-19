@@ -10,6 +10,7 @@ from PIL.Image import Image
 import cv2
 import numpy as np
 
+from .abstracts import HailoABC
 from ...camera.image_processing_queue import ImageProcessingQueue
 from ...log import LoggerABC
 from ...log.sub_logger import SubLogger
@@ -18,7 +19,7 @@ from ...utils import check_type
 from .. import Yolo
 from ..files import Files
 
-class Hailo:
+class Hailo(HailoABC):
     """
     Class to handle Hailo inferences.
     """
@@ -291,9 +292,8 @@ class Hailo:
             self.__stop()
 
             # Wait for the thread to finish
-            if self.__thread:
-                self.__thread.join()
-                self.__thread = None
+            self.__thread.join()
+            self.__thread = None
 
         # Log
         self.__logger.info("Hailo handler thread stopped.") if self.__logger else None

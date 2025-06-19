@@ -192,11 +192,6 @@ class ImageProcessingQueue(ImageProcessingQueueABC):
         Start the image processing queue.
         """
         with self.__rlock:
-            # Check if it has already been started
-            if self.is_running():
-                self.__logger.warning("Image processing queue already started.") if self.__logger else None
-                return
-
             # Initialize the queues
             self.__input_images_queue = Queue()
             self.__output_inference_queue = Queue()
@@ -255,22 +250,26 @@ class ImageProcessingQueue(ImageProcessingQueueABC):
             self.__thread = Thread(target=self.__loop)
             self.__thread.start()
 
-            # Log
-            self.__logger.info("Image processing queue thread started.") if self.__logger else None
+        # Log
+        self.__logger.info("Image processing queue thread started.") if self.__logger else None
 
     @final
     def stop_thread(self) -> None:
         with self.__rlock:
+            # Check if the image processing queue is already stopped
+            if self.is_stopped():
+                self.__logger.warning("Image processing queue already stopped.") if self.__logger else None
+                return
+
             # Stop the image processing queue
             self.__stop()
 
             # Wait for the thread to finish
-            if self.__thread:
-                self.__thread.join()
-                self.__thread = None
+            self.__thread.join()
+            self.__thread = None
 
-            # Log
-            self.__logger.info("Image processing queue thread stopped.") if self.__logger else None
+        # Log
+        self.__logger.info("Image processing queue thread stopped.") if self.__logger else None
 
     def __del__(self):
         """

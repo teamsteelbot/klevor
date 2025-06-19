@@ -159,10 +159,6 @@ class Logger(LoggerABC):
         Set the stop event to allow logging to start.
         """
         with self.__rlock:
-            if self.is_running():
-                self.warning("Logger is already running. Cannot start again.")
-                return
-
             # Clear the stop event
             self.__stop_event.clear()
 
@@ -179,10 +175,6 @@ class Logger(LoggerABC):
         Set the stop event to stop logging messages.
         """
         with self.__rlock:
-            # Check if the logger has already stopped
-            if self.is_stopped():
-                return
-
             # Log the closing message
             self.debug("Logger is closing.")
 
@@ -202,6 +194,11 @@ class Logger(LoggerABC):
     @final
     def create_thread(self) -> None:
         with self.__rlock:
+            # Check if the logger has already started
+            if self.is_running():
+                self.warning("Logger is already running. Cannot start again.")
+                return
+
             # Start the logger
             self.__start()
 
@@ -212,13 +209,17 @@ class Logger(LoggerABC):
     @final
     def stop_thread(self) -> None:
         with self.__rlock:
+            # Check if the logger has already stopped
+            if self.is_stopped():
+                print("Logger is already stopped. Cannot stop again.")
+                return
+
             # Stop the logger
             self.__stop()
 
             # Set thread to None if it exists
-            if self.__thread:
-                self.__thread.join()
-                self.__thread = None
+            self.__thread.join()
+            self.__thread = None
 
     def __del__(self):
         """
