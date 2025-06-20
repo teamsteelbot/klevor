@@ -1,5 +1,5 @@
-from ..opencv import OpenCV
-from .files import Files
+from ...opencv import OpenCV
+from ..files import Files
 
 if __name__ == '__main__':
     # Get the dataset paths

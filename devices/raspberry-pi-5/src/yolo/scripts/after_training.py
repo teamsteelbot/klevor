@@ -2,8 +2,8 @@ from argparse import ArgumentParser
 import os
 import shutil
 
-from .args import Args, Flags
-from .files import Files
+from ..args import Args, Flags
+from ..files import Files
 
 
 def after_training(input_dir: str | os.PathLike[str], hailo_suite_dir: str | os.PathLike[str],

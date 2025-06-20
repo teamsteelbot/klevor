@@ -1,9 +1,9 @@
 import os
 from argparse import ArgumentParser
 
-from . import Yolo
-from .args import Args, Flags
-from .files import Files
+from .. import Yolo
+from ..args import Args, Flags
+from ..files import Files
 
 
 def train_model(model: str = 'yolo11n.pt', device: str = 'cpu', data: str | os.PathLike[str] = 'data.yaml',

@@ -2,8 +2,8 @@ from argparse import ArgumentParser
 import json
 import os
 
-from .args import Args, Flags
-from .files import Files
+from ..args import Args, Flags
+from ..files import Files
 
 
 def convert_yolo_labels_to_json(annotations_dir: str | os.PathLike[str],

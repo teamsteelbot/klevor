@@ -1,8 +1,8 @@
 from argparse import ArgumentParser
 from enum import Enum, unique
 
-from ..args import Args as A
-from . import Yolo
+from ...args import Args as A
+from .. import Yolo
 
 @unique
 class Flags(Enum):

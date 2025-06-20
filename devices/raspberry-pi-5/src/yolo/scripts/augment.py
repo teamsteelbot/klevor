@@ -3,10 +3,10 @@ import os
 import shutil
 from typing import Optional
 
-from ..opencv import OpenCV
-from . import Yolo
-from .args import Args, Flags
-from .files import Files
+from ...opencv import OpenCV
+from .. import Yolo
+from ..args import Args, Flags
+from ..files import Files
 
 
 def augment_dataset(input_to_process_dir: str | os.PathLike[str], output_augmented_dir: str | os.PathLike[str],

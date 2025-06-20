@@ -14,7 +14,7 @@ from .abstracts import HailoABC
 from ...camera.image_processing_queue import ImageProcessingQueue
 from ...log import LoggerABC
 from ...log.sub_logger import SubLogger
-from ..image_bounding_boxes import ImageBoundingBoxes
+from ...opencv.image_bounding_boxes import ImageBoundingBoxes
 from ...utils import check_type
 from .. import Yolo
 from ..files import Files

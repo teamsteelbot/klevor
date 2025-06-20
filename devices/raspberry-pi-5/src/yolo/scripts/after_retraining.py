@@ -1,8 +1,8 @@
 from argparse import ArgumentParser
 import os
 
-from .args import Args, Flags
-from .files import Files
+from ..args import Args, Flags
+from ..files import Files
 
 if __name__ == '__main__':
     parser = ArgumentParser(description='Script to move YOLO model runs folder to old runs folder')

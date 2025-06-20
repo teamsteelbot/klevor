@@ -2,11 +2,9 @@ from argparse import ArgumentParser
 from os import path, PathLike
 import zipfile
 
-from typing_extensions import LiteralString
-
-from ..files.zip import Zip
-from .args import Args, Flags
-from .files import Files
+from ...files.zip import Zip
+from ..args import Args, Flags
+from ..files import Files
 
 
 def zip_to_train(input_dir: str | PathLike[str], input_yolo_dir: str | PathLike[str],

@@ -3,8 +3,8 @@ import os
 
 import tensorflow as tf
 
-from .args import Args, Flags
-from .files import Files
+from ..args import Args, Flags
+from ..files import Files
 
 
 def create_tfrecord(output_path: str | os.PathLike[str], image_dir: str | os.PathLike[str],

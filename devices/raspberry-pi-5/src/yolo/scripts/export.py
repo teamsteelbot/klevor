@@ -1,8 +1,8 @@
 from argparse import ArgumentParser
 
-from . import Yolo
-from .args import Args, Flags
-from .files import Files
+from .. import Yolo
+from ..args import Args, Flags
+from ..files import Files
 
 
 if __name__ == '__main__':

@@ -2,9 +2,9 @@ import os
 from os import PathLike
 from time import time
 
-from ..files import Files as F
-from ..utils import add_single_quotes_to_list_elements
-from . import Yolo
+from ...files import Files as F
+from ...utils import add_single_quotes_to_list_elements
+from .. import Yolo
 
 
 class Files(F):

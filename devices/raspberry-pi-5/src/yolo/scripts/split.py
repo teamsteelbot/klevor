@@ -3,9 +3,9 @@ import os
 import random
 import shutil
 
-from . import Yolo
-from .args import Args, Flags
-from .files import Files
+from .. import Yolo
+from ..args import Args, Flags
+from ..files import Files
 
 
 def split_dataset(input_dir: str | os.PathLike[str], output_dir: str | os.PathLike[str],

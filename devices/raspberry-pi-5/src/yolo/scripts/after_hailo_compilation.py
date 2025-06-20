@@ -2,8 +2,8 @@ from argparse import ArgumentParser
 import os
 import shutil
 
-from .args import Args, Flags
-from .files import Files
+from ..args import Args, Flags
+from ..files import Files
 
 
 def after_compilation(model_name: str, yolo_version: str, hailo_suite_dir: str | os.PathLike[str]) -> None:

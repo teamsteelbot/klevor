@@ -2,8 +2,8 @@ from argparse import ArgumentParser
 
 import torch
 
-from .args import Args, Flags
-from .files import Files
+from ..args import Args, Flags
+from ..files import Files
 
 
 def update_classes(model_name: str, model_version: str, new_classes: list[str]):

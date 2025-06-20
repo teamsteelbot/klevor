@@ -1,6 +1,6 @@
 class ImageBoundingBoxes:
     """
-    Class that represents the detected objects bounding boxes from a YOLO model on an image.
+    Class that represents the detected objects bounding boxes from an object detection model on an image.
     """
 
     def __init__(self, xwyhn: list = None, xyxy: list = None, xywh: list = None, xyxyn: list = None,

@@ -2,9 +2,9 @@ from argparse import ArgumentParser
 import os
 import shutil
 
-from ..opencv import OpenCV
-from .args import Args, Flags
-from .files import Files
+from ...opencv import OpenCV
+from ..args import Args, Flags
+from ..files import Files
 
 
 def after_training(input_dir: str | os.PathLike[str], calib_set_file_path: str | os.PathLike[str],

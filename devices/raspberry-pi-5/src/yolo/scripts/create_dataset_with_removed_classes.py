@@ -3,8 +3,8 @@ import json
 import os
 import shutil
 
-from .args import Args, Flags
-from .files import Files
+from ..args import Args, Flags
+from ..files import Files
 
 
 def create_dataset_with_removed_classes(input_dir: str | os.PathLike[str], input_to_process_dir: str | os.PathLike[str],

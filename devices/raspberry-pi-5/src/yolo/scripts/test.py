@@ -6,12 +6,12 @@ from typing import Callable, Optional
 import torch
 from ultralytics import YOLO
 
-from .image_bounding_boxes import ImageBoundingBoxes
-from ..opencv import OpenCV
-from ..plot import Plot
-from . import Yolo
-from .args import Args, Flags
-from .files import Files
+from ...opencv.image_bounding_boxes import ImageBoundingBoxes
+from ...opencv import OpenCV
+from ...plot import Plot
+from .. import Yolo
+from ..args import Args, Flags
+from ..files import Files
 
 
 def test_random_images(model, model_class_names: dict, run_inference_fn: Callable[[YOLO, torch.Tensor], tuple[list, float]],

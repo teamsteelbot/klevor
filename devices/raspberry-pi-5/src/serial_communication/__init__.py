@@ -27,9 +27,11 @@ class SerialCommunication(SerialCommunicationABC):
 
     # Raspberry PI Pico console port
     RASPBERRY_PI_PICO_CONSOLE_PORT = '/dev/ttyACM0'
+    RASPBERRY_PI_PICO_CONSOLE_PORT_ALT = '/dev/ttyACM2'
 
     # Raspberry PI Pico data port
     RASPBERRY_PI_PICO_DATA_PORT = '/dev/ttyACM1'
+    RASPBERRY_PI_PICO_DATA_PORT_ALT = '/dev/ttyACM3'
 
     # Message delay
     DELAY = 0.01
@@ -42,8 +44,10 @@ class SerialCommunication(SerialCommunicationABC):
         logger: Optional[Logger] = None,
         images_queue: Optional[ImageProcessingQueue] = None,
         server: Optional[WebsocketsServerABC] = None,
-        data_port: Optional[str] = RASPBERRY_PI_PICO_DATA_PORT,
         console_port: Optional[str] = RASPBERRY_PI_PICO_CONSOLE_PORT,
+        console_port_alt: Optional[str] = RASPBERRY_PI_PICO_CONSOLE_PORT_ALT,
+        data_port: Optional[str] = RASPBERRY_PI_PICO_DATA_PORT,
+        data_port_alt: Optional[str] = RASPBERRY_PI_PICO_DATA_PORT_ALT,
         baudrate: Optional[int] = RASPBERRY_PI_PICO_BAUDRATE
     ):
         """
@@ -52,8 +56,10 @@ class SerialCommunication(SerialCommunicationABC):
         Args:
             logger (Optional[Logger]): Logger instance for logging messages.
             images_queue (Optional[ImageProcessingQueue]): Images queue for handling images.
-            data_port (Optional[str]): Serial port used for sending data to Pico
             console_port (Optional[str]): Serial port used for receiving data from Pico.
+            console_port_alt (Optional[str]): Alternative serial port used for receiving data from Pico.
+            data_port (Optional[str]): Serial port used for sending data to Pico.
+            data_port_alt (Optional[str]): Alternative serial port used for sending data to Pico.
             baudrate (Optional[int]): Baud rate for the serial communication. Default is 115200.
             server (Optional[WebsocketsServerABC]): Server instance for sending messages to the server. Default is None.
         """
@@ -97,20 +103,26 @@ class SerialCommunication(SerialCommunicationABC):
         # Initialize the last incoming message
         self.__last_incoming_message = None
 
-        # Set the serial port, alternative serial port and baud rate
-        check_type(data_port, str)
-        self.__data_port = data_port
-
+        # Check the type of console port and its alternative port
         check_type(console_port, str)
         self.__console_port = console_port
+        check_type(console_port_alt, str)
+        self.__console_port_alt = console_port_alt
 
+        # Check the type of data port and its alternative port
+        check_type(data_port, str)
+        self.__data_port = data_port
+        check_type(data_port_alt, str)
+        self.__data_port_alt = data_port_alt
+
+        # Check the type of baudrate
         check_type(baudrate, int)
         self.__baudrate = baudrate
 
         # Initialize the console and data serial ports
         self.__console_serial = None
         self.__data_serial = None
-        
+
         # Initialize the threads
         self.__receiving_thread = None
         self.__sending_thread = None
@@ -143,22 +155,37 @@ class SerialCommunication(SerialCommunicationABC):
             # Clear queues closed event
             self.__queues_closed_event.clear()
 
-            # Open the data and console ports
+            # Open the console port
             try:
                 self.__console_serial = Serial(self.__console_port, self.__baudrate)
 
-            except SerialException as e:
-                raise RuntimeError(f"Error opening serial console port: {e}")
+            except SerialException as port_e:
+                # Try its alternative port
+                try:
+                    self.__console_serial = Serial(self.__console_port_alt, self.__baudrate)
 
+                except SerialException as port_alt_e:
+                    raise RuntimeError(f"Error opening serial console port: {port_e} and alternative port: {port_alt_e}")
+
+                raise RuntimeError(f"Error opening serial console port: {port_e}")
+
+            # Open the data port
             try:
                 self.__data_serial = Serial(self.__data_port, self.__baudrate)
 
-            except SerialException as alt_e:
-                raise RuntimeError(f"Error opening serial data port: {alt_e}")
+            except SerialException as port_e:
+                # Try its alternative port
+                try:
+                    self.__data_serial = Serial(self.__data_port_alt, self.__baudrate)
+
+                except SerialException as port_alt_e:
+                    raise RuntimeError(f"Error opening serial data port: {port_e} and alternative port: {port_alt_e}")
+
+                raise RuntimeError(f"Error opening serial data port: {port_e}")
 
         # Log
         self.__logger.info(
-            f"Serial console port '{self.__console_port}' and data port '{self.__data_port}' opened with baudrate {self.__baudrate}.") if self.__logger else None
+            f"Serial console port and data port opened with baudrate {self.__baudrate}.") if self.__logger else None
 
     @final
     def is_open(self) -> bool:
