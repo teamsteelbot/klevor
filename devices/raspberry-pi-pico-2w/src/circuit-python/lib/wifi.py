@@ -30,17 +30,23 @@ class WifiHandler:
     ATTEMPT_DELAY = 5
     SSID = getenv("WIFI_SSID", "default_ssid")
     PASSWORD = getenv("WIFI_PASSWORD", "default_password")
-    TAGET_IP = getenv("SOCKET_SERVER_IP", "default_target_ip")
+    TARGET_IP = getenv("SOCKET_SERVER_IP", "default_target_ip")
     TARGET_PORT = int(getenv("SOCKET_SERVER_PORT", 12345))
 
     def __init__(self, ssid: str = SSID, password: str = PASSWORD):
         """
         Initializes the WifiHandler with default values.
         """
+        # Set the Wi-Fi credentials
+        self.__ssid = ssid
+        self.__password = password
+
+        # Initialize attributes
         self.__pool = None
         self.__udp_socket = None
         self.__ipv4_address = None
         self.__ipv4_gateway = None
+        self.__ipv4_dns = None
 
     async def connect(self, attempts: int = ATTEMPTS):
         """
@@ -50,11 +56,12 @@ class WifiHandler:
         counter = 0
         while not self.__ipv4_address and counter < attempts:
             try:
-                radio.connect(self.SSID, self.PASSWORD)
+                radio.connect(self.__ssid, self.__password)
                 self.__ipv4_address = radio.ipv4_address
                 self.__ipv4_gateway = radio.ipv4_gateway
                 self.__ipv4_dns =  radio.ipv4_dns
-            except Exception as e:
+
+            except Exception:
                 pass
 
             sleep(self.ATTEMPT_DELAY)
@@ -103,7 +110,7 @@ class WifiHandler:
         except Exception as e:
             print(f"Error closing UDP socket: {e}")
 
-    async def send_udp_message(self, message: str, target_ip: str = TAGET_IP, target_port: int = TARGET_PORT):
+    async def send_udp_message(self, message: str, target_ip: str = TARGET_IP, target_port: int = TARGET_PORT):
         """
         Send message over UDP
 

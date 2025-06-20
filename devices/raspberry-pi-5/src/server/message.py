@@ -19,6 +19,22 @@ class Tag(Enum):
     STOP_EVENT = 9
     PARKING_EVENT = 10
 
+    @staticmethod
+    def from_string(tag_str: str) -> "Tag":
+        """
+        Convert a string to a Tag enum value.
+
+        Args:
+            tag_str (str): The string representation of the tag.
+
+        Returns:
+            Tag: The corresponding Tag enum value.
+        """
+        tag_name = tag_str.upper()
+        if tag_name not in Tag.__members__:
+            raise ValueError(f"Invalid tag: {tag_str}")
+        return Tag[tag_name]
+
 
 class Message:
     """
@@ -57,10 +73,7 @@ class Message:
             raise ValueError("Invalid message format")
 
         # Convert the tag string to a Tag enum value
-        tag_name = parts[0].upper()
-        if tag_name not in Tag.__members__:
-            raise ValueError(f"Invalid tag: {parts[0]}")
-        tag = Tag[tag_name]
+        tag = Tag.from_string(parts[0])
 
         # Create and return the Message object
         return Message(tag, parts[1])

@@ -30,8 +30,10 @@ class BNO08XHandler:
     I2C_SDA_PIN = GP0
     I2C_SCL_PIN = GP1
     I2C_ADDRESS = 0x4B
-    DELAY = 0.05
     INITIAL_SAMPLES = 10 # Number of samples to gather for initial calibration
+
+    # Delay between readings in seconds
+    DELAY = 0.05
 
     def __init__(self, i2c: I2C = I2C(I2C_SCL_PIN, I2C_SDA_PIN), address: int = I2C_ADDRESS):
         """
@@ -47,13 +49,62 @@ class BNO08XHandler:
             sleep(self.DELAY)
 
         # Saving the orientation, this makes the turns variables much smoother to handle
-        self.__initial_roll_deg, self.__initial_pitch_deg, self.__initial_yaw_deg = self.__quaternion_to_euler_degrees(*self.__quaternion)
+        self.__initial_roll_deg, self.__initial_pitch_deg, self.__initial_yaw_deg = BNO08XHandler.quaternion_to_euler_degrees(*self.__quaternion)
 
         # Set accumulated values to zero
         self.__accumulated_yaw_deg = 0.0
         self.__last_yaw_deg = 0.0
         self.__accumulated_90_deg_turns = 0
         self.__last_segment_count = 0
+
+        # Initialize gyroscope values
+        self.__gyro_x_deg = 0.0
+        self.__gyro_y_deg = 0.0
+        self.__gyro_z_deg = 0.0
+
+        # Initialize quaternion values
+        self.__roll_deg = 0.0
+        self.__pitch_deg = 0.0
+        self.__yaw_deg = 0.0
+
+    @staticmethod
+    def quaternion_to_euler_degrees(x: float, y: float, z: float, w: float):
+        """
+        This function receives the 4 components of the quaternion and calculates the orientation
+        """
+        # Roll
+        sinr_cosp = 2 * (w * x + y * z)
+        cosr_cosp = 1 - 2 * (x * x + y * y)
+        roll_rad = atan2(sinr_cosp, cosr_cosp)
+
+        # Pitch
+        sinp = 2 * (w * y - z * x)
+
+        # Clamp the value to avoid domain errors for asin (should be between -1 and 1)
+        if sinp > 1:
+            pitch_rad = pi / 2
+        elif sinp < -1:
+            pitch_rad = -pi / 2
+        else:
+            pitch_rad = asin(sinp)
+
+        # Yaw
+        siny_cosp = 2 * (w * z + x * y)
+        cosy_cosp = 1 - 2 * (y * y + z * z)
+        yaw_rad = atan2(siny_cosp, cosy_cosp)
+
+        return degrees(roll_rad), degrees(pitch_rad), degrees(yaw_rad)
+
+    @staticmethod
+    def gyro_to_degrees(x_rad: float, y_rad: float, z_rad: float):
+        """
+        Converts gyroscope readings from radians to degrees.
+        """
+        return (
+            degrees(x_rad),
+            degrees(y_rad),
+            degrees(z_rad)
+        )
 
     @property
     def quaternion(self):
@@ -162,43 +213,6 @@ class BNO08XHandler:
             self.update_gyro()
         return self.__gyro_z_deg
 
-    def __gyro_to_degrees(self, x_rad: float, y_rad: float, z_rad: float):
-        """
-        Converts gyroscope readings from radians to degrees.
-        """
-        return (
-            degrees(x_rad),
-            degrees(y_rad),
-            degrees(z_rad)
-        )
-
-    def __quaternion_to_euler_degrees(self, x: float, y: float, z: float, w: float):
-        """
-        This function receives the 4 components of the quaternion and calculates the orientation
-        """
-        # Roll
-        sinr_cosp = 2 * (w * x + y * z)
-        cosr_cosp = 1 - 2 * (x * x + y * y)
-        roll_rad = atan2(sinr_cosp, cosr_cosp)
-
-        # Pitch
-        sinp = 2 * (w * y - z * x)
-
-        # Clamp the value to avoid domain errors for asin (should be between -1 and 1)
-        if sinp > 1:
-            pitch_rad = pi / 2
-        elif sinp < -1:
-            pitch_rad = -pi / 2
-        else:
-            pitch_rad = asin(sinp)
-
-        # Yaw
-        siny_cosp = 2 * (w * z + x * y)
-        cosy_cosp = 1 - 2 * (y * y + z * z)
-        yaw_rad = atan2(siny_cosp, cosy_cosp)
-
-        return degrees(roll_rad), degrees(pitch_rad), degrees(yaw_rad)
-
     def __read_gyro(self):
         """
         Reads the gyroscope data.
@@ -216,7 +230,7 @@ class BNO08XHandler:
         self.__read_gyro()
 
         # Get the current gyroscope values in degrees
-        self.__gyro_x_deg, self.__gyro_y_deg , self.__gyro_z_deg = self.__gyro_to_degrees(*self.__gyro)
+        self.__gyro_x_deg, self.__gyro_y_deg , self.__gyro_z_deg = BNO08XHandler.gyro_to_degrees(*self.__gyro)
 
     def __read_quaternion(self):
         """
@@ -235,7 +249,7 @@ class BNO08XHandler:
         self.__read_quaternion()
 
         # Get the current roll, pitch, and yaw in degrees
-        self.__roll_deg, self.__pitch_deg, self.__yaw_deg = self.__quaternion_to_euler_degrees(*self.__quaternion)
+        self.__roll_deg, self.__pitch_deg, self.__yaw_deg = BNO08XHandler.quaternion_to_euler_degrees(*self.__quaternion)
 
         # Compute relative yaw
         relative_yaw = self.__yaw_deg - self.__initial_yaw_deg

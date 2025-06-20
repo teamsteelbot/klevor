@@ -34,20 +34,6 @@ class CameraABC(ABC):
         pass
 
     @abstractmethod
-    def start_thread(self) -> None:
-        """
-        Start the image processing queue thread.
-        """
-        pass
-
-    @abstractmethod
-    def stop_thread(self) -> None:
-        """
-        Stop the image processing queue thread.
-        """
-        pass
-
-    @abstractmethod
     def capture_image_pil(self, adjust_duration: float = ADJUST_DURATION) -> Image:
         """
         Capture an image and return a PIL image.
@@ -204,5 +190,19 @@ class ImageProcessingQueueABC(ABC):
     def _loop(self):
         """
         Loop to capture images and put them in the input image processing queue.
+        """
+        pass
+
+    @abstractmethod
+    def start_thread(self) -> None:
+        """
+        Start the image processing queue thread.
+        """
+        pass
+
+    @abstractmethod
+    def stop_thread(self) -> None:
+        """
+        Stop the image processing queue thread.
         """
         pass

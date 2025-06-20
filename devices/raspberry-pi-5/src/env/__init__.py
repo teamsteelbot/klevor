@@ -19,7 +19,6 @@ class Challenges(Enum):
 
     WITH_OBSTACLES = 1
     WITHOUT_OBSTACLES = 2
-    NONE = 3
 
 class Env:
     """

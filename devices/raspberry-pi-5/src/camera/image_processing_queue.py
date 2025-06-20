@@ -6,7 +6,7 @@ import numpy as np
 from PIL.Image import Image
 
 from .abstracts import CameraABC, ImageProcessingQueueABC
-from ..yolo.image_bounding_boxes import ImageBoundingBoxes
+from ..opencv.image_bounding_boxes import ImageBoundingBoxes
 from ..server.abstracts import WebsocketsServerABC
 from ..utils import check_type
 from ..log.abstracts import LoggerABC

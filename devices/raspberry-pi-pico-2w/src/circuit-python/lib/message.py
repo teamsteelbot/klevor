@@ -1,28 +1,15 @@
-from enum import Enum, unique
-
-from ..utils import check_type
-
-
-@unique
-class Category(Enum):
+class Category:
     """
-    Enum to represent the categories of messages sent and received from the Raspberry Pi Pico.
+    Class to represent the enum categories of messages sent and received from the Raspberry Pi Pico.
     """
-    CAPTURE_IMAGE = 1
-    INFERENCE = 2
-    RPLIDAR = 3
-    DEBUG = 4
-    STATUS = 5
-    CHALLENGE = 6
-
-    def get_category_name(self) -> str:
-        """
-        Get the category name in lowercase.
-
-        Returns:
-            str: The category name in lowercase.
-        """
-        return self.name.lower()
+    CAPTURE_IMAGE = "capture_image"
+    INFERENCE = "yolo_inference"
+    RPLIDAR = "rplidar"
+    DEBUG = "debug"
+    STATUS = "status"
+    CHALLENGE = "challenge"
+    SERVO = "servo"
+    MOTOR = "motor"
 
     @staticmethod
     def from_string(category_str: str) -> 'Category':
@@ -36,27 +23,58 @@ class Category(Enum):
             Category: The corresponding Category enum value.
         """
         category_name = category_str.upper()
-        if category_name not in Category.__members__:
+        if category_name not in [Category.CAPTURE_IMAGE, Category.INFERENCE, Category.RPLIDAR, Category.DEBUG,
+                                 Category.STATUS, Category.CHALLENGE, Category.SERVO, Category.MOTOR]:
             raise ValueError(f"Invalid category: {category_str}")
         return Category[category_name]
 
-@unique
-class Status(Enum):
+class Status:
     """
-    Enum to represent the status messages sent and received from the Raspberry Pi Pico.
+    Class to represent the enum status messages sent and received from the Raspberry Pi Pico.
     """
-    START = 1
-    STOP = 2
-    OK = 3
+    START = "start"
+    STOP = "stop"
+    OK = "ok"
 
-    def get_status_name(self) -> str:
+    @staticmethod
+    def from_string(status_str: str) -> 'Status':
         """
-        Get the status name in lowercase.
+        Convert a string to a Status enum value.
+
+        Args:
+            status_str (str): The string representation of the status.
 
         Returns:
-            str: The status name in lowercase.
+            Status: The corresponding Status enum value.
         """
-        return self.name.lower()
+        status_name = status_str.upper()
+        if status_name not in [Status.START, Status.STOP, Status.OK]:
+            raise ValueError(f"Invalid status: {status_str}")
+        return Status[status_name]
+
+class Challenge:
+    """
+    Class to represent the enum challenge messages sent and received from the Raspberry Pi Pico.
+    """
+    WITH_OBSTACLES = "with_obstacles"
+    WITHOUT_OBSTACLES = "without_obstacles"
+
+    @staticmethod
+    def from_string(challenge_str: str) -> 'Challenge':
+        """
+        Convert a string to a Challenge enum value.
+
+        Args:
+            challenge_str (str): The string representation of the challenge.
+
+        Returns:
+            Challenge: The corresponding Challenge enum value.
+        """
+        challenge_name = challenge_str.upper()
+        if challenge_name not in [Challenge.WITH_OBSTACLES, Challenge.WITHOUT_OBSTACLES]:
+            raise ValueError(f"Invalid challenge: {challenge_str}")
+        return Challenge[challenge_name]
+
 
 class Message:
     """
@@ -129,8 +147,6 @@ class Message:
         Args:
             category (str): The category of the message.
         """
-        # Check the type of message
-        check_type(category, Category)
         self.__category = category
 
     @property
@@ -151,24 +167,5 @@ class Message:
         Args:
             content (str): The content of the message.
         """
-        # Check the type of content
-        check_type(content, str)
         self.__content = content
 
-    def is_start(self) -> bool:
-        """
-        Check if the message is a start message.
-
-        Returns:
-            bool: True if the message is a start message, False otherwise.
-        """
-        return self.category == Category.STATUS and self.content == Status.START.get_status_name()
-
-    def is_stop(self) -> bool:
-        """
-        Check if the message is a stop message.
-
-        Returns:
-            bool: True if the message is a stop message, False otherwise.
-        """
-        return self.category == Category.STATUS and self.content == Status.STOP.get_status_name()

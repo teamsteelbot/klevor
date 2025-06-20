@@ -1,7 +1,18 @@
+# Settings for Raspberry Pi Pico 2W CircuitPython project
+
+# Sets the DEBUG mode for the application. Can be "true" or "false".
 DEBUG = "false"
-CHALLENGE = "example"
+
+# Sets the challenge mode for the application. Can be "with_obstacles" or "without_obstacles".
+CHALLENGE = "with_obstacles"
+
+# Enables or disables Wi-Fi functionality. Can be "true" or "false".
 ENABLE_WIFI = "false"
+
+# Wi-Fi SSID and password for connecting to a network.
 WIFI_SSID = "wifi"
 WIFI_PASSWORD = "12345678"
+
+# IP address and port for the socket server to connect to.
 SOCKET_SERVER_IP = "192.168.1.4"
 SOCKET_SERVER_PORT = 5000
