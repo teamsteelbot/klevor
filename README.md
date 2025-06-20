@@ -326,7 +326,7 @@ La forma en la que lo implementamos es bastante sencilla, el giroscopio siempre 
 
 <h1 id="lenguajes-de-programacion">Lenguajes de Programación</h1>
 
-Muchos robots autónomos necesitan de un lenguaje de programación para poder llevar a cabo tareas complejas, en el caso de Klevor, utilizamos un lenguaje principal: Python, y una implementación en microcontroladores como la Raspberry Pi Pico 2 WH, MicroPython.
+Muchos robots autónomos, sino todos necesitan de un lenguaje de programación para poder llevar a cabo tareas complejas, en el caso de Klevor, utilizamos un lenguaje principal: Python, y una implementación en microcontroladores como la Raspberry Pi Pico 2 WH, MicroPython.
 
 <h2 id="python">Python</h2>
 

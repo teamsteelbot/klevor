@@ -1,19 +1,28 @@
 import board
-import usb_cdc
-import pwmio
 import busio
-import math
-import time
 import digitalio
-from adafruit_motor import servo
-from adafruit_bno08x.i2c import BNO08X_I2C
-from adafruit_bno08x import (BNO_REPORT_GYROSCOPE, BNO_REPORT_ROTATION_VECTOR)
+import time
+from lib.bno08x import *
+from lib.esc_motor import *
+from lib.serial_communication import *
+from lib.servo import *
+from lib.switch import *
+from lib.wifi import *
 import asyncio
 
 # ---------- CONSTANTS ----------
 
 # Gyroscope I2C Bus
-I2C_BUS = busio.I2C(board.GP1, board.GP0) 
+I2C_BUS = busio.I2C(board.GP1, board.GP0)
+
+#Motor Pin
+ESC_MOTOR_PIN = board.GP2
+
+#Servo Pin
+SERVO_PIN = board.GP13
+
+#Switch Pin
+SWITCH_PIN = board.GP11
 
 # General configuration
 MOVEMENT_MODE = True
@@ -31,51 +40,14 @@ SPEED_STOP = 0
 TURNING_VALUE = 25
 TURNING_DELAY = 0.1
 
+#Switch Delay
+SWITCH_DELAY = 0.01
+
+#Gyroscope Reading Interval
+GYRO_READ_INTERVAL = 0.02
+
 # Parking delay
 PARKING_DELAY = 0.1
-
-# Difference between the sides is large enough to consider turning
-SIDE_DIFFERENCE_PERCENTAGE = 0.2
-
-# USB CDC headers
-USB_CDC_HEADER_RPLIDAR = "rplidar"
-USB_CDC_HEADER_STATUS = "status"
-USB_CDC_HEADER_SEPARATOR = ":"
-USB_CDC_RPLIDAR_CONTENT_SEPARATOR = ","
-
-# RPLIDAR Data Configuration
-RPLIDAR_MAX_DISTANCE = 3000
-RPLIDAR_DISTANCE_TOGGLE_LED_DELAY = 0.00015
-
-# Desired Gyroscope update rate
-GYRO_READ_INTERVAL = 0.05 # 50 ms for 20 Hz updates
-
-# Switch configuration
-SWITCH_PIN = board.GP11
-SWITCH_DELAY = 1
-
-# Distance Thresholds (Note: These distances are measured in milimeters)
-FRONT_DISTANCE_THRESHOLD = 500
-SIDE_DISTANCE_THRESHOLD = 1500
-TARGET_DISTANCE_STOP_START = 2000
-TARGET_DISTANCE_STOP_END = 1000
-
-# Servo pins and configuration
-SERVO_PIN = board.GP13
-SERVO_PWM_CONFIGURATION = pwmio.PWMOut(SERVO_PIN, duty_cycle=0, frequency=50)
-STEERING_SERVO = servo.Servo(SERVO_PWM_CONFIGURATION, actuation_range=180, min_pulse=500, max_pulse=2500)
-STEERING_SERVO_CENTER = 88
-SERVO_SETUP_DELAY = 0.1
-
-# Motor pins and configuration
-ESC_MOTOR_PIN = board.GP2
-ESC_PWM_Configuration = pwmio.PWMOut(ESC_MOTOR_PIN, duty_cycle=0, frequency=50)
-ESC = servo.ContinuousServo(ESC_PWM_Configuration, min_pulse=1000, max_pulse=2000)
-ESC_SETUP_DELAY = 0.2
-
-# Start and stop message
-START_MESSAGE = f"{USB_CDC_HEADER_STATUS}{USB_CDC_HEADER_SEPARATOR}on"
-STOP_MESSAGE = f"{USB_CDC_HEADER_STATUS}{USB_CDC_HEADER_SEPARATOR}off"
 
 # Turn on delay
 TURN_ON_DELAY = 2
@@ -83,201 +55,52 @@ TURN_ON_DELAY = 2
 # Sent start message delay
 SENT_START_MESSAGE_DELAY = 0.5
 
-# ---------- VARIABLES ----------
+#Serial communication headers
+USB_CDC_HEADER_RPLIDAR = "rplidar"
+USB_CDC_HEADER_STATUS = "status"
+USB_CDC_HEADER_SEPARATOR = ":"
+USB_CDC_RPLIDAR_CONTENT_SEPARATOR = ","
 
-# Gyroscope state and turn counter (initialized to avoid issues)
-last_raw_yaw = None
-yaw_deg = 0.0
-turns = 0
-last_segment_count = 0
-initial_yaw = None
+#LED Pin
+led_pin = digitalio.DigitalInOut(board.LED)
+led_pin.direction = digitalio.Direction.OUTPUT
 
-# Data port 
-data_port = usb_cdc.data
-data_port.reset_input_buffer()
-data_port.reset_output_buffer()
-
-# Console port
-console_port = usb_cdc.console
-
-# RPLIDAR distances
-rplidar_distances = [RPLIDAR_MAX_DISTANCE for i in range(360)]
-
-# Last motor speed and servo angle
-last_motor_speed = SPEED_STOP
-last_servo_angle = STEERING_SERVO_CENTER
-
-# ---------- USB CDC Setup ----------
-
-def receive_message() -> str|None:
-    """
-    Receive a message from the USB CDC data stream.
-    Returns:
-        str|None: The received message as a string, or None if no message is available.
-    """
-    if data_port.in_waiting > 0:
-        return data_port.readline().strip().decode("utf-8")
-
-def receive_360_rplidar_measures():
-    """
-    Receive messages 360 RPLIDAR measures from the USB CDC data stream.
-    """
-    measures_counter = 0
-    while measures_counter < 360:
-        if data_port.in_waiting > 0:
-            # Turn on the LED fast to indicate data reception
-            if DEBUG:
-                led_pin.value = True
-                time.sleep(RPLIDAR_DISTANCE_TOGGLE_LED_DELAY)
-                led_pin.value = False
-                time.sleep(RPLIDAR_DISTANCE_TOGGLE_LED_DELAY)
-
-            # Read the message from the data port
-            message = data_port.readline().decode("utf-8")
-            if DEBUG:
-                send_message(f"{USB_CDC_HEADER_STATUS}:received_message,{message}")
-            parts = message.split(USB_CDC_HEADER_SEPARATOR)
-
-            # Check if it's a RPLIDAR message
-            if len(parts) < 2:
-                continue
-
-            if parts[0] == USB_CDC_HEADER_RPLIDAR:
-                rplidar_content = parts[1].split(USB_CDC_RPLIDAR_CONTENT_SEPARATOR)
-                if len(rplidar_content) < 2:
-                    continue
-                
-                # Parse the RPLIDAR content
-                angle = int(float(rplidar_content[0]))
-                distance = int(float(rplidar_content[1]))
-                
-                if DEBUG:
-                    send_message(f"{USB_CDC_HEADER_STATUS}:received_message,{angle},{distance}")
-
-                # Check the distance and quality
-                if distance < RPLIDAR_MAX_DISTANCE and 0 <= angle < 360:
-                    rplidar_distances[angle] = distance
-                    
-            measures_counter += 1
-
-def send_message(message: str):
-    """
-    Send a message to the USB CDC data stream.
-    
-    Args:
-        message (str): The message to send.
-    """
-    try:
-        console_port.write((message + "\n").encode("utf-8"))
-    except Exception as e:
-        pass
-
-def wait_for_confirmation(message_to_compare: str):
-    while True:
-        message_received = receive_message()
-        if message_received and message_received == message_to_compare:
-            break
+# Start and stop message
+START_MESSAGE = f"{USB_CDC_HEADER_STATUS}{USB_CDC_HEADER_SEPARATOR}on"
+STOP_MESSAGE = f"{USB_CDC_HEADER_STATUS}{USB_CDC_HEADER_SEPARATOR}off"
 
 # ---------- SETUP ----------
 
+servo: ServoHandler = None
+motor: ESCMotorHandler = None
+gyroscope: BNO08XHandler = None
+serial_handler: SerialCommunication = None
+switch: SwitchHandler = None
+
 def setup():
-    global bno, initial_yaw, led_pin, switch_pin
+
+    servo = ServoHandler(servo_pin=SERVO_PIN)
+    motor = ESCMotorHandler(motor_pin=ESC_MOTOR_PIN)
+    gyroscope = BNO08XHandler(BNO08X_I2C=I2C_BUS)
+    serial_handler = SerialCommunication(console_port_enabled=True, data_port_enabled=True, toggle_led_on_receive=True)
+    switch = SwitchHandler(switch_pin=SWITCH_PIN)
+
+    # Last motor speed and servo angle
+    last_motor_speed = SPEED_STOP
+    last_servo_angle = servo.SERVO_CENTER_ANGLE
     
-    STEERING_SERVO.angle = STEERING_SERVO_CENTER 
+    servo.angle = servo.SERVO_CENTER_ANGLE 
 
-    # Initialize the ESC
-    ESC.throttle = SPEED_STOP
-    time.sleep(ESC_SETUP_DELAY)
-
-    # Start button
-    switch_pin = digitalio.DigitalInOut(SWITCH_PIN)
-    switch_pin.direction = digitalio.Direction.INPUT
-    switch_pin.pull = digitalio.Pull.UP
-
-    # LED pin
-    led_pin = digitalio.DigitalInOut(board.LED)
-    led_pin.direction = digitalio.Direction.OUTPUT
-
-    try:
-        bno = BNO08X_I2C(I2C_BUS, address=0x4B) # Normally you shouldn't have the need to force an I2C address, but in our case we had to
-   
-    except Exception as e:
-        raise e
-    
-    # Don't forget to enable these features
-    bno.enable_feature(BNO_REPORT_GYROSCOPE)
-    bno.enable_feature(BNO_REPORT_ROTATION_VECTOR)
-    time.sleep(1)
-    
     # Gathering multiple samples to fix errors
     N = 20
     for _ in range(N):
-        quat = bno.quaternion
+        quat = BNO08XHandler.__read_quaternion
         time.sleep(0.05)
         
     # Saving the orientation, this makes the turns variables much smoother to handle
-    quat = bno.quaternion
-    _, _, initial_yaw_val = quaternion_to_euler_degrees(*quat)
-    initial_yaw = initial_yaw_val
-
-# ---------- SENSOR FUNCTIONS ----------
-
-# This function receives the 4 components of the quaternion and calculates the orientation
-def quaternion_to_euler_degrees(x, y, z, w):
-    # Roll
-    sinr_cosp = 2 * (w * x + y * z)
-    cosr_cosp = 1 - 2 * (x * x + y * y)
-    roll_rad = math.atan2(sinr_cosp, cosr_cosp)
-
-    # Pitch
-    sinp = 2 * (w * y - z * x)
-    # Clamp the value to avoid domain errors for asin (should be between -1 and 1)
-    pitch_rad = math.asin(min(1, max(-1, sinp))) # Clamp value to avoid domain errors for asin
-
-    # Yaw
-    siny_cosp = 2 * (w * z + x * y)
-    cosy_cosp = 1 - 2 * (y * y + z * z)
-    yaw_rad = math.atan2(siny_cosp, cosy_cosp)
-
-    return math.degrees(roll_rad), math.degrees(pitch_rad), math.degrees(yaw_rad)
-
-# Gyroscope Reading Function (now runs as a background task)
-def gyro_reading():
-    try:
-        quat_x, quat_y, quat_z, quat_w = bno.quaternion
-        roll_deg, pitch_deg, raw_yaw_deg = quaternion_to_euler_degrees(quat_x, quat_y, quat_z, quat_w)
-
-        # Compute relative yaw
-        relative_yaw = raw_yaw_deg - initial_yaw
-        if relative_yaw > 180:
-            relative_yaw -= 360
-        elif relative_yaw < -180:
-            relative_yaw += 360
-
-        if last_raw_yaw is None:
-            yaw_deg = relative_yaw
-            last_raw_yaw = relative_yaw
-            last_segment_count = int(yaw_deg / 90)
-        else:
-            delta_raw_yaw = relative_yaw - last_raw_yaw
-            if delta_raw_yaw > 180:
-                delta_raw_yaw -= 360
-            elif delta_raw_yaw < -180:
-                delta_raw_yaw += 360
-
-            yaw_deg += delta_raw_yaw
-
-            current_segment_count = int(yaw_deg / 90)
-            if current_segment_count != last_segment_count:
-                turns += current_segment_count - last_segment_count
-                last_segment_count = current_segment_count
-
-            last_raw_yaw = relative_yaw
-
-    except Exception as e:
-        pass
-
-    #await asyncio.sleep(GYRO_READ_INTERVAL) # Ensures 50ms update rate
+    quat = BNO08XHandler.__read_quaternion
+    _, _, initial_yaw_val = BNO08XHandler.__quaternion_to_euler_degrees(*quat)
+    gyroscope.initial_yaw = initial_yaw_val
     
 # ---------- Movement Functions ----------
 
@@ -292,9 +115,9 @@ def set_robot_speed(speed_throttle):
     if last_motor_speed == speed_throttle:
         return
     
-    ESC.throttle = speed_throttle
+    motor.speed = speed_throttle
     last_motor_speed = speed_throttle
-    send_message(f"{USB_CDC_HEADER_STATUS}:motor,{speed_throttle}")
+    serial_handler.send_message(f"{USB_CDC_HEADER_STATUS}:motor,{speed_throttle}")
 
 def set_steering_angle(angle):
     """
@@ -307,18 +130,21 @@ def set_steering_angle(angle):
     if last_servo_angle == angle:
         return
     
-    STEERING_SERVO.angle = max(0, min(180, angle)) # Clamp angle to valid range
+    servo.angle = max(0, min(180, angle)) # Clamp angle to valid range
     last_servo_angle = angle
-    send_message(f"{USB_CDC_HEADER_STATUS}:servo,{angle}")
+    serial_handler.send_message(f"{USB_CDC_HEADER_STATUS}:servo,{angle}")
 
 def stop_robot(): # Renamed from 'stop' for consistency
-    set_steering_angle(STEERING_SERVO_CENTER)
+    set_steering_angle(servo.SERVO_CENTER_ANGLE)
     set_robot_speed(SPEED_STOP)
+
+async def gyro_update():
+    gyroscope.update_quaternion
+    await asyncio.sleep (GYRO_READ_INTERVAL)
 
 # ---------- Main Robot Control Loop ----------
 
 async def main_robot_loop():  
-    global turns, initial_yaw, last_raw_yaw, yaw_deg, turns, last_segment_count
 
     # Initialize the robot state
     setup()
@@ -331,11 +157,11 @@ async def main_robot_loop():
         time.sleep(TURN_ON_DELAY)
         
     # Wait for the switch to be pressed to start the robot
-    while switch_pin.value:
+    while switch.value:
         time.sleep(SWITCH_DELAY)  # Pequeña pausa para debouncing y eficiencia (ajusta si es necesario)
 
     # Send start message
-    send_message(START_MESSAGE)
+    serial_handler.send_message(START_MESSAGE)
 
     #  Turn on built-in LED two times to show that the start message has been sent
     if DEBUG:
@@ -350,82 +176,73 @@ async def main_robot_loop():
 
     # Start the gyroscope reading as a separate background task
     #asyncio.create_task(gyro_reading())
-    
-    # Give the gyro task a moment to update 'turns' before initializing last_known_turns
-    time.sleep(GYRO_READ_INTERVAL * 2)
 
     # Initialize with the current global turns value
-    last_known_turns = turns 
+    last_known_turns = gyroscope.turns 
     turning = False
     if DEBUG:
-        send_message(f"{USB_CDC_HEADER_STATUS}:starting main algorithm")
+        serial_handler.send_message(f"{USB_CDC_HEADER_STATUS}:starting main algorithm")
 
     while True:
-        # Update RPLIDAR measures
-        receive_360_rplidar_measures()
-        
         # Update gyro
-        gyro_reading()
+        gyro_update()
         
         # Check for Gyro Turn and Center Servo Immediately
         if turning:
-            if turns != last_known_turns:
-                set_steering_angle(STEERING_SERVO_CENTER)
+            if gyroscope.turns != last_known_turns:
+                set_steering_angle(servo.SERVO_CENTER_ANGLE)
 
                 # Update for the next check
-                last_known_turns = turns  
+                last_known_turns = gyroscope.turns  
                 turning = False
             else:
                 # Wait a bit before checking again
                 time.sleep(TURNING_DELAY)  
                 continue
 
-        # Calculate average distances from RPLIDAR data. I interchange the left side witht he right side because the RPLIDAR is upside-down
-        avg_front_dist = (sum(rplidar_distances[-5:]) + sum(rplidar_distances[:5])) / 10.0
-        avg_right_dist = sum(rplidar_distances[265:275]) / 10.0
-        avg_left_dist = sum(rplidar_distances[85:95]) / 10.0
-        
+        """       
         if DEBUG:
-            send_message(f"{USB_CDC_HEADER_STATUS}:avg_front_dist,{avg_front_dist}")
-            send_message(f"{USB_CDC_HEADER_STATUS}:avg_right_dist,{avg_right_dist}")
-            send_message(f"{USB_CDC_HEADER_STATUS}:avg_left_dist,{avg_left_dist}")
+            serial_handler.send_message(f"{USB_CDC_HEADER_STATUS}:avg_front_dist,{avg_front_dist}")
+            serial_handler.send_message(f"{USB_CDC_HEADER_STATUS}:avg_right_dist,{avg_right_dist}")
+            serial_handler.send_message(f"{USB_CDC_HEADER_STATUS}:avg_left_dist,{avg_left_dist}")
 
         # Overall Mission Completion Check
-        if abs(turns) == 12:
+        if abs(gyroscope.turns) == 12:
             if MOVEMENT_MODE:
                 set_robot_speed(SPEED_NORMAL)
-                set_steering_angle(STEERING_SERVO_CENTER)
+                set_steering_angle(servo.SERVO_CENTER_ANGLE)
 
                 while True:
                     if avg_front_dist > TARGET_DISTANCE_STOP_START and avg_front_dist < TARGET_DISTANCE_STOP_END:
                         set_robot_speed(SPEED_STOP)
-                        send_message(STOP_MESSAGE)
+                        serial_handler.send_message(STOP_MESSAGE)
 
                     time.sleep(PARKING_DELAY)
             return
-
+        
         # --- Navigation Logic ---
         if avg_front_dist >= FRONT_DISTANCE_THRESHOLD:
             set_robot_speed(SPEED_NORMAL)
             
             if avg_right_dist >= avg_left_dist * (1 + SIDE_DIFFERENCE_PERCENTAGE):
-                set_steering_angle(STEERING_SERVO_CENTER - TURNING_VALUE)
+                set_steering_angle(servo.SERVO_CENTER_ANGLE - TURNING_VALUE)
                 
             elif avg_left_dist >= avg_right_dist * (1 + SIDE_DIFFERENCE_PERCENTAGE):
-                set_steering_angle(STEERING_SERVO_CENTER + TURNING_VALUE)
+                set_steering_angle(servo.SERVO_CENTER_ANGLE + TURNING_VALUE)
             
             else:
-                set_steering_angle(STEERING_SERVO_CENTER)
+                set_steering_angle(servo.SERVO_CENTER_ANGLE)
 
         else:
             set_robot_speed(SPEED_TURN)
             
             if avg_right_dist >= SIDE_DISTANCE_THRESHOLD:
-                set_steering_angle(STEERING_SERVO_CENTER - TURNING_VALUE)
+                set_steering_angle(servo.SERVO_CENTER_ANGLE - TURNING_VALUE)
             elif avg_left_dist >= SIDE_DISTANCE_THRESHOLD:
-                set_steering_angle(STEERING_SERVO_CENTER + TURNING_VALUE)
+                set_steering_angle(servo.SERVO_CENTER_ANGLE + TURNING_VALUE)
 
         time.sleep(MOVEMENT_DELAY)
+        """
 
 # Start the asyncio event loop
 asyncio.run(main_robot_loop())
