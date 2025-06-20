@@ -106,11 +106,27 @@ Entre las características clave de las NPU se encuentran:
 
 <h1 id="montaje-del-modelo-de-deteccion-de-objetos">Montaje del Modelo de Detección de Objetos</h1>
 
+Primeramente, nos movemos a la carpeta [```scripts```](scripts), y creamos un entorno virtual de Python con los siguientes comandos:
+
+Si el sistema operativo es Windows:
+```
+python -m venv .venv
+./.venv/Scripts/activate
+pip install -r requirements.txt
+```
+
+Si el sistema operativo es Linux:
+```
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
 Para el montaje del modelo de detección de objetos, se deben seguir los siguientes pasos:
 
 <h2 id="creacion-del-conjunto-de-datos">Creación del Conjunto de Datos</h2>
 
-Para la creación del conjunto de datos, primeramente tomamos imágenes de los prismas que se utilizarán en la competencia. Estas imágenes fueron tomadas con los distintos dispositivos de nuestro equipo, en distintas condiciones de luz y ángulos, y las cuales guardamos en la carpeta [```dataset/general/original/to_process```](dataset/general/original/to_process). Seguidamente, ejecutamos el script [```scripts/resize.py```](scripts/resize.py) para redimensionar las imágenes a un tamaño de 640 × 640 píxeles, que es el tamaño de entrada del modelo YOLOv11. Este script utiliza la biblioteca OpenCV para redimensionar las imágenes y guardarlas en la carpeta [```dataset/general/resized/to_process```](dataset/general/resized/to_process).
+Para la creación del conjunto de datos, tomamos imágenes de los prismas que se utilizarán en la competencia. Estas imágenes fueron tomadas con los distintos dispositivos de nuestro equipo, en distintas condiciones de luz y ángulos, y las cuales guardamos en la carpeta [```dataset/general/original/to_process```](dataset/general/original/to_process). Seguidamente, ejecutamos el script [```scripts/resize.py```](scripts/resize.py) para redimensionar las imágenes a un tamaño de 640 × 640 píxeles, que es el tamaño de entrada del modelo YOLOv11. Este script utiliza la biblioteca OpenCV para redimensionar las imágenes y guardarlas en la carpeta [```dataset/general/resized/to_process```](dataset/general/resized/to_process).
 
 <p align="center">
    <img src="https://i.postimg.cc/RFBvkzPz/IMG-20250221-135320.jpg" alt="Imagen sin redimensionar del conjunto de datos" width="400">
