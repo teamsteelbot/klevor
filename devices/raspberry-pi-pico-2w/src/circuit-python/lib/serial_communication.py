@@ -186,3 +186,18 @@ class SerialCommunication:
         # Wait for confirmation of the start message
         if not await self.wait_for_confirmation():
             raise SerialCommunicationError("Failed to receive confirmation for start message.")
+
+    async def stop(self):
+        """
+        Send the stop message to the console port and wait for confirmation.
+        """
+        # Send the stop message
+        self.send_message(self.STOP_MESSAGE)
+
+        # Wait for confirmation of the stop message
+        if not await self.wait_for_confirmation():
+            raise SerialCommunicationError("Failed to receive confirmation for stop message.")
+
+        # Turn off the LED if it was toggled on receive
+        if self.__led:
+            self.__led.off()

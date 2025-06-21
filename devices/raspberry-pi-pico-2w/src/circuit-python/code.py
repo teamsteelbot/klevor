@@ -1,6 +1,5 @@
-import board
-import busio
-import digitalio
+from board import (LED, GP0, GP1, GP2, GP11, GP13)
+from busio import I2C
 from asyncio import run, create_task, gather
 
 from lib.bno08x import BNO08XHandler
@@ -20,17 +19,18 @@ CHALLENGE = Env.get_challenge()
 # Distance constants
 FRONT_DISTANCE_THRESHOLD = 500
 SIDE_DISTANCE_DIFFERENCE_PERCENTAGE = 0.2
-SIDE_DISTANCE_THRESHOLD = 15000
+SIDE_DISTANCE_THRESHOLD = 1500
+STOP_DISTANCE_THRESHOLD = 1500
 TARGET_DISTANCE_STOP_START = 200
 
 # Pins
-I2C_BUS = busio.I2C(board.GP1, board.GP0)
-ESC_MOTOR_PIN = board.GP2
-SERVO_PIN = board.GP13
-SWITCH_PIN = board.GP11
+I2C_BUS = I2C(GP1, GP0)
+ESC_MOTOR_PIN = GP2
+SERVO_PIN = GP13
+SWITCH_PIN = GP11
 
 # Robot's components handlers
-led: LEDHandler = LEDHandler(led_pin=board.LED)
+led: LEDHandler = LEDHandler(led_pin=LED)
 serial_communication: SerialCommunication = SerialCommunication(console_port_enabled=True, data_port_enabled=True,
                                                                 led=led)
 servo: ServoHandler = ServoHandler(servo_pin=SERVO_PIN, serial_communication=serial_communication)
@@ -49,6 +49,38 @@ async def challenge_with_obstacles():
     while True:
         break
 
+async def challenge_without_obstacles_calculate_distance(msgs: list[IncomingMessage]) -> tuple[float, float, float]:
+    """
+    Calculate the average distances from the received RPLIDAR messages.
+
+    Args:
+        msgs (list[IncomingMessage]): List of incoming messages from the serial communication.
+    Returns:
+        tuple[float, float, float]: Average distances for front, left, and right.
+    """
+    # Initialize average distances
+    avg_front_dist = 0.0
+    avg_left_dist = 0.0
+    avg_right_dist = 0.0
+
+    # Process the received messages (must be only RPLIDAR messages) on reverse order
+    for msg in msgs[::-1]:
+        if msg.category == IncomingCategory.RPLIDAR:
+            # Split the message content to extract distance
+            parts = msg.content.split(IncomingMessage.CONTENT_HEADER_SEPARATOR)
+
+            # Check the type of distance
+            if parts[0] == RPLIDAR.FRONT:
+                avg_front_dist = float(parts[1])
+
+            elif parts[0] == RPLIDAR.LEFT:
+                avg_left_dist = float(parts[1])
+
+            elif parts[0] == RPLIDAR.RIGHT:
+                avg_right_dist = float(parts[1])
+
+    return avg_front_dist, avg_left_dist, avg_right_dist
+
 async def challenge_without_obstacles():
     """
     Challenge without obstacles logic.
@@ -58,11 +90,6 @@ async def challenge_without_obstacles():
 
     # Set the last known turns to zero
     last_known_turns = 0
-
-    # Initialize the average distances
-    avg_front_dist = 0.0
-    avg_left_dist = 0.0
-    avg_right_dist = 0.0
 
     while True:
         # Create the update quaternion and receive serial messages tasks
@@ -74,20 +101,7 @@ async def challenge_without_obstacles():
         msgs = results[1]
 
         # Process the received messages (must be only RPLIDAR messages) on reverse order
-        for msg in msgs[::-1]:
-            if msg.category == IncomingCategory.RPLIDAR:
-                # Split the message content to extract distance
-                parts = msg.content.split(IncomingMessage.CONTENT_HEADER_SEPARATOR)
-
-                # Check the type of distance
-                if parts[0] == RPLIDAR.FRONT:
-                    avg_front_dist = float(parts[1])
-
-                elif parts[0] == RPLIDAR.LEFT:
-                    avg_left_dist = float(parts[1])
-
-                elif parts[0] == RPLIDAR.RIGHT:
-                    avg_right_dist = float(parts[1])
+        avg_front_dist, avg_left_dist, avg_right_dist = await challenge_without_obstacles_calculate_distance(msgs)
 
         # Algorithm tasks
         tasks = []
@@ -107,12 +121,17 @@ async def challenge_without_obstacles():
             await gather(*tasks)
 
             while True:
-                if avg_front_dist > TARGET_DISTANCE_STOP_START and avg_front_dist < TARGET_DISTANCE_STOP_END:
-                    set_robot_speed(SPEED_STOP)
-                    serial_communication.send_message(STOP_MESSAGE)
+                # Receive messages from the serial communication
+                msgs = await serial_communication.receive_messages()
 
-                    sleep(PARKING_DELAY)
-            return
+                # Process the received messages (must be only RPLIDAR messages) on reverse order
+                avg_front_dist, avg_left_dist, avg_right_dist = await challenge_without_obstacles_calculate_distance(
+                    msgs)
+
+                if avg_front_dist <= STOP_DISTANCE_THRESHOLD:
+                    await motor.stop()
+                    await serial_communication.stop()
+                    return
 
         # Check if the robot should move forward or turn
         if avg_front_dist >= FRONT_DISTANCE_THRESHOLD:

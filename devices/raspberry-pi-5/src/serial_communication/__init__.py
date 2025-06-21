@@ -37,6 +37,9 @@ class SerialCommunication(SerialCommunicationABC):
     # Message delay
     DELAY = 0.01
 
+    # Stop delay
+    STOP_DELAY = 0.1
+
     # Encode
     ENCODE = 'utf-8'
 
@@ -408,6 +411,15 @@ class SerialCommunication(SerialCommunicationABC):
             msg = IncomingMessage.from_string(msg_str)
 
             if msg.is_stop():
+                # Send a confirmation stop message
+                self._send_confirmation_message()
+
+                # Log the stop message
+                self.__logger.info("Received stop event.") if self.__logger else None
+
+                # Wait for a short time to ensure the message is sent
+                sleep(self.STOP_DELAY)
+
                 # Close the serial port
                 self.__close()
 
