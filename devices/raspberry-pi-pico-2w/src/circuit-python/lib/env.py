@@ -1,27 +1,6 @@
 from os import getenv
 
-class Challenge:
-    """
-    Class to represent the enum challenge messages sent and received from the Raspberry Pi Pico.
-    """
-    WITH_OBSTACLES = "with_obstacles"
-    WITHOUT_OBSTACLES = "without_obstacles"
-
-    @staticmethod
-    def from_string(challenge_str: str) -> 'Challenge':
-        """
-        Convert a string to a Challenge enum value.
-
-        Args:
-            challenge_str (str): The string representation of the challenge.
-
-        Returns:
-            Challenge: The corresponding Challenge enum value.
-        """
-        challenge_name = challenge_str.upper()
-        if challenge_name not in [Challenge.WITH_OBSTACLES, Challenge.WITHOUT_OBSTACLES]:
-            raise ValueError(f"Invalid challenge: {challenge_str}")
-        return Challenge[challenge_name]
+from .challenge import Challenge
 
 
 class Env:
@@ -95,7 +74,7 @@ class Env:
         Get the challenge type from the environment variable.
 
         Returns:
-            str: The challenge type, defaulting to 'without_obstacles' if not set.
+            str: The challenge type.
         """
         value = getenv("CHALLENGE", Challenge.WITHOUT_OBSTACLES).lower()
 

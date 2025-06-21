@@ -9,19 +9,12 @@ from lib.led import LEDHandler
 from lib.serial_communication import SerialCommunication
 from lib.servo import ServoHandler
 from lib.switch import SwitchHandler
-from lib.message import IncomingCategory, IncomingMessage, RPLIDAR
+from lib.challenge import WithoutObstacles, WithObstacles
 
 # Constants
 MOVEMENT = Env.get_movement_mode()
 DEBUG = Env.get_debug_mode()
 CHALLENGE = Env.get_challenge()
-
-# Distance constants
-FRONT_DISTANCE_THRESHOLD = 500
-SIDE_DISTANCE_DIFFERENCE_PERCENTAGE = 0.2
-SIDE_DISTANCE_THRESHOLD = 1500
-STOP_DISTANCE_THRESHOLD = 1500
-TARGET_DISTANCE_STOP_START = 200
 
 # Pins
 I2C_BUS = I2C(GP1, GP0)
@@ -38,128 +31,6 @@ motor: ESCMotorHandler = ESCMotorHandler(motor_pin=ESC_MOTOR_PIN, serial_communi
                                          movement=MOVEMENT)
 bno08x: BNO08XHandler = BNO08XHandler(i2c=I2C_BUS, serial_communication=serial_communication)
 switch: SwitchHandler = SwitchHandler(switch_pin=SWITCH_PIN, serial_communication=serial_communication, led=led)
-
-async def challenge_with_obstacles():
-    """
-    Challenge with obstacles logic.
-    This function will be executed when the robot is set to challenge mode with obstacles.
-    """
-    global bno08x, servo, motor, serial_communication
-
-    while True:
-        break
-
-async def challenge_without_obstacles_calculate_distance(msgs: list[IncomingMessage]) -> tuple[float, float, float]:
-    """
-    Calculate the average distances from the received RPLIDAR messages.
-
-    Args:
-        msgs (list[IncomingMessage]): List of incoming messages from the serial communication.
-    Returns:
-        tuple[float, float, float]: Average distances for front, left, and right.
-    """
-    # Initialize average distances
-    avg_front_dist = 0.0
-    avg_left_dist = 0.0
-    avg_right_dist = 0.0
-
-    # Process the received messages (must be only RPLIDAR messages) on reverse order
-    for msg in msgs[::-1]:
-        if msg.category == IncomingCategory.RPLIDAR:
-            # Split the message content to extract distance
-            parts = msg.content.split(IncomingMessage.CONTENT_HEADER_SEPARATOR)
-
-            # Check the type of distance
-            if parts[0] == RPLIDAR.FRONT:
-                avg_front_dist = float(parts[1])
-
-            elif parts[0] == RPLIDAR.LEFT:
-                avg_left_dist = float(parts[1])
-
-            elif parts[0] == RPLIDAR.RIGHT:
-                avg_right_dist = float(parts[1])
-
-    return avg_front_dist, avg_left_dist, avg_right_dist
-
-async def challenge_without_obstacles():
-    """
-    Challenge without obstacles logic.
-    This function will be executed when the robot is set to challenge mode without obstacles.
-    """
-    global bno08x, servo, motor, serial_communication
-
-    # Set the last known turns to zero
-    last_known_turns = 0
-
-    while True:
-        # Create the update quaternion and receive serial messages tasks
-        update_quaternion_task = create_task(bno08x.update_quaternion())
-        receive_serial_task = create_task(serial_communication.receive_messages())
-
-        # Wait for the tasks to complete
-        results = await gather(update_quaternion_task, receive_serial_task)
-        msgs = results[1]
-
-        # Process the received messages (must be only RPLIDAR messages) on reverse order
-        avg_front_dist, avg_left_dist, avg_right_dist = await challenge_without_obstacles_calculate_distance(msgs)
-
-        # Algorithm tasks
-        tasks = []
-
-        # Check for the current turn and center the servo if necessary
-        if servo.is_turning() and bno08x.turns != last_known_turns:
-            tasks.append(create_task(servo.center()))
-
-            # Update for the next check
-            last_known_turns = bno08x.turns
-
-        # Overall Mission Completion Check
-        if last_known_turns == 12:
-            tasks.append(create_task(motor.set_speed(motor.SPEED_NORMAL)))
-
-            # Gather the tasks and wait for them to complete
-            await gather(*tasks)
-
-            while True:
-                # Receive messages from the serial communication
-                msgs = await serial_communication.receive_messages()
-
-                # Process the received messages (must be only RPLIDAR messages) on reverse order
-                avg_front_dist, avg_left_dist, avg_right_dist = await challenge_without_obstacles_calculate_distance(
-                    msgs)
-
-                if avg_front_dist <= STOP_DISTANCE_THRESHOLD:
-                    await motor.stop()
-                    await serial_communication.stop()
-                    return
-
-        # Check if the robot should move forward or turn
-        if avg_front_dist >= FRONT_DISTANCE_THRESHOLD:
-            tasks.append(create_task(motor.set_speed(motor.SPEED_NORMAL)))
-
-            # Check if the servo should make a little turn to the left or right in order to center the robot
-            if avg_right_dist >= avg_left_dist * (1 + SIDE_DISTANCE_DIFFERENCE_PERCENTAGE):
-                tasks.append(create_task(servo.right(servo.SMALL_TURN_ANGLE)))
-
-            elif avg_left_dist >= avg_right_dist * (1 + SIDE_DISTANCE_DIFFERENCE_PERCENTAGE):
-                tasks.append(create_task(servo.left(servo.SMALL_TURN_ANGLE)))
-
-            else:
-                tasks.append(create_task(servo.center()))
-
-        else:
-            tasks.append(create_task(motor.set_speed(motor.SPEED_SLOW)))
-
-            # Check if the robot should turn left or right based on the side distances
-            if avg_right_dist >= SIDE_DISTANCE_THRESHOLD:
-                tasks.append(create_task(servo.right(servo.BIG_TURN_ANGLE)))
-
-            elif avg_left_dist >= SIDE_DISTANCE_THRESHOLD:
-                tasks.append(create_task(servo.left(servo.BIG_TURN_ANGLE)))
-
-        # Gather the tasks and wait for them to complete
-        if tasks:
-            await gather(*tasks)
 
 async def main():
     """
@@ -181,10 +52,20 @@ async def main():
 
         # Start the challenge based on the challenge type
         if CHALLENGE == Challenge.WITH_OBSTACLES:
-            await challenge_with_obstacles()
+            # Initialize the WithObstacles challenge handler
+            with_obstacles = WithObstacles(bno08x=bno08x, servo=servo, motor=motor,
+                                           serial_communication=serial_communication)
+
+            # Start the main loop for the challenge with obstacles
+            await with_obstacles.loop()
 
         elif CHALLENGE == Challenge.WITHOUT_OBSTACLES:
-            await challenge_without_obstacles()
+            # Initialize the WithoutObstacles challenge handler
+            without_obstacles = WithoutObstacles(bno08x=bno08x, servo=servo, motor=motor,
+                                                 serial_communication=serial_communication)
+
+            # Start the main loop for the challenge without obstacles
+            await without_obstacles.loop()
 
         else:
             raise ValueError(f"Unsupported challenge type: {CHALLENGE}")

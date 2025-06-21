@@ -2,15 +2,14 @@ import argparse
 from multiprocessing import Process, Manager, Event
 from threading import Thread
 
-from camera.image_processing_queue import main as images_queue_main, ImageProcessingQueue
+from camera.image_processing_queue import ImageProcessingQueue
 from env import Env
-from log import main as log_main, Logger
-from serial_communication import SerialCommunication, main as serial_communication_main
-from server import WebsocketServer
-from server import main as server_main
+from log import Logger
+from serial_communication import SerialCommunication
+from server import WebsocketsServer
 from utils import check_type
 from yolo.args import Args
-from yolo.hailo.object_detection import main as object_detection_main
+from yolo.hailo.object_detection import ObjectDetection
 
 
 def process_1_fn(serial_communication: SerialCommunication, server: WebsocketServer | None):
@@ -100,10 +99,8 @@ def process_3_fn(logger: Logger, images_queue: ImageProcessingQueue, parking_eve
 
     object_detection_main(logger, images_queue, parking_event, stop_event)
 
-def main():
-    """
-    Main function to run the script.
-    """
+
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Klevor - WRO 2025 - Future Engineers Car")
     Args.add_yolo_version_argument(parser)
@@ -143,7 +140,7 @@ def main():
 
             # Raspberry Pi Pico serial communication wrapper with multiprocessing safety
             serial_communication = manager.SerialCommunication(parking_event, stop_event, logger, images_queue,
-                                                            server=server)
+                                                               server=server)
 
             # First process
             process_1 = Process(target=process_1_fn, args=(serial_communication, server))
@@ -177,7 +174,3 @@ def main():
                 if process.is_alive():
                     process.terminate()
                     process.join()
-
-
-if __name__ == "__main__":
-    main()

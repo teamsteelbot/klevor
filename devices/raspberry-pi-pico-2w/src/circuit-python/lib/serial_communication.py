@@ -5,7 +5,7 @@ from time import monotonic
 
 from .led import LEDHandler
 from .message import IncomingMessage, IncomingCategory, OutgoingMessage, OutgoingCategory, Status, Request
-from .env import Challenge
+from .challenge import Challenge
 
 class SerialCommunicationError(Exception):
     """

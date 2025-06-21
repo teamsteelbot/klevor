@@ -7,7 +7,7 @@ class IncomingCategory:
     RPLIDAR = "rplidar"
 
     @classmethod
-    def from_string(cls, category_str: str) -> 'IncomingCategory':
+    def from_string(cls, category_str: str) -> str:
         """
         Convert a string to a IncomingCategory enum value.
 
@@ -15,12 +15,14 @@ class IncomingCategory:
             category_str (str): The string representation of the category.
 
         Returns:
-            IncomingCategory: The corresponding IncomingCategory enum value.
+            str: The corresponding IncomingCategory enum value.
         """
         category_name = category_str.upper()
-        if category_name not in [cls.STATUS, cls.INFERENCE, cls.RPLIDAR]:
-            raise ValueError(f"Invalid incoming category: {category_str}")
-        return cls[category_name]
+        for category in [cls.STATUS, cls.INFERENCE, cls.RPLIDAR]:
+            if category_name == category:
+                return category
+
+        raise ValueError(f"Invalid incoming category: {category_str}")
 
 class RPLIDAR:
     """
@@ -31,7 +33,7 @@ class RPLIDAR:
     RIGHT = "right"
 
     @classmethod
-    def from_string(cls, category_str: str) -> 'RPLIDAR':
+    def from_string(cls, category_str: str) -> str:
         """
         Convert a string to a RPLIDAR enum value.
 
@@ -39,12 +41,14 @@ class RPLIDAR:
             category_str (str): The string representation of the category.
 
         Returns:
-            RPLIDAR: The corresponding RPLIDAR enum value.
+            str: The corresponding RPLIDAR enum value.
         """
         category_name = category_str.upper()
-        if category_name not in [cls.FRONT, cls.LEFT, cls.RIGHT]:
-            raise ValueError(f"Invalid RPLIDAR category: {category_str}")
-        return cls[category_name]
+        for category in [cls.FRONT, cls.LEFT, cls.RIGHT]:
+            if category_name == category:
+                return category
+
+        raise ValueError(f"Invalid RPLIDAR category: {category_str}")
 
 class OutgoingCategory:
     """
@@ -59,7 +63,7 @@ class OutgoingCategory:
     ERROR = "error"
 
     @classmethod
-    def from_string(cls, category_str: str) -> 'OutgoingCategory':
+    def from_string(cls, category_str: str) -> str:
         """
         Convert a string to a OutgoingCategory enum value.
 
@@ -67,13 +71,15 @@ class OutgoingCategory:
             category_str (str): The string representation of the category.
 
         Returns:
-            OutgoingCategory: The corresponding OutgoingCategory enum value.
+            str: The corresponding OutgoingCategory enum value.
         """
         category_name = category_str.upper()
-        if category_name not in [cls.CHALLENGE, cls.STATUS, cls.SERVO_ANGLE, cls.MOTOR_SPEED, cls.REQUEST,
-                                 cls.BNO08X_TURNS, cls.ERROR]:
-            raise ValueError(f"Invalid outgoing category: {category_str}")
-        return cls[category_name]
+        for category in [cls.CHALLENGE, cls.STATUS, cls.SERVO_ANGLE, cls.MOTOR_SPEED, cls.REQUEST,
+                            cls.BNO08X_TURNS, cls.ERROR]:
+            if category_name == category:
+                return category
+
+        raise ValueError(f"Invalid outgoing category: {category_str}")
 
 class Status:
     """
@@ -84,7 +90,7 @@ class Status:
     OK = "ok"
 
     @classmethod
-    def from_string(cls, status_str: str) -> 'Status':
+    def from_string(cls, status_str: str) -> str:
         """
         Convert a string to a Status enum value.
 
@@ -92,21 +98,24 @@ class Status:
             status_str (str): The string representation of the status.
 
         Returns:
-            Status: The corresponding Status enum value.
+            str: The corresponding Status enum value.
         """
         status_name = status_str.upper()
-        if status_name not in [cls.START, cls.STOP, cls.OK]:
-            raise ValueError(f"Invalid status: {status_str}")
-        return cls[status_name]
+        for status in [cls.START, cls.STOP, cls.OK]:
+            if status_name == status:
+                return status
+
+        raise ValueError(f"Invalid status: {status_str}")
 
 class Request:
     """
     Class to represent the enum request messages sent to the Raspberry Pi 5.
     """
+
     INFERENCE = "inference"
 
     @classmethod
-    def from_string(cls, request_str: str) -> 'Request':
+    def from_string(cls, request_str: str) -> str:
         """
         Convert a string to a Request enum value.
 
@@ -114,12 +123,14 @@ class Request:
             request_str (str): The string representation of the request.
 
         Returns:
-            Request: The corresponding Request enum value.
+            str: The corresponding Request enum value.
         """
         request_name = request_str.upper()
-        if request_name not in [cls.INFERENCE, cls.RPLIDAR]:
-            raise ValueError(f"Invalid request: {request_str}")
-        return cls[request_name]
+        for request in [cls.INFERENCE]:
+            if request_name == request:
+                return request
+
+        raise ValueError(f"Invalid request: {request_str}")
 
 class IncomingMessage:
     """
@@ -137,12 +148,12 @@ class IncomingMessage:
     # Message end character
     END = '\n'
 
-    def __init__(self, category: IncomingCategory, content: str):
+    def __init__(self, category: str, content: str):
         """
         Initialize the message class.
 
         Args:
-            category (IncomingCategory): The category of the message.
+            category (str): The category of the message.
             content (str): The content of the message.
         """
         self.category = category
@@ -181,22 +192,22 @@ class IncomingMessage:
         return IncomingMessage(category, parts[1])
 
     @property
-    def category(self) -> IncomingCategory:
+    def category(self) -> str:
         """
         Property to get the message category.
 
         Returns:
-            IncomingCategory: The category of the message.
+            str: The category of the message.
         """
         return self.__category
 
     @category.setter
-    def category(self, category: IncomingCategory):
+    def category(self, category: str):
         """
         Setter for the message category.
 
         Args:
-            category (IncomingCategory): The category of the message.
+            category (str): The category of the message.
         """
         self.__category = category
 
@@ -230,12 +241,12 @@ class OutgoingMessage:
     # Message end character
     END = '\n'
 
-    def __init__(self, category: OutgoingCategory, content: str):
+    def __init__(self, category: str, content: str):
         """
         Initialize the message class.
 
         Args:
-            category (OutgoingCategory): The category of the message.
+            category (str): The category of the message.
             content (str): The content of the message.
         """
         self.category = category
@@ -274,22 +285,22 @@ class OutgoingMessage:
         return OutgoingMessage(category, parts[1])
 
     @property
-    def category(self) -> OutgoingCategory:
+    def category(self) -> str:
         """
         Property to get the message category.
 
         Returns:
-            OutgoingCategory: The category of the message.
+            str: The category of the message.
         """
         return self.__category
 
     @category.setter
-    def category(self, category: OutgoingCategory):
+    def category(self, category: str):
         """
         Setter for the message category.
 
         Args:
-            category (OutgoingCategory): The category of the message.
+            category (str): The category of the message.
         """
         self.__category = category
 

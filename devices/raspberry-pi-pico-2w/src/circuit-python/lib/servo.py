@@ -3,7 +3,6 @@ from pwmio import PWMOut
 from adafruit_motor.servo import Servo
 from asyncio import sleep
 
-from .message import Message, Category
 from .serial_communication import SerialCommunication
 
 class ServoError(Exception):

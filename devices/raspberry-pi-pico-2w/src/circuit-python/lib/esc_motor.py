@@ -3,7 +3,6 @@ from pwmio import PWMOut
 from adafruit_motor.servo import ContinuousServo
 from asyncio import sleep
 
-from .message import OutgoingCategory, OutgoingMessage
 from .serial_communication import SerialCommunication
 
 class ESCMotorError(Exception):
