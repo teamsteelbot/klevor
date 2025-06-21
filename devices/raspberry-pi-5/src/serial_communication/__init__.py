@@ -9,16 +9,17 @@ from serial import Serial, SerialException
 from ..camera.image_processing_queue import ImageProcessingQueue
 from ..log import Logger
 from ..log.sub_logger import SubLogger
-from .message import IncomingMessage, IncomingCategory, OutgoingMessage, OutgoingCategory, Status
+from .message import IncomingMessage, IncomingCategory, OutgoingMessage, OutgoingCategory, Status, RPLIDAR
 from .abstracts import SerialCommunicationABC
 from ..server import WebsocketsServerABC
 from ..utils import check_type
-from ..env import Env, Challenges
+from ..env import Env, Challenge
 
 class SerialCommunication(SerialCommunicationABC):
     """
     Class to handle the serial communication through USB.
     """
+
     # Logger configuration
     LOG_TAG = "Serial"
 
@@ -346,12 +347,17 @@ class SerialCommunication(SerialCommunicationABC):
         self._send_message(confirmation_msg)
 
     @final
-    def send_rplidar_measures(self, measures_str: str) -> None:
-        # Create a message with the RPLIDAR measures type
-        msg = OutgoingMessage(OutgoingCategory.RPLIDAR, measures_str)
+    def send_rplidar_measures(self, measures: dict[RPLIDAR, float]) -> None:
+        for key, value in measures.items():
+            # Check the type of key and value
+            check_type(key, RPLIDAR)
+            check_type(value, float)
 
-        # Put the message in the outgoing messages queue
-        self._send_message(msg)
+            # Create a message with the RPLIDAR measures type
+            msg = OutgoingMessage(OutgoingCategory.RPLIDAR, f"{key.get_name()}{OutgoingMessage.CONTENT_HEADER_SEPARATOR}{value}")
+
+            # Put the message in the outgoing messages queue
+            self._send_message(msg)
 
     @final
     def _receiving_message_handler(self) -> None:
@@ -381,7 +387,7 @@ class SerialCommunication(SerialCommunicationABC):
 
                 elif msg.is_challenge():
                     # Set the challenge as an environment variable
-                    Env.set_challenge(Challenges.from_string(msg.content))
+                    Env.set_challenge(Challenge.from_string(msg.content))
 
                     # Log
                     self.__logger.info("Received challenge message.") if self.__logger else None
@@ -404,6 +410,10 @@ class SerialCommunication(SerialCommunicationABC):
             if msg.is_stop():
                 # Close the serial port
                 self.__close()
+
+            elif msg.is_error():
+                # Log the error message
+                self.__logger.error(f"Received error message: {msg.content}") if self.__logger else None
 
             else:
                 # Log

@@ -22,6 +22,30 @@ class IncomingCategory:
             raise ValueError(f"Invalid incoming category: {category_str}")
         return cls[category_name]
 
+class RPLIDAR:
+    """
+    Class to represent the enum categories of RPLIDAR messages from the Raspberry Pi 5.
+    """
+    FRONT = "front"
+    LEFT = "left"
+    RIGHT = "right"
+
+    @classmethod
+    def from_string(cls, category_str: str) -> 'RPLIDAR':
+        """
+        Convert a string to a RPLIDAR enum value.
+
+        Args:
+            category_str (str): The string representation of the category.
+
+        Returns:
+            RPLIDAR: The corresponding RPLIDAR enum value.
+        """
+        category_name = category_str.upper()
+        if category_name not in [cls.FRONT, cls.LEFT, cls.RIGHT]:
+            raise ValueError(f"Invalid RPLIDAR category: {category_str}")
+        return cls[category_name]
+
 class OutgoingCategory:
     """
     Class to represent the enum categories of outgoing messages to the Raspberry Pi 5.
@@ -32,6 +56,7 @@ class OutgoingCategory:
     MOTOR_SPEED = "motor_speed"
     BNO08X_TURNS = "bno08x_turns"
     REQUEST = "request"
+    ERROR = "error"
 
     @classmethod
     def from_string(cls, category_str: str) -> 'OutgoingCategory':
@@ -46,7 +71,7 @@ class OutgoingCategory:
         """
         category_name = category_str.upper()
         if category_name not in [cls.CHALLENGE, cls.STATUS, cls.SERVO_ANGLE, cls.MOTOR_SPEED, cls.REQUEST,
-                                 cls.BNO08X_TURNS]:
+                                 cls.BNO08X_TURNS, cls.ERROR]:
             raise ValueError(f"Invalid outgoing category: {category_str}")
         return cls[category_name]
 
@@ -79,7 +104,6 @@ class Request:
     Class to represent the enum request messages sent to the Raspberry Pi 5.
     """
     INFERENCE = "inference"
-    RPLIDAR = "rplidar"
 
     @classmethod
     def from_string(cls, request_str: str) -> 'Request':
@@ -103,6 +127,12 @@ class IncomingMessage:
     """
     # Message header separator
     HEADER_SEPARATOR = ':'
+
+    # Content header separator
+    CONTENT_HEADER_SEPARATOR = '='
+
+    # Content separator
+    CONTENT_SEPARATOR = ','
 
     # Message end character
     END = '\n'

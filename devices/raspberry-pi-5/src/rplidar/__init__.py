@@ -3,14 +3,14 @@ import os
 from multiprocessing import Event, RLock
 from threading import Thread
 from typing import Optional, final
-import asyncio
 
-from ..env import Env
+from ..env import Env, Challenge
 from ..utils import check_type
 from ..log.abstracts import LoggerABC
 from ..log.sub_logger import SubLogger
 from ..server import WebsocketsServerABC
 from ..serial_communication import SerialCommunicationABC
+from ..serial_communication.message import RPLIDAR as RPLIDARKey
 from .abstracts import RPLIDARABC
 from .measure import Measure
 
@@ -46,7 +46,8 @@ class RPLIDAR(RPLIDARABC):
             server: Optional[WebsocketsServerABC] = None,
             serial: Optional[SerialCommunicationABC] = None,
             baudrate: int = RPLIDAR_C1_BAUDRATE,
-            port: str = RPLIDAR_C1_PORT
+            port: str = RPLIDAR_C1_PORT,
+            is_upside_down: bool = True
         ):
         """
         Initialize the RPLIDAR.
@@ -57,6 +58,7 @@ class RPLIDAR(RPLIDARABC):
             serial (Optional[SerialCommunicationABC]): SerialCommunication instance for RPLIDAR.
             baudrate (int): Baud rate for the serial communication.
             port (str): SerialCommunication port for the RPLIDAR.
+            is_upside_down (bool): If True, the RPLIDAR is upside down, and angles will be adjusted accordingly.
         """
         # Create the reentrant lock
         self.__rlock = RLock()
@@ -90,6 +92,10 @@ class RPLIDAR(RPLIDARABC):
         check_type(port, str)
         self.__port = port
 
+        # Check the type of is_upside_down
+        check_type(is_upside_down, bool)
+        self.__is_upside_down = is_upside_down
+
         # Distances dictionary
         self.__distances_dict = dict()
 
@@ -102,8 +108,62 @@ class RPLIDAR(RPLIDARABC):
         # Initialize the thread
         self.__thread = None
 
+        # Initialize the challenge
+        self.__challenge = None
+
         # Get the debug environment variable
         self.__debug = Env.get_debug_mode()
+
+    @final
+    @property
+    def measures(self) -> dict[float, Measure]:
+        """
+        Returns the distances dictionary containing the measures.
+
+        Returns:
+            dict[float, Measure]: A dictionary with angles as keys and Measure objects as values.
+        """
+        with self.__rlock:
+            return self.__distances_dict
+
+    @final
+    def _calculate_average_distance(self, angles: list[int]) -> float:
+        total_distance = 0.0
+        count = 0
+        for angle in angles:
+            if angle in self.__distances_dict:
+                total_distance += self.__distances_dict[angle].distance
+                count += 1
+        return total_distance / count if count > 0 else 0.0
+
+    @final
+    def _after_rotation(self) -> None:
+        # Log the end of the rotation
+        self.__logger.info("Full rotation completed.") if self.__logger else None
+
+        # Put the parsed line in the server
+        if self.__server:
+            for angle, measure in self.__distances_dict.items():
+                measure_str = str(measure)
+                self.__server.broadcast_rplidar_measures(str(measure))
+
+        # Send the measure string to the serial communication
+        if self.__serial_communication:
+            if self.__challenge == Challenge.WITHOUT_OBSTACLES:
+                # Calculate the average front, left and right distances by 5 degrees to each side
+                avg_front_dist = self._calculate_average_distance([*range(355, 360), *range(0, 6)])
+                avg_left_dist = self._calculate_average_distance([*range(265, 276)])
+                avg_right_dist = self._calculate_average_distance([*range(85, 96)])
+
+                # Create a dictionary with the average distances
+                avg_distances = {
+                    RPLIDARKey.FRONT: avg_front_dist,
+                    RPLIDARKey.LEFT: avg_left_dist,
+                    RPLIDARKey.RIGHT: avg_right_dist
+                }
+
+                # Send the average distances to the serial communication
+                self.__serial_communication.send_rplidar_measures(avg_distances)
 
     @final
     def _read_output(self):
@@ -131,8 +191,8 @@ class RPLIDAR(RPLIDARABC):
             return
 
         # Check if it's the last measure of a full rotation
-        full_rotation = len(parts) == 7
-        if full_rotation:
+        rotation = len(parts) == 7
+        if rotation:
             parts = parts[1:]
 
         # Get the angle, distance and quality
@@ -151,6 +211,11 @@ class RPLIDAR(RPLIDARABC):
         # Floor the angle to a float with no decimal places
         angle = round(angle, 0)
 
+        # Adjust the angle if the RPLIDAR is upside down
+        if self.__is_upside_down:
+            # Subtract the angle from 360
+            angle = 360 - angle
+
         # Check if the angle is already in the distances dictionary
         if not angle in self.__distances_dict:
             self.__distances_dict[angle] = Measure(angle, distance, quality)
@@ -163,18 +228,13 @@ class RPLIDAR(RPLIDARABC):
             self.__distances_dict[angle].distance = distance
             self.__distances_dict[angle].quality = quality
 
-        # Get the measure string representation
-        measure_str = str(self.__distances_dict[angle])
+        # Call the after rotation method if it's the last measure of a full rotation
+        if rotation:
+            self._after_rotation()
 
         # Log
-        self.__logger.debug("RPLIDAR measure: " + measure_str) if self.__logger and self.__debug else None
+        self.__logger.debug("RPLIDAR measure: " + str(self.__distances_dict[angle])) if self.__logger and self.__debug else None
 
-        # Put the parsed line in the server
-        asyncio.run(self.__server.broadcast_rplidar_measures(measure_str)) if self.__server else None
-
-        # Send the measure string to the serial communication
-        self.__serial_communication.send_rplidar_measures(measure_str) if self.__serial_communication else None
-        
         # Increment the messages counter
         self.__messages_counter += 1
 
@@ -182,6 +242,9 @@ class RPLIDAR(RPLIDARABC):
     def _loop(self):
         # Wait for the start event to be set
         self.__start_event.wait()
+
+        # Get the challenge environment variable
+        self.__challenge = Env.get_challenge()
 
         # Log the start of the RPLIDAR process
         self.__logger.info("Starting RPLIDAR process...") if self.__logger else None

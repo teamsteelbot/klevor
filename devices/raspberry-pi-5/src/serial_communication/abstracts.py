@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from .message import Message
+from .message import IncomingMessage, OutgoingMessage, RPLIDAR
 
 class SerialCommunicationABC(ABC):
     """
@@ -45,17 +45,17 @@ class SerialCommunicationABC(ABC):
         pass
 
     @abstractmethod
-    def receive_message(self) -> Message | None:
+    def receive_message(self) -> IncomingMessage | None:
         """
         Get a message from the incoming messages queue.
 
         Returns:
-            Message|None: The message from the incoming messages queue or None if no message is available.
+            IncomingMessage|None: The message from the incoming messages queue or None if no message is available.
         """
         pass
 
     @abstractmethod
-    def peek_last_received_message(self) -> Message | None:
+    def peek_last_received_message(self) -> IncomingMessage | None:
         """
         Peek the last message from the incoming messages queue without removing it.
 
@@ -65,22 +65,22 @@ class SerialCommunicationABC(ABC):
         pass
 
     @abstractmethod
-    def _send_message(self, msg: Message) -> None:
+    def _send_message(self, msg: OutgoingMessage) -> None:
         """
         Put a message in the outgoing messages queue.
 
         Args:
-            msg (Message): The message to put in the queue.
+            msg (OutgoingMessage): The message to put in the queue.
         """
         pass
 
     @abstractmethod
-    def send_rplidar_measures(self, measures_str: str) -> None:
+    def send_rplidar_measures(self, measures: dict[RPLIDAR, float]) -> None:
         """
         Put RPLIDAR measures in the outgoing messages queue.
 
         Args:
-            measures_str (str): The measures string to put in the queue.
+            measures (dict[RPLIDAR, float]): Dictionary containing RPLIDAR measures to put in the queue.
         """
         pass
 

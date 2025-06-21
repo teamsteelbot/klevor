@@ -13,6 +13,7 @@ class IncomingCategory(Enum):
     MOTOR_SPEED = 4
     REQUEST = 5
     BNO08X_TURNS = 6
+    ERROR = 7
 
     def get_name(self) -> str:
         """
@@ -79,7 +80,6 @@ class Request(Enum):
     Enum to represent the request messages received from the Raspberry Pi Pico 2W.
     """
     INFERENCE = 1
-    RPLIDAR = 2
 
     def get_name(self) -> str:
         """
@@ -139,6 +139,40 @@ class OutgoingCategory(Enum):
         if category_name not in cls.__members__:
             raise ValueError(f"Invalid outgoing category: {category_str}")
         return cls[category_name]
+
+@unique
+class RPLIDAR(Enum):
+    """
+    Enum to represent the RPLIDAR messages sent to the Raspberry Pi Pico 2W.
+    """
+    FRONT = 1
+    LEFT = 2
+    RIGHT = 3
+
+    def get_name(self) -> str:
+        """
+        Get the RPLIDAR name in lowercase.
+
+        Returns:
+            str: The RPLIDAR name in lowercase.
+        """
+        return self.name.lower()
+
+    @classmethod
+    def from_string(cls, rplidar_str: str) -> 'RPLIDAR':
+        """
+        Convert a string to a RPLIDAR enum value.
+
+        Args:
+            rplidar_str (str): The string representation of the RPLIDAR message.
+
+        Returns:
+            RPLIDAR: The corresponding RPLIDAR enum value.
+        """
+        rplidar_name = rplidar_str.upper()
+        if rplidar_name not in cls.__members__:
+            raise ValueError(f"Invalid RPLIDAR message: {rplidar_str}")
+        return cls[rplidar_name]
 
 class IncomingMessage:
     """
@@ -264,12 +298,27 @@ class IncomingMessage:
         """
         return self.category == IncomingCategory.STATUS and self.content == Status.STOP.get_name()
 
+    def is_error(self) -> bool:
+        """
+        Check if the message is an error message.
+
+        Returns:
+            bool: True if the message is an error message, False otherwise.
+        """
+        return self.category == IncomingCategory.ERROR
+
 class OutgoingMessage:
     """
     Class to handle the messages sent to the Raspberry Pi Pico 2W.
     """
     # Message header separator
     HEADER_SEPARATOR = ':'
+
+    # Content header separator
+    CONTENT_HEADER_SEPARATOR = '='
+
+    # Content separator
+    CONTENT_SEPARATOR = ','
 
     # Message end character
     END = '\n'

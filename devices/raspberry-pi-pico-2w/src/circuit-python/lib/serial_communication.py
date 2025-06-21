@@ -166,6 +166,16 @@ class SerialCommunication:
         bno08x_message = OutgoingMessage(OutgoingCategory.BNO08X_TURNS, str(turns))
         self.send_message(bno08x_message)
 
+    def send_error_message(self, error: Exception):
+        """
+        Send an error message to the console port.
+
+        Args:
+            error (Exception): The error to send.
+        """
+        error_message = OutgoingMessage(OutgoingCategory.ERROR, str(error))
+        self.send_message(error_message)
+
     async def start(self):
         """
         Send the start message to the console port and wait for confirmation.

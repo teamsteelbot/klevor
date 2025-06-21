@@ -1,7 +1,6 @@
 import board
 import busio
 import digitalio
-from time import sleep
 from asyncio import run, create_task, gather
 
 from lib.bno08x import BNO08XHandler
@@ -11,6 +10,7 @@ from lib.led import LEDHandler
 from lib.serial_communication import SerialCommunication
 from lib.servo import ServoHandler
 from lib.switch import SwitchHandler
+from lib.message import IncomingCategory, IncomingMessage, RPLIDAR
 
 # Constants
 MOVEMENT = Env.get_movement_mode()
@@ -53,6 +53,11 @@ async def challenge_without_obstacles():
     # Set the last known turns to zero
     last_known_turns = 0
 
+    # Initialize the average distances
+    avg_front_dist = 0.0
+    avg_left_dist = 0.0
+    avg_right_dist = 0.0
+
     while True:
         # Create the update quaternion and receive serial messages tasks
         update_quaternion_task = create_task(bno08x.update_quaternion())
@@ -61,6 +66,22 @@ async def challenge_without_obstacles():
         # Wait for the tasks to complete
         results = await gather(update_quaternion_task, receive_serial_task)
         msgs = results[1]
+
+        # Process the received messages (must be only RPLIDAR messages) on reverse order
+        for msg in msgs[::-1]:
+            if msg.category == IncomingCategory.RPLIDAR:
+                # Split the message content to extract distance
+                parts = msg.content.split(IncomingMessage.CONTENT_HEADER_SEPARATOR)
+
+                # Check the type of distance
+                if parts[0] == RPLIDAR.FRONT:
+                    avg_front_dist = float(parts[1])
+
+                elif parts[0] == RPLIDAR.LEFT:
+                    avg_left_dist = float(parts[1])
+
+                elif parts[0] == RPLIDAR.RIGHT:
+                    avg_right_dist = float(parts[1])
 
         # Algorithm tasks
         tasks = []
@@ -72,6 +93,7 @@ async def challenge_without_obstacles():
             # Update for the next check
             last_known_turns = bno08x.turns
 
+        """"
         # Overall Mission Completion Check
         if abs(gyroscope.turns) == 12:
             if MOVEMENT_MODE:
@@ -115,27 +137,32 @@ async def main():
     Main function to initialize the robot and start the main algorithm.
     """
     global bno08x, servo, motor, serial_communication, switch
-    
-    # Create tasks for initialization
-    bno08x_calibrate = create_task(bno08x.calibrate())
-    motor_stop = create_task(motor.stop())
-    servo_center = create_task(servo.center())
 
-    # Wait for all initialization tasks to complete
-    await gather(bno08x_calibrate, motor_stop, servo_center)
+    try:
+        # Create tasks for initialization
+        bno08x_calibrate = create_task(bno08x.calibrate())
+        motor_stop = create_task(motor.stop())
+        servo_center = create_task(servo.center())
 
-    # Wait for the switch to be pressed
-    await switch.wait()
+        # Wait for all initialization tasks to complete
+        await gather(bno08x_calibrate, motor_stop, servo_center)
 
-    # Start the challenge based on the challenge type
-    if CHALLENGE == Challenge.WITH_OBSTACLES:
-        await challenge_with_obstacles()
+        # Wait for the switch to be pressed
+        await switch.wait()
 
-    elif CHALLENGE == Challenge.WITHOUT_OBSTACLES:
-        await challenge_without_obstacles()
+        # Start the challenge based on the challenge type
+        if CHALLENGE == Challenge.WITH_OBSTACLES:
+            await challenge_with_obstacles()
 
-    else:
-        raise ValueError(f"Unsupported challenge type: {CHALLENGE}")
+        elif CHALLENGE == Challenge.WITHOUT_OBSTACLES:
+            await challenge_without_obstacles()
+
+        else:
+            raise ValueError(f"Unsupported challenge type: {CHALLENGE}")
+
+    except Exception as e:
+        # Send error message to the serial communication
+        serial_communication.send_error_message(e)
 
 # Start the asyncio event loop
 run(main())

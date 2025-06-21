@@ -2,7 +2,7 @@ import os
 from enum import Enum, unique
 
 @unique
-class Keys(Enum):
+class Key(Enum):
     """
     Enum for environment variable keys.
     """
@@ -12,7 +12,7 @@ class Keys(Enum):
     CHALLENGE = 3
 
 @unique
-class Challenges(Enum):
+class Challenge(Enum):
     """
     Enum to represent different challenges.
     """
@@ -35,7 +35,7 @@ class Env:
         Args:
             debug (bool): True to enable debug mode, False to disable.
         """
-        os.environ[Keys.DEBUG.name] = str(debug).lower()
+        os.environ[Key.DEBUG.name] = str(debug).lower()
 
     @staticmethod
     def set_yolo_version(version: str) -> None:
@@ -45,17 +45,17 @@ class Env:
         Args:
             version (str): The YOLO version to set.
         """
-        os.environ[Keys.YOLO_VERSION.name] = version
+        os.environ[Key.YOLO_VERSION.name] = version
 
     @staticmethod
-    def set_challenge(challenge: Challenges) -> None:
+    def set_challenge(challenge: Challenge) -> None:
         """
         Set the challenge in the environment variable.
 
         Args:
-            challenge (Challenges): The challenge to set.
+            challenge (Challenge): The challenge to set.
         """
-        os.environ[Keys.CHALLENGE.name] = challenge.name
+        os.environ[Key.CHALLENGE.name] = challenge.name
 
     @staticmethod
     def get_debug_mode() -> bool:
@@ -65,7 +65,7 @@ class Env:
         Returns:
             bool: True if debug mode is enabled, otherwise False.
         """
-        return os.getenv(Keys.DEBUG.name, 'false').lower() == 'true'
+        return os.getenv(Key.DEBUG.name, 'false').lower() == 'true'
 
     @staticmethod
     def get_yolo_version() -> str:
@@ -75,18 +75,18 @@ class Env:
         Returns:
             str: The YOLO version, or 'unknown' if not set.
         """
-        return os.getenv(Keys.YOLO_VERSION.name, 'unknown')
+        return os.getenv(Key.YOLO_VERSION.name, 'unknown')
 
     @staticmethod
-    def get_challenge() -> Challenges:
+    def get_challenge() -> Challenge:
         """
         Get the challenge from the environment variable.
 
         Returns:
-            Challenges: The challenge enum value.
+            Challenge: The challenge enum value.
         """
-        challenge_name = os.getenv(Keys.CHALLENGE.name, Challenges.NONE.name)
-        for challenge in Challenges:
+        challenge_name = os.getenv(Key.CHALLENGE.name, Challenge.NONE.name)
+        for challenge in Challenge:
             if challenge.name == challenge_name:
                 return challenge
-        return Challenges.NONE
+        return Challenge.NONE
