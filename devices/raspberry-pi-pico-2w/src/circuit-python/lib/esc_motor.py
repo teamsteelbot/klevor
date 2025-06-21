@@ -40,7 +40,7 @@ class ESCMotorHandler:
     # Common speed values
     SPEED_FAST = 1.0
     SPEED_NORMAL = 0.5
-    SPEED_TURN = 0.25
+    SPEED_SLOW = 0.25
 
     # Delay for motor operations
     DELAY = 0.15

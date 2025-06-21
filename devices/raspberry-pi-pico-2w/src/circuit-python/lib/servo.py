@@ -48,7 +48,8 @@ class ServoHandler:
 
     def __init__(self, servo_pin: int = SERVO_PIN, frequency: int = PWM_FREQUENCY,
                     min_pulse: int = MIN_PULSE, max_pulse: int = MAX_PULSE,
-                    actuation_range: int = ACTUATION_RANGE, serial_communication: SerialCommunication = None):
+                    actuation_range: int = ACTUATION_RANGE, serial_communication: SerialCommunication = None,
+                    movement: bool = True):
         """
         Initializes the servo handler with the specified parameters.
 
@@ -59,6 +60,7 @@ class ServoHandler:
             max_pulse (int): The maximum pulse width in microseconds.
             actuation_range (int): The range of motion of the servo in degrees.
             serial_communication (SerialCommunication): An instance of SerialCommunication for sending messages.
+            movement (bool): If True, the servo will be controlled for movement; if False, it will not.
         """
         # Setup PWM output for the servo motor
         self.__servo_pwm = PWMOut(servo_pin, duty_cycle=0, frequency=frequency)
@@ -67,6 +69,9 @@ class ServoHandler:
 
         # If serial communication is provided, set it
         self.__serial_communication = serial_communication
+
+        # Set the movement flag
+        self.__movement = movement
 
         # Set the servo to center position
         self.__angle = self.CENTER_ANGLE
@@ -114,7 +119,8 @@ class ServoHandler:
         # Check if the angle is within the valid range
         self._check_angle(angle)
         self.__angle = angle
-        self.__servo_motor.angle = self.__angle
+        if self.__movement:
+            self.__servo_motor.angle = self.__angle
 
         # If serial communication is enabled, send a message with the new angle
         if self.__serial_communication:

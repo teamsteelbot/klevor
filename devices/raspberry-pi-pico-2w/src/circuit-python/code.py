@@ -17,6 +17,12 @@ MOVEMENT = Env.get_movement_mode()
 DEBUG = Env.get_debug_mode()
 CHALLENGE = Env.get_challenge()
 
+# Distance constants
+FRONT_DISTANCE_THRESHOLD = 500
+SIDE_DISTANCE_DIFFERENCE_PERCENTAGE = 0.2
+SIDE_DISTANCE_THRESHOLD = 15000
+TARGET_DISTANCE_STOP_START = 200
+
 # Pins
 I2C_BUS = busio.I2C(board.GP1, board.GP0)
 ESC_MOTOR_PIN = board.GP2
@@ -93,44 +99,48 @@ async def challenge_without_obstacles():
             # Update for the next check
             last_known_turns = bno08x.turns
 
-        """"
         # Overall Mission Completion Check
-        if abs(gyroscope.turns) == 12:
-            if MOVEMENT_MODE:
-                set_robot_speed(SPEED_NORMAL)
-                set_steering_angle(servo.SERVO_CENTER_ANGLE)
+        if last_known_turns == 12:
+            tasks.append(create_task(motor.set_speed(motor.SPEED_NORMAL)))
 
-                while True:
-                    if avg_front_dist > TARGET_DISTANCE_STOP_START and avg_front_dist < TARGET_DISTANCE_STOP_END:
-                        set_robot_speed(SPEED_STOP)
-                        serial_communication.send_message(STOP_MESSAGE)
+            # Gather the tasks and wait for them to complete
+            await gather(*tasks)
+
+            while True:
+                if avg_front_dist > TARGET_DISTANCE_STOP_START and avg_front_dist < TARGET_DISTANCE_STOP_END:
+                    set_robot_speed(SPEED_STOP)
+                    serial_communication.send_message(STOP_MESSAGE)
 
                     sleep(PARKING_DELAY)
             return
 
-        # --- Navigation Logic ---
+        # Check if the robot should move forward or turn
         if avg_front_dist >= FRONT_DISTANCE_THRESHOLD:
-            set_robot_speed(SPEED_NORMAL)
+            tasks.append(create_task(motor.set_speed(motor.SPEED_NORMAL)))
 
-            if avg_right_dist >= avg_left_dist * (1 + SIDE_DIFFERENCE_PERCENTAGE):
-                set_steering_angle(servo.SERVO_CENTER_ANGLE - TURNING_VALUE)
+            # Check if the servo should make a little turn to the left or right in order to center the robot
+            if avg_right_dist >= avg_left_dist * (1 + SIDE_DISTANCE_DIFFERENCE_PERCENTAGE):
+                tasks.append(create_task(servo.right(servo.SMALL_TURN_ANGLE)))
 
-            elif avg_left_dist >= avg_right_dist * (1 + SIDE_DIFFERENCE_PERCENTAGE):
-                set_steering_angle(servo.SERVO_CENTER_ANGLE + TURNING_VALUE)
+            elif avg_left_dist >= avg_right_dist * (1 + SIDE_DISTANCE_DIFFERENCE_PERCENTAGE):
+                tasks.append(create_task(servo.left(servo.SMALL_TURN_ANGLE)))
 
             else:
-                set_steering_angle(servo.SERVO_CENTER_ANGLE)
+                tasks.append(create_task(servo.center()))
 
         else:
-            set_robot_speed(SPEED_TURN)
+            tasks.append(create_task(motor.set_speed(motor.SPEED_SLOW)))
 
+            # Check if the robot should turn left or right based on the side distances
             if avg_right_dist >= SIDE_DISTANCE_THRESHOLD:
-                set_steering_angle(servo.SERVO_CENTER_ANGLE - TURNING_VALUE)
-            elif avg_left_dist >= SIDE_DISTANCE_THRESHOLD:
-                set_steering_angle(servo.SERVO_CENTER_ANGLE + TURNING_VALUE)
+                tasks.append(create_task(servo.right(servo.BIG_TURN_ANGLE)))
 
-        sleep(MOVEMENT_DELAY)
-        """
+            elif avg_left_dist >= SIDE_DISTANCE_THRESHOLD:
+                tasks.append(create_task(servo.left(servo.BIG_TURN_ANGLE)))
+
+        # Gather the tasks and wait for them to complete
+        if tasks:
+            await gather(*tasks)
 
 async def main():
     """
