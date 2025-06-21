@@ -4,7 +4,8 @@ from digitalio import DigitalInOut, Direction
 from time import monotonic
 
 from .led import LEDHandler
-from .message import Message, Category, Status, Challenge
+from .message import IncomingMessage, IncomingCategory, OutgoingMessage, OutgoingCategory, Status, Request
+from .env import Challenge
 
 class SerialCommunicationError(Exception):
     """
@@ -27,13 +28,13 @@ class SerialCommunication:
     CONSOLE_PORT_ENABLED = True
 
     # Status messages
-    START_MESSAGE = Message(Category.STATUS, Status.START.get_status_name())
-    STOP_MESSAGE = Message(Category.STATUS, Status.STOP.get_status_name())
-    OK_MESSAGE = Message(Category.STATUS, Status.OK.get_status_name())
+    START_MESSAGE = OutgoingMessage(OutgoingCategory.STATUS, Status.START.get_name())
+    STOP_MESSAGE = OutgoingMessage(OutgoingCategory.STATUS, Status.STOP.get_name())
+    OK_MESSAGE = IncomingMessage(IncomingCategory.STATUS, Status.OK.get_name())
 
     # Challenge messages
-    CHALLENGE_WITH_OBSTACLES = Message(Category.CHALLENGE, Challenge.WITH_OBSTACLES.get_challenge_name())
-    CHALLENGE_WITHOUT_OBSTACLES = Message(Category.CHALLENGE, Challenge.WITHOUT_OBSTACLES.get_challenge_name())
+    CHALLENGE_WITH_OBSTACLES = OutgoingMessage(OutgoingCategory.CHALLENGE, Challenge.WITH_OBSTACLES.get_challenge_name())
+    CHALLENGE_WITHOUT_OBSTACLES = OutgoingMessage(OutgoingCategory.CHALLENGE, Challenge.WITHOUT_OBSTACLES.get_challenge_name())
 
     # Confirmation timeout
     CONFIRMATION_TIMEOUT = 30.0
@@ -54,12 +55,12 @@ class SerialCommunication:
         self.__challenge = challenge
         self.__led = led
 
-    async def receive_message(self) -> list[Message] | None:
+    async def receive_messages(self) -> list[IncomingMessage] | None:
         """
-        Receive a message from the USB CDC data stream.
+        Receive messages from the USB CDC data stream.
 
         Returns:
-            Message | None: The received message, or None if no message is available.
+            list[IncomingMessage] | None: A list of received messages or None if no messages are waiting.
         """
         if not self.__data_port:
             raise SerialCommunicationError("Data port is not enabled.")
@@ -80,7 +81,7 @@ class SerialCommunication:
             msg_str = self.__data_port.readline().strip().decode("utf-8")
 
             try:
-                msg = Message.from_string(msg_str)
+                msg = IncomingMessage.from_string(msg_str)
                 msgs.append(msg)
 
             except ValueError as e:
@@ -88,12 +89,12 @@ class SerialCommunication:
 
         return msgs
 
-    def send_message(self, message: Message):
+    def send_message(self, message: OutgoingMessage):
         """
         Send a message to the USB CDC console stream.
 
         Args:
-            message (Message): The message to send.
+            message (OutgoingMessage): The message to send.
         """
         if not self.__console_port:
             raise SerialCommunicationError("Console port is not enabled.")
@@ -116,19 +117,56 @@ class SerialCommunication:
         """
         start_time = monotonic()
         while monotonic() - start_time < timeout:
-            msg = await self.receive_message()
-            if msg and msg.category == Category.STATUS and msg.content == Status.OK.get_status_name():
-                return True
+            msgs = await self.receive_messages()
+            for msg in msgs:
+                # If the message is a confirmation message, return True
+                if msg and msg.category == IncomingCategory.STATUS and msg.content == Status.OK.get_name():
+                    return True
         return False
 
-    def send_challenge_message(self):
+    async def send_challenge_message(self):
         """
         Send a challenge message to the console port.
         """
+        # Send the challenge message based on the challenge type
         challenge_message = self.CHALLENGE_WITH_OBSTACLES if self.__challenge == Challenge.WITH_OBSTACLES else self.CHALLENGE_WITHOUT_OBSTACLES
         self.send_message(challenge_message)
 
-    def start(self):
+        # Wait for confirmation of the challenge message
+        if not await self.wait_for_confirmation():
+            raise SerialCommunicationError("Failed to receive confirmation for challenge message.")
+
+    def send_motor_speed_message(self, speed: float):
+        """
+        Send a motor speed message to the console port.
+
+        Args:
+            speed (float): The speed value to send.
+        """
+        motor_message = OutgoingMessage(OutgoingCategory.MOTOR_SPEED, str(speed))
+        self.send_message(motor_message)
+
+    def send_servo_angle_message(self, angle: int):
+        """
+        Send a servo angle message to the console port.
+
+        Args:
+            angle (int): The angle value to send.
+        """
+        servo_message = OutgoingMessage(OutgoingCategory.SERVO_ANGLE, str(angle))
+        self.send_message(servo_message)
+
+    def send_bno08x_turns_message(self, turns: int):
+        """
+        Send a BNO08x turns message to the console port.
+
+        Args:
+            turns (int): The number of turns to send.
+        """
+        bno08x_message = OutgoingMessage(OutgoingCategory.BNO08X_TURNS, str(turns))
+        self.send_message(bno08x_message)
+
+    async def start(self):
         """
         Send the start message to the console port and wait for confirmation.
         """
@@ -136,5 +174,5 @@ class SerialCommunication:
         self.send_message(self.START_MESSAGE)
 
         # Wait for confirmation of the start message
-        if not self.wait_for_confirmation():
+        if not await self.wait_for_confirmation():
             raise SerialCommunicationError("Failed to receive confirmation for start message.")

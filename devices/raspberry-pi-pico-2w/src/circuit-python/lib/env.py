@@ -1,6 +1,28 @@
 from os import getenv
 
-from .message import Challenge
+class Challenge:
+    """
+    Class to represent the enum challenge messages sent and received from the Raspberry Pi Pico.
+    """
+    WITH_OBSTACLES = "with_obstacles"
+    WITHOUT_OBSTACLES = "without_obstacles"
+
+    @staticmethod
+    def from_string(challenge_str: str) -> 'Challenge':
+        """
+        Convert a string to a Challenge enum value.
+
+        Args:
+            challenge_str (str): The string representation of the challenge.
+
+        Returns:
+            Challenge: The corresponding Challenge enum value.
+        """
+        challenge_name = challenge_str.upper()
+        if challenge_name not in [Challenge.WITH_OBSTACLES, Challenge.WITHOUT_OBSTACLES]:
+            raise ValueError(f"Invalid challenge: {challenge_str}")
+        return Challenge[challenge_name]
+
 
 class Env:
     """
@@ -34,6 +56,22 @@ class Env:
             bool: True if the string represents a valid challenge type, otherwise False.
         """
         return value in (Challenge.WITHOUT_OBSTACLES, Challenge.WITH_OBSTACLES)
+
+    @staticmethod
+    def get_movement_mode() -> bool:
+        """
+        Get the movement mode from the environment variable.
+
+        Returns:
+            bool: True if movement mode is enabled, otherwise False.
+        """
+        value = getenv("MOVEMENT", "false").lower()
+
+        # Check if the value is a valid boolean representation
+        if not Env._check_boolean(value):
+            raise ValueError(f"Invalid value for MOVEMENT: {value}. Expected 'true' or 'false'.")
+
+        return value == "true"
 
     @staticmethod
     def get_debug_mode() -> bool:

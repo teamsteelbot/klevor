@@ -9,11 +9,11 @@ from serial import Serial, SerialException
 from ..camera.image_processing_queue import ImageProcessingQueue
 from ..log import Logger
 from ..log.sub_logger import SubLogger
-from .message import Message, Category, Status
+from .message import IncomingMessage, IncomingCategory, OutgoingMessage, OutgoingCategory, Status
 from .abstracts import SerialCommunicationABC
 from ..server import WebsocketsServerABC
 from ..utils import check_type
-from ..env import Env
+from ..env import Env, Challenges
 
 class SerialCommunication(SerialCommunicationABC):
     """
@@ -236,12 +236,12 @@ class SerialCommunication(SerialCommunicationABC):
         with self.__rlock:
             return self.__start_event.is_set()
 
-    def __put_incoming_message(self, msg: Message) -> None:
+    def __put_incoming_message(self, msg: IncomingMessage) -> None:
         """
         Put a message in the incoming messages queue.
 
         Args:
-            msg (Message): The message to put in the queue.
+            msg (IncomingMessage): The message to put in the queue.
         """
         with self.__rlock:
             # Put the message in the queue
@@ -262,7 +262,7 @@ class SerialCommunication(SerialCommunicationABC):
         asyncio.run(self.__server.broadcast_serial_incoming_message(msg_str)) if self.__server else None
 
     @final
-    def receive_message(self) -> Message | None:
+    def receive_message(self) -> IncomingMessage | None:
         with self.__rlock:
             if self.is_closed() or not self.__pending_incoming_message_event.is_set():
                 return None
@@ -281,7 +281,7 @@ class SerialCommunication(SerialCommunicationABC):
             return msg
 
     @final
-    def peek_last_received_message(self) -> Message | None:
+    def peek_last_received_message(self) -> OutgoingMessage | None:
         with self.__rlock:
             return self.__last_incoming_message
 
@@ -318,9 +318,9 @@ class SerialCommunication(SerialCommunicationABC):
         return msg
 
     @final
-    def _send_message(self, msg: Message) -> None:
+    def _send_message(self, msg: OutgoingMessage) -> None:
         # Check the type of message
-        check_type(msg, Message)
+        check_type(msg, OutgoingMessage)
 
         with self.__rlock:
             if self.is_closed():
@@ -335,12 +335,12 @@ class SerialCommunication(SerialCommunicationABC):
         # Log
         self.__logger.debug(f"Sending message: {message}") if self.__logger and self.__debug else None
 
-    def _send_confirmation_start_message(self) -> None:
+    def _send_confirmation_message(self) -> None:
         """
-        Send a confirmation message to the server that the serial communication has started.
+        Send a confirmation message to the console port.
         """
         # Create a confirmation message
-        confirmation_msg = Message(Category.STATUS, Status.OK)
+        confirmation_msg = OutgoingMessage(OutgoingCategory.STATUS, Status.OK)
 
         # Put the message in the outgoing messages queue
         self._send_message(confirmation_msg)
@@ -348,7 +348,7 @@ class SerialCommunication(SerialCommunicationABC):
     @final
     def send_rplidar_measures(self, measures_str: str) -> None:
         # Create a message with the RPLIDAR measures type
-        msg = Message(Category.RPLIDAR, measures_str)
+        msg = OutgoingMessage(OutgoingCategory.RPLIDAR, measures_str)
 
         # Put the message in the outgoing messages queue
         self._send_message(msg)
@@ -365,8 +365,9 @@ class SerialCommunication(SerialCommunicationABC):
                 self.__logger.debug("Received initialization message: " + console_msg) if self.__logger and self.__debug else None
 
                 # Get the Message from the string
-                msg = Message.from_string(console_msg)
+                msg = IncomingMessage.from_string(console_msg)
 
+                # Check if the message is a start message
                 if msg.is_start():
                     # Set the start event
                     self.start()
@@ -375,8 +376,21 @@ class SerialCommunication(SerialCommunicationABC):
                     self.__logger.info("Received start event.") if self.__logger else None
 
                     # Send a confirmation start message
-                    self._send_confirmation_start_message()
+                    self._send_confirmation_message()
                     break
+
+                elif msg.is_challenge():
+                    # Set the challenge as an environment variable
+                    Env.set_challenge(Challenges.from_string(msg.content))
+
+                    # Log
+                    self.__logger.info("Received challenge message.") if self.__logger else None
+
+                    # Send a challenge message
+                    self._send_confirmation_message()
+
+                    # Continue to wait for the start event
+                    continue
         
         while self.is_open():
             if self.__console_serial.in_waiting == 0:
@@ -385,11 +399,15 @@ class SerialCommunication(SerialCommunicationABC):
 
             # Parse the message from the serial port
             msg_str = self.__console_serial.readline().decode(self.ENCODE).strip()
-            msg = Message.from_string(msg_str)
+            msg = IncomingMessage.from_string(msg_str)
 
             if msg.is_stop():
                 # Close the serial port
                 self.__close()
+
+            else:
+                # Log
+                self.__logger.debug(f"Received message: {msg}") if self.__logger and self.__debug else None
 
             # Put the message in the incoming messages queue
             self.__put_incoming_message(msg)

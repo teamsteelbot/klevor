@@ -3,7 +3,7 @@ from pwmio import PWMOut
 from adafruit_motor.servo import ContinuousServo
 from asyncio import sleep
 
-from .message import Category, Message
+from .message import OutgoingCategory, OutgoingMessage
 from .serial_communication import SerialCommunication
 
 class ESCMotorError(Exception):
@@ -46,7 +46,8 @@ class ESCMotorHandler:
     DELAY = 0.15
 
     def __init__(self, motor_pin: int = MOTOR_PIN, frequency: int = PWM_FREQUENCY,
-                 min_pulse: int = MIN_PULSE, max_pulse: int = MAX_PULSE, serial_communication: SerialCommunication = None):
+                 min_pulse: int = MIN_PULSE, max_pulse: int = MAX_PULSE,
+                 serial_communication: SerialCommunication = None, movement: bool = True):
         """
         Initializes the ESC motor handler with the specified parameters.
 
@@ -55,7 +56,8 @@ class ESCMotorHandler:
             frequency (int): The PWM frequency for the ESC motor.
             min_pulse (int): Minimum pulse width for the ESC motor.
             max_pulse (int): Maximum pulse width for the ESC motor.
-            serial_communication (SerialCommunication|None): Optional serial communication handler.
+            serial_communication (SerialCommunication | None): Optional serial communication handler.
+            movement (bool): If True, the motor will be controlled for movement; if False, it will not.
         """
         # Setup PWM output for the ESC motor
         self.__esc_pwm = PWMOut(motor_pin, duty_cycle=0, frequency=frequency)
@@ -63,6 +65,9 @@ class ESCMotorHandler:
 
         # If a serial communication handler is provided, use it
         self.__serial_communication = serial_communication
+
+        # Set the movement flag
+        self.__movement = movement
 
         # Initialize the speed to 0
         self.__speed = 0.0
@@ -108,11 +113,12 @@ class ESCMotorHandler:
         # Check if the speed is within the full range
         self._check_speed_full_range(speed)
         self.__speed = speed * self.SPEED_FACTOR
-        self.__esc_motor.throttle = self.__speed
+        if self.__movement:
+            self.__esc_motor.throttle = self.__speed
 
         # If a serial communication handler is provided, send the speed message
         if self.__serial_communication:
-            self.__serial_communication.send_message(Message(Category.STATUS,str(self.__speed)))
+            self.__serial_communication.send_motor_speed_message(self.__speed)
 
         # Add a delay to allow the motor to respond
         await sleep(self.DELAY)

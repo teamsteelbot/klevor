@@ -118,7 +118,7 @@ class ServoHandler:
 
         # If serial communication is enabled, send a message with the new angle
         if self.__serial_communication:
-            self.__serial_communication.send_message(Message(Category.SERVO, str(self.__angle)))
+            self.__serial_communication.send_servo_angle_message(self.__angle)
 
         # Add a small delay to allow the servo to move
         await sleep(self.DELAY)

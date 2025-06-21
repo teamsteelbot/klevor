@@ -1,6 +1,6 @@
 from board import GP11
 from digitalio import DigitalInOut, Direction, Pull
-from asyncio import sleep
+from asyncio import sleep, create_task, gather
 
 from .led import LEDHandler
 from .serial_communication import SerialCommunication
@@ -43,10 +43,16 @@ class SwitchHandler:
         while self.__switch.value:
             await sleep(self.DELAY)
 
+        # Create the tasks to signal the start of the robot's operation
+        start_tasks = []
+
         # If serial communication is provided, signal the start
         if self.__serial_communication:
-            self.__serial_communication.start()
+            start_tasks.append(create_task(self.__serial_communication.start()))
 
         # Blink the LED if provided
         if self.__led:
-            await self.__led.blink()
+            start_tasks.append(create_task(self.__led.blink()))
+
+        # Wait for all start tasks to complete
+        await gather(*start_tasks)

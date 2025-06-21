@@ -2,20 +2,19 @@ from enum import Enum, unique
 
 from ..utils import check_type
 
-
 @unique
-class Category(Enum):
+class IncomingCategory(Enum):
     """
-    Enum to represent the categories of messages sent and received from the Raspberry Pi Pico.
+    Enum to represent the categories of incoming messages from the Raspberry Pi Pico 2W.
     """
-    CAPTURE_IMAGE = 1
-    INFERENCE = 2
-    RPLIDAR = 3
-    DEBUG = 4
-    STATUS = 5
-    CHALLENGE = 6
+    CHALLENGE = 1
+    STATUS = 2
+    SERVO_ANGLE = 3
+    MOTOR_SPEED = 4
+    REQUEST = 5
+    BNO08X_TURNS = 6
 
-    def get_category_name(self) -> str:
+    def get_name(self) -> str:
         """
         Get the category name in lowercase.
 
@@ -24,32 +23,32 @@ class Category(Enum):
         """
         return self.name.lower()
 
-    @staticmethod
-    def from_string(category_str: str) -> 'Category':
+    @classmethod
+    def from_string(cls, category_str: str) -> 'IncomingCategory':
         """
-        Convert a string to a Category enum value.
+        Convert a string to an IncomingCategory enum value.
 
         Args:
-            category_str (str): The string representation of the category.
+            category_str (str): The string representation of the incoming category.
 
         Returns:
-            Category: The corresponding Category enum value.
+            IncomingCategory: The corresponding IncomingCategory enum value.
         """
         category_name = category_str.upper()
-        if category_name not in Category.__members__:
-            raise ValueError(f"Invalid category: {category_str}")
-        return Category[category_name]
+        if category_name not in cls.__members__:
+            raise ValueError(f"Invalid incoming category: {category_str}")
+        return cls[category_name]
 
 @unique
 class Status(Enum):
     """
-    Enum to represent the status messages sent and received from the Raspberry Pi Pico.
+    Enum to represent the status messages sent and received from the Raspberry Pi Pico 2W.
     """
     START = 1
     STOP = 2
     OK = 3
 
-    def get_status_name(self) -> str:
+    def get_name(self) -> str:
         """
         Get the status name in lowercase.
 
@@ -58,9 +57,92 @@ class Status(Enum):
         """
         return self.name.lower()
 
-class Message:
+    @classmethod
+    def from_string(cls, status_str: str) -> 'Status':
+        """
+        Convert a string to a Status enum value.
+
+        Args:
+            status_str (str): The string representation of the status.
+
+        Returns:
+            Status: The corresponding Status enum value.
+        """
+        status_name = status_str.upper()
+        if status_name not in cls.__members__:
+            raise ValueError(f"Invalid status: {status_str}")
+        return cls[status_name]
+
+@unique
+class Request(Enum):
     """
-    Class to handle the messages sent and received from the Raspberry Pi Pico.
+    Enum to represent the request messages received from the Raspberry Pi Pico 2W.
+    """
+    INFERENCE = 1
+    RPLIDAR = 2
+
+    def get_name(self) -> str:
+        """
+        Get the request name in lowercase.
+
+        Returns:
+            str: The request name in lowercase.
+        """
+        return self.name.lower()
+
+    @classmethod
+    def from_string(cls, request_str: str) -> 'Request':
+        """
+        Convert a string to a Request enum value.
+
+        Args:
+            request_str (str): The string representation of the request.
+
+        Returns:
+            Request: The corresponding Request enum value.
+        """
+        request_name = request_str.upper()
+        if request_name not in cls.__members__:
+            raise ValueError(f"Invalid request: {request_str}")
+        return cls[request_name]
+
+@unique
+class OutgoingCategory(Enum):
+    """
+    Enum to represent the categories of outgoing messages sent to the Raspberry Pi Pico 2W.
+    """
+    STATUS = 1
+    INFERENCE = 2
+    RPLIDAR = 3
+
+    def get_name(self) -> str:
+        """
+        Get the category name in lowercase.
+
+        Returns:
+            str: The category name in lowercase.
+        """
+        return self.name.lower()
+
+    @classmethod
+    def from_string(cls, category_str: str) -> 'OutgoingCategory':
+        """
+        Convert a string to an OutgoingCategory enum value.
+
+        Args:
+            category_str (str): The string representation of the outgoing category.
+
+        Returns:
+            OutgoingCategory: The corresponding OutgoingCategory enum value.
+        """
+        category_name = category_str.upper()
+        if category_name not in cls.__members__:
+            raise ValueError(f"Invalid outgoing category: {category_str}")
+        return cls[category_name]
+
+class IncomingMessage:
+    """
+    Class to handle the messages received from the Raspberry Pi Pico 2W.
     """
     # Message header separator
     HEADER_SEPARATOR = ':'
@@ -68,12 +150,12 @@ class Message:
     # Message end character
     END = '\n'
 
-    def __init__(self, category: Category, content: str):
+    def __init__(self, category: IncomingCategory, content: str):
         """
-        Initialize the message class.
+        Initialize the incomming message class.
 
         Args:
-            category (str): The category of the message.
+            category (IncomingCategory): The category of the message.
             content (str): The content of the message.
         """
         self.category = category
@@ -86,7 +168,7 @@ class Message:
         return f"{self.__category}{self.HEADER_SEPARATOR}{self.__content}{self.END}"
 
     @staticmethod
-    def from_string(msg_str: str) -> 'Message':
+    def from_string(msg_str: str) -> 'IncomingMessage':
         """
         Create a Message object from a string.
 
@@ -97,40 +179,40 @@ class Message:
             Message: The Message object created from the string.
         """
         # Remove the end character if present
-        if msg_str.endswith(Message.END):
+        if msg_str.endswith(IncomingMessage.END):
             msg_str = msg_str[:-1]
 
         # Split the string into category and content
-        parts = msg_str.strip().split(Message.HEADER_SEPARATOR, 1)
+        parts = msg_str.strip().split(IncomingMessage.HEADER_SEPARATOR, 1)
         if len(parts) != 2:
-            raise ValueError("Invalid message format")
+            raise ValueError("Invalid incoming message format")
 
         # Convert the category string to a Category enum value
-        category = Category.from_string(parts[0])
+        category = IncomingCategory.from_string(parts[0])
 
         # Create and return the Message object
-        return Message(category, parts[1])
+        return IncomingMessage(category, parts[1])
 
     @property
-    def category(self) -> Category:
+    def category(self) -> IncomingCategory:
         """
         Property to get the message category.
 
         Returns:
-            Category: The category of the message.
+            IncomingCategory: The category of the message.
         """
         return self.__category
 
     @category.setter
-    def category(self, category: Category):
+    def category(self, category: IncomingCategory):
         """
         Setter for the message category.
 
         Args:
-            category (str): The category of the message.
+            category (IncomingCategory): The category of the message.
         """
         # Check the type of message
-        check_type(category, Category)
+        check_type(category, IncomingCategory)
         self.__category = category
 
     @property
@@ -162,7 +244,16 @@ class Message:
         Returns:
             bool: True if the message is a start message, False otherwise.
         """
-        return self.category == Category.STATUS and self.content == Status.START.get_status_name()
+        return self.category == IncomingCategory.STATUS and self.content == Status.START.get_name()
+
+    def is_challenge(self) -> bool:
+        """
+        Check if the message is a challenge message.
+
+        Returns:
+            bool: True if the message is a challenge message, False otherwise.
+        """
+        return self.category == IncomingCategory.CHALLENGE
 
     def is_stop(self) -> bool:
         """
@@ -171,4 +262,101 @@ class Message:
         Returns:
             bool: True if the message is a stop message, False otherwise.
         """
-        return self.category == Category.STATUS and self.content == Status.STOP.get_status_name()
+        return self.category == IncomingCategory.STATUS and self.content == Status.STOP.get_name()
+
+class OutgoingMessage:
+    """
+    Class to handle the messages sent to the Raspberry Pi Pico 2W.
+    """
+    # Message header separator
+    HEADER_SEPARATOR = ':'
+
+    # Message end character
+    END = '\n'
+
+    def __init__(self, category: OutgoingCategory, content: str):
+        """
+        Initialize the outgoing message class.
+
+        Args:
+            category (OutgoingCategory): The category of the message.
+            content (str): The content of the message.
+        """
+        self.category = category
+        self.content = content
+
+    def __str__(self) -> str:
+        """
+        String representation of the message.
+        """
+        return f"{self.__category}{self.HEADER_SEPARATOR}{self.__content}{self.END}"
+
+    @staticmethod
+    def from_string(msg_str: str) -> 'OutgoingMessage':
+        """
+        Create a Message object from a string.
+
+        Args:
+            msg_str (str): The string representation of the message.
+
+        Returns:
+            Message: The Message object created from the string.
+        """
+        # Remove the end character if present
+        if msg_str.endswith(OutgoingMessage.END):
+            msg_str = msg_str[:-1]
+
+        # Split the string into category and content
+        parts = msg_str.strip().split(OutgoingMessage.HEADER_SEPARATOR, 1)
+        if len(parts) != 2:
+            raise ValueError("Invalid outgoing message format")
+
+        # Convert the category string to a Category enum value
+        category = OutgoingCategory.from_string(parts[0])
+
+        # Create and return the Message object
+        return OutgoingMessage(category, parts[1])
+
+    @property
+    def category(self) -> OutgoingCategory:
+        """
+        Property to get the message category.
+
+        Returns:
+            OutgoingCategory: The category of the message.
+        """
+        return self.__category
+
+    @category.setter
+    def category(self, category: OutgoingCategory):
+        """
+        Setter for the message category.
+
+        Args:
+            category (OutgoingCategory): The category of the message.
+        """
+        # Check the type of message
+        check_type(category, OutgoingCategory)
+        self.__category = category
+
+    @property
+    def content(self) -> str:
+        """
+        Get the message content.
+
+        Returns:
+            str: The content of the message.
+        """
+        return self.__content
+
+    @content.setter
+    def content(self, content: str):
+        """
+        Setter for the message content.
+
+        Args:
+            content (str): The content of the message.
+        """
+        # Check the type of content
+        check_type(content, str)
+        self.__content = content

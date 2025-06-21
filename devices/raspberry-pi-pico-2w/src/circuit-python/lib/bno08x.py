@@ -5,6 +5,8 @@ from asyncio import sleep
 from adafruit_bno08x.i2c import BNO08X_I2C
 from adafruit_bno08x import (BNO_REPORT_GYROSCOPE, BNO_REPORT_ROTATION_VECTOR)
 
+from .serial_communication import SerialCommunication
+
 class BNO08XError(Exception):
     """
     Custom exception class for BNO08X errors.
@@ -35,13 +37,22 @@ class BNO08XHandler:
     # Delay between readings in seconds
     DELAY = 0.05
 
-    def __init__(self, i2c: I2C = I2C(I2C_SCL_PIN, I2C_SDA_PIN), address: int = I2C_ADDRESS):
+    def __init__(self, i2c: I2C = I2C(I2C_SCL_PIN, I2C_SDA_PIN), address: int = I2C_ADDRESS,
+                    serial_communication: SerialCommunication = None):
         """
         Initializes the BNO08X handler with the specified I2C bus and address.
+
+        Args:
+            i2c (I2C): The I2C bus to use for communication with the BNO08X sensor.
+            address (int): The I2C address of the BNO08X sensor.
+            serial_communication (SerialCommunication | None): Optional serial communication handler.
         """
         self.__bno = BNO08X_I2C(i2c, address=address)
         self.__bno.enable_feature(BNO_REPORT_GYROSCOPE)
         self.__bno.enable_feature(BNO_REPORT_ROTATION_VECTOR)
+
+        # If a serial communication handler is provided, set it
+        self.__serial_communication = serial_communication
 
         # Set accumulated values to zero
         self.__accumulated_yaw_deg = 0.0
@@ -283,6 +294,10 @@ class BNO08XHandler:
         if current_segment_count != self.__last_segment_count:
             self.__accumulated_90_deg_turns += current_segment_count - self.__last_segment_count
             self.__last_segment_count = current_segment_count
+
+            # If serial communication is enabled, send the turn message
+            if self.__serial_communication:
+                self.__serial_communication.send_bno08x_turns_message(self.__accumulated_90_deg_turns)
 
         self.__last_yaw_deg = relative_yaw
 

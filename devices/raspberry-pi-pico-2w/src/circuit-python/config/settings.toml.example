@@ -1,6 +1,9 @@
 # Settings for Raspberry Pi Pico 2W CircuitPython project
 
-# Sets the DEBUG mode for the application. Can be "true" or "false".
+# Sets the movement mode for the application. Can be "true" or "false".
+MOVEMENT = "false"
+
+# Sets the debug mode for the application. Can be "true" or "false".
 DEBUG = "false"
 
 # Sets the challenge mode for the application. Can be "with_obstacles" or "without_obstacles".
