@@ -2,11 +2,12 @@ import board
 import busio
 import digitalio
 from time import sleep
-import asyncio
+from asyncio import run, create_task, gather
 
 from lib.bno08x import BNO08XHandler
 from lib.env import Env
 from lib.esc_motor import ESCMotorHandler
+from lib.led import LEDHandler
 from lib.serial_communication import SerialCommunication
 from lib.servo import ServoHandler
 from lib.switch import SwitchHandler
@@ -22,69 +23,48 @@ SERVO_PIN = board.GP13
 SWITCH_PIN = board.GP11
 
 # Robot's components handlers
-serial_communication: SerialCommunication = SerialCommunication(console_port_enabled=True, data_port_enabled=True, toggle_led_on_receive=True)
+led: LEDHandler = LEDHandler(led_pin=board.LED)
+serial_communication: SerialCommunication = SerialCommunication(console_port_enabled=True, data_port_enabled=True, led=led)
 servo: ServoHandler = ServoHandler(servo_pin=SERVO_PIN, serial_communication=serial_communication)
 motor: ESCMotorHandler = ESCMotorHandler(motor_pin=ESC_MOTOR_PIN, serial_communication=serial_communication)
 bno08x: BNO08XHandler = BNO08XHandler(i2c=I2C_BUS)
-switch: SwitchHandler = SwitchHandler(switch_pin=SWITCH_PIN)
+switch: SwitchHandler = SwitchHandler(switch_pin=SWITCH_PIN, serial_communication=serial_communication, led=led)
 
-# ---------- Main Robot Control Loop ----------
+async def main():
+    """
+    Main function to initialize the robot and start the main algorithm.
+    """
+    global bno08x, servo, motor, switch, serial_communication, led
 
-async def main_robot_loop():  
+    # Create tasks for initialization
+    bno08x_calibrate = create_task(bno08x.calibrate())
+    motor_stop = create_task(motor.stop())
+    servo_center = create_task(servo.center())
+    switch_wait = create_task(switch.wait())
 
-    # Initialize the robot state
-    setup()
+    # Wait for all initialization tasks to complete
+    await gather(bno08x_calibrate, motor_stop, servo_center, switch_wait)
 
-    # Turn on built-in LED to show that it's ready
-    if DEBUG:
-        led_pin.value = True
-        sleep(TURN_ON_DELAY)
-        led_pin.value = False
-        sleep(TURN_ON_DELAY)
-        
-    # Wait for the switch to be pressed to start the robot
-    while switch.value:
-        sleep(SWITCH_DELAY)  # Pequeña pausa para debouncing y eficiencia (ajusta si es necesario)
-
-    # Send start message
-    serial_communication.send_message(START_MESSAGE)
-
-    #  Turn on built-in LED two times to show that the start message has been sent
-    if DEBUG:
-        for i in range(2):
-            led_pin.value = True
-            sleep(SENT_START_MESSAGE_DELAY)
-            led_pin.value = False
-            sleep(SENT_START_MESSAGE_DELAY)
-    
-    # Create a receiving message handler task
-    #asyncio.create_task(receive_message_handler())
-
-    # Start the gyroscope reading as a separate background task
-    #asyncio.create_task(gyro_reading())
-
-    # Initialize with the current global turns value
-    last_known_turns = gyroscope.turns 
-    turning = False
-    if DEBUG:
-        serial_communication.send_message(f"{USB_CDC_HEADER_STATUS}:starting main algorithm")
+    # Set the last known turns to zero
+    last_known_turns = 0
 
     while True:
-        # Update gyro
-        gyro_update()
-        
-        # Check for Gyro Turn and Center Servo Immediately
-        if turning:
-            if gyroscope.turns != last_known_turns:
-                set_steering_angle(servo.SERVO_CENTER_ANGLE)
+        # Create the update quaternion and receive serial messages tasks
+        update_quaternion_task = create_task(bno08x.update_quaternion())
+        receive_serial_task = create_task(serial_communication.receive_message())
 
-                # Update for the next check
-                last_known_turns = gyroscope.turns  
-                turning = False
-            else:
-                # Wait a bit before checking again
-                sleep(TURNING_DELAY)  
-                continue
+        # Wait for the tasks to complete
+        await gather(update_quaternion_task, receive_serial_task)
+
+        # Algorithm tasks
+        tasks = []
+
+        # Check for the current turn and center the servo if necessary
+        if servo.is_turning() and bno08x.turns != last_known_turns:
+            tasks.append(create_task(servo.center()))
+
+            # Update for the next check
+            last_known_turns = bno08x.turns
 
         """       
         if DEBUG:
@@ -132,4 +112,4 @@ async def main_robot_loop():
         sleep(ESCMotorHandler.DELAY)
 
 # Start the asyncio event loop
-asyncio.run(main_robot_loop())
+run(main())

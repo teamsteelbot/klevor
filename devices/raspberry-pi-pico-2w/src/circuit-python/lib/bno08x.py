@@ -1,7 +1,7 @@
 from board import GP0, GP1
 from busio import I2C
 from math import (degrees, atan2, asin, pi)
-from time import sleep
+from asyncio import sleep
 from adafruit_bno08x.i2c import BNO08X_I2C
 from adafruit_bno08x import (BNO_REPORT_GYROSCOPE, BNO_REPORT_ROTATION_VECTOR)
 
@@ -43,14 +43,6 @@ class BNO08XHandler:
         self.__bno.enable_feature(BNO_REPORT_GYROSCOPE)
         self.__bno.enable_feature(BNO_REPORT_ROTATION_VECTOR)
 
-        # Gathering multiple samples to fix errors
-        for _ in range(self.INITIAL_SAMPLES):
-            self.__read_quaternion()
-            sleep(self.DELAY)
-
-        # Saving the orientation, this makes the turns variables much smoother to handle
-        self.__initial_roll_deg, self.__initial_pitch_deg, self.__initial_yaw_deg = BNO08XHandler.quaternion_to_euler_degrees(*self.__quaternion)
-
         # Set accumulated values to zero
         self.__accumulated_yaw_deg = 0.0
         self.__last_yaw_deg = 0.0
@@ -58,14 +50,34 @@ class BNO08XHandler:
         self.__last_segment_count = 0
 
         # Initialize gyroscope values
-        self.__gyro_x_deg = 0.0
-        self.__gyro_y_deg = 0.0
-        self.__gyro_z_deg = 0.0
+        self.__gyro_x_deg, self.__gyro_y_deg, self.__gyro_z_deg = 0.0, 0.0, 0.0
 
         # Initialize quaternion values
-        self.__roll_deg = 0.0
-        self.__pitch_deg = 0.0
-        self.__yaw_deg = 0.0
+        self.__initial_roll_deg, self.__initial_pitch_deg, self.__initial_yaw_deg = 0.0, 0.0, 0.0
+        self.__roll_deg, self.__pitch_deg, self.__yaw_deg = 0.0, 0.0, 0.0
+
+        # Set has been calibrated flag
+        self.__calibrated = False
+
+    async def calibrate(self):
+        """
+        Calibrates the BNO08X sensor by taking initial readings to set the initial orientation.
+        """
+        # Check if already calibrated
+        if self.__calibrated:
+            raise BNO08XError("BNO08X sensor is already calibrated.")
+
+        # Set the calibrated flag to True
+        self.__calibrated = True
+
+        # Gathering multiple samples to fix errors
+        for _ in range(self.INITIAL_SAMPLES):
+            await self.__read_quaternion()
+            await sleep(self.DELAY)
+
+        # Saving the orientation, this makes the turns variables much smoother to handle
+        self.__initial_roll_deg, self.__initial_pitch_deg, self.__initial_yaw_deg = BNO08XHandler.quaternion_to_euler_degrees(
+            *self.__quaternion)
 
     @staticmethod
     def quaternion_to_euler_degrees(x: float, y: float, z: float, w: float):
@@ -213,40 +225,40 @@ class BNO08XHandler:
             self.update_gyro()
         return self.__gyro_z_deg
 
-    def __read_gyro(self):
+    async def __read_gyro(self):
         """
         Reads the gyroscope data.
         """
         self.__gyro = self.__bno.gyro
 
         # Adding a delay to ensure the sensor has time to update
-        sleep(self.DELAY)
+        await sleep(self.DELAY)
 
-    def update_gyro(self):
+    async def update_gyro(self):
         """
         Reads the gyroscope data from the BNO08X sensor and updates the gyroscope values in degrees.
         """
         # Updating the gyroscope data
-        self.__read_gyro()
+        await self.__read_gyro()
 
         # Get the current gyroscope values in degrees
         self.__gyro_x_deg, self.__gyro_y_deg , self.__gyro_z_deg = BNO08XHandler.gyro_to_degrees(*self.__gyro)
 
-    def __read_quaternion(self):
+    async def __read_quaternion(self):
         """
         Reads the quaternion data from the BNO08X sensor.
         """
         self.__quaternion = self.__bno.quaternion
 
         # Adding a delay to ensure the sensor has time to update
-        sleep(self.DELAY)
+        await sleep(self.DELAY)
 
-    def update_quaternion(self):
+    async def update_quaternion(self):
         """
         Reads the quaternion data from the BNO08X sensor and updates the roll, pitch, and yaw values.
         """
         # Updating the quaternion data
-        self.__read_quaternion()
+        await self.__read_quaternion()
 
         # Get the current roll, pitch, and yaw in degrees
         self.__roll_deg, self.__pitch_deg, self.__yaw_deg = BNO08XHandler.quaternion_to_euler_degrees(*self.__quaternion)
@@ -273,3 +285,10 @@ class BNO08XHandler:
             self.__last_segment_count = current_segment_count
 
         self.__last_yaw_deg = relative_yaw
+
+    @property
+    def turns(self):
+        """
+        Returns the number of 90-degree turns made since the last reset.
+        """
+        return self.__accumulated_90_deg_turns

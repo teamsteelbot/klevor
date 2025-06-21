@@ -1,29 +1,62 @@
-from board import LED
 from digitalio import DigitalInOut, Direction
+from board import LED
+from asyncio import sleep
 
-class LED:
+class LEDHandler:
     """
-    Class handler for the Raspberry Pi Pico onboard LED.
+    A class to manage the onboard LED of the Raspberry Pi Pico 2W.
     """
 
-    def __init__(self, led_pin: int):
+    def __init__(self, led_pin: int = LED):
         """
-        Initialize the LED handler.
+        Initializes the LED on the specified GPIO pin.
 
         Args:
-            led_pin (int): The GPIO pin number for the onboard LED.
+            led_pin (int): The GPIO number where the LED is connected. Default is 25.
         """
-        self.led = DigitalInOut(LED)
-        self.led.direction = Direction.OUTPUT
+        self.__led = DigitalInOut(led_pin)
+        self.__led.direction = Direction.OUTPUT
 
-    def on(self) -> None:
-        """Turn the LED on."""
-        self.led.value = True
+    def on(self):
+        """Turns the LED on."""
+        self.__led.value = True
 
-    def off(self) -> None:
-        """Turn the LED off."""
-        self.led.value = False
+    def is_on(self) -> bool:
+        """
+        Checks if the LED is currently on.
 
-    def toggle(self) -> None:
-        """Toggle the LED state."""
-        self.led.value = not self.led.value
+        Returns:
+            bool: True if the LED is on, False otherwise.
+        """
+        return self.__led.value
+
+    def off(self):
+        """Turns the LED off."""
+        self.__led.value = False
+
+    def is_off(self) -> bool:
+        """
+        Checks if the LED is currently off.
+
+        Returns:
+            bool: True if the LED is off, False otherwise.
+        """
+        return not self.__led.value
+
+    def toggle(self):
+        """Toggles the LED state."""
+        self.__led.value = not self.__led.value
+
+    async def blink(self, times: int = 1, delay: float = 0.5):
+        """
+        Blinks the LED a specified number of times with a delay.
+
+        Args:
+            times (int): The number of times to blink the LED. Default is 1.
+            delay (float): The delay in seconds between on and off states. Default is 0.5 seconds.
+        """
+        for _ in range(times):
+            self.on()
+            await sleep(delay)
+            self.off()
+            await sleep(delay)

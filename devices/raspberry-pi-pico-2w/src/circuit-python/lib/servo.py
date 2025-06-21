@@ -1,6 +1,7 @@
 import board
 from pwmio import PWMOut
 from adafruit_motor.servo import Servo
+from asyncio import sleep
 
 from .message import Message, Category
 from .serial_communication import SerialCommunication
@@ -35,7 +36,7 @@ class ServoHandler:
     CENTER_ANGLE = 90
 
     # Angle factor to normalize that when subtracting the servo moves to the left, and adding moves to the right
-    ANGLE_FACTOR = -1.0
+    ANGLE_FACTOR = -1
 
     # Common angle values
     BIG_TURN_ANGLE = 35
@@ -90,14 +91,16 @@ class ServoHandler:
             raise ServoError(f"Angle must be between 0 and {ServoHandler.ACTUATION_RANGE} degrees")
 
     @property
-    def angle(self):
+    def angle(self) -> int:
         """
         Returns the current angle of the servo motor.
+
+        Returns:
+            int: The current angle of the servo motor.
         """
         return self.__angle
 
-    @angle.setter
-    def angle(self, angle: int):
+    async def set_angle(self, angle: int):
         """
         Sets the angle of the servo motor.
 
@@ -117,7 +120,10 @@ class ServoHandler:
         if self.__serial_communication:
             self.__serial_communication.send_message(Message(Category.SERVO, str(self.__angle)))
 
-    def set_angle_relative_to_center(self, relative_angle: int):
+        # Add a small delay to allow the servo to move
+        await sleep(self.DELAY)
+
+    async def set_angle_relative_to_center(self, relative_angle: int):
         """
         Sets the angle of the servo motor relative to the center position.
 
@@ -127,15 +133,15 @@ class ServoHandler:
         if not self.__left_limit <= relative_angle * self.ANGLE_FACTOR <=  self.__right_limit:
             raise ServoError(f"Relative angle must be between {self.__left_limit} and {self.__right_limit} degrees")
 
-        self.angle = self.CENTER_ANGLE + relative_angle * self.ANGLE_FACTOR
+        await self.set_angle(self.CENTER_ANGLE + relative_angle * self.ANGLE_FACTOR)
 
-    def center(self):
+    async def center(self):
         """
         Centers the servo motor to the middle position.
         """
-        self.angle = self.CENTER_ANGLE
+        await self.set_angle(self.CENTER_ANGLE)
 
-    def right(self, angle):
+    async def right(self, angle):
         """
         Sets the servo motor to the right by a specified angle.
 
@@ -145,9 +151,9 @@ class ServoHandler:
         if not 0 < angle <= self.__right_limit:
             raise ServoError(f"Angle must be between 0 and {self.__right_limit} degrees for right movement")
 
-        self.angle = self.CENTER_ANGLE + angle * self.ANGLE_FACTOR
+        await self.set_angle(self.CENTER_ANGLE + angle * self.ANGLE_FACTOR)
 
-    def left(self, angle):
+    async def left(self, angle):
         """
         Sets the servo motor to the left by a specified angle.
 
@@ -157,4 +163,13 @@ class ServoHandler:
         if not 0 < angle <= abs(self.__left_limit):
             raise ServoError(f"Angle must be between 0 and {abs(self.__left_limit)} degrees for left movement")
 
-        self.angle = self.CENTER_ANGLE - angle * self.ANGLE_FACTOR
+        await self.set_angle(self.CENTER_ANGLE - angle * self.ANGLE_FACTOR)
+
+    def is_turning(self):
+        """
+        Checks if the servo motor is currently turning.
+
+        Returns:
+            bool: True if the servo is not centered, False otherwise.
+        """
+        return self.__angle != self.CENTER_ANGLE

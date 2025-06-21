@@ -1,7 +1,7 @@
 from board import GP2
 from pwmio import PWMOut
 from adafruit_motor.servo import ContinuousServo
-from time import sleep
+from asyncio import sleep
 
 from .message import Category, Message
 from .serial_communication import SerialCommunication
@@ -88,11 +88,13 @@ class ESCMotorHandler:
     def speed(self) -> float:
         """
         Returns the current speed of the ESC motor.
+
+        Returns:
+            float: Current speed value between -1.0 (full reverse) and 1.0 (full forward).
         """
         return self.__speed
 
-    @speed.setter
-    def speed(self, speed: float):
+    async def set_speed(self, speed: float):
         """
         Sets the speed of the ESC motor.
 
@@ -113,15 +115,15 @@ class ESCMotorHandler:
             self.__serial_communication.send_message(Message(Category.STATUS,str(self.__speed)))
 
         # Add a delay to allow the motor to respond
-        sleep(self.DELAY)
+        await sleep(self.DELAY)
 
-    def stop(self):
+    async def stop(self):
         """
         Sets the speed of the ESC motor to 0.
         """
-        self.speed = 0
+        await self.set_speed(0.0)
 
-    def forward(self, speed: float):
+    async def forward(self, speed: float):
         """
         Sets the speed of the ESC motor forward.
 
@@ -129,9 +131,9 @@ class ESCMotorHandler:
             speed (float): Speed value between 0 and 1.0 (full forward).
         """
         self._check_speed_half_range(speed)
-        self.speed = speed
+        await self.set_speed(speed)
 
-    def backward(self, speed: float):
+    async def backward(self, speed: float):
         """
         Sets the speed of the ESC motor backward.
 
@@ -139,4 +141,4 @@ class ESCMotorHandler:
             speed (float): Speed value between 0 and 1.0 (full backward).
         """
         self._check_speed_half_range(speed)
-        self.speed = -speed
+        await self.set_speed(-speed)
