@@ -2,16 +2,33 @@ from re import Pattern
 from types import UnionType
 from typing import Any
 import socket
+from enum import Enum
 
-def check_type(obj: object, class_or_tuple: type | UnionType | tuple[Any, ...]) -> None:
+def is_instance(obj: object, class_or_tuple: type | UnionType | tuple[Any, ...]) -> None:
     """
     Check if the object is an instance of the specified class or tuple of classes.
+
+    Args:
+        obj (object): The object to check.
+        class_or_tuple (type | UnionType | tuple[Any, ...]): The class or tuple of classes to check against.
     """
     if not isinstance(obj, class_or_tuple):
         raise TypeError(
             f"Expected type {class_or_tuple}, got {type(obj)} for object {obj}"
         )
 
+def is_subclass(cls: type, class_or_tuple: type | UnionType | tuple[Any, ...]) -> None:
+    """
+    Check if the class is a subclass of the specified class or tuple of classes.
+
+    Args:
+        cls (type): The class to check.
+        class_or_tuple (type | UnionType | tuple[Any, ...]): The class or tuple of classes to check against.
+    """
+    if not issubclass(cls, class_or_tuple):
+        raise TypeError(
+            f"Expected subclass of {class_or_tuple}, got {type(cls)} for class {cls}"
+        )
 
 def match_any(regex_list: list[Pattern], string: str) -> bool:
     """
@@ -49,8 +66,31 @@ def get_local_ip() -> str | None | Any:
         # Doesn't need to be reachable
         s.connect(('8.8.8.8', 80))
         ip = s.getsockname()[0]
+
     except Exception as e:
         ip = '127.0.0.1'
+
     finally:
         s.close()
+
     return ip
+
+def map_string_to_enum(string: str, enum_class: type[Enum]) -> Any:
+    """
+    Map a string to an enum class.
+
+    Args:
+        string (str): The string to map.
+        enum_class (type[Enum]): The enum class to map the string to.
+
+    Returns:
+        Any: The corresponding enum value.
+    """
+    # Check the type of enum_class
+    is_subclass(enum_class, Enum)
+
+    try:
+        return enum_class[string.upper()]
+
+    except KeyError:
+        raise ValueError(f"'{string}' is not a valid value for {enum_class.__name__}")

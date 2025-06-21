@@ -1,19 +1,8 @@
-from enum import Enum, unique
 from typing import Optional
 from datetime import datetime as dt
 
-from ..utils import check_type
-
-@unique
-class Category(Enum):
-    """
-    Enum to define the category of log message.
-    """
-
-    INFO = 1
-    WARNING = 2
-    ERROR = 3
-    DEBUG = 4
+from .enums import Category
+from ..utils import is_instance
 
 class Message:
     """
@@ -75,7 +64,7 @@ class Message:
         Args:
             content (str): The new content for the log message.
         """
-        check_type(content, str)
+        is_instance(content, str)
         self.__content = content
 
     @property
@@ -96,7 +85,7 @@ class Message:
         Args:
             category (Category): The new category for the log message.
         """
-        check_type(category, Category)
+        is_instance(category, Category)
         self.__category = category
 
     @property
@@ -118,5 +107,5 @@ class Message:
             tag (Optional[str]): The new tag for the log message.
         """
         if tag:
-            check_type(tag, str)
+            is_instance(tag, str)
         self.__tag = tag

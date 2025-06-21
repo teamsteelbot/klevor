@@ -3,8 +3,9 @@ from multiprocessing import Event, RLock, Queue
 from typing import Optional, TextIO, final
 
 from .abstracts import LoggerABC
-from .message import Message, Category
-from ..utils import check_type
+from .message import Message
+from .enums import Category
+from ..utils import is_instance
 from ..files import Files
 
 
@@ -43,13 +44,13 @@ class Logger(LoggerABC):
     def log(self, content: str, category: Category = Category.INFO, tag: Optional[str] = None) -> None:
         with self.__rlock:
             # Check the type of content
-            check_type(content, str)
+            is_instance(content, str)
 
             # Check the type of category
-            check_type(category, Category)
+            is_instance(category, Category)
 
             # Check the type of tag
-            check_type(tag, str) if tag else None
+            is_instance(tag, str) if tag else None
 
             # Create a message object
             msg = Message(content, category, tag)
@@ -120,7 +121,7 @@ class Logger(LoggerABC):
         self.__messages_queue = Queue()
 
         # Check the type of file_path
-        check_type(file_path, str)
+        is_instance(file_path, str)
         self.__file_path = file_path
 
         # Ensure the file exists

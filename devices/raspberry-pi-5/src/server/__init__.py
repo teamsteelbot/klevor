@@ -10,8 +10,9 @@ from PIL.Image import Image
 from .abstracts import WebsocketsServerABC
 from ..log import LoggerABC
 from ..log.sub_logger import SubLogger
-from ..utils import check_type, get_local_ip
-from .message import Message, Tag
+from ..utils import is_instance, get_local_ip
+from .message import Message
+from .enums import Tag
 from ..yolo import Yolo
 
 class WebsocketsServer(WebsocketsServerABC):
@@ -60,17 +61,17 @@ class WebsocketsServer(WebsocketsServerABC):
         self.__parking_event = Event()
 
         # Check the type of logger
-        check_type(logger, LoggerABC) if logger else None
+        is_instance(logger, LoggerABC) if logger else None
 
         # Get the sub-logger for this class
         self.__logger = SubLogger(logger, self.LOG_TAG) if logger else None
 
         # Check the type of host
-        check_type(host, str)
+        is_instance(host, str)
         self.__host = host
 
         # Check the type of port
-        check_type(port, int)
+        is_instance(port, int)
         self.__port = port
 
         # Initialize the connected clients set
@@ -138,7 +139,7 @@ class WebsocketsServer(WebsocketsServerABC):
     @final
     async def _send_message(self, connection, msg: Message):
         try:
-            check_type(msg, Message)
+            is_instance(msg, Message)
             await connection.send(str(msg))
 
         except Exception as e:
@@ -148,7 +149,7 @@ class WebsocketsServer(WebsocketsServerABC):
     async def _broadcast_message(self, msg: Message):
         if self.__connected_clients:  # Only broadcast if there are clients
             try:
-                check_type(msg, Message)
+                is_instance(msg, Message)
                 await asyncio.gather(
                     *(client.send(str(msg)) for client in self.__connected_clients),
                     return_exceptions=True
@@ -213,21 +214,21 @@ class WebsocketsServer(WebsocketsServerABC):
 
     @final
     async def broadcast_serial_incoming_message(self, msg: str):
-        check_type(msg, str)
+        is_instance(msg, str)
 
         # Send a tagged message
         await self._broadcast_message(Message(Tag.SERIAL_INCOMING_MESSAGE, msg))
 
     @final
     async def broadcast_serial_outgoing_message(self, msg: str):
-        check_type(msg, str)
+        is_instance(msg, str)
 
         # Send a tagged message
         await self._broadcast_message(Message(Tag.SERIAL_OUTGOING_MESSAGE, msg))
 
     @final
     async def broadcast_rplidar_measures(self, msg: str):
-        check_type(msg, str)
+        is_instance(msg, str)
 
         # Send a tagged message
         await self._broadcast_message(Message(Tag.RPLIDAR_MEASURES, msg))

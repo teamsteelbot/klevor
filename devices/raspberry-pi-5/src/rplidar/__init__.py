@@ -5,12 +5,12 @@ from threading import Thread
 from typing import Optional, final
 
 from ..env import Env, Challenge
-from ..utils import check_type
+from ..utils import is_instance
 from ..log.abstracts import LoggerABC
 from ..log.sub_logger import SubLogger
 from ..server import WebsocketsServerABC
 from ..serial_communication import SerialCommunicationABC
-from ..serial_communication.message import RPLIDAR as RPLIDARKey
+from ..serial_communication.enums import RPLIDAR as RPLIDARKey
 from .abstracts import RPLIDARABC
 from .measure import Measure
 
@@ -71,29 +71,29 @@ class RPLIDAR(RPLIDARABC):
         self.__start_event = Event()
 
         # Check the type of logger
-        check_type(logger, LoggerABC) if logger else None
+        is_instance(logger, LoggerABC) if logger else None
 
         # Get the sub-logger for this class
         self.__logger = SubLogger(logger, self.LOG_TAG) if logger else None
 
         # Check the type of server
-        check_type(server, WebsocketsServerABC) if server else None
+        is_instance(server, WebsocketsServerABC) if server else None
         self.__server = server
 
         # Check the type of serial communication
-        check_type(serial, SerialCommunicationABC) if serial else None
+        is_instance(serial, SerialCommunicationABC) if serial else None
         self.__serial_communication = serial
 
         # Check the type of baudrate
-        check_type(baudrate, int)
+        is_instance(baudrate, int)
         self.__baudrate = baudrate
 
         # Check the type of the port
-        check_type(port, str)
+        is_instance(port, str)
         self.__port = port
 
         # Check the type of is_upside_down
-        check_type(is_upside_down, bool)
+        is_instance(is_upside_down, bool)
         self.__is_upside_down = is_upside_down
 
         # Distances dictionary

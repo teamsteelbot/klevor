@@ -6,14 +6,16 @@ import asyncio
 
 from serial import Serial, SerialException
 
+from ..challenge.enums import Challenge
 from ..camera.image_processing_queue import ImageProcessingQueue
 from ..log import Logger
 from ..log.sub_logger import SubLogger
-from .message import IncomingMessage, IncomingCategory, OutgoingMessage, OutgoingCategory, Status, RPLIDAR
+from .message import IncomingMessage, OutgoingMessage
+from .enums import IncomingCategory, OutgoingCategory, Status, RPLIDAR
 from .abstracts import SerialCommunicationABC
 from ..server import WebsocketsServerABC
-from ..utils import check_type
-from ..env import Env, Challenge
+from ..utils import is_instance
+from ..env import Env
 
 class SerialCommunication(SerialCommunicationABC):
     """
@@ -46,7 +48,7 @@ class SerialCommunication(SerialCommunicationABC):
     def __init__(
         self,
         logger: Optional[Logger] = None,
-        images_queue: Optional[ImageProcessingQueue] = None,
+        image_processing_queue: Optional[ImageProcessingQueue] = None,
         server: Optional[WebsocketsServerABC] = None,
         console_port: Optional[str] = RASPBERRY_PI_PICO_CONSOLE_PORT,
         console_port_alt: Optional[str] = RASPBERRY_PI_PICO_CONSOLE_PORT_ALT,
@@ -59,7 +61,7 @@ class SerialCommunication(SerialCommunicationABC):
 
         Args:
             logger (Optional[Logger]): Logger instance for logging messages.
-            images_queue (Optional[ImageProcessingQueue]): Images queue for handling images.
+            image_processing_queue (Optional[ImageProcessingQueue]): Images queue for handling images.
             console_port (Optional[str]): Serial port used for receiving data from Pico.
             console_port_alt (Optional[str]): Alternative serial port used for receiving data from Pico.
             data_port (Optional[str]): Serial port used for sending data to Pico.
@@ -80,15 +82,14 @@ class SerialCommunication(SerialCommunicationABC):
         self.__start_event = Event()
 
         # Check the type of images queue
-        check_type(images_queue, ImageProcessingQueue) if images_queue else None
-        self.__images_queue = images_queue
+        self.image_processing_queue = image_processing_queue
 
         # Check the type of the server
-        check_type(server, WebsocketsServerABC) if server else None
+        is_instance(server, WebsocketsServerABC) if server else None
         self.__server = server
 
         # Check the type of the logger
-        check_type(logger, Logger) if logger else None
+        is_instance(logger, Logger) if logger else None
 
         # Get the sub-logger for this class
         self.__logger = SubLogger(logger, self.LOG_TAG) if logger else None
@@ -108,19 +109,19 @@ class SerialCommunication(SerialCommunicationABC):
         self.__last_incoming_message = None
 
         # Check the type of console port and its alternative port
-        check_type(console_port, str)
+        is_instance(console_port, str)
         self.__console_port = console_port
-        check_type(console_port_alt, str)
+        is_instance(console_port_alt, str)
         self.__console_port_alt = console_port_alt
 
         # Check the type of data port and its alternative port
-        check_type(data_port, str)
+        is_instance(data_port, str)
         self.__data_port = data_port
-        check_type(data_port_alt, str)
+        is_instance(data_port_alt, str)
         self.__data_port_alt = data_port_alt
 
         # Check the type of baudrate
-        check_type(baudrate, int)
+        is_instance(baudrate, int)
         self.__baudrate = baudrate
 
         # Initialize the console and data serial ports
@@ -133,6 +134,32 @@ class SerialCommunication(SerialCommunicationABC):
 
         # Get the debug environment variable
         self.__debug = Env.get_debug_mode()
+
+    @property
+    def image_processing_queue(self) -> Optional[ImageProcessingQueue]:
+        """
+        Get the image processing queue.
+
+        Returns:
+            Optional[ImageProcessingQueue]: The image processing queue.
+        """
+        return self.__image_processing_queue
+
+    @image_processing_queue.setter
+    def image_processing_queue(self, image_processing_queue: Optional[ImageProcessingQueue]) -> None:
+        """
+        Set the image processing queue.
+
+        Args:
+            image_processing_queue (Optional[ImageProcessingQueue]): The image processing queue to set.
+        """
+        if not image_processing_queue:
+            self.__image_processing_queue = None
+            return
+
+        # Check the type of image processing queue
+        is_instance(image_processing_queue, ImageProcessingQueue)
+        self.__image_processing_queue = image_processing_queue
 
     def __open(self) -> None:
         """
@@ -324,7 +351,7 @@ class SerialCommunication(SerialCommunicationABC):
     @final
     def _send_message(self, msg: OutgoingMessage) -> None:
         # Check the type of message
-        check_type(msg, OutgoingMessage)
+        is_instance(msg, OutgoingMessage)
 
         with self.__rlock:
             if self.is_closed():
@@ -353,8 +380,8 @@ class SerialCommunication(SerialCommunicationABC):
     def send_rplidar_measures(self, measures: dict[RPLIDAR, float]) -> None:
         for key, value in measures.items():
             # Check the type of key and value
-            check_type(key, RPLIDAR)
-            check_type(value, float)
+            is_instance(key, RPLIDAR)
+            is_instance(value, float)
 
             # Create a message with the RPLIDAR measures type
             msg = OutgoingMessage(OutgoingCategory.RPLIDAR, f"{key.get_name()}{OutgoingMessage.CONTENT_HEADER_SEPARATOR}{value}")
@@ -378,6 +405,15 @@ class SerialCommunication(SerialCommunicationABC):
 
                 # Check if the message is a start message
                 if msg.is_start():
+                    # Check if the challenge is set
+                    if not Env.has_challenge():
+                        # Stop the communication
+                        self.__close()
+
+                        # Log
+                        self.__logger.error("Challenge not set. Stopping communication.") if self.__logger else None
+                        return
+
                     # Set the start event
                     self.start()
 

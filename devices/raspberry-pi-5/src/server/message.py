@@ -1,40 +1,6 @@
-from enum import Enum, unique
+from ..utils import is_instance
 
-from ..utils import check_type
-
-@unique
-class Tag(Enum):
-    """
-    Enum to represent the tags of messages sent and received from the server.
-    This is used for categorizing or filtering messages based on their type.
-    """
-    CONNECTION_STATUS = 1
-    SERIAL_INCOMING_MESSAGE = 2
-    SERIAL_OUTGOING_MESSAGE = 3
-    IMAGE_ORIGINAL = 4
-    IMAGE_MODEL_G = 5
-    IMAGE_MODEL_M = 6
-    IMAGE_MODEL_R = 7
-    RPLIDAR_MEASURES = 8
-    STOP_EVENT = 9
-    PARKING_EVENT = 10
-
-    @staticmethod
-    def from_string(tag_str: str) -> "Tag":
-        """
-        Convert a string to a Tag enum value.
-
-        Args:
-            tag_str (str): The string representation of the tag.
-
-        Returns:
-            Tag: The corresponding Tag enum value.
-        """
-        tag_name = tag_str.upper()
-        if tag_name not in Tag.__members__:
-            raise ValueError(f"Invalid tag: {tag_str}")
-        return Tag[tag_name]
-
+from .enums import Tag
 
 class Message:
     """
@@ -103,7 +69,7 @@ class Message:
         Args:
             value (str): The new content for the message.
         """
-        check_type(value, str)
+        is_instance(value, str)
         self.__content = value
         
     @property
@@ -124,5 +90,5 @@ class Message:
         Args:
             value (Tag): The new tag for the message.
         """
-        check_type(value, Tag)
+        is_instance(value, Tag)
         self.__tag = value

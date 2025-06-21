@@ -1,178 +1,6 @@
-from enum import Enum, unique
+from ..utils import is_instance
 
-from ..utils import check_type
-
-@unique
-class IncomingCategory(Enum):
-    """
-    Enum to represent the categories of incoming messages from the Raspberry Pi Pico 2W.
-    """
-    CHALLENGE = 1
-    STATUS = 2
-    SERVO_ANGLE = 3
-    MOTOR_SPEED = 4
-    REQUEST = 5
-    BNO08X_TURNS = 6
-    ERROR = 7
-
-    def get_name(self) -> str:
-        """
-        Get the category name in lowercase.
-
-        Returns:
-            str: The category name in lowercase.
-        """
-        return self.name.lower()
-
-    @classmethod
-    def from_string(cls, category_str: str) -> 'IncomingCategory':
-        """
-        Convert a string to an IncomingCategory enum value.
-
-        Args:
-            category_str (str): The string representation of the incoming category.
-
-        Returns:
-            IncomingCategory: The corresponding IncomingCategory enum value.
-        """
-        category_name = category_str.upper()
-        if category_name not in cls.__members__:
-            raise ValueError(f"Invalid incoming category: {category_str}")
-        return cls[category_name]
-
-@unique
-class Status(Enum):
-    """
-    Enum to represent the status messages sent and received from the Raspberry Pi Pico 2W.
-    """
-    START = 1
-    STOP = 2
-    OK = 3
-
-    def get_name(self) -> str:
-        """
-        Get the status name in lowercase.
-
-        Returns:
-            str: The status name in lowercase.
-        """
-        return self.name.lower()
-
-    @classmethod
-    def from_string(cls, status_str: str) -> 'Status':
-        """
-        Convert a string to a Status enum value.
-
-        Args:
-            status_str (str): The string representation of the status.
-
-        Returns:
-            Status: The corresponding Status enum value.
-        """
-        status_name = status_str.upper()
-        if status_name not in cls.__members__:
-            raise ValueError(f"Invalid status: {status_str}")
-        return cls[status_name]
-
-@unique
-class Request(Enum):
-    """
-    Enum to represent the request messages received from the Raspberry Pi Pico 2W.
-    """
-    INFERENCE = 1
-
-    def get_name(self) -> str:
-        """
-        Get the request name in lowercase.
-
-        Returns:
-            str: The request name in lowercase.
-        """
-        return self.name.lower()
-
-    @classmethod
-    def from_string(cls, request_str: str) -> 'Request':
-        """
-        Convert a string to a Request enum value.
-
-        Args:
-            request_str (str): The string representation of the request.
-
-        Returns:
-            Request: The corresponding Request enum value.
-        """
-        request_name = request_str.upper()
-        if request_name not in cls.__members__:
-            raise ValueError(f"Invalid request: {request_str}")
-        return cls[request_name]
-
-@unique
-class OutgoingCategory(Enum):
-    """
-    Enum to represent the categories of outgoing messages sent to the Raspberry Pi Pico 2W.
-    """
-    STATUS = 1
-    INFERENCE = 2
-    RPLIDAR = 3
-
-    def get_name(self) -> str:
-        """
-        Get the category name in lowercase.
-
-        Returns:
-            str: The category name in lowercase.
-        """
-        return self.name.lower()
-
-    @classmethod
-    def from_string(cls, category_str: str) -> 'OutgoingCategory':
-        """
-        Convert a string to an OutgoingCategory enum value.
-
-        Args:
-            category_str (str): The string representation of the outgoing category.
-
-        Returns:
-            OutgoingCategory: The corresponding OutgoingCategory enum value.
-        """
-        category_name = category_str.upper()
-        if category_name not in cls.__members__:
-            raise ValueError(f"Invalid outgoing category: {category_str}")
-        return cls[category_name]
-
-@unique
-class RPLIDAR(Enum):
-    """
-    Enum to represent the RPLIDAR messages sent to the Raspberry Pi Pico 2W.
-    """
-    FRONT = 1
-    LEFT = 2
-    RIGHT = 3
-
-    def get_name(self) -> str:
-        """
-        Get the RPLIDAR name in lowercase.
-
-        Returns:
-            str: The RPLIDAR name in lowercase.
-        """
-        return self.name.lower()
-
-    @classmethod
-    def from_string(cls, rplidar_str: str) -> 'RPLIDAR':
-        """
-        Convert a string to a RPLIDAR enum value.
-
-        Args:
-            rplidar_str (str): The string representation of the RPLIDAR message.
-
-        Returns:
-            RPLIDAR: The corresponding RPLIDAR enum value.
-        """
-        rplidar_name = rplidar_str.upper()
-        if rplidar_name not in cls.__members__:
-            raise ValueError(f"Invalid RPLIDAR message: {rplidar_str}")
-        return cls[rplidar_name]
+from .enums import IncomingCategory, OutgoingCategory, Status
 
 class IncomingMessage:
     """
@@ -246,7 +74,7 @@ class IncomingMessage:
             category (IncomingCategory): The category of the message.
         """
         # Check the type of message
-        check_type(category, IncomingCategory)
+        is_instance(category, IncomingCategory)
         self.__category = category
 
     @property
@@ -268,7 +96,7 @@ class IncomingMessage:
             content (str): The content of the message.
         """
         # Check the type of content
-        check_type(content, str)
+        is_instance(content, str)
         self.__content = content
 
     def is_start(self) -> bool:
@@ -385,7 +213,7 @@ class OutgoingMessage:
             category (OutgoingCategory): The category of the message.
         """
         # Check the type of message
-        check_type(category, OutgoingCategory)
+        is_instance(category, OutgoingCategory)
         self.__category = category
 
     @property
@@ -407,5 +235,5 @@ class OutgoingMessage:
             content (str): The content of the message.
         """
         # Check the type of content
-        check_type(content, str)
+        is_instance(content, str)
         self.__content = content

@@ -11,7 +11,7 @@ from picamera2.outputs import FileOutput
 from .abstracts import CameraABC
 from ..log.abstracts import LoggerABC
 from ..log.sub_logger import SubLogger
-from ..utils import check_type
+from ..utils import is_instance
 
 
 class Camera(CameraABC):
@@ -43,7 +43,7 @@ class Camera(CameraABC):
         self.__rlock = RLock()
 
         # Check the type of logger
-        check_type(logger, LoggerABC) if logger else None
+        is_instance(logger, LoggerABC) if logger else None
 
         # Get the sub-logger for this class
         self.__logger = SubLogger(logger, self.LOG_TAG) if logger else None

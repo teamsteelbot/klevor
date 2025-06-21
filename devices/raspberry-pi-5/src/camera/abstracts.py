@@ -6,7 +6,7 @@ import numpy as np
 from PIL import ImageEnhance
 from PIL.Image import Image
 
-from ..model.image_bounding_boxes import ImageBoundingBoxes
+from ..opencv.image_bounding_boxes import ImageBoundingBoxes
 
 class CameraABC(ABC):
     """

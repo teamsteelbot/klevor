@@ -1,7 +1,7 @@
 from typing import final
 
 from .abstracts import LoggerABC, SubLoggerABC
-from ..utils import check_type
+from ..utils import is_instance
 
 
 class SubLogger(SubLoggerABC):
@@ -29,7 +29,7 @@ class SubLogger(SubLoggerABC):
     @tag.setter
     def tag(self, tag: str) -> None:
         # Check the type of tag
-        check_type(tag, str)
+        is_instance(tag, str)
         self.__tag = tag
 
     @final
@@ -41,5 +41,5 @@ class SubLogger(SubLoggerABC):
     @logger.setter
     def logger(self, logger: LoggerABC) -> None:
         # Check the type of logger
-        check_type(logger, LoggerABC)
+        is_instance(logger, LoggerABC)
         self.__logger = logger

@@ -7,7 +7,7 @@ from ...camera.image_processing_queue import ImageProcessingQueue
 from ...env import Env
 from ...log import LoggerABC
 from ...log.sub_logger import SubLogger
-from ...utils import check_type
+from ...utils import is_instance
 from .. import Yolo
 from ..files import Files
 from ..hailo import Hailo
@@ -32,11 +32,11 @@ class ObjectDetection(ObjectDetectionABC):
         self.__rlock = RLock()
 
         # Check the type of image processing queue
-        check_type(image_processing_queue, ImageProcessingQueue)
+        is_instance(image_processing_queue, ImageProcessingQueue)
         self.__image_processing_queue = image_processing_queue
 
         # Check the type of logger
-        check_type(logger, LoggerABC) if logger else None
+        is_instance(logger, LoggerABC) if logger else None
 
         # Create a sub-logger for the Hailo handler
         self.__logger = SubLogger(logger, self.LOG_TAG) if logger else None

@@ -1,6 +1,6 @@
 from typing import Optional
 
-from ..utils import check_type
+from ..utils import is_instance
 
 class Measure:
     """
@@ -52,7 +52,7 @@ class Measure:
         Args:
             value (float): Angle to set.
         """
-        check_type(value, float)
+        is_instance(value, float)
 
         if not (0 <= value):
             raise ValueError(f"Angle must be a non-negative float, received: {value}")
@@ -76,7 +76,7 @@ class Measure:
         Args:
             value (float): Distance to set.
         """
-        check_type(value, float)
+        is_instance(value, float)
 
         if value < 0:
             raise ValueError("Distance must be a non-negative float, received: {}".format(value))
@@ -101,7 +101,7 @@ class Measure:
         Args:
             value (int): Quality to set.
         """
-        check_type(value, int)
+        is_instance(value, int)
 
         if value < 0:
             raise ValueError(f"Quality must be a non-negative integer, received: {value}")
@@ -120,7 +120,7 @@ class Measure:
         """
         try:
             # Check the type of measure_str
-            check_type(measure_str, str)
+            is_instance(measure_str, str)
 
             # Split the string by the attributes separator
             parts = measure_str.split(cls.ATTRIBUTES_SEPARATOR)
@@ -152,7 +152,7 @@ class Measure:
             str: String representation of the measures.
         """
         # Check the type of measures
-        check_type(measures, list)
+        is_instance(measures, list)
         
         # Convert each measure to string and join them with spaces
         return cls.MEASURES_SEPARATOR.join(str(measure) for measure in measures)
@@ -169,7 +169,7 @@ class Measure:
             list: List of Measure objects.
         """
         # Check the type of measures_str
-        check_type(measures_str, str)
+        is_instance(measures_str, str)
 
         # Split the string by the measures separator and convert each part to Measure
         return [cls.from_string(measure_str) for measure_str in measures_str.split(cls.MEASURES_SEPARATOR) if measure_str]
@@ -186,7 +186,7 @@ class Measure:
             tuple: A tuple containing the angle, distance, and quality of the measure.
         """
         # Check the type of measure_str
-        check_type(measure_str, str)
+        is_instance(measure_str, str)
 
         # Split the string by the attributes separator
         parts = measure_str.split(cls.ATTRIBUTES_SEPARATOR)

@@ -15,7 +15,7 @@ from ...camera.image_processing_queue import ImageProcessingQueue
 from ...log import LoggerABC
 from ...log.sub_logger import SubLogger
 from ...opencv.image_bounding_boxes import ImageBoundingBoxes
-from ...utils import check_type
+from ...utils import is_instance
 from .. import Yolo
 from ..files import Files
 
@@ -67,16 +67,16 @@ class Hailo(HailoABC):
         self.__lock = RLock()
 
         # Check the type of model name
-        check_type(model_name, str)
+        is_instance(model_name, str)
         self.__model_name = model_name
 
         # Check the HEF file path
-        check_type(hef_file_path, str)
+        is_instance(hef_file_path, str)
         Files.ensure_directory_exists(hef_file_path)
         self.__hef_file_path = hef_file_path
 
         # Check the labels path
-        check_type(labels_path, str)
+        is_instance(labels_path, str)
         Files.ensure_directory_exists(labels_path)
         self.__labels_path = labels_path
 
@@ -84,21 +84,21 @@ class Hailo(HailoABC):
         self.__labels = Yolo.get_labels_from_txt(self.__labels_path)
 
         # Check the type of image processing queue
-        check_type(image_processing_queue, ImageProcessingQueue)
+        is_instance(image_processing_queue, ImageProcessingQueue)
         self.__images_queue = image_processing_queue
 
         # Check the type of logger
-        check_type(logger, LoggerABC) if logger else None
+        is_instance(logger, LoggerABC) if logger else None
 
         # Create a sub-logger for the Hailo handler
         self.__logger = SubLogger(logger, self.LOG_TAG) if logger else None
 
         # Check the type of class colors
-        check_type(class_colors, dict)
+        is_instance(class_colors, dict)
         self.__class_colors = class_colors
 
         # Check the type of batch size
-        check_type(batch_size, int)
+        is_instance(batch_size, int)
         self.__batch_size = batch_size
 
         # Create the input queue
@@ -166,7 +166,7 @@ class Hailo(HailoABC):
     @final
     def add_image(self, preprocessed_image: np.ndarray) -> None:
         # Check the type of preprocessed image
-        check_type(preprocessed_image, np.ndarray)
+        is_instance(preprocessed_image, np.ndarray)
         self.__input_queue.put(preprocessed_image)
 
     @final

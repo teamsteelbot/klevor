@@ -1,24 +1,8 @@
 import os
-from enum import Enum, unique
 
-@unique
-class Key(Enum):
-    """
-    Enum for environment variable keys.
-    """
-
-    DEBUG = 1
-    YOLO_VERSION = 2
-    CHALLENGE = 3
-
-@unique
-class Challenge(Enum):
-    """
-    Enum to represent different challenges.
-    """
-
-    WITH_OBSTACLES = 1
-    WITHOUT_OBSTACLES = 2
+from .enums import Key
+from ..challenge.enums import Challenge
+from ..utils import map_string_to_enum
 
 class Env:
     """
@@ -85,8 +69,15 @@ class Env:
         Returns:
             Challenge: The challenge enum value.
         """
-        challenge_name = os.getenv(Key.CHALLENGE.name, Challenge.NONE.name)
-        for challenge in Challenge:
-            if challenge.name == challenge_name:
-                return challenge
-        return Challenge.NONE
+        challenge_name = os.getenv(Key.CHALLENGE.name, "unknown")
+        return map_string_to_enum(challenge_name.upper(), Challenge)
+
+    @staticmethod
+    def has_challenge() -> bool:
+        """
+        Check if the challenge environment variable is set.
+
+        Returns:
+            bool: True if the challenge is set, otherwise False.
+        """
+        return Key.CHALLENGE.name in os.environ

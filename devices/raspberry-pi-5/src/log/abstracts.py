@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Optional, TextIO
 
-from .message import Category, Message
+from .message import Message
+from .enums import Category
 
 class LoggerABC(ABC):
     """

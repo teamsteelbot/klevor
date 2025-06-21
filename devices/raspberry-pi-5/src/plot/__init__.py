@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib as plt
 
 from ..opencv import OpenCV
-from ..yolo.image_bounding_boxes import ImageBoundingBoxes
+from ..opencv.image_bounding_boxes import ImageBoundingBoxes
 
 class Plot:
     """

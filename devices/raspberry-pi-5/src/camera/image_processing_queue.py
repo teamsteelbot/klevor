@@ -8,7 +8,7 @@ from PIL.Image import Image
 from .abstracts import CameraABC, ImageProcessingQueueABC
 from ..opencv.image_bounding_boxes import ImageBoundingBoxes
 from ..server.abstracts import WebsocketsServerABC
-from ..utils import check_type
+from ..utils import is_instance
 from ..log.abstracts import LoggerABC
 from ..log.sub_logger import SubLogger
 
@@ -38,15 +38,15 @@ class ImageProcessingQueue(ImageProcessingQueueABC):
         self.__stop_event.set()
 
         # Check the type of camera
-        check_type(camera, CameraABC)
+        is_instance(camera, CameraABC)
         self.__camera = camera
 
         # Check the type of server
-        check_type(server, WebsocketsServerABC) if server else None
+        is_instance(server, WebsocketsServerABC) if server else None
         self.__server = server
 
         # Check the type of logger
-        check_type(logger, LoggerABC) if logger else None
+        is_instance(logger, LoggerABC) if logger else None
 
         # Get the sub-logger for this class
         self.__logger = SubLogger(logger, self.LOG_TAG) if logger else None
@@ -69,7 +69,7 @@ class ImageProcessingQueue(ImageProcessingQueueABC):
     @final
     def add_image(self, image: Image) -> None:
         # Check the type of the image
-        check_type(image, Image)
+        is_instance(image, Image)
 
         with self.__rlock:
             if self.is_stopped():

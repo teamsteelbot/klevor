@@ -9,7 +9,7 @@ import numpy as np
 import albumentations as A
 
 from ..files import Files
-from ..utils import check_type
+from ..utils import is_instance
 
 class OpenCV:
     # Image dimensions
@@ -103,7 +103,7 @@ class OpenCV:
             np.ndarray: Loaded image.
         """
         # Check the type of image path
-        check_type(image_path, str)
+        is_instance(image_path, str)
 
         # Check if the image path exists
         image = cv2.imread(image_path)
