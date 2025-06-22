@@ -1,7 +1,8 @@
-from multiprocessing import Manager, Process
+from multiprocessing import Process
 
 from .enums import Challenge
 from ..env import Env
+from ..manager import Manager
 
 
 class ChallengeHandler:
@@ -21,18 +22,18 @@ class ChallengeHandler:
         self.__debug = Env.get_debug_mode()
 
         # Initialize the logger
-        self.__logger = self.__manager.Logger()
+        self.__logger = self.__manager.logger()
 
         # Initialize the server if debug mode is enabled
-        self.__server = self.__manager.WebsocketsServer(logger=self.__logger) if self.__debug else None
+        self.__server = self.__manager.websockets_server(logger=self.__logger) if self.__debug else None
 
         # Initialize the serial communication
-        self.__serial_communication = self.__manager.SerialCommunication(logger=self.__logger,
+        self.__serial_communication = self.__manager.serial_communication(logger=self.__logger,
                                                                         server=self.__server,
                                                                         image_processing_queue=self.__image_processing_queue)
 
         # Initialize the RPLIDAR
-        self.__rplidar = self.__manager.RPLIDAR(logger=self.__logger,
+        self.__rplidar = self.__manager.rplidar(logger=self.__logger,
                                                 server=self.__server,
                                                 serial=self.__serial_communication)
 
@@ -85,15 +86,15 @@ class ChallengeHandler:
             return
 
         # Initialize the camera
-        self.__camera = self.__manager.Camera(logger=self.__logger)
+        self.__camera = self.__manager.camera(logger=self.__logger)
 
         # Initialize the image processing queue
-        self.__image_processing_queue = self.__manager.ImageProcessingQueue(logger=self.__logger,
+        self.__image_processing_queue = self.__manager.image_processing_queue(logger=self.__logger,
                                                                             camera=self.__camera,
                                                                             server=self.__server)
 
         # Initialize the Hailo object detection handler
-        self.__object_detection = self.__manager.ObjectDetection(logger=self.__logger,
+        self.__object_detection = self.__manager.object_detection(logger=self.__logger,
                                                                  image_processing_queue=self.__image_processing_queue,
                                                                  camera=self.__camera,
                                                                  serial_communication=self.__serial_communication)
