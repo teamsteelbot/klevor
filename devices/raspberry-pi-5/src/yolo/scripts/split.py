@@ -3,14 +3,18 @@ import os
 import random
 import shutil
 
-from .. import Yolo
+from ..constants import TRAINING_RATIO, VALIDATION_RATIO
 from ..args import Args, Flags
 from ..files import Files
+from ..files.constants import (
+    DATASET_IMAGES, DATASET_LABELS, DATASET_TRAINING, DATASET_VALIDATIONS, DATASET_TESTING,
+    DATASET_AUGMENTED, DATASET_ORGANIZED
+)
 
 
 def split_dataset(input_dir: str | os.PathLike[str], output_dir: str | os.PathLike[str],
-                  train_ratio: float = Yolo.TRAINING_RATIO,
-                  val_ratio: float = Yolo.VALIDATION_RATIO) -> None:
+                  train_ratio: float = TRAINING_RATIO,
+                  val_ratio: float = VALIDATION_RATIO) -> None:
     """
     Split the dataset into training, validation, and testing sets.
 
@@ -21,19 +25,19 @@ def split_dataset(input_dir: str | os.PathLike[str], output_dir: str | os.PathLi
         val_ratio (float): Ratio of the dataset to be used for validation.
     """
     # Get the input images and annotations directories
-    input_images_dir = os.path.join(input_dir, Files.DATASET_IMAGES)
-    input_annotations_dir = os.path.join(input_dir, Files.DATASET_LABELS)
+    input_images_dir = os.path.join(input_dir, DATASET_IMAGES)
+    input_annotations_dir = os.path.join(input_dir, DATASET_LABELS)
 
     # Get the output directories
-    output_training_dir = os.path.join(output_dir, Files.DATASET_TRAINING)
-    output_validations_dir = os.path.join(output_dir, Files.DATASET_VALIDATIONS)
-    output_testing_dir = os.path.join(output_dir, Files.DATASET_TESTING)
-    output_training_images_dir = os.path.join(output_training_dir, Files.DATASET_IMAGES)
-    output_validations_images_dir = os.path.join(output_validations_dir, Files.DATASET_IMAGES)
-    output_testing_images_dir = os.path.join(output_testing_dir, Files.DATASET_IMAGES)
-    output_training_annotations_dir = os.path.join(output_training_dir, Files.DATASET_LABELS)
-    output_validations_annotations_dir = os.path.join(output_validations_dir, Files.DATASET_LABELS)
-    output_testing_annotations_dir = os.path.join(output_testing_dir, Files.DATASET_LABELS)
+    output_training_dir = os.path.join(output_dir, DATASET_TRAINING)
+    output_validations_dir = os.path.join(output_dir, DATASET_VALIDATIONS)
+    output_testing_dir = os.path.join(output_dir, DATASET_TESTING)
+    output_training_images_dir = os.path.join(output_training_dir, DATASET_IMAGES)
+    output_validations_images_dir = os.path.join(output_validations_dir, DATASET_IMAGES)
+    output_testing_images_dir = os.path.join(output_testing_dir, DATASET_IMAGES)
+    output_training_annotations_dir = os.path.join(output_training_dir, DATASET_LABELS)
+    output_validations_annotations_dir = os.path.join(output_validations_dir, DATASET_LABELS)
+    output_testing_annotations_dir = os.path.join(output_testing_dir, DATASET_LABELS)
 
     # Check if the path exists, if not it creates it
     for io_dir in [input_dir, input_images_dir, input_annotations_dir, output_dir, output_training_dir,
@@ -89,8 +93,8 @@ if __name__ == '__main__':
     arg_yolo_input_model = Args.get_attribute_from_args_dict(args, Flags.INPUT_MODEL)
 
     # Get the dataset paths
-    augmented_dir = Files.get_dataset_model_dir_path(Files.DATASET_AUGMENTED, None, arg_yolo_input_model)
-    organized_dir = Files.get_dataset_model_dir_path(Files.DATASET_ORGANIZED, None, arg_yolo_input_model)
+    augmented_dir = Files.get_dataset_model_dir_path(DATASET_AUGMENTED, None, arg_yolo_input_model)
+    organized_dir = Files.get_dataset_model_dir_path(DATASET_ORGANIZED, None, arg_yolo_input_model)
 
     # Split the images
     split_dataset(augmented_dir, organized_dir)

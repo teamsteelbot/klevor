@@ -8,6 +8,8 @@ from picamera2 import Picamera2
 from picamera2.encoders import H264Encoder
 from picamera2.outputs import FileOutput
 
+from ..constants import WIDTH, HEIGHT
+from .constants import IMAGE_FORMAT, ADJUST_DURATION
 from .abstracts import CameraABC
 from ..log.abstracts import LoggerABC
 from ..log.sub_logger import SubLogger
@@ -21,12 +23,6 @@ class Camera(CameraABC):
 
     # Logger configuration
     LOG_TAG = "Camera"
-
-    # Camera settings
-    WIDTH = 640
-    HEIGHT = 640
-    FORMAT = 'jpeg'
-    ADJUST_DURATION = 0.02
 
     def __init__(self, logger: Optional[LoggerABC] = None, width: int = WIDTH, height: int = HEIGHT, rotation: int = 0, video_config: dict = None):
         """
@@ -140,7 +136,7 @@ class Camera(CameraABC):
         return image
 
     @final
-    def capture_image_stream(self, image_format: str = FORMAT, adjust_duration: float = ADJUST_DURATION) -> io.BytesIO:
+    def capture_image_stream(self, image_format: str = IMAGE_FORMAT, adjust_duration: float = ADJUST_DURATION) -> io.BytesIO:
         with self.__rlock:
             # Start the camera preview
             self._start_preview()

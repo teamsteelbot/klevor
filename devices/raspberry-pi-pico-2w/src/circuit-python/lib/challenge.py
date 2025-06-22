@@ -112,11 +112,13 @@ class WithoutObstacles:
             tasks = []
 
             # Check for the current turn and center the servo if necessary
-            if self.__servo.is_turning() and self.__bno08x.turns != last_known_turns:
-                tasks.append(create_task(self.__servo.center()))
+            if self.__servo.is_turning():
+                if self.__bno08x.turns != last_known_turns:
+                    tasks.append(create_task(self.__servo.center()))
 
-                # Update for the next check
-                last_known_turns = self.__bno08x.turns
+                    # Update for the next check
+                    last_known_turns = self.__bno08x.turns
+                continue
 
             # Overall Mission Completion Check
             if last_known_turns == 12:

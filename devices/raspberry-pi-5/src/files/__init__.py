@@ -2,23 +2,12 @@ import os
 import shutil
 from datetime import datetime as dt
 
+from ..log.constants import LOGS_DIR
+
 class Files:
     """
     Files utility class.
     """
-
-    # Files folder
-    FILES_DIR = os.path.dirname(os.path.abspath(__file__))
-
-    # Root directory
-    ROOT_DIR = os.path.abspath(os.path.join(FILES_DIR, '../'))
-
-    # Logs folders
-    LOG_DIR = os.path.abspath(os.path.join(ROOT_DIR, 'log'))
-    LOGS_DIR = os.path.abspath(os.path.join(LOG_DIR, 'logs'))
-
-    # Directories to ignore always
-    IGNORE_DIRS = ('.git', '__pycache__', '.idea', '.vscode', '.venv', 'venv', 'env')
 
     @staticmethod
     def move_file(input_path: str | os.PathLike[str], output_dir: str | os.PathLike[str]) -> None:
@@ -137,4 +126,4 @@ class Files:
         # Get the current time formatted as a string
         formatted_time = dt.now().strftime('%Y-%m-%d_%H-%M-%S')
 
-        return os.path.join(cls.LOGS_DIR, f'{formatted_time}.txt')
+        return os.path.join(LOGS_DIR, f'{formatted_time}.txt')

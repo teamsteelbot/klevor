@@ -6,6 +6,7 @@ class IncomingMessage:
     """
     Class to handle the messages received from the Raspberry Pi Pico 2W.
     """
+
     # Message header separator
     HEADER_SEPARATOR = ':'
 
@@ -29,8 +30,8 @@ class IncomingMessage:
         """
         return f"{self.__category}{self.HEADER_SEPARATOR}{self.__content}{self.END}"
 
-    @staticmethod
-    def from_string(msg_str: str) -> 'IncomingMessage':
+    @classmethod
+    def from_string(cls, msg_str: str) -> 'IncomingMessage':
         """
         Create a Message object from a string.
 
@@ -41,11 +42,11 @@ class IncomingMessage:
             Message: The Message object created from the string.
         """
         # Remove the end character if present
-        if msg_str.endswith(IncomingMessage.END):
+        if msg_str.endswith(cls.END):
             msg_str = msg_str[:-1]
 
         # Split the string into category and content
-        parts = msg_str.strip().split(IncomingMessage.HEADER_SEPARATOR, 1)
+        parts = msg_str.strip().split(cls.HEADER_SEPARATOR, 1)
         if len(parts) != 2:
             raise ValueError("Invalid incoming message format")
 

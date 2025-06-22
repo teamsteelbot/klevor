@@ -7,13 +7,15 @@ from typing import Optional, final
 from websockets import serve, exceptions
 from PIL.Image import Image
 
+from .constants import  HOST, PORT
+from ..camera.constants import IMAGE_FORMAT
 from .abstracts import WebsocketsServerABC
 from ..log import LoggerABC
 from ..log.sub_logger import SubLogger
 from ..utils import is_instance, get_local_ip
 from .message import Message
 from .enums import Tag
-from ..yolo import Yolo
+from ..constants import MODEL_G, MODEL_M, MODEL_R
 
 class WebsocketsServer(WebsocketsServerABC):
     """
@@ -25,16 +27,6 @@ class WebsocketsServer(WebsocketsServerABC):
 
     # Logger configuration
     LOG_TAG = "WebsocketServer"
-
-    # Server configuration
-    HOST = '0.0.0.0'
-    PORT = 8765
-
-    # Unknown message tag
-    TAG_UNKNOWN_TAG = "unknown_tag"
-
-    # Image format
-    IMAGE_FORMAT = "JPEG"
 
     def __init__(
         self,
@@ -163,7 +155,7 @@ class WebsocketsServer(WebsocketsServerABC):
         try:
             # Open the image and convert it to a binary stream
             img_stream = io.BytesIO()
-            img.save(img_stream, format=self.IMAGE_FORMAT)
+            img.save(img_stream, format=IMAGE_FORMAT)
             img_stream.seek(0)
             binary_data = img_stream.read()
 
@@ -200,13 +192,13 @@ class WebsocketsServer(WebsocketsServerABC):
 
     @final
     async def broadcast_model_image(self, img: Image, model_name: str):
-        if model_name == Yolo.MODEL_G:
+        if model_name == MODEL_G:
             await self.__broadcast_model_g_image(img)
 
-        elif model_name == Yolo.MODEL_M:
+        elif model_name == MODEL_M:
             await self.__broadcast_model_m_image(img)
 
-        elif model_name == Yolo.MODEL_R:
+        elif model_name == MODEL_R:
             await self.__broadcast_model_r_image(img)
 
         else:

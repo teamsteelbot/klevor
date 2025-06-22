@@ -8,6 +8,7 @@ class Message:
     This class is used to encapsulate the message data that will be sent
     over the WebSocket connection.
     """
+
     # Tag separator used to separate the tag from the content in the message string
     TAG_SEPARATOR = ":"
 
@@ -22,8 +23,8 @@ class Message:
         self.content = content
         self.tag = tag
     
-    @staticmethod
-    def from_string(msg_str: str) -> "Message":
+    @classmethod
+    def from_string(cls, msg_str: str) -> "Message":
         """
         Create a Message instance from a string representation.
 
@@ -34,7 +35,7 @@ class Message:
             Message: A new Message instance created from the string.
         """
         # Split the string into category and content
-        parts = msg_str.strip().split(Message.TAG_SEPARATOR, 1)
+        parts = msg_str.strip().split(cls.TAG_SEPARATOR, 1)
         if len(parts) != 2:
             raise ValueError("Invalid message format")
 

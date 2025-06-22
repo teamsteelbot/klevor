@@ -4,6 +4,10 @@ import os
 
 from ..args import Args, Flags
 from ..files import Files
+from ..files.constants import (
+    DATASET_IMAGES, DATASET_LABELS, DATASET_LABELED, DATASET_TO_PROCESS,
+    DATASET_ANNOTATIONS_JSON, DATASET_IMAGES_EXT
+)
 
 
 def convert_yolo_labels_to_json(annotations_dir: str | os.PathLike[str],
@@ -19,7 +23,7 @@ def convert_yolo_labels_to_json(annotations_dir: str | os.PathLike[str],
     annotations = []
 
     for label_name in os.listdir(annotations_dir):
-        image_name = label_name.replace(".txt", Files.DATASET_IMAGES_EXT)
+        image_name = label_name.replace(".txt", DATASET_IMAGES_EXT)
         image_path = os.path.join(images_dir, image_name)
 
         with open(os.path.join(annotations_dir, label_name), "r") as f:
@@ -52,15 +56,15 @@ if __name__ == "__main__":
     arg_yolo_input_model = Args.get_attribute_from_args_dict(args, Flags.INPUT_MODEL)
 
     # Get the dataset paths
-    labeled_to_process_dir = Files.get_dataset_model_dir_path(Files.DATASET_LABELED, Files.DATASET_TO_PROCESS,
+    labeled_to_process_dir = Files.get_dataset_model_dir_path(DATASET_LABELED, DATASET_TO_PROCESS,
                                                               arg_yolo_input_model)
 
     # Get the images and labels directories
-    labeled_to_process_images_dir = os.path.join(labeled_to_process_dir, Files.DATASET_IMAGES)
-    labeled_to_process_annotations_dir = os.path.join(labeled_to_process_dir, Files.DATASET_LABELS)
+    labeled_to_process_images_dir = os.path.join(labeled_to_process_dir, DATASET_IMAGES)
+    labeled_to_process_annotations_dir = os.path.join(labeled_to_process_dir, DATASET_LABELS)
 
     # Get the output JSON file path
-    labeled_annotations_json = os.path.join(labeled_to_process_dir, Files.DATASET_ANNOTATIONS_JSON)
+    labeled_annotations_json = os.path.join(labeled_to_process_dir, DATASET_ANNOTATIONS_JSON)
 
     # Convert YOLO labels to JSON format
     convert_yolo_labels_to_json(labeled_to_process_annotations_dir, labeled_to_process_images_dir,

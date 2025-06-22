@@ -5,6 +5,10 @@ import shutil
 
 from ..args import Args, Flags
 from ..files import Files
+from ..files.constants import (
+    DATASET_LABELED, DATASET_TO_PROCESS, DATASET_IMAGES, DATASET_LABELS, DATASET_CLASSES_TXT,
+    DATASET_NOTES_JSON, DATASET_IMAGES_EXT
+)
 
 
 def create_dataset_with_removed_classes(input_dir: str | os.PathLike[str], input_to_process_dir: str | os.PathLike[str],
@@ -24,23 +28,23 @@ def create_dataset_with_removed_classes(input_dir: str | os.PathLike[str], input
     Files.ensure_directory_exists(output_dir)
 
     # Get the input directory for images and labels
-    input_annotations_dir = os.path.join(input_to_process_dir, Files.DATASET_LABELS)
-    input_images_dir = os.path.join(input_to_process_dir, Files.DATASET_IMAGES)
+    input_annotations_dir = os.path.join(input_to_process_dir, DATASET_LABELS)
+    input_images_dir = os.path.join(input_to_process_dir, DATASET_IMAGES)
 
     # Get the input classes and notes file paths
-    input_classes_path = os.path.join(input_dir, Files.DATASET_CLASSES_TXT)
-    input_notes_path = os.path.join(input_dir, Files.DATASET_NOTES_JSON)
+    input_classes_path = os.path.join(input_dir, DATASET_CLASSES_TXT)
+    input_notes_path = os.path.join(input_dir, DATASET_NOTES_JSON)
 
     # Create the output directories for images and labels
-    output_annotations_dir = os.path.join(output_to_process_dir, Files.DATASET_LABELS)
-    output_images_dir = os.path.join(output_to_process_dir, Files.DATASET_IMAGES)
+    output_annotations_dir = os.path.join(output_to_process_dir, DATASET_LABELS)
+    output_images_dir = os.path.join(output_to_process_dir, DATASET_IMAGES)
 
     for dir_path in [output_annotations_dir, output_images_dir]:
         Files.ensure_directory_exists(dir_path)
 
     # Get the output classes and notes file paths
-    output_classes_path = os.path.join(output_dir, Files.DATASET_CLASSES_TXT)
-    output_notes_path = os.path.join(output_dir, Files.DATASET_NOTES_JSON)
+    output_classes_path = os.path.join(output_dir, DATASET_CLASSES_TXT)
+    output_notes_path = os.path.join(output_dir, DATASET_NOTES_JSON)
 
     # Get the indexes of the classes to ignore from the classes file
     ignore_classes_indexes = []
@@ -106,7 +110,7 @@ def create_dataset_with_removed_classes(input_dir: str | os.PathLike[str], input
         input_label_path = os.path.join(input_annotations_dir, input_label_name)
 
         # Get the input image name and path
-        input_image_name = input_label_name.replace(".txt", Files.DATASET_IMAGES_EXT)
+        input_image_name = input_label_name.replace(".txt", DATASET_IMAGES_EXT)
         input_image_path = os.path.join(input_images_dir, input_image_name)
         if not os.path.exists(input_image_path):
             print(f"Image file {input_image_path} does not exist. Skipping...")
@@ -150,11 +154,11 @@ if __name__ == '__main__':
     arg_yolo_ignore_classes = Args.get_attribute_from_args_dict(args, Flags.IGNORE_CLASSES)
 
     # Get the dataset paths
-    input_labeled_dir = Files.get_dataset_model_dir_path(Files.DATASET_LABELED, None, arg_yolo_input_model)
-    input_labeled_to_process_dir = Files.get_dataset_model_dir_path(Files.DATASET_LABELED, Files.DATASET_TO_PROCESS,
+    input_labeled_dir = Files.get_dataset_model_dir_path(DATASET_LABELED, None, arg_yolo_input_model)
+    input_labeled_to_process_dir = Files.get_dataset_model_dir_path(DATASET_LABELED, DATASET_TO_PROCESS,
                                                                     arg_yolo_input_model)
-    output_labeled_dir = Files.get_dataset_model_dir_path(Files.DATASET_LABELED, None, arg_yolo_output_model)
-    output_labeled_to_process_dir = Files.get_dataset_model_dir_path(Files.DATASET_LABELED, Files.DATASET_TO_PROCESS,
+    output_labeled_dir = Files.get_dataset_model_dir_path(DATASET_LABELED, None, arg_yolo_output_model)
+    output_labeled_to_process_dir = Files.get_dataset_model_dir_path(DATASET_LABELED, DATASET_TO_PROCESS,
                                                                      arg_yolo_output_model)
 
     # Create the dataset with removed classes

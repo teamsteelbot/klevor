@@ -6,9 +6,14 @@ import asyncio
 
 from serial import Serial, SerialException
 
+from .constants import (
+    RASPBERRY_PI_PICO_CONSOLE_PORT, RASPBERRY_PI_PICO_CONSOLE_PORT_ALT,
+    RASPBERRY_PI_PICO_DATA_PORT, RASPBERRY_PI_PICO_DATA_PORT_ALT,
+    RASPBERRY_PI_PICO_BAUDRATE, ENCODE
+)
 from ..challenge.enums import Challenge
-from ..camera.image_processing_queue import ImageProcessingQueue
-from ..log import Logger
+from ..camera.image_processing_queue import ImageProcessingQueueABC
+from ..log import LoggerABC
 from ..log.sub_logger import SubLogger
 from .message import IncomingMessage, OutgoingMessage
 from .enums import IncomingCategory, OutgoingCategory, Status, RPLIDAR
@@ -25,30 +30,16 @@ class SerialCommunication(SerialCommunicationABC):
     # Logger configuration
     LOG_TAG = "Serial"
 
-    # Raspberry Pi Pico baud rate
-    RASPBERRY_PI_PICO_BAUDRATE = 115200
-
-    # Raspberry PI Pico console port
-    RASPBERRY_PI_PICO_CONSOLE_PORT = '/dev/ttyACM0'
-    RASPBERRY_PI_PICO_CONSOLE_PORT_ALT = '/dev/ttyACM2'
-
-    # Raspberry PI Pico data port
-    RASPBERRY_PI_PICO_DATA_PORT = '/dev/ttyACM1'
-    RASPBERRY_PI_PICO_DATA_PORT_ALT = '/dev/ttyACM3'
-
     # Message delay
-    DELAY = 0.01
+    MESSAGE_DELAY = 0.01
 
     # Stop delay
     STOP_DELAY = 0.1
 
-    # Encode
-    ENCODE = 'utf-8'
-
     def __init__(
         self,
-        logger: Optional[Logger] = None,
-        image_processing_queue: Optional[ImageProcessingQueue] = None,
+        logger: Optional[LoggerABC] = None,
+        image_processing_queue: Optional[ImageProcessingQueueABC] = None,
         server: Optional[WebsocketsServerABC] = None,
         console_port: Optional[str] = RASPBERRY_PI_PICO_CONSOLE_PORT,
         console_port_alt: Optional[str] = RASPBERRY_PI_PICO_CONSOLE_PORT_ALT,
@@ -60,8 +51,8 @@ class SerialCommunication(SerialCommunicationABC):
         Initialize the serial communication class.
 
         Args:
-            logger (Optional[Logger]): Logger instance for logging messages.
-            image_processing_queue (Optional[ImageProcessingQueue]): Images queue for handling images.
+            logger (Optional[LoggerABC]): Logger instance for logging messages.
+            image_processing_queue (Optional[ImageProcessingQueueABC]): Images queue for handling images.
             console_port (Optional[str]): Serial port used for receiving data from Pico.
             console_port_alt (Optional[str]): Alternative serial port used for receiving data from Pico.
             data_port (Optional[str]): Serial port used for sending data to Pico.
@@ -89,7 +80,7 @@ class SerialCommunication(SerialCommunicationABC):
         self.__server = server
 
         # Check the type of the logger
-        is_instance(logger, Logger) if logger else None
+        is_instance(logger, LoggerABC) if logger else None
 
         # Get the sub-logger for this class
         self.__logger = SubLogger(logger, self.LOG_TAG) if logger else None
@@ -136,29 +127,29 @@ class SerialCommunication(SerialCommunicationABC):
         self.__debug = Env.get_debug_mode()
 
     @property
-    def image_processing_queue(self) -> Optional[ImageProcessingQueue]:
+    def image_processing_queue(self) -> Optional[ImageProcessingQueueABC]:
         """
         Get the image processing queue.
 
         Returns:
-            Optional[ImageProcessingQueue]: The image processing queue.
+            Optional[ImageProcessingQueueABC]: The image processing queue.
         """
         return self.__image_processing_queue
 
     @image_processing_queue.setter
-    def image_processing_queue(self, image_processing_queue: Optional[ImageProcessingQueue]) -> None:
+    def image_processing_queue(self, image_processing_queue: Optional[ImageProcessingQueueABC]) -> None:
         """
         Set the image processing queue.
 
         Args:
-            image_processing_queue (Optional[ImageProcessingQueue]): The image processing queue to set.
+            image_processing_queue (Optional[ImageProcessingQueueABC]): The image processing queue to set.
         """
         if not image_processing_queue:
             self.__image_processing_queue = None
             return
 
         # Check the type of image processing queue
-        is_instance(image_processing_queue, ImageProcessingQueue)
+        is_instance(image_processing_queue, ImageProcessingQueueABC)
         self.__image_processing_queue = image_processing_queue
 
     def __open(self) -> None:
@@ -397,7 +388,7 @@ class SerialCommunication(SerialCommunicationABC):
         # Check if there is an initialization message received
         while True:
             if self.is_open() and self.__console_serial.in_waiting > 0:
-                console_msg = self.__console_serial.read(self.__console_serial.in_waiting).decode(self.ENCODE).strip()
+                console_msg = self.__console_serial.read(self.__console_serial.in_waiting).decode(ENCODE).strip()
                 self.__logger.debug("Received initialization message: " + console_msg) if self.__logger and self.__debug else None
 
                 # Get the Message from the string
@@ -439,11 +430,11 @@ class SerialCommunication(SerialCommunicationABC):
         
         while self.is_open():
             if self.__console_serial.in_waiting == 0:
-                sleep(self.DELAY)
+                sleep(self.MESSAGE_DELAY)
                 continue
 
             # Parse the message from the serial port
-            msg_str = self.__console_serial.readline().decode(self.ENCODE).strip()
+            msg_str = self.__console_serial.readline().decode(ENCODE).strip()
             msg = IncomingMessage.from_string(msg_str)
 
             if msg.is_stop():
@@ -491,11 +482,11 @@ class SerialCommunication(SerialCommunicationABC):
             msg = self.__get_outgoing_message()
             if not msg:
                 # If there is no message, wait for a short time
-                sleep(self.DELAY)
+                sleep(self.MESSAGE_DELAY)
                 continue
 
             # Send the message to the serial port
-            self.__data_serial.write(str(msg).encode(self.ENCODE))
+            self.__data_serial.write(str(msg).encode(ENCODE))
 
         self.__logger.info(f"Serial port sending handler stopped for port {self.__data_port}.") if self.__logger else None
 

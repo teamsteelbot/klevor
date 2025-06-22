@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 from .. import Yolo
 from ..args import Args, Flags
 from ..files import Files
-
+from ..constants import FORMAT_ONNX, FORMAT_TFLITE
 
 if __name__ == '__main__':
     parser = ArgumentParser(description='Script to export YOLO model to a given format')
@@ -31,10 +31,10 @@ if __name__ == '__main__':
 
     # Export the model
     path = None
-    if arg_yolo_format == Yolo.FORMAT_ONNX:
+    if arg_yolo_format == FORMAT_ONNX:
         path = Yolo.export_onnx(model)
     elif arg_yolo_quantized:
-        if arg_yolo_format == Yolo.FORMAT_TFLITE:
+        if arg_yolo_format == FORMAT_TFLITE:
             path = Yolo.export_tflite(model, quantized=arg_yolo_quantized)
 
         else:

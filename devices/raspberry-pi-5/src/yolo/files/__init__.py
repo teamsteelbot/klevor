@@ -2,86 +2,27 @@ import os
 from os import PathLike
 from time import time
 
+from .. import Yolo
 from ...files import Files as F
 from ...utils import add_single_quotes_to_list_elements
-from .. import Yolo
+from .constants import (
+    DATASET_ORIGINAL, DATASET_RESIZED, DATASET_TO_PROCESS, DATASET_AUGMENTED, DATASET_ORGANIZED,
+    DATASET_PROCESSED, DATASET_STATUSES, RUNS, RUNS_OLD, DATA, DATASET_CLASSES_TXT,
+    DATASET_LABELED, DATASET_GENERAL, BEST_ONNX, HAILO, HAILO_SUITE, HAILO_LIBS, NOTEBOOKS,
+    HAILO_MODEL_ZOO, COLAB, LOCAL, BEST_PT, WEIGHTS, ZIP, HAILO_CALIB, HAILO_LABELS, TF_RECORDS,
+    DATASET_NOTES_JSON
+)
+from ..constants import YOLO_DIR
+from ..dataset.constants import DATASET_DIR
 
 
 class Files(F):
     """
     Files utility class.
     """
-    # YOLO folder
-    YOLO_DIR = os.path.abspath(os.path.join(F.ROOT_DIR, 'yolo'))
 
-    # YOLO data
-    DATA = 'data'
-
-    # YOLO dataset folders
-    DATASET_DIR = os.path.abspath(os.path.join(YOLO_DIR, 'dataset'))
-    DATASET_GENERAL = 'general'
-    DATASET_ORIGINAL = 'original'
-    DATASET_RESIZED = 'resized'
-    DATASET_LABELED = 'labeled'
-    DATASET_AUGMENTED = 'augmented'
-    DATASET_ORGANIZED = 'organized'
-    DATASET_IMAGES = 'images'
-    DATASET_LABELS = 'labels'
-    DATASET_TRAINING = 'train'
-    DATASET_VALIDATIONS = 'val'
-    DATASET_TESTING = 'test'
-    DATASET_ANNOTATIONS_JSON = 'annotations.json'
-    DATASET_CLASSES_TXT = 'classes.txt'
-    DATASET_NOTES_JSON = 'notes.json'
-    DATASET_IMAGES_EXT = '.jpg'
-
-    # YOLO dataset status folders
-    DATASET_TO_PROCESS = 'to_process'
-    DATASET_PROCESSED = 'processed'
-    DATASET_STATUSES = (DATASET_TO_PROCESS, DATASET_PROCESSED)
-
-    # YOLO colab
-    COLAB = 'colab'
-
-    # YOLO local
-    LOCAL = 'local'
-
-    # YOLO notebooks
-    NOTEBOOKS = 'notebooks'
-
-    # YOLO Hailo-related folders
-    HAILO = 'hailo'
-    HAILO_LABELS = 'labels'
-    HAILO_CALIB = 'calib'
-    HAILO_SUITE = 'suite'
-    HAILO_LIBS = 'libs'
-    HAILO_MODEL_ZOO = 'hailo_model_zoo'
-
-    # YOLO models
-    BEST = 'best'
-    BEST_ONNX = 'best.onnx'
-    BEST_PT = 'best.pt'
-    BEST_TENSOR_RT_QUANTIZED = 'best.engine'
-    LAST = 'last'
-
-    # TF Records
-    TF_RECORDS = 'tf_records'
-
-    # YOLO runs
-    RUNS_OLD = 'runs_old'
-    RUNS = 'runs'
-
-    # YOLO weights
-    WEIGHTS = 'weights'
-
-    # YOLO zip folder
-    ZIP = 'zip'
-
-    # Ignore lists
-    ZIP_IGNORE = ('.git', '.venv', '.idea', 'raspberry-pi-pico2', 'scripts', 'yolo')
-
-    @classmethod
-    def check_dataset_status(cls, dataset_status: str | None) -> None:
+    @staticmethod
+    def check_dataset_status(dataset_status: str | None) -> None:
         """
         Check the validity of dataset status.
 
@@ -89,13 +30,13 @@ class Files(F):
             dataset_status (str | None): The dataset status to check.
         """
         if dataset_status:
-            if dataset_status not in [cls.DATASET_TO_PROCESS, cls.DATASET_PROCESSED]:
-                mapped_yolo_dataset_statuses = add_single_quotes_to_list_elements(cls.DATASET_STATUSES)
+            if dataset_status not in [DATASET_TO_PROCESS, DATASET_PROCESSED]:
+                mapped_yolo_dataset_statuses = add_single_quotes_to_list_elements(DATASET_STATUSES)
                 raise ValueError(
                     f"Invalid dataset status: {dataset_status}. Must be one of the following: {', '.join(mapped_yolo_dataset_statuses)}.")
 
-    @classmethod
-    def check_model_dataset_status(cls, dataset_name: str, dataset_status: str | None) -> None:
+    @staticmethod
+    def check_model_dataset_status(dataset_name: str, dataset_status: str | None) -> None:
         """
         Check the validity of model dataset status.
 
@@ -105,7 +46,7 @@ class Files(F):
         """
         # Check if the dataset name is split by dataset status
         if dataset_status:
-            if dataset_name in [cls.DATASET_AUGMENTED, cls.DATASET_ORGANIZED]:
+            if dataset_name in [DATASET_AUGMENTED, DATASET_ORGANIZED]:
                 raise ValueError(
                     f"Invalid dataset path. The dataset name '{dataset_name}' should not be used with dataset status '{dataset_status}'.")
 
@@ -118,8 +59,8 @@ class Files(F):
             dataset_name (str): The name of the dataset to check.
         """
         # Check the validity of dataset name
-        if dataset_name not in [cls.DATASET_ORIGINAL, cls.DATASET_RESIZED, cls.DATASET_LABELED, cls.DATASET_AUGMENTED,
-                                cls.DATASET_ORGANIZED]:
+        if dataset_name not in [DATASET_ORIGINAL, DATASET_RESIZED, DATASET_LABELED, DATASET_AUGMENTED,
+                                DATASET_ORGANIZED]:
             raise ValueError(f"Invalid dataset name: {dataset_name}. Must be one of the defined dataset folders.")
 
     @classmethod
@@ -133,12 +74,12 @@ class Files(F):
         """
         # Check if the dataset name is split by model name
         if model_name:
-            if dataset_name in [cls.DATASET_ORIGINAL, cls.DATASET_RESIZED]:
+            if dataset_name in [DATASET_ORIGINAL, DATASET_RESIZED]:
                 raise ValueError(
                     f"Invalid dataset path. The dataset name '{dataset_name}' should not be used with model name '{model_name}'.")
 
         # Check if the dataset name is split by model name
-        elif dataset_name not in [cls.DATASET_ORIGINAL, cls.DATASET_RESIZED]:
+        elif dataset_name not in [DATASET_ORIGINAL, DATASET_RESIZED]:
             raise ValueError(
                 f"Invalid dataset path. The dataset name '{dataset_name}' should not be used without a model name.")
 
@@ -170,15 +111,15 @@ class Files(F):
 
         # Check if the dataset is split by model name
         if dataset_status and model_name:
-            return os.path.join(cls.DATASET_DIR, model_name, dataset_name, dataset_status)
+            return os.path.join(DATASET_DIR, model_name, dataset_name, dataset_status)
 
         if dataset_status:
-            return os.path.join(cls.DATASET_DIR, cls.DATASET_GENERAL, dataset_name, dataset_status)
+            return os.path.join(DATASET_DIR, DATASET_GENERAL, dataset_name, dataset_status)
 
         if model_name:
-            return os.path.join(cls.DATASET_DIR, model_name, dataset_name)
+            return os.path.join(DATASET_DIR, model_name, dataset_name)
 
-        return os.path.join(cls.DATASET_DIR, cls.DATASET_GENERAL, dataset_name)
+        return os.path.join(DATASET_DIR, DATASET_GENERAL, dataset_name)
 
     @classmethod
     def get_yolo_version_dir_path(cls, yolo_version: str) -> str | PathLike:
@@ -193,7 +134,7 @@ class Files(F):
         # Check the validity of the YOLO version
         Yolo.check_yolo_version(yolo_version)
 
-        return os.path.join(cls.YOLO_DIR, yolo_version)
+        return os.path.join(YOLO_DIR, yolo_version)
 
     @classmethod
     def get_yolo_runs_dir_path(cls, yolo_version: str) -> str | PathLike:
@@ -208,7 +149,7 @@ class Files(F):
         # Get the YOLO version folder path
         yolo_version_dir = cls.get_yolo_version_dir_path(yolo_version)
 
-        return os.path.join(yolo_version_dir, cls.RUNS)
+        return os.path.join(yolo_version_dir, RUNS)
 
     @classmethod
     def get_yolo_runs_new_name_dir_path(cls, yolo_version: str) -> str | PathLike:
@@ -226,7 +167,7 @@ class Files(F):
         # Get the current Unix timestamp
         unix_timestamp = int(time())
 
-        return os.path.join(yolo_version_dir, f'{cls.RUNS}_{unix_timestamp}')
+        return os.path.join(yolo_version_dir, f'{RUNS}_{unix_timestamp}')
 
     @classmethod
     def get_yolo_old_runs_dir_path(cls, yolo_version: str) -> str | PathLike:
@@ -241,7 +182,7 @@ class Files(F):
         # Get the YOLO version folder path
         yolo_version_dir = cls.get_yolo_version_dir_path(yolo_version)
 
-        return os.path.join(yolo_version_dir, cls.RUNS_OLD)
+        return os.path.join(yolo_version_dir, RUNS_OLD)
 
     @classmethod
     def get_model_runs_dir_path(cls, model_name: str, yolo_version: str) -> str | PathLike:
@@ -276,7 +217,7 @@ class Files(F):
         # Get the model runs path
         model_runs_path = cls.get_model_runs_dir_path(model_name, yolo_version)
 
-        return os.path.join(model_runs_path, cls.WEIGHTS)
+        return os.path.join(model_runs_path, WEIGHTS)
 
     @classmethod
     def get_model_best_pt_path(cls, model_name: str, yolo_version: str) -> str | PathLike:
@@ -292,7 +233,7 @@ class Files(F):
         # Get the model weight path
         model_weight_path = cls.get_model_weight_dir_path(model_name, yolo_version)
 
-        return os.path.join(model_weight_path, cls.BEST_PT)
+        return os.path.join(model_weight_path, BEST_PT)
 
     @classmethod
     def get_model_best_onnx_path(cls, model_name: str, yolo_version: str) -> str | PathLike:
@@ -308,7 +249,7 @@ class Files(F):
         # Get the model weight path
         model_weight_path = cls.get_model_weight_dir_path(model_name, yolo_version)
 
-        return os.path.join(model_weight_path, cls.BEST_ONNX)
+        return os.path.join(model_weight_path, BEST_ONNX)
 
     @classmethod
     def get_yolo_zip_dir_path(cls, yolo_version: str) -> str | PathLike:
@@ -323,7 +264,7 @@ class Files(F):
         # Check the validity of the YOLO version
         Yolo.check_yolo_version(yolo_version)
 
-        return os.path.join(cls.YOLO_DIR, yolo_version, cls.ZIP)
+        return os.path.join(YOLO_DIR, yolo_version, ZIP)
 
     @classmethod
     def get_yolo_data_dir_path(cls) -> str | PathLike:
@@ -333,7 +274,7 @@ class Files(F):
         Returns:
             str | PathLike: The path to the YOLO data folder.
         """
-        return os.path.join(cls.YOLO_DIR, cls.DATA)
+        return os.path.join(YOLO_DIR, DATA)
 
     @classmethod
     def get_yolo_colab_data_dir_path(cls) -> str | PathLike:
@@ -346,7 +287,7 @@ class Files(F):
         # Get the model data folder path
         yolo_data_dir = cls.get_yolo_data_dir_path()
 
-        return os.path.join(yolo_data_dir, cls.COLAB)
+        return os.path.join(yolo_data_dir, COLAB)
 
     @classmethod
     def get_yolo_local_data_dir_path(cls) -> str | PathLike:
@@ -359,7 +300,7 @@ class Files(F):
         # Get the model data folder path
         yolo_data_dir = cls.get_yolo_data_dir_path()
 
-        return os.path.join(yolo_data_dir, cls.LOCAL)
+        return os.path.join(yolo_data_dir, LOCAL)
 
     @classmethod
     def get_model_data_name(cls, model_name: str) -> str:
@@ -425,7 +366,7 @@ class Files(F):
         # Check the validity of the YOLO version
         Yolo.check_yolo_version(yolo_version)
 
-        return os.path.join(cls.YOLO_DIR, yolo_version, cls.NOTEBOOKS)
+        return os.path.join(YOLO_DIR, yolo_version, NOTEBOOKS)
 
     @classmethod
     def get_tf_record_path(cls, model_name: str, yolo_version: str) -> str | PathLike:
@@ -444,7 +385,7 @@ class Files(F):
         # Check the validity of the model name
         Yolo.check_model_name(model_name)
 
-        return os.path.join(yolo_version_dir, cls.TF_RECORDS, model_name + '.tfrecord')
+        return os.path.join(yolo_version_dir, TF_RECORDS, model_name + '.tfrecord')
 
     @classmethod
     def get_yolo_dataset_notes_file_path(cls, dataset_name: str, dataset_status: str | None,
@@ -462,7 +403,7 @@ class Files(F):
         # Get the dataset model directory path
         dataset_model_dir_path = cls.get_dataset_model_dir_path(dataset_name, dataset_status, model_name)
 
-        return os.path.join(dataset_model_dir_path, Files.DATASET_NOTES_JSON)
+        return os.path.join(dataset_model_dir_path, DATASET_NOTES_JSON)
 
     @classmethod
     def get_yolo_dataset_classes_file_path(cls, dataset_name: str, dataset_status: str | None,
@@ -480,7 +421,7 @@ class Files(F):
         # Get the dataset model directory path
         dataset_model_dir_path = cls.get_dataset_model_dir_path(dataset_name, dataset_status, model_name)
 
-        return os.path.join(dataset_model_dir_path, Files.DATASET_CLASSES_TXT)
+        return os.path.join(dataset_model_dir_path, DATASET_CLASSES_TXT)
 
     @classmethod
     def get_hailo_dir_path(cls) -> str | PathLike:
@@ -490,7 +431,7 @@ class Files(F):
         Returns:
             str | PathLike: The path to the Hailo folder.
         """
-        return os.path.join(cls.YOLO_DIR, cls.HAILO)
+        return os.path.join(YOLO_DIR, HAILO)
 
     @classmethod
     def get_hailo_suite_dir_path(cls) -> str | PathLike:
@@ -503,7 +444,7 @@ class Files(F):
         # Get the Hailo folder path
         hailo_dir = cls.get_hailo_dir_path()
 
-        return os.path.join(hailo_dir, cls.HAILO_SUITE)
+        return os.path.join(hailo_dir, HAILO_SUITE)
 
     @classmethod
     def get_model_hailo_suite_dir_path(cls, model_name: str, yolo_version: str) -> str | PathLike:
@@ -702,7 +643,7 @@ class Files(F):
         # Get the model Hailo Suite path
         model_hailo_suite_dir = cls.get_hailo_suite_dir_path()
 
-        return os.path.join(model_hailo_suite_dir, cls.HAILO_CALIB)
+        return os.path.join(model_hailo_suite_dir, HAILO_CALIB)
 
     @classmethod
     def get_hailo_suite_calib_file_path(cls) -> str | PathLike:
@@ -715,7 +656,7 @@ class Files(F):
         # Get the Hailo Suite calibration set folder path
         hailo_suite_calib_dir = cls.get_hailo_suite_calib_dir_path()
 
-        return os.path.join(hailo_suite_calib_dir, cls.HAILO_CALIB + '.npy')
+        return os.path.join(hailo_suite_calib_dir, HAILO_CALIB + '.npy')
 
     @classmethod
     def get_hailo_model_zoo_dir_path(cls) -> str | PathLike:
@@ -725,7 +666,7 @@ class Files(F):
         Returns:
             str | PathLike: The path to the Hailo Model Zoo folder.
         """
-        return os.path.join(cls.YOLO_DIR, cls.HAILO, cls.HAILO_SUITE, cls.HAILO_LIBS, cls.HAILO_MODEL_ZOO)
+        return os.path.join(YOLO_DIR, HAILO, HAILO_SUITE, HAILO_LIBS, HAILO_MODEL_ZOO)
 
     @classmethod
     def get_hailo_labels_dir_path(cls) -> str | PathLike:
@@ -738,7 +679,7 @@ class Files(F):
         # Get the Hailo folder path
         hailo_dir = cls.get_hailo_dir_path()
 
-        return os.path.join(hailo_dir, Files.HAILO_LABELS)
+        return os.path.join(hailo_dir, HAILO_LABELS)
 
     @classmethod
     def get_hailo_labels_file_path(cls, model_name: str) -> str | PathLike:

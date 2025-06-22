@@ -1,13 +1,15 @@
 import os
 from argparse import ArgumentParser
 
+from ...constants import SIZE
+from ..constants import EPOCHS
 from .. import Yolo
 from ..args import Args, Flags
 from ..files import Files
 
 
 def train_model(model: str = 'yolo11n.pt', device: str = 'cpu', data: str | os.PathLike[str] = 'data.yaml',
-                epochs: int = Yolo.EPOCHS, imgsz: int = Yolo.IMAGE_SIZE, project: str = 'yolo',
+                epochs: int = EPOCHS, imgsz: int = SIZE, project: str = 'yolo',
                 name: str = 'model') -> None:
     """
     Train model.

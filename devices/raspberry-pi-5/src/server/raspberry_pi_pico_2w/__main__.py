@@ -1,8 +1,7 @@
 import socket
 import time
 
-HOST = '0.0.0.0' # Listen on all available network interfaces
-PORT = 8080      # The same port used by the Pico W client
+from .constants import HOST, PORT
 
 # UDP Server Setup
 print("Starting UDP Server...")

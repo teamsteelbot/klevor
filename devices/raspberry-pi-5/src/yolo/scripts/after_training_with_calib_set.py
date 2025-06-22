@@ -5,6 +5,7 @@ import shutil
 from ...opencv import OpenCV
 from ..args import Args, Flags
 from ..files import Files
+from ..files.constants import DATASET_TRAINING, DATASET_VALIDATIONS, DATASET_IMAGES, DATASET_ORGANIZED
 
 
 def after_training(input_dir: str | os.PathLike[str], calib_set_file_path: str | os.PathLike[str],
@@ -22,13 +23,13 @@ def after_training(input_dir: str | os.PathLike[str], calib_set_file_path: str |
         None.
     """
     # Get the training folder to the Hailo Suite folder
-    input_training_images_path = os.path.join(input_dir, Files.DATASET_TRAINING, Files.DATASET_IMAGES)
+    input_training_images_path = os.path.join(input_dir, DATASET_TRAINING, DATASET_IMAGES)
 
     # Generate the .npy file to the Hailo Suite folder
     OpenCV.preprocess_images_to_npy(input_training_images_path, calib_set_file_path)
 
     # Remove the training and validations folder
-    for folder in [Files.DATASET_TRAINING, Files.DATASET_VALIDATIONS]:
+    for folder in [DATASET_TRAINING, DATASET_VALIDATIONS]:
         folder_path = os.path.join(input_dir, folder)
         if os.path.exists(folder_path):
             shutil.rmtree(folder_path)
@@ -58,7 +59,7 @@ if __name__ == '__main__':
     arg_yolo_version = Args.get_attribute_from_args_dict(args, Flags.VERSION)
 
     # Get the dataset paths
-    organized_dir = Files.get_dataset_model_dir_path(Files.DATASET_ORGANIZED, None, arg_yolo_input_model)
+    organized_dir = Files.get_dataset_model_dir_path(DATASET_ORGANIZED, None, arg_yolo_input_model)
 
     # Get the Hailo Suite calibration set file path
     calibration_set_file_path = Files.get_hailo_suite_calib_file_path()

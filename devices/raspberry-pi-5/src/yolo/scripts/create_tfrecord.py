@@ -5,6 +5,7 @@ import tensorflow as tf
 
 from ..args import Args, Flags
 from ..files import Files
+from ..files.constants import DATASET_ORGANIZED, DATASET_TO_PROCESS, DATASET_TESTING, DATASET_IMAGES, DATASET_LABELS
 
 
 def create_tfrecord(output_path: str | os.PathLike[str], image_dir: str | os.PathLike[str],
@@ -61,13 +62,13 @@ if __name__ == "__main__":
     arg_yolo_version = Args.get_attribute_from_args_dict(args, Flags.VERSION)
 
     # Get the dataset paths
-    organized_to_process_dir = Files.get_dataset_model_dir_path(Files.DATASET_ORGANIZED, Files.DATASET_TO_PROCESS,
+    organized_to_process_dir = Files.get_dataset_model_dir_path(DATASET_ORGANIZED, DATASET_TO_PROCESS,
                                                                arg_yolo_input_model)
 
     # Get the images and labels directories
-    organized_to_process_testing_dir = os.path.join(organized_to_process_dir, Files.DATASET_TESTING)
-    testing_images_dir = os.path.join(organized_to_process_testing_dir, Files.DATASET_IMAGES)
-    testing_labels_dir = os.path.join(organized_to_process_testing_dir, Files.DATASET_LABELS)
+    organized_to_process_testing_dir = os.path.join(organized_to_process_dir, DATASET_TESTING)
+    testing_images_dir = os.path.join(organized_to_process_testing_dir, DATASET_IMAGES)
+    testing_labels_dir = os.path.join(organized_to_process_testing_dir, DATASET_LABELS)
 
     # Get the TF Record output path
     output_tfrecord = Files.get_tf_record_path(arg_yolo_input_model, arg_yolo_version)

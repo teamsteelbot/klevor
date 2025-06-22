@@ -1,14 +1,8 @@
 from multiprocessing import Manager, Process
-from threading import Thread, Event
 
 from .enums import Challenge
-from ..camera import Camera
-from ..camera.image_processing_queue import ImageProcessingQueue
 from ..env import Env
-from ..log import Logger
-from ..serial_communication import SerialCommunication
-from ..server import WebsocketsServer
-from ..yolo.hailo.object_detection import ObjectDetection
+
 
 class ChallengeHandler:
     """

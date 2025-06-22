@@ -8,7 +8,7 @@ from websockets import connect
 
 from ..args import Args, Flags
 from ..server.message import Tag, Message
-from . import RPLIDAR
+from .constants import MAX_DISTANCE_LIMIT
 from .measure import Measure
 
 class App:
@@ -21,7 +21,7 @@ class App:
 
     # Application size and scaling factors
     APP_SIZE = 800
-    MAX_DISTANCE_RADIUS = RPLIDAR.MAX_DISTANCE_LIMIT
+    MAX_DISTANCE_RADIUS = MAX_DISTANCE_LIMIT
     MAX_DISTANCE_RADIUS_FACTOR = APP_SIZE / (2 * MAX_DISTANCE_RADIUS)
     RADIUS = APP_SIZE // 2
     CENTER_X = APP_SIZE // 2

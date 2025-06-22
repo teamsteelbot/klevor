@@ -3,18 +3,17 @@ import numpy as np
 import matplotlib as plt
 
 from ..opencv import OpenCV
-from ..opencv.image_bounding_boxes import ImageBoundingBoxes
+from ..opencv.constants import UNUSED_COLOR
+from ..model import ImageBoundingBoxes
+from .constants import FONT
 
 class Plot:
     """
     Class for plotting detections on images.
     """
 
-    # Font
-    FONT = cv2.FONT_HERSHEY_SIMPLEX
-
-    @classmethod
-    def draw_detection(cls, image: np.ndarray, box: list, class_name: str, score: float, color: tuple,
+    @staticmethod
+    def draw_detection(image: np.ndarray, box: list, class_name: str, score: float, color: tuple,
                        scale_factor: float) -> None:
         """
         Draw box and label for one detection.
@@ -32,7 +31,7 @@ class Plot:
         ymin, xmin, ymax, xmax = int(ymin * scale_factor), int(xmin * scale_factor), int(ymax * scale_factor), int(
             xmax * scale_factor)
         cv2.rectangle(image, (xmin, ymin), (xmax, ymax), color, 2)
-        cv2.putText(image, label, (xmin + 4, ymin + 20), cls.FONT, 0.5, color, 1, cv2.LINE_AA)
+        cv2.putText(image, label, (xmin + 4, ymin + 20), FONT, 0.5, color, 1, cv2.LINE_AA)
 
 
     @staticmethod
@@ -87,7 +86,7 @@ class Plot:
         for idx in range(image_bounding_boxes.get_number_of_objects()):
             if scores[idx] >= min_score:
                 class_name = classes[idx]
-                color = colors.get(idx, OpenCV.UNUSED_COLOR)
+                color = colors.get(idx, UNUSED_COLOR)
                 scaled_box = cls.denormalize_and_remove_padding(boxes[idx], size, padding_length, img_height, img_width)
                 cls.draw_detection(image, scaled_box, class_name, scores[idx] * 100.0, color, scale_factor)
 

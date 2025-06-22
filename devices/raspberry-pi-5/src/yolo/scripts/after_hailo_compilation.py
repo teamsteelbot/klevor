@@ -4,6 +4,7 @@ import shutil
 
 from ..args import Args, Flags
 from ..files import Files
+from ..files.constants import DATASET_TRAINING
 
 
 def after_compilation(model_name: str, yolo_version: str, hailo_suite_dir: str | os.PathLike[str]) -> None:
@@ -25,14 +26,14 @@ def after_compilation(model_name: str, yolo_version: str, hailo_suite_dir: str |
     model_weights_compiled_hef_file_path = Files.get_model_weights_compiled_hef_file_path(model_name, yolo_version)
 
     # Get the training images folder from model Hailo Suite folder
-    model_hailo_suite_training_dir = os.path.join(hailo_suite_dir, Files.DATASET_TRAINING)
+    model_hailo_suite_training_dir = os.path.join(hailo_suite_dir, DATASET_TRAINING)
 
     # Remove the training images folder from the model Hailo Suite folder
     if os.path.exists(model_hailo_suite_training_dir):
         shutil.rmtree(model_hailo_suite_training_dir)
-        print(f'Removed {Files.DATASET_TRAINING} folder from {hailo_suite_dir} folder')
+        print(f'Removed {DATASET_TRAINING} folder from {hailo_suite_dir} folder')
     else:
-        print(f'{Files.DATASET_TRAINING} folder does not exist in {hailo_suite_dir}')
+        print(f'{DATASET_TRAINING} folder does not exist in {hailo_suite_dir}')
 
     # Copy the generated '.har' and '.hef' files from the Hailo Model Zoo folder
     model_hailo_suite_file_paths = [

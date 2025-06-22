@@ -1,8 +1,9 @@
 from argparse import ArgumentParser
 
+from ...constants import MODELS_NAME
 from .enums import Flags
 from ...args import Args as A
-from .. import Yolo
+from ..constants import VERSIONS, FORMAT_PT, FORMATS
 
 class Args(A):
     """
@@ -18,7 +19,7 @@ class Args(A):
             parser (ArgumentParser): The argument parser to which the argument will be added.
         """
         cls._add_non_boolean_argument(parser, Flags.INPUT_MODEL, type=str, required=True, help='YOLO input model',
-                            choices=Yolo.MODELS_NAME)
+                            choices=MODELS_NAME)
 
     @classmethod
     def add_yolo_input_model_pt_argument(cls, parser: ArgumentParser) -> None:
@@ -40,7 +41,7 @@ class Args(A):
             parser (ArgumentParser): The argument parser to which the argument will be added.
         """
         cls._add_non_boolean_argument(parser, Flags.OUTPUT_MODEL, type=str, required=True, help='YOLO output model',
-                            choices=Yolo.MODELS_NAME)
+                            choices=MODELS_NAME)
 
     @classmethod
     def add_yolo_format_argument(cls, parser: ArgumentParser, required: bool = False) -> None:
@@ -52,7 +53,7 @@ class Args(A):
             required (bool): Whether the argument is required or not. Defaults to False.
         """
         cls._add_non_boolean_argument(parser, Flags.FORMAT, type=str, required=required, help='YOLO format',
-                                     choices=Yolo.FORMATS, default=Yolo.FORMAT_PT)
+                                     choices=FORMATS, default=FORMAT_PT)
 
     @classmethod
     def add_yolo_quantized_argument(cls, parser: ArgumentParser, default: bool = False) -> None:
@@ -74,7 +75,7 @@ class Args(A):
             parser (ArgumentParser): The argument parser to which the argument will be added.
         """
         cls._add_non_boolean_argument(parser, Flags.VERSION, type=str, required=True, help='YOLO model version',
-                                      choices=Yolo.VERSIONS)
+                                      choices=VERSIONS)
 
     @classmethod
     def add_yolo_retraining_argument(cls, parser: ArgumentParser, default: bool = False) -> None:

@@ -1,9 +1,9 @@
 import subprocess
-import os
 from multiprocessing import Event, RLock
 from threading import Thread
 from typing import Optional, final
 
+from .constants import RPLIDAR_C1_BAUDRATE, RPLIDAR_C1_PORT, ULTRA_SIMPLE_PATH, DISTANCE_DIFF
 from ..env import Env, Challenge
 from ..utils import is_instance
 from ..log.abstracts import LoggerABC
@@ -21,21 +21,6 @@ class RPLIDAR(RPLIDARABC):
 
     # Logger configuration
     LOG_TAG = "RPLIDAR"
-
-    # RPLIDAR C1 baud rate
-    RPLIDAR_C1_BAUDRATE = 460800
-
-    # Default port
-    RPLIDAR_C1_PORT = "/dev/ttyUSB0"
-
-    # Max distance limit
-    MAX_DISTANCE_LIMIT = 3000
-
-    # Distance difference 
-    DISTANCE_DIFF = 25
-
-    # Get the absolute path of the ultra_simple executable
-    ULTRA_SIMPLE_PATH = os.path.join(os.path.dirname(__file__), "ultra_simple")
 
     # Process wait timeout
     PROCESS_WAIT_TIMEOUT = 5
@@ -221,7 +206,7 @@ class RPLIDAR(RPLIDARABC):
             self.__distances_dict[angle] = Measure(angle, distance, quality)
         else:
             # Check if the distance is negligible
-            if self.__distances_dict[angle].distance > distance - self.DISTANCE_DIFF and self.__distances_dict[angle].distance < distance + self.DISTANCE_DIFF:
+            if self.__distances_dict[angle].distance > distance - DISTANCE_DIFF and self.__distances_dict[angle].distance < distance + DISTANCE_DIFF:
                 return
 
             # If it is, update the distance and quality
@@ -250,7 +235,7 @@ class RPLIDAR(RPLIDARABC):
         self.__logger.info("Starting RPLIDAR process...") if self.__logger else None
 
         command = [
-            self.ULTRA_SIMPLE_PATH,
+            ULTRA_SIMPLE_PATH,
             "--channel",
             "--serial",
             self.__port,
@@ -267,7 +252,7 @@ class RPLIDAR(RPLIDARABC):
             )
 
         except FileNotFoundError:
-            raise ValueError(f"The RPLIDAR ultra_simple executable was not found at {self.ULTRA_SIMPLE_PATH}. Please ensure it is installed correctly.")
+            raise ValueError(f"The RPLIDAR ultra_simple executable was not found at {ULTRA_SIMPLE_PATH}. Please ensure it is installed correctly.")
         
         except Exception as e:
             raise RuntimeError(f"An error occurred while starting the RPLIDAR process: {e}")

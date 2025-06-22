@@ -2,9 +2,12 @@ from argparse import ArgumentParser
 from os import path, PathLike
 import zipfile
 
+from ...constants import ROOT_DIR
+from ..constants import YOLO_DIR
 from ...files.zip import Zip
 from ..args import Args, Flags
 from ..files import Files
+from ..files.constants import DATASET_ORGANIZED, ZIP_IGNORE
 
 
 def zip_to_train(input_dir: str | PathLike[str], input_yolo_dir: str | PathLike[str],
@@ -38,7 +41,7 @@ def zip_to_train(input_dir: str | PathLike[str], input_yolo_dir: str | PathLike[
 
     with (zipfile.ZipFile(output_zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf):
         # Zip the folders except the YOLO folder
-        Zip.zip_nested_folder(zipf, input_dir, input_dir, Files.ZIP_IGNORE)
+        Zip.zip_nested_folder(zipf, input_dir, input_dir, ZIP_IGNORE)
         print('Zip the folders except the YOLO folder')
 
         # Zip the YOLO folder files  except its nested folders
@@ -81,7 +84,7 @@ if __name__ == '__main__':
     arg_yolo_retraining = Args.get_attribute_from_args_dict(args, Flags.RETRAINING)
 
     # Get the dataset paths
-    organized_dir = Files.get_dataset_model_dir_path(Files.DATASET_ORGANIZED, None, arg_yolo_input_model)
+    organized_dir = Files.get_dataset_model_dir_path(DATASET_ORGANIZED, None, arg_yolo_input_model)
 
     # Get the YOLO version folder
     yolo_version_dir = Files.get_yolo_version_dir_path(arg_yolo_version)
@@ -96,5 +99,5 @@ if __name__ == '__main__':
     yolo_data_dir = Files.get_yolo_data_dir_path()
 
     # Zip files
-    zip_to_train(Files.CWD, Files.YOLO_DIR, organized_dir, yolo_version_dir, yolo_data_dir, yolo_weights_dir,
+    zip_to_train(ROOT_DIR, YOLO_DIR, organized_dir, yolo_version_dir, yolo_data_dir, yolo_weights_dir,
                  yolo_zip_dir, arg_yolo_input_model, arg_yolo_retraining)

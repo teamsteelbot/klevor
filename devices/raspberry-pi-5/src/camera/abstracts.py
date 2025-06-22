@@ -6,18 +6,13 @@ import numpy as np
 from PIL import ImageEnhance
 from PIL.Image import Image
 
-from ..opencv.image_bounding_boxes import ImageBoundingBoxes
+from .constants import ADJUST_DURATION
+from ..model import ImageBoundingBoxes
 
 class CameraABC(ABC):
     """
     Abstract class that wraps the functionality required for the Raspberry Pi Camera.
     """
-
-    # Camera settings
-    WIDTH = 640
-    HEIGHT = 640
-    FORMAT = 'jpeg'
-    ADJUST_DURATION = 0.02
 
     @abstractmethod
     def _start_preview(self) -> None:

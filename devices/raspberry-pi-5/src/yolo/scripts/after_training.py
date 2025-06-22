@@ -4,6 +4,7 @@ import shutil
 
 from ..args import Args, Flags
 from ..files import Files
+from ..files.constants import DATASET_ORGANIZED, DATASET_TRAINING, DATASET_VALIDATIONS, DATASET_IMAGES
 
 
 def after_training(input_dir: str | os.PathLike[str], hailo_suite_dir: str | os.PathLike[str],
@@ -18,16 +19,16 @@ def after_training(input_dir: str | os.PathLike[str], hailo_suite_dir: str | os.
         best_onnx_weights_path (str | os.PathLike[str]): The path to the best ONNX weights file.
     """
     # Move the training folder to the Hailo Suite folder
-    input_training_images_path = os.path.join(input_dir, Files.DATASET_TRAINING, Files.DATASET_IMAGES)
-    output_training_path = os.path.join(hailo_suite_dir, Files.DATASET_TRAINING)
+    input_training_images_path = os.path.join(input_dir, DATASET_TRAINING, DATASET_IMAGES)
+    output_training_path = os.path.join(hailo_suite_dir, DATASET_TRAINING)
     if os.path.exists(input_training_images_path):
         Files.move_folder_content(input_training_images_path, output_training_path)
-        print(f'Moved {Files.DATASET_TRAINING} folder from {input_dir} folder to {output_training_path} folder')
+        print(f'Moved {DATASET_TRAINING} folder from {input_dir} folder to {output_training_path} folder')
     else:
-        print(f'{Files.DATASET_TRAINING} folder does not exist in {input_dir}')
+        print(f'{DATASET_TRAINING} folder does not exist in {input_dir}')
 
     # Remove the training and validations folder
-    for folder in [Files.DATASET_TRAINING, Files.DATASET_VALIDATIONS]:
+    for folder in [DATASET_TRAINING, DATASET_VALIDATIONS]:
         folder_path = os.path.join(input_dir, folder)
         if os.path.exists(folder_path):
             shutil.rmtree(folder_path)
@@ -58,7 +59,7 @@ if __name__ == '__main__':
     arg_yolo_version = Args.get_attribute_from_args_dict(args, Flags.VERSION)
 
     # Get the dataset paths
-    organized_dir = Files.get_dataset_model_dir_path(Files.DATASET_ORGANIZED, None, arg_yolo_input_model)
+    organized_dir = Files.get_dataset_model_dir_path(DATASET_ORGANIZED, None, arg_yolo_input_model)
 
     # Get the Hailo Suite path
     hailo_suite_dir = Files.get_hailo_suite_dir_path()

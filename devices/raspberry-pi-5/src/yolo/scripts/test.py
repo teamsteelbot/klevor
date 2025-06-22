@@ -6,18 +6,23 @@ from typing import Callable, Optional
 import torch
 from ultralytics import YOLO
 
-from ...opencv.image_bounding_boxes import ImageBoundingBoxes
+from ...constants import SIZE
+from ...model import ImageBoundingBoxes
 from ...opencv import OpenCV
 from ...plot import Plot
 from .. import Yolo
 from ..args import Args, Flags
 from ..files import Files
+from ..files.constants import (
+    DATASET_ORGANIZED, DATASET_TESTING, DATASET_IMAGES
+)
+from ..constants import FORMAT_PT, NUMBER_RANDOM_IMAGES
 
 
 def test_random_images(model, model_class_names: dict, run_inference_fn: Callable[[YOLO, torch.Tensor], tuple[list, float]],
                        input_organized_dir: str | os.PathLike[str], draw_labels_name: bool,
                        rgb_colors: Optional[tuple[tuple[int, int, int]]] = None,
-                       image_size: tuple[int, int] = OpenCV.SIZE) -> None:
+                       image_size: tuple[int, int] = SIZE) -> None:
     """
     Test random images from the given directory.
 
@@ -31,11 +36,11 @@ def test_random_images(model, model_class_names: dict, run_inference_fn: Callabl
         image_size (tuple[int, int]): Size of the images to preprocess.
     """
     # Get testing folder
-    input_images_testing_dir = os.path.join(input_organized_dir, Files.DATASET_TESTING, Files.DATASET_IMAGES)
+    input_images_testing_dir = os.path.join(input_organized_dir, DATASET_TESTING, DATASET_IMAGES)
 
     # Get some random images
     filenames = os.listdir(input_images_testing_dir)
-    random_filenames = random.sample(filenames, Yolo.NUMBER_RANDOM_IMAGES)
+    random_filenames = random.sample(filenames, NUMBER_RANDOM_IMAGES)
 
     for random_filename in random_filenames:
         # Get the image path
@@ -58,7 +63,7 @@ def test_random_images(model, model_class_names: dict, run_inference_fn: Callabl
 
 
 def test_random_images_pt(input_model_path: str | os.PathLike[str], output_organized_dir: str | os.PathLike[str],
-                          colors: Optional[tuple[tuple[int, int, int]]], image_size: tuple[int, int] = OpenCV.SIZE) -> None:
+                          colors: Optional[tuple[tuple[int, int, int]]], image_size: tuple[int, int] = SIZE) -> None:
     """
     Test random images from the given directory using the given PyTorch model.
 
@@ -91,14 +96,14 @@ if __name__ == '__main__':
     arg_yolo_version = Args.get_attribute_from_args_dict(args, Flags.VERSION)
 
     # Get the required dataset folder name
-    organized_dir = Files.get_dataset_model_dir_path(Files.DATASET_ORGANIZED, None, arg_yolo_input_model)
+    organized_dir = Files.get_dataset_model_dir_path(DATASET_ORGANIZED, None, arg_yolo_input_model)
 
     # Get the dataset paths
     weights_best_pt = Files.get_model_best_pt_path(arg_yolo_input_model, arg_yolo_version)
 
     # Get the class colors
     yolo_colors = None
-    if arg_yolo_format == Yolo.FORMAT_PT:
+    if arg_yolo_format == FORMAT_PT:
         yolo_colors = Yolo.get_model_classes_color_palette(arg_yolo_input_model)
 
     test_random_images_pt(weights_best_pt, organized_dir, yolo_colors)

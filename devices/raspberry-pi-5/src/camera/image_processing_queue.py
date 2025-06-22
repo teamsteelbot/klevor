@@ -6,7 +6,7 @@ import numpy as np
 from PIL.Image import Image
 
 from .abstracts import CameraABC, ImageProcessingQueueABC
-from ..opencv.image_bounding_boxes import ImageBoundingBoxes
+from ..model import ImageBoundingBoxes
 from ..server.abstracts import WebsocketsServerABC
 from ..utils import is_instance
 from ..log.abstracts import LoggerABC

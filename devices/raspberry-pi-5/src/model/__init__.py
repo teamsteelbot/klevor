@@ -3,22 +3,22 @@ class ImageBoundingBoxes:
     Class that represents the detected objects bounding boxes from an object detection model on an image.
     """
 
-    def __init__(self, xwyhn: list = None, xyxy: list = None, xywh: list = None, xyxyn: list = None,
+    def __init__(self, xywhn: list = None, xyxy: list = None, xywh: list = None, xyxyn: list = None,
                  cls: list = None, conf: list =None, n: int = None):
         """
         Initialize the ImageBoundingBoxes instance with bounding box coordinates, classes, and confidences.
 
         Args:
             xywh (list): Bounding box coordinates in the format (x_center, y_center, width, height).
-            xywhn (list): Normalized bounding box coordinates in the format (x_center, y_center, width, height).
             xyxy (list): Bounding box coordinates in the format (x1, y1, x2, y2).
+            xywhn (list): Normalized bounding box coordinates in the format (x_center, y_center, width, height).
             xyxyn (list): Normalized bounding box coordinates in the format (x1, y1, x2, y2).
             cls (list): Class indices for each detected object.
             conf (list): Confidence scores for each detected object.
             n (int): Number of detected objects.
         """
         self.__xywh = xywh
-        self.__xywhn = xwyhn
+        self.__xywhn = xywhn
         self.__xyxy = xyxy
         self.__xyxyn = xyxyn
         self.__cls = cls

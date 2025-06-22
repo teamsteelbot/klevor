@@ -1,7 +1,7 @@
 from websockets import connect
 import asyncio
 
-from . import WebsocketsServer
+from .constants import HOST, PORT
  
 async def ws_client():
     """
@@ -10,7 +10,7 @@ async def ws_client():
     and listen for incoming messages indefinitely.
     """
     # Connect to the server
-    url = f'ws://{WebsocketsServer.HOST}:{WebsocketsServer.PORT}'
+    url = f'ws://{HOST}:{PORT}'
     print(f"Connecting to WebSocket server at {url}...")
     async with connect(url) as ws: 
         # Stay alive forever, listen to incoming msgs

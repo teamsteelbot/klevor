@@ -7,7 +7,7 @@ class Measure:
     Class that represents a single measurement from the RPLIDAR.
     """
 
-    # Attributes separator
+    # Measure attributes separator
     ATTRIBUTES_SEPARATOR = ","
 
     # Measures separator

@@ -11,6 +11,9 @@ from ...utils import is_instance
 from .. import Yolo
 from ..files import Files
 from ..hailo import Hailo
+from ...constants import (
+    MODEL_G, MODEL_M, MODEL_R, MODELS_NAME
+)
 
 class ObjectDetection(ObjectDetectionABC):
     """
@@ -56,7 +59,7 @@ class ObjectDetection(ObjectDetectionABC):
 
         # Create the Hailo handlers
         self.__hailo_handlers = dict()
-        for model_name in Yolo.MODELS_NAME:
+        for model_name in MODELS_NAME:
             # Get the HEF file paths
             hef_file_path = Files.get_model_hailo_suite_compiled_hef_file_path(model_name, yolo_version)
 
@@ -112,8 +115,8 @@ class ObjectDetection(ObjectDetectionABC):
     @final
     def _loop(self)-> None:
         # Start the Hailo handler for model G and R
-        self.__hailo_handlers[Yolo.MODEL_G].start_thread()
-        self.__hailo_handlers[Yolo.MODEL_R].start_thread()
+        self.__hailo_handlers[MODEL_G].start_thread()
+        self.__hailo_handlers[MODEL_R].start_thread()
 
         # Wait for the stop event
         while self.is_running() and not self.__parking_event.is_set():
@@ -124,15 +127,15 @@ class ObjectDetection(ObjectDetectionABC):
             image = self.__image_processing_queue.get_image(Hailo.preprocess)
 
             # Put the model G and R images in the Hailo handler input queues
-            self.__hailo_handlers[Yolo.MODEL_G].add_image(image)
-            self.__hailo_handlers[Yolo.MODEL_R].add_image(image)
+            self.__hailo_handlers[MODEL_G].add_image(image)
+            self.__hailo_handlers[MODEL_R].add_image(image)
 
         # Stop the Hailo handlers for G and R models
-        self.__hailo_handlers[Yolo.MODEL_G].stop_thread()
-        self.__hailo_handlers[Yolo.MODEL_R].stop_thread()
+        self.__hailo_handlers[MODEL_G].stop_thread()
+        self.__hailo_handlers[MODEL_R].stop_thread()
 
         # Start the Hailo handler for model M
-        self.__hailo_handlers[Yolo.MODEL_M].start_thread()
+        self.__hailo_handlers[MODEL_M].start_thread()
 
         while self.is_running():
             # Wait for the pending image event
@@ -142,10 +145,10 @@ class ObjectDetection(ObjectDetectionABC):
             image = self.__image_processing_queue.get_image(Hailo.preprocess)
 
             # Put the model M image in the Hailo handler input queue
-            self.__hailo_handlers[Yolo.MODEL_M].add_image(image)
+            self.__hailo_handlers[MODEL_M].add_image(image)
 
         # Stop the Hailo handler for model M
-        self.__hailo_handlers[Yolo.MODEL_M].stop_thread()
+        self.__hailo_handlers[MODEL_M].stop_thread()
 
     def start_thread(self) -> None:
         """

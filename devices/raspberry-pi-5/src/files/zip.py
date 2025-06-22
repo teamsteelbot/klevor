@@ -3,6 +3,7 @@ from zipfile import ZipFile
 from re import Pattern
 from typing import Optional
 
+from .constants import IGNORE_DIRS
 from . import Files
 from ..utils import match_any
 
@@ -83,7 +84,7 @@ class Zip:
         # Added to ignore directories the list of directories that should be always ignored
         if not ignore_dirs:
             ignore_dirs = []
-        ignore_dirs += Files.IGNORE_DIRS
+        ignore_dirs += IGNORE_DIRS
 
         for root, _, filenames in os.walk(input_folder_path):
             # Skip directories in the ignore list

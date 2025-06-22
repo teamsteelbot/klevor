@@ -5,7 +5,7 @@ from PIL.Image import Image
 import numpy as np
 import cv2
 
-from ...opencv import OpenCV
+from ...constants import WIDTH, HEIGHT
 
 class HailoABC(ABC):
     """
@@ -13,7 +13,7 @@ class HailoABC(ABC):
     """
 
     @staticmethod
-    def preprocess(image: Image, width: int = OpenCV.WIDTH, height: int = OpenCV.HEIGHT) -> np.ndarray:
+    def preprocess(image: Image, width: int = WIDTH, height: int = HEIGHT) -> np.ndarray:
         """
         Resize image with unchanged aspect ratio using padding.
 

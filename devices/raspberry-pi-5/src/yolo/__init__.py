@@ -4,6 +4,8 @@ import time
 import torch
 from ultralytics import YOLO
 
+from ..constants import MODELS_NAME, MODELS_COLORS
+from .constants import VERSIONS
 from ..files import Files
 from ..utils import add_single_quotes_to_list_elements
 
@@ -16,61 +18,6 @@ class Yolo:
     and run inference. Also, this class contains constants related to YOLO models, directories, colors, and utility functions
     for checking model names, versions, dataset statuses, and dataset names.
     """
-
-    # ONNX metadata properties class names key
-    ONNX_METADATA_CLASS_NAMES_KEY = 'names'
-
-    # Number of augmentations
-    NUM_AUGMENTATIONS = 10
-
-    # Colors
-    GREEN_COLOR = (68, 214, 44)
-    MAGENTA_COLOR = (255, 0, 255)
-    RED_COLOR = (238, 39, 55)
-
-    # Epochs
-    EPOCHS = 100
-
-    # Image size
-    IMAGE_SIZE = 640
-
-    # YOLO model names
-    MODEL_M = 'm'
-    MODEL_G = 'g'
-    MODEL_R = 'r'
-    MODELS_NAME = (MODEL_M, MODEL_G, MODEL_R)
-
-    # YOLO class colors
-    MODEL_G_COLORS = (GREEN_COLOR,)
-    MODEL_M_COLORS = (MAGENTA_COLOR,)
-    MODEL_R_COLORS = (RED_COLOR,)
-    MODELS_COLORS = {
-        MODEL_G: MODEL_G_COLORS,
-        MODEL_M: MODEL_M_COLORS,
-        MODEL_R: MODEL_R_COLORS,
-    }
-
-    # YOLO model versions
-    VERSION_11 = 'v11'
-    VERSIONS = (VERSION_11,)
-
-    # Minimum confidence level and number of random images to test
-    MINIMUM_CONFIDENCE_LEVEL = 0.70
-    NUMBER_RANDOM_IMAGES = 10
-
-    # YOLO formats
-    FORMAT_ONNX = 'onnx'
-    FORMAT_TFLITE = 'tflite'
-    FORMAT_TENSOR_RT = 'tensor_rt'
-    FORMAT_PT = 'pt'
-    FORMATS = (FORMAT_ONNX, FORMAT_TFLITE, FORMAT_TENSOR_RT, FORMAT_PT)
-
-    # Allowed image extensions
-    IMAGE_EXTENSIONS = ('.png', '.jpg', '.jpeg')
-
-    # Dataset folders ratio
-    TRAINING_RATIO = 0.7
-    VALIDATION_RATIO = 0.2
 
     @staticmethod
     def load(model_path: str | os.PathLike[str], task='detect') -> YOLO:
@@ -184,34 +131,34 @@ class Yolo:
             class_names = f.read().splitlines()
         return class_names
 
-    @classmethod
-    def check_model_name(cls, model_name: str) -> None:
+    @staticmethod
+    def check_model_name(model_name: str) -> None:
         """
         Check the validity of model name.
 
         Args:
             model_name (str): Name of the YOLO model.
         """
-        if model_name not in cls.MODELS_NAME:
-            mapped_yolo_models_name = add_single_quotes_to_list_elements(cls.MODELS_NAME)
+        if model_name not in MODELS_NAME:
+            mapped_yolo_models_name = add_single_quotes_to_list_elements(MODELS_NAME)
             raise ValueError(
                 f"Invalid model name: {model_name}. Must be one of the following: {', '.join(mapped_yolo_models_name)}.")
 
-    @classmethod
-    def check_yolo_version(cls, yolo_version: str) -> None:
+    @staticmethod
+    def check_yolo_version(yolo_version: str) -> None:
         """
         Check the validity of YOLO version.
 
         Args:
             yolo_version (str): Version of the YOLO model.
         """
-        if yolo_version not in cls.VERSIONS:
-            mapped_yolo_versions = add_single_quotes_to_list_elements(cls.MODELS_NAME)
+        if yolo_version not in VERSIONS:
+            mapped_yolo_versions = add_single_quotes_to_list_elements(VERSIONS)
             raise ValueError(
                 f"Invalid yolo version: {yolo_version}. Must be one of the following: {', '.join(mapped_yolo_versions)}.")
 
-    @classmethod
-    def get_model_classes_color_palette(cls, model_name: str) -> tuple[tuple[int, int, int]]:
+    @staticmethod
+    def get_model_classes_color_palette(model_name: str) -> tuple[tuple[int, int, int]]:
         """
         Get the model classes color palette.
 
@@ -221,8 +168,8 @@ class Yolo:
             tuple[tuple[int, int, int]]: Tuple mapping class indices to RGB color tuples.
         """
         # Check the validity of the model name
-        cls.check_model_name(model_name)
+        Yolo.check_model_name(model_name)
 
-        if not model_name in cls.MODELS_COLORS:
+        if not model_name in MODELS_COLORS:
             raise ValueError(f"Model name '{model_name}' does not have a defined color palette.")
-        return cls.MODELS_COLORS[model_name]
+        return MODELS_COLORS[model_name]

@@ -9,7 +9,7 @@ class Args:
     """
 
     # Prefix for command line arguments
-    ARGS_PREFIX = '--'
+    PREFIX = '--'
 
     @classmethod
     def get_attribute_name(cls, attribute: str, disabled: bool = False) -> str:
@@ -22,7 +22,7 @@ class Args:
         Returns:
             str: The attribute name with the prefix.
         """
-        return f'{cls.ARGS_PREFIX}{attribute}' if not disabled else f'{cls.ARGS_PREFIX}no-{attribute}'
+        return f'{cls.PREFIX}{attribute}' if not disabled else f'{cls.PREFIX}no-{attribute}'
 
     @staticmethod
     def get_attribute_from_args_dict(args: dict, attribute: str) -> Any:

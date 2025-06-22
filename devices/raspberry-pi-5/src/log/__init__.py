@@ -14,8 +14,8 @@ class Logger(LoggerABC):
     Class to handle logging functionality.
     """
 
-    # Get message from queue timeout
-    GET_MESSAGE_FROM_QUEUE_TIMEOUT = 0.01
+    # Queue timeout
+    QUEUE_TIMEOUT = 5
 
     def __init__(self):
         """
@@ -100,7 +100,7 @@ class Logger(LoggerABC):
                 return None
             
             # Return the message from the queue
-            return self.__messages_queue.get(timeout=self.GET_MESSAGE_FROM_QUEUE_TIMEOUT)
+            return self.__messages_queue.get(timeout=self.QUEUE_TIMEOUT)
 
     @final
     def _write_last_message(self, file: TextIO) -> None:

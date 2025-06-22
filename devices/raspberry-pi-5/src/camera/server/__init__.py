@@ -2,30 +2,22 @@ import shlex
 import subprocess
 from http.server import BaseHTTPRequestHandler
 
+from ...constants import WIDTH, HEIGHT
+from ..constants import FPS, CODEC
+
 
 class StreamingServer(BaseHTTPRequestHandler):
     """
     Streaming server for live video feed.
     """
 
-    # Server configuration
-    HOST = '0.0.0.0'
-    PORT = 8080
-
-    # Video configuration
-    WIDTH = 640
-    HEIGHT = 640
-    FPS = 30
-    CODEC = 'mjpeg'
-    FORMAT = 'jpeg'
-
-    @classmethod
-    def generate_frames(cls):
+    @staticmethod
+    def generate_frames():
         """
         Generate frames from the camera using libcamera-vid.
         """
         # Execute the libcamera-vid command to capture video
-        command = f'libcamera-vid -n -t 0 --width {cls.WIDTH} --height {cls.HEIGHT} --framerate {cls.FPS} --codec {cls.CODEC} -o -'
+        command = f'libcamera-vid -n -t 0 --width {WIDTH} --height {HEIGHT} --framerate {FPS} --codec {CODEC} -o -'
         process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                    bufsize=-1)
 

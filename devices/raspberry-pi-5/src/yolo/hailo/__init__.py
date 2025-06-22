@@ -14,10 +14,11 @@ from .abstracts import HailoABC
 from ...camera.image_processing_queue import ImageProcessingQueue
 from ...log import LoggerABC
 from ...log.sub_logger import SubLogger
-from ...opencv.image_bounding_boxes import ImageBoundingBoxes
+from ...model import ImageBoundingBoxes
 from ...utils import is_instance
 from .. import Yolo
 from ..files import Files
+from ...constants import MODEL_G, MODEL_R, MODEL_M
 
 class Hailo(HailoABC):
     """
@@ -31,8 +32,8 @@ class Hailo(HailoABC):
     IMAGE_ALLOWED_EXTENSIONS: tuple = ('.jpg', '.png', '.bmp', '.jpeg')
 
     # Currently models file paths
-    NO_PARKING_MODELS_NAME = [Yolo.MODEL_G, Yolo.MODEL_R]
-    PARKING_MODELS_NAME = [Yolo.MODEL_M]
+    NO_PARKING_MODELS_NAME = [MODEL_G, MODEL_R]
+    PARKING_MODELS_NAME = [MODEL_M]
 
     # Batch size
     BATCH_SIZE = 1
