@@ -1,6 +1,6 @@
 import argparse
 
-from .yolo.args import Args
+from .args import Args
 from .args.enums import Flags
 from .env import Env
 from .challenge import ChallengeHandler

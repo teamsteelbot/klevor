@@ -5,7 +5,7 @@ import shutil
 from ..args import Args, Flags
 from ..files import Files
 from ..files.constants import DATASET_TRAINING
-
+from ...hailo.constants import HAILO_SUITE_DIR
 
 def after_compilation(model_name: str, yolo_version: str, hailo_suite_dir: str | os.PathLike[str]) -> None:
     """
@@ -70,8 +70,5 @@ if __name__ == '__main__':
     # Get the YOLO version
     arg_yolo_version = Args.get_attribute_from_args_dict(args, Flags.VERSION)
 
-    # Get the Hailo Suite path
-    hailo_suite_dir = Files.get_hailo_suite_dir_path()
-
     # Copy the files from the Hailo Model Zoo folder
-    after_compilation(arg_yolo_input_model, arg_yolo_version, hailo_suite_dir)
+    after_compilation(arg_yolo_input_model, arg_yolo_version, HAILO_SUITE_DIR)

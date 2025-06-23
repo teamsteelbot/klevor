@@ -104,7 +104,7 @@ if __name__ == '__main__':
     # Get the class colors
     yolo_colors = None
     if arg_yolo_format == FORMAT_PT:
-        yolo_colors = Yolo.get_model_classes_color_palette(arg_yolo_input_model)
+        yolo_colors = OpenCV.get_model_classes_color_palette(arg_yolo_input_model)
 
     test_random_images_pt(weights_best_pt, organized_dir, yolo_colors)
 

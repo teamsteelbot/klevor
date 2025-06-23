@@ -6,7 +6,8 @@ from typing import Optional
 import cv2
 import numpy as np
 
-from ..constants import SIZE
+from ..args import Args
+from ..constants import MODELS_COLORS, SIZE
 from .constants import SHAPE, MAX_CALIB_SET_SAMPLES, COLOR
 from ..files import Files
 from ..utils import is_instance
@@ -204,3 +205,20 @@ class OpenCV:
         # Save the array to a .npy file
         np.save(output_file, images_array)
         print(f"Saved preprocessed images to {output_file}")
+    
+    @staticmethod
+    def get_model_classes_color_palette(model_name: str) -> tuple[tuple[int, int, int]]:
+        """
+        Get the model classes color palette.
+
+        Args:
+            model_name (str): Name of the YOLO model.
+        Returns:
+            tuple[tuple[int, int, int]]: Tuple mapping class indices to RGB color tuples.
+        """
+        # Check the validity of the model name
+        Args.check_model_name(model_name)
+
+        if not model_name in MODELS_COLORS:
+            raise ValueError(f"Model name '{model_name}' does not have a defined color palette.")
+        return MODELS_COLORS[model_name]

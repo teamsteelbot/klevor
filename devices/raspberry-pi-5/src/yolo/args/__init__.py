@@ -1,25 +1,15 @@
 from argparse import ArgumentParser
 
-from ...constants import MODELS_NAME
+from ...constants import MODELS_NAME, SIZE
 from .enums import Flags
 from ...args import Args as A
-from ..constants import VERSIONS, FORMAT_PT, FORMATS
+from ..constants import FORMAT_PT, FORMATS
+
 
 class Args(A):
     """
     Class to handle command line arguments.
     """
-
-    @classmethod
-    def add_yolo_input_model_argument(cls, parser: ArgumentParser) -> None:
-        """
-        Add YOLO input model argument to the parser.
-
-        Args:
-            parser (ArgumentParser): The argument parser to which the argument will be added.
-        """
-        cls._add_non_boolean_argument(parser, Flags.INPUT_MODEL, type=str, required=True, help='YOLO input model',
-                            choices=MODELS_NAME)
 
     @classmethod
     def add_yolo_input_model_pt_argument(cls, parser: ArgumentParser) -> None:
@@ -65,17 +55,6 @@ class Args(A):
             default (bool): Default value for the quantized argument. Defaults to False.
         """
         cls._add_boolean_argument(parser, Flags.QUANTIZED, default=default)
-
-    @classmethod
-    def add_yolo_version_argument(cls, parser: ArgumentParser) -> None:
-        """
-        Add YOLO version argument to the parser.
-
-        Args:
-            parser (ArgumentParser): The argument parser to which the argument will be added.
-        """
-        cls._add_non_boolean_argument(parser, Flags.VERSION, type=str, required=True, help='YOLO model version',
-                                      choices=VERSIONS)
 
     @classmethod
     def add_yolo_retraining_argument(cls, parser: ArgumentParser, default: bool = False) -> None:
@@ -146,15 +125,5 @@ class Args(A):
             required (bool): Whether the argument is required or not. Defaults to True.
         """
         cls._add_non_boolean_argument(parser, Flags.IMAGE_SIZE, type=int, required=required,
-                                      help='YOLO image size', default=640)
+                                      help='YOLO image size', default=SIZE)
 
-    @classmethod
-    def add_debug_argument(cls, parser: ArgumentParser, default: bool = False) -> None:
-        """
-        Add debug argument to the parser.
-
-        Args:
-            parser (ArgumentParser): The argument parser to which the argument will be added.
-            default (bool): Default value for the debug argument. Defaults to False.
-        """
-        cls._add_boolean_argument(parser, Flags.DEBUG, default=default)

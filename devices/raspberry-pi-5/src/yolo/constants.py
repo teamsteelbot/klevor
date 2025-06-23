@@ -12,10 +12,6 @@ NUM_AUGMENTATIONS = 10
 # Epochs
 EPOCHS = 100
 
-# YOLO model versions
-VERSION_11 = 'v11'
-VERSIONS = (VERSION_11,)
-
 # Minimum confidence level and number of random images to test
 MINIMUM_CONFIDENCE_LEVEL = 0.70
 NUMBER_RANDOM_IMAGES = 10

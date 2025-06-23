@@ -32,14 +32,6 @@ LOCAL = 'local'
 # YOLO notebooks
 NOTEBOOKS = 'notebooks'
 
-# YOLO Hailo-related folders
-HAILO = 'hailo'
-HAILO_LABELS = 'labels'
-HAILO_CALIB = 'calib'
-HAILO_SUITE = 'suite'
-HAILO_LIBS = 'libs'
-HAILO_MODEL_ZOO = 'hailo_model_zoo'
-
 # YOLO models
 BEST = 'best'
 BEST_ONNX = 'best.onnx'

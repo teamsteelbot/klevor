@@ -5,7 +5,7 @@ import shutil
 from ..args import Args, Flags
 from ..files import Files
 from ..files.constants import DATASET_ORGANIZED, DATASET_TRAINING, DATASET_VALIDATIONS, DATASET_IMAGES
-
+from ...hailo.constants import HAILO_SUITE_DIR
 
 def after_training(input_dir: str | os.PathLike[str], hailo_suite_dir: str | os.PathLike[str],
                    model_hailo_suite_dir: str | os.PathLike[str], best_onnx_weights_path: str | os.PathLike[str]) -> None:
@@ -61,9 +61,6 @@ if __name__ == '__main__':
     # Get the dataset paths
     organized_dir = Files.get_dataset_model_dir_path(DATASET_ORGANIZED, None, arg_yolo_input_model)
 
-    # Get the Hailo Suite path
-    hailo_suite_dir = Files.get_hailo_suite_dir_path()
-
     # Get the model Hailo Suite path
     model_hailo_suite_dir = Files.get_model_hailo_suite_dir_path(arg_yolo_input_model, arg_yolo_version)
 
@@ -71,5 +68,5 @@ if __name__ == '__main__':
     best_onnx_weights_path = Files.get_model_best_onnx_path(arg_yolo_input_model, arg_yolo_version)
 
     # Move the folders
-    after_training(organized_dir, hailo_suite_dir, model_hailo_suite_dir, best_onnx_weights_path)
+    after_training(organized_dir, HAILO_SUITE_DIR, model_hailo_suite_dir, best_onnx_weights_path)
 

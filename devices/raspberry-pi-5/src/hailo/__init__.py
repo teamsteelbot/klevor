@@ -11,14 +11,13 @@ import cv2
 import numpy as np
 
 from .abstracts import HailoABC
-from ...camera.image_processing_queue import ImageProcessingQueue
-from ...log import LoggerABC
-from ...log.sub_logger import SubLogger
-from ...model import ImageBoundingBoxes
-from ...utils import is_instance
-from .. import Yolo
+from ..camera.image_processing_queue import ImageProcessingQueue
+from ..log import LoggerABC
+from ..log.sub_logger import SubLogger
+from ..model import ImageBoundingBoxes
+from ..utils import is_instance
 from ..files import Files
-from ...constants import MODEL_G, MODEL_R, MODEL_M
+from ..constants import MODEL_G, MODEL_R, MODEL_M
 
 class Hailo(HailoABC):
     """
@@ -82,7 +81,7 @@ class Hailo(HailoABC):
         self.__labels_path = labels_path
 
         # Load the labels
-        self.__labels = Yolo.get_labels_from_txt(self.__labels_path)
+        self.__labels = Files.get_labels_from_txt(self.__labels_path)
 
         # Check the type of image processing queue
         is_instance(image_processing_queue, ImageProcessingQueue)

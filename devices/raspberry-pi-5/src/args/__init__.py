@@ -2,6 +2,8 @@ from argparse import ArgumentParser, FileType
 from typing import Any, Callable, Optional
 
 from .enums import Flags
+from ..constants import VERSIONS, MODELS_NAME
+from ..utils import add_single_quotes_to_list_elements
 
 class Args:
     """
@@ -98,6 +100,18 @@ class Args:
         parser.add_argument(cls.get_attribute_name(name), dest=name, type=type, default=default,
                             required=required, choices=choices, nargs=nargs,
                             help=f"Set {name.lower()} argument" if not help else help)
+        
+    
+    @classmethod
+    def add_debug_argument(cls, parser: ArgumentParser, default: bool = False) -> None:
+        """
+        Add debug argument to the parser.
+
+        Args:
+            parser (ArgumentParser): The argument parser to which the argument will be added.
+            default (bool): Default value for the debug argument. Defaults to False.
+        """
+        cls._add_boolean_argument(parser, Flags.DEBUG, default=default)
 
     @classmethod
     def add_server_argument(cls, parser: ArgumentParser, default: bool = False) -> None:
@@ -144,3 +158,51 @@ class Args:
         """
         cls._add_non_boolean_argument(parser, Flags.PORT, type=int, default=default,
                                   choices=[*range(1, 65536)], help="Set the port number for the server")
+    
+    @classmethod
+    def add_yolo_input_model_argument(cls, parser: ArgumentParser) -> None:
+        """
+        Add YOLO input model argument to the parser.
+
+        Args:
+            parser (ArgumentParser): The argument parser to which the argument will be added.
+        """
+        cls._add_non_boolean_argument(parser, Flags.INPUT_MODEL, type=str, required=True, help='YOLO input model',
+                            choices=MODELS_NAME)
+        
+    @classmethod
+    def add_yolo_version_argument(cls, parser: ArgumentParser) -> None:
+        """
+        Add YOLO version argument to the parser.
+
+        Args:
+            parser (ArgumentParser): The argument parser to which the argument will be added.
+        """
+        cls._add_non_boolean_argument(parser, Flags.VERSION, type=str, required=True, help='YOLO model version',
+                                      choices=VERSIONS)
+        
+    @staticmethod
+    def check_model_name(model_name: str) -> None:
+        """
+        Check the validity of model name.
+
+        Args:
+            model_name (str): Name of the YOLO model.
+        """
+        if model_name not in MODELS_NAME:
+            mapped_yolo_models_name = add_single_quotes_to_list_elements(MODELS_NAME)
+            raise ValueError(
+                f"Invalid model name: {model_name}. Must be one of the following: {', '.join(mapped_yolo_models_name)}.")
+
+    @staticmethod
+    def check_yolo_version(yolo_version: str) -> None:
+        """
+        Check the validity of YOLO version.
+
+        Args:
+            yolo_version (str): Version of the YOLO model.
+        """
+        if yolo_version not in VERSIONS:
+            mapped_yolo_versions = add_single_quotes_to_list_elements(VERSIONS)
+            raise ValueError(
+                f"Invalid yolo version: {yolo_version}. Must be one of the following: {', '.join(mapped_yolo_versions)}.")

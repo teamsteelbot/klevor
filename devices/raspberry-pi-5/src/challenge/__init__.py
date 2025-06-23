@@ -1,6 +1,6 @@
 from multiprocessing import Process
 
-from .enums import Challenge
+from ..env.enums import Challenge
 from ..env import Env
 from ..manager import Manager
 

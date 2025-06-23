@@ -3,17 +3,17 @@ from multiprocessing import Event, RLock
 from typing import Optional, final
 
 from .abstracts import ObjectDetectionABC
-from ...camera.image_processing_queue import ImageProcessingQueue
-from ...env import Env
-from ...log import LoggerABC
-from ...log.sub_logger import SubLogger
-from ...utils import is_instance
-from .. import Yolo
+from ..camera.image_processing_queue import ImageProcessingQueue
+from ..env import Env
+from ..log import LoggerABC
+from ..log.sub_logger import SubLogger
+from ..utils import is_instance
 from ..files import Files
-from ..hailo import Hailo
-from ...constants import (
+from . import Hailo
+from ..constants import (
     MODEL_G, MODEL_M, MODEL_R, MODELS_NAME
 )
+from ..opencv import OpenCV
 
 class ObjectDetection(ObjectDetectionABC):
     """
@@ -67,7 +67,7 @@ class ObjectDetection(ObjectDetectionABC):
             labels_file_path = Files.get_hailo_labels_file_path(model_name)
 
             # Get the model class colors
-            model_class_colors = Yolo.get_model_classes_color_palette(model_name)
+            model_class_colors = OpenCV.get_model_classes_color_palette(model_name)
 
             # Create the Hailo handler
             hailo_handler = Hailo(model_name, hef_file_path, labels_file_path, model_class_colors,

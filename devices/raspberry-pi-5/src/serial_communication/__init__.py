@@ -11,7 +11,6 @@ from .constants import (
     RASPBERRY_PI_PICO_DATA_PORT, RASPBERRY_PI_PICO_DATA_PORT_ALT,
     RASPBERRY_PI_PICO_BAUDRATE, ENCODE
 )
-from ..challenge.enums import Challenge
 from ..camera.image_processing_queue import ImageProcessingQueueABC
 from ..log import LoggerABC
 from ..log.sub_logger import SubLogger
@@ -21,6 +20,7 @@ from .abstracts import SerialCommunicationABC
 from ..server import WebsocketsServerABC
 from ..utils import is_instance
 from ..env import Env
+from ..env.enums import Challenge
 
 class SerialCommunication(SerialCommunicationABC):
     """

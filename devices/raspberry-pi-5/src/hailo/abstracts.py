@@ -5,7 +5,8 @@ from PIL.Image import Image
 import numpy as np
 import cv2
 
-from ...constants import WIDTH, HEIGHT
+from ..constants import WIDTH, HEIGHT
+from ..opencv.constants import PADDING_COLOR
 
 class HailoABC(ABC):
     """
@@ -34,7 +35,7 @@ class HailoABC(ABC):
         image = cv2.resize(image, (new_img_width, new_img_height), interpolation=cv2.INTER_CUBIC)
 
         # Calculate padding and create padded image
-        padded_image = np.full((height, width, 3), OpenCV.PADDING_COLOR, dtype=np.uint8)
+        padded_image = np.full((height, width, 3), PADDING_COLOR, dtype=np.uint8)
         x_offset = (height - new_img_width) // 2
         y_offset = (height - new_img_height) // 2
         padded_image[y_offset:y_offset + new_img_height, x_offset:x_offset + new_img_width] = image

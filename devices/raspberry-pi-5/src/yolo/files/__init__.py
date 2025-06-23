@@ -3,6 +3,7 @@ from os import PathLike
 from time import time
 
 from .. import Yolo
+from ..args import Args
 from ...files import Files as F
 from ...utils import add_single_quotes_to_list_elements
 from .constants import (
@@ -98,7 +99,7 @@ class Files(F):
         """
         # Check the validity of the model name
         if model_name:
-            Yolo.check_model_name(model_name)
+            Args.check_model_name(model_name)
 
         # Check the validity of the dataset status
         if dataset_status:
@@ -132,7 +133,7 @@ class Files(F):
             str | PathLike: The path to the YOLO version folder.
         """
         # Check the validity of the YOLO version
-        Yolo.check_yolo_version(yolo_version)
+        Args.check_yolo_version(yolo_version)
 
         return os.path.join(YOLO_DIR, yolo_version)
 
@@ -199,7 +200,7 @@ class Files(F):
         yolo_runs_dir = cls.get_yolo_runs_dir_path(yolo_version)
 
         # Check the validity of the model name
-        Yolo.check_model_name(model_name)
+        Args.check_model_name(model_name)
 
         return os.path.join(yolo_runs_dir, model_name)
 
@@ -262,7 +263,7 @@ class Files(F):
             str | PathLike: The path to the YOLO zip folder.
         """
         # Check the validity of the YOLO version
-        Yolo.check_yolo_version(yolo_version)
+        Args.check_yolo_version(yolo_version)
 
         return os.path.join(YOLO_DIR, yolo_version, ZIP)
 
@@ -313,7 +314,7 @@ class Files(F):
             str: The name of the model data file.
         """
         # Check the validity of the model name
-        Yolo.check_model_name(model_name)
+        Args.check_model_name(model_name)
 
         return model_name + '.yaml'
 
@@ -364,7 +365,7 @@ class Files(F):
             str | PathLike: The path to the YOLO notebooks folder.
         """
         # Check the validity of the YOLO version
-        Yolo.check_yolo_version(yolo_version)
+        Args.check_yolo_version(yolo_version)
 
         return os.path.join(YOLO_DIR, yolo_version, NOTEBOOKS)
 
@@ -383,7 +384,7 @@ class Files(F):
         yolo_version_dir = cls.get_yolo_version_dir_path(yolo_version)
 
         # Check the validity of the model name
-        Yolo.check_model_name(model_name)
+        Args.check_model_name(model_name)
 
         return os.path.join(yolo_version_dir, TF_RECORDS, model_name + '.tfrecord')
 
@@ -422,279 +423,3 @@ class Files(F):
         dataset_model_dir_path = cls.get_dataset_model_dir_path(dataset_name, dataset_status, model_name)
 
         return os.path.join(dataset_model_dir_path, DATASET_CLASSES_TXT)
-
-    @classmethod
-    def get_hailo_dir_path(cls) -> str | PathLike:
-        """
-        Get the Hailo folder path.
-
-        Returns:
-            str | PathLike: The path to the Hailo folder.
-        """
-        return os.path.join(YOLO_DIR, HAILO)
-
-    @classmethod
-    def get_hailo_suite_dir_path(cls) -> str | PathLike:
-        """
-        Get the Hailo Suite folder path.
-
-        Returns:
-            str | PathLike: The path to the Hailo Suite folder.
-        """
-        # Get the Hailo folder path
-        hailo_dir = cls.get_hailo_dir_path()
-
-        return os.path.join(hailo_dir, HAILO_SUITE)
-
-    @classmethod
-    def get_model_hailo_suite_dir_path(cls, model_name: str, yolo_version: str) -> str | PathLike:
-        """
-        Get the model Hailo Suite path.
-
-        Args:
-            model_name (str): Name of the YOLO model.
-            yolo_version (str): Version of the YOLO model.
-        Returns:
-            str | PathLike: The path to the model Hailo Suite folder.
-        """
-        # Get the Hailo Suite folder path
-        hailo_suite_dir = cls.get_hailo_suite_dir_path()
-
-        # Check the validity of the model name
-        Yolo.check_model_name(model_name)
-
-        # Check the validity of the YOLO version
-        Yolo.check_yolo_version(yolo_version)
-
-        return os.path.join(hailo_suite_dir, yolo_version, model_name)
-
-    @classmethod
-    def get_model_hailo_suite_file_path(cls, model_name: str, yolo_version: str,
-                                        filename: str) -> str | PathLike:
-        """
-        Get the model Hailo Suite file path.
-
-        Args:
-            model_name (str): Name of the YOLO model.
-            yolo_version (str): Version of the YOLO model.
-            filename (str): Name of the file to retrieve.
-        Returns:
-            str | PathLike: The path to the specified file in the model Hailo Suite folder.
-        """
-        # Get the model Hailo Suite path
-        model_hailo_suite_dir = cls.get_model_hailo_suite_dir_path(model_name, yolo_version)
-
-        return os.path.join(model_hailo_suite_dir, filename)
-
-    @classmethod
-    def get_model_hailo_suite_parsed_har_file_name(cls, model_name: str) -> str | PathLike:
-        """
-        Get the Hailo Suite parsed filename.
-
-        Args:
-            model_name (str): Name of the YOLO model.
-        Returns:
-            str | PathLike: The name of the Hailo Suite parsed file.
-        """
-        return f'{model_name}_parsed.har'
-
-    @classmethod
-    def get_model_hailo_suite_optimized_har_file_name(cls, model_name: str) -> str | PathLike:
-        """
-        Get the Hailo Suite optimized filename.
-
-        Args:
-            model_name (str): Name of the YOLO model.
-        Returns:
-            str | PathLike: The name of the Hailo Suite optimized file.
-        """
-        return f'{model_name}_optimized.har'
-
-    @classmethod
-    def get_model_hailo_suite_compiled_hef_file_name(cls, model_name: str) -> str | PathLike:
-        """
-        Get the Hailo Suite compiled filename.
-
-        Args:
-            model_name (str): Name of the YOLO model.
-        Returns:
-            str | PathLike: The name of the Hailo Suite compiled file.
-        """
-        return f'{model_name}_compiled.hef'
-
-    @classmethod
-    def get_model_hailo_suite_parsed_har_file_path(cls, model_name: str,
-                                                   yolo_version: str) -> str | PathLike:
-        """
-        Get the model Hailo Suite parsed file path.
-
-        Args:
-            model_name (str): Name of the YOLO model.
-            yolo_version (str): Version of the YOLO model.
-        Returns:
-            str | PathLike: The path to the model Hailo Suite parsed file.
-        """
-        # Get the model Hailo Suite path
-        model_hailo_suite_dir = cls.get_model_hailo_suite_dir_path(model_name, yolo_version)
-
-        # Get the Hailo Suite parsed filename
-        model_hailo_suite_parsed_har_file_name = cls.get_model_hailo_suite_parsed_har_file_name(model_name)
-
-        return os.path.join(model_hailo_suite_dir, model_hailo_suite_parsed_har_file_name)
-
-    @classmethod
-    def get_model_hailo_suite_optimized_har_file_path(cls, model_name: str,
-                                                      yolo_version: str) -> str | PathLike:
-        """
-        Get the model Hailo Suite optimized file path.
-
-        Args:
-            model_name (str): Name of the YOLO model.
-            yolo_version (str): Version of the YOLO model.
-        Returns:
-            str | PathLike: The path to the model Hailo Suite optimized file.
-        """
-        # Get the model Hailo Suite path
-        model_hailo_suite_dir = cls.get_model_hailo_suite_dir_path(model_name, yolo_version)
-
-        # Get the Hailo Suite optimized filename
-        model_hailo_suite_optimized_har_file_name = cls.get_model_hailo_suite_optimized_har_file_name(model_name)
-
-        return os.path.join(model_hailo_suite_dir, model_hailo_suite_optimized_har_file_name)
-
-    @classmethod
-    def get_model_hailo_suite_compiled_hef_file_path(cls, model_name: str,
-                                                     yolo_version: str) -> str | PathLike:
-        """
-        Get the model Hailo Suite compiled file path.
-
-        Args:
-            model_name (str): Name of the YOLO model.
-            yolo_version (str): Version of the YOLO model.
-        Returns:
-            str | PathLike: The path to the model Hailo Suite compiled file.
-        """
-        # Get the model Hailo Suite path
-        model_hailo_suite_dir = cls.get_model_hailo_suite_dir_path(model_name, yolo_version)
-
-        # Get the Hailo Suite compiled filename
-        model_hailo_suite_compiled_hef_file_name = cls.get_model_hailo_suite_compiled_hef_file_name(model_name)
-
-        return os.path.join(model_hailo_suite_dir, model_hailo_suite_compiled_hef_file_name)
-
-    @classmethod
-    def get_model_weights_parsed_har_file_path(cls, model_name: str, yolo_version: str) -> str | PathLike:
-        """
-        Get the model weights parsed file path.
-
-        Args:
-            model_name (str): Name of the YOLO model.
-            yolo_version (str): Version of the YOLO model.
-        Returns:
-            str | PathLike: The path to the model weights parsed file.
-        """
-        # Get the model weights directory path
-        model_weights_dir = cls.get_model_weight_dir_path(model_name, yolo_version)
-
-        return os.path.join(model_weights_dir, 'parsed.har')
-
-    @classmethod
-    def get_model_weights_optimized_har_file_path(cls, model_name: str,
-                                                  yolo_version: str) -> str | PathLike:
-        """
-        Get the model weights optimized file path.
-
-        Args:
-            model_name (str): Name of the YOLO model.
-            yolo_version (str): Version of the YOLO model.
-        Returns:
-            str | PathLike: The path to the model weights optimized file.
-        """
-        # Get the model weights directory path
-        model_weights_dir = cls.get_model_weight_dir_path(model_name, yolo_version)
-
-        return os.path.join(model_weights_dir, 'optimized.har')
-
-    @classmethod
-    def get_model_weights_compiled_hef_file_path(cls, model_name: str,
-                                                 yolo_version: str) -> str | PathLike:
-        """
-        Get the model weights compiled file path.
-
-        Args:
-            model_name (str): Name of the YOLO model.
-            yolo_version (str): Version of the YOLO model.
-        Returns:
-            str | PathLike: The path to the model weights compiled file.
-        """
-        # Get the model weights directory path
-        model_weights_dir = cls.get_model_weight_dir_path(model_name, yolo_version)
-
-        return os.path.join(model_weights_dir, 'compiled.hef')
-
-    @classmethod
-    def get_hailo_suite_calib_dir_path(cls) -> str | PathLike:
-        """
-        Get the Hailo Suite calibration set folder.
-
-        Returns:
-            str | PathLike: The path to the Hailo Suite calibration set folder.
-        """
-        # Get the model Hailo Suite path
-        model_hailo_suite_dir = cls.get_hailo_suite_dir_path()
-
-        return os.path.join(model_hailo_suite_dir, HAILO_CALIB)
-
-    @classmethod
-    def get_hailo_suite_calib_file_path(cls) -> str | PathLike:
-        """
-        Get the Hailo Suite calibration set file path.
-
-        Returns:
-            str | PathLike: The path to the Hailo Suite calibration set file.
-        """
-        # Get the Hailo Suite calibration set folder path
-        hailo_suite_calib_dir = cls.get_hailo_suite_calib_dir_path()
-
-        return os.path.join(hailo_suite_calib_dir, HAILO_CALIB + '.npy')
-
-    @classmethod
-    def get_hailo_model_zoo_dir_path(cls) -> str | PathLike:
-        """
-        Get the Hailo Model Zoo path
-
-        Returns:
-            str | PathLike: The path to the Hailo Model Zoo folder.
-        """
-        return os.path.join(YOLO_DIR, HAILO, HAILO_SUITE, HAILO_LIBS, HAILO_MODEL_ZOO)
-
-    @classmethod
-    def get_hailo_labels_dir_path(cls) -> str | PathLike:
-        """
-        Get the Hailo labels folder path.
-
-        Returns:
-            str | PathLike: The path to the Hailo labels folder.
-        """
-        # Get the Hailo folder path
-        hailo_dir = cls.get_hailo_dir_path()
-
-        return os.path.join(hailo_dir, HAILO_LABELS)
-
-    @classmethod
-    def get_hailo_labels_file_path(cls, model_name: str) -> str | PathLike:
-        """
-        Get the Hailo labels file path.
-
-        Args:
-            model_name (str): Name of the YOLO model.
-        Returns:
-            str | PathLike: The path to the Hailo labels file.
-        """
-        # Check the validity of the model name
-        Yolo.check_model_name(model_name)
-
-        # Get the Hailo labels folder path
-        hailo_labels_dir = cls.get_hailo_labels_dir_path()
-
-        return os.path.join(hailo_labels_dir, model_name + '.txt')
