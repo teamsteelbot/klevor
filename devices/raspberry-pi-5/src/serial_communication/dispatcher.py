@@ -18,20 +18,20 @@ class Dispatcher(DispatcherABC):
     # Wait timeout
     WAIT_TIMEOUT = 0.1
 
-    def __init__(self, incoming_messages_queue: Queue,
-                 outgoing_messages_queue: Queue,
+    def __init__(self, serial_incoming_messages_queue: Queue,
+                 serial_outgoing_messages_queue: Queue,
                  writer_messages_queue: Queue):
         """
         Initializes the Dispatcher class.
 
         Args:
-            incoming_messages_queue (Queue): Queue to hold incoming messages from the serial port.
-            outgoing_messages_queue (Queue): Queue to hold outgoing messages to the serial port.
+            serial_incoming_messages_queue (Queue): Queue to hold incoming messages from the serial port.
+            serial_outgoing_messages_queue (Queue): Queue to hold outgoing messages to the serial port.
             writer_messages_queue (Queue): Queue to hold log messages.
         """
         # Initialize the queues
-        self.__incoming_messages_queue = incoming_messages_queue
-        self.__outgoing_messages_queue = outgoing_messages_queue
+        self.__serial_incoming_messages_queue = serial_incoming_messages_queue
+        self.__serial_outgoing_messages_queue = serial_outgoing_messages_queue
 
         # Initialize the logger
         self.__logger = Logger(writer_messages_queue, self.LOGGER_TAG,
@@ -40,7 +40,7 @@ class Dispatcher(DispatcherABC):
     @final
     def receive_message(self) -> IncomingMessage | None:
         # Get the message from the queue
-        return self.__incoming_messages_queue.get(timeout=self.WAIT_TIMEOUT)
+        return self.__serial_incoming_messages_queue.get(timeout=self.WAIT_TIMEOUT)
 
     @final
     def _send_message(self, msg: OutgoingMessage) -> None:
@@ -48,7 +48,7 @@ class Dispatcher(DispatcherABC):
         is_instance(msg, OutgoingMessage)
 
         # Put the message in the queue
-        self.__outgoing_messages_queue.put(msg)
+        self.__serial_outgoing_messages_queue.put(msg)
 
     @final
     def send_rplidar_measures(self, measures: dict[RPLIDAR, float]) -> None:

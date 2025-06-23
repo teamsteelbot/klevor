@@ -52,6 +52,5 @@ if __name__ == "__main__":
         # Stop the websocket server and writer process and clean up
         stop_event.set()
         server_process.join()
-
         writer_stop_event.set()
         writer_process.join()

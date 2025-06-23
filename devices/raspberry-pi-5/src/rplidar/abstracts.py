@@ -9,16 +9,6 @@ class RPLIDARABC(ABC):
     """
 
     @abstractmethod
-    def measures(self) -> dict[float, Measure]:
-        """
-        Returns the distances dictionary containing the measures.
-
-        Returns:
-            dict[float, Measure]: A dictionary with angles as keys and Measure objects as values.
-        """
-        pass
-
-    @abstractmethod
     def _calculate_average_distance(self, angles: list[int]) -> float:
         """
         Calculate the average distance for a given list of angles.
@@ -46,23 +36,9 @@ class RPLIDARABC(ABC):
         pass
 
     @abstractmethod
-    def _loop(self):
+    def run(self):
         """
-        Loop to read the output from the RPLIDAR process.
-        """
-        pass
-
-    @abstractmethod
-    def _start(self):
-        """
-        Clear the stop event to allow the RPLIDAR process to start.
-        """
-        pass
-
-    @abstractmethod
-    def start(self):
-        """
-        Start the RPLIDAR process.
+        Run the RPLIDAR process.
         """
         pass
 
@@ -73,13 +49,6 @@ class RPLIDARABC(ABC):
 
         Returns:
             bool: True if the RPLIDAR is running, False otherwise.
-        """
-        pass
-
-    @abstractmethod
-    def _stop(self):
-        """
-        Stop the RPLIDAR process.
         """
         pass
 

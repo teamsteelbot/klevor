@@ -16,7 +16,7 @@ class Tag(Enum):
     MODEL_G_IMAGE = 5
     MODEL_M_IMAGE = 6
     MODEL_R_IMAGE = 7
-    RPLIDAR_MEASURES = 8
+    RPLIDAR_MEASURE = 8
     STOP_EVENT = 9
     PARKING_EVENT = 10
 

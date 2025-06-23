@@ -23,13 +23,19 @@ def websocket_server_target(messages_queue: Queue, opened_event: Event,
         host (str): The host address for the WebSocket server.
         port (int): The port number for the WebSocket server.
     """
-    print("Initializing WebSocketServer in multiprocessing mode. Process ID:",
+    print("Initializing WebSocketServer in multiprocessing mode. Process ID: ",
           os.getpid())
 
     # Initialize the websocket server
-    server = WebSocketServer(messages_queue, opened_event, parking_event,
-                             stop_event,
-                             writer_messages_queue, host, port)
+    server = WebSocketServer(
+        messages_queue=messages_queue,
+        opened_event=opened_event,
+        parking_event=parking_event,
+        stop_event=stop_event,
+        writer_messages_queue=writer_messages_queue,
+        host=host,
+        port=port
+    )
 
     # Run the websocket server
     server.run()

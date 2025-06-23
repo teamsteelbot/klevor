@@ -1,6 +1,5 @@
 import subprocess
-from multiprocessing import Event, RLock
-from threading import Thread
+from multiprocessing import Event, RLock, Queue
 from typing import Optional, final
 
 from .abstracts import RPLIDARABC
@@ -8,11 +7,9 @@ from .constants import (
     RPLIDAR_C1_BAUDRATE, RPLIDAR_C1_PORT, ULTRA_SIMPLE_PATH, DISTANCE_DIFF
 )
 from .measure import Measure
-from ..env import Env, Challenge
-from ..log.abstracts import LoggerABC
-from ..serial_communication import SerialCommunicationABC
-from ..serial_communication.enums import RPLIDAR as RPLIDARKey
-from ..server import WebSocketServerABC
+from ..env import Env
+from ..log import Logger
+from ..server.dispatcher import Dispatcher as WebSocketServerDispatcher
 from ..utils import is_instance
 
 
@@ -22,16 +19,19 @@ class RPLIDAR(RPLIDARABC):
     """
 
     # Logger configuration
-    LOG_TAG = "RPLIDAR"
+    LOGGER_TAG = "RPLIDAR"
 
     # Process wait timeout
     PROCESS_WAIT_TIMEOUT = 5
 
     def __init__(
             self,
-            logger: Optional[LoggerABC] = None,
-            server: Optional[WebSocketServerABC] = None,
-            serial: Optional[SerialCommunicationABC] = None,
+            measures_queue: Queue,
+            started_event: Event,
+            start_event: Event,
+            stop_event: Event,
+            writer_messages_queue: Queue,
+            server_messages_queue: Optional[Queue] = None,
             baudrate: int = RPLIDAR_C1_BAUDRATE,
             port: str = RPLIDAR_C1_PORT,
             is_upside_down: bool = True
@@ -40,36 +40,31 @@ class RPLIDAR(RPLIDARABC):
         Initialize the RPLIDAR.
 
         Args:
-            logger (Optional[LoggerABC]): Logger instance for logging messages.
-            server (Optional[WebsocketServerABC]): Server instance for real-time tracking updates.
-            serial (Optional[SerialCommunicationABC]): SerialCommunication instance for RPLIDAR.
+            measures_queue (Queue): Queue to hold the measures from the RPLIDAR.
+            started_event (Event): Event to signal when the RPLIDAR has started.
+            start_event (Event): Event to signal when the RPLIDAR should start.
+            stop_event (Event): Event to signal when the RPLIDAR should stop.
+            writer_messages_queue (Queue): Queue to hold log messages.
+            server_messages_queue (Optional[Queue]): Queue to broadcast messages through the websockets server.
             baudrate (int): Baud rate for the serial communication.
             port (str): SerialCommunication port for the RPLIDAR.
             is_upside_down (bool): If True, the RPLIDAR is upside down, and angles will be adjusted accordingly.
         """
+        # Initialize the queues and events
+        self.__measures_queue = measures_queue
+        self.__started_event = started_event
+        self.__start_event = start_event
+        self.__stop_event = stop_event
+        
+        # Initialize the logger
+        self.__logger = Logger(writer_messages_queue, self.LOGGER_TAG)
+
+        # Initialize the server dispatcher
+        self.__server_dispatcher = WebSocketServerDispatcher(
+            server_messages_queue, writer_messages_queue) if server_messages_queue else None
+
         # Create the reentrant lock
         self.__rlock = RLock()
-
-        # Create a stop event
-        self.__stop_event = Event()
-        self.__stop_event.set()
-
-        # Create a start event
-        self.__start_event = Event()
-
-        # Check the type of logger
-        is_instance(logger, LoggerABC) if logger else None
-
-        # Get the sub-logger for this class
-        self.__logger = SubLogger(logger, self.LOG_TAG) if logger else None
-
-        # Check the type of server
-        is_instance(server, WebSocketServerABC) if server else None
-        self.__server = server
-
-        # Check the type of serial communication
-        is_instance(serial, SerialCommunicationABC) if serial else None
-        self.__serial_communication = serial
 
         # Check the type of baudrate
         is_instance(baudrate, int)
@@ -83,8 +78,8 @@ class RPLIDAR(RPLIDARABC):
         is_instance(is_upside_down, bool)
         self.__is_upside_down = is_upside_down
 
-        # Distances dictionary
-        self.__distances_dict = dict()
+        # Initialize distances dictionary
+        self.__distances_dict = {}
 
         # Messages counter
         self.__messages_counter = 0
@@ -102,18 +97,6 @@ class RPLIDAR(RPLIDARABC):
         self.__debug = Env.get_debug_mode()
 
     @final
-    @property
-    def measures(self) -> dict[float, Measure]:
-        """
-        Returns the distances dictionary containing the measures.
-
-        Returns:
-            dict[float, Measure]: A dictionary with angles as keys and Measure objects as values.
-        """
-        with self.__rlock:
-            return self.__distances_dict
-
-    @final
     def _calculate_average_distance(self, angles: list[int]) -> float:
         total_distance = 0.0
         count = 0
@@ -126,35 +109,13 @@ class RPLIDAR(RPLIDARABC):
     @final
     def _after_rotation(self) -> None:
         # Log the end of the rotation
-        self.__logger.info(
-            "Full rotation completed.") if self.__logger else None
+        self.__logger.info("Full rotation completed.")
 
-        # Put the parsed line in the server
-        if self.__server:
-            for angle, measure in self.__distances_dict.items():
-                measure_str = str(measure)
-                self.__server.broadcast_rplidar_measures(str(measure))
+        # Add the measures dictionary to the measures queue
+        self.__measures_queue.put(self.__distances_dict)
 
-        # Send the measure string to the serial communication
-        if self.__serial_communication:
-            if self.__challenge == Challenge.WITHOUT_OBSTACLES:
-                # Calculate the average front, left and right distances by 5 degrees to each side
-                avg_front_dist = self._calculate_average_distance(
-                    [*range(355, 360), *range(0, 6)])
-                avg_left_dist = self._calculate_average_distance(
-                    [*range(265, 276)])
-                avg_right_dist = self._calculate_average_distance(
-                    [*range(85, 96)])
-
-                # Create a dictionary with the average distances
-                avg_distances = {
-                    RPLIDARKey.FRONT: avg_front_dist,
-                    RPLIDARKey.LEFT: avg_left_dist,
-                    RPLIDARKey.RIGHT: avg_right_dist
-                }
-
-                # Send the average distances to the serial communication
-                self.__serial_communication.send_rplidar_measures(avg_distances)
+        # Reset the distances dictionary
+        self.__distances_dict = {}
 
     @final
     def _read_output(self):
@@ -208,42 +169,62 @@ class RPLIDAR(RPLIDARABC):
             angle = 360 - angle
 
         # Check if the angle is already in the distances dictionary
-        if not angle in self.__distances_dict:
-            self.__distances_dict[angle] = Measure(angle, distance, quality)
-        else:
-            # Check if the distance is negligible
-            if self.__distances_dict[
-                angle].distance > distance - DISTANCE_DIFF and \
-                    self.__distances_dict[
-                        angle].distance < distance + DISTANCE_DIFF:
-                return
+        if angle in self.__distances_dict:
+            self.__measure = Measure(angle, distance, quality)
+            self.__distances_dict[angle] = self.__measure
 
+        elif (abs(self.__distances_dict[angle].distance - distance) >
+              DISTANCE_DIFF) and (
+              abs(self.__distances_dict[angle].distance - distance) >
+              DISTANCE_DIFF):
+            return
+
+        else:
             # If it is, update the distance and quality
-            self.__distances_dict[angle].distance = distance
-            self.__distances_dict[angle].quality = quality
+            self.__measure = self.__distances_dict[angle]
+            self.__measure.distance = distance
+            self.__measure.quality = quality
 
         # Call the after rotation method if it's the last measure of a full rotation
-        if rotation:
-            self._after_rotation()
+        self._after_rotation() if rotation else None
+
+        # Send the measure to the server
+        self.__server_dispatcher.broadcast_rplidar_measure(self.__measure) if self.__server_dispatcher else None
 
         # Log
         self.__logger.debug("RPLIDAR measure: " + str(self.__distances_dict[
-                                                          angle])) if self.__logger and self.__debug else None
+                                                          angle])) if self.__debug else None
 
         # Increment the messages counter
         self.__messages_counter += 1
 
     @final
-    def _loop(self):
+    def run(self):
+        with self.__rlock:
+            # Check if the stop event is set
+            if self.__stop_event.is_set():
+                self.__logger.warning(
+                    "Stop event is set. RPLIDAR will not run.")
+                return
+
+            # Check if the RPLIDAR is already running
+            if self.__started_event.is_set():
+                self.__logger.warning(
+                    "RPLIDAR is already running. Cannot start again.")
+                return
+
         # Wait for the start event to be set
         self.__start_event.wait()
+
+        # Set the started event to signal that the RPLIDAR has started
+        with self.__rlock:
+            self.__started_event.set()
 
         # Get the challenge environment variable
         self.__challenge = Env.get_challenge()
 
-        # Log the start of the RPLIDAR process
-        self.__logger.info(
-            "Starting RPLIDAR process...") if self.__logger else None
+        # Log
+        self.__logger.info("RPLIDAR's starting...")
 
         command = [
             ULTRA_SIMPLE_PATH,
@@ -274,20 +255,23 @@ class RPLIDAR(RPLIDARABC):
         while self.__process.poll() is None and self.is_running():
             self._read_output()
 
-    @final
-    def _start(self):
+        # Ensure the process is cleaned up even if an error occurs
+        if self.__process and self.__process.poll() is None:
+            self.__logger.info("Ensuring process is terminated in finally block...")
+            self.__process.terminate()
+            self.__process.wait(timeout=self.PROCESS_WAIT_TIMEOUT)
+            if self.__process.poll() is None:
+                self.__process.kill()
+            self.__process.wait()
+            self.__process = None
+
+        # Clear the started event
         with self.__rlock:
-            # Clear the stop event
-            self.__stop_event.clear()
+            self.__start_event.clear()
 
-    def start(self):
-        with self.__rlock:
-            # Set the start event to indicate that the RPLIDAR is starting
-            self.__start_event.set()
-
-        # Log
-        self.__logger.info("RPLIDAR starting...") if self.__logger else None
-
+        # Log the stop message
+        self.__logger.info("RPLIDAR process stopped.")
+        
     @final
     def is_running(self) -> bool:
         with self.__rlock:
@@ -295,72 +279,11 @@ class RPLIDAR(RPLIDARABC):
                         self.__process is not None and self.__process.poll() is None)
 
     @final
-    def _stop(self):
-        with self.__rlock:
-            # Set the stop event
-            self.__stop_event.set()
-
-            # Clear the start event
-            self.__start_event.clear()
-
-            # Ensure the process is cleaned up even if an error occurs
-            if self.__process and self.__process.poll() is None:
-                self.__logger.info(
-                    "Ensuring process is terminated in finally block...") if self.__logger else None
-                self.__process.terminate()
-                self.__process.wait(timeout=self.PROCESS_WAIT_TIMEOUT)
-                if self.__process.poll() is None:
-                    self.__process.kill()
-                self.__process.wait()
-            self.__process = None
-
-        # Log the stop message
-        self.__logger.info(
-            "RPLIDAR process stopped.") if self.__logger else None
-
-    @final
     def is_stopped(self) -> bool:
-        with self.__rlock:
-            return not self.is_running()
-
-    def create_thread(self):
-        """
-        Create a thread for the RPLIDAR.
-        """
-        with self.__rlock:
-            if self.is_running():
-                self.__logger.warning(
-                    "RPLIDAR thread is already running.") if self.__logger else None
-                return
-
-            # Start the RPLIDAR
-            self._start()
-
-            # Start the RPLIDAR in a separate thread
-            self.__thread = Thread(target=self._loop)
-            self.__thread.start()
-
-    def stop_thread(self):
-        """
-        Stop the RPLIDAR thread.
-        """
-        with self.__rlock:
-            if not self.is_running():
-                self.__logger.warning(
-                    "RPLIDAR thread is not running.") if self.__logger else None
-                return
-
-            # Stop the RPLIDAR
-            self._stop()
-
-            # Wait for the thread to finish
-            if self.__thread:
-                self.__thread.join()
-                self.__thread = None
-
+        return not self.is_running()
+        
     def __del__(self):
         """
-        Destructor to clean up the RPLIDAR object.
+        Destructor to clean up resources when the RPLIDAR is no longer needed.
         """
-        self.stop_thread() if self.__thread else None
-        self.__logger.info("RPLIDAR object deleted.") if self.__logger else None
+        self.__stop_event.set()

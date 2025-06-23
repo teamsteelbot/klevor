@@ -55,6 +55,5 @@ if __name__ == "__main__":
         # Stop the serial communication and writer process and clean up
         stop_event.set()
         serial_opened_event.join()
-
         writer_stop_event.set()
         writer_process.join()

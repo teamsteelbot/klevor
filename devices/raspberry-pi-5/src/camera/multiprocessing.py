@@ -28,16 +28,23 @@ def photographer_target(images_queue: Queue, capture_image_event: Event,
         preprocess_fn: Callable[[Image], np.ndarray]: Function to preprocess images before inference.
         server_messages_queue (Optional[Queue]): Queue to broadcast messages through the websockets server, if any.
     """
-    print("Initializing Photographer in multiprocessing mode. Process ID:",
+    print("Initializing Photographer in multiprocessing mode. Process ID: ",
           os.getpid())
 
     # Initialize the camera
     camera = Camera(writer_messages_queue)
 
     # Initialize the photographer
-    photographer = Photographer(camera, images_queue, capture_image_event,
-                                opened_event, stop_event, writer_messages_queue,
-                                preprocess_fn, server_messages_queue)
+    photographer = Photographer(
+        camera=camera,
+        images_queue=images_queue,
+        capture_image_event=capture_image_event,
+        opened_event=opened_event,
+        stop_event=stop_event,
+        writer_messages_queue=writer_messages_queue,
+        preprocess_fn=preprocess_fn,
+        server_messages_queue=server_messages_queue
+    )
 
     # Run the photographer
     photographer.run()

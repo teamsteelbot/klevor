@@ -51,17 +51,24 @@ def serial_communication_target(opened_event: Event, start_event: Event,
         data_port_alt (Optional[str]): Alternative serial port used for sending data to Pico.
         baudrate (Optional[int]): Baud rate for the serial communication.
     """
-    print("Initializing SerialCommunication in multiprocessing mode. Process "
-          "ID:",
-          os.getpid())
+    print("Initializing SerialCommunication in multiprocessing mode. Process ID: ", os.getpid())
 
     # Initialize the serial communication
     serial_communication = SerialCommunication(
-        opened_event, start_event, parking_event, stop_event,
-        incoming_messages_queue, outgoing_messages_queue,
-        writer_messages_queue, photographer_capture_image_event,
-        server_messages_queue, console_port, console_port_alt,
-        data_port, data_port_alt, baudrate
+        opened_event=opened_event,
+        start_event=start_event,
+        parking_event=parking_event,
+        stop_event=stop_event,
+        incoming_messages_queue=incoming_messages_queue,
+        outgoing_messages_queue=outgoing_messages_queue,
+        writer_messages_queue=writer_messages_queue,
+        photographer_capture_image_event=photographer_capture_image_event,
+        server_messages_queue=server_messages_queue,
+        console_port=console_port,
+        console_port_alt=console_port_alt,
+        data_port=data_port,
+        data_port_alt=data_port_alt,
+        baudrate=baudrate
     )
 
     # Run the serial communication

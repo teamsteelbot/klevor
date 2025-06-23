@@ -4,7 +4,7 @@ from PIL.Image import Image
 
 from .enums import Tag
 from .message import Message
-
+from ..rplidar import Measure
 
 class WebSocketServerABC(ABC):
     """
@@ -154,11 +154,11 @@ class DispatcherABC:
         pass
 
     @abstractmethod
-    def broadcast_rplidar_measures(self, msg: str):
+    def broadcast_rplidar_measure(self, measure: Measure):
         """
-        Adds RPLIDAR measures to the messages queue to be sent to all connected clients.
+        Adds a RPLIDAR measure to the messages queue to be sent to all connected clients.
 
         Args:
-            msg (str): The RPLIDAR measures to broadcast.
+            measure (Measure): The RPLIDAR measure to broadcast.
         """
         pass

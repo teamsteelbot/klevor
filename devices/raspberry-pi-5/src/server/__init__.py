@@ -181,10 +181,6 @@ class WebSocketServer(WebSocketServerABC):
 
     @final
     async def _broadcast_handler(self):
-        """
-        Continuously checks the messages queue and broadcasts the last message
-        to all connected clients until the stop event is set.
-        """
         while not self.__stop_event.is_set():
             # Broadcast the last message if available
             await self._broadcast_last_message()
