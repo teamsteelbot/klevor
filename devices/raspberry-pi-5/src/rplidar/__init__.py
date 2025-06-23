@@ -4,12 +4,12 @@ from threading import Thread
 from typing import Optional, final
 
 from .abstracts import RPLIDARABC
-from .constants import RPLIDAR_C1_BAUDRATE, RPLIDAR_C1_PORT, ULTRA_SIMPLE_PATH, \
-    DISTANCE_DIFF
+from .constants import (
+    RPLIDAR_C1_BAUDRATE, RPLIDAR_C1_PORT, ULTRA_SIMPLE_PATH, DISTANCE_DIFF
+)
 from .measure import Measure
 from ..env import Env, Challenge
 from ..log.abstracts import LoggerABC
-from ..log.sub_logger import SubLogger
 from ..serial_communication import SerialCommunicationABC
 from ..serial_communication.enums import RPLIDAR as RPLIDARKey
 from ..server import WebSocketServerABC

@@ -72,7 +72,7 @@ class SerialCommunication(SerialCommunicationABC):
             console_port_alt (Optional[str]): Alternative serial port used for receiving data from Pico.
             data_port (Optional[str]): Serial port used for sending data to Pico.
             data_port_alt (Optional[str]): Alternative serial port used for sending data to Pico.
-            baudrate (Optional[int]): Baud rate for the serial communication. Default is 115200.
+            baudrate (Optional[int]): Baud rate for the serial communication.
         """
         # Initialize the queues and events
         self.__opened_event = opened_event

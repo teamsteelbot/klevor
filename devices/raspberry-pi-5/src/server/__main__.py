@@ -17,7 +17,7 @@ if __name__ == "__main__":
 
     # Create a process for the writer
     writer_process = Process(target=writer_target, args=(
-    writer_messages_queue, writer_opened_event, writer_stop_event))
+        writer_messages_queue, writer_opened_event, writer_stop_event))
     writer_process.start()
 
     # Create an instance of Logger
@@ -25,8 +25,8 @@ if __name__ == "__main__":
 
     # Create a process for the WebSocket server
     server_process = Process(target=websocket_server_target, args=(
-    server_messages_queue, server_opened_event, parking_event, stop_event,
-    writer_messages_queue))
+        server_messages_queue, server_opened_event, parking_event, stop_event,
+        writer_messages_queue))
     server_process.start()
 
     try:
@@ -37,7 +37,7 @@ if __name__ == "__main__":
 
 
     except KeyboardInterrupt:
-        # Handle keyboard interrupt to stop the writer process gracefully
+        # Handle keyboard interrupt to stop the processes gracefully
         print(
             "KeyboardInterrupt received. Stopping websocket server and writer process...")
         logger.warning(
