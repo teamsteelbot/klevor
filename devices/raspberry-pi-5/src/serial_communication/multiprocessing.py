@@ -14,29 +14,28 @@ from ..utils.decorators import ignore_sigint
 
 
 @ignore_sigint
-def serial_communication_target(opened_event: Event, start_event: Event,
-                            parking_event: Event, stop_event: Event,
-                            incoming_messages_queue: Queue,
-                            outgoing_messages_queue: Queue,
-                            writer_messages_queue: Queue,
-                            photographer_capture_image_event: Event,
-                            server_messages_queue: Optional[Queue] = None,
-                            console_port: Optional[
-                                str] = RASPBERRY_PI_PICO_CONSOLE_PORT,
-                            console_port_alt: Optional[
-                                str] = RASPBERRY_PI_PICO_CONSOLE_PORT_ALT,
-                            data_port: Optional[
-                                str] = RASPBERRY_PI_PICO_DATA_PORT,
-                            data_port_alt: Optional[
-                                str] = RASPBERRY_PI_PICO_DATA_PORT_ALT,
-                            baudrate: Optional[
-                                int] = RASPBERRY_PI_PICO_BAUDRATE):
+def serial_communication_target(start_event: Event, parking_event: Event,
+                                stop_event: Event,
+                                incoming_messages_queue: Queue,
+                                outgoing_messages_queue: Queue,
+                                writer_messages_queue: Queue,
+                                photographer_capture_image_event: Event,
+                                server_messages_queue: Optional[Queue] = None,
+                                console_port: Optional[
+                                    str] = RASPBERRY_PI_PICO_CONSOLE_PORT,
+                                console_port_alt: Optional[
+                                    str] = RASPBERRY_PI_PICO_CONSOLE_PORT_ALT,
+                                data_port: Optional[
+                                    str] = RASPBERRY_PI_PICO_DATA_PORT,
+                                data_port_alt: Optional[
+                                    str] = RASPBERRY_PI_PICO_DATA_PORT_ALT,
+                                baudrate: Optional[
+                                    int] = RASPBERRY_PI_PICO_BAUDRATE):
     """
     Target function for a multiprocessing process that handles the serial
     communication.
 
     Args:
-        opened_event (Event): Event to signal when the serial communication is ready to send and receive messages.
         start_event (Event): Event to signal when the serial communication has started.
         parking_event (Event): Event to signal the parking state of the robot.
         stop_event (Event): Event to signal when the serial communication should stop sending and receiving messages.
@@ -55,7 +54,6 @@ def serial_communication_target(opened_event: Event, start_event: Event,
 
     # Initialize the serial communication
     serial_communication = SerialCommunication(
-        opened_event=opened_event,
         start_event=start_event,
         parking_event=parking_event,
         stop_event=stop_event,

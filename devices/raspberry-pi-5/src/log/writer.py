@@ -16,20 +16,17 @@ class Writer(WriterABC):
     # Wait timeout for processing messages
     WAIT_TIMEOUT = 0.1
 
-    def __init__(self, messages_queue: Queue, opened_event: Event,
-                 stop_event: Event):
+    def __init__(self, messages_queue: Queue, stop_event: Event):
         """
         Initialize the Logger class.
 
         Args:
             messages_queue (Queue): Queue to hold log messages.
-            opened_event (Event): Event to signal when the logger is ready to write messages.
             stop_event (Event): Event to signal when the logger should stop.
         """
         # Initialize the messages queue and events
         self.__messages_queue = messages_queue
-        self.__opened_event = opened_event
-        self.__opened_event.clear()
+        self.__opened_event = Event()
         self.__stop_event = stop_event
 
         # Initialize the reentrant lock

@@ -22,8 +22,8 @@ class Photographer(PhotographerABC):
     WAIT_TIMEOUT = 0.1
 
     def __init__(self, camera: CameraABC, images_queue: Queue,
-                 capture_image_event: Event, opened_event: Event,
-                 stop_event: Event, writer_messages_queue: Queue,
+                 capture_image_event: Event, stop_event: Event,
+                 writer_messages_queue: Queue,
                  preprocess_fn: Callable[[Image], np.ndarray],
                  server_messages_queue: Optional[Queue] = None):
         """
@@ -33,7 +33,6 @@ class Photographer(PhotographerABC):
             camera (CameraABC): Camera instance for capturing images.
             images_queue (Queue): Queue to hold input images for processing.
             capture_image_event (Event): Event to signal when an image should be captured.
-            opened_event (Event): Event to signal when the photographer is ready to process images.
             stop_event (Event): Event to signal when the photographer should stop processing images.
             writer_messages_queue (Queue): Queue to hold log messages.
             preprocess_fn: Callable[[Image], np.ndarray]: Function to preprocess images before inference.
@@ -42,7 +41,7 @@ class Photographer(PhotographerABC):
         # Initialize the queues and events
         self.__images_queue = images_queue
         self.__capture_image_event = capture_image_event
-        self.__opened_event = opened_event
+        self.__opened_event = Event()
         self.__stop_event = stop_event
 
         # Check the type of camera

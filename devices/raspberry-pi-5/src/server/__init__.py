@@ -28,8 +28,7 @@ class WebSocketServer(WebSocketServerABC):
     # Wait timeout
     WAIT_TIMEOUT = 0.1
 
-    def __init__(self, messages_queue: Queue, opened_event: Event,
-                 parking_event: Event,
+    def __init__(self, messages_queue: Queue, parking_event: Event,
                  stop_event: Event, writer_messages_queue: Queue,
                  host: str = HOST, port: int = PORT
                  ):
@@ -38,7 +37,6 @@ class WebSocketServer(WebSocketServerABC):
 
         Args:
             messages_queue (Queue): Queue to broadcast messages through the websockets server.
-            opened_event (Event): Event to signal when the websockets server is ready to accept connections.
             parking_event (Event): Event to signal the parking state of the robot.
             stop_event (Event): Event to signal when the websockets server should stop.
             writer_messages_queue (Queue): Queue to hold log messages.
@@ -47,7 +45,7 @@ class WebSocketServer(WebSocketServerABC):
         """
         # Initialize the messages queue and events
         self.__messages_queue = messages_queue
-        self.__opened_event = opened_event
+        self.__opened_event = Event()
         self.__parking_event = parking_event
         self.__stop_event = stop_event
 

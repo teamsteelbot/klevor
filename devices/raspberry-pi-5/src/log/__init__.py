@@ -26,8 +26,7 @@ class Logger(LoggerABC):
         self.__writer_messages_queue = writer_messages_queue
 
         # Check the type of tag
-        if tag is not None:
-            is_instance(tag, str)
+        is_instance(tag, (str, None,))
         self.__tag = self.get_unique_tag(tag) if unique_tag or not tag else tag
 
         # Log the initialization if a tag is provided

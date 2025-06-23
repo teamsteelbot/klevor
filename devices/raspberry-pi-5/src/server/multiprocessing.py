@@ -7,8 +7,7 @@ from ..utils.decorators import ignore_sigint
 
 
 @ignore_sigint
-def websocket_server_target(messages_queue: Queue, opened_event: Event,
-                            parking_event: Event,
+def websocket_server_target(messages_queue: Queue, parking_event: Event,
                             stop_event: Event, writer_messages_queue: Queue,
                             host: str = HOST, port: int = PORT):
     """
@@ -16,7 +15,6 @@ def websocket_server_target(messages_queue: Queue, opened_event: Event,
 
     Args:
         messages_queue (Queue): Queue to broadcast messages through the websockets server.
-        opened_event (Event): Event to signal when the websockets server is ready to accept connections.
         parking_event (Event): Event to signal the parking state of the server.
         stop_event (Event): Event to signal when the websockets server should stop.
         writer_messages_queue (Queue): Queue to hold log messages.
@@ -29,7 +27,6 @@ def websocket_server_target(messages_queue: Queue, opened_event: Event,
     # Initialize the websocket server
     server = WebSocketServer(
         messages_queue=messages_queue,
-        opened_event=opened_event,
         parking_event=parking_event,
         stop_event=stop_event,
         writer_messages_queue=writer_messages_queue,

@@ -19,19 +19,16 @@ if __name__ == "__main__":
 
     # Create the required queues and events
     writer_messages_queue = Queue()
-    writer_opened_event = Event()
     writer_stop_event = Event()
     rplidar_measures_queue = Queue()
-    rplidar_started_event = Event()
     server_messages_queue = Queue() if arg_server else None
-    server_opened_event = Event()
     start_event = Event()
     parking_event = Event()
     stop_event = Event()
 
     # Create a process for the writer
     writer_process = Process(target=writer_target, args=(
-        writer_messages_queue, writer_opened_event, writer_stop_event))
+        writer_messages_queue, writer_stop_event))
     writer_process.start()
 
     # Create an instance of Logger
@@ -43,14 +40,14 @@ if __name__ == "__main__":
 
     else:
         server_process = Process(target=websocket_server_target, args=(
-            server_messages_queue, server_opened_event, parking_event, stop_event,
+            server_messages_queue, parking_event, stop_event,
             writer_messages_queue))
         server_process.start()
 
     # Create a process for the RPLIDAR
     rplidar_process = Process(
         target=rplidar_target,
-        args=(rplidar_measures_queue, rplidar_started_event, start_event, stop_event,
+        args=(rplidar_measures_queue, start_event, stop_event,
               writer_messages_queue, server_messages_queue if arg_server else
               None,)
     )

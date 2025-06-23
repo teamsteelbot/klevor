@@ -128,7 +128,7 @@ class HailoABC(ABC):
         pass
 
     @abstractmethod
-    def _run(self) -> None:
+    def run(self) -> None:
         """
         Run the inference loop.
 
@@ -158,7 +158,7 @@ class HailoABC(ABC):
         pass
 
 
-class ObjectDetectionABC(ABC):
+class ObjectDetectorABC(ABC):
     """
     Abstract class to handle object detection using Hailo handlers.
     """

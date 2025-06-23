@@ -1,57 +1,63 @@
 import threading
-from multiprocessing import Event, RLock
-from typing import Optional, final
+from multiprocessing import Event, RLock, Queue
+from typing import final
 
 from . import Hailo
-from .abstracts import ObjectDetectionABC
+from .abstracts import ObjectDetectorABC
 from ..camera.image_processing_queue import Photographer
 from ..constants import (
     MODEL_G, MODEL_M, MODEL_R, MODELS_NAME
 )
 from ..env import Env
 from ..files import Files
-from ..log import LoggerABC
-from ..log.sub_logger import SubLogger
+from ..log import Logger
 from ..opencv import OpenCV
 from ..utils import is_instance
 
 
-class ObjectDetection(ObjectDetectionABC):
+class ObjectDetector(ObjectDetectorABC):
     """
     Class to handle object detection using Hailo handlers.
     """
 
     # Logger configuration
-    LOG_TAG = 'ObjectDetection'
+    LOGGER_TAG = 'ObjectDetector'
 
-    def __init__(self, image_processing_queue: Photographer,
-                 logger: Optional[LoggerABC] = None):
+    def __init__(
+            self,
+            inferences_queue: Queue,
+            started_event: Event,
+            start_event: Event,
+            parking_event: Event,
+            stop_event: Event,
+            photographer_images_queue: Queue,
+            writer_messages_queue: Queue,
+    ) -> None:
         """
         Initialize the ObjectDetection class.
 
         Args:
-            image_processing_queue (Photographer): The queue to process images.
-            logger (Optional[LoggerABC]): Logger instance to use for logging. Defaults to None.
+            inferences_queue (Queue): Queue to hold the inferences from the Hailo handlers.
+            started_event (Event): Event to signal when the object detector has started.
+            start_event (Event): Event to signal when the object detector should start.
+            parking_event (Event): Event to signal the parking state of the robot.
+            stop_event (Event): Event to signal when the object detector should stop.
+            photographer_images_queue (Queue): Queue to hold input images for processing.
+            writer_messages_queue (Queue): Queue to hold log messages.
         """
+        # Initialize the queues and events
+        self.__inferences_queue = inferences_queue
+        self.__photographer_images_queue = photographer_images_queue
+        self.__started_event = started_event
+        self.__start_event = start_event
+        self.__parking_event = parking_event
+        self.__stop_event = stop_event
+
+        # Initialize the logger
+        self.__logger = Logger(writer_messages_queue, self.LOGGER_TAG)
+
         # Initialize the reentrant lock
         self.__rlock = RLock()
-
-        # Check the type of image processing queue
-        is_instance(image_processing_queue, Photographer)
-        self.__image_processing_queue = image_processing_queue
-
-        # Check the type of logger
-        is_instance(logger, LoggerABC) if logger else None
-
-        # Create a sub-logger for the Hailo handler
-        self.__logger = SubLogger(logger, self.LOG_TAG) if logger else None
-
-        # Create the stop event
-        self.__stop_event = Event()
-        self.__stop_event.set()  # Initially set to stop
-
-        # Create the parking event
-        self.__parking_event = Event()
 
         # Initialize the thread
         self.__thread = None
@@ -81,42 +87,14 @@ class ObjectDetection(ObjectDetectionABC):
                                   put_output_inference_fn=image_processing_queue.add_inference)
             self.__hailo_handlers[model_name] = hailo_handler
 
-    def __start(self) -> None:
-        """
-        Clear the stop and parking events
-        """
-        with self.__rlock:
-            # Clear the stop event
-            self.__stop_event.clear()
-
-            # Clear the parking event
-            self.__parking_event.clear()
-
     @final
     def is_running(self) -> bool:
         with self.__rlock:
             return not self.__stop_event.is_set()
 
-    def __stop(self) -> None:
-        """
-        Set the stop event to stop the object detection.
-        """
-        with self.__rlock:
-            # Set the stop event
-            self.__stop_event.set()
-
-            # Clear the parking event
-            self.__parking_event.clear()
-
     @final
     def is_stopped(self) -> bool:
-        with self.__rlock:
-            return self.__stop_event.is_set()
-
-    @final
-    def set_parking_event(self) -> None:
-        with self.__rlock:
-            self.__parking_event.set()
+        return not self.is_running()
 
     @final
     def _loop(self) -> None:

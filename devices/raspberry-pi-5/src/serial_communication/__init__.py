@@ -39,7 +39,6 @@ class SerialCommunication(SerialCommunicationABC):
 
     def __init__(
             self,
-            opened_event: Event,
             start_event: Event,
             parking_event: Event,
             stop_event: Event,
@@ -59,7 +58,6 @@ class SerialCommunication(SerialCommunicationABC):
         Initialize the serial communication class.
 
         Args:
-            opened_event (Event): Event to signal when the serial communication is ready to send and receive messages.
             start_event (Event): Event to signal when the serial communication has started.
             parking_event (Event): Event to signal the parking state of the robot.
             stop_event (Event): Event to signal when the serial communication should stop sending and receiving messages.
@@ -75,7 +73,7 @@ class SerialCommunication(SerialCommunicationABC):
             baudrate (Optional[int]): Baud rate for the serial communication.
         """
         # Initialize the queues and events
-        self.__opened_event = opened_event
+        self.__opened_event = Event()
         self.__start_event = start_event
         self.__parking_event = parking_event
         self.__stop_event = stop_event

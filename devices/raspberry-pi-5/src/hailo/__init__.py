@@ -1,8 +1,7 @@
 import os
 from functools import partial
 from multiprocessing import Event, Queue, RLock
-from threading import Thread
-from typing import Callable, Optional, final
+from typing import Optional, final
 
 import cv2
 import numpy as np
@@ -11,11 +10,9 @@ from hailo_platform import (HEF, VDevice,
                             FormatType, HailoSchedulingAlgorithm)
 
 from .abstracts import HailoABC
-from ..camera.image_processing_queue import Photographer
 from ..constants import MODEL_G, MODEL_R, MODEL_M
 from ..files import Files
-from ..log import LoggerABC
-from ..log.sub_logger import SubLogger
+from ..log import Logger
 from ..model import ImageBoundingBoxes
 from ..utils import is_instance
 
@@ -26,7 +23,7 @@ class Hailo(HailoABC):
     """
 
     # Logger configuration
-    LOG_TAG = "Hailo"
+    LOGGER_TAG = "Hailo"
 
     # Image allowed extensions
     IMAGE_ALLOWED_EXTENSIONS: tuple = ('.jpg', '.png', '.bmp', '.jpeg')
@@ -38,19 +35,20 @@ class Hailo(HailoABC):
     # Batch size
     BATCH_SIZE = 1
 
+    # Wait timeout
+    WAIT_TIMEOUT = 0.1
+
     # Job timeout
-    TIMEOUT = 10000
+    JOB_TIMEOUT = 5000
 
     def __init__(self, model_name: str, hef_file_path: str | os.PathLike[str],
                  labels_path: str | os.PathLike[str],
                  class_colors: tuple[tuple[int, int, int]],
+                 processed_images_queue: Queue, inferences_queue: Queue,
+                 stop_event: Event, writer_messages_queue: Queue,
                  multi_threading: bool = True, multiprocessing: bool = False,
-                 image_processing_queue: Photographer = None,
-                 logger: Optional[LoggerABC] = None,
                  batch_size: int = BATCH_SIZE, input_type: Optional[str] = None,
-                 output_type: Optional[dict[str, str]] = None,
-                 put_output_inference_fn: Optional[
-                     Callable[[str, ImageBoundingBoxes], None]] = None) -> None:
+                 output_type: Optional[dict[str, str]] = None) -> None:
         """
         Initialize the Hailo handler class.
 
@@ -59,17 +57,28 @@ class Hailo(HailoABC):
             hef_file_path (str | os.PathLike[str]): Path to the HEF file.
             labels_path (str | os.PathLike[str]): Path to the labels file.
             class_colors (tuple[tuple[int, int, int]]): Tuple mapping class IDs to RGB colors.
-            multi_threading (bool): Whether to enable multi-threading. Defaults to True.
-            multiprocessing (bool): Whether to enable multiprocessing. Defaults to False.
-            image_processing_queue (Photographer): Queue for images. Defaults to None.
-            logger (Optional[Logger]): Logger instance for logging messages. Defaults to None.
-            batch_size (int): Batch size for inference. Defaults to BATCH_SIZE.
-            input_type (Optional[str]): Format type of the input stream. Defaults to None.
-            output_type (Optional[dict[str, str]]): Format type of the output stream. Defaults to None.
-            put_output_inference_fn (Optional[Callable[[str, ImageBoundingBoxes], None]]): Function to put output inference results into the queue. Defaults to None.
+            processed_images_queue (Queue): Queue to hold input images for processing.
+            inferences_queue (Queue): Queue to hold the inferences from the Hailo handlers.
+            stop_event (Event): Event to signal when the Hailo handler should stop.
+            writer_messages_queue (Queue): Queue to hold log messages.
+            multi_threading (bool): Whether to enable multi-threading.
+            multiprocessing (bool): Whether to enable multiprocessing.
+            batch_size (int): Batch size for inference.
+            input_type (Optional[str]): Format type of the input stream.
+            output_type (Optional[dict[str, str]]): Format type of the output stream.
         """
+        # Initialize the queues and events
+        self.__processed_images_queue = processed_images_queue
+        self.__inferences_queue = inferences_queue
+        self.__started_event = Event()
+        self.__stop_event = stop_event
+        
+        # Initialize the logger
+        self.__logger_tag = f"{self.LOGGER_TAG}_{model_name}"
+        self.__logger = Logger(writer_messages_queue, self.__logger_tag)
+        
         # Initialize the reentrant lock
-        self.__lock = RLock()
+        self.__rlock = RLock()
 
         # Check the type of model name
         is_instance(model_name, str)
@@ -83,20 +92,7 @@ class Hailo(HailoABC):
         # Check the labels path
         is_instance(labels_path, str)
         Files.ensure_directory_exists(labels_path)
-        self.__labels_path = labels_path
-
-        # Load the labels
-        self.__labels = Files.get_labels_from_txt(self.__labels_path)
-
-        # Check the type of image processing queue
-        is_instance(image_processing_queue, Photographer)
-        self.__images_queue = image_processing_queue
-
-        # Check the type of logger
-        is_instance(logger, LoggerABC) if logger else None
-
-        # Create a sub-logger for the Hailo handler
-        self.__logger = SubLogger(logger, self.LOG_TAG) if logger else None
+        self.__labels = Files.get_labels_from_txt(labels_path)
 
         # Check the type of class colors
         is_instance(class_colors, dict)
@@ -106,46 +102,23 @@ class Hailo(HailoABC):
         is_instance(batch_size, int)
         self.__batch_size = batch_size
 
-        # Create the input queue
-        self.__input_queue = Queue()
+        # Initialize the multiprocessing and multi-threading flags
+        is_instance(multi_threading, bool)
+        self.__multi_threading = multi_threading
+        is_instance(multiprocessing, bool)
+        self.__multiprocessing = multiprocessing
 
-        # Create the stop event
-        self.__stop_event = Event()
-        self.__stop_event.set()  # Initially set to stop
+        # Initialize the input type
+        is_instance(input_type, (str, type(None)))
+        self.__input_type = input_type
 
-        # Set the put output inference function
-        self.__put_output_inference_fn = put_output_inference_fn
+        # Initialize the output type
+        self.__output_type: Optional[dict[str, str]] = output_type
 
-        # Initialize the thread
-        self.__thread = None
-
-        # Create the VDevice parameters
-        params = VDevice.create_params()
-
-        # Set the scheduling algorithm to round-robin to activate the scheduler
-        params.scheduling_algorithm = HailoSchedulingAlgorithm.ROUND_ROBIN
-
-        # Set the group ID to SHARED
-        if multi_threading or multiprocessing:
-            params.group_id = "SHARED"
-
-        # Enable multi-processing service
-        if multiprocessing:
-            params.multi_process_service = True
-
-        # Set the VDevice parameters
-        self.__target = VDevice(params)
-
-        # Set the HEF model
-        self.__hef = HEF(self.__hef_file_path)
-        self.__infer_model = self.__target.create_infer_model(
-            self.__hef_file_path)
-        self.__infer_model.set_batch_size(batch_size)
-
-        # Set the input and output types
-        self._set_input_type(input_type) if input_type else None
-        self._set_output_type(output_type) if output_type else None
-        self.__output_type = output_type
+        # Initialize the target, HEF, and infer model
+        self.__target = None
+        self.__hef = None
+        self.__infer_model = None
 
     @final
     def _set_input_type(self, input_type: Optional[str] = None) -> None:
@@ -169,14 +142,14 @@ class Hailo(HailoABC):
 
     @final
     def get_input_shape(self) -> tuple[int, ...]:
-        return self.__hef.get_input_vstream_infos()[
-            0].shape  # Assumes one input
+        # Assumes one input
+        return self.__hef.get_input_vstream_infos()[0].shape
 
     @final
     def add_image(self, preprocessed_image: np.ndarray) -> None:
         # Check the type of preprocessed image
         is_instance(preprocessed_image, np.ndarray)
-        self.__input_queue.put(preprocessed_image)
+        self.__processed_images_queue.put(preprocessed_image)
 
     @final
     def _create_bindings(self, configured_infer_model) -> object:
@@ -220,22 +193,67 @@ class Hailo(HailoABC):
                 )
                 for name in bindings._output_names
             }
-        self.__put_output_inference_fn(self.__model_name,
-                                       ImageBoundingBoxes.from_hailo(result))
+        self.__inferences_queue.put(ImageBoundingBoxes.from_hailo(result))
 
     @final
-    def _run(self) -> None:
+    def run(self) -> None:
+        with self.__rlock:
+            # Check if the stop event is set
+            if self.__stop_event.is_set():
+                self.__logger.warning(
+                    f"Stop event is set. Hailo handler for model '{self.__model_name}' will not run.")
+                return
+
+            # Check if the RPLIDAR is already running
+            if self.__started_event.is_set():
+                self.__logger.warning(
+                    f"Hailo handler for model '{self.__model_name}' is already running. Cannot start again.")
+                return
+
+            # Set the started event
+            self.__started_event.set()
+
+        # Create the VDevice parameters
+        params = VDevice.create_params()
+
+        # Set the scheduling algorithm to round-robin to activate the scheduler
+        params.scheduling_algorithm = HailoSchedulingAlgorithm.ROUND_ROBIN
+
+        # Set the group ID to SHARED
+        if self.__multi_threading or self.__multiprocessing:
+            params.group_id = "SHARED"
+
+        # Enable multi-processing service
+        if self.__multiprocessing:
+            params.multi_process_service = True
+
+        # Set the VDevice parameters
+        self.__target = VDevice(params)
+
+        # Set the HEF model
+        self.__hef = HEF(self.__hef_file_path)
+        self.__infer_model = self.__target.create_infer_model(
+            self.__hef_file_path)
+        self.__infer_model.set_batch_size(self.__batch_size)
+
+        # Set the input and output types
+        self._set_input_type(self.__input_type) if self.__input_type else None
+        self._set_output_type(self.__output_type) if self.__output_type else None
+        
         with self.__infer_model.configure() as configured_infer_model:
-            while not self.__stop_event.is_set():
+            while self.is_running():
                 # Get a preprocessed image from the input queue
-                preprocessed_image = self.__input_queue.get()
+                preprocessed_image = self.__processed_images_queue.get(
+                    timeout=self.WAIT_TIMEOUT)
+                if preprocessed_image is None:
+                    continue
 
                 # Create the bindings for the input and output buffers
                 bindings = self._create_bindings(configured_infer_model)
                 bindings.input().set_buffer(np.array(preprocessed_image))
 
                 configured_infer_model.wait_for_async_ready(
-                    timeout_ms=self.TIMEOUT)
+                    timeout_ms=self.JOB_TIMEOUT)
                 job = configured_infer_model.run_async(
                     bindings, partial(
                         self._callback,
@@ -243,79 +261,24 @@ class Hailo(HailoABC):
                         bindings=bindings
                     )
                 )
-            job.wait(self.TIMEOUT)  # Wait for the last job
 
-    def __start(self) -> None:
-        """
-        Start the Hailo handler by setting the stop event to False
-        """
-        with self.__lock:
-            # Clear the stop event to indicate that the handler is running
-            self.__stop_event.clear()
+            # Wait for the last job
+            job.wait(self.JOB_TIMEOUT)
+
+        # Clear the started event
+        with self.__rlock:
+            self.__started_event.clear()
 
     @final
     def is_running(self) -> bool:
         return not self.__stop_event.is_set()
 
-    def __stop(self) -> None:
-        """
-        Stop the Hailo handler by setting the stop event to True.
-        """
-        with self.__lock:
-            # Set the stop event to indicate that the handler should stop
-            self.__stop_event.set()
-
     @final
     def is_stopped(self) -> bool:
         return not self.is_running()
 
-    def start_thread(self) -> None:
-        """
-        Start the Hailo handler thread.
-        """
-        with self.__lock:
-            if self.is_running():
-                self.__logger.warning(
-                    "Hailo handler thread is already running.") if self.__logger else None
-                return
-
-            # Start the Hailo handler
-            self.__start()
-
-            # Create and start the thread
-            self.__thread = Thread(target=self._run)
-            self.__thread.start()
-
-        # Log
-        self.__logger.info(
-            "Hailo handler thread started.") if self.__logger else None
-
-    def stop_thread(self) -> None:
-        """
-        Stop the Hailo handler thread.
-        """
-        with self.__lock:
-            if self.is_stopped():
-                self.__logger.warning(
-                    "Hailo handler thread is already stopped.") if self.__logger else None
-                return
-
-            # Stop the Hailo handler
-            self.__stop()
-
-            # Wait for the thread to finish
-            self.__thread.join()
-            self.__thread = None
-
-        # Log
-        self.__logger.info(
-            "Hailo handler thread stopped.") if self.__logger else None
-
     def __del__(self):
         """
-        Destructor to ensure the thread is stopped when the object is deleted.
+        Destructor to clean up resources when the Hailo handler is no longer needed.
         """
-        # Stop the thread if it is running
-        self.stop_thread() if self.is_running() else None
-        self.__logger.info(
-            "Hailo handler object deleted.") if self.__logger else None
+        self.__stop_event.set()

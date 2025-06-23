@@ -8,16 +8,14 @@ from ..log.multiprocessing import writer_target
 if __name__ == "__main__":
     # Create the required queues and events
     writer_messages_queue = Queue()
-    writer_opened_event = Event()
     writer_stop_event = Event()
     server_messages_queue = Queue()
-    server_opened_event = Event()
     parking_event = Event()
     stop_event = Event()
 
     # Create a process for the writer
     writer_process = Process(target=writer_target, args=(
-        writer_messages_queue, writer_opened_event, writer_stop_event))
+        writer_messages_queue, writer_stop_event))
     writer_process.start()
 
     # Create an instance of Logger
@@ -25,7 +23,7 @@ if __name__ == "__main__":
 
     # Create a process for the WebSocket server
     server_process = Process(target=websocket_server_target, args=(
-        server_messages_queue, server_opened_event, parking_event, stop_event,
+        server_messages_queue, parking_event, stop_event,
         writer_messages_queue))
     server_process.start()
 

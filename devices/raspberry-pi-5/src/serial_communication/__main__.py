@@ -8,9 +8,7 @@ from ..log.multiprocessing import writer_target
 if __name__ == "__main__":
     # Create the required queues and events
     writer_messages_queue = Queue()
-    writer_opened_event = Event()
     writer_stop_event = Event()
-    serial_opened_event = Event()
     serial_incoming_messages_queue = Queue()
     serial_outgoing_messages_queue = Queue()
     photographer_capture_image_event = Event()
@@ -20,7 +18,7 @@ if __name__ == "__main__":
 
     # Create a process for the writer
     writer_process = Process(target=writer_target, args=(
-        writer_messages_queue, writer_opened_event, writer_stop_event))
+        writer_messages_queue, writer_stop_event))
     writer_process.start()
 
     # Create an instance of Logger
@@ -29,9 +27,9 @@ if __name__ == "__main__":
     # Create a process for the serial communication
     serial_communication_process = Process(
         target=serial_communication_target,
-        args=(serial_opened_event, serial_incoming_messages_queue,
-              serial_outgoing_messages_queue, photographer_capture_image_event,
-              start_event, parking_event, stop_event, writer_messages_queue)
+        args=(serial_incoming_messages_queue, serial_outgoing_messages_queue,
+              photographer_capture_image_event, start_event, parking_event,
+              stop_event, writer_messages_queue)
     )
     serial_communication_process.start()
 
@@ -54,6 +52,6 @@ if __name__ == "__main__":
     finally:
         # Stop the serial communication and writer process and clean up
         stop_event.set()
-        serial_opened_event.join()
+        serial_communication_process.join()
         writer_stop_event.set()
         writer_process.join()

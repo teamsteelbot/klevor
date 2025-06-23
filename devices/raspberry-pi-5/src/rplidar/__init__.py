@@ -27,7 +27,6 @@ class RPLIDAR(RPLIDARABC):
     def __init__(
             self,
             measures_queue: Queue,
-            started_event: Event,
             start_event: Event,
             stop_event: Event,
             writer_messages_queue: Queue,
@@ -41,7 +40,6 @@ class RPLIDAR(RPLIDARABC):
 
         Args:
             measures_queue (Queue): Queue to hold the measures from the RPLIDAR.
-            started_event (Event): Event to signal when the RPLIDAR has started.
             start_event (Event): Event to signal when the RPLIDAR should start.
             stop_event (Event): Event to signal when the RPLIDAR should stop.
             writer_messages_queue (Queue): Queue to hold log messages.
@@ -52,7 +50,7 @@ class RPLIDAR(RPLIDARABC):
         """
         # Initialize the queues and events
         self.__measures_queue = measures_queue
-        self.__started_event = started_event
+        self.__started_event = Event()
         self.__start_event = start_event
         self.__stop_event = stop_event
         
@@ -86,12 +84,6 @@ class RPLIDAR(RPLIDARABC):
 
         # Initialize the process
         self.__process = None
-
-        # Initialize the thread
-        self.__thread = None
-
-        # Initialize the challenge
-        self.__challenge = None
 
         # Get the debug environment variable
         self.__debug = Env.get_debug_mode()
@@ -219,9 +211,6 @@ class RPLIDAR(RPLIDARABC):
         # Set the started event to signal that the RPLIDAR has started
         with self.__rlock:
             self.__started_event.set()
-
-        # Get the challenge environment variable
-        self.__challenge = Env.get_challenge()
 
         # Log
         self.__logger.info("RPLIDAR's starting...")

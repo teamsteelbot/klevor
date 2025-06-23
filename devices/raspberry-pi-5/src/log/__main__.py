@@ -7,12 +7,11 @@ from .multiprocessing import writer_target
 if __name__ == "__main__":
     # Create the required queues and events
     writer_messages_queue = Queue()
-    writer_opened_event = Event()
     stop_event = Event()
 
     # Create a process for the writer
     writer_process = Process(target=writer_target, args=(
-        writer_messages_queue, writer_opened_event, stop_event))
+        writer_messages_queue, stop_event))
     writer_process.start()
 
     # Create an instance of Logger

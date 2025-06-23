@@ -1,7 +1,7 @@
 import io
 from multiprocessing import RLock, Queue
 from time import sleep
-from typing import final
+from typing import final, Optional
 
 from PIL.Image import Image
 from picamera2 import Picamera2
@@ -24,7 +24,7 @@ class Camera(CameraABC):
 
     def __init__(self, writer_messages_queue: Queue, width: int = WIDTH,
                  height: int = HEIGHT, rotation: int = 0,
-                 video_config: dict = None):
+                 video_config: Optional[dict] = None):
         """
         Initialize the camera with the specified width, height, and video configuration.
 
@@ -32,8 +32,8 @@ class Camera(CameraABC):
             writer_messages_queue (Queue): Queue to hold log messages.
             width (int): Width of the camera image.
             height (int): Height of the camera image.
-            video_config(dict): Configuration for video recording, if any.
-            rotation (int): Rotation angle for the camera, default is 0.
+            video_config(Optional[dict]): Configuration for video recording.
+            rotation (int): Rotation angle for the camera.
         """
         # Initialize the logger
         self.__logger = Logger(writer_messages_queue, self.LOGGER_TAG)
