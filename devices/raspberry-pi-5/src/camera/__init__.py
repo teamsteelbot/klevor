@@ -1,7 +1,7 @@
 import io
-from multiprocessing import RLock
+from multiprocessing import RLock, Queue, Event
 from time import sleep
-from typing import Optional, final
+from typing import final
 
 from PIL.Image import Image
 from picamera2 import Picamera2
@@ -11,9 +11,7 @@ from picamera2.outputs import FileOutput
 from ..constants import WIDTH, HEIGHT
 from .constants import IMAGE_FORMAT, ADJUST_DURATION
 from .abstracts import CameraABC
-from ..log.abstracts import LoggerABC
-from ..log.sub_logger import SubLogger
-from ..utils import is_instance
+from ..log import Logger
 
 
 class Camera(CameraABC):
@@ -24,12 +22,13 @@ class Camera(CameraABC):
     # Logger configuration
     LOG_TAG = "Camera"
 
-    def __init__(self, logger: Optional[LoggerABC] = None, width: int = WIDTH, height: int = HEIGHT, rotation: int = 0, video_config: dict = None):
+    def __init__(self, messages_queue: Queue, opened_event: Event, width: int = WIDTH, height: int = HEIGHT, rotation: int = 0, video_config: dict = None):
         """
         Initialize the camera with the specified width, height, and video configuration.
 
         Args:
-            logger (Optional[LoggerABC]): Logger instance for logging messages.
+            messages_queue (Queue): Queue to hold log messages.
+            opened_event (Event): Event to signal when the logger is ready to write messages.
             width (int): Width of the camera image.
             height (int): Height of the camera image.
             video_config(dict): Configuration for video recording, if any.
@@ -38,14 +37,9 @@ class Camera(CameraABC):
         # Initialize the reentrant lock
         self.__rlock = RLock()
 
-        # Check the type of logger
-        is_instance(logger, LoggerABC) if logger else None
-
-        # Get the sub-logger for this class
-        self.__logger = SubLogger(logger, self.LOG_TAG) if logger else None
-
-        # Log
-        self.__logger.debug("Initializing camera...") if self.__logger else None
+        # Initialize the logger
+        self.__logger = Logger(messages_queue, opened_event, self.LOG_TAG)
+        self.__logger.debug("Initializing camera...") 
 
         # Configure the camera and video settings
         self.__picam2 = Picamera2()
@@ -72,7 +66,7 @@ class Camera(CameraABC):
             self.__started_preview = True
 
         # Log
-        self.__logger.info("Camera preview started.") if self.__logger else None
+        self.__logger.info("Camera preview started.") 
 
     @final
     def _stop_preview(self) -> None:
@@ -85,7 +79,7 @@ class Camera(CameraABC):
             self.__started_preview = False
 
         # Log
-        self.__logger.info("Camera preview stopped.") if self.__logger else None
+        self.__logger.info("Camera preview stopped.") 
 
     @final
     def record_video(self, width: int = WIDTH, height: int = HEIGHT, duration: int = 10, file_path: str = 'video.h264',
@@ -113,7 +107,7 @@ class Camera(CameraABC):
             self.__picam2.stop_recording()
 
         # Log
-        self.__logger.info(f"Video of {duration} seconds recording saved to {file_path}.") if self.__logger else None
+        self.__logger.info(f"Video of {duration} seconds recording saved to {file_path}.") 
 
     @final
     def capture_image(self, adjust_duration: float = ADJUST_DURATION) -> Image:
@@ -131,7 +125,7 @@ class Camera(CameraABC):
             self._stop_preview()
 
         # Log
-        self.__logger.info("Captured image.") if self.__logger else None
+        self.__logger.info("Captured image.") 
 
         return image
 
@@ -152,7 +146,7 @@ class Camera(CameraABC):
             self._stop_preview()
 
         # Log
-        self.__logger.info("Captured image stream.") if self.__logger else None
+        self.__logger.info("Captured image stream.") 
 
         return image_stream
 
@@ -176,4 +170,4 @@ class Camera(CameraABC):
         self.__picam2.close()
 
         # Log
-        self.__logger.info("Closed camera.") if self.__logger else None
+        self.__logger.info("Closed camera.") 

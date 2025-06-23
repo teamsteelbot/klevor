@@ -1,32 +1,36 @@
+from multiprocessing import Event, Queue, Process
 from time import sleep
 
 from . import Logger
-from .sub_logger import SubLogger
+from .multiprocessing import writer_target
 
 if __name__ == "__main__":
-    # Create an instance of Logger
-    logger = Logger()
+    # Create the required queues and events
+    messages_queue = Queue()
+    opened_event = Event()
+    stop_event = Event()
 
-    # Create a sub-logger for this module
-    sub_logger = SubLogger(logger, "Test")
+    # Create a process for the writer
+    writer_process = Process(target=writer_target, args=(messages_queue, opened_event, stop_event))
+    writer_process.start()
+
+    # Create an instance of Logger
+    logger = Logger(messages_queue, opened_event)
 
     try:
-        # Create a thread for the logger
-        logger.create_thread()
-
         # Log a message using the sub-logger
-        sub_logger.info("This is a test log message.")
-
-        # Log a message using the main logger
-        logger.info("This is a test log message from the main logger.")
+        logger.info("This is a test log message.")
 
         # Wait for a while to ensure the log messages are processed
         print("Logger is running. Press Ctrl+C to stop.")
         while True:
+            # Keep the main thread alive to allow the logger to run
+            logger.info("Logger is still running...")
             sleep(1)
 
     except KeyboardInterrupt:
         # Handle keyboard interrupt to stop the logger thread gracefully
+        print("KeyboardInterrupt received. Stopping logger thread...")
         logger.warning("KeyboardInterrupt received. Stopping logger thread.")
 
     except Exception as e:
@@ -34,6 +38,6 @@ if __name__ == "__main__":
         logger.error(f"An error occurred: {e}")
 
     finally:
-        # Stop the logger thread gracefully
-        if logger:
-            logger.stop_thread()
+        # Stop the writer process and clean up
+        stop_event.set()
+        writer_process.join()

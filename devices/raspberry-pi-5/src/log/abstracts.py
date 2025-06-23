@@ -1,13 +1,171 @@
+from multiprocessing import Queue, Event
 from abc import ABC, abstractmethod
-from typing import Optional, TextIO
+from typing import TextIO
 
 from .message import Message
 from .enums import Category
+from ..files import Files
 
 class LoggerABC(ABC):
     """
     Abstract class to handle logging functionality.
     """
+
+    @property
+    @abstractmethod
+    def tag(self) -> str:
+        """
+        Get the tag of the logger.
+
+        Returns:
+            str: The tag used for logging.
+        """
+        pass
+
+    @tag.setter
+    @abstractmethod
+    def tag(self, tag: str) -> None:
+        """
+        Set the tag for the logger.
+
+        Args:
+            tag (str): New tag for the log messages.
+        """
+        pass
+
+    @property
+    @abstractmethod
+    def messages_queue(self) -> Queue:
+        """
+        Get the messages queue.
+
+        Returns:
+            Queue: The messages queue.
+        """
+        pass
+
+    @messages_queue.setter
+    @abstractmethod
+    def messages_queue(self, messages_queue: Queue) -> None:
+        """
+        Set the messages queue.
+
+        Args:
+            messages_queue (Queue): New messages queue.
+        """
+        pass
+
+    @property
+    @abstractmethod
+    def opened_event(self) -> Event:
+        """
+        Get the event indicating if the log file is opened.
+
+        Returns:
+            Event: The event indicating if the log file is opened.
+        """
+        pass
+
+    @opened_event.setter
+    @abstractmethod
+    def opened_event(self, opened_event: Event) -> None:
+        """
+        Set the event indicating if the log file is opened.
+
+        Args:
+            opened_event (Event): New event indicating if the log file is opened.
+        """
+        pass
+
+    @abstractmethod
+    def log(self, content: str, category: Category = Category.INFO) -> None:
+        """
+        Put a log message in the queue.
+
+        Args:
+            content (str): Content of the log message.
+            category (Category): Category of the log message.
+        """
+        pass
+
+    @abstractmethod
+    def info(self, content: str) -> None:
+        """
+        Log an informational message.
+
+        Args:
+            content (str): Content of the log message.
+        """
+        pass
+
+    @abstractmethod
+    def error(self, content: str) -> None:
+        """
+        Log an error message.
+
+        Args:
+            content (str): Content of the log message.
+        """
+        pass
+
+    @abstractmethod
+    def warning(self, content: str) -> None:
+        """
+        Log a warning message.
+
+        Args:
+            content (str): Content of the log message.
+        """
+        pass
+
+    @abstractmethod
+    def debug(self, content: str) -> None:
+        """
+        Log a debug message.
+
+        Args:
+            content (str): Content of the log message.
+        """
+        pass
+
+
+class WriterABC(ABC):
+    """
+    Abstract class to handle writing log messages to a file.
+    """
+
+    @property
+    @abstractmethod
+    def opened_event(self) -> Event:
+        """
+        Get the event indicating if the log file is opened.
+
+        Returns:
+            Event: The event indicating if the log file is opened.
+        """
+        pass
+
+    @property
+    @abstractmethod
+    def stop_event(self) -> Event:
+        """
+        Get the event indicating if the logger is stopped.
+
+        Returns:
+            Event: The event indicating if the logger is stopped.
+        """
+        pass
+
+    @property
+    @abstractmethod
+    def messages_queue(self) -> Queue:
+        """
+        Get the messages queue.
+
+        Returns:
+            Queue: The messages queue.
+        """
+        pass
 
     @staticmethod
     def _write(file: TextIO, message: Message) -> None:
@@ -44,12 +202,19 @@ class LoggerABC(ABC):
         pass
 
     @abstractmethod
-    def _write_last_message(self, file: TextIO) -> None:
+    def _write_last_message(self) -> None:
         """
         Write the last message to the log file.
+        """
+        pass
+
+    @abstractmethod
+    def run(self, file_path: str = Files.get_log_file_path()) -> None:
+        """
+        Main loop for the logger to write messages to the log file.
 
         Args:
-            file (TextIO): The file to write the message to.
+            file_path (str): Path to the log file.
         """
         pass
 
@@ -72,168 +237,3 @@ class LoggerABC(ABC):
             bool: True if the stop event is set (indicating the logger is stopped), False otherwise.
         """
         pass
-
-    @abstractmethod
-    def create_thread(self) -> None:
-        """
-        Create thread for the logger.
-        """
-        pass
-
-    @abstractmethod
-    def stop_thread(self) -> None:
-        """
-        Stop the logger thread.
-        """
-        pass
-
-    @abstractmethod
-    def log(self, content: str, category: Category = Category.INFO, tag: Optional[str] = None) -> None:
-        """
-        Put a log message in the queue.
-
-        Args:
-            content (str): Content of the log message.
-            category (Category): Category of the log message.
-            tag (Optional[str]): Optional tag for the log message.
-        """
-        pass
-
-    @abstractmethod
-    def info(self, content: str, tag: Optional[str] = None) -> None:
-        """
-        Log an informational message.
-
-        Args:
-            content (str): Content of the log message.
-            tag (Optional[str]): Optional tag for the log message.
-        """
-        pass
-
-    @abstractmethod
-    def error(self, content: str, tag: Optional[str] = None) -> None:
-        """
-        Log an error message.
-
-        Args:
-            content (str): Content of the log message.
-            tag (Optional[str]): Optional tag for the log message.
-        """
-        pass
-
-    @abstractmethod
-    def warning(self, content: str, tag: Optional[str] = None) -> None:
-        """
-        Log a warning message.
-
-        Args:
-            content (str): Content of the log message.
-            tag (Optional[str]): Optional tag for the log message.
-        """
-        pass
-
-    @abstractmethod
-    def debug(self, content: str, tag: Optional[str] = None) -> None:
-        """
-        Log a debug message.
-
-        Args:
-            content (str): Content of the log message.
-            tag (Optional[str]): Optional tag for the log message.
-        """
-        pass
-
-class SubLoggerABC(ABC):
-    """
-    Abstract class to handle sub-logging functionality.
-    """
-
-    @property
-    @abstractmethod
-    def tag(self) -> str:
-        """
-        Get the tag of the logger.
-
-        Returns:
-            str: The tag used for logging.
-        """
-        pass
-
-    @tag.setter
-    @abstractmethod
-    def tag(self, tag: str) -> None:
-        """
-        Set the tag for the logger.
-
-        Args:
-            tag (str): New tag for the log messages.
-        """
-        pass
-
-    @property
-    @abstractmethod
-    def logger(self) -> LoggerABC:
-        """
-        Get the logger instance.
-
-        Returns:
-            LoggerABC: The logger instance used for logging.
-        """
-        pass
-
-    @logger.setter
-    @abstractmethod
-    def logger(self, logger: LoggerABC) -> None:
-        """
-        Set the logger instance.
-
-        Args:
-            logger (LoggerABC): New logger instance to use for logging.
-        """
-        pass
-
-    def log(self, content: str, category: Category = Category.INFO) -> None:
-        """
-        Log a message with the specified tag.
-
-        Args:
-            content (str): Content of the log message.
-            category (Category): Category of the log message.
-        """
-        self.logger.log(content, category, self.tag)
-
-    def info(self, content: str) -> None:
-        """
-        Log an info message.
-
-        Args:
-            content (str): Content of the info message.
-        """
-        self.logger.info(content, self.tag)
-
-    def warning(self, content: str) -> None:
-        """
-        Log a warning message.
-
-        Args:
-            content (str): Content of the warning message.
-        """
-        self.logger.warning(content, self.tag)
-
-    def error(self, content: str) -> None:
-        """
-        Log an error message.
-
-        Args:
-            content (str): Content of the error message.
-        """
-        self.logger.error(content, self.tag)
-
-    def debug(self, content: str) -> None:
-        """
-        Log a debug message.
-
-        Args:
-            content (str): Content of the debug message.
-        """
-        self.logger.debug(content, self.tag)

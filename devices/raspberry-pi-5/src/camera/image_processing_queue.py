@@ -9,8 +9,7 @@ from .abstracts import CameraABC, ImageProcessingQueueABC
 from ..model import ImageBoundingBoxes
 from ..server.abstracts import WebsocketsServerABC
 from ..utils import is_instance
-from ..log.abstracts import LoggerABC
-from ..log.sub_logger import SubLogger
+from ..log import Logger
 
 
 class ImageProcessingQueue(ImageProcessingQueueABC):
@@ -21,13 +20,14 @@ class ImageProcessingQueue(ImageProcessingQueueABC):
     # Logger configuration
     LOG_TAG = "ImagesQueue"
 
-    def __init__(self, camera: CameraABC, logger: Optional[LoggerABC] = None, server: Optional[WebsocketsServerABC]=None):
+    def __init__(self, camera: CameraABC, messages_queue: Queue, opened_event: Event, server: Optional[WebsocketsServerABC]=None):
         """
         Initialize the image processing queue.
 
         Args:
             camera (CameraABC): Camera instance for capturing images.
-            logger (Optional[Logger]): Logger instance for logging messages.
+            messages_queue (Queue): Queue to hold log messages.
+            opened_event (Event): Event to signal when the logger is ready to write messages.
             server (Optional[WebsocketsServerABC]): Websockets server instance for real-time tracking updates.
         """
         # Initialize the reentrant lock
@@ -41,15 +41,13 @@ class ImageProcessingQueue(ImageProcessingQueueABC):
         is_instance(camera, CameraABC)
         self.__camera = camera
 
+        # Initialize the logger
+        self.__logger = Logger(messages_queue, opened_event, self.LOG_TAG)
+        self.__logger.debug("Initializing image processing queue...")
+
         # Check the type of server
         is_instance(server, WebsocketsServerABC) if server else None
         self.__server = server
-
-        # Check the type of logger
-        is_instance(logger, LoggerABC) if logger else None
-
-        # Get the sub-logger for this class
-        self.__logger = SubLogger(logger, self.LOG_TAG) if logger else None
 
         # Initialize the events
         self.__capture_image_event = Event()

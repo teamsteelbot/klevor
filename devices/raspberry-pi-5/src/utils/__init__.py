@@ -18,7 +18,6 @@ def is_instance(obj: object, class_or_tuple: type | UnionType | tuple[Any, ...])
         obj = obj._getvalue()
     elif hasattr(obj, '_get_obj'):
         obj = obj._get_obj()
-    # Add more unwrapping logic here if needed
 
     if not isinstance(obj, class_or_tuple):
         raise TypeError(

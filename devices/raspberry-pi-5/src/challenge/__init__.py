@@ -2,8 +2,7 @@ from multiprocessing import Process
 
 from ..env.enums import Challenge
 from ..env import Env
-from ..manager import Manager
-
+from ..log.writer import Writer
 
 class ChallengeHandler:
     """
@@ -15,17 +14,13 @@ class ChallengeHandler:
         """
         Initialize the ChallengeHandler
         """
-        # Initialize the manager
-        self.__manager = Manager()
-
-        # Start the manager
-        self.__manager.start()
-
         # Get the debug mode form environment variables
         self.__debug = Env.get_debug_mode()
 
-        # Initialize the logger
-        self.__logger = self.__manager.logger()
+
+
+        # Initialize the Writer
+        self.__writer = Writer()
 
         # Initialize the server if debug mode is enabled
         self.__server = self.__manager.websockets_server(logger=self.__logger) if self.__debug else None
