@@ -5,7 +5,8 @@ import numpy as np
 from PIL import ImageEnhance
 from PIL.Image import Image
 
-from .constants import ADJUST_DURATION, IMAGE_FORMAT
+from .constants import ADJUST_DURATION
+from ..constants import IMAGE_FORMAT
 
 class CameraABC(ABC):
     """

@@ -10,6 +10,9 @@ HEIGHT = 640
 # Image size
 SIZE = 640
 
+# Imae format
+IMAGE_FORMAT = 'jpeg'
+
 # Colors
 GREEN_COLOR = (68, 214, 44)
 MAGENTA_COLOR = (255, 0, 255)

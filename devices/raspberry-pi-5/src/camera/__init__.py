@@ -8,8 +8,8 @@ from picamera2 import Picamera2
 from picamera2.encoders import H264Encoder
 from picamera2.outputs import FileOutput
 
-from ..constants import WIDTH, HEIGHT
-from .constants import IMAGE_FORMAT, ADJUST_DURATION
+from ..constants import WIDTH, HEIGHT, IMAGE_FORMAT
+from .constants import ADJUST_DURATION
 from .abstracts import CameraABC
 from ..log import Logger
 

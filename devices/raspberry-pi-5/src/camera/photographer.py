@@ -7,6 +7,7 @@ from PIL.Image import Image
 from .abstracts import CameraABC, PhotographerABC
 from ..utils import is_instance
 from ..log import Logger
+from ..server.recepcionist import Receptionist
 from ..server.enums import Tag
 from ..server.message import Message
 
@@ -56,8 +57,8 @@ class Photographer(PhotographerABC):
         is_instance(preprocess_fn, Callable)
         self.__preprocess_fn = preprocess_fn
 
-        # Initialize the broadcast messages queue if provided
-        self.__broadcast_messages_queue = server_messages_queue
+        # Initialize the receptionist for broadcasting messages
+        self.__receptionist = Receptionist(server_messages_queue, writer_messages_queue) if server_messages_queue else None
 
         # Initialize the reentrant lock
         self.__rlock = RLock()
@@ -107,12 +108,8 @@ class Photographer(PhotographerABC):
             # Clear the capture image event
             self.__capture_image_event.clear()
 
-            # If a broadcast messages queue is provided, send a message
-            if self.__broadcast_messages_queue:
-                # Send the bytes of the preprocessed image to the broadcast messages queue
-                image_stream.seek(0)
-                binary_data = image.read()
-                self.__broadcast_messages_queue.put(Message(Tag.IMAGE_ORIGINAL, binary_data))
+            # If the receptionist is available, broadcast the original image
+            self.__receptionist.broadcast_original_image(image) if self.__receptionist else None
 
         # Clear the events
         self.__capture_image_event.clear()

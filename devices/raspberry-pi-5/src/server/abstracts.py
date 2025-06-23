@@ -24,72 +24,10 @@ class WebsocketsServerABC(ABC):
     @abstractmethod
     async def _broadcast_message(self, msg: Message):
         """
-        Broadcasts a message to all connected clients.
+        Broadcasts a message to all connected WebSocket clients.
 
         Args:
             msg (Message): The message to broadcast.
-        """
-        pass
-
-    @abstractmethod
-    async def _broadcast_image_with_tag(self, tag: Tag, img: Image):
-        """
-        Broadcasts an image with a tag to all the connected clients.
-
-        Args:
-            tag (Tag): The tag associated with the image.
-            img (Image): The image to broadcast.
-        """
-        pass
-
-    @abstractmethod
-    def broadcast_original_image(self, img: Image):
-        """
-        Broadcasts the original image to all connected clients.
-
-        Args:
-            img (Image): The original image to broadcast.
-        """
-        pass
-
-    @abstractmethod
-    async def broadcast_model_image(self, img: Image, model_name: str):
-        """
-        Broadcasts the image processed by the specified model to all connected clients.
-
-        Args:
-            img (Image): The image to broadcast.
-            model_name (str): The name of the model that processed the image.
-        """
-        pass
-
-    @abstractmethod
-    async def broadcast_serial_incoming_message(self, msg: str):
-        """
-        Broadcasts a serial incoming message to all connected clients.
-
-        Args:
-            msg (str): The serial incoming message to broadcast.
-        """
-        pass
-
-    @abstractmethod
-    async def broadcast_serial_outgoing_message(self, msg: str):
-        """
-        Broadcasts a serial outgoing message to all connected clients.
-
-        Args:
-            msg (str): The serial outgoing message to broadcast.
-        """
-        pass
-
-    @abstractmethod
-    async def broadcast_rplidar_measures(self, msg: str):
-        """
-        Broadcasts RPLIDAR measures to all connected clients.
-
-        Args:
-            msg (str): The RPLIDAR measures to broadcast.
         """
         pass
 
@@ -131,5 +69,82 @@ class WebsocketsServerABC(ABC):
     def wait_parking_event(self):
         """
         Waits for the parking event to be set.
+        """
+        pass
+
+class ReceptionistABC:
+    """
+    Abstract class for a receptionist that handles broadcasting messages and images
+    """
+
+    @abstractmethod
+    async def _broadcast_message(self, msg: Message):
+        """
+        Add a message to the messages queue to be sent to all connected clients.
+
+        Args:
+            msg (Message): The message to broadcast.
+        """
+        pass
+
+    @abstractmethod
+    async def _broadcast_image_with_tag(self, tag: Tag, img: Image):
+        """
+        Adds an image with a specific tag to the messages queue to be sent to all connected clients.
+
+        Args:
+            tag (Tag): The tag associated with the image.
+            img (Image): The image to broadcast.
+        """
+        pass
+
+    @abstractmethod
+    def broadcast_original_image(self, img: Image):
+        """
+        Adds the original image to the messages queue to be sent to all connected clients.
+
+        Args:
+            img (Image): The original image to broadcast.
+        """
+        pass
+
+    @abstractmethod
+    async def broadcast_model_image(self, img: Image, model_name: str):
+        """
+        Adds a model-processed image to the messages queue to be sent to all connected clients.
+
+        Args:
+            img (Image): The image to broadcast.
+            model_name (str): The name of the model that processed the image.
+        """
+        pass
+
+    @abstractmethod
+    async def broadcast_serial_incoming_message(self, msg: str):
+        """
+        Adds a serial incoming message to the messages queue to be sent to all connected clients.
+
+        Args:
+            msg (str): The serial incoming message to broadcast.
+        """
+        pass
+
+    @abstractmethod
+    async def broadcast_serial_outgoing_message(self, msg: str):
+        """
+        Adds a serial outgoing message to the messages queue to be sent to all connected clients.
+
+        Args:
+            msg (str): The serial outgoing message to broadcast.
+        """
+        pass
+
+    @abstractmethod
+    async def broadcast_rplidar_measures(self, msg: str):
+        """
+        Adds RPLIDAR measures to the messages queue to be sent to all connected clients.
+
+        Args:
+            msg (str): The RPLIDAR measures to broadcast.
         """
         pass

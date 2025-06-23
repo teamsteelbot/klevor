@@ -8,14 +8,11 @@ from websockets import serve, exceptions
 from PIL.Image import Image
 
 from .constants import  HOST, PORT
-from ..camera.constants import IMAGE_FORMAT
 from .abstracts import WebsocketsServerABC
-from ..log import LoggerABC
-from ..log.sub_logger import SubLogger
+from ..log import Logger
 from ..utils import is_instance, get_local_ip
 from .message import Message
 from .enums import Tag
-from ..constants import MODEL_G, MODEL_M, MODEL_R
 
 class WebsocketsServer(WebsocketsServerABC):
     """
@@ -149,81 +146,6 @@ class WebsocketsServer(WebsocketsServerABC):
             
             except Exception as e:
                 self.__logger.error(f"Unexpected error while broadcasting message: {e}") if self.__logger else None
-
-    @final
-    async def _broadcast_image_with_tag(self, tag: Tag, img: Image):
-        try:
-            # Open the image and convert it to a binary stream
-            img_stream = io.BytesIO()
-            img.save(img_stream, format=IMAGE_FORMAT)
-            img_stream.seek(0)
-            binary_data = img_stream.read()
-
-            # Send the tagged binary data to the clients
-            await self._broadcast_message(Message(tag, str(binary_data)))
-
-        except Exception as e:
-            self.__logger.error(f"Error sending image: {e}") if self.__logger else None
-
-    @final
-    async def broadcast_original_image(self, img: Image):
-        """
-        Broadcasts the original image to all connected clients.
-        """
-        await self._broadcast_image_with_tag(Tag.IMAGE_ORIGINAL, img)
-
-    async def __broadcast_model_g_image(self, img: Image):
-        """
-        Broadcasts the image processed by model G to all connected clients.
-        """
-        await self._broadcast_image_with_tag(Tag.IMAGE_MODEL_G, img)
-
-    async def __broadcast_model_m_image(self, img: Image):
-        """
-        Broadcasts the image processed by model M to all connected clients.
-        """
-        await self._broadcast_image_with_tag(Tag.IMAGE_MODEL_M, img)
-
-    async def __broadcast_model_r_image(self, img: Image):
-        """
-        Broadcasts the image processed by model R to all connected clients.
-        """
-        await self._broadcast_image_with_tag(Tag.IMAGE_MODEL_R, img)
-
-    @final
-    async def broadcast_model_image(self, img: Image, model_name: str):
-        if model_name == MODEL_G:
-            await self.__broadcast_model_g_image(img)
-
-        elif model_name == MODEL_M:
-            await self.__broadcast_model_m_image(img)
-
-        elif model_name == MODEL_R:
-            await self.__broadcast_model_r_image(img)
-
-        else:
-            raise ValueError(f"Unknown model name: {model_name}")
-
-    @final
-    async def broadcast_serial_incoming_message(self, msg: str):
-        is_instance(msg, str)
-
-        # Send a tagged message
-        await self._broadcast_message(Message(Tag.SERIAL_INCOMING_MESSAGE, msg))
-
-    @final
-    async def broadcast_serial_outgoing_message(self, msg: str):
-        is_instance(msg, str)
-
-        # Send a tagged message
-        await self._broadcast_message(Message(Tag.SERIAL_OUTGOING_MESSAGE, msg))
-
-    @final
-    async def broadcast_rplidar_measures(self, msg: str):
-        is_instance(msg, str)
-
-        # Send a tagged message
-        await self._broadcast_message(Message(Tag.RPLIDAR_MEASURES, msg))
 
     @final
     async def _loop(self):
