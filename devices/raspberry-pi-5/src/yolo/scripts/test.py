@@ -11,7 +11,7 @@ from ...model import ImageBoundingBoxes
 from ...opencv import OpenCV
 from ...plot import Plot
 from .. import Yolo
-from ..args import Args, Flags
+from ..args import Args, Flag
 from ..files import Files
 from ..files.constants import (
     DATASET_ORGANIZED, DATASET_TESTING, DATASET_IMAGES
@@ -87,13 +87,13 @@ if __name__ == '__main__':
     args = Args.parse_args_as_dict(parser)
 
     # Get the YOLO input model
-    arg_yolo_input_model = Args.get_attribute_from_args_dict(args, Flags.INPUT_MODEL)
+    arg_yolo_input_model = Args.get_attribute_from_args_dict(args, Flag.INPUT_MODEL)
 
     # Get the YOLO format
-    arg_yolo_format = Args.get_attribute_from_args_dict(args, Flags.FORMAT)
+    arg_yolo_format = Args.get_attribute_from_args_dict(args, Flag.FORMAT)
 
     # Get the YOLO version
-    arg_yolo_version = Args.get_attribute_from_args_dict(args, Flags.VERSION)
+    arg_yolo_version = Args.get_attribute_from_args_dict(args, Flag.VERSION)
 
     # Get the required dataset folder name
     organized_dir = Files.get_dataset_model_dir_path(DATASET_ORGANIZED, None, arg_yolo_input_model)

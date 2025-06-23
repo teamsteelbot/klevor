@@ -6,7 +6,7 @@ from threading import Thread
 import pygame
 from websockets import connect
 
-from ..args import Args, Flags
+from ..args import Args, Flag
 from ..server.message import Tag, Message
 from .constants import MAX_DISTANCE_LIMIT
 from .measure import Measure
@@ -191,10 +191,10 @@ if __name__ == "__main__":
     args = Args.parse_args_as_dict(parser)
 
     # Get the IP address from the arguments
-    ip = Args.get_attribute_from_args_dict(args, Flags.IP)
+    ip = Args.get_attribute_from_args_dict(args, Flag.IP)
     
     # Get the port from the arguments
-    port = Args.get_attribute_from_args_dict(args, Flags.PORT)
+    port = Args.get_attribute_from_args_dict(args, Flag.PORT)
 
     app = App(ip, port)
     ws_thread = Thread(target=asyncio.run, args=(app.ws_listener(),), daemon=True)

@@ -107,7 +107,7 @@ class IncomingMessage:
         Returns:
             bool: True if the message is a start message, False otherwise.
         """
-        return self.category == IncomingCategory.STATUS and self.content == Status.START.get_name()
+        return self.category == IncomingCategory.STATUS and self.content == Status.START.parsed_name
 
     def is_challenge(self) -> bool:
         """
@@ -125,7 +125,7 @@ class IncomingMessage:
         Returns:
             bool: True if the message is a stop message, False otherwise.
         """
-        return self.category == IncomingCategory.STATUS and self.content == Status.STOP.get_name()
+        return self.category == IncomingCategory.STATUS and self.content == Status.STOP.parsed_name
 
     def is_error(self) -> bool:
         """

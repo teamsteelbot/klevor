@@ -2,7 +2,7 @@ from argparse import ArgumentParser
 
 import torch
 
-from ..args import Args, Flags
+from ..args import Args, Flag
 from ..files import Files
 
 
@@ -42,13 +42,13 @@ if __name__ == "__main__":
     args = Args.parse_args_as_dict(parser)
 
     # Get the YOLO input model
-    arg_yolo_input_model = Args.get_attribute_from_args_dict(args, Flags.INPUT_MODEL)
+    arg_yolo_input_model = Args.get_attribute_from_args_dict(args, Flag.INPUT_MODEL)
 
     # Get the YOLO version
-    arg_yolo_version = Args.get_attribute_from_args_dict(args, Flags.VERSION)
+    arg_yolo_version = Args.get_attribute_from_args_dict(args, Flag.VERSION)
 
     # Get the YOLO classes
-    arg_yolo_classes = Args.get_attribute_from_args_dict(args, Flags.CLASSES)
+    arg_yolo_classes = Args.get_attribute_from_args_dict(args, Flag.CLASSES)
 
     # Update the classes
     update_classes(arg_yolo_input_model, arg_yolo_version, arg_yolo_classes)

@@ -1,7 +1,7 @@
 import argparse
 
 from .args import Args
-from .args.enums import Flags
+from .args.enums import Flag
 from .env import Env
 from .challenge import ChallengeHandler
 
@@ -14,10 +14,10 @@ if __name__ == "__main__":
     args = Args.parse_args_as_dict(parser)
 
     # Get the YOLO version
-    arg_yolo_version = Args.get_attribute_from_args_dict(args, Flags.VERSION)
+    arg_yolo_version = Args.get_attribute_from_args_dict(args, Flag.VERSION)
 
     # Get the debug mode
-    arg_debug = Args.get_attribute_from_args_dict(args, Flags.DEBUG)
+    arg_debug = Args.get_attribute_from_args_dict(args, Flag.DEBUG)
 
     # Set the debug mode and YOLO version as environment variables
     Env.set_yolo_version(arg_yolo_version)

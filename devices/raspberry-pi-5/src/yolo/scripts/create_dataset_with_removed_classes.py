@@ -3,7 +3,7 @@ import json
 import os
 import shutil
 
-from ..args import Args, Flags
+from ..args import Args, Flag
 from ..files import Files
 from ..files.constants import (
     DATASET_LABELED, DATASET_TO_PROCESS, DATASET_IMAGES, DATASET_LABELS, DATASET_CLASSES_TXT,
@@ -145,13 +145,13 @@ if __name__ == '__main__':
     args = Args.parse_args_as_dict(parser)
 
     # Get the YOLO input model
-    arg_yolo_input_model = Args.get_attribute_from_args_dict(args, Flags.INPUT_MODEL)
+    arg_yolo_input_model = Args.get_attribute_from_args_dict(args, Flag.INPUT_MODEL)
 
     # Get the YOLO output model
-    arg_yolo_output_model = Args.get_attribute_from_args_dict(args, Flags.OUTPUT_MODEL)
+    arg_yolo_output_model = Args.get_attribute_from_args_dict(args, Flag.OUTPUT_MODEL)
 
     # Get the YOLO ignore classes
-    arg_yolo_ignore_classes = Args.get_attribute_from_args_dict(args, Flags.IGNORE_CLASSES)
+    arg_yolo_ignore_classes = Args.get_attribute_from_args_dict(args, Flag.IGNORE_CLASSES)
 
     # Get the dataset paths
     input_labeled_dir = Files.get_dataset_model_dir_path(DATASET_LABELED, None, arg_yolo_input_model)

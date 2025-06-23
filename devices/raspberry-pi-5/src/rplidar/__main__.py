@@ -1,6 +1,6 @@
 from argparse import ArgumentParser
 
-from ..args import Args, Flags
+from ..args import Args, Flag
 from . import RPLIDAR
 from ..server import WebsocketsServer
 from ..log import Logger
@@ -15,10 +15,10 @@ if __name__ == "__main__":
     args = Args.parse_args_as_dict(parser)
 
     # Get the server argument
-    arg_server = Args.get_attribute_from_args_dict(args, Flags.SERVER)
+    arg_server = Args.get_attribute_from_args_dict(args, Flag.SERVER)
 
     # Get the serial argument
-    arg_serial = Args.get_attribute_from_args_dict(args, Flags.SERIAL)
+    arg_serial = Args.get_attribute_from_args_dict(args, Flag.SERIAL)
 
     # Initialize variables for logger, server, serial communication, and RPLIDAR
     logger = None

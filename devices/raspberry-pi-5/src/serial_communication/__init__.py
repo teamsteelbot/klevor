@@ -375,7 +375,7 @@ class SerialCommunication(SerialCommunicationABC):
             is_instance(value, float)
 
             # Create a message with the RPLIDAR measures type
-            msg = OutgoingMessage(OutgoingCategory.RPLIDAR, f"{key.get_name()}{OutgoingMessage.CONTENT_HEADER_SEPARATOR}{value}")
+            msg = OutgoingMessage(OutgoingCategory.RPLIDAR, f"{key.parsed_name}{OutgoingMessage.CONTENT_HEADER_SEPARATOR}{value}")
 
             # Put the message in the outgoing messages queue
             self._send_message(msg)

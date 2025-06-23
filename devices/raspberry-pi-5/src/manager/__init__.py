@@ -6,7 +6,7 @@ from ..serial_communication import SerialCommunication
 from ..rplidar import RPLIDAR
 from ..camera import Camera
 from ..camera.image_processing_queue import ImageProcessingQueue
-from ..yolo.hailo.object_detection import ObjectDetection
+from ..hailo.object_detection import ObjectDetection
 
 class Manager(BaseManager):
     """

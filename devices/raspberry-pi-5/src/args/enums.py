@@ -1,21 +1,25 @@
 from enum import Enum, unique
 
 @unique
-class Flags(Enum):
+class Flag(Enum):
     """
     Enum to represent command line flags.
     """
 
-    SERVER = 1
-    SERIAL = 2
-    IP = 3
-    PORT = 4
+    DEBUG = 1
+    INPUT_MODEL = 2
+    VERSION = 3
+    SERVER = 4
+    SERIAL = 5
+    IP = 6
+    PORT = 7
 
-    def get_flag_name(self) -> str:
+    @property
+    def parsed_name(self) -> str:
         """
-        Get the flag name with the prefix.
+        Get the flag name in lowercase.
 
         Returns:
-            str: The flag name with the prefix.
+            str: The flag name in lowercase.
         """
         return self.name.lower()

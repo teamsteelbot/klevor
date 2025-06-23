@@ -1,7 +1,7 @@
 from argparse import ArgumentParser
 
 from .. import Yolo
-from ..args import Args, Flags
+from ..args import Args, Flag
 from ..files import Files
 from ..constants import FORMAT_ONNX, FORMAT_TFLITE
 
@@ -14,16 +14,16 @@ if __name__ == '__main__':
     args = Args.parse_args_as_dict(parser)
 
     # Get the YOLO input model
-    arg_yolo_input_model = Args.get_attribute_from_args_dict(args, Flags.INPUT_MODEL)
+    arg_yolo_input_model = Args.get_attribute_from_args_dict(args, Flag.INPUT_MODEL)
 
     # Get the YOLO format
-    arg_yolo_format = Args.get_attribute_from_args_dict(args, Flags.FORMAT)
+    arg_yolo_format = Args.get_attribute_from_args_dict(args, Flag.FORMAT)
 
     # Get the YOLO quantization
-    arg_yolo_quantized = Args.get_attribute_from_args_dict(args, Flags.QUANTIZED)
+    arg_yolo_quantized = Args.get_attribute_from_args_dict(args, Flag.QUANTIZED)
 
     # Get the YOLO version
-    arg_yolo_version = Args.get_attribute_from_args_dict(args, Flags.VERSION)
+    arg_yolo_version = Args.get_attribute_from_args_dict(args, Flag.VERSION)
 
     # Load a model
     model_path = Files.get_model_best_pt_path(arg_yolo_input_model, arg_yolo_version)

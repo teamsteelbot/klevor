@@ -18,6 +18,9 @@ class ChallengeHandler:
         # Initialize the manager
         self.__manager = Manager()
 
+        # Start the manager
+        self.__manager.start()
+
         # Get the debug mode form environment variables
         self.__debug = Env.get_debug_mode()
 
@@ -29,8 +32,7 @@ class ChallengeHandler:
 
         # Initialize the serial communication
         self.__serial_communication = self.__manager.serial_communication(logger=self.__logger,
-                                                                        server=self.__server,
-                                                                        image_processing_queue=self.__image_processing_queue)
+                                                                        server=self.__server)
 
         # Initialize the RPLIDAR
         self.__rplidar = self.__manager.rplidar(logger=self.__logger,
@@ -98,6 +100,9 @@ class ChallengeHandler:
                                                                  image_processing_queue=self.__image_processing_queue,
                                                                  camera=self.__camera,
                                                                  serial_communication=self.__serial_communication)
+
+        # Add the image processing queue to the serial communication
+        self.__serial_communication.image_processing_queue = self.__image_processing_queue
 
         # Create the image processing queue process
         self.__image_processing_queue_proc = Process(

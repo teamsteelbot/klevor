@@ -4,7 +4,7 @@ import random
 import shutil
 
 from ..constants import TRAINING_RATIO, VALIDATION_RATIO
-from ..args import Args, Flags
+from ..args import Args, Flag
 from ..files import Files
 from ..files.constants import (
     DATASET_IMAGES, DATASET_LABELS, DATASET_TRAINING, DATASET_VALIDATIONS, DATASET_TESTING,
@@ -90,7 +90,7 @@ if __name__ == '__main__':
     args = Args.parse_args_as_dict(parser)
 
     # Get the YOLO input model
-    arg_yolo_input_model = Args.get_attribute_from_args_dict(args, Flags.INPUT_MODEL)
+    arg_yolo_input_model = Args.get_attribute_from_args_dict(args, Flag.INPUT_MODEL)
 
     # Get the dataset paths
     augmented_dir = Files.get_dataset_model_dir_path(DATASET_AUGMENTED, None, arg_yolo_input_model)

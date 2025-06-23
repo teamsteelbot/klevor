@@ -6,12 +6,20 @@ from enum import Enum
 
 def is_instance(obj: object, class_or_tuple: type | UnionType | tuple[Any, ...]) -> None:
     """
-    Check if the object is an instance of the specified class or tuple of classes.
+    Check if the object is an instance of the specified class or tuple of classes,
+    unwrapping proxy objects if necessary.
 
     Args:
         obj (object): The object to check.
         class_or_tuple (type | UnionType | tuple[Any, ...]): The class or tuple of classes to check against.
     """
+    # Unwrap common proxy objects (e.g., multiprocessing.Manager proxies)
+    if hasattr(obj, '_getvalue'):
+        obj = obj._getvalue()
+    elif hasattr(obj, '_get_obj'):
+        obj = obj._get_obj()
+    # Add more unwrapping logic here if needed
+
     if not isinstance(obj, class_or_tuple):
         raise TypeError(
             f"Expected type {class_or_tuple}, got {type(obj)} for object {obj}"

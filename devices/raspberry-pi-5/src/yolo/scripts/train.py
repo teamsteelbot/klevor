@@ -4,7 +4,7 @@ from argparse import ArgumentParser
 from ...constants import SIZE
 from ..constants import EPOCHS
 from .. import Yolo
-from ..args import Args, Flags
+from ..args import Args, Flag
 from ..files import Files
 
 
@@ -47,19 +47,19 @@ if __name__ == '__main__':
     args = Args.parse_args_as_dict(parser)
 
     # Get the YOLO input model
-    arg_yolo_input_model = Args.get_attribute_from_args_dict(args, Flags.INPUT_MODEL)
+    arg_yolo_input_model = Args.get_attribute_from_args_dict(args, Flag.INPUT_MODEL)
 
     # Get the YOLO input PyTorch model
-    arg_yolo_input_model_pt = Args.get_attribute_from_args_dict(args, Flags.INPUT_MODEL_PT)
+    arg_yolo_input_model_pt = Args.get_attribute_from_args_dict(args, Flag.INPUT_MODEL_PT)
 
     # Get the YOLO epochs
-    arg_yolo_epochs = Args.get_attribute_from_args_dict(args, Flags.EPOCHS)
+    arg_yolo_epochs = Args.get_attribute_from_args_dict(args, Flag.EPOCHS)
 
     # Get the YOLO device
-    arg_yolo_device = Args.get_attribute_from_args_dict(args, Flags.DEVICE)
+    arg_yolo_device = Args.get_attribute_from_args_dict(args, Flag.DEVICE)
 
     # Get the YOLO image size
-    arg_yolo_image_size = Args.get_attribute_from_args_dict(args, Flags.IMAGE_SIZE)
+    arg_yolo_image_size = Args.get_attribute_from_args_dict(args, Flag.IMAGE_SIZE)
 
     # Get model local data path
     model_local_data_path = Files.get_model_local_data_path(arg_yolo_input_model)

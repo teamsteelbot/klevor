@@ -3,11 +3,9 @@ import shutil
 from datetime import datetime as dt
 
 from ..args import Args
-from ..log.constants import LOGS_DIR
-from ..hailo.constants import (
-    HAILO_DIR, HAILO_CALIB, HAILO_LABELS_DIR, HAILO_LIBS_DIR, HAILO_MODEL_ZOO_DIR, HAILO_SUITE_DIR, HAILO_CALIB_DIR
+from .constants import (
+    HAILO_CALIB, HAILO_LABELS_DIR, HAILO_SUITE_DIR, HAILO_CALIB_DIR, LOGS_DIR
 )
-from ..constants import ROOT_DIR
 
 class Files:
     """

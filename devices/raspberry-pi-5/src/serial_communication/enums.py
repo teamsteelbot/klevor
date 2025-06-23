@@ -15,7 +15,8 @@ class IncomingCategory(Enum):
     BNO08X_TURNS = 6
     ERROR = 7
 
-    def get_name(self) -> str:
+    @property
+    def parsed_name(self) -> str:
         """
         Get the category name in lowercase.
 
@@ -46,7 +47,8 @@ class Status(Enum):
     STOP = 2
     OK = 3
 
-    def get_name(self) -> str:
+    @property
+    def parsed_name(self) -> str:
         """
         Get the status name in lowercase.
 
@@ -75,7 +77,8 @@ class Request(Enum):
     """
     INFERENCE = 1
 
-    def get_name(self) -> str:
+    @property
+    def parsed_name(self) -> str:
         """
         Get the request name in lowercase.
 
@@ -106,7 +109,8 @@ class OutgoingCategory(Enum):
     INFERENCE = 2
     RPLIDAR = 3
 
-    def get_name(self) -> str:
+    @property
+    def parsed_name(self) -> str:
         """
         Get the category name in lowercase.
 
@@ -137,7 +141,8 @@ class RPLIDAR(Enum):
     LEFT = 2
     RIGHT = 3
 
-    def get_name(self) -> str:
+    @property
+    def parsed_name(self) -> str:
         """
         Get the RPLIDAR name in lowercase.
 
