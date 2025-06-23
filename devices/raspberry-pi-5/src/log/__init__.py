@@ -28,6 +28,9 @@ class Logger(LoggerABC):
             is_instance(tag, str)
         self.__tag = tag
 
+        # Log the initialization if a tag is provided
+        self.debug(f"Initializing Logger with tag: {self.__tag}") if self.__tag else None
+
     @final
     def log(self, content: str, category: Category = Category.INFO) -> None:
         # Check the type of content

@@ -82,8 +82,10 @@ class Writer(WriterABC):
             self.__opened_event.set()
 
             # Write the initial message to the log file
-            self._write(self.__file, Message(f"Logger opened at {self.__file_path}.", Category.DEBUG))
+            self._write(self.__file, Message(f"Log file opened at {self.__file_path}.", Category.DEBUG))
 
+            # Main loop to write messages to the log file
+            self._write(self.__file, Message("Writer's starting...", Category.DEBUG))
             while not self.__stop_event.is_set():
                 # Write the last message if available
                 self._write_last_message()
@@ -94,7 +96,7 @@ class Writer(WriterABC):
                 self._write_last_message()
 
             # Write the stop message to the log file
-            self._write(self.__file, Message("Logger is stopping.", Category.DEBUG))
+            self._write(self.__file, Message("Writer stopped.", Category.DEBUG))
 
         # Clear the opened event
         self.__opened_event.clear()
@@ -109,6 +111,6 @@ class Writer(WriterABC):
 
     def __del__(self):
         """
-        Destructor to ensure the logger thread is stopped when the object is deleted.
+        Destructor to clean up resources when the photographer is no longer needed.
         """
         self.__stop_event.set()

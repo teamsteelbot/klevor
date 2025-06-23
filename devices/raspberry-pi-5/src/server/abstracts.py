@@ -5,10 +5,20 @@ from PIL.Image import Image
 from .message import Message
 from .enums import Tag
 
-class WebsocketsServerABC(ABC):
+class WebSocketServerABC(ABC):
     """
     Abstract class for a WebSocket server that handles real-time tracking updates.
     """
+
+    @abstractmethod
+    async def _reactive_handler(self, connection) -> None:
+        """
+        Handles WebSocket connections and messages.
+
+        Args:
+            connection: The WebSocket connection object.
+        """
+        pass
 
     @abstractmethod
     async def _send_message(self, connection, msg: Message):
@@ -52,25 +62,12 @@ class WebsocketsServerABC(ABC):
         pass
 
     @abstractmethod
-    async def _loop(self):
+    async def run(self):
         """
-        The main loop for the WebSocket server.
-        """
-        pass
-
-    @abstractmethod
-    def wait_stop_event(self):
-        """
-        Waits for the stop event to be set.
+        Starts the WebSocket server and listens for incoming connections and messages.
         """
         pass
 
-    @abstractmethod
-    def wait_parking_event(self):
-        """
-        Waits for the parking event to be set.
-        """
-        pass
 
 class ReceptionistABC:
     """

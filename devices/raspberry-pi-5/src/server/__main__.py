@@ -1,38 +1,52 @@
+from multiprocessing import Process, Queue, Event
 from time import sleep
 
-from . import WebsocketsServer
+from .multiprocessing import websocket_server_target
 from ..log import Logger
+from ..log.multiprocessing import writer_target
 
 if __name__ == "__main__":
-    # Create an instance of Logger
-    logger = Logger()
+    # Create the required queues and events
+    writer_messages_queue = Queue()
+    writer_opened_event = Event()
+    writer_stop_event = Event()
+    server_messages_queue = Queue()
+    server_opened_event = Event()
+    parking_event = Event()
+    stop_event = Event()
 
-    # Create an instance of WebsocketServer
-    server = WebsocketsServer(logger=logger)
+    # Create a process for the writer
+    writer_process = Process(target=writer_target, args=(writer_messages_queue, writer_opened_event, writer_stop_event))
+    writer_process.start()
+
+    # Create an instance of Logger
+    logger = Logger(writer_messages_queue)
+
+    # Create a process for the WebSocket server
+    server_process = Process(target=websocket_server_target, args=(server_messages_queue, server_opened_event, parking_event, stop_event, writer_messages_queue))
+    server_process.start()
 
     try:
-        # Create a thread for the logger
-        logger.create_thread()
-
-        # Create a thread for the server
-        server.create_thread()
-
         # Wait indefinitely to keep the server running
-        print("Realtime Tracker Server is running. Press Ctrl+C to stop.")
+        print("WebSocketServer is running. Press Ctrl+C to stop.")
         while True:
             sleep(1) # Sleep to prevent busy-waiting
 
+
     except KeyboardInterrupt:
-        # Handle keyboard interrupt to stop the server gracefully
-        logger.warning("KeyboardInterrupt received. Stopping the server...")
+        # Handle keyboard interrupt to stop the writer process gracefully
+        print("KeyboardInterrupt received. Stopping websocket server and writer process...")
+        logger.warning("KeyboardInterrupt received. Stopping websocket server and writer process.")
+
 
     except Exception as e:
         # Log any exceptions that occur
         logger.error(f"An error occurred: {e}")
 
     finally:
-        # Stop the server thread
-        server.stop_thread()
+        # Stop the websocket server and writer process and clean up
+        stop_event.set()
+        server_process.join()
 
-        # Stop the logger thread
-        logger.stop_thread()
+        writer_stop_event.set()
+        writer_process.join()

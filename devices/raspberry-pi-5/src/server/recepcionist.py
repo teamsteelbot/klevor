@@ -35,8 +35,7 @@ class Receptionist(ReceptionistABC):
         # Initialize the logger
         self.__uuid = uuid.uuid4()
         self.__logger_tag = f"{self.LOGGER_TAG}_{self.__uuid}"
-        self.__logger = Logger(writer_messages_queue, self.LOGGER_TAG)
-        self.__logger.debug(f"Initializing receptionist of UUID: {self.__uuid}")
+        self.__logger = Logger(writer_messages_queue, self.__logger_tag)
 
     @final
     async def _broadcast_message(self, msg: Message):

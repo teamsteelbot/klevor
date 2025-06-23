@@ -35,7 +35,6 @@ class Camera(CameraABC):
         """
         # Initialize the logger
         self.__logger = Logger(writer_messages_queue, self.LOGGER_TAG)
-        self.__logger.debug("Initializing camera...")
 
         # Initialize the reentrant lock
         self.__rlock = RLock()

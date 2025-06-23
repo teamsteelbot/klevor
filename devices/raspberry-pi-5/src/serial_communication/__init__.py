@@ -17,7 +17,7 @@ from ..log.sub_logger import SubLogger
 from .message import IncomingMessage, OutgoingMessage
 from .enums import IncomingCategory, OutgoingCategory, Status, RPLIDAR
 from .abstracts import SerialCommunicationABC
-from ..server import WebsocketsServerABC
+from ..server import WebSocketServerABC
 from ..utils import is_instance
 from ..env import Env
 from ..env.enums import Challenge
@@ -40,7 +40,7 @@ class SerialCommunication(SerialCommunicationABC):
         self,
         logger: Optional[LoggerABC] = None,
         image_processing_queue: Optional[ImageProcessingQueueABC] = None,
-        server: Optional[WebsocketsServerABC] = None,
+        server: Optional[WebSocketServerABC] = None,
         console_port: Optional[str] = RASPBERRY_PI_PICO_CONSOLE_PORT,
         console_port_alt: Optional[str] = RASPBERRY_PI_PICO_CONSOLE_PORT_ALT,
         data_port: Optional[str] = RASPBERRY_PI_PICO_DATA_PORT,
@@ -58,7 +58,7 @@ class SerialCommunication(SerialCommunicationABC):
             data_port (Optional[str]): Serial port used for sending data to Pico.
             data_port_alt (Optional[str]): Alternative serial port used for sending data to Pico.
             baudrate (Optional[int]): Baud rate for the serial communication. Default is 115200.
-            server (Optional[WebsocketsServerABC]): Server instance for sending messages to the server. Default is None.
+            server (Optional[WebSocketServerABC]): Server instance for sending messages to the server. Default is None.
         """
         # Create the reentrant lock
         self.__rlock = RLock()
@@ -76,7 +76,7 @@ class SerialCommunication(SerialCommunicationABC):
         self.image_processing_queue = image_processing_queue
 
         # Check the type of the server
-        is_instance(server, WebsocketsServerABC) if server else None
+        is_instance(server, WebSocketServerABC) if server else None
         self.__server = server
 
         # Check the type of the logger

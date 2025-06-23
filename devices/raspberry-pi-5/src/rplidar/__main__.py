@@ -2,7 +2,7 @@ from argparse import ArgumentParser
 
 from ..args import Args, Flag
 from . import RPLIDAR
-from ..server import WebsocketsServer
+from ..server import WebSocketServer
 from ..log import Logger
 from time import sleep
 from ..serial_communication import SerialCommunication
@@ -37,7 +37,7 @@ if __name__ == "__main__":
             server = None
         else:
             # Create an instance of the server
-            server = WebsocketsServer(logger=logger)
+            server = WebSocketServer(logger=logger)
 
             # Start the server
             server.create_thread()

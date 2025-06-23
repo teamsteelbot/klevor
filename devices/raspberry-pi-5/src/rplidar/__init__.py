@@ -8,7 +8,7 @@ from ..env import Env, Challenge
 from ..utils import is_instance
 from ..log.abstracts import LoggerABC
 from ..log.sub_logger import SubLogger
-from ..server import WebsocketsServerABC
+from ..server import WebSocketServerABC
 from ..serial_communication import SerialCommunicationABC
 from ..serial_communication.enums import RPLIDAR as RPLIDARKey
 from .abstracts import RPLIDARABC
@@ -28,7 +28,7 @@ class RPLIDAR(RPLIDARABC):
     def __init__(
             self,
             logger: Optional[LoggerABC] = None,
-            server: Optional[WebsocketsServerABC] = None,
+            server: Optional[WebSocketServerABC] = None,
             serial: Optional[SerialCommunicationABC] = None,
             baudrate: int = RPLIDAR_C1_BAUDRATE,
             port: str = RPLIDAR_C1_PORT,
@@ -62,7 +62,7 @@ class RPLIDAR(RPLIDARABC):
         self.__logger = SubLogger(logger, self.LOG_TAG) if logger else None
 
         # Check the type of server
-        is_instance(server, WebsocketsServerABC) if server else None
+        is_instance(server, WebSocketServerABC) if server else None
         self.__server = server
 
         # Check the type of serial communication

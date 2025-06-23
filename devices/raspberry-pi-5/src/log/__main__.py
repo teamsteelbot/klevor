@@ -18,20 +18,20 @@ if __name__ == "__main__":
     logger = Logger(writer_messages_queue)
 
     try:
-        # Log a message using the sub-logger
+        # Log a message using the logger
         logger.info("This is a test log message.")
 
         # Wait for a while to ensure the log messages are processed
-        print("Logger is running. Press Ctrl+C to stop.")
+        print("Writer is running. Press Ctrl+C to stop.")
         while True:
-            # Keep the main thread alive to allow the logger to run
-            logger.info("Logger is still running...")
+            # Keep the main thread alive to allow the writer to process messages
+            logger.info("Writer is still running...")
             sleep(1)
 
     except KeyboardInterrupt:
-        # Handle keyboard interrupt to stop the logger thread gracefully
-        print("KeyboardInterrupt received. Stopping logger thread...")
-        logger.warning("KeyboardInterrupt received. Stopping logger thread.")
+        # Handle keyboard interrupt to stop the writer process gracefully
+        print("KeyboardInterrupt received. Stopping writer process...")
+        logger.warning("KeyboardInterrupt received. Stopping writer process.")
 
     except Exception as e:
         # Log any exceptions that occur

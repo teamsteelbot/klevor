@@ -1,0 +1,30 @@
+from multiprocessing import Queue, Event
+import os
+
+from .constants import HOST, PORT
+from . import WebSocketServer
+from ..utils.decorators import ignore_sigint
+
+@ignore_sigint
+def websocket_server_target(messages_queue: Queue, opened_event: Event, parking_event: Event,
+        stop_event: Event, writer_messages_queue: Queue, host: str = HOST, port: int = PORT):
+    """
+    Target function for a multiprocessing process that handles the WebSocket server.
+
+    Args:
+        messages_queue (Queue): Queue to broadcast messages through the websockets server.
+        opened_event (Event): Event to signal when the websockets server is ready to accept connections.
+        parking_event (Event): Event to signal the parking state of the server.
+        stop_event (Event): Event to signal when the websockets server should stop.
+        writer_messages_queue (Queue): Queue to hold log messages.
+        host (str): The host address for the WebSocket server.
+        port (int): The port number for the WebSocket server.
+    """
+    print("Initializing WebSocketServer in multiprocessing mode. Process ID:", os.getpid())
+
+    # Initialize the websocket server
+    server = WebSocketServer(messages_queue, opened_event, parking_event, stop_event,
+                             writer_messages_queue, host, port)
+
+    # Run the websocket server
+    server.run()
