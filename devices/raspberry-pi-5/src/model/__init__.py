@@ -3,8 +3,9 @@ class ImageBoundingBoxes:
     Class that represents the detected objects bounding boxes from an object detection model on an image.
     """
 
-    def __init__(self, xywhn: list = None, xyxy: list = None, xywh: list = None, xyxyn: list = None,
-                 cls: list = None, conf: list =None, n: int = None):
+    def __init__(self, xywhn: list = None, xyxy: list = None, xywh: list = None,
+                 xyxyn: list = None,
+                 cls: list = None, conf: list = None, n: int = None):
         """
         Initialize the ImageBoundingBoxes instance with bounding box coordinates, classes, and confidences.
 
@@ -40,7 +41,8 @@ class ImageBoundingBoxes:
                 f"(X0, Y0): ({self.__xyxyn[i][0]}, {self.__xyxyn[i][1]})",
                 f"(X1, Y1): ({self.__xyxyn[i][2]}, {self.__xyxyn[i][3]})",
             ]
-            bounding_boxes.append(f"Box {i + 1}:\n\t" + "\n\t".join(bounding_box_attributes))
+            bounding_boxes.append(
+                f"Box {i + 1}:\n\t" + "\n\t".join(bounding_box_attributes))
         return "\n".join(bounding_boxes)
 
     @staticmethod
@@ -78,7 +80,8 @@ class ImageBoundingBoxes:
         return ImageBoundingBoxes.from_pt_cpu_boxes(input_data[0].boxes)
 
     @staticmethod
-    def from_hailo(input_data: list, threshold: float = 0.5) -> 'ImageBoundingBoxes':
+    def from_hailo(input_data: list,
+                   threshold: float = 0.5) -> 'ImageBoundingBoxes':
         """
         Extract detections from the input data.
 
@@ -105,7 +108,8 @@ class ImageBoundingBoxes:
                     classes.append(i)
                     num_detections += 1
 
-        return ImageBoundingBoxes(n=num_detections, xyxy=boxes, cls=classes, conf=scores)
+        return ImageBoundingBoxes(n=num_detections, xyxy=boxes, cls=classes,
+                                  conf=scores)
 
     def get_number_of_objects(self) -> int:
         """

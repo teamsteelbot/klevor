@@ -5,9 +5,9 @@ import numpy as np
 from PIL.Image import Image
 
 from .abstracts import CameraABC, PhotographerABC
-from ..utils import is_instance
 from ..log import Logger
 from ..server.recepcionist import Receptionist
+from ..utils import is_instance
 
 
 class Photographer(PhotographerABC):
@@ -17,13 +17,15 @@ class Photographer(PhotographerABC):
 
     # Logger configuration
     LOGGER_TAG = "Photographer"
-    
+
     # Wait timeout
     WAIT_TIMEOUT = 0.1
 
-    def __init__(self, camera: CameraABC, images_queue: Queue, capture_image_event: Event, opened_event: Event,
-                 stop_event: Event, writer_messages_queue: Queue, preprocess_fn: Callable[[Image], np.ndarray],
-                 server_messages_queue: Optional[Queue]=None):
+    def __init__(self, camera: CameraABC, images_queue: Queue,
+                 capture_image_event: Event, opened_event: Event,
+                 stop_event: Event, writer_messages_queue: Queue,
+                 preprocess_fn: Callable[[Image], np.ndarray],
+                 server_messages_queue: Optional[Queue] = None):
         """
         Initialize the Photographer class.
 
@@ -40,7 +42,7 @@ class Photographer(PhotographerABC):
         # Check the type of camera
         is_instance(camera, CameraABC)
         self.__camera: CameraABC = camera
-        
+
         # Initialize the queues and events
         self.__images_queue = images_queue
         self.__capture_image_event = capture_image_event
@@ -55,7 +57,8 @@ class Photographer(PhotographerABC):
         self.__preprocess_fn = preprocess_fn
 
         # Initialize the receptionist for broadcasting messages
-        self.__receptionist = Receptionist(server_messages_queue, writer_messages_queue) if server_messages_queue else None
+        self.__receptionist = Receptionist(server_messages_queue,
+                                           writer_messages_queue) if server_messages_queue else None
 
         # Initialize the image counter
         self.__imager_counter = 0
@@ -64,12 +67,14 @@ class Photographer(PhotographerABC):
     def run(self):
         # Check if the stop event is set
         if self.__stop_event.is_set():
-            self.__logger.warning("Stop event is set. Photographer will not run.")
+            self.__logger.warning(
+                "Stop event is set. Photographer will not run.")
             return
 
         # Check if the photographer is already running
         if self.is_running():
-            self.__logger.warning("Photographer is already running. Cannot start again.")
+            self.__logger.warning(
+                "Photographer is already running. Cannot start again.")
             return
 
         # Set the opened event to signal that the photographer is ready
@@ -79,7 +84,8 @@ class Photographer(PhotographerABC):
         self.__logger.debug("Photographer's starting...")
         while self.is_running():
             # Wait for the capture image event
-            capture_image = self.__capture_image_event.wait(timeout=self.WAIT_TIMEOUT)
+            capture_image = self.__capture_image_event.wait(
+                timeout=self.WAIT_TIMEOUT)
             if not capture_image:
                 continue
 
@@ -106,7 +112,8 @@ class Photographer(PhotographerABC):
             self.__capture_image_event.clear()
 
             # If the receptionist is available, broadcast the original image
-            self.__receptionist.broadcast_original_image(image) if self.__receptionist else None
+            self.__receptionist.broadcast_original_image(
+                image) if self.__receptionist else None
 
         # Clear the events
         self.__capture_image_event.clear()

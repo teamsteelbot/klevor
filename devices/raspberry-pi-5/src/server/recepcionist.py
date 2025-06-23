@@ -1,17 +1,18 @@
-from typing import final
 import io
-from multiprocessing import Queue
 import uuid
+from multiprocessing import Queue
+from typing import final
 
 from PIL.Image import Image
 
-from ..log import Logger
-from ..constants import IMAGE_FORMAT
 from .abstracts import ReceptionistABC
-from ..utils import is_instance
+from ..constants import IMAGE_FORMAT
+from ..constants import MODEL_G, MODEL_M, MODEL_R
+from ..log import Logger
 from ..server.enums import Tag
 from ..server.message import Message
-from ..constants import MODEL_G, MODEL_M, MODEL_R
+from ..utils import is_instance
+
 
 class Receptionist(ReceptionistABC):
     """
@@ -21,7 +22,8 @@ class Receptionist(ReceptionistABC):
     # Logger configuration
     LOGGER_TAG = "Receptionist"
 
-    def __init__(self, server_messages_queue: Queue, writer_messages_queue: Queue):
+    def __init__(self, server_messages_queue: Queue,
+                 writer_messages_queue: Queue):
         """
         Initializes the Receptionist class.
 
@@ -58,7 +60,8 @@ class Receptionist(ReceptionistABC):
             await self._broadcast_message(Message(tag, str(binary_data)))
 
         except Exception as e:
-            self.__logger.error(f"Error sending image: {e}") if self.__logger else None
+            self.__logger.error(
+                f"Error sending image: {e}") if self.__logger else None
 
     @final
     async def broadcast_original_image(self, img: Image):

@@ -2,6 +2,7 @@ from enum import Enum, unique
 
 from ...args.enums import Flag as BaseFlags
 
+
 @unique
 class Flag(Enum):
     """

@@ -2,6 +2,7 @@ from typing import Optional
 
 from ..utils import is_instance
 
+
 class Measure:
     """
     Class that represents a single measurement from the RPLIDAR.
@@ -25,15 +26,16 @@ class Measure:
         """
         String representation of the Measure object.
         """
-        #return self.ATTRIBUTES_SEPARATOR.join([str(self.angle), str(self.distance), str(self.quality)])
-        return self.ATTRIBUTES_SEPARATOR.join([str(self.angle), str(self.distance)])
+        # return self.ATTRIBUTES_SEPARATOR.join([str(self.angle), str(self.distance), str(self.quality)])
+        return self.ATTRIBUTES_SEPARATOR.join(
+            [str(self.angle), str(self.distance)])
 
     def __repr__(self):
         """
         String representation of the Measure object for debugging.
         """
         return f"Measure(angle={self.angle}, distance={self.distance}, quality={self.quality})"
-    
+
     @property
     def angle(self) -> float:
         """
@@ -43,7 +45,7 @@ class Measure:
             float: Angle of the measure.
         """
         return self.__angle
-    
+
     @angle.setter
     def angle(self, value: float) -> None:
         """
@@ -55,7 +57,8 @@ class Measure:
         is_instance(value, float)
 
         if not (0 <= value):
-            raise ValueError(f"Angle must be a non-negative float, received: {value}")
+            raise ValueError(
+                f"Angle must be a non-negative float, received: {value}")
         self.__angle = 0.0 if value >= 360.0 else value
 
     @property
@@ -67,7 +70,7 @@ class Measure:
             float: Distance of the measure.
         """
         return self.__distance
-    
+
     @distance.setter
     def distance(self, value: float) -> None:
         """
@@ -79,8 +82,10 @@ class Measure:
         is_instance(value, float)
 
         if value < 0:
-            raise ValueError("Distance must be a non-negative float, received: {}".format(value))
-        
+            raise ValueError(
+                "Distance must be a non-negative float, received: {}".format(
+                    value))
+
         self.__distance = value
 
     @property
@@ -92,7 +97,7 @@ class Measure:
             int: Quality of the measure.
         """
         return self.__quality
-    
+
     @quality.setter
     def quality(self, value: int) -> None:
         """
@@ -104,7 +109,8 @@ class Measure:
         is_instance(value, int)
 
         if value < 0:
-            raise ValueError(f"Quality must be a non-negative integer, received: {value}")
+            raise ValueError(
+                f"Quality must be a non-negative integer, received: {value}")
         self.__quality = value
 
     @classmethod
@@ -139,7 +145,7 @@ class Measure:
             return None
 
         return cls(angle, distance, quality)
-    
+
     @classmethod
     def measures_to_string(cls, measures: list) -> str:
         """
@@ -153,7 +159,7 @@ class Measure:
         """
         # Check the type of measures
         is_instance(measures, list)
-        
+
         # Convert each measure to string and join them with spaces
         return cls.MEASURES_SEPARATOR.join(str(measure) for measure in measures)
 
@@ -172,7 +178,8 @@ class Measure:
         is_instance(measures_str, str)
 
         # Split the string by the measures separator and convert each part to Measure
-        return [cls.from_string(measure_str) for measure_str in measures_str.split(cls.MEASURES_SEPARATOR) if measure_str]
+        return [cls.from_string(measure_str) for measure_str in
+                measures_str.split(cls.MEASURES_SEPARATOR) if measure_str]
 
     @classmethod
     def get_properties_from_string(cls, measure_str: str) -> tuple:
@@ -197,6 +204,6 @@ class Measure:
         return (
             float(parts[0]),
             float(parts[1]),
-            int(parts[2]) if len(parts) > 2 else 0  # Quality, default to 0 if not provided
+            int(parts[2]) if len(parts) > 2 else 0
+        # Quality, default to 0 if not provided
         )
-    

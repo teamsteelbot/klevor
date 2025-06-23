@@ -1,14 +1,15 @@
 import os
 from argparse import ArgumentParser
 
-from ...constants import SIZE
-from ..constants import EPOCHS
 from .. import Yolo
 from ..args import Args, Flag
+from ..constants import EPOCHS
 from ..files import Files
+from ...constants import SIZE
 
 
-def train_model(model: str = 'yolo11n.pt', device: str = 'cpu', data: str | os.PathLike[str] = 'data.yaml',
+def train_model(model: str = 'yolo11n.pt', device: str = 'cpu',
+                data: str | os.PathLike[str] = 'data.yaml',
                 epochs: int = EPOCHS, imgsz: int = SIZE, project: str = 'yolo',
                 name: str = 'model') -> None:
     """
@@ -47,10 +48,12 @@ if __name__ == '__main__':
     args = Args.parse_args_as_dict(parser)
 
     # Get the YOLO input model
-    arg_yolo_input_model = Args.get_attribute_from_args_dict(args, Flag.INPUT_MODEL)
+    arg_yolo_input_model = Args.get_attribute_from_args_dict(args,
+                                                             Flag.INPUT_MODEL)
 
     # Get the YOLO input PyTorch model
-    arg_yolo_input_model_pt = Args.get_attribute_from_args_dict(args, Flag.INPUT_MODEL_PT)
+    arg_yolo_input_model_pt = Args.get_attribute_from_args_dict(args,
+                                                                Flag.INPUT_MODEL_PT)
 
     # Get the YOLO epochs
     arg_yolo_epochs = Args.get_attribute_from_args_dict(args, Flag.EPOCHS)
@@ -59,12 +62,16 @@ if __name__ == '__main__':
     arg_yolo_device = Args.get_attribute_from_args_dict(args, Flag.DEVICE)
 
     # Get the YOLO image size
-    arg_yolo_image_size = Args.get_attribute_from_args_dict(args, Flag.IMAGE_SIZE)
+    arg_yolo_image_size = Args.get_attribute_from_args_dict(args,
+                                                            Flag.IMAGE_SIZE)
 
     # Get model local data path
-    model_local_data_path = Files.get_model_local_data_path(arg_yolo_input_model)
+    model_local_data_path = Files.get_model_local_data_path(
+        arg_yolo_input_model)
 
     # Train the model
-    train_model(model=arg_yolo_input_model_pt, data=model_local_data_path, epochs=arg_yolo_epochs,
-                imgsz=arg_yolo_image_size, project=arg_yolo_input_model, name=arg_yolo_input_model,
+    train_model(model=arg_yolo_input_model_pt, data=model_local_data_path,
+                epochs=arg_yolo_epochs,
+                imgsz=arg_yolo_image_size, project=arg_yolo_input_model,
+                name=arg_yolo_input_model,
                 device=arg_yolo_device)

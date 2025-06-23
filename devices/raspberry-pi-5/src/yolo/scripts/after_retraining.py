@@ -1,11 +1,12 @@
-from argparse import ArgumentParser
 import os
+from argparse import ArgumentParser
 
 from ..args import Args, Flag
 from ..files import Files
 
 if __name__ == '__main__':
-    parser = ArgumentParser(description='Script to move YOLO model runs folder to old runs folder')
+    parser = ArgumentParser(
+        description='Script to move YOLO model runs folder to old runs folder')
     Args.add_yolo_version_argument(parser)
     args = Args.parse_args_as_dict(parser)
 
@@ -16,7 +17,8 @@ if __name__ == '__main__':
     yolo_runs_dir = Files.get_yolo_runs_dir_path(arg_yolo_version)
 
     # Get the runs folder path with the new name
-    yolo_runs_new_name_dir = Files.get_yolo_runs_new_name_dir_path(arg_yolo_version)
+    yolo_runs_new_name_dir = Files.get_yolo_runs_new_name_dir_path(
+        arg_yolo_version)
 
     # Check if the new name folder exists
     if os.path.exists(yolo_runs_new_name_dir):

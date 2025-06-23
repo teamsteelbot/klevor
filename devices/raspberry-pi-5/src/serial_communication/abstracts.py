@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 
-from .message import IncomingMessage, OutgoingMessage
 from .enums import RPLIDAR
+from .message import IncomingMessage, OutgoingMessage
+
 
 class SerialCommunicationABC(ABC):
     """

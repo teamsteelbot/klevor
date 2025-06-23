@@ -1,17 +1,19 @@
+import os
 from multiprocessing import Queue, Event
 from typing import Optional, Callable
-import os
 
-from PIL.Image import Image
 import numpy as np
+from PIL.Image import Image
 
 from . import Camera
 from .photographer import Photographer
 from ..utils.decorators import ignore_sigint
 
+
 @ignore_sigint
 def photographer_target(images_queue: Queue, capture_image_event: Event,
-                        opened_event: Event, stop_event: Event, writer_messages_queue: Queue,
+                        opened_event: Event, stop_event: Event,
+                        writer_messages_queue: Queue,
                         preprocess_fn: Callable[[Image], np.ndarray],
                         server_messages_queue: Optional[Queue] = None):
     """
@@ -26,7 +28,8 @@ def photographer_target(images_queue: Queue, capture_image_event: Event,
         preprocess_fn: Callable[[Image], np.ndarray]: Function to preprocess images before inference.
         server_messages_queue (Optional[Queue]): Queue to broadcast messages through the websockets server, if any.
     """
-    print("Initializing Photographer in multiprocessing mode. Process ID:", os.getpid())
+    print("Initializing Photographer in multiprocessing mode. Process ID:",
+          os.getpid())
 
     # Initialize the camera
     camera = Camera(writer_messages_queue)

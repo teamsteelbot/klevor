@@ -12,5 +12,8 @@ MAX_DISTANCE_LIMIT = 3000
 # Distance difference
 DISTANCE_DIFF = 25
 
+# Apps folder
+APPS_DIR = os.path.join(os.path.dirname(__file__), "apps")
+
 # Get the absolute path of the ultra_simple executable
-ULTRA_SIMPLE_PATH = os.path.join(os.path.dirname(__file__), "ultra_simple")
+ULTRA_SIMPLE_PATH = os.path.join(APPS_DIR, "ultra_simple")

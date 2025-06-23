@@ -1,11 +1,11 @@
 from argparse import ArgumentParser
-
-from ..args import Args, Flag
-from . import RPLIDAR
-from ..server import WebSocketServer
-from ..log import Logger
 from time import sleep
+
+from . import RPLIDAR
+from ..args import Args, Flag
+from ..log import Logger
 from ..serial_communication import SerialCommunication
+from ..server import WebSocketServer
 
 if __name__ == "__main__":
     parser = ArgumentParser(

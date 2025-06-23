@@ -1,5 +1,6 @@
 from typing import Protocol
 
+
 class FlagProtocol(Protocol):
     """
     Protocol for flag classes.

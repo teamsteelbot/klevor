@@ -1,15 +1,18 @@
-from argparse import ArgumentParser
 import os
 import shutil
+from argparse import ArgumentParser
 
-from ...opencv import OpenCV
 from ..args import Args, Flag
 from ..files import Files
-from ..files.constants import DATASET_TRAINING, DATASET_VALIDATIONS, DATASET_IMAGES, DATASET_ORGANIZED
+from ..files.constants import DATASET_TRAINING, DATASET_VALIDATIONS, \
+    DATASET_IMAGES, DATASET_ORGANIZED
+from ...opencv import OpenCV
 
 
-def after_training(input_dir: str | os.PathLike[str], calib_set_file_path: str | os.PathLike[str],
-                   model_hailo_suite_dir: str | os.PathLike[str], best_onnx_weights_path: str | os.PathLike[str]):
+def after_training(input_dir: str | os.PathLike[str],
+                   calib_set_file_path: str | os.PathLike[str],
+                   model_hailo_suite_dir: str | os.PathLike[str],
+                   best_onnx_weights_path: str | os.PathLike[str]):
     """
     Remove the YOLO training and validations folders from the dataset, create the calibration set and copy the best ONNX weights to the Hailo Suite folder.
 
@@ -23,10 +26,12 @@ def after_training(input_dir: str | os.PathLike[str], calib_set_file_path: str |
         None.
     """
     # Get the training folder to the Hailo Suite folder
-    input_training_images_path = os.path.join(input_dir, DATASET_TRAINING, DATASET_IMAGES)
+    input_training_images_path = os.path.join(input_dir, DATASET_TRAINING,
+                                              DATASET_IMAGES)
 
     # Generate the .npy file to the Hailo Suite folder
-    OpenCV.preprocess_images_to_npy(input_training_images_path, calib_set_file_path)
+    OpenCV.preprocess_images_to_npy(input_training_images_path,
+                                    calib_set_file_path)
 
     # Remove the training and validations folder
     for folder in [DATASET_TRAINING, DATASET_VALIDATIONS]:
@@ -40,7 +45,8 @@ def after_training(input_dir: str | os.PathLike[str], calib_set_file_path: str |
     # Copy the best ONNX weights to the model Hailo Suite folder
     if os.path.exists(best_onnx_weights_path):
         shutil.copy(best_onnx_weights_path, model_hailo_suite_dir)
-        print(f'Copied {best_onnx_weights_path} to {model_hailo_suite_dir} folder')
+        print(
+            f'Copied {best_onnx_weights_path} to {model_hailo_suite_dir} folder')
     else:
         print(f'{best_onnx_weights_path} does not exist')
 
@@ -53,23 +59,27 @@ if __name__ == '__main__':
     args = Args.parse_args_as_dict(parser)
 
     # Get the YOLO input model
-    arg_yolo_input_model = Args.get_attribute_from_args_dict(args, Flag.INPUT_MODEL)
+    arg_yolo_input_model = Args.get_attribute_from_args_dict(args,
+                                                             Flag.INPUT_MODEL)
 
     # Get the YOLO version
     arg_yolo_version = Args.get_attribute_from_args_dict(args, Flag.VERSION)
 
     # Get the dataset paths
-    organized_dir = Files.get_dataset_model_dir_path(DATASET_ORGANIZED, None, arg_yolo_input_model)
+    organized_dir = Files.get_dataset_model_dir_path(DATASET_ORGANIZED, None,
+                                                     arg_yolo_input_model)
 
     # Get the Hailo Suite calibration set file path
     calibration_set_file_path = Files.get_hailo_suite_calib_file_path()
 
     # Get the model Hailo Suite path
-    model_hailo_suite_dir = Files.get_model_hailo_suite_dir_path(arg_yolo_input_model, arg_yolo_version)
+    model_hailo_suite_dir = Files.get_model_hailo_suite_dir_path(
+        arg_yolo_input_model, arg_yolo_version)
 
     # Get the best weights path
-    best_onnx_weights_path = Files.get_model_best_onnx_path(arg_yolo_input_model, arg_yolo_version)
+    best_onnx_weights_path = Files.get_model_best_onnx_path(
+        arg_yolo_input_model, arg_yolo_version)
 
     # Move the folders
-    after_training(organized_dir, calibration_set_file_path, model_hailo_suite_dir, best_onnx_weights_path)
-
+    after_training(organized_dir, calibration_set_file_path,
+                   model_hailo_suite_dir, best_onnx_weights_path)

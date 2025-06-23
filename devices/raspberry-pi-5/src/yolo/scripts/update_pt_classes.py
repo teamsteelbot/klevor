@@ -42,7 +42,8 @@ if __name__ == "__main__":
     args = Args.parse_args_as_dict(parser)
 
     # Get the YOLO input model
-    arg_yolo_input_model = Args.get_attribute_from_args_dict(args, Flag.INPUT_MODEL)
+    arg_yolo_input_model = Args.get_attribute_from_args_dict(args,
+                                                             Flag.INPUT_MODEL)
 
     # Get the YOLO version
     arg_yolo_version = Args.get_attribute_from_args_dict(args, Flag.VERSION)

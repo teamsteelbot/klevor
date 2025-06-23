@@ -1,26 +1,27 @@
+import asyncio
 from multiprocessing import Event, Queue, RLock
 from threading import Thread
-from typing import Optional, final
 from time import sleep
-import asyncio
+from typing import Optional, final
 
 from serial import Serial, SerialException
 
+from .abstracts import SerialCommunicationABC
 from .constants import (
     RASPBERRY_PI_PICO_CONSOLE_PORT, RASPBERRY_PI_PICO_CONSOLE_PORT_ALT,
     RASPBERRY_PI_PICO_DATA_PORT, RASPBERRY_PI_PICO_DATA_PORT_ALT,
     RASPBERRY_PI_PICO_BAUDRATE, ENCODE
 )
-from ..camera.image_processing_queue import ImageProcessingQueueABC
-from ..log import LoggerABC
-from ..log.sub_logger import SubLogger
+from .enums import OutgoingCategory, Status, RPLIDAR
 from .message import IncomingMessage, OutgoingMessage
-from .enums import IncomingCategory, OutgoingCategory, Status, RPLIDAR
-from .abstracts import SerialCommunicationABC
-from ..server import WebSocketServerABC
-from ..utils import is_instance
+from ..camera.image_processing_queue import ImageProcessingQueueABC
 from ..env import Env
 from ..env.enums import Challenge
+from ..log import LoggerABC
+from ..log.sub_logger import SubLogger
+from ..server import WebSocketServerABC
+from ..utils import is_instance
+
 
 class SerialCommunication(SerialCommunicationABC):
     """
@@ -37,15 +38,16 @@ class SerialCommunication(SerialCommunicationABC):
     STOP_DELAY = 0.1
 
     def __init__(
-        self,
-        logger: Optional[LoggerABC] = None,
-        image_processing_queue: Optional[ImageProcessingQueueABC] = None,
-        server: Optional[WebSocketServerABC] = None,
-        console_port: Optional[str] = RASPBERRY_PI_PICO_CONSOLE_PORT,
-        console_port_alt: Optional[str] = RASPBERRY_PI_PICO_CONSOLE_PORT_ALT,
-        data_port: Optional[str] = RASPBERRY_PI_PICO_DATA_PORT,
-        data_port_alt: Optional[str] = RASPBERRY_PI_PICO_DATA_PORT_ALT,
-        baudrate: Optional[int] = RASPBERRY_PI_PICO_BAUDRATE
+            self,
+            logger: Optional[LoggerABC] = None,
+            image_processing_queue: Optional[ImageProcessingQueueABC] = None,
+            server: Optional[WebSocketServerABC] = None,
+            console_port: Optional[str] = RASPBERRY_PI_PICO_CONSOLE_PORT,
+            console_port_alt: Optional[
+                str] = RASPBERRY_PI_PICO_CONSOLE_PORT_ALT,
+            data_port: Optional[str] = RASPBERRY_PI_PICO_DATA_PORT,
+            data_port_alt: Optional[str] = RASPBERRY_PI_PICO_DATA_PORT_ALT,
+            baudrate: Optional[int] = RASPBERRY_PI_PICO_BAUDRATE
     ):
         """
         Initialize the serial communication class.
@@ -137,7 +139,8 @@ class SerialCommunication(SerialCommunicationABC):
         return self.__image_processing_queue
 
     @image_processing_queue.setter
-    def image_processing_queue(self, image_processing_queue: Optional[ImageProcessingQueueABC]) -> None:
+    def image_processing_queue(self, image_processing_queue: Optional[
+        ImageProcessingQueueABC]) -> None:
         """
         Set the image processing queue.
 
@@ -179,17 +182,21 @@ class SerialCommunication(SerialCommunicationABC):
 
             # Open the console port
             try:
-                self.__console_serial = Serial(self.__console_port, self.__baudrate)
+                self.__console_serial = Serial(self.__console_port,
+                                               self.__baudrate)
 
             except SerialException as port_e:
                 # Try its alternative port
                 try:
-                    self.__console_serial = Serial(self.__console_port_alt, self.__baudrate)
+                    self.__console_serial = Serial(self.__console_port_alt,
+                                                   self.__baudrate)
 
                 except SerialException as port_alt_e:
-                    raise RuntimeError(f"Error opening serial console port: {port_e} and alternative port: {port_alt_e}")
+                    raise RuntimeError(
+                        f"Error opening serial console port: {port_e} and alternative port: {port_alt_e}")
 
-                raise RuntimeError(f"Error opening serial console port: {port_e}")
+                raise RuntimeError(
+                    f"Error opening serial console port: {port_e}")
 
             # Open the data port
             try:
@@ -198,10 +205,12 @@ class SerialCommunication(SerialCommunicationABC):
             except SerialException as port_e:
                 # Try its alternative port
                 try:
-                    self.__data_serial = Serial(self.__data_port_alt, self.__baudrate)
+                    self.__data_serial = Serial(self.__data_port_alt,
+                                                self.__baudrate)
 
                 except SerialException as port_alt_e:
-                    raise RuntimeError(f"Error opening serial data port: {port_e} and alternative port: {port_alt_e}")
+                    raise RuntimeError(
+                        f"Error opening serial data port: {port_e} and alternative port: {port_alt_e}")
 
                 raise RuntimeError(f"Error opening serial data port: {port_e}")
 
@@ -242,13 +251,14 @@ class SerialCommunication(SerialCommunicationABC):
             self.__queues_closed_event.set()
 
         # Log
-        self.__logger.info(f"Serial console port '{self.__console_port}' and data port '{self.__data_port}' closed.") if self.__logger else None
+        self.__logger.info(
+            f"Serial console port '{self.__console_port}' and data port '{self.__data_port}' closed.") if self.__logger else None
 
     @final
     def is_closed(self) -> bool:
         return not self.is_open()
-    
-    @final 
+
+    @final
     def start(self) -> None:
         with self.__rlock:
             self.__start_event.set()
@@ -268,20 +278,22 @@ class SerialCommunication(SerialCommunicationABC):
         with self.__rlock:
             # Put the message in the queue
             self.__outgoing_messages_queue.put(msg)
-    
+
             # Set the last incoming message
             self.__last_incoming_message = msg
-    
+
             # Set the pending incoming message event
             self.__pending_incoming_message_event.set()
-    
+
         # Log
         msg_str = str(msg)
         first_line = str(msg).split('\n')[0]
-        self.__logger.debug(f"Received message: {first_line}") if self.__logger and self.__debug else None
+        self.__logger.debug(
+            f"Received message: {first_line}") if self.__logger and self.__debug else None
 
         # If the server is set, send the message to the server
-        asyncio.run(self.__server.broadcast_serial_incoming_message(msg_str)) if self.__server else None
+        asyncio.run(self.__server.broadcast_serial_incoming_message(
+            msg_str)) if self.__server else None
 
     @final
     def receive_message(self) -> IncomingMessage | None:
@@ -291,7 +303,7 @@ class SerialCommunication(SerialCommunicationABC):
 
             # Check if the queue is closed or empty
             if self.__queues_closed_event.is_set() or self.__incoming_messages_queue.empty():
-                    return None
+                return None
 
             # Get the message from the queue
             msg = self.__incoming_messages_queue.get()
@@ -317,7 +329,7 @@ class SerialCommunication(SerialCommunicationABC):
         with self.__rlock:
             if self.is_closed() or not self.__pending_outgoing_message_event.is_set():
                 return None
-                
+
             # Check if the queue is closed or empty
             if self.__queues_closed_event.is_set() or self.__outgoing_messages_queue.empty():
                 return None
@@ -332,10 +344,12 @@ class SerialCommunication(SerialCommunicationABC):
         # Log
         msg_str = str(msg)
         first_line = msg_str.split('\n')[0]
-        self.__logger.debug(f"Sending message: {first_line}") if self.__logger and self.__debug else None
+        self.__logger.debug(
+            f"Sending message: {first_line}") if self.__logger and self.__debug else None
 
         # If the server is set, send the message to the server
-        asyncio.run(self.__server.broadcast_serial_outgoing_message(msg_str)) if self.__server else None
+        asyncio.run(self.__server.broadcast_serial_outgoing_message(
+            msg_str)) if self.__server else None
 
         return msg
 
@@ -355,7 +369,8 @@ class SerialCommunication(SerialCommunicationABC):
             self.__pending_outgoing_message_event.set()
 
         # Log
-        self.__logger.debug(f"Sending message: {message}") if self.__logger and self.__debug else None
+        self.__logger.debug(
+            f"Sending message: {message}") if self.__logger and self.__debug else None
 
     def _send_confirmation_message(self) -> None:
         """
@@ -375,7 +390,8 @@ class SerialCommunication(SerialCommunicationABC):
             is_instance(value, float)
 
             # Create a message with the RPLIDAR measures type
-            msg = OutgoingMessage(OutgoingCategory.RPLIDAR, f"{key.parsed_name}{OutgoingMessage.CONTENT_HEADER_SEPARATOR}{value}")
+            msg = OutgoingMessage(OutgoingCategory.RPLIDAR,
+                                  f"{key.parsed_name}{OutgoingMessage.CONTENT_HEADER_SEPARATOR}{value}")
 
             # Put the message in the outgoing messages queue
             self._send_message(msg)
@@ -383,13 +399,16 @@ class SerialCommunication(SerialCommunicationABC):
     @final
     def _receiving_message_handler(self) -> None:
         # Log
-        self.__logger.info(f"Serial port receiving handler started for port {self.__console_port}.") if self.__logger else None
+        self.__logger.info(
+            f"Serial port receiving handler started for port {self.__console_port}.") if self.__logger else None
 
         # Check if there is an initialization message received
         while True:
             if self.is_open() and self.__console_serial.in_waiting > 0:
-                console_msg = self.__console_serial.read(self.__console_serial.in_waiting).decode(ENCODE).strip()
-                self.__logger.debug("Received initialization message: " + console_msg) if self.__logger and self.__debug else None
+                console_msg = self.__console_serial.read(
+                    self.__console_serial.in_waiting).decode(ENCODE).strip()
+                self.__logger.debug(
+                    "Received initialization message: " + console_msg) if self.__logger and self.__debug else None
 
                 # Get the Message from the string
                 msg = IncomingMessage.from_string(console_msg)
@@ -402,14 +421,16 @@ class SerialCommunication(SerialCommunicationABC):
                         self.__close()
 
                         # Log
-                        self.__logger.error("Challenge not set. Stopping communication.") if self.__logger else None
+                        self.__logger.error(
+                            "Challenge not set. Stopping communication.") if self.__logger else None
                         return
 
                     # Set the start event
                     self.start()
 
                     # Log
-                    self.__logger.info("Received start event.") if self.__logger else None
+                    self.__logger.info(
+                        "Received start event.") if self.__logger else None
 
                     # Send a confirmation start message
                     self._send_confirmation_message()
@@ -420,14 +441,15 @@ class SerialCommunication(SerialCommunicationABC):
                     Env.set_challenge(Challenge.from_string(msg.content))
 
                     # Log
-                    self.__logger.info("Received challenge message.") if self.__logger else None
+                    self.__logger.info(
+                        "Received challenge message.") if self.__logger else None
 
                     # Send a challenge message
                     self._send_confirmation_message()
 
                     # Continue to wait for the start event
                     continue
-        
+
         while self.is_open():
             if self.__console_serial.in_waiting == 0:
                 sleep(self.MESSAGE_DELAY)
@@ -442,7 +464,8 @@ class SerialCommunication(SerialCommunicationABC):
                 self._send_confirmation_message()
 
                 # Log the stop message
-                self.__logger.info("Received stop event.") if self.__logger else None
+                self.__logger.info(
+                    "Received stop event.") if self.__logger else None
 
                 # Wait for a short time to ensure the message is sent
                 sleep(self.STOP_DELAY)
@@ -452,27 +475,32 @@ class SerialCommunication(SerialCommunicationABC):
 
             elif msg.is_error():
                 # Log the error message
-                self.__logger.error(f"Received error message: {msg.content}") if self.__logger else None
+                self.__logger.error(
+                    f"Received error message: {msg.content}") if self.__logger else None
 
             else:
                 # Log
-                self.__logger.debug(f"Received message: {msg}") if self.__logger and self.__debug else None
+                self.__logger.debug(
+                    f"Received message: {msg}") if self.__logger and self.__debug else None
 
             # Put the message in the incoming messages queue
             self.__put_incoming_message(msg)
 
-        self.__logger.info(f"Serial port receiving handler stopped for port {self.__console_port}.") if self.__logger else None
+        self.__logger.info(
+            f"Serial port receiving handler stopped for port {self.__console_port}.") if self.__logger else None
 
     @final
     def _sending_message_handler(self) -> None:
         # Log 
-        self.__logger.info("Waiting for start event on receiving handler...") if self.__logger else None
+        self.__logger.info(
+            "Waiting for start event on receiving handler...") if self.__logger else None
 
         # Wait for start event to be set
         self.__start_event.wait()
 
         # Log
-        self.__logger.info(f"Serial port sending handler started for port {self.__data_port}.") if self.__logger else None
+        self.__logger.info(
+            f"Serial port sending handler started for port {self.__data_port}.") if self.__logger else None
 
         while self.is_open():
             # Check if there is a message to send
@@ -488,7 +516,8 @@ class SerialCommunication(SerialCommunicationABC):
             # Send the message to the serial port
             self.__data_serial.write(str(msg).encode(ENCODE))
 
-        self.__logger.info(f"Serial port sending handler stopped for port {self.__data_port}.") if self.__logger else None
+        self.__logger.info(
+            f"Serial port sending handler stopped for port {self.__data_port}.") if self.__logger else None
 
     def create_threads(self) -> None:
         """
@@ -496,22 +525,25 @@ class SerialCommunication(SerialCommunicationABC):
         """
         with self.__rlock:
             if self.is_open():
-                self.__logger.warning("Communication threads already created.") if self.__logger else None
+                self.__logger.warning(
+                    "Communication threads already created.") if self.__logger else None
                 return
-            
+
             # Open the serial ports
             self.__open()
-            
+
             # Create the receiving thread
-            self.__receiving_thread = Thread(target=self._receiving_message_handler)
+            self.__receiving_thread = Thread(
+                target=self._receiving_message_handler)
             self.__receiving_thread.start()
-            
+
             # Create the sending thread
             self.__sending_thread = Thread(target=self._sending_message_handler)
             self.__sending_thread.start()
 
         # Log
-        self.__logger.info("Communication threads created.") if self.__logger else None
+        self.__logger.info(
+            "Communication threads created.") if self.__logger else None
 
     def stop_threads(self) -> None:
         """
@@ -519,17 +551,18 @@ class SerialCommunication(SerialCommunicationABC):
         """
         with self.__rlock:
             if self.is_closed():
-                self.__logger.warning("Communication threads already stopped.") if self.__logger else None
+                self.__logger.warning(
+                    "Communication threads already stopped.") if self.__logger else None
                 return
-            
+
             # Close the serial port
             self.__close()
-            
+
             # Wait for the receiving thread to finish
             if self.__receiving_thread:
                 self.__receiving_thread.join()
                 self.__receiving_thread = None
-                
+
             # Wait for the sending thread to finish
             if self.__sending_thread:
                 self.__sending_thread.join()
@@ -538,11 +571,11 @@ class SerialCommunication(SerialCommunicationABC):
     @final
     def wait_stop_event(self) -> None:
         return self.__stop_event.wait()
-    
+
     @final
     def wait_start_event(self) -> None:
         return self.__start_event.wait()
-    
+
     @final
     def wait_parking_event(self) -> None:
         return self.__parking_event.wait()
@@ -553,7 +586,7 @@ class SerialCommunication(SerialCommunicationABC):
 
     @final
     def wait_pending_outgoing_message_event(self) -> None:
-        return self.__pending_outgoing_message_event.wait()                
+        return self.__pending_outgoing_message_event.wait()
 
     def __del__(self):
         """
@@ -561,4 +594,5 @@ class SerialCommunication(SerialCommunicationABC):
         """
         self.stop_threads() if self.__receiving_thread or self.__sending_thread else None
         self.__close() if self.is_open() else None
-        self.__logger.info("SerialCommunication instance deleted.") if self.__logger else None
+        self.__logger.info(
+            "SerialCommunication instance deleted.") if self.__logger else None

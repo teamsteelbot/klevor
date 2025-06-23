@@ -2,9 +2,8 @@ import argparse
 
 from .args import Args
 from .args.enums import Flag
-from .env import Env
 from .challenge import ChallengeHandler
-
+from .env import Env
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(

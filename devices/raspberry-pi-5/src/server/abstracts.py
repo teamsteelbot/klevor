@@ -2,8 +2,9 @@ from abc import ABC, abstractmethod
 
 from PIL.Image import Image
 
-from .message import Message
 from .enums import Tag
+from .message import Message
+
 
 class WebSocketServerABC(ABC):
     """

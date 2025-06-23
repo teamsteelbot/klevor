@@ -1,18 +1,23 @@
-from argparse import ArgumentParser
 import json
 import os
 import shutil
+from argparse import ArgumentParser
 
 from ..args import Args, Flag
 from ..files import Files
 from ..files.constants import (
-    DATASET_LABELED, DATASET_TO_PROCESS, DATASET_IMAGES, DATASET_LABELS, DATASET_CLASSES_TXT,
+    DATASET_LABELED, DATASET_TO_PROCESS, DATASET_IMAGES, DATASET_LABELS,
+    DATASET_CLASSES_TXT,
     DATASET_NOTES_JSON, DATASET_IMAGES_EXT
 )
 
 
-def create_dataset_with_removed_classes(input_dir: str | os.PathLike[str], input_to_process_dir: str | os.PathLike[str],
-                                        output_dir: str | os.PathLike[str], output_to_process_dir: str | os.PathLike[str],
+def create_dataset_with_removed_classes(input_dir: str | os.PathLike[str],
+                                        input_to_process_dir: str | os.PathLike[
+                                            str],
+                                        output_dir: str | os.PathLike[str],
+                                        output_to_process_dir: str |
+                                                               os.PathLike[str],
                                         ignore_classes: list):
     """
     Create a new dataset with the labeled classes removed.
@@ -89,7 +94,8 @@ def create_dataset_with_removed_classes(input_dir: str | os.PathLike[str], input
         categories = new_notes_json_data.get('categories', [])
 
         # Filter out the ignored classes
-        filtered_categories = [cat for cat in categories if cat['id'] not in ignore_classes_indexes]
+        filtered_categories = [cat for cat in categories if
+                               cat['id'] not in ignore_classes_indexes]
 
         # Update the IDs of the remaining categories
         for i, cat in enumerate(filtered_categories):
@@ -126,7 +132,8 @@ def create_dataset_with_removed_classes(input_dir: str | os.PathLike[str], input
             lines = f.readlines()
 
         # Write the filtered labels to the output label file
-        output_label_path = os.path.join(output_annotations_dir, input_label_name)
+        output_label_path = os.path.join(output_annotations_dir,
+                                         input_label_name)
         with open(output_label_path, 'w') as f:
             for line in lines:
                 line_parts = line.split()
@@ -138,29 +145,40 @@ def create_dataset_with_removed_classes(input_dir: str | os.PathLike[str], input
 
 
 if __name__ == '__main__':
-    parser = ArgumentParser(description='Script to remove labeled classes from a given YOLO model dataset')
+    parser = ArgumentParser(
+        description='Script to remove labeled classes from a given YOLO model dataset')
     Args.add_yolo_input_model_argument(parser)
     Args.add_yolo_output_model_argument(parser)
     Args.add_yolo_ignore_classes_argument(parser)
     args = Args.parse_args_as_dict(parser)
 
     # Get the YOLO input model
-    arg_yolo_input_model = Args.get_attribute_from_args_dict(args, Flag.INPUT_MODEL)
+    arg_yolo_input_model = Args.get_attribute_from_args_dict(args,
+                                                             Flag.INPUT_MODEL)
 
     # Get the YOLO output model
-    arg_yolo_output_model = Args.get_attribute_from_args_dict(args, Flag.OUTPUT_MODEL)
+    arg_yolo_output_model = Args.get_attribute_from_args_dict(args,
+                                                              Flag.OUTPUT_MODEL)
 
     # Get the YOLO ignore classes
-    arg_yolo_ignore_classes = Args.get_attribute_from_args_dict(args, Flag.IGNORE_CLASSES)
+    arg_yolo_ignore_classes = Args.get_attribute_from_args_dict(args,
+                                                                Flag.IGNORE_CLASSES)
 
     # Get the dataset paths
-    input_labeled_dir = Files.get_dataset_model_dir_path(DATASET_LABELED, None, arg_yolo_input_model)
-    input_labeled_to_process_dir = Files.get_dataset_model_dir_path(DATASET_LABELED, DATASET_TO_PROCESS,
-                                                                    arg_yolo_input_model)
-    output_labeled_dir = Files.get_dataset_model_dir_path(DATASET_LABELED, None, arg_yolo_output_model)
-    output_labeled_to_process_dir = Files.get_dataset_model_dir_path(DATASET_LABELED, DATASET_TO_PROCESS,
-                                                                     arg_yolo_output_model)
+    input_labeled_dir = Files.get_dataset_model_dir_path(DATASET_LABELED, None,
+                                                         arg_yolo_input_model)
+    input_labeled_to_process_dir = Files.get_dataset_model_dir_path(
+        DATASET_LABELED, DATASET_TO_PROCESS,
+        arg_yolo_input_model)
+    output_labeled_dir = Files.get_dataset_model_dir_path(DATASET_LABELED, None,
+                                                          arg_yolo_output_model)
+    output_labeled_to_process_dir = Files.get_dataset_model_dir_path(
+        DATASET_LABELED, DATASET_TO_PROCESS,
+        arg_yolo_output_model)
 
     # Create the dataset with removed classes
-    create_dataset_with_removed_classes(input_labeled_dir, input_labeled_to_process_dir, output_labeled_dir,
-                                        output_labeled_to_process_dir, arg_yolo_ignore_classes)
+    create_dataset_with_removed_classes(input_labeled_dir,
+                                        input_labeled_to_process_dir,
+                                        output_labeled_dir,
+                                        output_labeled_to_process_dir,
+                                        arg_yolo_ignore_classes)

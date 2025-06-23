@@ -1,16 +1,17 @@
-import random
 import os
+import random
 import time
 from typing import Optional
 
 import cv2
 import numpy as np
 
+from .constants import SHAPE, MAX_CALIB_SET_SAMPLES, COLOR
 from ..args import Args
 from ..constants import MODELS_COLORS, SIZE
-from .constants import SHAPE, MAX_CALIB_SET_SAMPLES, COLOR
 from ..files import Files
 from ..utils import is_instance
+
 
 class OpenCV:
     """
@@ -18,7 +19,8 @@ class OpenCV:
     """
 
     @staticmethod
-    def resize_image(image: np.ndarray, size: tuple[int, int] = (SIZE, SIZE), interpolation=cv2.INTER_LINEAR) -> np.ndarray:
+    def resize_image(image: np.ndarray, size: tuple[int, int] = (SIZE, SIZE),
+                     interpolation=cv2.INTER_LINEAR) -> np.ndarray:
         """
         Resize an image to the specified size.
 
@@ -30,7 +32,8 @@ class OpenCV:
         Returns:
             np.ndarray: Resized image.
         """
-        return cv2.resize(image, size, interpolation=interpolation) if size else image
+        return cv2.resize(image, size,
+                          interpolation=interpolation) if size else image
 
     @staticmethod
     def rgb_to_bgr(rgb: tuple[int, int, int]) -> tuple:
@@ -45,7 +48,8 @@ class OpenCV:
         return rgb[::-1]
 
     @classmethod
-    def get_rgb_color(cls, class_number: int, rgb_colors: tuple[tuple[int, int, int]] = None) -> tuple[
+    def get_rgb_color(cls, class_number: int,
+                      rgb_colors: tuple[tuple[int, int, int]] = None) -> tuple[
         int, int, int]:
         """
         Get RGB color.
@@ -56,10 +60,12 @@ class OpenCV:
         Returns:
             tuple[int, int, int]: RGB color tuple for the class number.
         """
-        return rgb_colors[class_number] if rgb_colors is not None and class_number in rgb_colors else COLOR
+        return rgb_colors[
+            class_number] if rgb_colors is not None and class_number in rgb_colors else COLOR
 
     @classmethod
-    def get_bgr_color(cls, class_number: int, rgb_colors: tuple[tuple[int, int, int]] = None) -> tuple:
+    def get_bgr_color(cls, class_number: int,
+                      rgb_colors: tuple[tuple[int, int, int]] = None) -> tuple:
         """
         Get BGR color.
 
@@ -72,7 +78,8 @@ class OpenCV:
         return cls.rgb_to_bgr(cls.get_rgb_color(class_number, rgb_colors))
 
     @classmethod
-    def load_image(cls, image_path: str, image_size: tuple[int, int] = None, to_rgb: bool = True,
+    def load_image(cls, image_path: str, image_size: tuple[int, int] = None,
+                   to_rgb: bool = True,
                    interpolation=cv2.INTER_LINEAR) -> np.ndarray:
         """
         Load an image from a file.
@@ -103,7 +110,8 @@ class OpenCV:
         return image
 
     @classmethod
-    def preprocess(cls, image_path: str, image_size: tuple[int, int] = (SIZE, SIZE)) -> tuple:
+    def preprocess(cls, image_path: str,
+                   image_size: tuple[int, int] = (SIZE, SIZE)) -> tuple:
         """
         Preprocess the image.
 
@@ -125,9 +133,12 @@ class OpenCV:
         return image, image_expanded
 
     @classmethod
-    def resize_images(cls, input_to_process_dir: str | os.PathLike[str], output_resized_to_process_dir: str | os.PathLike[str],
-                     output_processed_dir: Optional[str | os.PathLike[str]] = None, new_image_size: tuple[int, int] = SIZE,
-                     interpolation=cv2.INTER_LINEAR) -> None:
+    def resize_images(cls, input_to_process_dir: str | os.PathLike[str],
+                      output_resized_to_process_dir: str | os.PathLike[str],
+                      output_processed_dir: Optional[
+                          str | os.PathLike[str]] = None,
+                      new_image_size: tuple[int, int] = SIZE,
+                      interpolation=cv2.INTER_LINEAR) -> None:
         """
         Resize images function.
 
@@ -149,10 +160,12 @@ class OpenCV:
 
                 # Read image
                 image_path = os.path.join(input_to_process_dir, filename)
-                image = cls.load_image(image_path, new_image_size, interpolation=interpolation)
+                image = cls.load_image(image_path, new_image_size,
+                                       interpolation=interpolation)
 
                 # Write back the image
-                output_path = os.path.join(output_resized_to_process_dir, filename)
+                output_path = os.path.join(output_resized_to_process_dir,
+                                           filename)
                 cv2.imwrite(output_path, image)
 
                 # End timing
@@ -160,15 +173,19 @@ class OpenCV:
                 elapsed_time = end_time - start_time
 
                 # Log
-                print(f'Resized and saved {filename} to {output_resized_to_process_dir} in {elapsed_time:.2f} seconds')
+                print(
+                    f'Resized and saved {filename} to {output_resized_to_process_dir} in {elapsed_time:.2f} seconds')
 
                 # Check if the output_processed_dir is not None
                 if not output_processed_dir:
-                    Files.move_file(image_path, os.path.join(output_processed_dir, filename))
+                    Files.move_file(image_path,
+                                    os.path.join(output_processed_dir,
+                                                 filename))
 
     @classmethod
     def preprocess_images_to_npy(cls, input_folder: str | os.PathLike[str],
-                                 output_file: str | os.PathLike[str], target_shape: tuple = SHAPE) -> None:
+                                 output_file: str | os.PathLike[str],
+                                 target_shape: tuple = SHAPE) -> None:
         """
         Preprocess images from a folder and save them as a .npy file.
 
@@ -186,7 +203,8 @@ class OpenCV:
             image_files = enumerate(os.listdir(input_folder))
         else:
             calib_size = MAX_CALIB_SET_SAMPLES
-            image_files = enumerate(random.sample(os.listdir(input_folder), MAX_CALIB_SET_SAMPLES))
+            image_files = enumerate(
+                random.sample(os.listdir(input_folder), MAX_CALIB_SET_SAMPLES))
         h, w, c = target_shape
 
         # Initialize an empty array to store preprocessed images
@@ -196,7 +214,8 @@ class OpenCV:
         counter = 0
         for _, image_name in image_files:
             image_path = os.path.join(input_folder, image_name)
-            image = cls.load_image(image_path, image_size=(w, h), to_rgb=True, interpolation=cv2.INTER_LINEAR)
+            image = cls.load_image(image_path, image_size=(w, h), to_rgb=True,
+                                   interpolation=cv2.INTER_LINEAR)
 
             # Add the preprocessed image to the array
             images_array[counter] = image
@@ -205,9 +224,10 @@ class OpenCV:
         # Save the array to a .npy file
         np.save(output_file, images_array)
         print(f"Saved preprocessed images to {output_file}")
-    
+
     @staticmethod
-    def get_model_classes_color_palette(model_name: str) -> tuple[tuple[int, int, int]]:
+    def get_model_classes_color_palette(model_name: str) -> tuple[
+        tuple[int, int, int]]:
         """
         Get the model classes color palette.
 
@@ -220,5 +240,6 @@ class OpenCV:
         Args.check_model_name(model_name)
 
         if not model_name in MODELS_COLORS:
-            raise ValueError(f"Model name '{model_name}' does not have a defined color palette.")
+            raise ValueError(
+                f"Model name '{model_name}' does not have a defined color palette.")
         return MODELS_COLORS[model_name]

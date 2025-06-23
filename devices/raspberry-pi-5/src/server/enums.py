@@ -2,6 +2,7 @@ from enum import Enum, unique
 
 from ..utils import map_string_to_enum
 
+
 @unique
 class Tag(Enum):
     """

@@ -2,11 +2,12 @@ from argparse import ArgumentParser
 
 from .. import Yolo
 from ..args import Args, Flag
-from ..files import Files
 from ..constants import FORMAT_ONNX, FORMAT_TFLITE
+from ..files import Files
 
 if __name__ == '__main__':
-    parser = ArgumentParser(description='Script to export YOLO model to a given format')
+    parser = ArgumentParser(
+        description='Script to export YOLO model to a given format')
     Args.add_yolo_input_model_argument(parser)
     Args.add_yolo_format_argument(parser)
     Args.add_yolo_quantized_argument(parser)
@@ -14,7 +15,8 @@ if __name__ == '__main__':
     args = Args.parse_args_as_dict(parser)
 
     # Get the YOLO input model
-    arg_yolo_input_model = Args.get_attribute_from_args_dict(args, Flag.INPUT_MODEL)
+    arg_yolo_input_model = Args.get_attribute_from_args_dict(args,
+                                                             Flag.INPUT_MODEL)
 
     # Get the YOLO format
     arg_yolo_format = Args.get_attribute_from_args_dict(args, Flag.FORMAT)
@@ -26,7 +28,8 @@ if __name__ == '__main__':
     arg_yolo_version = Args.get_attribute_from_args_dict(args, Flag.VERSION)
 
     # Load a model
-    model_path = Files.get_model_best_pt_path(arg_yolo_input_model, arg_yolo_version)
+    model_path = Files.get_model_best_pt_path(arg_yolo_input_model,
+                                              arg_yolo_version)
     model = Yolo.load(model_path)
 
     # Export the model

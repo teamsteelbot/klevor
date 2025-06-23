@@ -1,12 +1,12 @@
 from multiprocessing import Event, Queue
-from time import sleep
 from typing import TextIO, final
 
+from .abstracts import WriterABC
+from .enums import Category
+from .message import Message
 from ..files import Files
 from ..utils import is_instance
-from .abstracts import WriterABC
-from .message import Message
-from .enums import Category
+
 
 class Writer(WriterABC):
     """
@@ -16,7 +16,8 @@ class Writer(WriterABC):
     # Wait timeout for processing messages
     WAIT_TIMEOUT = 0.1
 
-    def __init__(self, messages_queue: Queue, opened_event: Event, stop_event: Event):
+    def __init__(self, messages_queue: Queue, opened_event: Event,
+                 stop_event: Event):
         """
         Initialize the Logger class.
 
@@ -82,10 +83,13 @@ class Writer(WriterABC):
             self.__opened_event.set()
 
             # Write the initial message to the log file
-            self._write(self.__file, Message(f"Log file opened at {self.__file_path}.", Category.DEBUG))
+            self._write(self.__file,
+                        Message(f"Log file opened at {self.__file_path}.",
+                                Category.DEBUG))
 
             # Main loop to write messages to the log file
-            self._write(self.__file, Message("Writer's starting...", Category.DEBUG))
+            self._write(self.__file,
+                        Message("Writer's starting...", Category.DEBUG))
             while not self.__stop_event.is_set():
                 # Write the last message if available
                 self._write_last_message()

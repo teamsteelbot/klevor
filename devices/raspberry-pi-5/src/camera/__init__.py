@@ -1,5 +1,5 @@
 import io
-from multiprocessing import RLock, Queue, Event
+from multiprocessing import RLock, Queue
 from time import sleep
 from typing import final
 
@@ -8,9 +8,9 @@ from picamera2 import Picamera2
 from picamera2.encoders import H264Encoder
 from picamera2.outputs import FileOutput
 
-from ..constants import WIDTH, HEIGHT, IMAGE_FORMAT
-from .constants import ADJUST_DURATION
 from .abstracts import CameraABC
+from .constants import ADJUST_DURATION
+from ..constants import WIDTH, HEIGHT, IMAGE_FORMAT
 from ..log import Logger
 
 
@@ -22,7 +22,9 @@ class Camera(CameraABC):
     # Logger configuration
     LOGGER_TAG = "Camera"
 
-    def __init__(self, writer_messages_queue: Queue, width: int = WIDTH, height: int = HEIGHT, rotation: int = 0, video_config: dict = None):
+    def __init__(self, writer_messages_queue: Queue, width: int = WIDTH,
+                 height: int = HEIGHT, rotation: int = 0,
+                 video_config: dict = None):
         """
         Initialize the camera with the specified width, height, and video configuration.
 
@@ -41,8 +43,10 @@ class Camera(CameraABC):
 
         # Configure the camera and video settings
         self.__picam2 = Picamera2()
-        self.__picam2.set_controls({"AwbMode": "auto"})  # Set Auto White Balance (AWB)
-        self.__config = self.__picam2.create_still_configuration(main={"size": (width, height)})
+        self.__picam2.set_controls(
+            {"AwbMode": "auto"})  # Set Auto White Balance (AWB)
+        self.__config = self.__picam2.create_still_configuration(
+            main={"size": (width, height)})
         self.__picam2.configure(self.__config)
 
         # Configure rotation if specified
@@ -64,7 +68,7 @@ class Camera(CameraABC):
             self.__started_preview = True
 
         # Log
-        self.__logger.info("Camera preview started.") 
+        self.__logger.info("Camera preview started.")
 
     @final
     def _stop_preview(self) -> None:
@@ -77,19 +81,21 @@ class Camera(CameraABC):
             self.__started_preview = False
 
         # Log
-        self.__logger.info("Camera preview stopped.") 
+        self.__logger.info("Camera preview stopped.")
 
     @final
-    def record_video(self, width: int = WIDTH, height: int = HEIGHT, duration: int = 10, file_path: str = 'video.h264',
-                     encoder = H264Encoder()) -> None:
+    def record_video(self, width: int = WIDTH, height: int = HEIGHT,
+                     duration: int = 10, file_path: str = 'video.h264',
+                     encoder=H264Encoder()) -> None:
         with self.__rlock:
             # Stop the camera preview if it is running
             self._stop_preview()
 
             # Configure the camera for video recording
             if not self.__video_config:
-                self.__video_config = self.__picam2.create_video_configuration(main={"size": (width, height)},
-                                                                               display="preview")
+                self.__video_config = self.__picam2.create_video_configuration(
+                    main={"size": (width, height)},
+                    display="preview")
             self.__picam2.configure(self.__video_config)
 
             # Get the  output
@@ -105,7 +111,8 @@ class Camera(CameraABC):
             self.__picam2.stop_recording()
 
         # Log
-        self.__logger.info(f"Video of {duration} seconds recording saved to {file_path}.") 
+        self.__logger.info(
+            f"Video of {duration} seconds recording saved to {file_path}.")
 
     @final
     def capture_image(self, adjust_duration: float = ADJUST_DURATION) -> Image:
@@ -123,12 +130,13 @@ class Camera(CameraABC):
             self._stop_preview()
 
         # Log
-        self.__logger.info("Captured image.") 
+        self.__logger.info("Captured image.")
 
         return image
 
     @final
-    def capture_image_stream(self, image_format: str = IMAGE_FORMAT, adjust_duration: float = ADJUST_DURATION) -> io.BytesIO:
+    def capture_image_stream(self, image_format: str = IMAGE_FORMAT,
+                             adjust_duration: float = ADJUST_DURATION) -> io.BytesIO:
         with self.__rlock:
             # Start the camera preview
             self._start_preview()
@@ -144,7 +152,7 @@ class Camera(CameraABC):
             self._stop_preview()
 
         # Log
-        self.__logger.info("Captured image stream.") 
+        self.__logger.info("Captured image stream.")
 
         return image_stream
 

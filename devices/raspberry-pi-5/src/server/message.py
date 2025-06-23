@@ -1,6 +1,6 @@
+from .enums import Tag
 from ..utils import is_instance
 
-from .enums import Tag
 
 class Message:
     """
@@ -22,7 +22,7 @@ class Message:
         """
         self.content = content
         self.tag = tag
-    
+
     @classmethod
     def from_string(cls, msg_str: str) -> "Message":
         """
@@ -72,7 +72,7 @@ class Message:
         """
         is_instance(value, str)
         self.__content = value
-        
+
     @property
     def tag(self) -> Tag:
         """
@@ -82,7 +82,7 @@ class Message:
             Tag: The tag of the message.
         """
         return self.__tag
-        
+
     @tag.setter
     def tag(self, value: Tag):
         """

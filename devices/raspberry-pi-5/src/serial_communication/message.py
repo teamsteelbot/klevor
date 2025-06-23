@@ -1,6 +1,6 @@
+from .enums import IncomingCategory, OutgoingCategory, Status
 from ..utils import is_instance
 
-from .enums import IncomingCategory, OutgoingCategory, Status
 
 class IncomingMessage:
     """
@@ -135,6 +135,7 @@ class IncomingMessage:
             bool: True if the message is an error message, False otherwise.
         """
         return self.category == IncomingCategory.ERROR
+
 
 class OutgoingMessage:
     """

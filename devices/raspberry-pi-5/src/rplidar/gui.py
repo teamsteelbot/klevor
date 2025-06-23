@@ -1,15 +1,16 @@
-from argparse import ArgumentParser
-import math
 import asyncio
+import math
+from argparse import ArgumentParser
 from threading import Thread
 
 import pygame
 from websockets import connect
 
-from ..args import Args, Flag
-from ..server.message import Tag, Message
 from .constants import MAX_DISTANCE_LIMIT
 from .measure import Measure
+from ..args import Args, Flag
+from ..server.message import Tag, Message
+
 
 class App:
     """
@@ -48,7 +49,7 @@ class App:
     # Update properties
     UPDATE_DELAY = 50  # ms
     DISTANCE_MINIMUM_DIFFERENCE = 50
-    
+
     def __init__(self, ip: str, port: int):
         """
         Initializes the application with the given IP and port.
@@ -65,7 +66,7 @@ class App:
         self.__running = True
 
         # Initialize the measures and points-related objects
-        self.__measures = [Measure(angle*1.0, 0.0, 0) for angle in range(361)]
+        self.__measures = [Measure(angle * 1.0, 0.0, 0) for angle in range(361)]
         self.__previous_measures = {}
         self.__point_positions = {}
 
@@ -81,18 +82,23 @@ class App:
         # Draw static circles
         n = int(self.MAX_DISTANCE_RADIUS / self.STATIC_CIRCLE_RADIUS)
         is_exact = self.MAX_DISTANCE_RADIUS % self.STATIC_CIRCLE_RADIUS == 0
-        for i in range(1, n+1):
+        for i in range(1, n + 1):
             radius = i * self.STATIC_CIRCLE_RADIUS * self.MAX_DISTANCE_RADIUS_FACTOR
             color = self.INTERNAL_STATIC_CIRCLE_COLOR if not is_exact or i < n else self.EXTERNAL_STATIC_CIRCLE_COLOR
             width = self.INTERNAL_STATIC_CIRCLE_WIDTH if not is_exact or i < n else self.EXTERNAL_STATIC_CIRCLE_WIDTH
-            pygame.draw.circle(self.__screen, color, (self.CENTER_X, self.CENTER_Y), radius, width)
+            pygame.draw.circle(self.__screen, color,
+                               (self.CENTER_X, self.CENTER_Y), radius, width)
 
         # Draw external static circle
         if not is_exact:
-            pygame.draw.circle(self.__screen, self.EXTERNAL_STATIC_CIRCLE_COLOR, (self.CENTER_X, self.CENTER_Y), self.RADIUS, self.EXTERNAL_STATIC_CIRCLE_WIDTH)
+            pygame.draw.circle(self.__screen, self.EXTERNAL_STATIC_CIRCLE_COLOR,
+                               (self.CENTER_X, self.CENTER_Y), self.RADIUS,
+                               self.EXTERNAL_STATIC_CIRCLE_WIDTH)
 
         # Draw central point
-        pygame.draw.circle(self.__screen, self.CENTRAL_POINT_COLOR, (self.CENTER_X, self.CENTER_Y), self.CENTRAL_POINT_RADIUS)
+        pygame.draw.circle(self.__screen, self.CENTRAL_POINT_COLOR,
+                           (self.CENTER_X, self.CENTER_Y),
+                           self.CENTRAL_POINT_RADIUS)
 
     def update_points(self):
         """
@@ -100,16 +106,19 @@ class App:
         This method calculates the positions of the points based on the angle and distance
         of each measure, and stores them in the __point_positions dictionary.
         """
-        for measure in self.__measures:  
+        for measure in self.__measures:
             prev = self.__previous_measures.get(measure.angle)
-            if prev and abs(prev.distance - measure.distance) < self.DISTANCE_MINIMUM_DIFFERENCE:
+            if prev and abs(
+                    prev.distance - measure.distance) < self.DISTANCE_MINIMUM_DIFFERENCE:
                 continue
             self.__previous_measures[measure.angle] = measure
 
             # Adjust angle to match the coordinate system
             radian_angle = math.radians(int(measure.angle + 270) % 360)
-            x = int(self.CENTER_X + measure.distance * math.cos(radian_angle) * self.MAX_DISTANCE_RADIUS_FACTOR)
-            y = int(self.CENTER_Y + measure.distance * math.sin(radian_angle) * self.MAX_DISTANCE_RADIUS_FACTOR)
+            x = int(self.CENTER_X + measure.distance * math.cos(
+                radian_angle) * self.MAX_DISTANCE_RADIUS_FACTOR)
+            y = int(self.CENTER_Y + measure.distance * math.sin(
+                radian_angle) * self.MAX_DISTANCE_RADIUS_FACTOR)
             self.__point_positions[measure.angle] = (x, y)
 
         """
@@ -126,10 +135,12 @@ class App:
         """
         for pos in self.__point_positions.values():
             # Draw the point
-            pygame.draw.circle(self.__screen, self.POINT_COLOR, pos, self.POINT_RADIUS)
+            pygame.draw.circle(self.__screen, self.POINT_COLOR, pos,
+                               self.POINT_RADIUS)
 
             # Draw border around the point
-            pygame.draw.circle(self.__screen, self.POINT_BORDER_COLOR, pos, self.POINT_RADIUS, self.POINT_BORDER_WIDTH)
+            pygame.draw.circle(self.__screen, self.POINT_BORDER_COLOR, pos,
+                               self.POINT_RADIUS, self.POINT_BORDER_WIDTH)
 
     def run(self):
         """
@@ -182,6 +193,7 @@ class App:
                     print(f"Error receiving message: {e}")
                     continue
 
+
 if __name__ == "__main__":
     parser = ArgumentParser(
         description="Script to run the Klevor RPLIDAR GUI application.",
@@ -192,11 +204,12 @@ if __name__ == "__main__":
 
     # Get the IP address from the arguments
     ip = Args.get_attribute_from_args_dict(args, Flag.IP)
-    
+
     # Get the port from the arguments
     port = Args.get_attribute_from_args_dict(args, Flag.PORT)
 
     app = App(ip, port)
-    ws_thread = Thread(target=asyncio.run, args=(app.ws_listener(),), daemon=True)
+    ws_thread = Thread(target=asyncio.run, args=(app.ws_listener(),),
+                       daemon=True)
     ws_thread.start()
     app.run()

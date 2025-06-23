@@ -2,18 +2,19 @@ import threading
 from multiprocessing import Event, RLock
 from typing import Optional, final
 
+from . import Hailo
 from .abstracts import ObjectDetectionABC
 from ..camera.image_processing_queue import Photographer
-from ..env import Env
-from ..log import LoggerABC
-from ..log.sub_logger import SubLogger
-from ..utils import is_instance
-from ..files import Files
-from . import Hailo
 from ..constants import (
     MODEL_G, MODEL_M, MODEL_R, MODELS_NAME
 )
+from ..env import Env
+from ..files import Files
+from ..log import LoggerABC
+from ..log.sub_logger import SubLogger
 from ..opencv import OpenCV
+from ..utils import is_instance
+
 
 class ObjectDetection(ObjectDetectionABC):
     """
@@ -23,7 +24,8 @@ class ObjectDetection(ObjectDetectionABC):
     # Logger configuration
     LOG_TAG = 'ObjectDetection'
 
-    def __init__(self, image_processing_queue: Photographer, logger: Optional[LoggerABC] = None):
+    def __init__(self, image_processing_queue: Photographer,
+                 logger: Optional[LoggerABC] = None):
         """
         Initialize the ObjectDetection class.
 
@@ -61,20 +63,24 @@ class ObjectDetection(ObjectDetectionABC):
         self.__hailo_handlers = dict()
         for model_name in MODELS_NAME:
             # Get the HEF file paths
-            hef_file_path = Files.get_model_hailo_suite_compiled_hef_file_path(model_name, yolo_version)
+            hef_file_path = Files.get_model_hailo_suite_compiled_hef_file_path(
+                model_name, yolo_version)
 
             # Get the labels file paths
             labels_file_path = Files.get_hailo_labels_file_path(model_name)
 
             # Get the model class colors
-            model_class_colors = OpenCV.get_model_classes_color_palette(model_name)
+            model_class_colors = OpenCV.get_model_classes_color_palette(
+                model_name)
 
             # Create the Hailo handler
-            hailo_handler = Hailo(model_name, hef_file_path, labels_file_path, model_class_colors,
-                                  image_processing_queue=image_processing_queue, logger=logger,
+            hailo_handler = Hailo(model_name, hef_file_path, labels_file_path,
+                                  model_class_colors,
+                                  image_processing_queue=image_processing_queue,
+                                  logger=logger,
                                   put_output_inference_fn=image_processing_queue.add_inference)
             self.__hailo_handlers[model_name] = hailo_handler
-            
+
     def __start(self) -> None:
         """
         Clear the stop and parking events
@@ -113,7 +119,7 @@ class ObjectDetection(ObjectDetectionABC):
             self.__parking_event.set()
 
     @final
-    def _loop(self)-> None:
+    def _loop(self) -> None:
         # Start the Hailo handler for model G and R
         self.__hailo_handlers[MODEL_G].start_thread()
         self.__hailo_handlers[MODEL_R].start_thread()
@@ -157,7 +163,8 @@ class ObjectDetection(ObjectDetectionABC):
         with self.__rlock:
             # Check if the threads are already running
             if self.is_running():
-                self.__logger.warning('Object detection threads are already running.') if self.__logger else None
+                self.__logger.warning(
+                    'Object detection threads are already running.') if self.__logger else None
                 return
 
             # Start the object detection loop thread
@@ -166,7 +173,8 @@ class ObjectDetection(ObjectDetectionABC):
             self.__thread.start()
 
         # Log
-        self.__logger.info('Object detection threads started.') if self.__logger else None
+        self.__logger.info(
+            'Object detection threads started.') if self.__logger else None
 
     def stop_thread(self) -> None:
         """
@@ -175,7 +183,8 @@ class ObjectDetection(ObjectDetectionABC):
         with self.__rlock:
             # Check if the thread is not running
             if self.is_stopped():
-                self.__logger.warning('Object detection threads are already stopped.') if self.__logger else None
+                self.__logger.warning(
+                    'Object detection threads are already stopped.') if self.__logger else None
                 return
 
             # Stop the object detection loop
@@ -186,11 +195,13 @@ class ObjectDetection(ObjectDetectionABC):
             self.__thread = None
 
         # Log
-        self.__logger.info('Object detection threads stopped.') if self.__logger else None
+        self.__logger.info(
+            'Object detection threads stopped.') if self.__logger else None
 
     def __del__(self):
         """
         Destructor to ensure the thread is stopped when the object is deleted.
         """
         self.stop_thread() if self.is_running() else None
-        self.__logger.info('ObjectDetection instance deleted.') if self.__logger else None
+        self.__logger.info(
+            'ObjectDetection instance deleted.') if self.__logger else None

@@ -2,6 +2,7 @@ from enum import Enum, unique
 
 from ..utils import map_string_to_enum
 
+
 @unique
 class IncomingCategory(Enum):
     """
@@ -38,6 +39,7 @@ class IncomingCategory(Enum):
         """
         return map_string_to_enum(category_str.upper(), cls)
 
+
 @unique
 class Status(Enum):
     """
@@ -70,6 +72,7 @@ class Status(Enum):
         """
         return map_string_to_enum(status_str.upper(), cls)
 
+
 @unique
 class Request(Enum):
     """
@@ -99,6 +102,7 @@ class Request(Enum):
             Request: The corresponding Request enum value.
         """
         return map_string_to_enum(request_str.upper(), cls)
+
 
 @unique
 class OutgoingCategory(Enum):
@@ -131,6 +135,7 @@ class OutgoingCategory(Enum):
             OutgoingCategory: The corresponding OutgoingCategory enum value.
         """
         return map_string_to_enum(category_str.upper(), cls)
+
 
 @unique
 class RPLIDAR(Enum):

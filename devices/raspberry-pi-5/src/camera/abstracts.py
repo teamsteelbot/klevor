@@ -1,5 +1,5 @@
-from abc import ABC, abstractmethod
 import io
+from abc import ABC, abstractmethod
 
 import numpy as np
 from PIL import ImageEnhance
@@ -7,6 +7,7 @@ from PIL.Image import Image
 
 from .constants import ADJUST_DURATION
 from ..constants import IMAGE_FORMAT
+
 
 class CameraABC(ABC):
     """
@@ -42,7 +43,8 @@ class CameraABC(ABC):
         pass
 
     @abstractmethod
-    def capture_image_stream(self, image_format: str = IMAGE_FORMAT, adjust_duration: float = ADJUST_DURATION) -> io.BytesIO:
+    def capture_image_stream(self, image_format: str = IMAGE_FORMAT,
+                             adjust_duration: float = ADJUST_DURATION) -> io.BytesIO:
         """
         Capture an image and return a byte stream.
 
@@ -55,7 +57,8 @@ class CameraABC(ABC):
         pass
 
     @abstractmethod
-    def record_video(self, width: int, height: int, duration: int, file_path: str, encoder) -> None:
+    def record_video(self, width: int, height: int, duration: int,
+                     file_path: str, encoder) -> None:
         """
         Record a video with the camera.
 
@@ -80,6 +83,7 @@ class CameraABC(ABC):
             Image: Color-corrected image.
         """
         return ImageEnhance.Color(image).enhance(factor)
+
 
 class PhotographerABC(ABC):
     """

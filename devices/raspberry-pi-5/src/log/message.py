@@ -1,15 +1,17 @@
-from typing import Optional
 from datetime import datetime as dt
+from typing import Optional
 
 from .enums import Category
 from ..utils import is_instance
+
 
 class Message:
     """
     Class to handle log messages.
     """
 
-    def __init__(self, content: str, category: Category = Category.INFO, tag: Optional[str] = None):
+    def __init__(self, content: str, category: Category = Category.INFO,
+                 tag: Optional[str] = None):
         """
         Initialize the Message class.
 
@@ -54,7 +56,6 @@ class Message:
             str: The content of the log message.
         """
         return self.__content
-
 
     @content.setter
     def content(self, content: str):

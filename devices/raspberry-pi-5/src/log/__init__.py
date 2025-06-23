@@ -1,9 +1,9 @@
-from multiprocessing import Event, Queue
+from multiprocessing import Queue
 from typing import final, Optional
 
 from .abstracts import LoggerABC
-from .message import Message
 from .enums import Category
+from .message import Message
 from ..utils import is_instance
 
 
@@ -29,7 +29,8 @@ class Logger(LoggerABC):
         self.__tag = tag
 
         # Log the initialization if a tag is provided
-        self.debug(f"Initializing Logger with tag: {self.__tag}") if self.__tag else None
+        self.debug(
+            f"Initializing Logger with tag: {self.__tag}") if self.__tag else None
 
     @final
     def log(self, content: str, category: Category = Category.INFO) -> None:

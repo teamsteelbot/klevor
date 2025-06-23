@@ -2,8 +2,8 @@ import shlex
 import subprocess
 from http.server import BaseHTTPRequestHandler
 
-from ...constants import WIDTH, HEIGHT
 from ..constants import FPS, CODEC
+from ...constants import WIDTH, HEIGHT
 
 
 class StreamingServer(BaseHTTPRequestHandler):
@@ -18,7 +18,8 @@ class StreamingServer(BaseHTTPRequestHandler):
         """
         # Execute the libcamera-vid command to capture video
         command = f'libcamera-vid -n -t 0 --width {WIDTH} --height {HEIGHT} --framerate {FPS} --codec {CODEC} -o -'
-        process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+        process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE,
                                    bufsize=-1)
 
         try:
@@ -42,7 +43,8 @@ class StreamingServer(BaseHTTPRequestHandler):
 
                     frame_data += byte
                     if frame_data.endswith(b'\xff\xd9'):
-                        print(f"Found complete JPEG frame, size: {len(frame_data)}")
+                        print(
+                            f"Found complete JPEG frame, size: {len(frame_data)}")
                         yield (frame_data)
                         break
         finally:
@@ -63,7 +65,8 @@ class StreamingServer(BaseHTTPRequestHandler):
                 b'<html><head></head><body><h1>Live Stream</h1><img src="stream.mjpg" width="640" height="480" /></body></html>')
         elif self.path == '/stream.mjpg':
             self.send_response(200)
-            self.send_header('Content-type', 'multipart/x-mixed-replace; boundary=frame')
+            self.send_header('Content-type',
+                             'multipart/x-mixed-replace; boundary=frame')
             self.end_headers()
             try:
                 # Start generating frames

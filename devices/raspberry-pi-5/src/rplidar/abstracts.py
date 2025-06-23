@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 
 from .measure import Measure
 
+
 class RPLIDARABC(ABC):
     """
     Abstract class to handle RPLIDAR operations.

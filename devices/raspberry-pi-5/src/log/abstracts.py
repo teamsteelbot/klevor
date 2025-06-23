@@ -1,10 +1,10 @@
-from multiprocessing import Queue, Event
 from abc import ABC, abstractmethod
 from typing import TextIO
 
-from .message import Message
 from .enums import Category
+from .message import Message
 from ..files import Files
+
 
 class LoggerABC(ABC):
     """
@@ -84,7 +84,9 @@ class WriterABC(ABC):
 
         # Check if the message is an instance of Message
         if not isinstance(msg, Message):
-            cls._write(file, Message(f"Invalid message type: {type(msg)}. Expected Message.", Category.ERROR))
+            cls._write(file, Message(
+                f"Invalid message type: {type(msg)}. Expected Message.",
+                Category.ERROR))
             return
 
         # Write the message to the log file

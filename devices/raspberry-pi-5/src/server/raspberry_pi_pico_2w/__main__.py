@@ -29,7 +29,8 @@ try:
         except Exception as e:
             print(f"[UDP Server] Error receiving UDP data: {e}")
 
-        time.sleep(0.5) # Small delay to avoid busy-waiting, but still responsive
+        time.sleep(
+            0.5)  # Small delay to avoid busy-waiting, but still responsive
 
 except KeyboardInterrupt:
     print("\nServer stopped by user (Ctrl+C).")

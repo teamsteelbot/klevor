@@ -1,11 +1,12 @@
+import socket
+from enum import Enum
 from re import Pattern
 from types import UnionType
 from typing import Any
-import socket
-from enum import Enum
 
 
-def is_instance(obj: object, class_or_tuple: type | UnionType | tuple[Any, ...]) -> None:
+def is_instance(obj: object,
+                class_or_tuple: type | UnionType | tuple[Any, ...]) -> None:
     """
     Check if the object is an instance of the specified class or tuple of classes,
     unwrapping proxy objects if necessary.
@@ -25,7 +26,9 @@ def is_instance(obj: object, class_or_tuple: type | UnionType | tuple[Any, ...])
             f"Expected type {class_or_tuple}, got {type(obj)} for object {obj}"
         )
 
-def is_subclass(cls: type, class_or_tuple: type | UnionType | tuple[Any, ...]) -> None:
+
+def is_subclass(cls: type,
+                class_or_tuple: type | UnionType | tuple[Any, ...]) -> None:
     """
     Check if the class is a subclass of the specified class or tuple of classes.
 
@@ -37,6 +40,7 @@ def is_subclass(cls: type, class_or_tuple: type | UnionType | tuple[Any, ...]) -
         raise TypeError(
             f"Expected subclass of {class_or_tuple}, got {type(cls)} for class {cls}"
         )
+
 
 def match_any(regex_list: list[Pattern], string: str) -> bool:
     """
@@ -62,6 +66,7 @@ def add_single_quotes_to_list_elements(lst: list | tuple) -> list:
     """
     return [f"'{item}'" for item in lst]
 
+
 def get_local_ip() -> str | None | Any:
     """
     Get the local IP address of the machine.
@@ -83,6 +88,7 @@ def get_local_ip() -> str | None | Any:
 
     return ip
 
+
 def map_string_to_enum(string: str, enum_class: type[Enum]) -> Any:
     """
     Map a string to an enum class.
@@ -101,4 +107,5 @@ def map_string_to_enum(string: str, enum_class: type[Enum]) -> Any:
         return enum_class[string.upper()]
 
     except KeyError:
-        raise ValueError(f"'{string}' is not a valid value for {enum_class.__name__}")
+        raise ValueError(
+            f"'{string}' is not a valid value for {enum_class.__name__}")

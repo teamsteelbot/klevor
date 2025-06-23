@@ -1,7 +1,7 @@
 from time import sleep
 
-from ..log import Logger
 from . import SerialCommunication
+from ..log import Logger
 
 if __name__ == "__main__":
     # Create an instance of Logger
@@ -26,7 +26,8 @@ if __name__ == "__main__":
 
         # Wait for the stop message from SerialCommunication
         serial.wait_stop_event()
-        logger.log("Received stop message from SerialCommunication, stopping RPLIDAR...")
+        logger.log(
+            "Received stop message from SerialCommunication, stopping RPLIDAR...")
 
         # Wait indefinitely to keep the serial communication running
         print("Serial communication is running. Press Ctrl+C to stop.")
@@ -35,7 +36,8 @@ if __name__ == "__main__":
 
     except KeyboardInterrupt as e:
         # Handle keyboard interrupt to stop the serial communication gracefully
-        logger.warning(f"KeyboardInterrupt received. Stopping serial and logger threads.")
+        logger.warning(
+            f"KeyboardInterrupt received. Stopping serial and logger threads.")
 
     finally:
         # Stop the serial communication threads gracefully

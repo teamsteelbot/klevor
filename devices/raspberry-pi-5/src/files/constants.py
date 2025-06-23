@@ -19,4 +19,5 @@ LOG_DIR = os.path.join(ROOT_DIR, 'log')
 LOGS_DIR = os.path.abspath(os.path.join(LOG_DIR, 'logs'))
 
 # Directories to ignore always
-IGNORE_DIRS = ('.git', '__pycache__', '.idea', '.vscode', '.venv', 'venv', 'env')
+IGNORE_DIRS = (
+    '.git', '__pycache__', '.idea', '.vscode', '.venv', 'venv', 'env')
