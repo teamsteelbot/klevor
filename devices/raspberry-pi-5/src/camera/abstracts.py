@@ -1,13 +1,11 @@
 from abc import ABC, abstractmethod
 import io
-from typing import Callable
 
 import numpy as np
 from PIL import ImageEnhance
 from PIL.Image import Image
 
 from .constants import ADJUST_DURATION
-from ..model import ImageBoundingBoxes
 
 class CameraABC(ABC):
     """
@@ -86,6 +84,13 @@ class ImageProcessingQueueABC(ABC):
     """
 
     @abstractmethod
+    def run(self):
+        """
+        Loop to capture images and put them in the input image processing queue.
+        """
+        pass
+
+    @abstractmethod
     def is_running(self) -> bool:
         """
         Check if the image processing queue is running.
@@ -102,102 +107,5 @@ class ImageProcessingQueueABC(ABC):
 
         Returns:
             bool: True if the image processing queue is not running, False otherwise.
-        """
-        pass
-
-    @abstractmethod
-    def add_image(self, image: Image) -> None:
-        """
-        Put image in input images queue.
-
-        Args:
-            image (Image): Image to put in the input images queue.
-        """
-        pass
-
-    @abstractmethod
-    def get_image(self, preprocess_fn: Callable[[Image], np.ndarray]) -> np.ndarray | None:
-        """
-        Get image from input images queue.
-
-        Returns:
-            np.ndarray|None: Preprocessed image from the input images queue or None if no image is available.
-        """
-        pass
-
-    @abstractmethod
-    def add_inference(self, model_name: str, inference: ImageBoundingBoxes) -> None:
-        """
-        Put inference in output inference queue.
-
-        Args:
-            model_name (str): Name of the model that produced the inference.
-            inference (ImageBoundingBoxes): Inference to put in the output inference queue.
-        """
-        pass
-
-    @abstractmethod
-    def get_inference(self) -> tuple[str, ImageBoundingBoxes] | None:
-        """
-        Get inference from output inference queue.
-
-        Returns:
-            tuple[str, ImageBoundingBoxes]|None: Tuple containing model name and inference from the output inference queue or None if no inference is available.
-        """
-        pass
-
-    @abstractmethod
-    def capture_image(self) -> None:
-        """
-        Capture image from camera.
-        """
-        pass
-
-    @abstractmethod
-    def wait_capture_image_event(self) -> None:
-        """
-        Wait for the capture image event to be set.
-        """
-        pass
-
-    @abstractmethod
-    def set_capture_image_event(self) -> None:
-        """
-        Set the capture image event.
-        """
-        pass
-
-    @abstractmethod
-    def wait_pending_input_image_event(self) -> None:
-        """
-        Wait for the pending input image event to be set.
-        """
-        pass
-
-    @abstractmethod
-    def wait_pending_output_inference_event(self) -> None:
-        """
-        Wait for the pending output inference event to be set.
-        """
-        pass
-
-    @abstractmethod
-    def _loop(self):
-        """
-        Loop to capture images and put them in the input image processing queue.
-        """
-        pass
-
-    @abstractmethod
-    def start_thread(self) -> None:
-        """
-        Start the image processing queue thread.
-        """
-        pass
-
-    @abstractmethod
-    def stop_thread(self) -> None:
-        """
-        Stop the image processing queue thread.
         """
         pass

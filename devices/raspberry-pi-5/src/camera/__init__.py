@@ -34,12 +34,12 @@ class Camera(CameraABC):
             video_config(dict): Configuration for video recording, if any.
             rotation (int): Rotation angle for the camera, default is 0.
         """
-        # Initialize the reentrant lock
-        self.__rlock = RLock()
-
         # Initialize the logger
         self.__logger = Logger(messages_queue, opened_event, self.LOG_TAG)
-        self.__logger.debug("Initializing camera...") 
+        self.__logger.debug("Initializing camera...")
+
+        # Initialize the reentrant lock
+        self.__rlock = RLock()
 
         # Configure the camera and video settings
         self.__picam2 = Picamera2()
@@ -170,4 +170,4 @@ class Camera(CameraABC):
         self.__picam2.close()
 
         # Log
-        self.__logger.info("Closed camera.") 
+        self.__logger.debug("Camera resources cleaned up.")

@@ -3,7 +3,7 @@ from multiprocessing import Event, RLock
 from typing import Optional, final
 
 from .abstracts import ObjectDetectionABC
-from ..camera.image_processing_queue import ImageProcessingQueue
+from ..camera.image_processing_queue import Photographer
 from ..env import Env
 from ..log import LoggerABC
 from ..log.sub_logger import SubLogger
@@ -23,19 +23,19 @@ class ObjectDetection(ObjectDetectionABC):
     # Logger configuration
     LOG_TAG = 'ObjectDetection'
 
-    def __init__(self, image_processing_queue: ImageProcessingQueue, logger: Optional[LoggerABC] = None):
+    def __init__(self, image_processing_queue: Photographer, logger: Optional[LoggerABC] = None):
         """
         Initialize the ObjectDetection class.
 
         Args:
-            image_processing_queue (ImageProcessingQueue): The queue to process images.
+            image_processing_queue (Photographer): The queue to process images.
             logger (Optional[LoggerABC]): Logger instance to use for logging. Defaults to None.
         """
         # Initialize the reentrant lock
         self.__rlock = RLock()
 
         # Check the type of image processing queue
-        is_instance(image_processing_queue, ImageProcessingQueue)
+        is_instance(image_processing_queue, Photographer)
         self.__image_processing_queue = image_processing_queue
 
         # Check the type of logger

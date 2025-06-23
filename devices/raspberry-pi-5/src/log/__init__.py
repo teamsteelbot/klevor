@@ -21,45 +21,14 @@ class Logger(LoggerABC):
             opened_event (Event): Event to signal when the logger is ready to write messages.
             tag (Optional[str]): Tag to identify the logger instance.
         """
-        self.tag = tag
-        self.messages_queue = messages_queue
-        self.opened_event = opened_event
-
-    @final
-    @property
-    def tag(self) -> str:
-        return self.__tag
-
-    @final
-    @tag.setter
-    def tag(self, tag: Optional[str]) -> None:
-        # Check the type of tag
-        if tag is None:
-            self.__tag = None
-            return
-
-        is_instance(tag, str)
-        self.__tag = tag
-
-    @final
-    @property
-    def messages_queue(self) -> Queue:
-        return self.__messages_queue
-
-    @final
-    @messages_queue.setter
-    def messages_queue(self, messages_queue: Queue) -> None:
+        # Initialize the messages queue and events
         self.__messages_queue = messages_queue
-
-    @final
-    @property
-    def opened_event(self) -> Event:
-        return self.__opened_event
-
-    @final
-    @opened_event.setter
-    def opened_event(self, opened_event: Event) -> None:
         self.__opened_event = opened_event
+
+        # Check the type of tag
+        if tag is not None:
+            is_instance(tag, str)
+        self.__tag = tag
 
     @final
     def log(self, content: str, category: Category = Category.INFO) -> None:

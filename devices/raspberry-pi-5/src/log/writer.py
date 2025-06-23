@@ -1,5 +1,4 @@
 from multiprocessing import RLock, Event, Queue
-from threading import Thread
 from time import sleep
 from typing import TextIO, final
 
@@ -35,26 +34,12 @@ class Writer(WriterABC):
         # Initialize the reentrant lock
         self.__rlock = RLock()
 
-        # Initialize the file
+        # Initialize the file path and file
+        self.__file_path: str = ""
         self.__file: TextIO | None = None
 
         # Initialize the thread
         self.__thread = None
-
-    @final
-    @property
-    def opened_event(self) -> Event:
-        return self.__opened_event
-
-    @final
-    @property
-    def messages_queue(self) -> Queue:
-        return self.__messages_queue
-
-    @final
-    @property
-    def stop_event(self) -> Event:
-        return self.__stop_event
 
     @final
     def _get_message(self) -> Message | None:
@@ -110,7 +95,7 @@ class Writer(WriterABC):
             # Write the initial message to the log file
             self._write(self.__file, Message(f"Logger opened at {self.__file_path}.", Category.DEBUG))
 
-            while not self.stop_event.is_set():
+            while not self.__stop_event.is_set():
                 # Process any remaining messages in the queue
                 while not self.__messages_queue.empty():
                     # Write the last message to the log file
@@ -137,4 +122,4 @@ class Writer(WriterABC):
         """
         Destructor to ensure the logger thread is stopped when the object is deleted.
         """
-        self.stop_event.set()
+        self.__stop_event.set()

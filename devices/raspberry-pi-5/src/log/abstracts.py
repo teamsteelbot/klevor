@@ -11,72 +11,6 @@ class LoggerABC(ABC):
     Abstract class to handle logging functionality.
     """
 
-    @property
-    @abstractmethod
-    def tag(self) -> str:
-        """
-        Get the tag of the logger.
-
-        Returns:
-            str: The tag used for logging.
-        """
-        pass
-
-    @tag.setter
-    @abstractmethod
-    def tag(self, tag: str) -> None:
-        """
-        Set the tag for the logger.
-
-        Args:
-            tag (str): New tag for the log messages.
-        """
-        pass
-
-    @property
-    @abstractmethod
-    def messages_queue(self) -> Queue:
-        """
-        Get the messages queue.
-
-        Returns:
-            Queue: The messages queue.
-        """
-        pass
-
-    @messages_queue.setter
-    @abstractmethod
-    def messages_queue(self, messages_queue: Queue) -> None:
-        """
-        Set the messages queue.
-
-        Args:
-            messages_queue (Queue): New messages queue.
-        """
-        pass
-
-    @property
-    @abstractmethod
-    def opened_event(self) -> Event:
-        """
-        Get the event indicating if the log file is opened.
-
-        Returns:
-            Event: The event indicating if the log file is opened.
-        """
-        pass
-
-    @opened_event.setter
-    @abstractmethod
-    def opened_event(self, opened_event: Event) -> None:
-        """
-        Set the event indicating if the log file is opened.
-
-        Args:
-            opened_event (Event): New event indicating if the log file is opened.
-        """
-        pass
-
     @abstractmethod
     def log(self, content: str, category: Category = Category.INFO) -> None:
         """
@@ -133,39 +67,6 @@ class WriterABC(ABC):
     """
     Abstract class to handle writing log messages to a file.
     """
-
-    @property
-    @abstractmethod
-    def opened_event(self) -> Event:
-        """
-        Get the event indicating if the log file is opened.
-
-        Returns:
-            Event: The event indicating if the log file is opened.
-        """
-        pass
-
-    @property
-    @abstractmethod
-    def stop_event(self) -> Event:
-        """
-        Get the event indicating if the logger is stopped.
-
-        Returns:
-            Event: The event indicating if the logger is stopped.
-        """
-        pass
-
-    @property
-    @abstractmethod
-    def messages_queue(self) -> Queue:
-        """
-        Get the messages queue.
-
-        Returns:
-            Queue: The messages queue.
-        """
-        pass
 
     @staticmethod
     def _write(file: TextIO, message: Message) -> None:

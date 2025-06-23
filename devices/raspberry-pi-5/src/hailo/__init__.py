@@ -11,7 +11,7 @@ import cv2
 import numpy as np
 
 from .abstracts import HailoABC
-from ..camera.image_processing_queue import ImageProcessingQueue
+from ..camera.image_processing_queue import Photographer
 from ..log import LoggerABC
 from ..log.sub_logger import SubLogger
 from ..model import ImageBoundingBoxes
@@ -40,9 +40,9 @@ class Hailo(HailoABC):
     # Job timeout
     TIMEOUT = 10000
 
-    def __init__(self, model_name: str, hef_file_path: str | os.PathLike[str], labels_path: str | os.PathLike[str], 
-                 class_colors: tuple[tuple[int,int,int]], multi_threading: bool = True, multiprocessing: bool = False, 
-                 image_processing_queue: ImageProcessingQueue = None, logger: Optional[LoggerABC] = None,
+    def __init__(self, model_name: str, hef_file_path: str | os.PathLike[str], labels_path: str | os.PathLike[str],
+                 class_colors: tuple[tuple[int,int,int]], multi_threading: bool = True, multiprocessing: bool = False,
+                 image_processing_queue: Photographer = None, logger: Optional[LoggerABC] = None,
                  batch_size: int = BATCH_SIZE, input_type: Optional[str] = None,
                  output_type: Optional[dict[str, str]] = None,
                  put_output_inference_fn: Optional[Callable[[str, ImageBoundingBoxes], None]] = None) -> None:
@@ -56,7 +56,7 @@ class Hailo(HailoABC):
             class_colors (tuple[tuple[int, int, int]]): Tuple mapping class IDs to RGB colors.
             multi_threading (bool): Whether to enable multi-threading. Defaults to True.
             multiprocessing (bool): Whether to enable multiprocessing. Defaults to False.
-            image_processing_queue (ImageProcessingQueue): Queue for images. Defaults to None.
+            image_processing_queue (Photographer): Queue for images. Defaults to None.
             logger (Optional[Logger]): Logger instance for logging messages. Defaults to None.
             batch_size (int): Batch size for inference. Defaults to BATCH_SIZE.
             input_type (Optional[str]): Format type of the input stream. Defaults to None.
@@ -84,7 +84,7 @@ class Hailo(HailoABC):
         self.__labels = Files.get_labels_from_txt(self.__labels_path)
 
         # Check the type of image processing queue
-        is_instance(image_processing_queue, ImageProcessingQueue)
+        is_instance(image_processing_queue, Photographer)
         self.__images_queue = image_processing_queue
 
         # Check the type of logger
