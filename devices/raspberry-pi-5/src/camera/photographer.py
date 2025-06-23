@@ -4,22 +4,27 @@ from typing import Optional, Callable, final
 import numpy as np
 from PIL.Image import Image
 
-from .abstracts import CameraABC, ImageProcessingQueueABC
+from .abstracts import CameraABC, PhotographerABC
 from ..utils import is_instance
 from ..log import Logger
+from ..server.enums import Tag
+from ..server.message import Message
 
 
-class Photographer(ImageProcessingQueueABC):
+class Photographer(PhotographerABC):
     """
     Class to handle image processing for the camera.
     """
 
     # Logger configuration
-    LOG_TAG = "ImagesQueue"
+    LOGGER_TAG = "ImagesQueue"
+    
+    # Wait timeout
+    WAIT_TIMEOUT = 0.1
 
     def __init__(self, camera: CameraABC, images_queue: Queue, capture_image_event: Event, opened_event: Event,
-                 stop_event: Event, messages_queue: Queue, logger_opened_event: Event,
-                 preprocess_fn: Callable[[Image], np.ndarray], original_images_queue: Optional[Queue]=None):
+                 stop_event: Event, writer_messages_queue: Queue, preprocess_fn: Callable[[Image], np.ndarray],
+                 server_messages_queue: Optional[Queue]=None):
         """
         Initialize the Photographer class.
 
@@ -29,10 +34,9 @@ class Photographer(ImageProcessingQueueABC):
             capture_image_event (Event): Event to signal when an image should be captured.
             opened_event (Event): Event to signal when the logger is ready to write messages.
             stop_event (Event): Event to signal when the logger should stop.
-            messages_queue (Queue): Queue to hold log messages.
-            logger_opened_event (Event): Event to signal when the logger is ready to write messages.
+            writer_messages_queue (Queue): Queue to hold log messages.
             preprocess_fn: Callable[[Image], np.ndarray]: Function to preprocess images before inference.
-            original_images_queue (Optional[Queue]): Queue to hold original images, if any.
+            server_messages_queue (Optional[Queue]): Queue to broadcast messages through the websockets server, if any.
         """
         # Check the type of camera
         is_instance(camera, CameraABC)
@@ -45,15 +49,15 @@ class Photographer(ImageProcessingQueueABC):
         self.__stop_event = stop_event
 
         # Initialize the logger
-        self.__logger = Logger(messages_queue, logger_opened_event, self.LOG_TAG)
+        self.__logger = Logger(writer_messages_queue, self.LOGGER_TAG)
         self.__logger.debug("Initializing image processing queue...")
         
         # Check the type of preprocess function
         is_instance(preprocess_fn, Callable)
         self.__preprocess_fn = preprocess_fn
 
-        # Initialize the original images queue if provided
-        self.__original_images_queue = original_images_queue
+        # Initialize the broadcast messages queue if provided
+        self.__broadcast_messages_queue = server_messages_queue
 
         # Initialize the reentrant lock
         self.__rlock = RLock()
@@ -77,11 +81,16 @@ class Photographer(ImageProcessingQueueABC):
         self.__logger.debug("Starting image processing queue...")
         while self.is_running():
             # Wait for the capture image event
-            self.__capture_image_event.wait()
+            capture_image = self.__capture_image_event.wait(timeout=self.WAIT_TIMEOUT)
+            if not capture_image:
+                continue
 
-            # Capture image from camera
-            image = self.__camera.capture_image_pil()
-            
+            # Capture image stream from camera
+            image_stream = self.__camera.capture_image_stream()
+
+            # Convert the image stream to a PIL Image
+            image = self.__camera.convert_image_stream_to_pil(image_stream)
+
             # Preprocess the image
             preprocessed_image = self.__preprocess_fn(image)
 
@@ -97,6 +106,13 @@ class Photographer(ImageProcessingQueueABC):
 
             # Clear the capture image event
             self.__capture_image_event.clear()
+
+            # If a broadcast messages queue is provided, send a message
+            if self.__broadcast_messages_queue:
+                # Send the bytes of the preprocessed image to the broadcast messages queue
+                image_stream.seek(0)
+                binary_data = image.read()
+                self.__broadcast_messages_queue.put(Message(Tag.IMAGE_ORIGINAL, binary_data))
 
         # Clear the events
         self.__capture_image_event.clear()

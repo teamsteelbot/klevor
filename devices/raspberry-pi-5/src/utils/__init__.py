@@ -3,7 +3,6 @@ from types import UnionType
 from typing import Any
 import socket
 from enum import Enum
-from signal import signal, SIGINT, SIG_IGN
 
 
 def is_instance(obj: object, class_or_tuple: type | UnionType | tuple[Any, ...]) -> None:
@@ -103,20 +102,3 @@ def map_string_to_enum(string: str, enum_class: type[Enum]) -> Any:
 
     except KeyError:
         raise ValueError(f"'{string}' is not a valid value for {enum_class.__name__}")
-
-def ignore_sigint(func):
-    """
-    Decorator to ignore keyboard interrupts (SIGINT) in a function.
-
-    Args:
-        func (function): The function to decorate.
-
-    Returns:
-        function: The decorated function.
-    """
-    def wrapper(*args, **kwargs):
-        # Ignore the SIGINT signal to prevent the process from being interrupted by Ctrl+C
-        signal(SIGINT, SIG_IGN)
-
-        return func(*args, **kwargs)
-    return wrapper

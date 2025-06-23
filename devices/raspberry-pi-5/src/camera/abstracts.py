@@ -5,12 +5,26 @@ import numpy as np
 from PIL import ImageEnhance
 from PIL.Image import Image
 
-from .constants import ADJUST_DURATION
+from .constants import ADJUST_DURATION, IMAGE_FORMAT
 
 class CameraABC(ABC):
     """
     Abstract class that wraps the functionality required for the Raspberry Pi Camera.
     """
+
+    @staticmethod
+    def convert_image_stream_to_pil(image_stream: io.BytesIO) -> Image:
+        """
+        Convert a byte stream to a PIL image.
+
+        Args:
+            image_stream (io.BytesIO): Byte stream containing the image data.
+        Returns:
+            Image: Converted PIL image.
+        """
+        # Convert the image stream to a PIL image
+        image_stream.seek(0)
+        return Image.open(image_stream)
 
     @abstractmethod
     def _start_preview(self) -> None:
@@ -27,19 +41,7 @@ class CameraABC(ABC):
         pass
 
     @abstractmethod
-    def capture_image_pil(self, adjust_duration: float = ADJUST_DURATION) -> Image:
-        """
-        Capture an image and return a PIL image.
-
-        Args:
-            adjust_duration (float): Duration to allow the camera to adjust before capturing the image.
-        Returns:
-            Image: Captured image as a PIL Image.
-        """
-        pass
-
-    @abstractmethod
-    def capture_image_stream(self, image_format: str, adjust_duration: float = 0) -> io.BytesIO:
+    def capture_image_stream(self, image_format: str = IMAGE_FORMAT, adjust_duration: float = ADJUST_DURATION) -> io.BytesIO:
         """
         Capture an image and return a byte stream.
 
@@ -78,9 +80,9 @@ class CameraABC(ABC):
         """
         return ImageEnhance.Color(image).enhance(factor)
 
-class ImageProcessingQueueABC(ABC):
+class PhotographerABC(ABC):
     """
-    Abstract class for managing a queue of images for processing in a real-time tracking system.
+    Abstract class to handle image processing for the camera.
     """
 
     @abstractmethod

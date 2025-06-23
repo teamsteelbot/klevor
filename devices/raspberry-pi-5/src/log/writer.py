@@ -1,4 +1,4 @@
-from multiprocessing import RLock, Event, Queue
+from multiprocessing import Event, Queue
 from time import sleep
 from typing import TextIO, final
 
@@ -13,8 +13,8 @@ class Writer(WriterABC):
     Class to handle writing log messages to a file.
     """
 
-    # Delay for writing messages to the log file
-    WRITE_LOG_DELAY = 0.1
+    # Wait timeout for processing messages
+    WAIT_TIMEOUT = 0.1
 
     def __init__(self, messages_queue: Queue, opened_event: Event, stop_event: Event):
         """
@@ -31,9 +31,6 @@ class Writer(WriterABC):
         self.__opened_event.clear()
         self.__stop_event = stop_event
 
-        # Initialize the reentrant lock
-        self.__rlock = RLock()
-
         # Initialize the file path and file
         self.__file_path: str = ""
         self.__file: TextIO | None = None
@@ -42,21 +39,13 @@ class Writer(WriterABC):
         self.__thread = None
 
     @final
-    def _get_message(self) -> Message | None:
-        # Get the message from the queue
-        with self.__rlock:
-            if self.__messages_queue.empty():
-                return None
-
-            # Return the message from the queue
-            return self.__messages_queue.get()
-
-    @final
     def _write_last_message(self) -> None:
-        # Get the last message from the queue
-        msg = self._get_message()
+        # Process any remaining messages in the queue
+        msg = self.__messages_queue.get(timeout=self.WAIT_TIMEOUT)
+        if msg is None:
+            return None
 
-        # Log the message
+        # Write the message to the log file
         self._write(self.__file, msg)
 
     def run(self, file_path: str = Files.get_log_file_path()) -> None:
@@ -96,13 +85,13 @@ class Writer(WriterABC):
             self._write(self.__file, Message(f"Logger opened at {self.__file_path}.", Category.DEBUG))
 
             while not self.__stop_event.is_set():
-                # Process any remaining messages in the queue
-                while not self.__messages_queue.empty():
-                    # Write the last message to the log file
-                    self._write_last_message()
+                # Write the last message if available
+                self._write_last_message()
 
-                # Sleep for a short duration to avoid busy waiting
-                sleep(self.WRITE_LOG_DELAY)
+            # Check if there are any remaining messages in the queue
+            while not self.__messages_queue.empty():
+                # Write the last message if available
+                self._write_last_message()
 
             # Write the stop message to the log file
             self._write(self.__file, Message("Logger is stopping.", Category.DEBUG))

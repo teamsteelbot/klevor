@@ -12,18 +12,16 @@ class Logger(LoggerABC):
     Class to handle logging functionality.
     """
 
-    def __init__(self, messages_queue: Queue, opened_event: Event, tag: Optional[str] = None):
+    def __init__(self, writer_messages_queue: Queue, tag: Optional[str] = None):
         """
         Initialize the Logger class.
 
         Args:
-            messages_queue (Queue): Queue to hold log messages.
-            opened_event (Event): Event to signal when the logger is ready to write messages.
+            writer_messages_queue (Queue): Queue to hold log messages.
             tag (Optional[str]): Tag to identify the logger instance.
         """
         # Initialize the messages queue and events
-        self.__messages_queue = messages_queue
-        self.__opened_event = opened_event
+        self.__writer_messages_queue = writer_messages_queue
 
         # Check the type of tag
         if tag is not None:
@@ -41,13 +39,8 @@ class Logger(LoggerABC):
         # Create a message object
         msg = Message(content, category, self.__tag)
 
-        # Check if the opened event is set
-        if not self.__opened_event.is_set():
-            # If the opened event is not set, wait for it to be set
-            self.__opened_event.wait()
-
         # Put the message in the queue
-        self.__messages_queue.put(msg)
+        self.__writer_messages_queue.put(msg)
 
     @final
     def info(self, content: str) -> None:

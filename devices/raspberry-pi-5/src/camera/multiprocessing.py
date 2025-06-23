@@ -7,13 +7,13 @@ import numpy as np
 
 from . import Camera
 from .photographer import Photographer
-from ..utils import ignore_sigint
+from ..utils.decorators import ignore_sigint
 
 @ignore_sigint
 def photographer_target(images_queue: Queue, capture_image_event: Event,
-                        opened_event: Event, stop_event: Event, messages_queue: Queue,
-                        logger_opened_event: Event, preprocess_fn: Callable[[Image], np.ndarray],
-                        original_images_queue: Optional[Queue] = None):
+                        opened_event: Event, stop_event: Event, writer_messages_queue: Queue,
+                        preprocess_fn: Callable[[Image], np.ndarray],
+                        server_messages_queue: Optional[Queue] = None):
     """
     Target function for a multiprocessing process that handles photography tasks.
 
@@ -22,21 +22,19 @@ def photographer_target(images_queue: Queue, capture_image_event: Event,
         capture_image_event (Event): Event to signal when an image should be captured.
         opened_event (Event): Event to signal when the logger is ready to write messages.
         stop_event (Event): Event to signal when the logger should stop.
-        messages_queue (Queue): Queue to hold log messages.
-        logger_opened_event (Event): Event to signal when the logger is ready to write messages.
+        writer_messages_queue (Queue): Queue to hold log messages.
         preprocess_fn: Callable[[Image], np.ndarray]: Function to preprocess images before inference.
-        original_images_queue (Optional[Queue]): Queue to hold original images, if any.
+        server_messages_queue (Optional[Queue]): Queue to broadcast messages through the websockets server, if any.
     """
     print("Initializing photographer in multiprocessing mode. Process ID:", os.getpid())
 
     # Initialize the camera
-    camera = Camera(messages_queue, logger_opened_event)
+    camera = Camera(writer_messages_queue)
 
     # Initialize the photographer
     photographer = Photographer(camera, images_queue, capture_image_event,
-                                opened_event, stop_event, messages_queue,
-                                logger_opened_event, preprocess_fn,
-                                original_images_queue)
+                                opened_event, stop_event, writer_messages_queue,
+                                preprocess_fn, server_messages_queue)
 
     # Run the photographer
     photographer.run()

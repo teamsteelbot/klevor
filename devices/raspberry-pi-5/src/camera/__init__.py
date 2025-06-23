@@ -20,22 +20,21 @@ class Camera(CameraABC):
     """
 
     # Logger configuration
-    LOG_TAG = "Camera"
+    LOGGER_TAG = "Camera"
 
-    def __init__(self, messages_queue: Queue, opened_event: Event, width: int = WIDTH, height: int = HEIGHT, rotation: int = 0, video_config: dict = None):
+    def __init__(self, writer_messages_queue: Queue, width: int = WIDTH, height: int = HEIGHT, rotation: int = 0, video_config: dict = None):
         """
         Initialize the camera with the specified width, height, and video configuration.
 
         Args:
-            messages_queue (Queue): Queue to hold log messages.
-            opened_event (Event): Event to signal when the logger is ready to write messages.
+            writer_messages_queue (Queue): Queue to hold log messages.
             width (int): Width of the camera image.
             height (int): Height of the camera image.
             video_config(dict): Configuration for video recording, if any.
             rotation (int): Rotation angle for the camera, default is 0.
         """
         # Initialize the logger
-        self.__logger = Logger(messages_queue, opened_event, self.LOG_TAG)
+        self.__logger = Logger(writer_messages_queue, self.LOGGER_TAG)
         self.__logger.debug("Initializing camera...")
 
         # Initialize the reentrant lock
@@ -149,15 +148,6 @@ class Camera(CameraABC):
         self.__logger.info("Captured image stream.") 
 
         return image_stream
-
-    @final
-    def capture_image_pil(self, adjust_duration: float = ADJUST_DURATION) -> Image:
-        # Capture an image stream
-        image_stream = self.capture_image_stream(adjust_duration=adjust_duration)
-
-        # Convert the image stream to a PIL image
-        image_stream.seek(0)
-        return Image.open(image_stream)
 
     def __del__(self):
         """

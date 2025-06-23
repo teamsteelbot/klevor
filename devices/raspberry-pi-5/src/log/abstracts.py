@@ -68,44 +68,35 @@ class WriterABC(ABC):
     Abstract class to handle writing log messages to a file.
     """
 
-    @staticmethod
-    def _write(file: TextIO, message: Message) -> None:
+    @classmethod
+    def _write(cls, file: TextIO, msg: Message) -> None:
         """
         Write a message to the log file.
 
         Args:
             file (TextIO): The file to write the message to.
-            message (Message): Message to log.
+            msg (Message): Message to log.
         """
         # Check if the file is open
         if not file:
             print(f"Log file is not open. Must open it first.")
             return
 
-        if not message:
-            print("No message to log.")
+        # Check if the message is an instance of Message
+        if not isinstance(msg, Message):
+            cls._write(file, Message(f"Invalid message type: {type(msg)}. Expected Message.", Category.ERROR))
             return
 
         # Write the message to the log file
-        file.write(f"{message}\n")
+        file.write(f"{msg}\n")
 
         # Ensure immediate write
         file.flush()
 
     @abstractmethod
-    def _get_message(self) -> Message | None:
-        """
-        Get a message from the queue.
-
-        Returns:
-            Message|None: Message from the queue.
-        """
-        pass
-
-    @abstractmethod
     def _write_last_message(self) -> None:
         """
-        Write the last message to the log file.
+        Write the last message to the log file if available.
         """
         pass
 
