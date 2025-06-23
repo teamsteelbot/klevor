@@ -4,7 +4,7 @@ from digitalio import DigitalInOut, Direction
 from time import monotonic
 
 from .led import LEDHandler
-from .message import IncomingMessage, IncomingCategory, OutgoingMessage, OutgoingCategory, Status, Request
+from .message import IncomingMessage, IncomingCategory, OutgoingMessage, OutgoingCategory, Status
 from .challenge import Challenge
 
 class SerialCommunicationError(Exception):
@@ -61,6 +61,9 @@ class SerialCommunication:
 
         Returns:
             list[IncomingMessage] | None: A list of received messages or None if no messages are waiting.
+
+        Raises:
+            SerialCommunicationError: If the data port is not enabled or if there is an error in reading messages.
         """
         if not self.__data_port:
             raise SerialCommunicationError("Data port is not enabled.")
@@ -95,6 +98,9 @@ class SerialCommunication:
 
         Args:
             message (OutgoingMessage): The message to send.
+
+        Raises:
+            SerialCommunicationError: If the console port is not enabled or if there is an error in sending the message.
         """
         if not self.__console_port:
             raise SerialCommunicationError("Console port is not enabled.")
@@ -127,6 +133,9 @@ class SerialCommunication:
     async def send_challenge_message(self):
         """
         Send a challenge message to the console port.
+
+        Raises:
+            SerialCommunicationError: If the console port is not enabled or if confirmation is not received.
         """
         # Send the challenge message based on the challenge type
         challenge_message = self.CHALLENGE_WITH_OBSTACLES if self.__challenge == Challenge.WITH_OBSTACLES else self.CHALLENGE_WITHOUT_OBSTACLES
@@ -136,25 +145,15 @@ class SerialCommunication:
         if not await self.wait_for_confirmation():
             raise SerialCommunicationError("Failed to receive confirmation for challenge message.")
 
-    def send_motor_speed_message(self, speed: float):
+    def send_bno08x_yaw_message(self, yaw: float):
         """
-        Send a motor speed message to the console port.
+        Send a BNO08x yaw message to the console port.
 
         Args:
-            speed (float): The speed value to send.
+            yaw (float): The yaw value to send.
         """
-        motor_message = OutgoingMessage(OutgoingCategory.MOTOR_SPEED, str(speed))
-        self.send_message(motor_message)
-
-    def send_servo_angle_message(self, angle: int):
-        """
-        Send a servo angle message to the console port.
-
-        Args:
-            angle (int): The angle value to send.
-        """
-        servo_message = OutgoingMessage(OutgoingCategory.SERVO_ANGLE, str(angle))
-        self.send_message(servo_message)
+        bno08x_message = OutgoingMessage(OutgoingCategory.BNO08X_YAW, str(yaw))
+        self.send_message(bno08x_message)
 
     def send_bno08x_turns_message(self, turns: int):
         """
@@ -179,6 +178,9 @@ class SerialCommunication:
     async def start(self):
         """
         Send the start message to the console port and wait for confirmation.
+
+        Raises:
+            SerialCommunicationError: If the console port is not enabled or if confirmation is not received.
         """
         # Send the start message
         self.send_message(self.START_MESSAGE)
@@ -190,6 +192,9 @@ class SerialCommunication:
     async def stop(self):
         """
         Send the stop message to the console port and wait for confirmation.
+
+        Raises:
+            SerialCommunicationError: If the console port is not enabled or if confirmation is not received.
         """
         # Send the stop message
         self.send_message(self.STOP_MESSAGE)

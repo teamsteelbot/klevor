@@ -4,7 +4,7 @@ from typing import final
 from ..log import Logger
 from .abstracts import DispatcherABC
 from .message import IncomingMessage, OutgoingMessage
-from .enums import RPLIDAR, OutgoingCategory
+from .enums import OutgoingCategory
 from ..utils import is_instance
 
 class Dispatcher(DispatcherABC):
@@ -51,15 +51,17 @@ class Dispatcher(DispatcherABC):
         self.__serial_outgoing_messages_queue.put(msg)
 
     @final
-    def send_rplidar_measures(self, measures: dict[RPLIDAR, float]) -> None:
-        for key, value in measures.items():
-            # Check the type of key and value
-            is_instance(key, RPLIDAR)
-            is_instance(value, float)
+    def send_motor_speed(self, speed: float) -> None:
+        # Create the message
+        msg = OutgoingMessage(OutgoingCategory.MOTOR_SPEED, str(speed))
 
-            # Create a message with the RPLIDAR measures type
-            msg = OutgoingMessage(OutgoingCategory.RPLIDAR,
-                                  f"{key.parsed_name}{OutgoingMessage.CONTENT_HEADER_SEPARATOR}{value}")
+        # Send the message
+        self._send_message(msg)
 
-            # Put the message in the outgoing messages queue
-            self._send_message(msg)
+    @final
+    def send_servo_angle(self, angle: float) -> None:
+        # Create the message
+        msg = OutgoingMessage(OutgoingCategory.SERVO_ANGLE, str(angle))
+
+        # Send the message
+        self._send_message(msg)

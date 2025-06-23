@@ -36,6 +36,9 @@ class ESCMotorHandler:
     # Speed factor to normalize that if positive the motor move forward, and if negative it moves backward
     SPEED_FACTOR = -1.0
 
+    # Speed range
+    SPEED_RANGE = (-1.0, 1.0)
+
     # Common speed values
     SPEED_FAST = 1.0
     SPEED_NORMAL = 0.5
@@ -72,21 +75,33 @@ class ESCMotorHandler:
         self.__speed = 0.0
         self.stop()
 
-    @staticmethod
-    def _check_speed_half_range(speed: float):
+    @classmethod
+    def _check_speed_half_range(cls, speed: float):
         """
         Check the speed value to ensure it is within the valid half range for ESC motors.
-        """
-        if not 0 < speed <= 1.0:
-            raise ESCMotorError("Speed must be between 0 and 1.0")
 
-    @staticmethod
-    def _check_speed_full_range(speed: float):
+        Args:
+            speed (float): The speed value to check.
+
+        Raises:
+            ESCMotorError: If the speed is not within the valid half range.
+        """
+        if not (0 < speed <= cls.SPEED_RANGE[1]):
+            raise ESCMotorError(f"Speed must be between 0 and {cls.SPEED_RANGE[1]}")
+
+    @classmethod
+    def _check_speed_full_range(cls, speed: float):
         """
         Check the speed value to ensure it is within the valid full range for ESC motors.
+
+        Args:
+            speed (float): The speed value to check.
+
+        Raises:
+            ESCMotorError: If the speed is not within the valid full range.
         """
-        if not -1.0 <= speed <= 1.0:
-            raise ESCMotorError("Speed must be between -1.0 and 1.0")
+        if not (cls.SPEED_RANGE[0] <= speed <= cls.SPEED_RANGE[1]):
+            raise ESCMotorError(f"Speed must be between {cls.SPEED_RANGE[0]} and {cls.SPEED_RANGE[1]}")
 
     @property
     def speed(self) -> float:
@@ -114,10 +129,6 @@ class ESCMotorHandler:
         self.__speed = speed * self.SPEED_FACTOR
         if self.__movement:
             self.__esc_motor.throttle = self.__speed
-
-        # If a serial communication handler is provided, send the speed message
-        if self.__serial_communication:
-            self.__serial_communication.send_motor_speed_message(self.__speed)
 
         # Add a delay to allow the motor to respond
         await sleep(self.DELAY)

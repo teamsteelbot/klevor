@@ -1,12 +1,139 @@
-"""
-serial_incoming_messages_queue (Queue): Queue to hold incoming messages from the serial port.
+from multiprocessing import Queue
+from typing import final
+
+from ..log import Logger
+from .constants import SERVO_CENTER_ANGLE, SERVO_RIGHT_LIMIT, SERVO_LEFT_LIMIT
+from ..serial_communication.dispatcher import Dispatcher as SerialDispatcher
+from .abstracts import PilotABC
+
+class Pilot(PilotABC):
+    """
+    Class for the Pilot handler.
+
+    This class defines the interface for a Pilot handler, which is responsible for
+    controlling the robot's movements.
+    """
+
+    # Logger configuration
+    LOGGER_TAG = "Pilot"
+
+    def __init__(
+            self,
+            serial_incoming_messages_queue: Queue,
+            serial_outgoing_messages_queue: Queue,
+            writer_messages_queue: Queue,
+            movement: bool = True
+    ):
+        """
+        Initialize the Pilot class.
+
+        Args:
+            serial_incoming_messages_queue (Queue): Queue to hold incoming messages from the serial port.
             serial_outgoing_messages_queue (Queue): Queue to hold outgoing messages to the serial port.
-
-        # Initialize the serial dispatcher
+            writer_messages_queue (Queue): Queue to hold log messages.
+            movement (bool): Flag to indicate if the pilot should handle movement. Defaults to True.
+        """
+        # Initialize the serial communication dispatcher
         self.__serial_dispatcher = SerialDispatcher(
-            serial_incoming_messages_queue, serial_outgoing_messages_queue,
-            writer_messages_queue)
+            serial_incoming_messages_queue,
+            serial_outgoing_messages_queue,
+            writer_messages_queue
+        )
 
+        # Initialize the logger
+        self.__logger = Logger(writer_messages_queue, self.LOGGER_TAG)
+
+        # Initialize the motor speed, servo angle and movement state
+        self.__motor_speed = 0.0
+        self.__servo_angle = SERVO_CENTER_ANGLE
+        self.__movement = movement
+
+
+    @final
+    async def _set_motor_speed(self, speed: float):
+        # Check if the speed is the same as the current speed
+        if self.__motor_speed == speed:
+            return
+
+        # Check if the speed is within the full range
+        self._check_motor_speed_full_range(speed)
+        self.__motor_speed = speed
+
+        # Send the speed message to the serial communication
+        if self.__movement:
+            self.__serial_dispatcher.send_motor_speed(self.__motor_speed)
+
+        # Log
+        self.__logger.info(f"Set motor speed to: {speed}")
+
+    @final
+    async def _set_motor_stop(self):
+        """
+        Sets the speed of the ESC motor to 0.
+        """
+        await self._set_motor_speed(0.0)
+
+    @final
+    async def _set_motor_forward(self, speed: float):
+        self._check_motor_speed_half_range(speed)
+        await self._set_motor_speed(speed)
+
+    @final
+    async def _set_motor_backward(self, speed: float):
+        self._check_motor_speed_half_range(speed)
+        await self._set_motor_speed(-speed)
+
+    @final
+    async def _set_servo_angle(self, angle: int):
+        # Check if the angle is the same as the current angle
+        if self.__servo_angle == angle:
+            return
+
+        # Check if the angle is within the valid range
+        self._check_servo_angle(angle)
+        self.__servo_angle = angle
+
+        if self.__movement:
+            self.__serial_dispatcher.send_servo_angle(self.__servo_angle)
+
+        # Log
+        self.__logger.info(f"Set servo angle to: {angle}deg")
+
+    @final
+    async def _set_servo_angle_relative_to_center(self, relative_angle: int):
+        if not (SERVO_LEFT_LIMIT <= relative_angle <= SERVO_RIGHT_LIMIT):
+            raise ValueError(
+                f"Relative angle must be between {SERVO_LEFT_LIMIT} and"
+                f" {SERVO_RIGHT_LIMIT} degrees")
+
+        await self._set_servo_angle(SERVO_CENTER_ANGLE + relative_angle)
+
+    @final
+    async def _set_servo_to_center(self):
+        await self._set_servo_angle(SERVO_CENTER_ANGLE)
+
+    @final
+    async def _set_servo_to_right(self, angle):
+        if not 0 < angle <= SERVO_RIGHT_LIMIT:
+            raise ValueError(
+                f"Angle must be between 0 and {SERVO_RIGHT_LIMIT} degrees for right movement")
+
+        await self._set_servo_angle(SERVO_CENTER_ANGLE + angle)
+
+    @final
+    async def _set_servo_to_left(self, angle):
+        if not 0 < angle <= abs(SERVO_LEFT_LIMIT):
+            raise ValueError(
+                f"Angle must be between 0 and {abs(SERVO_LEFT_LIMIT)} degrees for left "
+                f"movement")
+
+        await self._set_servo_angle(SERVO_CENTER_ANGLE - angle)
+
+    @final
+    def _is_servo_turning(self):
+        return self.__servo_angle != SERVO_CENTER_ANGLE
+
+"""
 after rotation
 
 

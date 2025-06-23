@@ -33,6 +33,8 @@ class ServoHandler:
     MAX_PULSE = 2500
     ACTUATION_RANGE = 180
     CENTER_ANGLE = 90
+    LEFT_LIMIT = -(ACTUATION_RANGE - CENTER_ANGLE)
+    RIGHT_LIMIT = (ACTUATION_RANGE - (ACTUATION_RANGE - CENTER_ANGLE))
 
     # Angle factor to normalize that when subtracting the servo moves to the left, and adding moves to the right
     ANGLE_FACTOR = -1
@@ -75,10 +77,7 @@ class ServoHandler:
         # Set the servo to center position
         self.__angle = self.CENTER_ANGLE
         self.center()
-
-        # Calculate the left and right relative limits
-        self.__left_limit = -(self.ACTUATION_RANGE - self.CENTER_ANGLE)
-        self.__right_limit = (self.ACTUATION_RANGE - (self.ACTUATION_RANGE - self.CENTER_ANGLE))
+        
 
     @staticmethod
     def _check_angle(angle: int):
@@ -121,10 +120,6 @@ class ServoHandler:
         if self.__movement:
             self.__servo_motor.angle = self.__angle
 
-        # If serial communication is enabled, send a message with the new angle
-        if self.__serial_communication:
-            self.__serial_communication.send_servo_angle_message(self.__angle)
-
         # Add a small delay to allow the servo to move
         await sleep(self.DELAY)
 
@@ -134,9 +129,12 @@ class ServoHandler:
 
         Args:
             relative_angle (int): Relative angle value between -90 and 90 degrees.
+
+        Raises:
+            ServoError: If the relative angle is not within the left and right limits.
         """
-        if not self.__left_limit <= relative_angle * self.ANGLE_FACTOR <=  self.__right_limit:
-            raise ServoError(f"Relative angle must be between {self.__left_limit} and {self.__right_limit} degrees")
+        if not self.LEFT_LIMIT <= relative_angle * self.ANGLE_FACTOR <=  self.RIGHT_LIMIT:
+            raise ServoError(f"Relative angle must be between {self.LEFT_LIMIT} and {self.RIGHT_LIMIT} degrees")
 
         await self.set_angle(self.CENTER_ANGLE + relative_angle * self.ANGLE_FACTOR)
 
@@ -152,9 +150,12 @@ class ServoHandler:
 
         Args:
             angle (int): Angle value to move the servo to the right, must be between 0 and right limit.
+
+        Raises:
+            ServoError: If the angle is not within the right limit.
         """
-        if not 0 < angle <= self.__right_limit:
-            raise ServoError(f"Angle must be between 0 and {self.__right_limit} degrees for right movement")
+        if not 0 < angle <= self.RIGHT_LIMIT:
+            raise ServoError(f"Angle must be between 0 and {self.RIGHT_LIMIT} degrees for right movement")
 
         await self.set_angle(self.CENTER_ANGLE + angle * self.ANGLE_FACTOR)
 
@@ -164,9 +165,12 @@ class ServoHandler:
 
         Args:
             angle (int): Angle value to move the servo to the left, must be between 0 and left limit.
+
+        Raises:
+            ServoError: If the angle is not within the left limit.
         """
-        if not 0 < angle <= abs(self.__left_limit):
-            raise ServoError(f"Angle must be between 0 and {abs(self.__left_limit)} degrees for left movement")
+        if not 0 < angle <= abs(self.LEFT_LIMIT):
+            raise ServoError(f"Angle must be between 0 and {abs(self.LEFT_LIMIT)} degrees for left movement")
 
         await self.set_angle(self.CENTER_ANGLE - angle * self.ANGLE_FACTOR)
 

@@ -39,6 +39,13 @@ class VL53L0XHandler:
     def __init__(self, i2c: I2C = I2C(I2C_SCL_PIN, I2C_SDA_PIN), xshut_pins: tuple = XSHUT_PINS):
         """
         Initializes the VL53L0XHandler with default settings.
+
+        Args:
+            i2c (I2C): The I2C bus instance to communicate with the sensors.
+            xshut_pins (tuple): A tuple of GPIO pins used to control the XSHUT lines of the sensors.
+
+        Raises:
+            VL53L0XError: If there is an error initializing the sensors.
         """
         # Initialize XSHUT list, sensors and measures list
         self.__xshut = []
@@ -73,6 +80,9 @@ class VL53L0XHandler:
     async def multiple_tof_sensors_reading(self):
         """
         Asynchronously reads the distance from multiple VL53L0X ToF sensors.
+
+        Raises:
+            VL53L0XError: If there is an error reading from any sensor.
         """
         for i, sensor in enumerate(self.__sensors):
             try:

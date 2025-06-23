@@ -2,7 +2,7 @@ from asyncio import create_task, gather
 
 from .bno08x import BNO08XHandler
 from .servo import ServoHandler
-from .message import IncomingMessage, IncomingCategory, RPLIDAR
+from .message import IncomingMessage, IncomingCategory
 from .esc_motor import ESCMotorHandler
 from .serial_communication import SerialCommunication
 

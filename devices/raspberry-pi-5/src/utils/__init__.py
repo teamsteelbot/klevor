@@ -14,6 +14,9 @@ def is_instance(obj: object,
     Args:
         obj (object): The object to check.
         class_or_tuple (type | UnionType | tuple[Any, ...]): The class or tuple of classes to check against.
+
+    Raises:
+        TypeError: If the object is not an instance of the specified class or tuple of classes.
     """
     # Unwrap common proxy objects (e.g., multiprocessing.Manager proxies)
     if hasattr(obj, '_getvalue'):
@@ -35,6 +38,9 @@ def is_subclass(cls: type,
     Args:
         cls (type): The class to check.
         class_or_tuple (type | UnionType | tuple[Any, ...]): The class or tuple of classes to check against.
+
+    Raises:
+        TypeError: If the class is not a subclass of the specified class or tuple of classes.
     """
     if not issubclass(cls, class_or_tuple):
         raise TypeError(
@@ -99,6 +105,9 @@ def map_string_to_enum(string: str, enum_class: type[Enum]) -> Any:
 
     Returns:
         Any: The corresponding enum value.
+
+    Raises:
+        ValueError: If the string does not match any enum value.
     """
     # Check the type of enum_class
     is_subclass(enum_class, Enum)

@@ -3,8 +3,8 @@ class IncomingCategory:
     Class to represent the enum categories of incoming messages from the Raspberry Pi 5.
     """
     STATUS = "status"
-    INFERENCE = "inference"
-    RPLIDAR = "rplidar"
+    MOTOR_SPEED = "motor_speed"
+    SERVO_ANGLE = "servo_angle"
 
     @classmethod
     def from_string(cls, category_str: str) -> str:
@@ -18,37 +18,11 @@ class IncomingCategory:
             str: The corresponding IncomingCategory enum value.
         """
         category_name = category_str.upper()
-        for category in [cls.STATUS, cls.INFERENCE, cls.RPLIDAR]:
+        for category in [cls.STATUS, cls.MOTOR_SPEED, cls.SERVO_ANGLE]:
             if category_name == category:
                 return category
 
         raise ValueError(f"Invalid incoming category: {category_str}")
-
-class RPLIDAR:
-    """
-    Class to represent the enum categories of RPLIDAR messages from the Raspberry Pi 5.
-    """
-    FRONT = "front"
-    LEFT = "left"
-    RIGHT = "right"
-
-    @classmethod
-    def from_string(cls, category_str: str) -> str:
-        """
-        Convert a string to a RPLIDAR enum value.
-
-        Args:
-            category_str (str): The string representation of the category.
-
-        Returns:
-            str: The corresponding RPLIDAR enum value.
-        """
-        category_name = category_str.upper()
-        for category in [cls.FRONT, cls.LEFT, cls.RIGHT]:
-            if category_name == category:
-                return category
-
-        raise ValueError(f"Invalid RPLIDAR category: {category_str}")
 
 class OutgoingCategory:
     """
@@ -56,10 +30,8 @@ class OutgoingCategory:
     """
     CHALLENGE = "challenge"
     STATUS = "status"
-    SERVO_ANGLE = "servo_angle"
-    MOTOR_SPEED = "motor_speed"
+    BNO08X_YAW = "bno08x_yaw"
     BNO08X_TURNS = "bno08x_turns"
-    REQUEST = "request"
     ERROR = "error"
 
     @classmethod
@@ -74,8 +46,8 @@ class OutgoingCategory:
             str: The corresponding OutgoingCategory enum value.
         """
         category_name = category_str.upper()
-        for category in [cls.CHALLENGE, cls.STATUS, cls.SERVO_ANGLE, cls.MOTOR_SPEED, cls.REQUEST,
-                            cls.BNO08X_TURNS, cls.ERROR]:
+        for category in [cls.CHALLENGE, cls.STATUS, cls.BNO08X_YAW,
+                         cls.BNO08X_TURNS, cls.ERROR]:
             if category_name == category:
                 return category
 

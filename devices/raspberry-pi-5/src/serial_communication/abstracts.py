@@ -112,11 +112,21 @@ class DispatcherABC:
         pass
 
     @abstractmethod
-    def send_rplidar_measures(self, measures: dict[RPLIDAR, float]) -> None:
+    def send_motor_speed(self, speed: float) -> None:
         """
-        Put RPLIDAR measures in the outgoing messages queue.
+        Send the motor speed to the serial port.
 
         Args:
-            measures (dict[RPLIDAR, float]): Dictionary containing RPLIDAR measures to put in the queue.
+            speed (float): The speed of the motor.
+        """
+        pass
+
+    @abstractmethod
+    def send_servo_angle(self, angle: float) -> None:
+        """
+        Send the servo angle to the serial port.
+
+        Args:
+            angle (float): The angle of the servo.
         """
         pass

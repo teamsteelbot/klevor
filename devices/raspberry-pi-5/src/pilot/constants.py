@@ -1,0 +1,21 @@
+# Motor speed range
+MOTOR_SPEED_RANGE = (-1.0, 1.0)
+
+# Common motor speed values
+MOTOR_SPEED_FAST = 1.0
+MOTOR_SPEED_NORMAL = 0.5
+MOTOR_SPEED_SLOW = 0.25
+
+# Servo center angle
+SERVO_CENTER_ANGLE = 90
+
+# Servo actuation range
+SERVO_ACTUATION_RANGE = 180
+SERVO_LEFT_LIMIT = -(SERVO_ACTUATION_RANGE - SERVO_CENTER_ANGLE)
+SERVO_RIGHT_LIMIT = (SERVO_ACTUATION_RANGE - (SERVO_ACTUATION_RANGE -
+                                     SERVO_CENTER_ANGLE))
+
+# Servo angles for different turns
+SERVO_BIG_TURN_ANGLE = 35
+SERVO_MEDIUM_TURN_ANGLE = 25
+SERVO_SMALL_TURN_ANGLE = 15

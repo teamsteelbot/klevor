@@ -10,11 +10,9 @@ class IncomingCategory(Enum):
     """
     CHALLENGE = 1
     STATUS = 2
-    SERVO_ANGLE = 3
-    MOTOR_SPEED = 4
-    REQUEST = 5
-    BNO08X_TURNS = 6
-    ERROR = 7
+    BNO08X_YAW = 3
+    BNO08X_TURNS = 4
+    ERROR = 5
 
     @property
     def parsed_name(self) -> str:
@@ -72,46 +70,14 @@ class Status(Enum):
         """
         return map_string_to_enum(status_str.upper(), cls)
 
-
-@unique
-class Request(Enum):
-    """
-    Enum to represent the request messages received from the Raspberry Pi Pico 2W.
-    """
-    INFERENCE = 1
-
-    @property
-    def parsed_name(self) -> str:
-        """
-        Get the request name in lowercase.
-
-        Returns:
-            str: The request name in lowercase.
-        """
-        return self.name.lower()
-
-    @classmethod
-    def from_string(cls, request_str: str) -> 'Request':
-        """
-        Convert a string to a Request enum value.
-
-        Args:
-            request_str (str): The string representation of the request.
-
-        Returns:
-            Request: The corresponding Request enum value.
-        """
-        return map_string_to_enum(request_str.upper(), cls)
-
-
 @unique
 class OutgoingCategory(Enum):
     """
     Enum to represent the categories of outgoing messages sent to the Raspberry Pi Pico 2W.
     """
     STATUS = 1
-    INFERENCE = 2
-    RPLIDAR = 3
+    SERVO_ANGLE = 2
+    MOTOR_SPEED = 3
 
     @property
     def parsed_name(self) -> str:
@@ -135,36 +101,3 @@ class OutgoingCategory(Enum):
             OutgoingCategory: The corresponding OutgoingCategory enum value.
         """
         return map_string_to_enum(category_str.upper(), cls)
-
-
-@unique
-class RPLIDAR(Enum):
-    """
-    Enum to represent the RPLIDAR messages sent to the Raspberry Pi Pico 2W.
-    """
-    FRONT = 1
-    LEFT = 2
-    RIGHT = 3
-
-    @property
-    def parsed_name(self) -> str:
-        """
-        Get the RPLIDAR name in lowercase.
-
-        Returns:
-            str: The RPLIDAR name in lowercase.
-        """
-        return self.name.lower()
-
-    @classmethod
-    def from_string(cls, rplidar_str: str) -> 'RPLIDAR':
-        """
-        Convert a string to a RPLIDAR enum value.
-
-        Args:
-            rplidar_str (str): The string representation of the RPLIDAR message.
-
-        Returns:
-            RPLIDAR: The corresponding RPLIDAR enum value.
-        """
-        return map_string_to_enum(rplidar_str.upper(), cls)

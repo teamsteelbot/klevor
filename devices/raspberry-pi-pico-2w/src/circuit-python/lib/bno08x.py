@@ -73,6 +73,9 @@ class BNO08XHandler:
     async def calibrate(self):
         """
         Calibrates the BNO08X sensor by taking initial readings to set the initial orientation.
+
+        Raises:
+            BNO08XError: If the sensor is already calibrated.
         """
         # Check if already calibrated
         if self.__calibrated:
