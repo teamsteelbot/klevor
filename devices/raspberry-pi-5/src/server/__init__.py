@@ -1,6 +1,6 @@
 import asyncio
-from multiprocessing import Event
-from multiprocessing import Queue
+from multiprocessing import Event, Queue, RLock
+from threading import Thread
 from typing import final
 
 from PIL.Image import Image
@@ -23,7 +23,10 @@ class WebSocketServer(WebSocketServerABC):
     """
 
     # Logger configuration
-    LOGGER_TAG = "WebsocketServer"
+    LOGGER_TAG = "WebSocketServer"
+
+    # Wait timeout
+    WAIT_TIMEOUT = 0.1
 
     def __init__(self, messages_queue: Queue, opened_event: Event,
                  parking_event: Event,
@@ -36,7 +39,7 @@ class WebSocketServer(WebSocketServerABC):
         Args:
             messages_queue (Queue): Queue to broadcast messages through the websockets server.
             opened_event (Event): Event to signal when the websockets server is ready to accept connections.
-            parking_event (Event): Event to signal the parking state of the server.
+            parking_event (Event): Event to signal the parking state of the robot.
             stop_event (Event): Event to signal when the websockets server should stop.
             writer_messages_queue (Queue): Queue to hold log messages.
             host (str): The host address for the WebSocket server.
@@ -59,8 +62,14 @@ class WebSocketServer(WebSocketServerABC):
         is_instance(port, int)
         self.__port = port
 
+        # Initialize the reentrant lock
+        self.__rlock = RLock()
+
         # Initialize the connected clients set
         self.__connected_clients = set()
+
+        # Initialize the broadcast thread
+        self.__broadcast_thread = None
 
     @final
     async def _reactive_handler(self, connection) -> None:
@@ -161,24 +170,55 @@ class WebSocketServer(WebSocketServerABC):
                 f"Unexpected error while broadcasting message: {e}")
 
     @final
+    async def _broadcast_last_message(self) -> None:
+        # Process any remaining messages in the queue
+        msg = self.__messages_queue.get(timeout=self.WAIT_TIMEOUT)
+        if msg is None:
+            return None
+
+        # Broadcast the last message to all connected clients
+        await self._broadcast_message(msg)
+
+    @final
+    async def _broadcast_handler(self):
+        """
+        Continuously checks the messages queue and broadcasts the last message
+        to all connected clients until the stop event is set.
+        """
+        while not self.__stop_event.is_set():
+            # Broadcast the last message if available
+            await self._broadcast_last_message()
+
+        # Check if there are any remaining messages in the queue
+        while not self.__messages_queue.empty():
+            # Broadcast the last message if available
+            await self._broadcast_last_message()
+
+    @final
     async def run(self):
+        with self.__rlock:
+            # Check if the stop event is set
+            if self.__stop_event.is_set():
+                self.__logger.warning(
+                    "Stop event is set. WebSocket server will not run.")
+                return
+
+            # Check if the websocket server is already running
+            if self.is_running():
+                self.__logger.warning(
+                    "WebSocket server is already running. Cannot start again.")
+                return
+
+            # Set the opened event to signal that the websocket server is ready
+            self.__opened_event.set()
+
         # Get the local IP address
         local_ip = get_local_ip()
 
-        # Check if the stop event is set
-        if self.__stop_event.is_set():
-            self.__logger.warning(
-                "Stop event is set. WebSocket server will not run.")
-            return
-
-        # Check if the websocket server is already running
-        if self.is_running():
-            self.__logger.warning(
-                "WebSocket server is already running. Cannot start again.")
-            return
-
-        # Set the opened event to signal that the websocket server is ready
-        self.__opened_event.set()
+        # Create a thread to handle broadcasting messages
+        self.__broadcast_thread = Thread(
+            target=self._broadcast_handler)
+        self.__broadcast_thread.start()
 
         # Start the WebSocket server
         self.__logger.debug("WebSocket server is starting...")
@@ -188,12 +228,21 @@ class WebSocketServer(WebSocketServerABC):
             await asyncio.get_running_loop().run_in_executor(None,
                                                              self.__stop_event.wait)
 
+        # Wait for the broadcast thread to finish
+        self.__broadcast_thread.join()
+        self.__broadcast_thread = None
+
+        # Clear the opened event
+        with self.__rlock:
+            self.__opened_event.clear()
+
         # Log the stopping of the server
         self.__logger.info("WebSocket server stopped.")
 
     @final
     def is_running(self) -> bool:
-        return not self.__stop_event.is_set()
+        with self.__rlock:
+            return not self.__stop_event.is_set() and self.__opened_event.is_set()
 
     @final
     def is_stopped(self) -> bool:

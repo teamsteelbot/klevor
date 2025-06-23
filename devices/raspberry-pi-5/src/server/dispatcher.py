@@ -1,11 +1,10 @@
 import io
-import uuid
 from multiprocessing import Queue
 from typing import final
 
 from PIL.Image import Image
 
-from .abstracts import ReceptionistABC
+from .abstracts import DispatcherABC
 from ..constants import IMAGE_FORMAT
 from ..constants import MODEL_G, MODEL_M, MODEL_R
 from ..log import Logger
@@ -14,18 +13,18 @@ from ..server.message import Message
 from ..utils import is_instance
 
 
-class Receptionist(ReceptionistABC):
+class Dispatcher(DispatcherABC):
     """
-    Class for a receptionist that handles broadcasting messages and images
+    Class for a dispatcher that handles broadcasting messages and images
     """
 
     # Logger configuration
-    LOGGER_TAG = "Receptionist"
+    LOGGER_TAG = "Dispatcher"
 
     def __init__(self, server_messages_queue: Queue,
                  writer_messages_queue: Queue):
         """
-        Initializes the Receptionist class.
+        Initializes the Dispatcher class.
 
         Args:
             server_messages_queue (Queue): Queue to broadcast messages through the websockets server.
@@ -35,12 +34,11 @@ class Receptionist(ReceptionistABC):
         self.__server_messages_queue = server_messages_queue
 
         # Initialize the logger
-        self.__uuid = uuid.uuid4()
-        self.__logger_tag = f"{self.LOGGER_TAG}_{self.__uuid}"
-        self.__logger = Logger(writer_messages_queue, self.__logger_tag)
+        self.__logger = Logger(writer_messages_queue, self.LOGGER_TAG,
+                               unique_tag=True)
 
     @final
-    async def _broadcast_message(self, msg: Message):
+    def _broadcast_message(self, msg: Message):
         # Check the type of message
         is_instance(msg, Message)
 
@@ -48,7 +46,7 @@ class Receptionist(ReceptionistABC):
         self.__server_messages_queue.put(msg)
 
     @final
-    async def _broadcast_image_with_tag(self, tag: Tag, img: Image):
+    def _broadcast_image_with_tag(self, tag: Tag, img: Image):
         try:
             # Open the image and convert it to a binary stream
             img_stream = io.BytesIO()
@@ -57,68 +55,77 @@ class Receptionist(ReceptionistABC):
             binary_data = img_stream.read()
 
             # Send the tagged binary data to the clients
-            await self._broadcast_message(Message(tag, str(binary_data)))
+            self._broadcast_message(Message(tag, str(binary_data)))
 
         except Exception as e:
             self.__logger.error(
                 f"Error sending image: {e}") if self.__logger else None
 
     @final
-    async def broadcast_original_image(self, img: Image):
+    def broadcast_original_image(self, img: Image):
         """
         Broadcasts the original image to all connected clients.
         """
-        await self._broadcast_image_with_tag(Tag.IMAGE_ORIGINAL, img)
+        self._broadcast_image_with_tag(Tag.IMAGE_ORIGINAL, img)
 
-    async def __broadcast_model_g_image(self, img: Image):
+    def __broadcast_model_g_image(self, img: Image):
         """
         Broadcasts the image processed by model G to all connected clients.
         """
-        await self._broadcast_image_with_tag(Tag.IMAGE_MODEL_G, img)
+        self._broadcast_image_with_tag(Tag.IMAGE_MODEL_G, img)
 
-    async def __broadcast_model_m_image(self, img: Image):
+    def __broadcast_model_m_image(self, img: Image):
         """
         Broadcasts the image processed by model M to all connected clients.
         """
-        await self._broadcast_image_with_tag(Tag.IMAGE_MODEL_M, img)
+        self._broadcast_image_with_tag(Tag.IMAGE_MODEL_M, img)
 
-    async def __broadcast_model_r_image(self, img: Image):
+    def __broadcast_model_r_image(self, img: Image):
         """
         Broadcasts the image processed by model R to all connected clients.
         """
-        await self._broadcast_image_with_tag(Tag.IMAGE_MODEL_R, img)
+        self._broadcast_image_with_tag(Tag.IMAGE_MODEL_R, img)
 
     @final
-    async def broadcast_model_image(self, img: Image, model_name: str):
+    def broadcast_model_image(self, img: Image, model_name: str):
+        # Check the type of model_name
+        is_instance(model_name, str)
+
+        # Check the type of image
+        is_instance(img, Image)
+
         if model_name == MODEL_G:
-            await self.__broadcast_model_g_image(img)
+            self.__broadcast_model_g_image(img)
 
         elif model_name == MODEL_M:
-            await self.__broadcast_model_m_image(img)
+            self.__broadcast_model_m_image(img)
 
         elif model_name == MODEL_R:
-            await self.__broadcast_model_r_image(img)
+            self.__broadcast_model_r_image(img)
 
         else:
             raise ValueError(f"Unknown model name: {model_name}")
 
     @final
-    async def broadcast_serial_incoming_message(self, msg: str):
+    def broadcast_serial_incoming_message(self, msg: str):
+        # Check the type of msg
         is_instance(msg, str)
 
         # Send a tagged message
-        await self._broadcast_message(Message(Tag.SERIAL_INCOMING_MESSAGE, msg))
+        self._broadcast_message(Message(Tag.SERIAL_INCOMING_MESSAGE, msg))
 
     @final
-    async def broadcast_serial_outgoing_message(self, msg: str):
+    def broadcast_serial_outgoing_message(self, msg: str):
+        # Check the type of msg
         is_instance(msg, str)
 
         # Send a tagged message
-        await self._broadcast_message(Message(Tag.SERIAL_OUTGOING_MESSAGE, msg))
+        self._broadcast_message(Message(Tag.SERIAL_OUTGOING_MESSAGE, msg))
 
     @final
-    async def broadcast_rplidar_measures(self, msg: str):
+    def broadcast_rplidar_measures(self, msg: str):
+        # Check the type of msg
         is_instance(msg, str)
 
         # Send a tagged message
-        await self._broadcast_message(Message(Tag.RPLIDAR_MEASURES, msg))
+        self._broadcast_message(Message(Tag.RPLIDAR_MEASURES, msg))

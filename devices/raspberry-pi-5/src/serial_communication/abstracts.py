@@ -10,6 +10,13 @@ class SerialCommunicationABC(ABC):
     """
 
     @abstractmethod
+    def _open(self) -> None:
+        """
+        Open the communication.
+        """
+        pass
+
+    @abstractmethod
     def is_open(self) -> bool:
         """
         Check if the serial port is open, and it's processing outgoing and incoming messages.
@@ -30,13 +37,6 @@ class SerialCommunicationABC(ABC):
         pass
 
     @abstractmethod
-    def start(self) -> None:
-        """
-        Start the serial communication.
-        """
-        pass
-
-    @abstractmethod
     def has_started(self) -> bool:
         """
         Check if the communication has started.
@@ -47,22 +47,57 @@ class SerialCommunicationABC(ABC):
         pass
 
     @abstractmethod
+    def _put_incoming_message(self, msg: IncomingMessage) -> None:
+        """
+        Put a message in the incoming messages queue.
+
+        Args:
+            msg (IncomingMessage): The message to put in the queue.
+        """
+        pass
+
+    @abstractmethod
+    def _get_outgoing_message(self) -> OutgoingMessage | None:
+        """
+        Get a message from the outgoing messages queue.
+
+        Returns:
+            OutgoingMessage|None: The message from the outgoing messages queue or None if no message is available.
+        """
+
+    @abstractmethod
+    def _receiving_message_handler(self) -> None:
+        """
+        Handler to receive messages from the serial port.
+        """
+        pass
+
+    @abstractmethod
+    def _sending_message_handler(self) -> None:
+        """
+        Handler to send messages to the serial port.
+        """
+        pass
+
+    @abstractmethod
+    def run(self) -> None:
+        """
+        Run the serial communication by creating threads for receiving and sending messages.
+        """
+        pass
+
+class DispatcherABC:
+    """
+    Abstract class for a dispatcher that handles incoming and outgoing messages.
+    """
+
+    @abstractmethod
     def receive_message(self) -> IncomingMessage | None:
         """
         Get a message from the incoming messages queue.
 
         Returns:
             IncomingMessage|None: The message from the incoming messages queue or None if no message is available.
-        """
-        pass
-
-    @abstractmethod
-    def peek_last_received_message(self) -> IncomingMessage | None:
-        """
-        Peek the last message from the incoming messages queue without removing it.
-
-        Returns:
-            Message|None: The last incoming message or None if no message is available.
         """
         pass
 
@@ -83,54 +118,5 @@ class SerialCommunicationABC(ABC):
 
         Args:
             measures (dict[RPLIDAR, float]): Dictionary containing RPLIDAR measures to put in the queue.
-        """
-        pass
-
-    @abstractmethod
-    def wait_stop_event(self) -> None:
-        """
-        Wait for the stop event to be set.
-        """
-        pass
-
-    @abstractmethod
-    def wait_start_event(self) -> None:
-        """
-        Wait for the start event to be set.
-        """
-        pass
-
-    @abstractmethod
-    def wait_parking_event(self) -> None:
-        """
-        Wait for the parking event to be set.
-        """
-        pass
-
-    @abstractmethod
-    def wait_pending_incoming_message_event(self) -> None:
-        """
-        Wait for a pending incoming message event.
-        """
-        pass
-
-    @abstractmethod
-    def wait_pending_outgoing_message_event(self) -> None:
-        """
-        Wait for a pending outgoing message event.
-        """
-        pass
-
-    @abstractmethod
-    def _receiving_message_handler(self) -> None:
-        """
-        Handler to receive messages from the serial port.
-        """
-        pass
-
-    @abstractmethod
-    def _sending_message_handler(self) -> None:
-        """
-        Handler to send messages to the serial port.
         """
         pass

@@ -1,4 +1,4 @@
-from multiprocessing import Event, Queue
+from multiprocessing import Event, Queue, RLock
 from typing import TextIO, final
 
 from .abstracts import WriterABC
@@ -32,12 +32,12 @@ class Writer(WriterABC):
         self.__opened_event.clear()
         self.__stop_event = stop_event
 
+        # Initialize the reentrant lock
+        self.__rlock = RLock()
+
         # Initialize the file path and file
         self.__file_path: str = ""
         self.__file: TextIO | None = None
-
-        # Initialize the thread
-        self.__thread = None
 
     @final
     def _write_last_message(self) -> None:
@@ -56,15 +56,16 @@ class Writer(WriterABC):
         Args:
             file_path (str): Path to the log file.
         """
-        # Check if the stop event is set
-        if self.__stop_event.is_set():
-            print("Stop event is set. Logger will not run.")
-            return
+        with self.__rlock:
+            # Check if the stop event is set
+            if self.__stop_event.is_set():
+                print("Stop event is set. Logger will not run.")
+                return
 
-        # Check if the logger is already running
-        if self.is_running():
-            print("Logger is already running. Cannot start again.")
-            return
+            # Check if the logger is already running
+            if self.is_running():
+                print("Logger is already running. Cannot start again.")
+                return
 
         # Check the type of file_path
         is_instance(file_path, str)
@@ -80,7 +81,8 @@ class Writer(WriterABC):
             self.__file = file
 
             # Set the opened event
-            self.__opened_event.set()
+            with self.__rlock:
+                self.__opened_event.set()
 
             # Write the initial message to the log file
             self._write(self.__file,
@@ -103,11 +105,13 @@ class Writer(WriterABC):
             self._write(self.__file, Message("Writer stopped.", Category.DEBUG))
 
         # Clear the opened event
-        self.__opened_event.clear()
+        with self.__rlock:
+            self.__opened_event.clear()
 
     @final
     def is_running(self) -> bool:
-        return self.__opened_event.is_set() and not self.__stop_event.is_set()
+        with self.__rlock:
+            return self.__opened_event.is_set() and not self.__stop_event.is_set()
 
     @final
     def is_stopped(self) -> bool:

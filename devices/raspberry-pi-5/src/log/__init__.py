@@ -12,13 +12,15 @@ class Logger(LoggerABC):
     Class to handle logging functionality.
     """
 
-    def __init__(self, writer_messages_queue: Queue, tag: Optional[str] = None):
+    def __init__(self, writer_messages_queue: Queue, tag: Optional[str] = None,
+                 unique_tag: bool = False):
         """
         Initialize the Logger class.
 
         Args:
             writer_messages_queue (Queue): Queue to hold log messages.
             tag (Optional[str]): Tag to identify the logger instance.
+            unique_tag (bool): Whether to generate a unique tag for the logger instance.
         """
         # Initialize the messages queue and events
         self.__writer_messages_queue = writer_messages_queue
@@ -26,11 +28,15 @@ class Logger(LoggerABC):
         # Check the type of tag
         if tag is not None:
             is_instance(tag, str)
-        self.__tag = tag
+        self.__tag = self.get_unique_tag(tag) if unique_tag or not tag else tag
 
         # Log the initialization if a tag is provided
         self.debug(
             f"Initializing Logger with tag: {self.__tag}") if self.__tag else None
+
+    @final
+    def get_unique_tag(self, tag: str):
+        return f"{tag}_{id(self)}" if tag else f"Logger_{id(self)}"
 
     @final
     def log(self, content: str, category: Category = Category.INFO) -> None:

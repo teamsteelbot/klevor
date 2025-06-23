@@ -15,7 +15,7 @@ class IncomingMessage:
 
     def __init__(self, category: IncomingCategory, content: str):
         """
-        Initialize the incomming message class.
+        Initialize the incoming message class.
 
         Args:
             category (IncomingCategory): The category of the message.

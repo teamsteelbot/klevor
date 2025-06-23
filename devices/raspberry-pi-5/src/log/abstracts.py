@@ -12,6 +12,18 @@ class LoggerABC(ABC):
     """
 
     @abstractmethod
+    def get_unique_tag(self, tag: str):
+        """
+        Generate a unique tag for the logger instance.
+
+        Args:
+            tag (str): The tag to identify the logger instance.
+
+        Returns:
+            str: A unique tag for the logger instance.
+        """
+
+    @abstractmethod
     def log(self, content: str, category: Category = Category.INFO) -> None:
         """
         Put a log message in the queue.

@@ -1,4 +1,4 @@
-from multiprocessing import Queue, Event
+from multiprocessing import Queue, Event, RLock
 from typing import Optional, Callable, final
 
 import numpy as np
@@ -6,7 +6,7 @@ from PIL.Image import Image
 
 from .abstracts import CameraABC, PhotographerABC
 from ..log import Logger
-from ..server.recepcionist import Receptionist
+from ..server.dispatcher import Dispatcher
 from ..utils import is_instance
 
 
@@ -39,15 +39,18 @@ class Photographer(PhotographerABC):
             preprocess_fn: Callable[[Image], np.ndarray]: Function to preprocess images before inference.
             server_messages_queue (Optional[Queue]): Queue to broadcast messages through the websockets server, if any.
         """
-        # Check the type of camera
-        is_instance(camera, CameraABC)
-        self.__camera: CameraABC = camera
-
         # Initialize the queues and events
         self.__images_queue = images_queue
         self.__capture_image_event = capture_image_event
         self.__opened_event = opened_event
         self.__stop_event = stop_event
+
+        # Check the type of camera
+        is_instance(camera, CameraABC)
+        self.__camera: CameraABC = camera
+
+        # Initialize the reentrant lock
+        self.__rlock = RLock()
 
         # Initialize the logger
         self.__logger = Logger(writer_messages_queue, self.LOGGER_TAG)
@@ -56,8 +59,8 @@ class Photographer(PhotographerABC):
         is_instance(preprocess_fn, Callable)
         self.__preprocess_fn = preprocess_fn
 
-        # Initialize the receptionist for broadcasting messages
-        self.__receptionist = Receptionist(server_messages_queue,
+        # Initialize the dispatcher for broadcasting messages
+        self.__dispatcher = Dispatcher(server_messages_queue,
                                            writer_messages_queue) if server_messages_queue else None
 
         # Initialize the image counter
@@ -65,20 +68,21 @@ class Photographer(PhotographerABC):
 
     @final
     def run(self):
-        # Check if the stop event is set
-        if self.__stop_event.is_set():
-            self.__logger.warning(
-                "Stop event is set. Photographer will not run.")
-            return
+        with self.__rlock:
+            # Check if the stop event is set
+            if self.__stop_event.is_set():
+                self.__logger.warning(
+                    "Stop event is set. Photographer will not run.")
+                return
 
-        # Check if the photographer is already running
-        if self.is_running():
-            self.__logger.warning(
-                "Photographer is already running. Cannot start again.")
-            return
+            # Check if the photographer is already running
+            if self.is_running():
+                self.__logger.warning(
+                    "Photographer is already running. Cannot start again.")
+                return
 
-        # Set the opened event to signal that the photographer is ready
-        self.__opened_event.set()
+            # Set the opened event to signal that the photographer is ready
+            self.__opened_event.set()
 
         # Start the photographer
         self.__logger.debug("Photographer's starting...")
@@ -111,12 +115,14 @@ class Photographer(PhotographerABC):
             # Clear the capture image event
             self.__capture_image_event.clear()
 
-            # If the receptionist is available, broadcast the original image
-            self.__receptionist.broadcast_original_image(
-                image) if self.__receptionist else None
+            # If the dispatcher is available, broadcast the original image
+            self.__dispatcher.broadcast_original_image(
+                image) if self.__dispatcher else None
 
         # Clear the events
         self.__capture_image_event.clear()
+        with self.__rlock:
+            self.__opened_event.clear()
 
         # Reset the image counter
         self.__imager_counter = 0
@@ -126,7 +132,8 @@ class Photographer(PhotographerABC):
 
     @final
     def is_running(self) -> bool:
-        return not self.__stop_event.is_set()
+        with self.__rlock:
+            return not self.__stop_event.is_set() and self.__opened_event.is_set()
 
     @final
     def is_stopped(self) -> bool:

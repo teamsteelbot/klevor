@@ -43,6 +43,28 @@ class WebSocketServerABC(ABC):
         pass
 
     @abstractmethod
+    async def _broadcast_last_message(self) -> None:
+        """
+        Processes the last message in the queue and broadcasts it to all connected clients.
+        """
+        pass
+
+    @abstractmethod
+    async def _broadcast_handler(self):
+        """
+        Continuously checks the messages queue and broadcasts the last message
+        to all connected clients until the stop event is set.
+        """
+        pass
+
+    @abstractmethod
+    async def run(self):
+        """
+        Starts the WebSocket server and listens for incoming connections and messages.
+        """
+        pass
+
+    @abstractmethod
     def is_running(self) -> bool:
         """
         Checks if the WebSocket server is running.
@@ -62,21 +84,15 @@ class WebSocketServerABC(ABC):
         """
         pass
 
-    @abstractmethod
-    async def run(self):
-        """
-        Starts the WebSocket server and listens for incoming connections and messages.
-        """
-        pass
 
-
-class ReceptionistABC:
+class DispatcherABC:
     """
-    Abstract class for a receptionist that handles broadcasting messages and images
+    Abstract class for a dispatcher that handles broadcasting messages
+    and images
     """
 
     @abstractmethod
-    async def _broadcast_message(self, msg: Message):
+    def _broadcast_message(self, msg: Message):
         """
         Add a message to the messages queue to be sent to all connected clients.
 
@@ -86,7 +102,7 @@ class ReceptionistABC:
         pass
 
     @abstractmethod
-    async def _broadcast_image_with_tag(self, tag: Tag, img: Image):
+    def _broadcast_image_with_tag(self, tag: Tag, img: Image):
         """
         Adds an image with a specific tag to the messages queue to be sent to all connected clients.
 
@@ -107,7 +123,7 @@ class ReceptionistABC:
         pass
 
     @abstractmethod
-    async def broadcast_model_image(self, img: Image, model_name: str):
+    def broadcast_model_image(self, img: Image, model_name: str):
         """
         Adds a model-processed image to the messages queue to be sent to all connected clients.
 
@@ -118,7 +134,7 @@ class ReceptionistABC:
         pass
 
     @abstractmethod
-    async def broadcast_serial_incoming_message(self, msg: str):
+    def broadcast_serial_incoming_message(self, msg: str):
         """
         Adds a serial incoming message to the messages queue to be sent to all connected clients.
 
@@ -128,7 +144,7 @@ class ReceptionistABC:
         pass
 
     @abstractmethod
-    async def broadcast_serial_outgoing_message(self, msg: str):
+    def broadcast_serial_outgoing_message(self, msg: str):
         """
         Adds a serial outgoing message to the messages queue to be sent to all connected clients.
 
@@ -138,7 +154,7 @@ class ReceptionistABC:
         pass
 
     @abstractmethod
-    async def broadcast_rplidar_measures(self, msg: str):
+    def broadcast_rplidar_measures(self, msg: str):
         """
         Adds RPLIDAR measures to the messages queue to be sent to all connected clients.
 
