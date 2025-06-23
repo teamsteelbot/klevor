@@ -11,18 +11,20 @@ from ..utils.decorators import ignore_sigint
 
 
 @ignore_sigint
-def photographer_target(images_queue: Queue, capture_image_event: Event,
-                        opened_event: Event, stop_event: Event,
-                        writer_messages_queue: Queue,
-                        preprocess_fn: Callable[[Image], np.ndarray],
-                        server_messages_queue: Optional[Queue] = None):
+def photographer_target(
+    images_queue: Queue,
+    capture_image_event: Event,
+    stop_event: Event,
+    writer_messages_queue: Queue,
+    preprocess_fn: Callable[[Image], np.ndarray],
+    server_messages_queue: Optional[Queue] = None
+):
     """
     Target function for a multiprocessing process that handles photography tasks.
 
     Args:
         images_queue (Queue): Queue to hold input images for processing.
         capture_image_event (Event): Event to signal when an image should be captured.
-        opened_event (Event): Event to signal when the logger is ready to write messages.
         stop_event (Event): Event to signal when the logger should stop.
         writer_messages_queue (Queue): Queue to hold log messages.
         preprocess_fn: Callable[[Image], np.ndarray]: Function to preprocess images before inference.
@@ -39,7 +41,6 @@ def photographer_target(images_queue: Queue, capture_image_event: Event,
         camera=camera,
         images_queue=images_queue,
         capture_image_event=capture_image_event,
-        opened_event=opened_event,
         stop_event=stop_event,
         writer_messages_queue=writer_messages_queue,
         preprocess_fn=preprocess_fn,

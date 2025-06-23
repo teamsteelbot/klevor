@@ -7,9 +7,14 @@ from ..utils.decorators import ignore_sigint
 
 
 @ignore_sigint
-def websocket_server_target(messages_queue: Queue, parking_event: Event,
-                            stop_event: Event, writer_messages_queue: Queue,
-                            host: str = HOST, port: int = PORT):
+def websocket_server_target(
+    messages_queue: Queue,
+    parking_event: Event,
+    stop_event: Event,
+    writer_messages_queue: Queue,
+    host: str = HOST,
+    port: int = PORT
+):
     """
     Target function for a multiprocessing process that handles the WebSocket server.
 

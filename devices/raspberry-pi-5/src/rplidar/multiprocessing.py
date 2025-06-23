@@ -10,11 +10,16 @@ from ..utils.decorators import ignore_sigint
 
 
 @ignore_sigint
-def rplidar_target(measures_queue: Queue, start_event: Event, stop_event: Event,
-            writer_messages_queue: Queue,
-            server_messages_queue: Optional[Queue] = None,
-            baudrate: int = RPLIDAR_C1_BAUDRATE, port: str = RPLIDAR_C1_PORT,
-            is_upside_down: bool = True):
+def rplidar_target(
+    measures_queue: Queue,
+    start_event: Event,
+    stop_event: Event,
+    writer_messages_queue: Queue,
+    server_messages_queue: Optional[Queue] = None,
+    baudrate: int = RPLIDAR_C1_BAUDRATE,
+    port: str = RPLIDAR_C1_PORT,
+    is_upside_down: bool = True
+) -> None:
     """
     Target function for a multiprocessing process that handles the RPLIDAR.
 

@@ -6,7 +6,10 @@ from ..utils.decorators import ignore_sigint
 
 
 @ignore_sigint
-def writer_target(messages_queue: Queue, stop_event: Event):
+def writer_target(
+    messages_queue: Queue,
+    stop_event: Event
+) -> None:
     """
     Target function for a multiprocessing process that handles writing log messages.
 

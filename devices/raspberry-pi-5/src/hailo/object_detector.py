@@ -36,7 +36,7 @@ class ObjectDetector(ObjectDetectorABC):
             writer_messages_queue: Queue,
     ) -> None:
         """
-        Initialize the ObjectDetection class.
+        Initialize the ObjectDetector class.
 
         Args:
             model_g_inferences_queue (Queue): Queue to hold inferences for model G.
