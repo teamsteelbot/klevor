@@ -146,12 +146,6 @@ class Hailo(HailoABC):
         return self.__hef.get_input_vstream_infos()[0].shape
 
     @final
-    def add_image(self, preprocessed_image: np.ndarray) -> None:
-        # Check the type of preprocessed image
-        is_instance(preprocessed_image, np.ndarray)
-        self.__processed_images_queue.put(preprocessed_image)
-
-    @final
     def _create_bindings(self, configured_infer_model) -> object:
         if not self.__output_type:
             output_buffers = {
@@ -204,13 +198,13 @@ class Hailo(HailoABC):
                     f"Stop event is set. Hailo handler for model '{self.__model_name}' will not run.")
                 return
 
-            # Check if the RPLIDAR is already running
+            # Check if the Hailo handler for the given model name is already running
             if self.__started_event.is_set():
                 self.__logger.warning(
                     f"Hailo handler for model '{self.__model_name}' is already running. Cannot start again.")
                 return
 
-            # Set the started event
+            # Set the started event to signal that the Hailo handler has started
             self.__started_event.set()
 
         # Create the VDevice parameters

@@ -91,16 +91,6 @@ class HailoABC(ABC):
         pass
 
     @abstractmethod
-    def add_image(self, preprocessed_image: np.ndarray) -> None:
-        """
-        Put a preprocessed image into the input queue.
-
-        Args:
-            preprocessed_image (np.ndarray): Preprocessed image to be put into the queue.
-        """
-        pass
-
-    @abstractmethod
     def _create_bindings(self, configured_infer_model) -> object:
         """
         Create bindings for input and output buffers.
@@ -184,14 +174,7 @@ class ObjectDetectorABC(ABC):
         pass
 
     @abstractmethod
-    def set_parking_event(self) -> None:
-        """
-        Set the parking event to indicate that the object detection is searching for a parking spot.
-        """
-        pass
-
-    @abstractmethod
-    def _loop(self) -> None:
+    def run(self) -> None:
         """
         The main loop to run the object detection using Hailo handlers.
         """

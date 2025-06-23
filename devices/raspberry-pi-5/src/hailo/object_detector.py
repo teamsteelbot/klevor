@@ -1,10 +1,9 @@
-import threading
 from multiprocessing import Event, RLock, Queue
+from threading import Thread
 from typing import final
 
 from . import Hailo
 from .abstracts import ObjectDetectorABC
-from ..camera.image_processing_queue import Photographer
 from ..constants import (
     MODEL_G, MODEL_M, MODEL_R, MODELS_NAME
 )
@@ -12,7 +11,6 @@ from ..env import Env
 from ..files import Files
 from ..log import Logger
 from ..opencv import OpenCV
-from ..utils import is_instance
 
 
 class ObjectDetector(ObjectDetectorABC):
@@ -23,10 +21,14 @@ class ObjectDetector(ObjectDetectorABC):
     # Logger configuration
     LOGGER_TAG = 'ObjectDetector'
 
+    # Wait timeout
+    WAIT_TIMEOUT = 0.1
+
     def __init__(
             self,
-            inferences_queue: Queue,
-            started_event: Event,
+            model_g_inferences_queue: Queue,
+            model_m_inferences_queue: Queue,
+            model_r_inferences_queue: Queue,
             start_event: Event,
             parking_event: Event,
             stop_event: Event,
@@ -37,8 +39,9 @@ class ObjectDetector(ObjectDetectorABC):
         Initialize the ObjectDetection class.
 
         Args:
-            inferences_queue (Queue): Queue to hold the inferences from the Hailo handlers.
-            started_event (Event): Event to signal when the object detector has started.
+            model_g_inferences_queue (Queue): Queue to hold inferences for model G.
+            model_m_inferences_queue (Queue): Queue to hold inferences for model M.
+            model_r_inferences_queue (Queue): Queue to hold inferences for model R.
             start_event (Event): Event to signal when the object detector should start.
             parking_event (Event): Event to signal the parking state of the robot.
             stop_event (Event): Event to signal when the object detector should stop.
@@ -46,12 +49,18 @@ class ObjectDetector(ObjectDetectorABC):
             writer_messages_queue (Queue): Queue to hold log messages.
         """
         # Initialize the queues and events
-        self.__inferences_queue = inferences_queue
         self.__photographer_images_queue = photographer_images_queue
-        self.__started_event = started_event
+        self.__started_event = Event
         self.__start_event = start_event
         self.__parking_event = parking_event
         self.__stop_event = stop_event
+        self.__inferences_queues = {}
+        self.__processed_images_queues = {}
+        self.__stop_events = {}
+        for model_name in MODELS_NAME:
+            self.__inferences_queues[model_name] = Queue()
+            self.__processed_images_queues[model_name] = Queue()
+            self.__stop_events[model_name] = Event()
 
         # Initialize the logger
         self.__logger = Logger(writer_messages_queue, self.LOGGER_TAG)
@@ -66,7 +75,8 @@ class ObjectDetector(ObjectDetectorABC):
         yolo_version = Env.get_yolo_version()
 
         # Create the Hailo handlers
-        self.__hailo_handlers = dict()
+        self.__hailo_handlers = {}
+        self.__hailo_handler_threads: dict[str, Thread|None] = {}
         for model_name in MODELS_NAME:
             # Get the HEF file paths
             hef_file_path = Files.get_model_hailo_suite_compiled_hef_file_path(
@@ -82,10 +92,14 @@ class ObjectDetector(ObjectDetectorABC):
             # Create the Hailo handler
             hailo_handler = Hailo(model_name, hef_file_path, labels_file_path,
                                   model_class_colors,
-                                  image_processing_queue=image_processing_queue,
-                                  logger=logger,
-                                  put_output_inference_fn=image_processing_queue.add_inference)
+                                  self.__processed_images_queues[model_name],
+                                  self.__inferences_queues[model_name],
+                                  self.__stop_events[model_name],
+                                  writer_messages_queue)
             self.__hailo_handlers[model_name] = hailo_handler
+
+            # Initialize the thread
+            self.__hailo_handler_threads[model_name] = None
 
     @final
     def is_running(self) -> bool:
@@ -97,89 +111,89 @@ class ObjectDetector(ObjectDetectorABC):
         return not self.is_running()
 
     @final
-    def _loop(self) -> None:
-        # Start the Hailo handler for model G and R
-        self.__hailo_handlers[MODEL_G].start_thread()
-        self.__hailo_handlers[MODEL_R].start_thread()
+    def run(self) -> None:
+        with self.__rlock:
+            # Check if the stop event is set
+            if self.__stop_event.is_set():
+                self.__logger.warning(
+                    "Stop event is set. ObjectDetector will not run.")
+                return
 
-        # Wait for the stop event
+            # Check if the object detector is already running
+            if self.__started_event.is_set():
+                self.__logger.warning(
+                    "ObjectDetector is already running. Cannot start again.")
+                return
+
+            # Set the started event to signal that the object detector has started
+            self.__started_event.set()
+
+        # Wait for the start event to be set
+        self.__start_event.wait()
+
+        for model_name in MODELS_NAME:
+            # Initialize the Hailo handler thread
+            hailo_handler = self.__hailo_handlers[model_name]
+            hailo_handler_thread = Thread(target=hailo_handler.run())
+
+            # Start only the G and R model handlers
+            hailo_handler_thread.start() if model_name in [MODEL_G, MODEL_R] else None
+
+            # Store the thread in the dictionary
+            self.__hailo_handler_threads[model_name] = hailo_handler_thread
+
+        # Process images for G and R models
+        self.__logger.info("Starting Hailo handlers for G and R models...")
         while self.is_running() and not self.__parking_event.is_set():
-            # Wait for the pending image event
-            self.__image_processing_queue.wait_pending_input_image_event()
+            # Get the image from the photographer images queue
+            image = self.__photographer_images_queue.get(
+                timeout=self.WAIT_TIMEOUT)
+            if image is None:
+                continue
 
-            # Get the image from the image processing queue
-            image = self.__image_processing_queue.get_image(Hailo.preprocess)
-
-            # Put the model G and R images in the Hailo handler input queues
-            self.__hailo_handlers[MODEL_G].add_image(image)
-            self.__hailo_handlers[MODEL_R].add_image(image)
+            # Put the model G and R images in the Hailo handler processed images queues
+            for model_name in [MODEL_G, MODEL_R]:
+                self.__processed_images_queues[model_name].put(image)
 
         # Stop the Hailo handlers for G and R models
-        self.__hailo_handlers[MODEL_G].stop_thread()
-        self.__hailo_handlers[MODEL_R].stop_thread()
+        for model_name in [MODEL_G, MODEL_R]:
+            # Set the stop event for the model handler
+            self.__stop_events[model_name].set()
 
-        # Start the Hailo handler for model M
-        self.__hailo_handlers[MODEL_M].start_thread()
+            # Wait for the Hailo handler thread to finish
+            self.__logger.info(f"Stopping Hailo handler for {model_name} model...")
+            self.__hailo_handler_threads[model_name].join()
+            self.__hailo_handler_threads[model_name] = None
 
+        # Start the Hailo handler thread for model M
+        self.__hailo_handler_threads[MODEL_M].start()
+
+        # Process images for model M
+        self.__logger.info("Starting Hailo handler for M model...")
         while self.is_running():
-            # Wait for the pending image event
-            self.__image_processing_queue.wait_pending_input_image_event()
+            # Get the image from the photographer images queue
+            image = self.__photographer_images_queue.get(
+                timeout=self.WAIT_TIMEOUT)
+            if image is None:
+                continue
 
-            # Get the image from the image processing queue
-            image = self.__image_processing_queue.get_image(Hailo.preprocess)
+            # Put the model M image in the Hailo handler processed images queue
+            self.__processed_images_queues[MODEL_M].put(image)
 
-            # Put the model M image in the Hailo handler input queue
-            self.__hailo_handlers[MODEL_M].add_image(image)
+        # Stop the Hailo handler thread for model M
+        self.__stop_events[MODEL_M].set()
 
-        # Stop the Hailo handler for model M
-        self.__hailo_handlers[MODEL_M].stop_thread()
+        # Wait for the Hailo handler thread for model M to finish
+        self.__logger.info("Stopping Hailo handler for M model...")
+        self.__hailo_handler_threads[MODEL_M].join()
+        self.__hailo_handler_threads[MODEL_M] = None
 
-    def start_thread(self) -> None:
-        """
-        Start the object detection thread.
-        """
+        # Clear the started event to signal that the object detector has stopped
         with self.__rlock:
-            # Check if the threads are already running
-            if self.is_running():
-                self.__logger.warning(
-                    'Object detection threads are already running.') if self.__logger else None
-                return
-
-            # Start the object detection loop thread
-            self.__start()
-            self.__thread = threading.Thread(target=self._loop)
-            self.__thread.start()
-
-        # Log
-        self.__logger.info(
-            'Object detection threads started.') if self.__logger else None
-
-    def stop_thread(self) -> None:
-        """
-        Stop the object detection thread.
-        """
-        with self.__rlock:
-            # Check if the thread is not running
-            if self.is_stopped():
-                self.__logger.warning(
-                    'Object detection threads are already stopped.') if self.__logger else None
-                return
-
-            # Stop the object detection loop
-            self.__stop()
-
-            # Wait for the thread to finish
-            self.__thread.join()
-            self.__thread = None
-
-        # Log
-        self.__logger.info(
-            'Object detection threads stopped.') if self.__logger else None
+            self.__started_event.clear()
 
     def __del__(self):
         """
-        Destructor to ensure the thread is stopped when the object is deleted.
+        Destructor to clean up resources when the ObjectDetector is no longer needed.
         """
-        self.stop_thread() if self.is_running() else None
-        self.__logger.info(
-            'ObjectDetection instance deleted.') if self.__logger else None
+        self.__stop_event.set()
