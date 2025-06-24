@@ -1,5 +1,7 @@
 from .enums import IncomingCategory, OutgoingCategory, Status
 from ..utils import is_instance
+from .constants import (INCOMING_OK_MESSAGE, OUTGOING_OK_MESSAGE,
+                        START_MESSAGE, STOP_MESSAGE)
 
 
 class IncomingMessage:
@@ -29,6 +31,18 @@ class IncomingMessage:
         String representation of the message.
         """
         return f"{self.__category}{self.HEADER_SEPARATOR}{self.__content}{self.END}"
+
+    def __eq__(self, other: 'IncomingMessage') -> bool:
+        """
+        Check equality of two IncomingMessage objects.
+
+        Args:
+            other (IncomingMessage): The other IncomingMessage object to compare with.
+
+        Returns:
+            bool: True if both messages have the same category and content, False otherwise.
+        """
+        return self.category == other.category and self.content == other.content
 
     @classmethod
     def from_string(cls, msg_str: str) -> 'IncomingMessage':
@@ -107,7 +121,7 @@ class IncomingMessage:
         Returns:
             bool: True if the message is a start message, False otherwise.
         """
-        return self.category == IncomingCategory.STATUS and self.content == Status.START.parsed_name
+        return self == START_MESSAGE
 
     def is_challenge(self) -> bool:
         """
@@ -118,15 +132,6 @@ class IncomingMessage:
         """
         return self.category == IncomingCategory.CHALLENGE
 
-    def is_stop(self) -> bool:
-        """
-        Check if the message is a stop message.
-
-        Returns:
-            bool: True if the message is a stop message, False otherwise.
-        """
-        return self.category == IncomingCategory.STATUS and self.content == Status.STOP.parsed_name
-
     def is_error(self) -> bool:
         """
         Check if the message is an error message.
@@ -136,17 +141,32 @@ class IncomingMessage:
         """
         return self.category == IncomingCategory.ERROR
 
-    def __eq__(self, other: 'IncomingMessage') -> bool:
+    def is_confirmation(self) -> bool:
         """
-        Check equality of two IncomingMessage objects.
-
-        Args:
-            other (IncomingMessage): The other IncomingMessage object to compare with.
+        Check if the message is a confirmation message.
 
         Returns:
-            bool: True if both messages have the same category and content, False otherwise.
+            bool: True if the message is a confirmation message, False otherwise.
         """
-        return self.category == other.category and self.content == other.content
+        return self == INCOMING_OK_MESSAGE
+
+    def is_bno08x_yaw(self) -> bool:
+        """
+        Check if the message is a BNO08X yaw message.
+
+        Returns:
+            bool: True if the message is a BNO08X yaw message, False otherwise.
+        """
+        return self.category == IncomingCategory.BNO08X_YAW
+
+    def is_bno08x_turns(self) -> bool:
+        """
+        Check if the message is a BNO08X turns message.
+
+        Returns:
+            bool: True if the message is a BNO08X turns message, False otherwise.
+        """
+        return self.category == IncomingCategory.BNO08X_TURNS
 
 
 class OutgoingMessage:
@@ -181,6 +201,18 @@ class OutgoingMessage:
         String representation of the message.
         """
         return f"{self.__category}{self.HEADER_SEPARATOR}{self.__content}{self.END}"
+
+    def __eq__(self, other: 'OutgoingMessage') -> bool:
+        """
+        Check equality of two OutgoingMessage objects.
+
+        Args:
+            other (OutgoingMessage): The other OutgoingMessage object to compare with.
+
+        Returns:
+            bool: True if both messages have the same category and content, False otherwise.
+        """
+        return self.category == other.category and self.content == other.content
 
     @staticmethod
     def from_string(msg_str: str) -> 'OutgoingMessage':
@@ -251,15 +283,3 @@ class OutgoingMessage:
         # Check the type of content
         is_instance(content, str)
         self.__content = content
-
-    def __eq__(self, other: 'OutgoingMessage') -> bool:
-        """
-        Check equality of two OutgoingMessage objects.
-
-        Args:
-            other (OutgoingMessage): The other OutgoingMessage object to compare with.
-
-        Returns:
-            bool: True if both messages have the same category and content, False otherwise.
-        """
-        return self.category == other.category and self.content == other.content

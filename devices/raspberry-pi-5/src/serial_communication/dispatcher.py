@@ -1,6 +1,7 @@
 from multiprocessing import Queue
 from typing import final
 
+from .constants import STOP_MESSAGE
 from .abstracts import DispatcherABC
 from .enums import OutgoingCategory
 from .message import IncomingMessage, OutgoingMessage
@@ -59,7 +60,7 @@ class Dispatcher(DispatcherABC):
         self.__serial_outgoing_messages_queue.put(msg)
 
     @final
-    def send_motor_speed(self, speed: float) -> None:
+    def send_motor_speed_message(self, speed: float) -> None:
         # Create the message
         msg = OutgoingMessage(OutgoingCategory.MOTOR_SPEED, str(speed))
 
@@ -67,9 +68,13 @@ class Dispatcher(DispatcherABC):
         self._send_message(msg)
 
     @final
-    def send_servo_angle(self, angle: float) -> None:
+    def send_servo_angle_message(self, angle: float) -> None:
         # Create the message
         msg = OutgoingMessage(OutgoingCategory.SERVO_ANGLE, str(angle))
 
         # Send the message
         self._send_message(msg)
+
+    @final
+    def send_stop_message(self) -> None:
+        self._send_message(STOP_MESSAGE)

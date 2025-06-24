@@ -295,6 +295,6 @@ class Hailo(HailoABC):
         self.__stop_event.set()
 
         # Log
-        self.__logger.info(
+        self.__logger.debug(
             f"Hailo handler instance for model '{self.__model_name}' is being deleted. Resources will be cleaned up."
         )

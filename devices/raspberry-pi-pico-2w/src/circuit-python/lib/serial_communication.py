@@ -65,7 +65,7 @@ class SerialCommunication:
         )
 
     # Confirmation timeout
-    CONFIRMATION_TIMEOUT = 30.0
+    CONFIRMATION_TIMEOUT = 5.0
 
     def __init__(
         self,
@@ -133,7 +133,6 @@ class SerialCommunication:
 
         Args:
             message (OutgoingMessage): The message to send.
-
         Raises:
             SerialCommunicationError: If the console port is not enabled or if there is an error in sending the message.
         """
@@ -154,24 +153,28 @@ class SerialCommunication:
 
     async def wait_for_confirmation_message(
         self,
+        msg_to_confirm: OutgoingMessage,
         timeout: float = CONFIRMATION_TIMEOUT
-        ) -> bool:
+        ) -> None:
         """
         Wait for a confirmation message from the console port.
 
         Args:
             timeout (float): The maximum time to wait for a confirmation message.
-
-        Returns:
-            bool: True if confirmation received, False if timeout.
+            msg_to_confirm (OutgoingMessage): The message to confirm.
+        Raises:
+            SerialCommunicationError: If the confirmation message is not received within the timeout period.
         """
         start_time = monotonic()
         while monotonic() - start_time < timeout:
             msgs = await self.receive_messages()
             for msg in msgs:
                 if msg == self.INCOMING_OK_MESSAGE:
-                    return True
-        return False
+                    return
+
+        raise SerialCommunicationError(
+            f"Confirmation message '{msg_to_confirm}' not received within {timeout} seconds."
+            )
 
     async def send_challenge_message(self):
         """
@@ -185,10 +188,7 @@ class SerialCommunication:
         self.send_message(challenge_message)
 
         # Wait for confirmation of the challenge message
-        if not await self.wait_for_confirmation_message():
-            raise SerialCommunicationError(
-                "Failed to receive confirmation for challenge message."
-                )
+        await self.wait_for_confirmation_message(challenge_message)
 
     def send_bno08x_yaw_message(self, yaw: float):
         """
@@ -234,10 +234,7 @@ class SerialCommunication:
         self.send_message(self.START_MESSAGE)
 
         # Wait for confirmation of the start message
-        if not await self.wait_for_confirmation_message():
-            raise SerialCommunicationError(
-                "Failed to receive confirmation for start message."
-                )
+        await self.wait_for_confirmation_message(self.START_MESSAGE)
 
     async def stop(self):
         """

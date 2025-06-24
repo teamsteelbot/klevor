@@ -69,7 +69,7 @@ class Pilot(PilotABC):
 
         # Send the speed message to the serial communication
         if self.__movement:
-            self.__serial_dispatcher.send_motor_speed(self.__motor_speed)
+            self.__serial_dispatcher.send_motor_speed_message(self.__motor_speed)
 
         # Log
         self.__logger.info(f"Set motor speed to: {speed}")
@@ -102,7 +102,7 @@ class Pilot(PilotABC):
         self.__servo_angle = angle
 
         if self.__movement:
-            self.__serial_dispatcher.send_servo_angle(self.__servo_angle)
+            self.__serial_dispatcher.send_servo_angle_message(self.__servo_angle)
 
         # Log
         self.__logger.info(f"Set servo angle to: {angle}deg")

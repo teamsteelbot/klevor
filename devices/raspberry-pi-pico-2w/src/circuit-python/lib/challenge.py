@@ -1,4 +1,5 @@
 from asyncio import create_task, gather
+from time import monotonic
 
 from .bno08x import BNO08XHandler
 from .esc_motor import ESCMotorHandler
@@ -12,6 +13,8 @@ class WithoutObstacles:
     Class for the WRO 2025 Challenge without Obstacles in the Future Engineers Car category.
     This class contains constants and methods related to the challenge.
     """
+    # Receiving message timeout
+    RECEIVING_MESSAGE_TIMEOUT = 10.0
 
     def __init__(
         self,
@@ -39,11 +42,11 @@ class WithoutObstacles:
         Main loop for the challenge without obstacles.
         This function will continuously check the distances and control the robot's movements accordingly.
         """
-        # Set the last known turns to zero
-        last_known_turns = 0
-
         # Set the exit condition to False
         to_exit = False
+
+        # Get start time to compare with the timeout
+        start_time = monotonic()
 
         while not to_exit:
             # Create the update quaternion and receive serial messages tasks
@@ -57,6 +60,15 @@ class WithoutObstacles:
             # Wait for the tasks to complete
             results = await gather(update_quaternion_task, receive_serial_task)
             msgs: list[IncomingMessage] = results[1]
+            if len(msgs) == 0:
+                # If no messages were received, check if the timeout has been reached
+                if monotonic() - start_time > self.RECEIVING_MESSAGE_TIMEOUT:
+                    raise TimeoutError(
+                        "No messages received within the timeout period."
+                    )
+            else:
+                # Reset the start time if messages are received
+                start_time = monotonic()
 
             # Algortihm tasks
             tasks = []

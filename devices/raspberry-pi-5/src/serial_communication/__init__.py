@@ -1,4 +1,4 @@
-from multiprocessing import Event, Queue, RLock
+from multiprocessing import Event, Queue, RLock, Value
 from threading import Thread
 from time import sleep
 from typing import Optional, final
@@ -13,8 +13,9 @@ from .constants import (
     RASPBERRY_PI_PICO_CONSOLE_PORT_ALT,
     RASPBERRY_PI_PICO_DATA_PORT,
     RASPBERRY_PI_PICO_DATA_PORT_ALT,
+    OUTGOING_OK_MESSAGE,
+    STOP_MESSAGE
 )
-from .enums import OutgoingCategory, Status
 from .message import IncomingMessage, OutgoingMessage
 from ..env import Env
 from ..env.enums import Challenge
@@ -40,6 +41,10 @@ class SerialCommunication(SerialCommunicationABC):
     # Stop delay
     STOP_DELAY = 0.1
 
+    # Confirmation timeout
+    CONFIRMATION_TIMEOUT = 5.0
+    CONFIRMATION_ATTEMPTS = CONFIRMATION_TIMEOUT // INCOMING_DELAY
+
     def __init__(
         self,
         start_event: Event,
@@ -48,6 +53,8 @@ class SerialCommunication(SerialCommunicationABC):
         incoming_messages_queue: Queue,
         outgoing_messages_queue: Queue,
         writer_messages_queue: Queue,
+        bno08x_yaw_deg: Value,
+        bno08x_turns: Value,
         photographer_capture_image_event: Event,
         server_messages_queue: Optional[Queue] = None,
         console_port: Optional[str] = RASPBERRY_PI_PICO_CONSOLE_PORT,
@@ -68,6 +75,8 @@ class SerialCommunication(SerialCommunicationABC):
             outgoing_messages_queue (Queue): Queue to hold outgoing messages to the serial port.
             writer_messages_queue (Queue): Queue to hold log messages.
             photographer_capture_image_event (Event): Event to signal when an image should be captured.
+            bno08x_yaw_deg (Value): Shared value for the BNO08X yaw angle in degrees.
+            bno08x_turns (Value): Shared value for the BNO08X turns.
             server_messages_queue (Optional[Queue]): Queue to broadcast the messages through the websockets server.
             console_port (Optional[str]): Serial port used for receiving data from Pico.
             console_port_alt (Optional[str]): Alternative serial port used for receiving data from Pico.
@@ -75,13 +84,15 @@ class SerialCommunication(SerialCommunicationABC):
             data_port_alt (Optional[str]): Alternative serial port used for sending data to Pico.
             baudrate (Optional[int]): Baud rate for the serial communication.
         """
-        # Initialize the queues and events
+        # Initialize the values, queues and events
         self.__opened_event = Event()
         self.__start_event = start_event
         self.__parking_event = parking_event
         self.__stop_event = stop_event
         self.__incoming_messages_queue = incoming_messages_queue
         self.__outgoing_messages_queue = outgoing_messages_queue
+        self.__bno08x_yaw_deg = bno08x_yaw_deg
+        self.__bno08x_turns = bno08x_turns
         self.__photographer_capture_image_event = photographer_capture_image_event
 
         # Initialize the logger
@@ -176,7 +187,7 @@ class SerialCommunication(SerialCommunicationABC):
     @final
     def is_open(self) -> bool:
         with (self.__rlock):
-            return not self.__stop_event.is_set() and self.__console_serial and self.__console_serial.is_open and self.__data_serial and self.__data_serial.is_open
+            return not self.__stop_event.is_set()
 
     @final
     def is_closed(self) -> bool:
@@ -197,7 +208,7 @@ class SerialCommunication(SerialCommunicationABC):
         first_line = str(msg).split('\n')[0]
         self.__logger.debug(
             f"Received message: {first_line}"
-        ) if self.__logger and self.__debug else None
+        ) if self.__debug else None
 
         # If the server is set, send the message to the server
         self.__server_dispatcher.broadcast_serial_incoming_message(
@@ -217,7 +228,7 @@ class SerialCommunication(SerialCommunicationABC):
         first_line = str(msg).split('\n')[0]
         self.__logger.debug(
             f"Sending message: {first_line}"
-        ) if self.__logger and self.__debug else None
+        ) if self.__debug else None
 
         # If the server is set, send the message to the server
         self.__server_dispatcher.broadcast_serial_outgoing_message(
@@ -228,14 +239,48 @@ class SerialCommunication(SerialCommunicationABC):
 
     @final
     def _send_confirmation_message(self) -> None:
-        """
-        Send a confirmation message to the console port.
-        """
-        # Create a confirmation message
-        confirmation_msg = OutgoingMessage(OutgoingCategory.STATUS, Status.OK)
+        self.__outgoing_messages_queue.put(OUTGOING_OK_MESSAGE)
 
-        # Put the message in the outgoing messages queue
-        self.__outgoing_messages_queue.put(confirmation_msg)
+    @final
+    def _wait_confirmation_message(self, msg_to_confirm: OutgoingMessage) -> None:
+        # Log
+        self.__logger.debug(
+            f"Waiting for confirmation message for: {msg_to_confirm}"
+        ) if self.__debug else None
+
+        # Wait for the confirmation message
+        attempts = 0
+        while attempts < self.CONFIRMATION_ATTEMPTS:
+            if self.__console_serial.in_waiting == 0:
+                attempts += 1
+                sleep(self.INCOMING_DELAY)
+                continue
+
+            msg_str = self.__console_serial.readline().decode(ENCODE).strip()
+            msg = IncomingMessage.from_string(msg_str)
+
+            if msg.is_confirmation():
+                # Log the confirmation message
+                self.__logger.debug(
+                    f"Received confirmation message: {msg.content}"
+                ) if self.__debug else None
+                return
+
+            elif msg.is_error():
+                raise RuntimeError(
+                    f"Received error message: {msg.content}"
+                )
+
+        raise RuntimeError(
+            f"Confirmation message for {msg_to_confirm} not received within timeout."
+        )
+
+    @final
+    def _send_stop_message(self) -> None:
+        self.__outgoing_messages_queue.put(STOP_MESSAGE)
+
+        # Wait for the confirmation message
+        self._wait_confirmation_message(STOP_MESSAGE)
 
     @final
     def _receiving_message_handler(self) -> None:
@@ -252,7 +297,7 @@ class SerialCommunication(SerialCommunicationABC):
                 ).decode(ENCODE).strip()
                 self.__logger.debug(
                     "Received initialization message: " + console_msg
-                ) if self.__logger and self.__debug else None
+                ) if self.__debug else None
 
                 # Get the Message from the string
                 msg = IncomingMessage.from_string(console_msg)
@@ -261,11 +306,14 @@ class SerialCommunication(SerialCommunicationABC):
                 if msg.is_start():
                     # Check if the challenge is set
                     if not Env.has_challenge():
+                        # Send the stop message
+                        self._send_stop_message()
+
                         # Stop the communication
                         self.__stop_event()
 
                         # Log
-                        self.__logger.error(
+                        self.__logger.warning(
                             "Challenge not set. Stopping communication."
                         )
                         return
@@ -305,34 +353,38 @@ class SerialCommunication(SerialCommunicationABC):
             msg_str = self.__console_serial.readline().decode(ENCODE).strip()
             msg = IncomingMessage.from_string(msg_str)
 
-            """
-            if msg.is_stop():
-                # Send a confirmation stop message
-                self._send_confirmation_message()
+            if msg.is_bno08x_yaw():
+                # Log
+                self.__logger.debug(
+                    f"Received BNO08X yaw message: {msg.content}"
+                ) if self.__debug else None
 
-                # Log the stop message
-                self.__logger.info(
-                    "Received stop event.")
+                # Update the BNO08X yaw angle
+                with self.__bno08x_yaw_deg.get_lock():
+                    self.__bno08x_yaw_deg.value = float(msg.content)
 
-                # Wait for a short time to ensure the message is sent
-                sleep(self.STOP_DELAY)
-                break
-            """
+            elif msg.is_bno08x_turns():
+                # Log
+                self.__logger.debug(
+                    f"Received BNO08X turns message: {msg.content}"
+                ) if self.__debug else None
 
-            if msg.is_error():
-                # Log the error message
+                # Update the BNO08X turns
+                with self.__bno08x_turns.get_lock():
+                    self.__bno08x_turns.value = int(msg.content)
+
+            elif msg.is_error():
+                # Log
                 self.__logger.error(
+                    f"Received error message: {msg.content}"
+                )
+
+                raise RuntimeError(
                     f"Received error message: {msg.content}"
                 )
 
             # Put the message in the incoming messages queue
             self._put_incoming_message(msg)
-
-        # Set the stop event to signal that the receiving handler has stopped
-        self.__stop_event.set()
-
-        # Clear the start event
-        self.__start_event.clear()
 
         # Close the console serial port
         if self.__console_serial and self.__console_serial.is_open:
@@ -371,8 +423,9 @@ class SerialCommunication(SerialCommunicationABC):
             # Flush the serial port to ensure the message is sent
             self.__data_serial.flush()
 
-        # Set the stop event to signal that the sending handler has stopped
-        self.__stop_event.set()
+        # Send the stop message to the serial port
+        if self.__data_serial and self.__data_serial.is_open:
+            self._send_stop_message()
 
         # Clear the start event
         self.__start_event.clear()

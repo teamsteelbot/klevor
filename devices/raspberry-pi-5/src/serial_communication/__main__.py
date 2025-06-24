@@ -1,4 +1,4 @@
-from multiprocessing import Event, Process, Queue
+from multiprocessing import Event, Process, Queue, Value
 from time import sleep
 
 from .multiprocessing import serial_communication_target
@@ -11,6 +11,7 @@ if __name__ == "__main__":
     writer_stop_event = Event()
     serial_incoming_messages_queue = Queue()
     serial_outgoing_messages_queue = Queue()
+    bno08x_turns = Value("i", 0)  # Shared value for BNO08x turns
     photographer_capture_image_event = Event()
     start_event = Event()
     parking_event = Event()

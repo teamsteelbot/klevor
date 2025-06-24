@@ -1,5 +1,5 @@
 import os
-from multiprocessing import Event, Queue
+from multiprocessing import Event, Queue,Value
 from typing import Optional
 
 from . import SerialCommunication
@@ -21,6 +21,8 @@ def serial_communication_target(
     incoming_messages_queue: Queue,
     outgoing_messages_queue: Queue,
     writer_messages_queue: Queue,
+    bno08x_yaw_deg: Value,
+    bno08x_turns: Value,
     photographer_capture_image_event: Event,
     server_messages_queue: Optional[Queue] = None,
     console_port: Optional[str] = RASPBERRY_PI_PICO_CONSOLE_PORT,
@@ -40,6 +42,8 @@ def serial_communication_target(
         incoming_messages_queue (Queue): Queue to hold incoming messages from the serial port.
         outgoing_messages_queue (Queue): Queue to hold outgoing messages to the serial port.
         writer_messages_queue (Queue): Queue to hold log messages.
+        bno08x_yaw_deg (Value): Shared value for the BNO08X yaw angle in degrees.
+        bno08x_turns (Value): Shared value for the BNO08X turns.
         photographer_capture_image_event (Event): Event to signal when an image should be captured.
         server_messages_queue (Optional[Queue]): Queue to broadcast the messages through the websockets server.
         console_port (Optional[str]): Serial port used for receiving data from Pico.
@@ -61,6 +65,8 @@ def serial_communication_target(
         incoming_messages_queue=incoming_messages_queue,
         outgoing_messages_queue=outgoing_messages_queue,
         writer_messages_queue=writer_messages_queue,
+        bno08x_yaw_deg=bno08x_yaw_deg,
+        bno08x_turns=bno08x_turns,
         photographer_capture_image_event=photographer_capture_image_event,
         server_messages_queue=server_messages_queue,
         console_port=console_port,

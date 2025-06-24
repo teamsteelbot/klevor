@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 
-from .enums import RPLIDAR
 from .message import IncomingMessage, OutgoingMessage
 
 
@@ -67,11 +66,41 @@ class SerialCommunicationABC(ABC):
         Returns:
             OutgoingMessage|None: The message from the outgoing messages queue or None if no message is available.
         """
+        pass
+
+    @abstractmethod
+    def _send_confirmation_message(self) -> None:
+        """
+        Send a confirmation message to the serial port.
+        """
+        pass
+
+    @abstractmethod
+    def _wait_confirmation_message(self, msg_to_confirm: OutgoingMessage) -> None:
+        """
+        Wait for the confirmation message from the serial port.
+
+        Args:
+            msg_to_confirm (OutgoingMessage): The message to confirm.
+        Raises:
+            RuntimeError: If an error message is received instead of a confirmation message or if the confirmation message is not received within a timeout.
+        """
+        pass
+
+    @abstractmethod
+    def _send_stop_message(self) -> None:
+        """
+        Send a stop message to the serial port.
+        """
+        pass
 
     @abstractmethod
     def _receiving_message_handler(self) -> None:
         """
         Handler to receive messages from the serial port.
+
+        Raises:
+            RuntimeError: If an error message is received or if the confirmation message is not received within a timeout.
         """
         pass
 
@@ -116,7 +145,7 @@ class DispatcherABC:
         pass
 
     @abstractmethod
-    def send_motor_speed(self, speed: float) -> None:
+    def send_motor_speed_message(self, speed: float) -> None:
         """
         Send the motor speed to the serial port.
 
@@ -126,11 +155,18 @@ class DispatcherABC:
         pass
 
     @abstractmethod
-    def send_servo_angle(self, angle: float) -> None:
+    def send_servo_angle_message(self, angle: float) -> None:
         """
         Send the servo angle to the serial port.
 
         Args:
             angle (float): The angle of the servo.
+        """
+        pass
+
+    @abstractmethod
+    def send_stop_message(self) -> None:
+        """
+        Send a stop message to the serial port.
         """
         pass

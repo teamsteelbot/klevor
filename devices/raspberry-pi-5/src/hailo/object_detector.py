@@ -214,6 +214,6 @@ class ObjectDetector(ObjectDetectorABC):
         self.__stop_event.set()
 
         # Log
-        self.__logger.info(
+        self.__logger.debug(
             "ObjectDetector instance is being deleted. Resources will be cleaned up."
             )
