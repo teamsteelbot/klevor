@@ -1,5 +1,6 @@
-from machine import Pin
 import time
+
+from machine import Pin
 
 # For Raspberry Pi Pico W, the onboard LED is connected to the wireless chip
 # and is accessed using the string "LED"

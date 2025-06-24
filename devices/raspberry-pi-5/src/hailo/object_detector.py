@@ -216,4 +216,4 @@ class ObjectDetector(ObjectDetectorABC):
         # Log
         self.__logger.debug(
             "ObjectDetector instance is being deleted. Resources will be cleaned up."
-            )
+        )

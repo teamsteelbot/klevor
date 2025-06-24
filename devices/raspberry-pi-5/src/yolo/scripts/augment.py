@@ -14,7 +14,7 @@ from albumentations import (
     ShiftScaleRotate,
 )
 
-from ..args import Args, Flag
+from ..args import Args
 from ..constants import IMAGE_EXTENSIONS, NUM_AUGMENTATIONS
 from ..files import Files
 from ..files.constants import (
@@ -82,7 +82,7 @@ def augment_image(
             ShiftScaleRotate(
                 shift_limit=0.2, scale_limit=0.2, rotate_limit=25,
                 p=0.5
-                ),
+            ),
 
             # Apply with a 30% probability a random RGB shift
             # RGBShift(r_shift_limit=25, g_shift_limit=25, b_shift_limit=25, p=0.3),
@@ -92,7 +92,7 @@ def augment_image(
             RandomCrop(
                 width=int(image.shape[1] * 0.9),
                 height=int(image.shape[0] * 0.9), p=0.3
-                ),
+            ),
         ], bbox_params=BboxParams(format='yolo', label_fields=['class_labels'])
     )
 
@@ -102,7 +102,7 @@ def augment_image(
             transformed = transform(
                 image=image, bboxes=bboxes,
                 class_labels=class_labels
-                )
+            )
             transformed_image = transformed['image']
             transformed_bboxes = transformed['bboxes']
             transformed_class_labels = transformed['class_labels']
@@ -111,7 +111,7 @@ def augment_image(
             output_image_path = os.path.join(
                 output_augmented_images_dir,
                 f"{os.path.splitext(os.path.basename(input_to_process_image_path))[0]}_aug_{i}.jpg"
-                )
+            )
             output_annotations_path = os.path.join(
                 output_augmented_annotations_dir,
                 f"{os.path.splitext(os.path.basename(input_to_process_annotations_path))[0]}_aug_{i}.txt"
@@ -121,7 +121,7 @@ def augment_image(
             cv2.imwrite(
                 output_image_path,
                 cv2.cvtColor(transformed_image, cv2.COLOR_RGB2BGR)
-                )
+            )
 
             # Log the image
             end_time = time()
@@ -151,14 +151,14 @@ def augment_image(
                 Files.move_file(
                     input_to_process_image_path,
                     output_processed_images_dir
-                    )
+                )
 
             # Check if the output_processed_annotations_dir is not None
             if output_processed_annotations_dir:
                 Files.move_file(
                     input_to_process_annotations_path,
                     output_processed_annotations_dir
-                    )
+                )
 
     except Exception as e:
         print(f"Error: {e} for {input_to_process_image_path}")
@@ -183,29 +183,29 @@ def augment_dataset(
     input_to_process_images_dir = os.path.join(
         input_to_process_dir,
         DATASET_IMAGES
-        )
+    )
     input_to_process_annotations_dir = os.path.join(
         input_to_process_dir,
         DATASET_LABELS
-        )
+    )
 
     # Get the output directories
     output_augmented_images_dir = os.path.join(
         output_augmented_dir,
         DATASET_IMAGES
-        )
+    )
     output_augmented_annotations_dir = os.path.join(
         output_augmented_dir,
         DATASET_LABELS
-        )
+    )
     output_processed_images_dir = os.path.join(
         output_processed_dir,
         DATASET_IMAGES
-        )
+    )
     output_processed_annotations_dir = os.path.join(
         output_processed_dir,
         DATASET_LABELS
-        )
+    )
 
     # Check if the output directories exist, if not it creates them
     for io_dir in [input_to_process_dir, input_to_process_images_dir,
@@ -228,7 +228,7 @@ def augment_dataset(
         input_to_process_image_path = os.path.join(
             input_to_process_images_dir,
             image_filename
-            )
+        )
         annotations_filename = os.path.splitext(image_filename)[0] + '.txt'
         input_to_process_annotations_path = os.path.join(
             input_to_process_annotations_dir, annotations_filename
@@ -255,33 +255,30 @@ def augment_dataset(
 
 if __name__ == '__main__':
     parser = ArgumentParser(description='Script to augment YOLO model')
-    Args.add_yolo_input_model_argument(parser)
-    args = Args.parse_args_as_dict(parser)
+    args = Args(parser)
+    args.add_yolo_input_model_argument()
 
     # Get the YOLO input model
-    arg_yolo_input_model = Args.get_attribute_from_args_dict(
-        args,
-        Flag.INPUT_MODEL
-        )
+    arg_yolo_input_model = args.get_yolo_input_model()
 
     # Get the dataset paths
     labeled_to_process_dir = Files.get_dataset_model_dir_path(
         DATASET_LABELED,
         DATASET_TO_PROCESS,
         arg_yolo_input_model
-        )
+    )
     labeled_processed_dir = Files.get_dataset_model_dir_path(
         DATASET_LABELED,
         DATASET_PROCESSED,
         arg_yolo_input_model
-        )
+    )
     augmented_dir = Files.get_dataset_model_dir_path(
         DATASET_AUGMENTED, None,
         arg_yolo_input_model
-        )
+    )
 
     # Augment the dataset
     augment_dataset(
         labeled_to_process_dir, augmented_dir, NUM_AUGMENTATIONS,
         labeled_processed_dir
-        )
+    )

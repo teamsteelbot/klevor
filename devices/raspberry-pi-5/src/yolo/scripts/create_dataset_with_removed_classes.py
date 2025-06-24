@@ -3,7 +3,7 @@ import os
 import shutil
 from argparse import ArgumentParser
 
-from ..args import Args, Flag
+from ..args import Args
 from ..files import Files
 from ..files.constants import (
     DATASET_CLASSES_TXT,
@@ -24,7 +24,7 @@ def create_dataset_with_removed_classes(
     output_to_process_dir: str |
                            os.PathLike[str],
     ignore_classes: list
-    ):
+):
     """
     Create a new dataset with the labeled classes removed.
 
@@ -142,7 +142,7 @@ def create_dataset_with_removed_classes(
         output_label_path = os.path.join(
             output_annotations_dir,
             input_label_name
-            )
+        )
         with open(output_label_path, 'w') as f:
             for line in lines:
                 line_parts = line.split()
@@ -157,34 +157,25 @@ if __name__ == '__main__':
     parser = ArgumentParser(
         description='Script to remove labeled classes from a given YOLO model dataset'
     )
-    Args.add_yolo_input_model_argument(parser)
-    Args.add_yolo_output_model_argument(parser)
-    Args.add_yolo_ignore_classes_argument(parser)
-    args = Args.parse_args_as_dict(parser)
+    args = Args(parser)
+    args.add_yolo_input_model_argument()
+    args.add_yolo_output_model_argument()
+    args.add_yolo_ignore_classes_argument()
 
     # Get the YOLO input model
-    arg_yolo_input_model = Args.get_attribute_from_args_dict(
-        args,
-        Flag.INPUT_MODEL
-        )
+    arg_yolo_input_model = args.get_yolo_input_model()
 
     # Get the YOLO output model
-    arg_yolo_output_model = Args.get_attribute_from_args_dict(
-        args,
-        Flag.OUTPUT_MODEL
-        )
+    arg_yolo_output_model = args.get_yolo_output_model()
 
     # Get the YOLO ignore classes
-    arg_yolo_ignore_classes = Args.get_attribute_from_args_dict(
-        args,
-        Flag.IGNORE_CLASSES
-        )
+    arg_yolo_ignore_classes = args.get_yolo_ignore_classes()
 
     # Get the dataset paths
     input_labeled_dir = Files.get_dataset_model_dir_path(
         DATASET_LABELED, None,
         arg_yolo_input_model
-        )
+    )
     input_labeled_to_process_dir = Files.get_dataset_model_dir_path(
         DATASET_LABELED, DATASET_TO_PROCESS,
         arg_yolo_input_model
@@ -192,7 +183,7 @@ if __name__ == '__main__':
     output_labeled_dir = Files.get_dataset_model_dir_path(
         DATASET_LABELED, None,
         arg_yolo_output_model
-        )
+    )
     output_labeled_to_process_dir = Files.get_dataset_model_dir_path(
         DATASET_LABELED, DATASET_TO_PROCESS,
         arg_yolo_output_model
@@ -205,4 +196,4 @@ if __name__ == '__main__':
         output_labeled_dir,
         output_labeled_to_process_dir,
         arg_yolo_ignore_classes
-        )
+    )

@@ -22,7 +22,7 @@ class StreamingServer(BaseHTTPRequestHandler):
             shlex.split(command), stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             bufsize=-1
-            )
+        )
 
         try:
             while True:
@@ -72,7 +72,7 @@ class StreamingServer(BaseHTTPRequestHandler):
             self.send_header(
                 'Content-type',
                 'multipart/x-mixed-replace; boundary=frame'
-                )
+            )
             self.end_headers()
             try:
                 # Start generating frames

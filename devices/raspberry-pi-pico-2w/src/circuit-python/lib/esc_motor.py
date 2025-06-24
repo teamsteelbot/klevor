@@ -52,7 +52,7 @@ class ESCMotorHandler:
         self, motor_pin: int = MOTOR_PIN, frequency: int = PWM_FREQUENCY,
         min_pulse: int = MIN_PULSE, max_pulse: int = MAX_PULSE,
         movement: bool = True
-        ):
+    ):
         """
         Initializes the ESC motor handler with the specified parameters.
 
@@ -69,7 +69,7 @@ class ESCMotorHandler:
             self.__esc_pwm,
             min_pulse=min_pulse,
             max_pulse=max_pulse
-            )
+        )
 
         # Set the movement flag
         self.__movement = movement
@@ -92,7 +92,7 @@ class ESCMotorHandler:
         if not (0 < speed <= cls.SPEED_RANGE[1]):
             raise ESCMotorError(
                 f"Speed must be between 0 and {cls.SPEED_RANGE[1]}"
-                )
+            )
 
     @classmethod
     def _check_speed_full_range(cls, speed: float):
@@ -108,7 +108,7 @@ class ESCMotorHandler:
         if not (cls.SPEED_RANGE[0] <= speed <= cls.SPEED_RANGE[1]):
             raise ESCMotorError(
                 f"Speed must be between {cls.SPEED_RANGE[0]} and {cls.SPEED_RANGE[1]}"
-                )
+            )
 
     @property
     def speed(self) -> float:

@@ -40,29 +40,29 @@ class SerialCommunication:
     START_MESSAGE = OutgoingMessage(
         OutgoingCategory.STATUS,
         Status.START.get_name()
-        )
+    )
     STOP_MESSAGE = IncomingMessage(
         OutgoingCategory.STATUS,
         Status.STOP.get_name()
-        )
+    )
     INCOMING_OK_MESSAGE = IncomingMessage(
         IncomingCategory.STATUS,
         Status.OK.get_name()
-        )
+    )
     OUTGOING_OK_MESSAGE = OutgoingMessage(
         OutgoingCategory.STATUS,
         Status.OK.get_name()
-        )
+    )
 
     # Challenge messages
     CHALLENGE_WITH_OBSTACLES = OutgoingMessage(
         OutgoingCategory.CHALLENGE,
         Challenge.WITH_OBSTACLES.get_challenge_name()
-        )
+    )
     CHALLENGE_WITHOUT_OBSTACLES = OutgoingMessage(
         OutgoingCategory.CHALLENGE,
         Challenge.WITHOUT_OBSTACLES.get_challenge_name()
-        )
+    )
 
     # Confirmation timeout
     CONFIRMATION_TIMEOUT = 5.0
@@ -73,7 +73,7 @@ class SerialCommunication:
         data_port_enabled: bool = DATA_PORT_ENABLED,
         challenge: Challenge = Challenge.WITHOUT_OBSTACLES,
         led: LEDHandler = None
-        ):
+    ):
         """
         Initialize the SerialCommunication instance.
 
@@ -123,7 +123,7 @@ class SerialCommunication:
             except ValueError as e:
                 raise SerialCommunicationError(
                     f"Invalid message format: {msg_str}"
-                    ) from e
+                ) from e
 
         return msgs
 
@@ -155,7 +155,7 @@ class SerialCommunication:
         self,
         msg_to_confirm: OutgoingMessage,
         timeout: float = CONFIRMATION_TIMEOUT
-        ) -> None:
+    ) -> None:
         """
         Wait for a confirmation message from the console port.
 
@@ -174,7 +174,7 @@ class SerialCommunication:
 
         raise SerialCommunicationError(
             f"Confirmation message '{msg_to_confirm}' not received within {timeout} seconds."
-            )
+        )
 
     async def send_challenge_message(self):
         """
@@ -210,7 +210,7 @@ class SerialCommunication:
         bno08x_message = OutgoingMessage(
             OutgoingCategory.BNO08X_TURNS,
             str(turns)
-            )
+        )
         self.send_message(bno08x_message)
 
     def send_error_message(self, error: Exception):

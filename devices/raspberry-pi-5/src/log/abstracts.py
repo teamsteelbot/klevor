@@ -101,7 +101,7 @@ class WriterABC(ABC):
                     f"Invalid message type: {type(msg)}. Expected Message.",
                     Category.ERROR
                 )
-                )
+            )
             return
 
         # Write the message to the log file

@@ -44,7 +44,7 @@ class Plot:
         cv2.putText(
             image, label, (xmin + 4, ymin + 20), FONT, 0.5, color, 1,
             cv2.LINE_AA
-            )
+        )
 
     @staticmethod
     def denormalize_and_remove_padding(
@@ -187,13 +187,13 @@ class Plot:
                 cv2.rectangle(
                     image_with_detections, (x1, y1), (x2, y2), color,
                     thickness
-                    )
+                )
                 cv2.putText(
                     image_with_detections, class_name,
                     (x1 + font_x_diff, y1 + font_y_diff), font,
                     font_scale,
                     color, thickness
-                    )
+                )
 
         else:
             for i in range(n):
@@ -203,13 +203,13 @@ class Plot:
                 cv2.rectangle(
                     image_with_detections, (x1, y1), (x2, y2), color,
                     thickness
-                    )
+                )
                 cv2.putText(
                     image_with_detections, str(class_number),
                     (x1 + font_x_diff, y1 + font_y_diff), font,
                     font_scale, color,
                     thickness
-                    )
+                )
 
         # Convert the image back to HWC format
         plt.subplot(1, 2, 2)

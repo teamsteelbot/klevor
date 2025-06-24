@@ -1,3 +1,4 @@
 # Diagramas
 
-Esta carpeta contiene todos los diagramas correspondientes al desarrollo de Klevor.
+Esta carpeta contiene todos los diagramas correspondientes al desarrollo de
+Klevor.

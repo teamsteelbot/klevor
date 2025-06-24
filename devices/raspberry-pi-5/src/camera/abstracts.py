@@ -63,7 +63,7 @@ class CameraABC(ABC):
     def record_video(
         self, width: int, height: int, duration: int,
         file_path: str, encoder
-        ) -> None:
+    ) -> None:
         """
         Record a video with the camera.
 

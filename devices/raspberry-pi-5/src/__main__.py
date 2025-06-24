@@ -1,27 +1,26 @@
 import argparse
 
 from .args import Args
-from .args.enums import Flag
-from .spawner import Spawner
 from .env import Env
+from .spawner import Spawner
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Klevor - WRO 2025 - Future Engineers Car"
     )
-    Args.add_yolo_version_argument(parser)
-    Args.add_debug_argument(parser)
-    Args.add_movement_argument(parser)
-    args = Args.parse_args_as_dict(parser)
+    args = Args(parser)
+    args.add_yolo_version_argument()
+    args.add_debug_argument()
+    args.add_movement_argument()
 
     # Get the YOLO version
-    arg_yolo_version = Args.get_attribute_from_args_dict(args, Flag.VERSION)
+    arg_yolo_version = args.get_yolo_version()
 
     # Get the debug mode
-    arg_debug = Args.get_attribute_from_args_dict(args, Flag.DEBUG)
+    arg_debug = args.get_debug()
 
     # Get the movement flag
-    arg_movement = Args.get_attribute_from_args_dict(args, Flag.MOVEMENT)
+    arg_movement = args.get_movement()
 
     # Set the debug mode and YOLO version as environment variables
     Env.set_yolo_version(arg_yolo_version)

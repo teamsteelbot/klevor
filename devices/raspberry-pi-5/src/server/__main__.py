@@ -17,7 +17,7 @@ if __name__ == "__main__":
     writer_process = Process(
         target=writer_target, args=(
             writer_messages_queue, writer_stop_event)
-        )
+    )
     writer_process.start()
 
     # Create an instance of Logger
@@ -28,7 +28,7 @@ if __name__ == "__main__":
         target=websocket_server_target, args=(
             server_messages_queue, parking_event, stop_event,
             writer_messages_queue)
-        )
+    )
     server_process.start()
 
     try:

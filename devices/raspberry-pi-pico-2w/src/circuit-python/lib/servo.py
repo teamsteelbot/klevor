@@ -53,7 +53,7 @@ class ServoHandler:
         self, servo_pin: int = SERVO_PIN, frequency: int = PWM_FREQUENCY,
         min_pulse: int = MIN_PULSE, max_pulse: int = MAX_PULSE,
         actuation_range: int = ACTUATION_RANGE, movement: bool = True
-        ):
+    ):
         """
         Initializes the servo handler with the specified parameters.
 
@@ -70,7 +70,7 @@ class ServoHandler:
         self.__servo_motor = Servo(
             self.__servo_pwm, actuation_range=actuation_range,
             min_pulse=min_pulse, max_pulse=max_pulse
-            )
+        )
 
         # Set the movement flag
         self.__movement = movement
@@ -93,7 +93,7 @@ class ServoHandler:
         if not 0 <= angle <= ServoHandler.ACTUATION_RANGE:
             raise ServoError(
                 f"Angle must be between 0 and {ServoHandler.ACTUATION_RANGE} degrees"
-                )
+            )
 
     @property
     def angle(self) -> int:
@@ -138,11 +138,11 @@ class ServoHandler:
         if not self.LEFT_LIMIT <= relative_angle * self.ANGLE_FACTOR <= self.RIGHT_LIMIT:
             raise ServoError(
                 f"Relative angle must be between {self.LEFT_LIMIT} and {self.RIGHT_LIMIT} degrees"
-                )
+            )
 
         await self.set_angle(
             self.CENTER_ANGLE + relative_angle * self.ANGLE_FACTOR
-            )
+        )
 
     async def center(self):
         """
@@ -163,7 +163,7 @@ class ServoHandler:
         if not 0 < angle <= self.RIGHT_LIMIT:
             raise ServoError(
                 f"Angle must be between 0 and {self.RIGHT_LIMIT} degrees for right movement"
-                )
+            )
 
         await self.set_angle(self.CENTER_ANGLE + angle * self.ANGLE_FACTOR)
 
@@ -180,7 +180,7 @@ class ServoHandler:
         if not 0 < angle <= abs(self.LEFT_LIMIT):
             raise ServoError(
                 f"Angle must be between 0 and {abs(self.LEFT_LIMIT)} degrees for left movement"
-                )
+            )
 
         await self.set_angle(self.CENTER_ANGLE - angle * self.ANGLE_FACTOR)
 

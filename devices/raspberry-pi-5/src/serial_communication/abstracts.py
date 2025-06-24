@@ -79,7 +79,7 @@ class SerialCommunicationABC(ABC):
     def _wait_confirmation_message(
         self,
         msg_to_confirm: OutgoingMessage
-        ) -> None:
+    ) -> None:
         """
         Wait for the confirmation message from the serial port.
 

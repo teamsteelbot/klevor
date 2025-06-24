@@ -131,7 +131,7 @@ class Pilot(PilotABC):
         if self.__movement:
             self.__serial_dispatcher.send_motor_speed_message(
                 self.__motor_speed
-                )
+            )
 
         # Log
         self.__logger.info(f"Set motor speed to: {speed}")
@@ -166,7 +166,7 @@ class Pilot(PilotABC):
         if self.__movement:
             self.__serial_dispatcher.send_servo_angle_message(
                 self.__servo_angle
-                )
+            )
 
         # Log
         self.__logger.info(f"Set servo angle to: {angle}deg")

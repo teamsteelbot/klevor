@@ -24,7 +24,7 @@ class Dispatcher(DispatcherABC):
     def __init__(
         self, server_messages_queue: Queue,
         writer_messages_queue: Queue
-        ):
+    ):
         """
         Initializes the Dispatcher class.
 
@@ -39,7 +39,7 @@ class Dispatcher(DispatcherABC):
         self.__logger = Logger(
             writer_messages_queue, self.LOGGER_TAG,
             unique_tag=True
-            )
+        )
 
     @final
     def _broadcast_message(self, msg: Message):

@@ -2,7 +2,7 @@ import os
 import shutil
 from argparse import ArgumentParser
 
-from ..args import Args, Flag
+from ..args import Args
 from ..files import Files
 from ..files.constants import (
     DATASET_IMAGES,
@@ -32,13 +32,13 @@ def after_training(
     input_training_images_path = os.path.join(
         input_dir, DATASET_TRAINING,
         DATASET_IMAGES
-        )
+    )
     output_training_path = os.path.join(hailo_suite_dir, DATASET_TRAINING)
     if os.path.exists(input_training_images_path):
         Files.move_folder_content(
             input_training_images_path,
             output_training_path
-            )
+        )
         print(
             f'Moved {DATASET_TRAINING} folder from {input_dir} folder to {output_training_path} folder'
         )
@@ -69,24 +69,21 @@ if __name__ == '__main__':
     parser = ArgumentParser(
         description='Script to removed the unnecessary files and prepare the dataset for Hailo'
     )
-    Args.add_yolo_input_model_argument(parser)
-    Args.add_yolo_version_argument(parser)
-    args = Args.parse_args_as_dict(parser)
+    args = Args(parser)
+    args.add_yolo_input_model_argument()
+    args.add_yolo_version_argument()
 
     # Get the YOLO input model
-    arg_yolo_input_model = Args.get_attribute_from_args_dict(
-        args,
-        Flag.INPUT_MODEL
-        )
+    arg_yolo_input_model = args.get_yolo_input_model()
 
     # Get the YOLO version
-    arg_yolo_version = Args.get_attribute_from_args_dict(args, Flag.VERSION)
+    arg_yolo_version = args.get_yolo_version()
 
     # Get the dataset paths
     organized_dir = Files.get_dataset_model_dir_path(
         DATASET_ORGANIZED, None,
         arg_yolo_input_model
-        )
+    )
 
     # Get the model Hailo Suite path
     model_hailo_suite_dir = Files.get_model_hailo_suite_dir_path(
@@ -102,4 +99,4 @@ if __name__ == '__main__':
     after_training(
         organized_dir, HAILO_SUITE_DIR, model_hailo_suite_dir,
         best_onnx_weights_path
-        )
+    )

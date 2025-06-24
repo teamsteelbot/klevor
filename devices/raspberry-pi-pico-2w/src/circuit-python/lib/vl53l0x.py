@@ -44,7 +44,7 @@ class VL53L0XHandler:
         self,
         i2c: I2C = I2C(I2C_SCL_PIN, I2C_SDA_PIN),
         xshut_pins: tuple = XSHUT_PINS
-        ):
+    ):
         """
         Initializes the VL53L0XHandler with default settings.
 
@@ -85,7 +85,7 @@ class VL53L0XHandler:
             except ValueError as e:
                 raise VL53L0XError(
                     f"Failed to initialize sensor on pin {pin}: {e}"
-                    )
+                )
 
     async def multiple_tof_sensors_reading(self):
         """
@@ -113,4 +113,4 @@ class VL53L0XHandler:
             except Exception as e:
                 raise VL53L0XError(
                     f"Error reading sensor on pin {self.__xshut[i].pin}: {e}"
-                    )
+                )

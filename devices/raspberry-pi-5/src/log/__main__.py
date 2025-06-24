@@ -13,7 +13,7 @@ if __name__ == "__main__":
     writer_process = Process(
         target=writer_target, args=(
             writer_messages_queue, stop_event)
-        )
+    )
     writer_process.start()
 
     # Create an instance of Logger

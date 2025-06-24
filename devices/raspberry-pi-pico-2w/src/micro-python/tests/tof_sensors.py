@@ -1,10 +1,16 @@
-from machine import Pin, I2C
 import time
+
+from machine import I2C, Pin
 from vl53l0x import VL53L0X
 
 # Define I2C buses
 i2c0 = I2C(0, scl=Pin(1), sda=Pin(0), freq=100000)
-i2c1 = I2C(1, scl=Pin(3), sda=Pin(2), freq=100000)  # Using default pins for I2C1
+i2c1 = I2C(
+    1,
+    scl=Pin(3),
+    sda=Pin(2),
+    freq=100000
+    )  # Using default pins for I2C1
 
 # Define XSHUT pins for the six sensors
 xshut_pins = [
@@ -16,6 +22,7 @@ xshut_pins = [
     Pin(9, Pin.OUT, value=0),  # Sensor 6 (I2C1)
 ]
 
+
 # Function to initialize a VL53L0X sensor with a given I2C bus, XSHUT pin, and new address
 def initialize_sensor(i2c_bus, xshut_pin, new_address):
     xshut_pin.value(0)
@@ -25,6 +32,7 @@ def initialize_sensor(i2c_bus, xshut_pin, new_address):
     sensor = VL53L0X(i2c_bus)
     sensor.set_address(new_address)
     return sensor
+
 
 # Initialize sensors on I2C0
 sensor1 = initialize_sensor(i2c0, xshut_pins[0], 0x2A)
@@ -77,8 +85,24 @@ try:
         sensor5.stop_ranging()
         sensor6.stop_ranging()
 
-        print("I2C0 - Sensor 1:", dist1, "mm, Sensor 2:", dist2, "mm, Sensor 3:", dist3, "mm")
-        print("I2C1 - Sensor 4:", dist4, "mm, Sensor 5:", dist5, "mm, Sensor 6:", dist6, "mm")
+        print(
+            "I2C0 - Sensor 1:",
+            dist1,
+            "mm, Sensor 2:",
+            dist2,
+            "mm, Sensor 3:",
+            dist3,
+            "mm"
+            )
+        print(
+            "I2C1 - Sensor 4:",
+            dist4,
+            "mm, Sensor 5:",
+            dist5,
+            "mm, Sensor 6:",
+            dist6,
+            "mm"
+            )
         time.sleep(1)
 
 except KeyboardInterrupt:
@@ -90,4 +114,3 @@ finally:
     sensor4.stop_ranging()
     sensor5.stop_ranging()
     sensor6.stop_ranging()
-    

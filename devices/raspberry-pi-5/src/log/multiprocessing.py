@@ -20,7 +20,7 @@ def writer_target(
     print(
         "Initializing Writer in multiprocessing mode. Process ID: ",
         os.getpid()
-        )
+    )
 
     # Initialize the writer
     writer = Writer(

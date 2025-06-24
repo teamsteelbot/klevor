@@ -22,7 +22,7 @@ class WithoutObstacles:
         servo: ServoHandler,
         motor: ESCMotorHandler,
         serial_communication: SerialCommunication
-        ):
+    ):
         """
         Initialize the WithoutObstacles class with the necessary handlers.
 
@@ -52,10 +52,10 @@ class WithoutObstacles:
             # Create the update quaternion and receive serial messages tasks
             update_quaternion_task = create_task(
                 self.__bno08x.update_quaternion()
-                )
+            )
             receive_serial_task = create_task(
                 self.__serial_communication.receive_messages()
-                )
+            )
 
             # Wait for the tasks to complete
             results = await gather(update_quaternion_task, receive_serial_task)
@@ -106,12 +106,12 @@ class WithoutObstacles:
                 if motor_speed is not None:
                     tasks.append(
                         create_task(self.__motor.set_speed(motor_speed))
-                        )
+                    )
 
                 if servo_angle is not None:
                     tasks.append(
                         create_task(self.__servo.set_angle(servo_angle))
-                        )
+                    )
 
             # Gather the tasks and wait for them to complete
             await gather(*tasks) if tasks else None
@@ -132,7 +132,7 @@ class WithObstacles:
         servo: ServoHandler,
         motor: ESCMotorHandler,
         serial_communication: SerialCommunication
-        ):
+    ):
         """
         Initialize the WithObstacles class with the necessary handlers.
 

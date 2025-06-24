@@ -124,7 +124,7 @@ class ImageBoundingBoxes:
         return ImageBoundingBoxes(
             n=num_detections, xyxy=boxes, cls=classes,
             conf=scores
-            )
+        )
 
     def get_number_of_objects(self) -> int:
         """

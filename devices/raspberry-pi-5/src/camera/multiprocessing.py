@@ -33,7 +33,7 @@ def photographer_target(
     print(
         "Initializing Photographer in multiprocessing mode. Process ID: ",
         os.getpid()
-        )
+    )
 
     # Initialize the camera
     camera = Camera(writer_messages_queue=writer_messages_queue)

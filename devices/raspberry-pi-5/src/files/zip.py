@@ -74,14 +74,14 @@ class Zip:
         cls.zip_files(
             zipf, filenames, input_folder_path, input_base_path,
             ignore_filenames_regex
-            )
+        )
 
         # Log
         if debug:
             input_folder_rel_path = os.path.relpath(
                 input_folder_path,
                 input_base_path
-                )
+            )
             print(f'Zipped folder: {input_folder_rel_path}')
 
     @classmethod
@@ -123,14 +123,14 @@ class Zip:
             cls.zip_files(
                 zipf, filenames, root, input_base_path,
                 ignore_filenames_regex
-                )
+            )
 
         # Log
         if debug:
             input_folder_rel_path = os.path.relpath(
                 input_folder_path,
                 input_base_path
-                )
+            )
             print(f'Zipped folder: {input_folder_rel_path}')
 
     @staticmethod

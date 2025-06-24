@@ -1,18 +1,18 @@
 import os
 from argparse import ArgumentParser
 
-from ..args import Args, Flag
+from ..args import Args
 from ..files import Files
 
 if __name__ == '__main__':
     parser = ArgumentParser(
         description='Script to move YOLO model runs folder to old runs folder'
     )
-    Args.add_yolo_version_argument(parser)
-    args = Args.parse_args_as_dict(parser)
+    args = Args(parser)
+    args.add_yolo_version_argument()
 
     # Get the YOLO version
-    arg_yolo_version = Args.get_attribute_from_args_dict(args, Flag.VERSION)
+    arg_yolo_version = args.get_yolo_version()
 
     # Get the runs folder path
     yolo_runs_dir = Files.get_yolo_runs_dir_path(arg_yolo_version)

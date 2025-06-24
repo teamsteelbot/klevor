@@ -29,7 +29,7 @@ def websocket_server_target(
     print(
         "Initializing WebSocketServer in multiprocessing mode. Process ID: ",
         os.getpid()
-        )
+    )
 
     # Initialize the websocket server
     server = WebSocketServer(

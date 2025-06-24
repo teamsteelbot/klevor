@@ -24,7 +24,7 @@ try:
         for address in found_devices:
             print(
                 f"  - 0x{address:x}"
-                )  # Print the address in hexadecimal format
+            )  # Print the address in hexadecimal format
 
 finally:
     i2c.unlock()

@@ -67,7 +67,7 @@ class Photographer(PhotographerABC):
         self.__dispatcher = Dispatcher(
             server_messages_queue,
             writer_messages_queue
-            ) if server_messages_queue else None
+        ) if server_messages_queue else None
 
         # Initialize the image counter
         self.__imager_counter = 0

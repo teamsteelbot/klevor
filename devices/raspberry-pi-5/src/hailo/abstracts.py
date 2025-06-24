@@ -42,13 +42,13 @@ class HailoABC(ABC):
         image = cv2.resize(
             image, (new_img_width, new_img_height),
             interpolation=cv2.INTER_CUBIC
-            )
+        )
 
         # Calculate padding and create padded image
         padded_image = np.full(
             (height, width, 3), PADDING_COLOR,
             dtype=np.uint8
-            )
+        )
         x_offset = (height - new_img_width) // 2
         y_offset = (height - new_img_height) // 2
         padded_image[y_offset:y_offset + new_img_height,

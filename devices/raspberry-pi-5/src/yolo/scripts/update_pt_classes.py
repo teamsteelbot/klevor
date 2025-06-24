@@ -2,7 +2,7 @@ from argparse import ArgumentParser
 
 import torch
 
-from ..args import Args, Flag
+from ..args import Args
 from ..files import Files
 
 
@@ -37,22 +37,19 @@ def update_classes(model_name: str, model_version: str, new_classes: list[str]):
 
 if __name__ == "__main__":
     parser = ArgumentParser(description='Script to update YOLO model classes')
-    Args.add_yolo_input_model_argument(parser)
-    Args.add_yolo_version_argument(parser)
-    Args.add_yolo_classes_argument(parser)
-    args = Args.parse_args_as_dict(parser)
+    args = Args(parser)
+    args.add_yolo_input_model_argument()
+    args.add_yolo_version_argument()
+    args.add_yolo_classes_argument()
 
     # Get the YOLO input model
-    arg_yolo_input_model = Args.get_attribute_from_args_dict(
-        args,
-        Flag.INPUT_MODEL
-        )
+    arg_yolo_input_model = args.get_yolo_input_model()
 
     # Get the YOLO version
-    arg_yolo_version = Args.get_attribute_from_args_dict(args, Flag.VERSION)
+    arg_yolo_version = args.get_yolo_version()
 
     # Get the YOLO classes
-    arg_yolo_classes = Args.get_attribute_from_args_dict(args, Flag.CLASSES)
+    arg_yolo_classes = args.get_yolo_classes()
 
     # Update the classes
     update_classes(arg_yolo_input_model, arg_yolo_version, arg_yolo_classes)

@@ -3,7 +3,7 @@ from multiprocessing import Event, Process, Queue
 from time import sleep
 
 from .multiprocessing import rplidar_target
-from ..args import Args, Flag
+from ..args import Args
 from ..log import Logger
 from ..log.multiprocessing import writer_target
 from ..server.multiprocessing import websocket_server_target
@@ -12,11 +12,11 @@ if __name__ == "__main__":
     parser = ArgumentParser(
         description="Script to test the RPLidar functionality and start it."
     )
-    Args.add_server_argument(parser)
-    args = Args.parse_args_as_dict(parser)
+    args = Args(parser)
+    args.add_server_argument()
 
     # Get the server argument
-    arg_server = Args.get_attribute_from_args_dict(args, Flag.SERVER)
+    arg_server = args.get_server()
 
     # Create the required queues and events
     writer_messages_queue = Queue()

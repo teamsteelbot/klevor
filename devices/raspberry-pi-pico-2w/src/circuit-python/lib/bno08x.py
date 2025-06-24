@@ -268,7 +268,7 @@ class BNO08XHandler:
         # Get the current gyroscope values in degrees
         self.__gyro_x_deg, self.__gyro_y_deg, self.__gyro_z_deg = BNO08XHandler.gyro_to_degrees(
             *self.__gyro
-            )
+        )
 
     async def __read_quaternion(self):
         """
@@ -289,7 +289,7 @@ class BNO08XHandler:
         # Get the current roll, pitch, and yaw in degrees
         self.__roll_deg, self.__pitch_deg, self.__yaw_deg = BNO08XHandler.quaternion_to_euler_degrees(
             *self.__quaternion
-            )
+        )
 
         # If serial communication is enabled, send the yaw message
         self.__serial_communication.send_bno08x_yaw_message(self.__yaw_deg)
@@ -318,7 +318,7 @@ class BNO08XHandler:
             # If serial communication is enabled, send the turn message
             self.__serial_communication.send_bno08x_turns_message(
                 self.__accumulated_90_deg_turns
-                )
+            )
 
         self.__last_yaw_deg = relative_yaw
 

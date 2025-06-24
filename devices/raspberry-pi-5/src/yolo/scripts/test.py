@@ -7,7 +7,7 @@ import torch
 from ultralytics import YOLO
 
 from .. import Yolo
-from ..args import Args, Flag
+from ..args import Args
 from ..constants import FORMAT_PT, NUMBER_RANDOM_IMAGES
 from ..files import Files
 from ..files.constants import (
@@ -29,7 +29,7 @@ def test_random_images(
     draw_labels_name: bool,
     rgb_colors: Optional[tuple[tuple[int, int, int]]] = None,
     image_size: tuple[int, int] = SIZE
-    ) -> None:
+) -> None:
     """
     Test random images from the given directory.
 
@@ -46,7 +46,7 @@ def test_random_images(
     input_images_testing_dir = os.path.join(
         input_organized_dir,
         DATASET_TESTING, DATASET_IMAGES
-        )
+    )
 
     # Get some random images
     filenames = os.listdir(input_images_testing_dir)
@@ -57,14 +57,14 @@ def test_random_images(
         input_image_path = os.path.join(
             input_images_testing_dir,
             random_filename
-            )
+        )
         print(f'Testing {input_image_path}')
 
         # Get the image
-        original_image, preprocessed_image = OpenCV.preprocess(
+        original_image, preprocessed_image = OpenCV.load_and_preprocess_image(
             input_image_path,
             image_size
-            )
+        )
 
         # Run inference
         input_data = run_inference_fn(model, preprocessed_image)
@@ -79,7 +79,7 @@ def test_random_images(
             image_bounding_boxes,
             draw_labels_name=draw_labels_name,
             rgb_colors=rgb_colors
-            )
+        )
 
 
 def test_random_images_pt(
@@ -87,7 +87,7 @@ def test_random_images_pt(
     output_organized_dir: str | os.PathLike[str],
     colors: Optional[tuple[tuple[int, int, int]]],
     image_size: tuple[int, int] = SIZE
-    ) -> None:
+) -> None:
     """
     Test random images from the given directory using the given PyTorch model.
 
@@ -103,41 +103,38 @@ def test_random_images_pt(
         model, model_class_names, Yolo.run_inference,
         output_organized_dir, False, colors,
         image_size=image_size
-        )
+    )
 
 
 if __name__ == '__main__':
     parser = ArgumentParser(
         description='Script to test YOLO model with a given format'
     )
-    Args.add_yolo_input_model_argument(parser)
-    Args.add_yolo_format_argument(parser)
-    Args.add_yolo_version_argument(parser)
-    args = Args.parse_args_as_dict(parser)
+    args = Args(parser)
+    args.add_yolo_input_model_argument()
+    args.add_yolo_format_argument()
+    args.add_yolo_version_argument()
 
     # Get the YOLO input model
-    arg_yolo_input_model = Args.get_attribute_from_args_dict(
-        args,
-        Flag.INPUT_MODEL
-        )
+    arg_yolo_input_model = args.get_yolo_input_model()
 
     # Get the YOLO format
-    arg_yolo_format = Args.get_attribute_from_args_dict(args, Flag.FORMAT)
+    arg_yolo_format = args.get_yolo_format()
 
     # Get the YOLO version
-    arg_yolo_version = Args.get_attribute_from_args_dict(args, Flag.VERSION)
+    arg_yolo_version = args.get_yolo_version()
 
     # Get the required dataset folder name
     organized_dir = Files.get_dataset_model_dir_path(
         DATASET_ORGANIZED, None,
         arg_yolo_input_model
-        )
+    )
 
     # Get the dataset paths
     weights_best_pt = Files.get_model_best_pt_path(
         arg_yolo_input_model,
         arg_yolo_version
-        )
+    )
 
     # Get the class colors
     yolo_colors = None

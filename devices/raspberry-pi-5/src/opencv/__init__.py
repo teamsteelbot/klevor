@@ -3,9 +3,9 @@ import random
 import time
 from typing import Optional
 
-from PIL.Image import Image
 import cv2
 import numpy as np
+from PIL.Image import Image
 
 from .constants import COLOR, MAX_CALIB_SET_SAMPLES, SHAPE
 from ..args import Args
@@ -169,7 +169,7 @@ class OpenCV:
         # Load the image
         original_image = cls.load_image(
             image_path, image_size, to_rgb, interpolation
-            )
+        )
 
         # Resize the image and convert it to RGB
         return cls.preprocess(original_image)
@@ -229,13 +229,13 @@ class OpenCV:
                 image = cls.load_image(
                     image_path, new_image_size,
                     interpolation=interpolation
-                    )
+                )
 
                 # Write back the image
                 output_path = os.path.join(
                     output_resized_to_process_dir,
                     filename
-                    )
+                )
                 cv2.imwrite(output_path, image)
 
                 # End timing
@@ -254,8 +254,8 @@ class OpenCV:
                         os.path.join(
                             output_processed_dir,
                             filename
-                            )
                         )
+                    )
 
     @classmethod
     def preprocess_images_to_npy(
@@ -296,7 +296,7 @@ class OpenCV:
             image = cls.load_image(
                 image_path, image_size=(w, h), to_rgb=True,
                 interpolation=cv2.INTER_LINEAR
-                )
+            )
 
             # Add the preprocessed image to the array
             images_array[counter] = image

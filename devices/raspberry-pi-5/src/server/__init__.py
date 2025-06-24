@@ -32,7 +32,7 @@ class WebSocketServer(WebSocketServerABC):
         self, messages_queue: Queue, parking_event: Event,
         stop_event: Event, writer_messages_queue: Queue,
         host: str = HOST, port: int = PORT
-        ):
+    ):
         """
         Initializes the WebSocket server with the specified host and port.
 
@@ -81,8 +81,8 @@ class WebSocketServer(WebSocketServerABC):
             connection, Message(
                 Tag.CONNECTION_STATUS,
                 "Connected to WebsocketServer"
-                )
             )
+        )
 
         try:
             while not self.__stop_event.is_set():
@@ -120,8 +120,8 @@ class WebSocketServer(WebSocketServerABC):
                         Message(
                             Tag.UNKNOWN_TAG,
                             "Unknown message type received."
-                            )
                         )
+                    )
                     continue
 
                 # Broadcast the received message to all connected clients
@@ -244,7 +244,7 @@ class WebSocketServer(WebSocketServerABC):
             await asyncio.get_running_loop().run_in_executor(
                 None,
                 self.__stop_event.wait
-                )
+            )
 
         # Wait for the broadcast thread to finish
         self.__broadcast_thread.join()
@@ -275,4 +275,4 @@ class WebSocketServer(WebSocketServerABC):
         # Log
         self.__logger.debug(
             "WebSocket server instance is being deleted. Resources will be cleaned up."
-            )
+        )

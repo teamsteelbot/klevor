@@ -75,7 +75,7 @@ class WifiHandler:
         if not self.__ipv4_address:
             raise WifiError(
                 "Failed to connect to Wi-Fi after multiple attempts."
-                )
+            )
 
     def create_socket(self):
         """
@@ -84,7 +84,7 @@ class WifiHandler:
         if not self.__ipv4_address:
             raise WifiError(
                 "Wi-Fi is not connected. Cannot create socket pool."
-                )
+            )
 
         try:
             self.__pool = SocketPool(radio)
@@ -99,13 +99,13 @@ class WifiHandler:
         if not self.__pool:
             raise WifiError(
                 "Socket pool is not available. Cannot create UDP socket."
-                )
+            )
 
         try:
             self.__udp_socket = self.__pool.socket(
                 self.__pool.AF_INET,
                 self.__pool.SOCK_DGRAM
-                )
+            )
             self.__udp_socket.setblocking(False)
 
         except Exception as e:
@@ -118,7 +118,7 @@ class WifiHandler:
         if not self.__udp_socket:
             raise WifiError(
                 "UDP socket is not available. Cannot close UDP socket."
-                )
+            )
 
         try:
             self.__udp_socket.close()
@@ -131,7 +131,7 @@ class WifiHandler:
         message: str,
         target_ip: str = TARGET_IP,
         target_port: int = TARGET_PORT
-        ):
+    ):
         """
         Send message over UDP
 
@@ -147,14 +147,14 @@ class WifiHandler:
         if not target_ip or not target_port:
             raise WifiError(
                 "Target host or port is not set. Cannot send message."
-                )
+            )
         ip_address(target_ip)
 
         try:
             self.__udp_socket.sendto(
                 message.encode('utf-8'),
                 (target_ip, target_port)
-                )
+            )
 
         except OSError as e:
             print(f"Error sending message: {e}")

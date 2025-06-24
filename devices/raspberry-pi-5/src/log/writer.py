@@ -87,14 +87,14 @@ class Writer(WriterABC):
                 Message(
                     f"Log file opened at {self.__file_path}.",
                     Category.DEBUG
-                    )
                 )
+            )
 
             # Main loop to write messages to the log file
             self._write(
                 self.__file,
                 Message("Writer's starting...", Category.DEBUG)
-                )
+            )
             while not self.__stop_event.is_set():
                 # Write the last message if available
                 self._write_last_message()

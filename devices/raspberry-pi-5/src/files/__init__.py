@@ -270,7 +270,7 @@ class Files:
         model_hailo_suite_dir = cls.get_model_hailo_suite_dir_path(
             model_name,
             yolo_version
-            )
+        )
 
         return os.path.join(model_hailo_suite_dir, filename)
 
@@ -338,7 +338,7 @@ class Files:
         model_hailo_suite_dir = cls.get_model_hailo_suite_dir_path(
             model_name,
             yolo_version
-            )
+        )
 
         # Get the Hailo Suite parsed filename
         model_hailo_suite_parsed_har_file_name = cls.get_model_hailo_suite_parsed_har_file_name(
@@ -348,7 +348,7 @@ class Files:
         return os.path.join(
             model_hailo_suite_dir,
             model_hailo_suite_parsed_har_file_name
-            )
+        )
 
     @classmethod
     def get_model_hailo_suite_optimized_har_file_path(
@@ -369,7 +369,7 @@ class Files:
         model_hailo_suite_dir = cls.get_model_hailo_suite_dir_path(
             model_name,
             yolo_version
-            )
+        )
 
         # Get the Hailo Suite optimized filename
         model_hailo_suite_optimized_har_file_name = cls.get_model_hailo_suite_optimized_har_file_name(
@@ -379,7 +379,7 @@ class Files:
         return os.path.join(
             model_hailo_suite_dir,
             model_hailo_suite_optimized_har_file_name
-            )
+        )
 
     @classmethod
     def get_model_hailo_suite_compiled_hef_file_path(
@@ -400,7 +400,7 @@ class Files:
         model_hailo_suite_dir = cls.get_model_hailo_suite_dir_path(
             model_name,
             yolo_version
-            )
+        )
 
         # Get the Hailo Suite compiled filename
         model_hailo_suite_compiled_hef_file_name = cls.get_model_hailo_suite_compiled_hef_file_name(
@@ -410,7 +410,7 @@ class Files:
         return os.path.join(
             model_hailo_suite_dir,
             model_hailo_suite_compiled_hef_file_name
-            )
+        )
 
     @classmethod
     def get_model_weights_parsed_har_file_path(
@@ -431,7 +431,7 @@ class Files:
         model_weights_dir = cls.get_model_weight_dir_path(
             model_name,
             yolo_version
-            )
+        )
 
         return os.path.join(model_weights_dir, 'parsed.har')
 
@@ -454,7 +454,7 @@ class Files:
         model_weights_dir = cls.get_model_weight_dir_path(
             model_name,
             yolo_version
-            )
+        )
 
         return os.path.join(model_weights_dir, 'optimized.har')
 
@@ -477,7 +477,7 @@ class Files:
         model_weights_dir = cls.get_model_weight_dir_path(
             model_name,
             yolo_version
-            )
+        )
 
         return os.path.join(model_weights_dir, 'compiled.hef')
 

@@ -20,7 +20,7 @@ class SwitchHandler:
         serial_communication: SerialCommunication,
         switch_pin: int = SWITCH_PIN,
         led: LEDHandler = None
-        ):
+    ):
         """
         Initializes the switch handler with the specified pin.
 

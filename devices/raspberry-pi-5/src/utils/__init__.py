@@ -34,7 +34,7 @@ def is_instance(
 def is_subclass(
     cls: type,
     class_or_tuple: type | UnionType | tuple[Any, ...]
-    ) -> None:
+) -> None:
     """
     Check if the class is a subclass of the specified class or tuple of classes.
 

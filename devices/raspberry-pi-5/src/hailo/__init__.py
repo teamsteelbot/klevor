@@ -137,7 +137,7 @@ class Hailo(HailoABC):
     def _set_output_type(
         self, output_type_dict: Optional[
             dict[str, str]] = None
-        ) -> None:
+    ) -> None:
         for output_name, output_type in output_type_dict.items():
             self.__infer_model.output(output_name).set_format_type(
                 getattr(FormatType, output_type)

@@ -33,7 +33,7 @@ def object_detector_target(
     print(
         "Initializing ObjectDetector in multiprocessing mode. Process ID: ",
         os.getpid()
-        )
+    )
 
     # Initialize the object detector
     object_detector = ObjectDetector(

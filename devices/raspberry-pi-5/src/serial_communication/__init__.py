@@ -245,7 +245,7 @@ class SerialCommunication(SerialCommunicationABC):
     def _wait_confirmation_message(
         self,
         msg_to_confirm: OutgoingMessage
-        ) -> None:
+    ) -> None:
         # Log
         self.__logger.debug(
             f"Waiting for confirmation message for: {msg_to_confirm}"

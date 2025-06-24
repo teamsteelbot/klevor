@@ -158,13 +158,13 @@ class Files(F):
             return os.path.join(
                 DATASET_DIR, model_name, dataset_name,
                 dataset_status
-                )
+            )
 
         if dataset_status:
             return os.path.join(
                 DATASET_DIR, DATASET_GENERAL, dataset_name,
                 dataset_status
-                )
+            )
 
         if model_name:
             return os.path.join(DATASET_DIR, model_name, dataset_name)
@@ -175,7 +175,7 @@ class Files(F):
     def get_yolo_runs_new_name_dir_path(
         cls,
         yolo_version: str
-        ) -> str | PathLike:
+    ) -> str | PathLike:
         """
         Get the YOLO runs folder path with the new name.
 
@@ -211,7 +211,7 @@ class Files(F):
     def get_model_best_pt_path(
         cls, model_name: str,
         yolo_version: str
-        ) -> str | PathLike:
+    ) -> str | PathLike:
         """
         Get the model best PyTorch path.
 
@@ -225,7 +225,7 @@ class Files(F):
         model_weight_path = cls.get_model_weight_dir_path(
             model_name,
             yolo_version
-            )
+        )
 
         return os.path.join(model_weight_path, BEST_PT)
 
@@ -233,7 +233,7 @@ class Files(F):
     def get_model_best_onnx_path(
         cls, model_name: str,
         yolo_version: str
-        ) -> str | PathLike:
+    ) -> str | PathLike:
         """
         Get  the model best ONNX path.
 
@@ -247,7 +247,7 @@ class Files(F):
         model_weight_path = cls.get_model_weight_dir_path(
             model_name,
             yolo_version
-            )
+        )
 
         return os.path.join(model_weight_path, BEST_ONNX)
 
@@ -392,7 +392,7 @@ class Files(F):
         return os.path.join(
             yolo_version_dir, TF_RECORDS,
             model_name + '.tfrecord'
-            )
+        )
 
     @classmethod
     def get_yolo_dataset_notes_file_path(
@@ -442,6 +442,6 @@ class Files(F):
             dataset_name,
             dataset_status,
             model_name
-            )
+        )
 
         return os.path.join(dataset_model_dir_path, DATASET_CLASSES_TXT)
