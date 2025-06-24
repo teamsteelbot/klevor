@@ -1,4 +1,4 @@
-from multiprocessing import Queue
+from multiprocessing import Queue, Event
 from typing import final
 
 from ..log import Logger
@@ -19,6 +19,14 @@ class Pilot(PilotABC):
 
     def __init__(
             self,
+            start_event: Event,
+            parking_event: Event,
+            stop_event: Event,
+            photographer_capture_image_event: Event,
+            rplidar_measures_queue: Queue,
+            detector_model_g_inferences_queue: Queue,
+            detector_model_m_inferences_queue: Queue,
+            detector_model_r_inferences_queue: Queue,
             serial_incoming_messages_queue: Queue,
             serial_outgoing_messages_queue: Queue,
             writer_messages_queue: Queue,

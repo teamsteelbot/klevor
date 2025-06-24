@@ -1,4 +1,4 @@
-from multiprocessing import Process, Queue, Event
+from multiprocessing import Event, Process, Queue
 from time import sleep
 
 from .multiprocessing import websocket_server_target
@@ -14,17 +14,21 @@ if __name__ == "__main__":
     stop_event = Event()
 
     # Create a process for the writer
-    writer_process = Process(target=writer_target, args=(
-        writer_messages_queue, writer_stop_event))
+    writer_process = Process(
+        target=writer_target, args=(
+            writer_messages_queue, writer_stop_event)
+        )
     writer_process.start()
 
     # Create an instance of Logger
     logger = Logger(writer_messages_queue)
 
     # Create a process for the WebSocket server
-    server_process = Process(target=websocket_server_target, args=(
-        server_messages_queue, parking_event, stop_event,
-        writer_messages_queue))
+    server_process = Process(
+        target=websocket_server_target, args=(
+            server_messages_queue, parking_event, stop_event,
+            writer_messages_queue)
+        )
     server_process.start()
 
     try:
@@ -37,9 +41,11 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         # Handle keyboard interrupt to stop the processes gracefully
         print(
-            "KeyboardInterrupt received. Stopping websocket server and writer process...")
+            "KeyboardInterrupt received. Stopping websocket server and writer process..."
+        )
         logger.warning(
-            "KeyboardInterrupt received. Stopping websocket server and writer process.")
+            "KeyboardInterrupt received. Stopping websocket server and writer process."
+        )
 
 
     except Exception as e:

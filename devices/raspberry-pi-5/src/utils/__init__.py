@@ -5,8 +5,10 @@ from types import UnionType
 from typing import Any
 
 
-def is_instance(obj: object,
-                class_or_tuple: type | UnionType | tuple[Any, ...]) -> None:
+def is_instance(
+    obj: object,
+    class_or_tuple: type | UnionType | tuple[Any, ...]
+) -> None:
     """
     Check if the object is an instance of the specified class or tuple of classes,
     unwrapping proxy objects if necessary.
@@ -14,7 +16,6 @@ def is_instance(obj: object,
     Args:
         obj (object): The object to check.
         class_or_tuple (type | UnionType | tuple[Any, ...]): The class or tuple of classes to check against.
-
     Raises:
         TypeError: If the object is not an instance of the specified class or tuple of classes.
     """
@@ -30,15 +31,16 @@ def is_instance(obj: object,
         )
 
 
-def is_subclass(cls: type,
-                class_or_tuple: type | UnionType | tuple[Any, ...]) -> None:
+def is_subclass(
+    cls: type,
+    class_or_tuple: type | UnionType | tuple[Any, ...]
+    ) -> None:
     """
     Check if the class is a subclass of the specified class or tuple of classes.
 
     Args:
         cls (type): The class to check.
         class_or_tuple (type | UnionType | tuple[Any, ...]): The class or tuple of classes to check against.
-
     Raises:
         TypeError: If the class is not a subclass of the specified class or tuple of classes.
     """
@@ -86,7 +88,7 @@ def get_local_ip() -> str | None | Any:
         s.connect(('8.8.8.8', 80))
         ip = s.getsockname()[0]
 
-    except Exception as e:
+    except Exception:
         ip = '127.0.0.1'
 
     finally:
@@ -117,4 +119,5 @@ def map_string_to_enum(string: str, enum_class: type[Enum]) -> Any:
 
     except KeyError:
         raise ValueError(
-            f"'{string}' is not a valid value for {enum_class.__name__}")
+            f"'{string}' is not a valid value for {enum_class.__name__}"
+        )

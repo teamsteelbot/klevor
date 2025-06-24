@@ -1,10 +1,10 @@
 import os
-from multiprocessing import Queue, Event
+from multiprocessing import Event, Queue
 from typing import Optional
 
 from . import RPLIDAR
 from .constants import (
-    RPLIDAR_C1_BAUDRATE, RPLIDAR_C1_PORT
+    RPLIDAR_C1_BAUDRATE, RPLIDAR_C1_PORT,
 )
 from ..utils.decorators import ignore_sigint
 
@@ -33,8 +33,10 @@ def rplidar_target(
         port (str): SerialCommunication port for the RPLIDAR.
         is_upside_down (bool): If True, the RPLIDAR is upside down, and angles will be adjusted accordingly.
     """
-    print("Initializing RPLIDAR in multiprocessing mode. Process ID: ",
-          os.getpid())
+    print(
+        "Initializing RPLIDAR in multiprocessing mode. Process ID: ",
+        os.getpid()
+        )
 
     # Initialize the RPLIDAR
     rplidar = RPLIDAR(

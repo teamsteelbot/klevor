@@ -70,6 +70,7 @@ class Status(Enum):
         """
         return map_string_to_enum(status_str.upper(), cls)
 
+
 @unique
 class OutgoingCategory(Enum):
     """

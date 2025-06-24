@@ -24,7 +24,8 @@ def update_classes(model_name: str, model_version: str, new_classes: list[str]):
     # Check if the model has the same number of classes as the new classes
     if len(model["model"].names) != len(new_classes):
         print(
-            f"Error: The model has {len(model['model'].names)} classes, but the new classes have {len(new_classes)} classes.")
+            f"Error: The model has {len(model['model'].names)} classes, but the new classes have {len(new_classes)} classes."
+        )
         return
 
     # Update class names
@@ -42,8 +43,10 @@ if __name__ == "__main__":
     args = Args.parse_args_as_dict(parser)
 
     # Get the YOLO input model
-    arg_yolo_input_model = Args.get_attribute_from_args_dict(args,
-                                                             Flag.INPUT_MODEL)
+    arg_yolo_input_model = Args.get_attribute_from_args_dict(
+        args,
+        Flag.INPUT_MODEL
+        )
 
     # Get the YOLO version
     arg_yolo_version = Args.get_attribute_from_args_dict(args, Flag.VERSION)

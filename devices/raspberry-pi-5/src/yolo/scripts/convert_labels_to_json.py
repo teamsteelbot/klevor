@@ -5,14 +5,20 @@ from argparse import ArgumentParser
 from ..args import Args, Flag
 from ..files import Files
 from ..files.constants import (
-    DATASET_IMAGES, DATASET_LABELS, DATASET_LABELED, DATASET_TO_PROCESS,
-    DATASET_ANNOTATIONS_JSON, DATASET_IMAGES_EXT
+    DATASET_ANNOTATIONS_JSON,
+    DATASET_IMAGES,
+    DATASET_IMAGES_EXT,
+    DATASET_LABELED,
+    DATASET_LABELS,
+    DATASET_TO_PROCESS,
 )
 
 
-def convert_yolo_labels_to_json(annotations_dir: str | os.PathLike[str],
-                                images_dir: str | os.PathLike[str],
-                                output_json: str | os.PathLike[str]):
+def convert_yolo_labels_to_json(
+    annotations_dir: str | os.PathLike[str],
+    images_dir: str | os.PathLike[str],
+    output_json: str | os.PathLike[str]
+):
     """
     Convert YOLO labels to JSON format for Label Studio.
 
@@ -32,18 +38,22 @@ def convert_yolo_labels_to_json(annotations_dir: str | os.PathLike[str],
             for line in f:
                 parts = line.strip().split()
                 class_id, x_center, y_center, width, height = map(float, parts)
-                objects.append({
-                    "label": class_id,
-                    "x": x_center,
-                    "y": y_center,
-                    "width": width,
-                    "height": height
-                })
+                objects.append(
+                    {
+                        "label": class_id,
+                        "x": x_center,
+                        "y": y_center,
+                        "width": width,
+                        "height": height
+                    }
+                )
 
-        annotations.append({
-            "image": image_path,
-            "annotations": objects
-        })
+        annotations.append(
+            {
+                "image": image_path,
+                "annotations": objects
+            }
+        )
 
     with open(output_json, "w") as f:
         json.dump(annotations, f, indent=4)
@@ -51,30 +61,43 @@ def convert_yolo_labels_to_json(annotations_dir: str | os.PathLike[str],
 
 if __name__ == "__main__":
     parser = ArgumentParser(
-        description='Script to convert YOLO labels to JSON format for Label Studio')
+        description='Script to convert YOLO labels to JSON format for Label Studio'
+    )
     Args.add_yolo_input_model_argument(parser)
     args = Args.parse_args_as_dict(parser)
 
     # Get the YOLO input model
-    arg_yolo_input_model = Args.get_attribute_from_args_dict(args,
-                                                             Flag.INPUT_MODEL)
+    arg_yolo_input_model = Args.get_attribute_from_args_dict(
+        args,
+        Flag.INPUT_MODEL
+        )
 
     # Get the dataset paths
-    labeled_to_process_dir = Files.get_dataset_model_dir_path(DATASET_LABELED,
-                                                              DATASET_TO_PROCESS,
-                                                              arg_yolo_input_model)
+    labeled_to_process_dir = Files.get_dataset_model_dir_path(
+        DATASET_LABELED,
+        DATASET_TO_PROCESS,
+        arg_yolo_input_model
+        )
 
     # Get the images and labels directories
-    labeled_to_process_images_dir = os.path.join(labeled_to_process_dir,
-                                                 DATASET_IMAGES)
-    labeled_to_process_annotations_dir = os.path.join(labeled_to_process_dir,
-                                                      DATASET_LABELS)
+    labeled_to_process_images_dir = os.path.join(
+        labeled_to_process_dir,
+        DATASET_IMAGES
+        )
+    labeled_to_process_annotations_dir = os.path.join(
+        labeled_to_process_dir,
+        DATASET_LABELS
+        )
 
     # Get the output JSON file path
-    labeled_annotations_json = os.path.join(labeled_to_process_dir,
-                                            DATASET_ANNOTATIONS_JSON)
+    labeled_annotations_json = os.path.join(
+        labeled_to_process_dir,
+        DATASET_ANNOTATIONS_JSON
+        )
 
     # Convert YOLO labels to JSON format
-    convert_yolo_labels_to_json(labeled_to_process_annotations_dir,
-                                labeled_to_process_images_dir,
-                                labeled_annotations_json)
+    convert_yolo_labels_to_json(
+        labeled_to_process_annotations_dir,
+        labeled_to_process_images_dir,
+        labeled_annotations_json
+        )

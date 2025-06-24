@@ -1,4 +1,4 @@
-from multiprocessing import Process, Queue, Event
+from multiprocessing import Event, Process, Queue
 from time import sleep
 
 from .multiprocessing import serial_communication_target
@@ -17,8 +17,10 @@ if __name__ == "__main__":
     stop_event = Event()
 
     # Create a process for the writer
-    writer_process = Process(target=writer_target, args=(
-        writer_messages_queue, writer_stop_event))
+    writer_process = Process(
+        target=writer_target, args=(
+            writer_messages_queue, writer_stop_event)
+        )
     writer_process.start()
 
     # Create an instance of Logger
@@ -41,9 +43,12 @@ if __name__ == "__main__":
 
     except KeyboardInterrupt:
         # Handle keyboard interrupt to stop the processes gracefully
-        print("KeyboardInterrupt received. Stopping serial communication and writer process...")
+        print(
+            "KeyboardInterrupt received. Stopping serial communication and writer process..."
+        )
         logger.warning(
-            "KeyboardInterrupt received. Stopping serial communication and writer process...")
+            "KeyboardInterrupt received. Stopping serial communication and writer process..."
+        )
 
     except Exception as e:
         # Log any exceptions that occur

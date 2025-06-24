@@ -1,10 +1,10 @@
 from asyncio import create_task, gather
 
 from .bno08x import BNO08XHandler
-from .servo import ServoHandler
-from .message import IncomingMessage, IncomingCategory
 from .esc_motor import ESCMotorHandler
+from .message import IncomingCategory, IncomingMessage
 from .serial_communication import SerialCommunication
+from .servo import ServoHandler
 
 
 class WithoutObstacles:
@@ -13,8 +13,13 @@ class WithoutObstacles:
     This class contains constants and methods related to the challenge.
     """
 
-    def __init__(self, bno08x: BNO08XHandler, servo: ServoHandler, motor: ESCMotorHandler,
-                 serial_communication: SerialCommunication):
+    def __init__(
+        self,
+        bno08x: BNO08XHandler,
+        servo: ServoHandler,
+        motor: ESCMotorHandler,
+        serial_communication: SerialCommunication
+        ):
         """
         Initialize the WithoutObstacles class with the necessary handlers.
 
@@ -42,8 +47,12 @@ class WithoutObstacles:
 
         while not to_exit:
             # Create the update quaternion and receive serial messages tasks
-            update_quaternion_task = create_task(self.__bno08x.update_quaternion())
-            receive_serial_task = create_task(self.__serial_communication.receive_messages())
+            update_quaternion_task = create_task(
+                self.__bno08x.update_quaternion()
+                )
+            receive_serial_task = create_task(
+                self.__serial_communication.receive_messages()
+                )
 
             # Wait for the tasks to complete
             results = await gather(update_quaternion_task, receive_serial_task)
@@ -65,8 +74,11 @@ class WithoutObstacles:
                     tasks.append(create_task(self.__servo.center()))
 
                     # Send a confirmation message to the serial communication
-                    tasks.append(create_task(
-                        self.__serial_communication.send_confirmation_message()))
+                    tasks.append(
+                        create_task(
+                            self.__serial_communication.send_confirmation_message()
+                        )
+                    )
                     break
 
                 elif msg.category == IncomingCategory.MOTOR_SPEED:
@@ -80,10 +92,14 @@ class WithoutObstacles:
             # Add the set motor speed task and set servo angle task if the exit flag is not set
             if not to_exit:
                 if motor_speed is not None:
-                    tasks.append(create_task(self.__motor.set_speed(motor_speed)))
+                    tasks.append(
+                        create_task(self.__motor.set_speed(motor_speed))
+                        )
 
                 if servo_angle is not None:
-                    tasks.append(create_task(self.__servo.set_angle(servo_angle)))
+                    tasks.append(
+                        create_task(self.__servo.set_angle(servo_angle))
+                        )
 
             # Gather the tasks and wait for them to complete
             await gather(*tasks) if tasks else None
@@ -91,14 +107,20 @@ class WithoutObstacles:
         # Stop the serial communication when exiting the loop
         await self.__serial_communication.stop()
 
+
 class WithObstacles:
     """
     Class for the WRO 2025 Challenge with Obstacles in the Future Engineers Car category.
     This class contains constants and methods related to the challenge.
     """
 
-    def __init__(self, bno08x: BNO08XHandler, servo: ServoHandler, motor: ESCMotorHandler,
-                 serial_communication: SerialCommunication):
+    def __init__(
+        self,
+        bno08x: BNO08XHandler,
+        servo: ServoHandler,
+        motor: ESCMotorHandler,
+        serial_communication: SerialCommunication
+        ):
         """
         Initialize the WithObstacles class with the necessary handlers.
 

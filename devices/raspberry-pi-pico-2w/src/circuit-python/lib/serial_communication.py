@@ -1,22 +1,31 @@
-from usb_cdc import console, data
-from board import LED
-from digitalio import DigitalInOut, Direction
 from time import monotonic
 
-from .led import LEDHandler
-from .message import IncomingMessage, IncomingCategory, OutgoingMessage, OutgoingCategory
+from board import LED
+from digitalio import DigitalInOut, Direction
+from usb_cdc import console, data
+
 from .enums import Challenge, Status
+from .led import LEDHandler
+from .message import (
+    IncomingCategory,
+    IncomingMessage,
+    OutgoingCategory,
+    OutgoingMessage,
+)
+
 
 class SerialCommunicationError(Exception):
     """
     Custom exception class for serial communication errors.
     """
+
     def __init__(self, msg: str):
         super().__init__(msg)
         self.msg = msg
 
     def __str__(self):
         return f"SerialCommunicationError: {self.msg}"
+
 
 class SerialCommunication:
     """
@@ -28,20 +37,43 @@ class SerialCommunication:
     CONSOLE_PORT_ENABLED = True
 
     # Status messages
-    START_MESSAGE = OutgoingMessage(OutgoingCategory.STATUS, Status.START.get_name())
-    STOP_MESSAGE = IncomingMessage(OutgoingCategory.STATUS, Status.STOP.get_name())
-    INCOMING_OK_MESSAGE = IncomingMessage(IncomingCategory.STATUS, Status.OK.get_name())
-    OUTGOING_OK_MESSAGE = OutgoingMessage(OutgoingCategory.STATUS, Status.OK.get_name())
+    START_MESSAGE = OutgoingMessage(
+        OutgoingCategory.STATUS,
+        Status.START.get_name()
+        )
+    STOP_MESSAGE = IncomingMessage(
+        OutgoingCategory.STATUS,
+        Status.STOP.get_name()
+        )
+    INCOMING_OK_MESSAGE = IncomingMessage(
+        IncomingCategory.STATUS,
+        Status.OK.get_name()
+        )
+    OUTGOING_OK_MESSAGE = OutgoingMessage(
+        OutgoingCategory.STATUS,
+        Status.OK.get_name()
+        )
 
     # Challenge messages
-    CHALLENGE_WITH_OBSTACLES = OutgoingMessage(OutgoingCategory.CHALLENGE, Challenge.WITH_OBSTACLES.get_challenge_name())
-    CHALLENGE_WITHOUT_OBSTACLES = OutgoingMessage(OutgoingCategory.CHALLENGE, Challenge.WITHOUT_OBSTACLES.get_challenge_name())
+    CHALLENGE_WITH_OBSTACLES = OutgoingMessage(
+        OutgoingCategory.CHALLENGE,
+        Challenge.WITH_OBSTACLES.get_challenge_name()
+        )
+    CHALLENGE_WITHOUT_OBSTACLES = OutgoingMessage(
+        OutgoingCategory.CHALLENGE,
+        Challenge.WITHOUT_OBSTACLES.get_challenge_name()
+        )
 
     # Confirmation timeout
     CONFIRMATION_TIMEOUT = 30.0
 
-    def __init__(self, console_port_enabled: bool = CONSOLE_PORT_ENABLED, data_port_enabled: bool = DATA_PORT_ENABLED,
-                 challenge: Challenge = Challenge.WITHOUT_OBSTACLES, led: LEDHandler = None):
+    def __init__(
+        self,
+        console_port_enabled: bool = CONSOLE_PORT_ENABLED,
+        data_port_enabled: bool = DATA_PORT_ENABLED,
+        challenge: Challenge = Challenge.WITHOUT_OBSTACLES,
+        led: LEDHandler = None
+        ):
         """
         Initialize the SerialCommunication instance.
 
@@ -89,7 +121,9 @@ class SerialCommunication:
                 msgs.append(msg)
 
             except ValueError as e:
-                raise SerialCommunicationError(f"Invalid message format: {msg_str}") from e
+                raise SerialCommunicationError(
+                    f"Invalid message format: {msg_str}"
+                    ) from e
 
         return msgs
 
@@ -118,7 +152,10 @@ class SerialCommunication:
         """
         self.send_message(self.OUTGOING_OK_MESSAGE)
 
-    async def wait_for_confirmation_message(self, timeout: float = CONFIRMATION_TIMEOUT) -> bool:
+    async def wait_for_confirmation_message(
+        self,
+        timeout: float = CONFIRMATION_TIMEOUT
+        ) -> bool:
         """
         Wait for a confirmation message from the console port.
 
@@ -149,7 +186,9 @@ class SerialCommunication:
 
         # Wait for confirmation of the challenge message
         if not await self.wait_for_confirmation_message():
-            raise SerialCommunicationError("Failed to receive confirmation for challenge message.")
+            raise SerialCommunicationError(
+                "Failed to receive confirmation for challenge message."
+                )
 
     def send_bno08x_yaw_message(self, yaw: float):
         """
@@ -168,7 +207,10 @@ class SerialCommunication:
         Args:
             turns (int): The number of turns to send.
         """
-        bno08x_message = OutgoingMessage(OutgoingCategory.BNO08X_TURNS, str(turns))
+        bno08x_message = OutgoingMessage(
+            OutgoingCategory.BNO08X_TURNS,
+            str(turns)
+            )
         self.send_message(bno08x_message)
 
     def send_error_message(self, error: Exception):
@@ -193,7 +235,9 @@ class SerialCommunication:
 
         # Wait for confirmation of the start message
         if not await self.wait_for_confirmation_message():
-            raise SerialCommunicationError("Failed to receive confirmation for start message.")
+            raise SerialCommunicationError(
+                "Failed to receive confirmation for start message."
+                )
 
     async def stop(self):
         """

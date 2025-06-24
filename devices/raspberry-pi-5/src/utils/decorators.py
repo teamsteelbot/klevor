@@ -1,4 +1,4 @@
-from signal import signal, SIGINT, SIG_IGN
+from signal import SIGINT, SIG_IGN, signal
 
 
 def ignore_sigint(func):

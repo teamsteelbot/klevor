@@ -5,8 +5,7 @@ from typing import final
 from PIL.Image import Image
 
 from .abstracts import DispatcherABC
-from ..constants import IMAGE_FORMAT
-from ..constants import MODEL_G, MODEL_M, MODEL_R
+from ..constants import IMAGE_FORMAT, MODEL_G, MODEL_M, MODEL_R
 from ..log import Logger
 from ..rplidar.measure import Measure
 from ..server.enums import Tag
@@ -22,8 +21,10 @@ class Dispatcher(DispatcherABC):
     # Logger configuration
     LOGGER_TAG = "Dispatcher"
 
-    def __init__(self, server_messages_queue: Queue,
-                 writer_messages_queue: Queue):
+    def __init__(
+        self, server_messages_queue: Queue,
+        writer_messages_queue: Queue
+        ):
         """
         Initializes the Dispatcher class.
 
@@ -35,8 +36,10 @@ class Dispatcher(DispatcherABC):
         self.__server_messages_queue = server_messages_queue
 
         # Initialize the logger
-        self.__logger = Logger(writer_messages_queue, self.LOGGER_TAG,
-                               unique_tag=True)
+        self.__logger = Logger(
+            writer_messages_queue, self.LOGGER_TAG,
+            unique_tag=True
+            )
 
     @final
     def _broadcast_message(self, msg: Message):
@@ -60,7 +63,8 @@ class Dispatcher(DispatcherABC):
 
         except Exception as e:
             self.__logger.error(
-                f"Error sending image: {e}") if self.__logger else None
+                f"Error sending image: {e}"
+            ) if self.__logger else None
 
     @final
     def broadcast_original_image(self, img: Image):

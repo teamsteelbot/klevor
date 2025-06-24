@@ -7,7 +7,8 @@ from .env import Env
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Klevor - WRO 2025 - Future Engineers Car")
+        description="Klevor - WRO 2025 - Future Engineers Car"
+    )
     Args.add_yolo_version_argument(parser)
     Args.add_debug_argument(parser)
     args = Args.parse_args_as_dict(parser)

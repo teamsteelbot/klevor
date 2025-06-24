@@ -14,9 +14,14 @@ class Plot:
     """
 
     @staticmethod
-    def draw_detection(image: np.ndarray, box: list, class_name: str,
-                       score: float, color: tuple,
-                       scale_factor: float) -> None:
+    def draw_detection(
+        image: np.ndarray,
+        box: list,
+        class_name: str,
+        score: float,
+        color: tuple,
+        scale_factor: float
+    ) -> None:
         """
         Draw box and label for one detection.
 
@@ -31,16 +36,24 @@ class Plot:
         label = f"{class_name}: {score:.2f}%"
         ymin, xmin, ymax, xmax = box
         ymin, xmin, ymax, xmax = int(ymin * scale_factor), int(
-            xmin * scale_factor), int(ymax * scale_factor), int(
-            xmax * scale_factor)
+            xmin * scale_factor
+        ), int(ymax * scale_factor), int(
+            xmax * scale_factor
+        )
         cv2.rectangle(image, (xmin, ymin), (xmax, ymax), color, 2)
-        cv2.putText(image, label, (xmin + 4, ymin + 20), FONT, 0.5, color, 1,
-                    cv2.LINE_AA)
+        cv2.putText(
+            image, label, (xmin + 4, ymin + 20), FONT, 0.5, color, 1,
+            cv2.LINE_AA
+            )
 
     @staticmethod
-    def denormalize_and_remove_padding(box: list, size: int,
-                                       padding_length: int, input_height: int,
-                                       input_width: int) -> list:
+    def denormalize_and_remove_padding(
+        box: list,
+        size: int,
+        padding_length: int,
+        input_height: int,
+        input_width: int
+    ) -> list:
         """
         Denormalize bounding box coordinates and remove padding.
 
@@ -63,10 +76,14 @@ class Plot:
         return box
 
     @classmethod
-    def draw_detections(cls, colors: dict[int, tuple[int, int, int]],
-                        image_bounding_boxes: ImageBoundingBoxes,
-                        image: np.ndarray, min_score: float = 0.45,
-                        scale_factor: float = 1):
+    def draw_detections(
+        cls,
+        colors: dict[int, tuple[int, int, int]],
+        image_bounding_boxes: ImageBoundingBoxes,
+        image: np.ndarray,
+        min_score: float = 0.45,
+        scale_factor: float = 1
+    ):
         """
         Draw detections on the image.
 
@@ -92,25 +109,37 @@ class Plot:
             if scores[idx] >= min_score:
                 class_name = classes[idx]
                 color = colors.get(idx, UNUSED_COLOR)
-                scaled_box = cls.denormalize_and_remove_padding(boxes[idx],
-                                                                size,
-                                                                padding_length,
-                                                                img_height,
-                                                                img_width)
-                cls.draw_detection(image, scaled_box, class_name,
-                                   scores[idx] * 100.0, color, scale_factor)
+                scaled_box = cls.denormalize_and_remove_padding(
+                    boxes[idx],
+                    size,
+                    padding_length,
+                    img_height,
+                    img_width
+                )
+                cls.draw_detection(
+                    image,
+                    scaled_box,
+                    class_name,
+                    scores[idx] * 100.0,
+                    color,
+                    scale_factor
+                )
 
         return image
 
     @staticmethod
-    def display_detections(class_names: dict[int, str],
-                           preprocessed_image: list[np.ndarray],
-                           image_bounding_boxes: ImageBoundingBoxes,
-                           draw_labels_name=False, font=FONT,
-                           font_x_diff=0, font_y_diff=-10, font_scale=0.9,
-                           thickness=2,
-                           rgb_colors: tuple[
-                               tuple[int, int, int]] = None) -> None:
+    def display_detections(
+        class_names: dict[int, str],
+        preprocessed_image: list[np.ndarray],
+        image_bounding_boxes: ImageBoundingBoxes,
+        draw_labels_name=False,
+        font=FONT,
+        font_x_diff=0,
+        font_y_diff=-10,
+        font_scale=0.9,
+        thickness=2,
+        rgb_colors: tuple[tuple[int, int, int]] = None
+    ) -> None:
         """
         Function to display the preprocessed image and the image with detections.
 
@@ -133,7 +162,8 @@ class Plot:
 
         # Convert the image to uint8
         preprocessed_image_uint8 = (preprocessed_image_hwc * 255).astype(
-            np.uint8)
+            np.uint8
+        )
 
         # Display the preprocessed image
         plt.subplot(1, 2, 1)
@@ -154,24 +184,32 @@ class Plot:
                 class_number = int(class_numbers[i])
                 class_name = class_names[class_number]
                 color = OpenCV.get_rgb_color(class_number, rgb_colors)
-                cv2.rectangle(image_with_detections, (x1, y1), (x2, y2), color,
-                              thickness)
-                cv2.putText(image_with_detections, class_name,
-                            (x1 + font_x_diff, y1 + font_y_diff), font,
-                            font_scale,
-                            color, thickness)
+                cv2.rectangle(
+                    image_with_detections, (x1, y1), (x2, y2), color,
+                    thickness
+                    )
+                cv2.putText(
+                    image_with_detections, class_name,
+                    (x1 + font_x_diff, y1 + font_y_diff), font,
+                    font_scale,
+                    color, thickness
+                    )
 
         else:
             for i in range(n):
                 x1, y1, x2, y2 = xyxy[i].astype(int)
                 class_number = int(class_numbers[i])
                 color = OpenCV.get_rgb_color(class_number, rgb_colors)
-                cv2.rectangle(image_with_detections, (x1, y1), (x2, y2), color,
-                              thickness)
-                cv2.putText(image_with_detections, str(class_number),
-                            (x1 + font_x_diff, y1 + font_y_diff), font,
-                            font_scale, color,
-                            thickness)
+                cv2.rectangle(
+                    image_with_detections, (x1, y1), (x2, y2), color,
+                    thickness
+                    )
+                cv2.putText(
+                    image_with_detections, str(class_number),
+                    (x1 + font_x_diff, y1 + font_y_diff), font,
+                    font_scale, color,
+                    thickness
+                    )
 
         # Convert the image back to HWC format
         plt.subplot(1, 2, 2)

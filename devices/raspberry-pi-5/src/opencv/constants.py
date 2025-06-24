@@ -1,4 +1,4 @@
-from ..constants import WIDTH, HEIGHT
+from ..constants import HEIGHT, WIDTH
 
 # Image processing constants
 CHANNELS = 3

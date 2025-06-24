@@ -4,14 +4,14 @@ from threading import Thread
 from typing import final
 
 from PIL.Image import Image
-from websockets import serve, exceptions
+from websockets import exceptions, serve
 
 from .abstracts import WebSocketServerABC
 from .constants import HOST, PORT
 from .enums import Tag
 from .message import Message
 from ..log import Logger
-from ..utils import is_instance, get_local_ip
+from ..utils import get_local_ip, is_instance
 
 
 class WebSocketServer(WebSocketServerABC):
@@ -28,10 +28,11 @@ class WebSocketServer(WebSocketServerABC):
     # Wait timeout
     WAIT_TIMEOUT = 0.1
 
-    def __init__(self, messages_queue: Queue, parking_event: Event,
-                 stop_event: Event, writer_messages_queue: Queue,
-                 host: str = HOST, port: int = PORT
-                 ):
+    def __init__(
+        self, messages_queue: Queue, parking_event: Event,
+        stop_event: Event, writer_messages_queue: Queue,
+        host: str = HOST, port: int = PORT
+        ):
         """
         Initializes the WebSocket server with the specified host and port.
 
@@ -76,8 +77,12 @@ class WebSocketServer(WebSocketServerABC):
         self.__logger.debug(f"Client connected: {connection.remote_address}")
 
         # Send a welcome message immediately upon connection
-        await self._send_message(connection, Message(Tag.CONNECTION_STATUS,
-                                                     "Connected to WebsocketServer"))
+        await self._send_message(
+            connection, Message(
+                Tag.CONNECTION_STATUS,
+                "Connected to WebsocketServer"
+                )
+            )
 
         try:
             while not self.__stop_event.is_set():
@@ -89,27 +94,34 @@ class WebSocketServer(WebSocketServerABC):
                 # Check if the message is a stop event
                 if msg == Tag.STOP_EVENT:
                     self.__logger.debug(
-                        "Stop event received. Stopping the server...")
+                        "Stop event received. Stopping the server..."
+                    )
                     self.__stop_event.set()
 
                 # Check if the message is a parking event
                 elif msg == Tag.PARKING_EVENT:
                     if self.__parking_event.is_set():
                         self.__logger.debug(
-                            "Parking event received. Resuming processing...")
+                            "Parking event received. Resuming processing..."
+                        )
                         self.__parking_event.clear()
                     else:
                         self.__logger.debug(
-                            "Parking event received. Pausing processing...")
+                            "Parking event received. Pausing processing..."
+                        )
                         self.__parking_event.set()
 
                 else:
                     # Unknown message type
                     self.__logger.warning(f"Unknown message type: {msg}")
 
-                    await self._send_message(connection,
-                                             Message(Tag.UNKNOWN_TAG,
-                                                     "Unknown message type received."))
+                    await self._send_message(
+                        connection,
+                        Message(
+                            Tag.UNKNOWN_TAG,
+                            "Unknown message type received."
+                            )
+                        )
                     continue
 
                 # Broadcast the received message to all connected clients
@@ -117,21 +129,25 @@ class WebSocketServer(WebSocketServerABC):
 
         except exceptions.ConnectionClosedOK:
             self.__logger.error(
-                f"Client {connection.remote_address} disconnected gracefully.")
+                f"Client {connection.remote_address} disconnected gracefully."
+            )
 
         except exceptions.ConnectionClosedError as e:
             self.__logger.error(
-                f"Client {connection.remote_address} disconnected with error: {e}")
+                f"Client {connection.remote_address} disconnected with error: {e}"
+            )
 
         except Exception as e:
             self.__logger.error(
-                f"An unexpected error occurred with {connection.remote_address}: {e}")
+                f"An unexpected error occurred with {connection.remote_address}: {e}"
+            )
 
         finally:
             # Remove the client from the set of connected clients
             self.__connected_clients.discard(connection)
             self.__logger.debug(
-                f"Client {connection.remote_address} disconnected.")
+                f"Client {connection.remote_address} disconnected."
+            )
 
     @final
     async def _send_message(self, connection, msg: Message):
@@ -146,7 +162,8 @@ class WebSocketServer(WebSocketServerABC):
 
         except Exception as e:
             self.__logger.error(
-                f"Error sending message to {connection.remote_address}: {e}")
+                f"Error sending message to {connection.remote_address}: {e}"
+            )
 
     @final
     async def _broadcast_message(self, msg: Message):
@@ -165,7 +182,8 @@ class WebSocketServer(WebSocketServerABC):
 
         except Exception as e:
             self.__logger.error(
-                f"Unexpected error while broadcasting message: {e}")
+                f"Unexpected error while broadcasting message: {e}"
+            )
 
     @final
     async def _broadcast_last_message(self) -> None:
@@ -194,13 +212,15 @@ class WebSocketServer(WebSocketServerABC):
             # Check if the stop event is set
             if self.__stop_event.is_set():
                 self.__logger.warning(
-                    "Stop event is set. WebSocket server will not run.")
+                    "Stop event is set. WebSocket server will not run."
+                )
                 return
 
             # Check if the websocket server is already running
             if self.is_running():
                 self.__logger.warning(
-                    "WebSocket server is already running. Cannot start again.")
+                    "WebSocket server is already running. Cannot start again."
+                )
                 return
 
             # Set the opened event to signal that the websocket server is ready
@@ -211,16 +231,20 @@ class WebSocketServer(WebSocketServerABC):
 
         # Create a thread to handle broadcasting messages
         self.__broadcast_thread = Thread(
-            target=self._broadcast_handler)
+            target=self._broadcast_handler
+        )
         self.__broadcast_thread.start()
 
         # Start the WebSocket server
         self.__logger.debug("WebSocket server is starting...")
         async with serve(self._reactive_handler, self.__host, self.__port):
             self.__logger.info(
-                f"WebSocket server started successfully on ws://{local_ip}:{self.__port}")
-            await asyncio.get_running_loop().run_in_executor(None,
-                                                             self.__stop_event.wait)
+                f"WebSocket server started successfully on ws://{local_ip}:{self.__port}"
+            )
+            await asyncio.get_running_loop().run_in_executor(
+                None,
+                self.__stop_event.wait
+                )
 
         # Wait for the broadcast thread to finish
         self.__broadcast_thread.join()
@@ -247,3 +271,8 @@ class WebSocketServer(WebSocketServerABC):
         Destructor to clean up resources when the websockets server is no longer needed.
         """
         self.__stop_event.set()
+
+        # Log
+        self.__logger.debug(
+            "WebSocket server instance is being deleted. Resources will be cleaned up."
+            )

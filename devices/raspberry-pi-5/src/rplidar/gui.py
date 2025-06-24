@@ -9,7 +9,7 @@ from websockets import connect
 from .constants import MAX_DISTANCE_LIMIT
 from .measure import Measure
 from ..args import Args, Flag
-from ..server.message import Tag, Message
+from ..server.message import Message, Tag
 
 
 class App:
@@ -86,19 +86,25 @@ class App:
             radius = i * self.STATIC_CIRCLE_RADIUS * self.MAX_DISTANCE_RADIUS_FACTOR
             color = self.INTERNAL_STATIC_CIRCLE_COLOR if not is_exact or i < n else self.EXTERNAL_STATIC_CIRCLE_COLOR
             width = self.INTERNAL_STATIC_CIRCLE_WIDTH if not is_exact or i < n else self.EXTERNAL_STATIC_CIRCLE_WIDTH
-            pygame.draw.circle(self.__screen, color,
-                               (self.CENTER_X, self.CENTER_Y), radius, width)
+            pygame.draw.circle(
+                self.__screen, color,
+                (self.CENTER_X, self.CENTER_Y), radius, width
+                )
 
         # Draw external static circle
         if not is_exact:
-            pygame.draw.circle(self.__screen, self.EXTERNAL_STATIC_CIRCLE_COLOR,
-                               (self.CENTER_X, self.CENTER_Y), self.RADIUS,
-                               self.EXTERNAL_STATIC_CIRCLE_WIDTH)
+            pygame.draw.circle(
+                self.__screen, self.EXTERNAL_STATIC_CIRCLE_COLOR,
+                (self.CENTER_X, self.CENTER_Y), self.RADIUS,
+                self.EXTERNAL_STATIC_CIRCLE_WIDTH
+                )
 
         # Draw central point
-        pygame.draw.circle(self.__screen, self.CENTRAL_POINT_COLOR,
-                           (self.CENTER_X, self.CENTER_Y),
-                           self.CENTRAL_POINT_RADIUS)
+        pygame.draw.circle(
+            self.__screen, self.CENTRAL_POINT_COLOR,
+            (self.CENTER_X, self.CENTER_Y),
+            self.CENTRAL_POINT_RADIUS
+            )
 
     def update_points(self):
         """
@@ -109,16 +115,23 @@ class App:
         for measure in self.__measures:
             prev = self.__previous_measures.get(measure.angle)
             if prev and abs(
-                    prev.distance - measure.distance) < self.DISTANCE_MINIMUM_DIFFERENCE:
+                    prev.distance - measure.distance
+            ) < self.DISTANCE_MINIMUM_DIFFERENCE:
                 continue
             self.__previous_measures[measure.angle] = measure
 
             # Adjust angle to match the coordinate system
             radian_angle = math.radians(int(measure.angle + 270) % 360)
-            x = int(self.CENTER_X + measure.distance * math.cos(
-                radian_angle) * self.MAX_DISTANCE_RADIUS_FACTOR)
-            y = int(self.CENTER_Y + measure.distance * math.sin(
-                radian_angle) * self.MAX_DISTANCE_RADIUS_FACTOR)
+            x = int(
+                self.CENTER_X + measure.distance * math.cos(
+                    radian_angle
+                ) * self.MAX_DISTANCE_RADIUS_FACTOR
+                )
+            y = int(
+                self.CENTER_Y + measure.distance * math.sin(
+                    radian_angle
+                ) * self.MAX_DISTANCE_RADIUS_FACTOR
+                )
             self.__point_positions[measure.angle] = (x, y)
 
         """
@@ -135,12 +148,16 @@ class App:
         """
         for pos in self.__point_positions.values():
             # Draw the point
-            pygame.draw.circle(self.__screen, self.POINT_COLOR, pos,
-                               self.POINT_RADIUS)
+            pygame.draw.circle(
+                self.__screen, self.POINT_COLOR, pos,
+                self.POINT_RADIUS
+                )
 
             # Draw border around the point
-            pygame.draw.circle(self.__screen, self.POINT_BORDER_COLOR, pos,
-                               self.POINT_RADIUS, self.POINT_BORDER_WIDTH)
+            pygame.draw.circle(
+                self.__screen, self.POINT_BORDER_COLOR, pos,
+                self.POINT_RADIUS, self.POINT_BORDER_WIDTH
+                )
 
     def run(self):
         """
@@ -209,7 +226,9 @@ if __name__ == "__main__":
     port = Args.get_attribute_from_args_dict(args, Flag.PORT)
 
     app = App(ip, port)
-    ws_thread = Thread(target=asyncio.run, args=(app.ws_listener(),),
-                       daemon=True)
+    ws_thread = Thread(
+        target=asyncio.run, args=(app.ws_listener(),),
+        daemon=True
+        )
     ws_thread.start()
     app.run()

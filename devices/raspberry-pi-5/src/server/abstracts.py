@@ -6,6 +6,7 @@ from .enums import Tag
 from .message import Message
 from ..rplidar import Measure
 
+
 class WebSocketServerABC(ABC):
     """
     Abstract class for a WebSocket server that handles real-time tracking updates.

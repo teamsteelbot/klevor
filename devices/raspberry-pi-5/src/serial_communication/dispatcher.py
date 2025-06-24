@@ -1,11 +1,12 @@
 from multiprocessing import Queue
 from typing import final
 
-from ..log import Logger
 from .abstracts import DispatcherABC
-from .message import IncomingMessage, OutgoingMessage
 from .enums import OutgoingCategory
+from .message import IncomingMessage, OutgoingMessage
+from ..log import Logger
 from ..utils import is_instance
+
 
 class Dispatcher(DispatcherABC):
     """
@@ -18,9 +19,12 @@ class Dispatcher(DispatcherABC):
     # Wait timeout
     WAIT_TIMEOUT = 0.1
 
-    def __init__(self, serial_incoming_messages_queue: Queue,
-                 serial_outgoing_messages_queue: Queue,
-                 writer_messages_queue: Queue):
+    def __init__(
+        self,
+        serial_incoming_messages_queue: Queue,
+        serial_outgoing_messages_queue: Queue,
+        writer_messages_queue: Queue
+    ) -> None:
         """
         Initializes the Dispatcher class.
 
@@ -34,13 +38,17 @@ class Dispatcher(DispatcherABC):
         self.__serial_outgoing_messages_queue = serial_outgoing_messages_queue
 
         # Initialize the logger
-        self.__logger = Logger(writer_messages_queue, self.LOGGER_TAG,
-                               unique_tag=True)
+        self.__logger = Logger(
+            writer_messages_queue, self.LOGGER_TAG,
+            unique_tag=True
+            )
 
     @final
     def receive_message(self) -> IncomingMessage | None:
         # Get the message from the queue
-        return self.__serial_incoming_messages_queue.get(timeout=self.WAIT_TIMEOUT)
+        return self.__serial_incoming_messages_queue.get(
+            timeout=self.WAIT_TIMEOUT
+        )
 
     @final
     def _send_message(self, msg: OutgoingMessage) -> None:

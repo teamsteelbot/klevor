@@ -1,13 +1,16 @@
-from board import (GP0, GP1, GP4, GP5, GP7, GP13, GP16, GP17, GP22, GP28)
-from busio import I2C
-from adafruit_vl53l0x import VL53L0X
-from digitalio import DigitalInOut, Direction
 from time import sleep
+
+from adafruit_vl53l0x import VL53L0X
+from board import (GP0, GP1, GP13, GP16, GP17, GP22, GP28, GP4, GP5, GP7)
+from busio import I2C
+from digitalio import DigitalInOut, Direction
+
 
 class VL53L0XError(Exception):
     """
     Custom exception class for VL53L0X errors.
     """
+
     def __init__(self, message):
         """
         Initializes the VL53L0XError with a custom message.
@@ -20,6 +23,7 @@ class VL53L0XError(Exception):
         Returns a string representation of the VL53L0XError.
         """
         return f"VL53L0X Error: {self.message}"
+
 
 class VL53L0XHandler:
     """
@@ -36,7 +40,11 @@ class VL53L0XHandler:
     SENSOR_DELAY = 0.05
     START_NEW_I2C_ADDRESS = 0x30
 
-    def __init__(self, i2c: I2C = I2C(I2C_SCL_PIN, I2C_SDA_PIN), xshut_pins: tuple = XSHUT_PINS):
+    def __init__(
+        self,
+        i2c: I2C = I2C(I2C_SCL_PIN, I2C_SDA_PIN),
+        xshut_pins: tuple = XSHUT_PINS
+        ):
         """
         Initializes the VL53L0XHandler with default settings.
 
@@ -75,7 +83,9 @@ class VL53L0XHandler:
                 sleep(self.SHORT_SETUP_DELAY)
 
             except ValueError as e:
-                raise VL53L0XError(f"Failed to initialize sensor on pin {pin}: {e}")
+                raise VL53L0XError(
+                    f"Failed to initialize sensor on pin {pin}: {e}"
+                    )
 
     async def multiple_tof_sensors_reading(self):
         """
@@ -101,4 +111,6 @@ class VL53L0XHandler:
                 sleep(self.SENSOR_DELAY)
 
             except Exception as e:
-                raise VL53L0XError(f"Error reading sensor on pin {self.__xshut[i].pin}: {e}")
+                raise VL53L0XError(
+                    f"Error reading sensor on pin {self.__xshut[i].pin}: {e}"
+                    )

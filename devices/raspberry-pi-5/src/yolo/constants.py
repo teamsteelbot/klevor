@@ -1,8 +1,3 @@
-import os
-
-# YOLO folder
-YOLO_DIR = os.path.abspath(os.path.dirname(__file__))
-
 # ONNX metadata properties class names key
 ONNX_METADATA_CLASS_NAMES_KEY = 'names'
 

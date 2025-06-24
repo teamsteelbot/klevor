@@ -5,7 +5,7 @@ import cv2
 import numpy as np
 from PIL.Image import Image
 
-from ..constants import WIDTH, HEIGHT
+from ..constants import HEIGHT, WIDTH
 from ..opencv.constants import PADDING_COLOR
 
 
@@ -15,8 +15,11 @@ class HailoABC(ABC):
     """
 
     @staticmethod
-    def preprocess(image: Image, width: int = WIDTH,
-                   height: int = HEIGHT) -> np.ndarray:
+    def preprocess(
+        image: Image,
+        width: int = WIDTH,
+        height: int = HEIGHT
+    ) -> np.ndarray:
         """
         Resize image with unchanged aspect ratio using padding.
 
@@ -34,13 +37,18 @@ class HailoABC(ABC):
         img_height, img_width, _ = image.shape[:3]
         scale = min(width / img_width, height / img_height)
         new_img_width, new_img_height = int(img_width * scale), int(
-            img_height * scale)
-        image = cv2.resize(image, (new_img_width, new_img_height),
-                           interpolation=cv2.INTER_CUBIC)
+            img_height * scale
+        )
+        image = cv2.resize(
+            image, (new_img_width, new_img_height),
+            interpolation=cv2.INTER_CUBIC
+            )
 
         # Calculate padding and create padded image
-        padded_image = np.full((height, width, 3), PADDING_COLOR,
-                               dtype=np.uint8)
+        padded_image = np.full(
+            (height, width, 3), PADDING_COLOR,
+            dtype=np.uint8
+            )
         x_offset = (height - new_img_width) // 2
         y_offset = (height - new_img_height) // 2
         padded_image[y_offset:y_offset + new_img_height,
@@ -59,8 +67,10 @@ class HailoABC(ABC):
         pass
 
     @abstractmethod
-    def _set_output_type(self, output_type_dict: Optional[
-        dict[str, str]] = None) -> None:
+    def _set_output_type(
+        self,
+        output_type_dict: Optional[dict[str, str]] = None
+    ) -> None:
         """
         Set the output type for the HEF model. If the model has multiple outputs,
         it will set the same type for all of them.
@@ -105,7 +115,10 @@ class HailoABC(ABC):
 
     @abstractmethod
     def _callback(
-            self, completion_info, bindings, preprocessed_image: np.ndarray
+        self,
+        completion_info,
+        bindings,
+        preprocessed_image: np.ndarray
     ) -> None:
         """
         Callback function for handling inference results.

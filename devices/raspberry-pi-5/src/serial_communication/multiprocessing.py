@@ -1,14 +1,14 @@
 import os
-from multiprocessing import Queue, Event
+from multiprocessing import Event, Queue
 from typing import Optional
 
 from . import SerialCommunication
 from .constants import (
+    RASPBERRY_PI_PICO_BAUDRATE,
     RASPBERRY_PI_PICO_CONSOLE_PORT,
     RASPBERRY_PI_PICO_CONSOLE_PORT_ALT,
     RASPBERRY_PI_PICO_DATA_PORT,
     RASPBERRY_PI_PICO_DATA_PORT_ALT,
-    RASPBERRY_PI_PICO_BAUDRATE
 )
 from ..utils.decorators import ignore_sigint
 
@@ -48,7 +48,10 @@ def serial_communication_target(
         data_port_alt (Optional[str]): Alternative serial port used for sending data to Pico.
         baudrate (Optional[int]): Baud rate for the serial communication.
     """
-    print("Initializing SerialCommunication in multiprocessing mode. Process ID: ", os.getpid())
+    print(
+        "Initializing SerialCommunication in multiprocessing mode. Process ID: ",
+        os.getpid()
+    )
 
     # Initialize the serial communication
     serial_communication = SerialCommunication(

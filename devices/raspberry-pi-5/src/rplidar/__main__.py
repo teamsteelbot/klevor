@@ -1,16 +1,17 @@
-from multiprocessing import Process, Queue, Event
 from argparse import ArgumentParser
+from multiprocessing import Event, Process, Queue
 from time import sleep
 
 from .multiprocessing import rplidar_target
 from ..args import Args, Flag
-from ..log.multiprocessing import writer_target
 from ..log import Logger
+from ..log.multiprocessing import writer_target
 from ..server.multiprocessing import websocket_server_target
 
 if __name__ == "__main__":
     parser = ArgumentParser(
-        description="Script to test the RPLIDAR functionality and start it.")
+        description="Script to test the RPLIDAR functionality and start it."
+    )
     Args.add_server_argument(parser)
     args = Args.parse_args_as_dict(parser)
 
@@ -27,8 +28,10 @@ if __name__ == "__main__":
     stop_event = Event()
 
     # Create a process for the writer
-    writer_process = Process(target=writer_target, args=(
-        writer_messages_queue, writer_stop_event))
+    writer_process = Process(
+        target=writer_target, args=(
+            writer_messages_queue, writer_stop_event)
+        )
     writer_process.start()
 
     # Create an instance of Logger
@@ -39,9 +42,11 @@ if __name__ == "__main__":
         server_process = None
 
     else:
-        server_process = Process(target=websocket_server_target, args=(
-            server_messages_queue, parking_event, stop_event,
-            writer_messages_queue))
+        server_process = Process(
+            target=websocket_server_target, args=(
+                server_messages_queue, parking_event, stop_event,
+                writer_messages_queue)
+            )
         server_process.start()
 
     # Create a process for the RPLIDAR
@@ -62,9 +67,11 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         # Handle keyboard interrupt to stop the processes gracefully
         print(
-            "KeyboardInterrupt received. Stopping RPLIDAR, server and writer process...")
+            "KeyboardInterrupt received. Stopping RPLIDAR, server and writer process..."
+        )
         logger.warning(
-            "KeyboardInterrupt received. Stopping RPLIDAR, server and writer process...")
+            "KeyboardInterrupt received. Stopping RPLIDAR, server and writer process..."
+        )
 
     except Exception as e:
         # Log any exceptions that occur

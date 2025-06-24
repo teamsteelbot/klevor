@@ -1,22 +1,32 @@
+from typing import Optional
+
+
 class ImageBoundingBoxes:
     """
     Class that represents the detected objects bounding boxes from an object detection model on an image.
     """
 
-    def __init__(self, xywhn: list = None, xyxy: list = None, xywh: list = None,
-                 xyxyn: list = None,
-                 cls: list = None, conf: list = None, n: int = None):
+    def __init__(
+        self,
+        xywhn: Optional[list] = None,
+        xyxy: Optional[list] = None,
+        xywh: Optional[list] = None,
+        xyxyn: Optional[list] = None,
+        cls: Optional[list] = None,
+        conf: Optional[list] = None,
+        n: Optional[int] = None
+    ):
         """
         Initialize the ImageBoundingBoxes instance with bounding box coordinates, classes, and confidences.
 
         Args:
-            xywh (list): Bounding box coordinates in the format (x_center, y_center, width, height).
-            xyxy (list): Bounding box coordinates in the format (x1, y1, x2, y2).
-            xywhn (list): Normalized bounding box coordinates in the format (x_center, y_center, width, height).
-            xyxyn (list): Normalized bounding box coordinates in the format (x1, y1, x2, y2).
-            cls (list): Class indices for each detected object.
-            conf (list): Confidence scores for each detected object.
-            n (int): Number of detected objects.
+            xywh (Optional[list]): Bounding box coordinates in the format (x_center, y_center, width, height).
+            xyxy (Optional[list]): Bounding box coordinates in the format (x1, y1, x2, y2).
+            xywhn (Optional[list]): Normalized bounding box coordinates in the format (x_center, y_center, width, height).
+            xyxyn (Optional[list]): Normalized bounding box coordinates in the format (x1, y1, x2, y2).
+            cls (Optional[list]): Class indices for each detected object.
+            conf (Optional[list]): Confidence scores for each detected object.
+            n (Optional[int]): Number of detected objects.
         """
         self.__xywh = xywh
         self.__xywhn = xywhn
@@ -42,7 +52,8 @@ class ImageBoundingBoxes:
                 f"(X1, Y1): ({self.__xyxyn[i][2]}, {self.__xyxyn[i][3]})",
             ]
             bounding_boxes.append(
-                f"Box {i + 1}:\n\t" + "\n\t".join(bounding_box_attributes))
+                f"Box {i + 1}:\n\t" + "\n\t".join(bounding_box_attributes)
+            )
         return "\n".join(bounding_boxes)
 
     @staticmethod
@@ -80,8 +91,10 @@ class ImageBoundingBoxes:
         return ImageBoundingBoxes.from_pt_cpu_boxes(input_data[0].boxes)
 
     @staticmethod
-    def from_hailo(input_data: list,
-                   threshold: float = 0.5) -> 'ImageBoundingBoxes':
+    def from_hailo(
+        input_data: list,
+        threshold: float = 0.5
+    ) -> 'ImageBoundingBoxes':
         """
         Extract detections from the input data.
 
@@ -108,8 +121,10 @@ class ImageBoundingBoxes:
                     classes.append(i)
                     num_detections += 1
 
-        return ImageBoundingBoxes(n=num_detections, xyxy=boxes, cls=classes,
-                                  conf=scores)
+        return ImageBoundingBoxes(
+            n=num_detections, xyxy=boxes, cls=classes,
+            conf=scores
+            )
 
     def get_number_of_objects(self) -> int:
         """

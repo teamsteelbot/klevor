@@ -1,5 +1,5 @@
 from multiprocessing import Queue
-from typing import final, Optional
+from typing import Optional, final
 
 from .abstracts import LoggerABC
 from .enums import Category
@@ -12,8 +12,12 @@ class Logger(LoggerABC):
     Class to handle logging functionality.
     """
 
-    def __init__(self, writer_messages_queue: Queue, tag: Optional[str] = None,
-                 unique_tag: bool = False):
+    def __init__(
+        self,
+        writer_messages_queue: Queue,
+        tag: Optional[str] = None,
+        unique_tag: bool = False
+    ) -> None:
         """
         Initialize the Logger class.
 
@@ -31,7 +35,8 @@ class Logger(LoggerABC):
 
         # Log the initialization if a tag is provided
         self.debug(
-            f"Initializing Logger with tag: {self.__tag}") if self.__tag else None
+            f"Initializing Logger with tag: {self.__tag}"
+        ) if self.__tag else None
 
     @final
     def get_unique_tag(self, tag: str):

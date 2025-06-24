@@ -1,8 +1,10 @@
 from typing import Any, Union
 
 
-def is_instance(obj: object,
-                class_or_tuple: Union[type, tuple[Any, ...]]) -> None:
+def is_instance(
+    obj: object,
+    class_or_tuple: Union[type, tuple[Any, ...]]
+    ) -> None:
     """
     Check if the object is an instance of the specified class or tuple of classes.
 

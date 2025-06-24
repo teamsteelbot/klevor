@@ -7,9 +7,12 @@ from serial import Serial, SerialException
 
 from .abstracts import SerialCommunicationABC
 from .constants import (
-    RASPBERRY_PI_PICO_CONSOLE_PORT, RASPBERRY_PI_PICO_CONSOLE_PORT_ALT,
-    RASPBERRY_PI_PICO_DATA_PORT, RASPBERRY_PI_PICO_DATA_PORT_ALT,
-    RASPBERRY_PI_PICO_BAUDRATE, ENCODE
+    ENCODE,
+    RASPBERRY_PI_PICO_BAUDRATE,
+    RASPBERRY_PI_PICO_CONSOLE_PORT,
+    RASPBERRY_PI_PICO_CONSOLE_PORT_ALT,
+    RASPBERRY_PI_PICO_DATA_PORT,
+    RASPBERRY_PI_PICO_DATA_PORT_ALT,
 )
 from .enums import OutgoingCategory, Status
 from .message import IncomingMessage, OutgoingMessage
@@ -38,21 +41,21 @@ class SerialCommunication(SerialCommunicationABC):
     STOP_DELAY = 0.1
 
     def __init__(
-            self,
-            start_event: Event,
-            parking_event: Event,
-            stop_event: Event,
-            incoming_messages_queue: Queue,
-            outgoing_messages_queue: Queue,
-            writer_messages_queue: Queue,
-            photographer_capture_image_event: Event,
-            server_messages_queue: Optional[Queue] = None,
-            console_port: Optional[str] = RASPBERRY_PI_PICO_CONSOLE_PORT,
-            console_port_alt: Optional[
-                str] = RASPBERRY_PI_PICO_CONSOLE_PORT_ALT,
-            data_port: Optional[str] = RASPBERRY_PI_PICO_DATA_PORT,
-            data_port_alt: Optional[str] = RASPBERRY_PI_PICO_DATA_PORT_ALT,
-            baudrate: Optional[int] = RASPBERRY_PI_PICO_BAUDRATE
+        self,
+        start_event: Event,
+        parking_event: Event,
+        stop_event: Event,
+        incoming_messages_queue: Queue,
+        outgoing_messages_queue: Queue,
+        writer_messages_queue: Queue,
+        photographer_capture_image_event: Event,
+        server_messages_queue: Optional[Queue] = None,
+        console_port: Optional[str] = RASPBERRY_PI_PICO_CONSOLE_PORT,
+        console_port_alt: Optional[
+            str] = RASPBERRY_PI_PICO_CONSOLE_PORT_ALT,
+        data_port: Optional[str] = RASPBERRY_PI_PICO_DATA_PORT,
+        data_port_alt: Optional[str] = RASPBERRY_PI_PICO_DATA_PORT_ALT,
+        baudrate: Optional[int] = RASPBERRY_PI_PICO_BAUDRATE
     ):
         """
         Initialize the serial communication class.
@@ -83,10 +86,12 @@ class SerialCommunication(SerialCommunicationABC):
 
         # Initialize the logger
         self.__logger = Logger(writer_messages_queue, self.LOGGER_TAG)
-        
+
         # Initialize the server dispatcher
         self.__server_dispatcher = Dispatcher(
-            server_messages_queue, writer_messages_queue) if server_messages_queue else None
+            server_messages_queue,
+            writer_messages_queue
+        ) if server_messages_queue else None
 
         # Initialize the reentrant lock
         self.__rlock = RLock()
@@ -130,15 +135,19 @@ class SerialCommunication(SerialCommunicationABC):
         except SerialException as port_e:
             # Try its alternative port
             try:
-                self.__console_serial = Serial(self.__console_port_alt,
-                                               self.__baudrate)
+                self.__console_serial = Serial(
+                    self.__console_port_alt,
+                    self.__baudrate
+                    )
 
             except SerialException as port_alt_e:
                 raise RuntimeError(
-                    f"Error opening serial console port: {port_e} and alternative port: {port_alt_e}")
+                    f"Error opening serial console port: {port_e} and alternative port: {port_alt_e}"
+                )
 
             raise RuntimeError(
-                f"Error opening serial console port: {port_e}")
+                f"Error opening serial console port: {port_e}"
+            )
 
         # Open the data port
         try:
@@ -147,18 +156,22 @@ class SerialCommunication(SerialCommunicationABC):
         except SerialException as port_e:
             # Try its alternative port
             try:
-                self.__data_serial = Serial(self.__data_port_alt,
-                                            self.__baudrate)
+                self.__data_serial = Serial(
+                    self.__data_port_alt,
+                    self.__baudrate
+                    )
 
             except SerialException as port_alt_e:
                 raise RuntimeError(
-                    f"Error opening serial data port: {port_e} and alternative port: {port_alt_e}")
+                    f"Error opening serial data port: {port_e} and alternative port: {port_alt_e}"
+                )
 
             raise RuntimeError(f"Error opening serial data port: {port_e}")
 
         # Log
         self.__logger.info(
-            f"Serial console port and data port opened with baudrate {self.__baudrate}.") if self.__logger else None
+            f"Serial console port and data port opened with baudrate {self.__baudrate}."
+        )
 
     @final
     def is_open(self) -> bool:
@@ -168,7 +181,7 @@ class SerialCommunication(SerialCommunicationABC):
     @final
     def is_closed(self) -> bool:
         return not self.is_open()
-    
+
     @final
     def has_started(self) -> bool:
         with self.__rlock:
@@ -183,30 +196,36 @@ class SerialCommunication(SerialCommunicationABC):
         msg_str = str(msg)
         first_line = str(msg).split('\n')[0]
         self.__logger.debug(
-            f"Received message: {first_line}") if self.__logger and self.__debug else None
+            f"Received message: {first_line}"
+        ) if self.__logger and self.__debug else None
 
         # If the server is set, send the message to the server
         self.__server_dispatcher.broadcast_serial_incoming_message(
-            msg_str) if self.__server_dispatcher else None
+            msg_str
+        ) if self.__server_dispatcher else None
 
     @final
     def _get_outgoing_message(self) -> OutgoingMessage | None:
         # Get the message from the queue
-        msg = self.__outgoing_messages_queue.get(timeout=self.OUTGOING_WAIT_TIMEOUT)
+        msg = self.__outgoing_messages_queue.get(
+            timeout=self.OUTGOING_WAIT_TIMEOUT
+        )
         if msg is None:
             return None
 
         # Log
         first_line = str(msg).split('\n')[0]
         self.__logger.debug(
-            f"Sending message: {first_line}") if self.__logger and self.__debug else None
+            f"Sending message: {first_line}"
+        ) if self.__logger and self.__debug else None
 
         # If the server is set, send the message to the server
         self.__server_dispatcher.broadcast_serial_outgoing_message(
-            first_line) if self.__server_dispatcher else None
+            first_line
+        ) if self.__server_dispatcher else None
 
         return msg
-    
+
     @final
     def _send_confirmation_message(self) -> None:
         """
@@ -222,15 +241,18 @@ class SerialCommunication(SerialCommunicationABC):
     def _receiving_message_handler(self) -> None:
         # Log
         self.__logger.info(
-            f"Serial port receiving handler started for port {self.__console_port}.") if self.__logger else None
+            f"Serial port receiving handler started for port {self.__console_port}."
+        )
 
         # Check if there is an initialization message received
         while self.is_open():
             if self.__console_serial.in_waiting > 0:
                 console_msg = self.__console_serial.read(
-                    self.__console_serial.in_waiting).decode(ENCODE).strip()
+                    self.__console_serial.in_waiting
+                ).decode(ENCODE).strip()
                 self.__logger.debug(
-                    "Received initialization message: " + console_msg) if self.__logger and self.__debug else None
+                    "Received initialization message: " + console_msg
+                ) if self.__logger and self.__debug else None
 
                 # Get the Message from the string
                 msg = IncomingMessage.from_string(console_msg)
@@ -244,7 +266,8 @@ class SerialCommunication(SerialCommunicationABC):
 
                         # Log
                         self.__logger.error(
-                            "Challenge not set. Stopping communication.") if self.__logger else None
+                            "Challenge not set. Stopping communication."
+                        )
                         return
 
                     # Send a confirmation message
@@ -255,7 +278,8 @@ class SerialCommunication(SerialCommunicationABC):
 
                     # Log
                     self.__logger.info(
-                        "Received start event.") if self.__logger else None
+                        "Received start event."
+                    )
                     break
 
                 elif msg.is_challenge():
@@ -267,7 +291,8 @@ class SerialCommunication(SerialCommunicationABC):
 
                     # Log
                     self.__logger.info(
-                        "Received challenge message.") if self.__logger else None
+                        "Received challenge message."
+                    )
                     # Continue to wait for the start event
                     continue
 
@@ -287,7 +312,7 @@ class SerialCommunication(SerialCommunicationABC):
 
                 # Log the stop message
                 self.__logger.info(
-                    "Received stop event.") if self.__logger else None
+                    "Received stop event.")
 
                 # Wait for a short time to ensure the message is sent
                 sleep(self.STOP_DELAY)
@@ -297,38 +322,42 @@ class SerialCommunication(SerialCommunicationABC):
             if msg.is_error():
                 # Log the error message
                 self.__logger.error(
-                    f"Received error message: {msg.content}") if self.__logger else None
+                    f"Received error message: {msg.content}"
+                )
 
             # Put the message in the incoming messages queue
             self._put_incoming_message(msg)
-            
+
         # Set the stop event to signal that the receiving handler has stopped
         self.__stop_event.set()
 
         # Clear the start event
         self.__start_event.clear()
-        
+
         # Close the console serial port
         if self.__console_serial and self.__console_serial.is_open:
             self.__console_serial.close()
             self.__console_serial = None
-            
+
         # Log
         self.__logger.info(
-            f"Serial port receiving handler stopped for port {self.__console_port}.") if self.__logger else None
+            f"Serial port receiving handler stopped for port {self.__console_port}."
+        )
 
     @final
     def _sending_message_handler(self) -> None:
         # Log 
         self.__logger.info(
-            "Waiting for start event on receiving handler...") if self.__logger else None
+            "Waiting for start event on receiving handler..."
+        )
 
         # Wait for start event to be set
         self.__start_event.wait()
 
         # Log
         self.__logger.info(
-            f"Serial port sending handler started for port {self.__data_port}.") if self.__logger else None
+            f"Serial port sending handler started for port {self.__data_port}."
+        )
 
         while self.is_open():
             # Get the message from the queue
@@ -355,7 +384,8 @@ class SerialCommunication(SerialCommunicationABC):
 
         # Log
         self.__logger.info(
-            f"Serial port sending handler stopped for port {self.__data_port}.") if self.__logger else None
+            f"Serial port sending handler stopped for port {self.__data_port}."
+        )
 
     @final
     def run(self) -> None:
@@ -363,21 +393,24 @@ class SerialCommunication(SerialCommunicationABC):
             # Check if the stop event is set
             if self.__stop_event.is_set():
                 self.__logger.warning(
-                    "Stop event is set. Serial communication will not run.")
+                    "Stop event is set. Serial communication will not run."
+                )
                 return
-    
+
             # Check if the websocket server is already running
             if self.is_open():
                 self.__logger.warning(
-                    "Serial communication is already running. Cannot start again.")
+                    "Serial communication is already running. Cannot start again."
+                )
                 return
-    
+
             # Set the opened event to signal that the websocket server is ready
             self.__opened_event.set()
 
         # Create the receiving thread
         self.__receiving_thread = Thread(
-            target=self._receiving_message_handler)
+            target=self._receiving_message_handler
+        )
         self.__receiving_thread.start()
 
         # Create the sending thread
@@ -401,3 +434,8 @@ class SerialCommunication(SerialCommunicationABC):
         Destructor to clean up resources when the SerialCommunication instance is deleted.
         """
         self.__stop_event.set()
+
+        # Log
+        self.__logger.debug(
+            "SerialCommunication instance is being deleted. Resources will be cleaned up."
+        )

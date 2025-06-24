@@ -1,9 +1,11 @@
+from asyncio import create_task, gather, sleep
+
 from board import GP11
 from digitalio import DigitalInOut, Direction, Pull
-from asyncio import sleep, create_task, gather
 
 from .led import LEDHandler
 from .serial_communication import SerialCommunication
+
 
 class SwitchHandler:
     """
@@ -13,8 +15,12 @@ class SwitchHandler:
     SWITCH_PIN = GP11
     DELAY = 0.01
 
-    def __init__(self, serial_communication: SerialCommunication, switch_pin: int = SWITCH_PIN,
-                 led: LEDHandler = None):
+    def __init__(
+        self,
+        serial_communication: SerialCommunication,
+        switch_pin: int = SWITCH_PIN,
+        led: LEDHandler = None
+        ):
         """
         Initializes the switch handler with the specified pin.
 

@@ -1,6 +1,6 @@
 import os
-from multiprocessing import Queue, Event
-from typing import Optional, Callable
+from multiprocessing import Event, Queue
+from typing import Callable, Optional
 
 import numpy as np
 from PIL.Image import Image
@@ -30,11 +30,13 @@ def photographer_target(
         preprocess_fn: Callable[[Image], np.ndarray]: Function to preprocess images before inference.
         server_messages_queue (Optional[Queue]): Queue to broadcast messages through the websockets server, if any.
     """
-    print("Initializing Photographer in multiprocessing mode. Process ID: ",
-          os.getpid())
+    print(
+        "Initializing Photographer in multiprocessing mode. Process ID: ",
+        os.getpid()
+        )
 
     # Initialize the camera
-    camera = Camera(writer_messages_queue)
+    camera = Camera(writer_messages_queue=writer_messages_queue)
 
     # Initialize the photographer
     photographer = Photographer(

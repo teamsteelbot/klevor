@@ -1,6 +1,7 @@
+from time import sleep
+
 from board import LED
 from digitalio import DigitalInOut, Direction
-from time import sleep
 
 # Set up the onboard LED on the Raspberry Pi Pico
 led = DigitalInOut(LED)

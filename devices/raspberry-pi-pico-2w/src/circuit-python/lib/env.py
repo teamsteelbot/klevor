@@ -48,7 +48,9 @@ class Env:
 
         # Check if the value is a valid boolean representation
         if not Env._check_boolean(value):
-            raise ValueError(f"Invalid value for MOVEMENT: {value}. Expected 'true' or 'false'.")
+            raise ValueError(
+                f"Invalid value for MOVEMENT: {value}. Expected 'true' or 'false'."
+                )
 
         return value == "true"
 
@@ -64,7 +66,9 @@ class Env:
 
         # Check if the value is a valid boolean representation
         if not Env._check_boolean(value):
-            raise ValueError(f"Invalid value for DEBUG: {value}. Expected 'true' or 'false'.")
+            raise ValueError(
+                f"Invalid value for DEBUG: {value}. Expected 'true' or 'false'."
+                )
 
         return value == "true"
 
@@ -80,6 +84,8 @@ class Env:
 
         # Check if the value is a valid challenge type
         if not Env._check_challenge(value):
-            raise ValueError(f"Invalid value for CHALLENGE: {value}. Expected 'without_obstacles' or 'with_obstacles'.")
+            raise ValueError(
+                f"Invalid value for CHALLENGE: {value}. Expected 'without_obstacles' or 'with_obstacles'."
+                )
 
         return value

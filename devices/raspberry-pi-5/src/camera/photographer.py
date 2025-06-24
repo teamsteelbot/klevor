@@ -1,5 +1,5 @@
-from multiprocessing import Queue, Event, RLock
-from typing import Optional, Callable, final
+from multiprocessing import Event, Queue, RLock
+from typing import Callable, Optional, final
 
 import numpy as np
 from PIL.Image import Image
@@ -21,11 +21,16 @@ class Photographer(PhotographerABC):
     # Wait timeout
     WAIT_TIMEOUT = 0.1
 
-    def __init__(self, camera: CameraABC, images_queue: Queue,
-                 capture_image_event: Event, stop_event: Event,
-                 writer_messages_queue: Queue,
-                 preprocess_fn: Callable[[Image], np.ndarray],
-                 server_messages_queue: Optional[Queue] = None):
+    def __init__(
+        self,
+        camera: CameraABC,
+        images_queue: Queue,
+        capture_image_event: Event,
+        stop_event: Event,
+        writer_messages_queue: Queue,
+        preprocess_fn: Callable[[Image], np.ndarray],
+        server_messages_queue: Optional[Queue] = None
+    ):
         """
         Initialize the Photographer class.
 
@@ -59,8 +64,10 @@ class Photographer(PhotographerABC):
         self.__preprocess_fn = preprocess_fn
 
         # Initialize the dispatcher for broadcasting messages
-        self.__dispatcher = Dispatcher(server_messages_queue,
-                                           writer_messages_queue) if server_messages_queue else None
+        self.__dispatcher = Dispatcher(
+            server_messages_queue,
+            writer_messages_queue
+            ) if server_messages_queue else None
 
         # Initialize the image counter
         self.__imager_counter = 0
@@ -71,13 +78,15 @@ class Photographer(PhotographerABC):
             # Check if the stop event is set
             if self.__stop_event.is_set():
                 self.__logger.warning(
-                    "Stop event is set. Photographer will not run.")
+                    "Stop event is set. Photographer will not run."
+                )
                 return
 
             # Check if the photographer is already running
             if self.is_running():
                 self.__logger.warning(
-                    "Photographer is already running. Cannot start again.")
+                    "Photographer is already running. Cannot start again."
+                )
                 return
 
             # Set the opened event to signal that the photographer is ready
@@ -88,7 +97,8 @@ class Photographer(PhotographerABC):
         while self.is_running():
             # Wait for the capture image event
             capture_image = self.__capture_image_event.wait(
-                timeout=self.WAIT_TIMEOUT)
+                timeout=self.WAIT_TIMEOUT
+            )
             if not capture_image:
                 continue
 
@@ -116,7 +126,8 @@ class Photographer(PhotographerABC):
 
             # If the dispatcher is available, broadcast the original image
             self.__dispatcher.broadcast_original_image(
-                image) if self.__dispatcher else None
+                image
+            ) if self.__dispatcher else None
 
         # Clear the events
         self.__capture_image_event.clear()
@@ -143,3 +154,8 @@ class Photographer(PhotographerABC):
         Destructor to clean up resources when the photographer is no longer needed.
         """
         self.__stop_event.set()
+
+        # Log
+        self.__logger.debug(
+            "Photographer instance is being. Resources will be cleaned up."
+        )

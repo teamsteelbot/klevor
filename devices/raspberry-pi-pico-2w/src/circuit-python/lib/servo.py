@@ -1,13 +1,15 @@
-import board
-from pwmio import PWMOut
-from adafruit_motor.servo import Servo
 from asyncio import sleep
+
+import board
+from adafruit_motor.servo import Servo
+from pwmio import PWMOut
 
 
 class ServoError(Exception):
     """
     Custom exception class for servo motor errors.
     """
+
     def __init__(self, message):
         """
         Initializes the ServoError with a custom message.
@@ -20,6 +22,7 @@ class ServoError(Exception):
         Returns a string representation of the ServoError.
         """
         return f"Servo Error: {self.message}"
+
 
 class ServoHandler:
     """
@@ -46,9 +49,11 @@ class ServoHandler:
     # Delay
     DELAY = 0.05
 
-    def __init__(self, servo_pin: int = SERVO_PIN, frequency: int = PWM_FREQUENCY,
-                    min_pulse: int = MIN_PULSE, max_pulse: int = MAX_PULSE,
-                    actuation_range: int = ACTUATION_RANGE, movement: bool = True):
+    def __init__(
+        self, servo_pin: int = SERVO_PIN, frequency: int = PWM_FREQUENCY,
+        min_pulse: int = MIN_PULSE, max_pulse: int = MAX_PULSE,
+        actuation_range: int = ACTUATION_RANGE, movement: bool = True
+        ):
         """
         Initializes the servo handler with the specified parameters.
 
@@ -62,8 +67,10 @@ class ServoHandler:
         """
         # Setup PWM output for the servo motor
         self.__servo_pwm = PWMOut(servo_pin, duty_cycle=0, frequency=frequency)
-        self.__servo_motor = Servo(self.__servo_pwm, actuation_range=actuation_range,
-                                        min_pulse=min_pulse, max_pulse=max_pulse)
+        self.__servo_motor = Servo(
+            self.__servo_pwm, actuation_range=actuation_range,
+            min_pulse=min_pulse, max_pulse=max_pulse
+            )
 
         # Set the movement flag
         self.__movement = movement
@@ -71,7 +78,6 @@ class ServoHandler:
         # Set the servo to center position
         self.__angle = self.CENTER_ANGLE
         self.center()
-        
 
     @staticmethod
     def _check_angle(angle: int):
@@ -85,7 +91,9 @@ class ServoHandler:
             ServoError: If the angle is not within the valid range.
         """
         if not 0 <= angle <= ServoHandler.ACTUATION_RANGE:
-            raise ServoError(f"Angle must be between 0 and {ServoHandler.ACTUATION_RANGE} degrees")
+            raise ServoError(
+                f"Angle must be between 0 and {ServoHandler.ACTUATION_RANGE} degrees"
+                )
 
     @property
     def angle(self) -> int:
@@ -127,10 +135,14 @@ class ServoHandler:
         Raises:
             ServoError: If the relative angle is not within the left and right limits.
         """
-        if not self.LEFT_LIMIT <= relative_angle * self.ANGLE_FACTOR <=  self.RIGHT_LIMIT:
-            raise ServoError(f"Relative angle must be between {self.LEFT_LIMIT} and {self.RIGHT_LIMIT} degrees")
+        if not self.LEFT_LIMIT <= relative_angle * self.ANGLE_FACTOR <= self.RIGHT_LIMIT:
+            raise ServoError(
+                f"Relative angle must be between {self.LEFT_LIMIT} and {self.RIGHT_LIMIT} degrees"
+                )
 
-        await self.set_angle(self.CENTER_ANGLE + relative_angle * self.ANGLE_FACTOR)
+        await self.set_angle(
+            self.CENTER_ANGLE + relative_angle * self.ANGLE_FACTOR
+            )
 
     async def center(self):
         """
@@ -149,7 +161,9 @@ class ServoHandler:
             ServoError: If the angle is not within the right limit.
         """
         if not 0 < angle <= self.RIGHT_LIMIT:
-            raise ServoError(f"Angle must be between 0 and {self.RIGHT_LIMIT} degrees for right movement")
+            raise ServoError(
+                f"Angle must be between 0 and {self.RIGHT_LIMIT} degrees for right movement"
+                )
 
         await self.set_angle(self.CENTER_ANGLE + angle * self.ANGLE_FACTOR)
 
@@ -164,7 +178,9 @@ class ServoHandler:
             ServoError: If the angle is not within the left limit.
         """
         if not 0 < angle <= abs(self.LEFT_LIMIT):
-            raise ServoError(f"Angle must be between 0 and {abs(self.LEFT_LIMIT)} degrees for left movement")
+            raise ServoError(
+                f"Angle must be between 0 and {abs(self.LEFT_LIMIT)} degrees for left movement"
+                )
 
         await self.set_angle(self.CENTER_ANGLE - angle * self.ANGLE_FACTOR)
 

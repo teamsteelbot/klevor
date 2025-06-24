@@ -1,6 +1,5 @@
 import os
-from multiprocessing import Queue, Event
-from typing import Optional
+from multiprocessing import Event, Queue
 
 from .object_detector import ObjectDetector
 from ..utils.decorators import ignore_sigint
@@ -31,8 +30,10 @@ def object_detector_target(
         photographer_images_queue (Queue): Queue to hold input images for processing.
         writer_messages_queue (Queue): Queue to hold log messages.
     """
-    print("Initializing ObjectDetector in multiprocessing mode. Process ID: ",
-          os.getpid())
+    print(
+        "Initializing ObjectDetector in multiprocessing mode. Process ID: ",
+        os.getpid()
+        )
 
     # Initialize the object detector
     object_detector = ObjectDetector(

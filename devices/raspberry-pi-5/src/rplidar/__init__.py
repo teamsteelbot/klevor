@@ -1,10 +1,13 @@
 import subprocess
-from multiprocessing import Event, RLock, Queue
+from multiprocessing import Event, Queue, RLock
 from typing import Optional, final
 
 from .abstracts import RPLIDARABC
 from .constants import (
-    RPLIDAR_C1_BAUDRATE, RPLIDAR_C1_PORT, ULTRA_SIMPLE_PATH, DISTANCE_DIFF
+    DISTANCE_DIFF,
+    RPLIDAR_C1_BAUDRATE,
+    RPLIDAR_C1_PORT,
+    ULTRA_SIMPLE_PATH,
 )
 from .measure import Measure
 from ..env import Env
@@ -25,15 +28,15 @@ class RPLIDAR(RPLIDARABC):
     PROCESS_WAIT_TIMEOUT = 5
 
     def __init__(
-            self,
-            measures_queue: Queue,
-            start_event: Event,
-            stop_event: Event,
-            writer_messages_queue: Queue,
-            server_messages_queue: Optional[Queue] = None,
-            baudrate: int = RPLIDAR_C1_BAUDRATE,
-            port: str = RPLIDAR_C1_PORT,
-            is_upside_down: bool = True
+        self,
+        measures_queue: Queue,
+        start_event: Event,
+        stop_event: Event,
+        writer_messages_queue: Queue,
+        server_messages_queue: Optional[Queue] = None,
+        baudrate: int = RPLIDAR_C1_BAUDRATE,
+        port: str = RPLIDAR_C1_PORT,
+        is_upside_down: bool = True
     ):
         """
         Initialize the RPLIDAR.
@@ -53,13 +56,15 @@ class RPLIDAR(RPLIDARABC):
         self.__started_event = Event()
         self.__start_event = start_event
         self.__stop_event = stop_event
-        
+
         # Initialize the logger
         self.__logger = Logger(writer_messages_queue, self.LOGGER_TAG)
 
         # Initialize the server dispatcher
         self.__server_dispatcher = WebSocketServerDispatcher(
-            server_messages_queue, writer_messages_queue) if server_messages_queue else None
+            server_messages_queue,
+            writer_messages_queue
+        ) if server_messages_queue else None
 
         # Create the reentrant lock
         self.__rlock = RLock()
@@ -167,8 +172,8 @@ class RPLIDAR(RPLIDARABC):
 
         elif (abs(self.__distances_dict[angle].distance - distance) >
               DISTANCE_DIFF) and (
-              abs(self.__distances_dict[angle].distance - distance) >
-              DISTANCE_DIFF):
+                abs(self.__distances_dict[angle].distance - distance) >
+                DISTANCE_DIFF):
             return
 
         else:
@@ -181,11 +186,17 @@ class RPLIDAR(RPLIDARABC):
         self._after_rotation() if rotation else None
 
         # Send the measure to the server
-        self.__server_dispatcher.broadcast_rplidar_measure(self.__measure) if self.__server_dispatcher else None
+        self.__server_dispatcher.broadcast_rplidar_measure(
+            self.__measure
+        ) if self.__server_dispatcher else None
 
         # Log
-        self.__logger.debug("RPLIDAR measure: " + str(self.__distances_dict[
-                                                          angle])) if self.__debug else None
+        self.__logger.debug(
+            "RPLIDAR measure: " + str(
+                self.__distances_dict[
+                    angle]
+                )
+            ) if self.__debug else None
 
         # Increment the messages counter
         self.__messages_counter += 1
@@ -196,13 +207,15 @@ class RPLIDAR(RPLIDARABC):
             # Check if the stop event is set
             if self.__stop_event.is_set():
                 self.__logger.warning(
-                    "Stop event is set. RPLIDAR will not run.")
+                    "Stop event is set. RPLIDAR will not run."
+                )
                 return
 
             # Check if the RPLIDAR is already running
             if self.__started_event.is_set():
                 self.__logger.warning(
-                    "RPLIDAR is already running. Cannot start again.")
+                    "RPLIDAR is already running. Cannot start again."
+                )
                 return
 
         # Wait for the start event to be set
@@ -234,11 +247,13 @@ class RPLIDAR(RPLIDARABC):
 
         except FileNotFoundError:
             raise ValueError(
-                f"The RPLIDAR ultra_simple executable was not found at {ULTRA_SIMPLE_PATH}. Please ensure it is installed correctly.")
+                f"The RPLIDAR ultra_simple executable was not found at {ULTRA_SIMPLE_PATH}. Please ensure it is installed correctly."
+            )
 
         except Exception as e:
             raise RuntimeError(
-                f"An error occurred while starting the RPLIDAR process: {e}")
+                f"An error occurred while starting the RPLIDAR process: {e}"
+            )
 
         # Read the output in a loop until the process ends or stop event is set
         while self.__process.poll() is None and self.is_running():
@@ -246,7 +261,9 @@ class RPLIDAR(RPLIDARABC):
 
         # Ensure the process is cleaned up even if an error occurs
         if self.__process and self.__process.poll() is None:
-            self.__logger.info("Ensuring process is terminated in finally block...")
+            self.__logger.info(
+                "Ensuring process is terminated in finally block..."
+            )
             self.__process.terminate()
             self.__process.wait(timeout=self.PROCESS_WAIT_TIMEOUT)
             if self.__process.poll() is None:
@@ -260,19 +277,24 @@ class RPLIDAR(RPLIDARABC):
 
         # Log the stop message
         self.__logger.info("RPLIDAR process stopped.")
-        
+
     @final
     def is_running(self) -> bool:
         with self.__rlock:
             return not self.__stop_event.is_set() and (
-                        self.__process is not None and self.__process.poll() is None)
+                    self.__process is not None and self.__process.poll() is None)
 
     @final
     def is_stopped(self) -> bool:
         return not self.is_running()
-        
+
     def __del__(self):
         """
         Destructor to clean up resources when the RPLIDAR is no longer needed.
         """
         self.__stop_event.set()
+
+        # Log
+        self.__logger.info(
+            "RPLIDAR instance is being deleted. Resources will be cleaned up."
+            )

@@ -1,7 +1,5 @@
 from abc import ABC, abstractmethod
 
-from .measure import Measure
-
 
 class RPLIDARABC(ABC):
     """
@@ -39,6 +37,10 @@ class RPLIDARABC(ABC):
     def run(self):
         """
         Run the RPLIDAR process.
+
+        Raises:
+            ValueError: If the ultra_simple file is not found.
+            RuntimeError: If the RPLIDAR process fails to start.
         """
         pass
 

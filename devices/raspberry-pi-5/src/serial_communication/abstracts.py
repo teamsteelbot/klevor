@@ -13,6 +13,9 @@ class SerialCommunicationABC(ABC):
     def _open(self) -> None:
         """
         Open the communication.
+
+        Raises:
+            RuntimeError: If the serial port cannot be opened.
         """
         pass
 
@@ -85,6 +88,7 @@ class SerialCommunicationABC(ABC):
         Run the serial communication by creating threads for receiving and sending messages.
         """
         pass
+
 
 class DispatcherABC:
     """

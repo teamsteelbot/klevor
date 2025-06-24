@@ -6,11 +6,10 @@ from typing import Optional, final
 import cv2
 import numpy as np
 from PIL.Image import Image
-from hailo_platform import (HEF, VDevice,
-                            FormatType, HailoSchedulingAlgorithm)
+from hailo_platform import (FormatType, HEF, HailoSchedulingAlgorithm, VDevice)
 
 from .abstracts import HailoABC
-from ..constants import MODEL_G, MODEL_R, MODEL_M
+from ..constants import MODEL_G, MODEL_M, MODEL_R
 from ..files import Files
 from ..log import Logger
 from ..model import ImageBoundingBoxes
@@ -41,14 +40,22 @@ class Hailo(HailoABC):
     # Job timeout
     JOB_TIMEOUT = 5000
 
-    def __init__(self, model_name: str, hef_file_path: str | os.PathLike[str],
-                 labels_path: str | os.PathLike[str],
-                 class_colors: tuple[tuple[int, int, int]],
-                 processed_images_queue: Queue, inferences_queue: Queue,
-                 stop_event: Event, writer_messages_queue: Queue,
-                 multi_threading: bool = True, multiprocessing: bool = False,
-                 batch_size: int = BATCH_SIZE, input_type: Optional[str] = None,
-                 output_type: Optional[dict[str, str]] = None) -> None:
+    def __init__(
+        self,
+        model_name: str,
+        hef_file_path: str | os.PathLike[str],
+        labels_path: str | os.PathLike[str],
+        class_colors: tuple[tuple[int, int, int]],
+        processed_images_queue: Queue,
+        inferences_queue: Queue,
+        stop_event: Event,
+        writer_messages_queue: Queue,
+        multi_threading: bool = True,
+        multiprocessing: bool = False,
+        batch_size: int = BATCH_SIZE,
+        input_type: Optional[str] = None,
+        output_type: Optional[dict[str, str]] = None
+    ) -> None:
         """
         Initialize the Hailo handler class.
 
@@ -72,11 +79,11 @@ class Hailo(HailoABC):
         self.__inferences_queue = inferences_queue
         self.__started_event = Event()
         self.__stop_event = stop_event
-        
+
         # Initialize the logger
         self.__logger_tag = f"{self.LOGGER_TAG}_{model_name}"
         self.__logger = Logger(writer_messages_queue, self.__logger_tag)
-        
+
         # Initialize the reentrant lock
         self.__rlock = RLock()
 
@@ -123,11 +130,14 @@ class Hailo(HailoABC):
     @final
     def _set_input_type(self, input_type: Optional[str] = None) -> None:
         self.__infer_model.input().set_format_type(
-            getattr(FormatType, input_type))
+            getattr(FormatType, input_type)
+        )
 
     @final
-    def _set_output_type(self, output_type_dict: Optional[
-        dict[str, str]] = None) -> None:
+    def _set_output_type(
+        self, output_type_dict: Optional[
+            dict[str, str]] = None
+        ) -> None:
         for output_name, output_type in output_type_dict.items():
             self.__infer_model.output(output_name).set_format_type(
                 getattr(FormatType, output_type)
@@ -169,7 +179,7 @@ class Hailo(HailoABC):
 
     @final
     def _callback(
-            self, completion_info, bindings, preprocessed_image: np.ndarray
+        self, completion_info, bindings, preprocessed_image: np.ndarray
     ) -> None:
         if completion_info.exception:
             self.__logger.log(f'Inference error: {completion_info.exception}')
@@ -195,13 +205,15 @@ class Hailo(HailoABC):
             # Check if the stop event is set
             if self.__stop_event.is_set():
                 self.__logger.warning(
-                    f"Stop event is set. Hailo handler for model '{self.__model_name}' will not run.")
+                    f"Stop event is set. Hailo handler for model '{self.__model_name}' will not run."
+                )
                 return
 
             # Check if the Hailo handler for the given model name is already running
             if self.__started_event.is_set():
                 self.__logger.warning(
-                    f"Hailo handler for model '{self.__model_name}' is already running. Cannot start again.")
+                    f"Hailo handler for model '{self.__model_name}' is already running. Cannot start again."
+                )
                 return
 
             # Set the started event to signal that the Hailo handler has started
@@ -227,18 +239,22 @@ class Hailo(HailoABC):
         # Set the HEF model
         self.__hef = HEF(self.__hef_file_path)
         self.__infer_model = self.__target.create_infer_model(
-            self.__hef_file_path)
+            self.__hef_file_path
+        )
         self.__infer_model.set_batch_size(self.__batch_size)
 
         # Set the input and output types
         self._set_input_type(self.__input_type) if self.__input_type else None
-        self._set_output_type(self.__output_type) if self.__output_type else None
-        
+        self._set_output_type(
+            self.__output_type
+        ) if self.__output_type else None
+
         with self.__infer_model.configure() as configured_infer_model:
             while self.is_running():
                 # Get a preprocessed image from the input queue
                 preprocessed_image = self.__processed_images_queue.get(
-                    timeout=self.WAIT_TIMEOUT)
+                    timeout=self.WAIT_TIMEOUT
+                )
                 if preprocessed_image is None:
                     continue
 
@@ -247,7 +263,8 @@ class Hailo(HailoABC):
                 bindings.input().set_buffer(np.array(preprocessed_image))
 
                 configured_infer_model.wait_for_async_ready(
-                    timeout_ms=self.JOB_TIMEOUT)
+                    timeout_ms=self.JOB_TIMEOUT
+                )
                 job = configured_infer_model.run_async(
                     bindings, partial(
                         self._callback,
@@ -276,3 +293,8 @@ class Hailo(HailoABC):
         Destructor to clean up resources when the Hailo handler is no longer needed.
         """
         self.__stop_event.set()
+
+        # Log
+        self.__logger.info(
+            f"Hailo handler instance for model '{self.__model_name}' is being deleted. Resources will be cleaned up."
+        )

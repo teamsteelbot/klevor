@@ -16,7 +16,7 @@ class Writer(WriterABC):
     # Wait timeout for processing messages
     WAIT_TIMEOUT = 0.1
 
-    def __init__(self, messages_queue: Queue, stop_event: Event):
+    def __init__(self, messages_queue: Queue, stop_event: Event) -> None:
         """
         Initialize the Logger class.
 
@@ -82,13 +82,19 @@ class Writer(WriterABC):
                 self.__opened_event.set()
 
             # Write the initial message to the log file
-            self._write(self.__file,
-                        Message(f"Log file opened at {self.__file_path}.",
-                                Category.DEBUG))
+            self._write(
+                self.__file,
+                Message(
+                    f"Log file opened at {self.__file_path}.",
+                    Category.DEBUG
+                    )
+                )
 
             # Main loop to write messages to the log file
-            self._write(self.__file,
-                        Message("Writer's starting...", Category.DEBUG))
+            self._write(
+                self.__file,
+                Message("Writer's starting...", Category.DEBUG)
+                )
             while not self.__stop_event.is_set():
                 # Write the last message if available
                 self._write_last_message()
@@ -119,3 +125,6 @@ class Writer(WriterABC):
         Destructor to clean up resources when the photographer is no longer needed.
         """
         self.__stop_event.set()
+
+        # Log
+        print("Writer instance is being deleted. Resources will be cleaned up.")

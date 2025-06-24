@@ -10,8 +10,12 @@ class Message:
     Class to handle log messages.
     """
 
-    def __init__(self, content: str, category: Category = Category.INFO,
-                 tag: Optional[str] = None):
+    def __init__(
+        self,
+        content: str,
+        category: Category = Category.INFO,
+        tag: Optional[str] = None
+    ):
         """
         Initialize the Message class.
 

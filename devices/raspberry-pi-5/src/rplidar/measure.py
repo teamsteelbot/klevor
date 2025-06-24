@@ -28,7 +28,8 @@ class Measure:
         """
         # return self.ATTRIBUTES_SEPARATOR.join([str(self.angle), str(self.distance), str(self.quality)])
         return self.ATTRIBUTES_SEPARATOR.join(
-            [str(self.angle), str(self.distance)])
+            [str(self.angle), str(self.distance)]
+        )
 
     def __repr__(self):
         """
@@ -58,7 +59,8 @@ class Measure:
 
         if not (0 <= value):
             raise ValueError(
-                f"Angle must be a non-negative float, received: {value}")
+                f"Angle must be a non-negative float, received: {value}"
+            )
         self.__angle = 0.0 if value >= 360.0 else value
 
     @property
@@ -84,7 +86,9 @@ class Measure:
         if value < 0:
             raise ValueError(
                 "Distance must be a non-negative float, received: {}".format(
-                    value))
+                    value
+                )
+            )
 
         self.__distance = value
 
@@ -110,7 +114,8 @@ class Measure:
 
         if value < 0:
             raise ValueError(
-                f"Quality must be a non-negative integer, received: {value}")
+                f"Quality must be a non-negative integer, received: {value}"
+            )
         self.__quality = value
 
     @classmethod
@@ -205,5 +210,5 @@ class Measure:
             float(parts[0]),
             float(parts[1]),
             int(parts[2]) if len(parts) > 2 else 0
-        # Quality, default to 0 if not provided
+            # Quality, default to 0 if not provided
         )

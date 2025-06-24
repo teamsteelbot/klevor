@@ -5,13 +5,20 @@ import tensorflow as tf
 
 from ..args import Args, Flag
 from ..files import Files
-from ..files.constants import DATASET_ORGANIZED, DATASET_TO_PROCESS, \
-    DATASET_TESTING, DATASET_IMAGES, DATASET_LABELS
+from ..files.constants import (
+    DATASET_IMAGES,
+    DATASET_LABELS,
+    DATASET_ORGANIZED,
+    DATASET_TESTING,
+    DATASET_TO_PROCESS,
+)
 
 
-def create_tfrecord(output_path: str | os.PathLike[str],
-                    image_dir: str | os.PathLike[str],
-                    label_dir: str | os.PathLike[str]):
+def create_tfrecord(
+    output_path: str | os.PathLike[str],
+    image_dir: str | os.PathLike[str],
+    label_dir: str | os.PathLike[str]
+    ):
     """
     This script creates a TFRecord file from images and their labels.
 
@@ -26,8 +33,10 @@ def create_tfrecord(output_path: str | os.PathLike[str],
 
     for image_name in os.listdir(image_dir):
         image_path = os.path.join(image_dir, image_name)
-        label_path = os.path.join(label_dir,
-                                  os.path.splitext(image_name)[0] + ".txt")
+        label_path = os.path.join(
+            label_dir,
+            os.path.splitext(image_name)[0] + ".txt"
+            )
 
         # Read image data
         with open(image_path, "rb") as img_file:
@@ -43,9 +52,11 @@ def create_tfrecord(output_path: str | os.PathLike[str],
         # Create TFRecord features
         feature = {
             "image": tf.train.Feature(
-                bytes_list=tf.train.BytesList(value=[image_data])),
+                bytes_list=tf.train.BytesList(value=[image_data])
+            ),
             "label": tf.train.Feature(
-                bytes_list=tf.train.BytesList(value=[label_data.encode()])),
+                bytes_list=tf.train.BytesList(value=[label_data.encode()])
+            ),
         }
 
         example = tf.train.Example(features=tf.train.Features(feature=feature))
@@ -56,14 +67,17 @@ def create_tfrecord(output_path: str | os.PathLike[str],
 
 if __name__ == "__main__":
     parser = ArgumentParser(
-        description='Script to create TFRecord from images and labels')
+        description='Script to create TFRecord from images and labels'
+    )
     Args.add_yolo_input_model_argument(parser)
     Args.add_yolo_version_argument(parser)
     args = Args.parse_args_as_dict(parser)
 
     # Get the YOLO input model
-    arg_yolo_input_model = Args.get_attribute_from_args_dict(args,
-                                                             Flag.INPUT_MODEL)
+    arg_yolo_input_model = Args.get_attribute_from_args_dict(
+        args,
+        Flag.INPUT_MODEL
+        )
 
     # Get the YOLO version
     arg_yolo_version = Args.get_attribute_from_args_dict(args, Flag.VERSION)
@@ -71,19 +85,28 @@ if __name__ == "__main__":
     # Get the dataset paths
     organized_to_process_dir = Files.get_dataset_model_dir_path(
         DATASET_ORGANIZED, DATASET_TO_PROCESS,
-        arg_yolo_input_model)
+        arg_yolo_input_model
+    )
 
     # Get the images and labels directories
-    organized_to_process_testing_dir = os.path.join(organized_to_process_dir,
-                                                    DATASET_TESTING)
-    testing_images_dir = os.path.join(organized_to_process_testing_dir,
-                                      DATASET_IMAGES)
-    testing_labels_dir = os.path.join(organized_to_process_testing_dir,
-                                      DATASET_LABELS)
+    organized_to_process_testing_dir = os.path.join(
+        organized_to_process_dir,
+        DATASET_TESTING
+        )
+    testing_images_dir = os.path.join(
+        organized_to_process_testing_dir,
+        DATASET_IMAGES
+        )
+    testing_labels_dir = os.path.join(
+        organized_to_process_testing_dir,
+        DATASET_LABELS
+        )
 
     # Get the TF Record output path
-    output_tfrecord = Files.get_tf_record_path(arg_yolo_input_model,
-                                               arg_yolo_version)
+    output_tfrecord = Files.get_tf_record_path(
+        arg_yolo_input_model,
+        arg_yolo_version
+        )
 
     # Create TFRecord
     create_tfrecord(output_tfrecord, testing_images_dir, testing_labels_dir)

@@ -84,8 +84,10 @@ class Yolo:
         return model.export(format="tflite", int8=quantized)
 
     @staticmethod
-    def run_inference(model: YOLO, preprocessed_image: torch.Tensor) -> tuple[
-        list, float]:
+    def run_inference(
+        model: YOLO,
+        preprocessed_image: torch.Tensor
+    ) -> tuple[list, float]:
         """
         Run inference from PyTorch model.
 

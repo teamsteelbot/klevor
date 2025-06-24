@@ -1,4 +1,4 @@
-from multiprocessing import Event, Queue, Process
+from multiprocessing import Event, Process, Queue
 from time import sleep
 
 from . import Logger
@@ -10,8 +10,10 @@ if __name__ == "__main__":
     stop_event = Event()
 
     # Create a process for the writer
-    writer_process = Process(target=writer_target, args=(
-        writer_messages_queue, stop_event))
+    writer_process = Process(
+        target=writer_target, args=(
+            writer_messages_queue, stop_event)
+        )
     writer_process.start()
 
     # Create an instance of Logger

@@ -43,8 +43,11 @@ class CameraABC(ABC):
         pass
 
     @abstractmethod
-    def capture_image_stream(self, image_format: str = IMAGE_FORMAT,
-                             adjust_duration: float = ADJUST_DURATION) -> io.BytesIO:
+    def capture_image_stream(
+        self,
+        image_format: str = IMAGE_FORMAT,
+        adjust_duration: float = ADJUST_DURATION
+    ) -> io.BytesIO:
         """
         Capture an image and return a byte stream.
 
@@ -57,8 +60,10 @@ class CameraABC(ABC):
         pass
 
     @abstractmethod
-    def record_video(self, width: int, height: int, duration: int,
-                     file_path: str, encoder) -> None:
+    def record_video(
+        self, width: int, height: int, duration: int,
+        file_path: str, encoder
+        ) -> None:
         """
         Record a video with the camera.
 
@@ -72,7 +77,10 @@ class CameraABC(ABC):
         pass
 
     @staticmethod
-    def correct_color(image: Image, factor: float = 1.1) -> Image:
+    def correct_color(
+        image: Image,
+        factor: float = 1.1
+    ) -> Image:
         """
         Apply color correction to the image.
 

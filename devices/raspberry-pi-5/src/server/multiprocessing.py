@@ -1,5 +1,5 @@
 import os
-from multiprocessing import Queue, Event
+from multiprocessing import Event, Queue
 
 from . import WebSocketServer
 from .constants import HOST, PORT
@@ -26,8 +26,10 @@ def websocket_server_target(
         host (str): The host address for the WebSocket server.
         port (int): The port number for the WebSocket server.
     """
-    print("Initializing WebSocketServer in multiprocessing mode. Process ID: ",
-          os.getpid())
+    print(
+        "Initializing WebSocketServer in multiprocessing mode. Process ID: ",
+        os.getpid()
+        )
 
     # Initialize the websocket server
     server = WebSocketServer(

@@ -1,13 +1,15 @@
+from asyncio import sleep
+
+from adafruit_motor.servo import ContinuousServo
 from board import GP2
 from pwmio import PWMOut
-from adafruit_motor.servo import ContinuousServo
-from asyncio import sleep
 
 
 class ESCMotorError(Exception):
     """
     Custom exception class for ESC motor errors.
     """
+
     def __init__(self, message):
         """
         Initializes the ESCMotorError with a custom message.
@@ -46,9 +48,11 @@ class ESCMotorHandler:
     # Delay for motor operations
     DELAY = 0.15
 
-    def __init__(self, motor_pin: int = MOTOR_PIN, frequency: int = PWM_FREQUENCY,
-                 min_pulse: int = MIN_PULSE, max_pulse: int = MAX_PULSE,
-                 movement: bool = True):
+    def __init__(
+        self, motor_pin: int = MOTOR_PIN, frequency: int = PWM_FREQUENCY,
+        min_pulse: int = MIN_PULSE, max_pulse: int = MAX_PULSE,
+        movement: bool = True
+        ):
         """
         Initializes the ESC motor handler with the specified parameters.
 
@@ -61,7 +65,11 @@ class ESCMotorHandler:
         """
         # Setup PWM output for the ESC motor
         self.__esc_pwm = PWMOut(motor_pin, duty_cycle=0, frequency=frequency)
-        self.__esc_motor = ContinuousServo(self.__esc_pwm, min_pulse=min_pulse, max_pulse=max_pulse)
+        self.__esc_motor = ContinuousServo(
+            self.__esc_pwm,
+            min_pulse=min_pulse,
+            max_pulse=max_pulse
+            )
 
         # Set the movement flag
         self.__movement = movement
@@ -82,7 +90,9 @@ class ESCMotorHandler:
             ESCMotorError: If the speed is not within the valid half range.
         """
         if not (0 < speed <= cls.SPEED_RANGE[1]):
-            raise ESCMotorError(f"Speed must be between 0 and {cls.SPEED_RANGE[1]}")
+            raise ESCMotorError(
+                f"Speed must be between 0 and {cls.SPEED_RANGE[1]}"
+                )
 
     @classmethod
     def _check_speed_full_range(cls, speed: float):
@@ -96,7 +106,9 @@ class ESCMotorHandler:
             ESCMotorError: If the speed is not within the valid full range.
         """
         if not (cls.SPEED_RANGE[0] <= speed <= cls.SPEED_RANGE[1]):
-            raise ESCMotorError(f"Speed must be between {cls.SPEED_RANGE[0]} and {cls.SPEED_RANGE[1]}")
+            raise ESCMotorError(
+                f"Speed must be between {cls.SPEED_RANGE[0]} and {cls.SPEED_RANGE[1]}"
+                )
 
     @property
     def speed(self) -> float:

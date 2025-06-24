@@ -42,13 +42,6 @@ LAST = 'last'
 # TF Records
 TF_RECORDS = 'tf_records'
 
-# YOLO runs
-RUNS_OLD = 'runs_old'
-RUNS = 'runs'
-
-# YOLO weights
-WEIGHTS = 'weights'
-
 # YOLO zip folder
 ZIP = 'zip'
 

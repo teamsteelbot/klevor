@@ -1,4 +1,4 @@
-from .enums import OutgoingCategory, IncomingCategory
+from .enums import IncomingCategory, OutgoingCategory
 
 
 class IncomingMessage:
@@ -99,6 +99,7 @@ class IncomingMessage:
             content (str): The content of the message.
         """
         self.__content = content
+
 
 class OutgoingMessage:
     """

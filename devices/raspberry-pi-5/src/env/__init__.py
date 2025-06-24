@@ -1,6 +1,6 @@
 import os
 
-from .enums import Key, Challenge
+from .enums import Challenge, Key
 from ..utils import map_string_to_enum
 
 

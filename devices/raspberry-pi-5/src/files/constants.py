@@ -18,6 +18,16 @@ HAILO_MODEL_ZOO_DIR = os.path.join(HAILO_LIBS_DIR, 'model_zoo')
 LOG_DIR = os.path.join(ROOT_DIR, 'log')
 LOGS_DIR = os.path.abspath(os.path.join(LOG_DIR, 'logs'))
 
+# YOLO folder
+YOLO_DIR = os.path.abspath(os.path.dirname(__file__))
+
+# YOLO runs
+RUNS_OLD = 'runs_old'
+RUNS = 'runs'
+
+# YOLO weights
+WEIGHTS = 'weights'
+
 # Directories to ignore always
 IGNORE_DIRS = (
     '.git', '__pycache__', '.idea', '.vscode', '.venv', 'venv', 'env')

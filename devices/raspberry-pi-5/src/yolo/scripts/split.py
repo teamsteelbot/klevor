@@ -7,16 +7,22 @@ from ..args import Args, Flag
 from ..constants import TRAINING_RATIO, VALIDATION_RATIO
 from ..files import Files
 from ..files.constants import (
-    DATASET_IMAGES, DATASET_LABELS, DATASET_TRAINING, DATASET_VALIDATIONS,
+    DATASET_AUGMENTED,
+    DATASET_IMAGES,
+    DATASET_LABELS,
+    DATASET_ORGANIZED,
     DATASET_TESTING,
-    DATASET_AUGMENTED, DATASET_ORGANIZED
+    DATASET_TRAINING,
+    DATASET_VALIDATIONS,
 )
 
 
-def split_dataset(input_dir: str | os.PathLike[str],
-                  output_dir: str | os.PathLike[str],
-                  train_ratio: float = TRAINING_RATIO,
-                  val_ratio: float = VALIDATION_RATIO) -> None:
+def split_dataset(
+    input_dir: str | os.PathLike[str],
+    output_dir: str | os.PathLike[str],
+    train_ratio: float = TRAINING_RATIO,
+    val_ratio: float = VALIDATION_RATIO
+    ) -> None:
     """
     Split the dataset into training, validation, and testing sets.
 
@@ -34,17 +40,27 @@ def split_dataset(input_dir: str | os.PathLike[str],
     output_training_dir = os.path.join(output_dir, DATASET_TRAINING)
     output_validations_dir = os.path.join(output_dir, DATASET_VALIDATIONS)
     output_testing_dir = os.path.join(output_dir, DATASET_TESTING)
-    output_training_images_dir = os.path.join(output_training_dir,
-                                              DATASET_IMAGES)
-    output_validations_images_dir = os.path.join(output_validations_dir,
-                                                 DATASET_IMAGES)
+    output_training_images_dir = os.path.join(
+        output_training_dir,
+        DATASET_IMAGES
+        )
+    output_validations_images_dir = os.path.join(
+        output_validations_dir,
+        DATASET_IMAGES
+        )
     output_testing_images_dir = os.path.join(output_testing_dir, DATASET_IMAGES)
-    output_training_annotations_dir = os.path.join(output_training_dir,
-                                                   DATASET_LABELS)
-    output_validations_annotations_dir = os.path.join(output_validations_dir,
-                                                      DATASET_LABELS)
-    output_testing_annotations_dir = os.path.join(output_testing_dir,
-                                                  DATASET_LABELS)
+    output_training_annotations_dir = os.path.join(
+        output_training_dir,
+        DATASET_LABELS
+        )
+    output_validations_annotations_dir = os.path.join(
+        output_validations_dir,
+        DATASET_LABELS
+        )
+    output_testing_annotations_dir = os.path.join(
+        output_testing_dir,
+        DATASET_LABELS
+        )
 
     # Check if the path exists, if not it creates it
     for io_dir in [input_dir, input_images_dir, input_annotations_dir,
@@ -72,27 +88,43 @@ def split_dataset(input_dir: str | os.PathLike[str],
     # Copy the files to the output directories
     for i, image_filename in enumerate(image_filenames):
         # Get the image and annotations paths
-        input_to_process_image_path = os.path.join(input_images_dir,
-                                                   image_filename)
+        input_to_process_image_path = os.path.join(
+            input_images_dir,
+            image_filename
+            )
         annotations_filename = os.path.splitext(image_filename)[0] + '.txt'
-        input_to_process_annotations_path = os.path.join(input_annotations_dir,
-                                                         annotations_filename)
+        input_to_process_annotations_path = os.path.join(
+            input_annotations_dir,
+            annotations_filename
+            )
 
         if i < train_split:
-            Files.copy_file(input_to_process_image_path,
-                            output_training_images_dir)
-            Files.copy_file(input_to_process_annotations_path,
-                            output_training_annotations_dir)
+            Files.copy_file(
+                input_to_process_image_path,
+                output_training_images_dir
+                )
+            Files.copy_file(
+                input_to_process_annotations_path,
+                output_training_annotations_dir
+                )
         elif i < train_split + val_split:
-            Files.copy_file(input_to_process_image_path,
-                            output_validations_images_dir)
-            Files.copy_file(input_to_process_annotations_path,
-                            output_validations_annotations_dir)
+            Files.copy_file(
+                input_to_process_image_path,
+                output_validations_images_dir
+                )
+            Files.copy_file(
+                input_to_process_annotations_path,
+                output_validations_annotations_dir
+                )
         else:
-            Files.copy_file(input_to_process_image_path,
-                            output_testing_images_dir)
-            Files.copy_file(input_to_process_annotations_path,
-                            output_testing_annotations_dir)
+            Files.copy_file(
+                input_to_process_image_path,
+                output_testing_images_dir
+                )
+            Files.copy_file(
+                input_to_process_annotations_path,
+                output_testing_annotations_dir
+                )
 
         # Log
         print(f'Copied {image_filename} to the respective directories')
@@ -104,19 +136,26 @@ def split_dataset(input_dir: str | os.PathLike[str],
 
 if __name__ == '__main__':
     parser = ArgumentParser(
-        description='Script to split YOLO dataset images and labels')
+        description='Script to split YOLO dataset images and labels'
+    )
     Args.add_yolo_input_model_argument(parser)
     args = Args.parse_args_as_dict(parser)
 
     # Get the YOLO input model
-    arg_yolo_input_model = Args.get_attribute_from_args_dict(args,
-                                                             Flag.INPUT_MODEL)
+    arg_yolo_input_model = Args.get_attribute_from_args_dict(
+        args,
+        Flag.INPUT_MODEL
+        )
 
     # Get the dataset paths
-    augmented_dir = Files.get_dataset_model_dir_path(DATASET_AUGMENTED, None,
-                                                     arg_yolo_input_model)
-    organized_dir = Files.get_dataset_model_dir_path(DATASET_ORGANIZED, None,
-                                                     arg_yolo_input_model)
+    augmented_dir = Files.get_dataset_model_dir_path(
+        DATASET_AUGMENTED, None,
+        arg_yolo_input_model
+        )
+    organized_dir = Files.get_dataset_model_dir_path(
+        DATASET_ORGANIZED, None,
+        arg_yolo_input_model
+        )
 
     # Split the images
     split_dataset(augmented_dir, organized_dir)

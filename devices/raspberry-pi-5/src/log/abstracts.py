@@ -96,9 +96,12 @@ class WriterABC(ABC):
 
         # Check if the message is an instance of Message
         if not isinstance(msg, Message):
-            cls._write(file, Message(
-                f"Invalid message type: {type(msg)}. Expected Message.",
-                Category.ERROR))
+            cls._write(
+                file, Message(
+                    f"Invalid message type: {type(msg)}. Expected Message.",
+                    Category.ERROR
+                )
+                )
             return
 
         # Write the message to the log file

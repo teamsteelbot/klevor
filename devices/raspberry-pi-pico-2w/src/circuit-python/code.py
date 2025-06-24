@@ -1,16 +1,17 @@
-from board import (LED, GP0, GP1, GP2, GP11, GP13)
+from asyncio import create_task, gather, run
+
+from board import (GP0, GP1, GP11, GP13, GP2, LED)
 from busio import I2C
-from asyncio import run, create_task, gather
 
 from lib.bno08x import BNO08XHandler
-from lib.env import Env
+from lib.challenge import WithObstacles, WithoutObstacles
 from lib.enums import Challenge
+from lib.env import Env
 from lib.esc_motor import ESCMotorHandler
 from lib.led import LEDHandler
 from lib.serial_communication import SerialCommunication
 from lib.servo import ServoHandler
 from lib.switch import SwitchHandler
-from lib.challenge import WithoutObstacles, WithObstacles
 
 # Constants
 MOVEMENT = Env.get_movement_mode()
@@ -41,6 +42,7 @@ switch = SwitchHandler(
     serial_communication=serial_communication,
     led=led
 )
+
 
 async def main():
     """
@@ -91,6 +93,7 @@ async def main():
     except Exception as e:
         # Send error message to the serial communication
         serial_communication.send_error_message(e)
+
 
 # Start the asyncio event loop
 run(main())

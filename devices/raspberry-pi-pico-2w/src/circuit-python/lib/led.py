@@ -1,6 +1,8 @@
-from digitalio import DigitalInOut, Direction
-from board import LED
 from asyncio import sleep
+
+from board import LED
+from digitalio import DigitalInOut, Direction
+
 
 class LEDHandler:
     """

@@ -24,6 +24,7 @@ class IncomingCategory:
 
         raise ValueError(f"Invalid incoming category: {category_str}")
 
+
 class OutgoingCategory:
     """
     Class to represent the enum categories of outgoing messages to the Raspberry Pi 5.
@@ -53,6 +54,7 @@ class OutgoingCategory:
 
         raise ValueError(f"Invalid outgoing category: {category_str}")
 
+
 class Status:
     """
     Class to represent the enum status messages sent and received to the Raspberry Pi 5.
@@ -78,6 +80,7 @@ class Status:
                 return status
 
         raise ValueError(f"Invalid status: {status_str}")
+
 
 class Challenge:
     """
