@@ -8,13 +8,13 @@ from serial import Serial, SerialException
 from .abstracts import SerialCommunicationABC
 from .constants import (
     ENCODE,
+    OUTGOING_OK_MESSAGE,
     RASPBERRY_PI_PICO_BAUDRATE,
     RASPBERRY_PI_PICO_CONSOLE_PORT,
     RASPBERRY_PI_PICO_CONSOLE_PORT_ALT,
     RASPBERRY_PI_PICO_DATA_PORT,
     RASPBERRY_PI_PICO_DATA_PORT_ALT,
-    OUTGOING_OK_MESSAGE,
-    STOP_MESSAGE
+    STOP_MESSAGE,
 )
 from .message import IncomingMessage, OutgoingMessage
 from ..env import Env
@@ -149,7 +149,7 @@ class SerialCommunication(SerialCommunicationABC):
                 self.__console_serial = Serial(
                     self.__console_port_alt,
                     self.__baudrate
-                    )
+                )
 
             except SerialException as port_alt_e:
                 raise RuntimeError(
@@ -170,7 +170,7 @@ class SerialCommunication(SerialCommunicationABC):
                 self.__data_serial = Serial(
                     self.__data_port_alt,
                     self.__baudrate
-                    )
+                )
 
             except SerialException as port_alt_e:
                 raise RuntimeError(
@@ -242,7 +242,10 @@ class SerialCommunication(SerialCommunicationABC):
         self.__outgoing_messages_queue.put(OUTGOING_OK_MESSAGE)
 
     @final
-    def _wait_confirmation_message(self, msg_to_confirm: OutgoingMessage) -> None:
+    def _wait_confirmation_message(
+        self,
+        msg_to_confirm: OutgoingMessage
+        ) -> None:
         # Log
         self.__logger.debug(
             f"Waiting for confirmation message for: {msg_to_confirm}"

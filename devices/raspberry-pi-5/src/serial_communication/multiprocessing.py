@@ -1,5 +1,5 @@
 import os
-from multiprocessing import Event, Queue,Value
+from multiprocessing import Event, Queue, Value
 from typing import Optional
 
 from . import SerialCommunication

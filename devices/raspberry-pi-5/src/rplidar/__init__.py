@@ -1,5 +1,6 @@
 import subprocess
 from multiprocessing import Event, Queue, RLock
+from threading import Thread
 from typing import Optional, final
 
 from .abstracts import RPLIDARABC
@@ -29,6 +30,7 @@ class RPLIDAR(RPLIDARABC):
 
     def __init__(
         self,
+        update_measures_event: Event,
         measures_queue: Queue,
         start_event: Event,
         stop_event: Event,
@@ -42,6 +44,7 @@ class RPLIDAR(RPLIDARABC):
         Initialize the RPLIDAR.
 
         Args:
+            update_measures_event (Event): Event to signal when the RPLIDAR should update measures.
             measures_queue (Queue): Queue to hold the measures from the RPLIDAR.
             start_event (Event): Event to signal when the RPLIDAR should start.
             stop_event (Event): Event to signal when the RPLIDAR should stop.
@@ -52,6 +55,7 @@ class RPLIDAR(RPLIDARABC):
             is_upside_down (bool): If True, the RPLIDAR is upside down, and angles will be adjusted accordingly.
         """
         # Initialize the queues and events
+        self.__update_measures_event = update_measures_event
         self.__measures_queue = measures_queue
         self.__started_event = Event()
         self.__start_event = start_event
@@ -93,6 +97,9 @@ class RPLIDAR(RPLIDARABC):
         # Get the debug environment variable
         self.__debug = Env.get_debug_mode()
 
+        # Initialize the listener thread for measures updates
+        self.__update_measures_listener_thread = None
+
     @final
     def _calculate_average_distance(self, angles: list[int]) -> float:
         total_distance = 0.0
@@ -102,17 +109,6 @@ class RPLIDAR(RPLIDARABC):
                 total_distance += self.__distances_dict[angle].distance
                 count += 1
         return total_distance / count if count > 0 else 0.0
-
-    @final
-    def _after_rotation(self) -> None:
-        # Log the end of the rotation
-        self.__logger.info("Full rotation completed.")
-
-        # Add the measures dictionary to the measures queue
-        self.__measures_queue.put(self.__distances_dict)
-
-        # Reset the distances dictionary
-        self.__distances_dict = {}
 
     @final
     def _read_output(self):
@@ -128,6 +124,14 @@ class RPLIDAR(RPLIDARABC):
         if self.__messages_counter < 6:
             self.__messages_counter += 1
             return
+
+        # Check if the listener thread for measures updates is running
+        if not self.__update_measures_listener_thread:
+            # Create and start the listener thread
+            self.__update_measures_listener_thread = Thread(
+                target=self._update_measures_event_listener,
+            )
+            self.__update_measures_listener_thread.start()
 
         # Strip the line to remove leading/trailing whitespace
         parsed_line = line.strip()
@@ -182,8 +186,8 @@ class RPLIDAR(RPLIDARABC):
             self.__measure.distance = distance
             self.__measure.quality = quality
 
-        # Call the after rotation method if it's the last measure of a full rotation
-        self._after_rotation() if rotation else None
+        # Log the end of the rotation
+        self.__logger.info("Full rotation completed.") if rotation else None
 
         # Send the measure to the server
         self.__server_dispatcher.broadcast_rplidar_measure(
@@ -195,11 +199,25 @@ class RPLIDAR(RPLIDARABC):
             "RPLIDAR measure: " + str(
                 self.__distances_dict[
                     angle]
-                )
-            ) if self.__debug else None
+            )
+        ) if self.__debug else None
 
         # Increment the messages counter
         self.__messages_counter += 1
+
+    def _update_measures_event_listener(self):
+        """
+        Listen for the update measures event and process the measures.
+        """
+        while self.is_running():
+            # Wait for the update measures event to be set
+            self.__update_measures_event.wait()
+
+            # Put the measure in the measures queue
+            self.__measures_queue.put(self.__distances_dict)
+
+            # Clear the update measures event
+            self.__update_measures_event.clear()
 
     @final
     def run(self):
@@ -271,6 +289,11 @@ class RPLIDAR(RPLIDARABC):
             self.__process.wait()
             self.__process = None
 
+        # Wait for the listener for measures updates to finish
+        if self.__update_measures_listener_thread:
+            self.__update_measures_listener_thread.join()
+            self.__update_measures_listener_thread = None
+
         # Clear the started event
         with self.__rlock:
             self.__start_event.clear()
@@ -297,4 +320,4 @@ class RPLIDAR(RPLIDARABC):
         # Log
         self.__logger.info(
             "RPLIDAR instance is being deleted. Resources will be cleaned up."
-            )
+        )

@@ -11,6 +11,7 @@ from ..utils.decorators import ignore_sigint
 
 @ignore_sigint
 def rplidar_target(
+    update_measures_event: Event,
     measures_queue: Queue,
     start_event: Event,
     stop_event: Event,
@@ -24,6 +25,7 @@ def rplidar_target(
     Target function for a multiprocessing process that handles the RPLIDAR.
 
     Args:
+        update_measures_event (Event): Event to signal when the RPLIDAR should update measures.
         measures_queue (Queue): Queue to hold the measures from the RPLIDAR.
         start_event (Event): Event to signal when the RPLIDAR should start.
         stop_event (Event): Event to signal when the RPLIDAR should stop.
@@ -36,10 +38,11 @@ def rplidar_target(
     print(
         "Initializing RPLIDAR in multiprocessing mode. Process ID: ",
         os.getpid()
-        )
+    )
 
     # Initialize the RPLIDAR
     rplidar = RPLIDAR(
+        update_measures_event=update_measures_event,
         measures_queue=measures_queue,
         start_event=start_event,
         stop_event=stop_event,

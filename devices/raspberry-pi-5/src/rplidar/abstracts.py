@@ -20,13 +20,6 @@ class RPLIDARABC(ABC):
         pass
 
     @abstractmethod
-    def _after_rotation(self):
-        """
-        Method to be called after a full rotation.
-        """
-        pass
-
-    @abstractmethod
     def _read_output(self):
         """
         Read the output from the RPLIDAR process.

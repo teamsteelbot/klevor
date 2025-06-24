@@ -1,5 +1,5 @@
-from multiprocessing import Queue, Event
-from typing import final
+from multiprocessing import Queue, Event, Value
+from typing import final, Optional
 
 from ..log import Logger
 from .constants import SERVO_CENTER_ANGLE, SERVO_RIGHT_LIMIT, SERVO_LEFT_LIMIT
@@ -22,25 +22,54 @@ class Pilot(PilotABC):
             start_event: Event,
             parking_event: Event,
             stop_event: Event,
-            photographer_capture_image_event: Event,
+            rplidar_update_measures_event: Event,
             rplidar_measures_queue: Queue,
-            detector_model_g_inferences_queue: Queue,
-            detector_model_m_inferences_queue: Queue,
-            detector_model_r_inferences_queue: Queue,
             serial_incoming_messages_queue: Queue,
             serial_outgoing_messages_queue: Queue,
             writer_messages_queue: Queue,
-            movement: bool = True
+            bno08x_yaw_deg: Value,
+            bno08x_turns: Value,
+            movement: bool = True,
+            photographer_capture_image_event: Optional[Event] = None,
+            detector_model_g_inferences_queue: Optional[Queue] = None,
+            detector_model_m_inferences_queue: Optional[Queue] = None,
+            detector_model_r_inferences_queue: Optional[Queue] = None,
     ):
         """
         Initialize the Pilot class.
 
         Args:
+            start_event (Event): Event to signal when the pilot should start.
+            parking_event (Event): Event to signal the parking state of the robot.
+            stop_event (Event): Event to signal when the pilot should stop.
+            rplidar_update_measures_event (Event): Event to signal when the
+            RPLIDAR should update measures.
+            rplidar_measures_queue (Queue): Queue to hold RPLIDAR measures.
             serial_incoming_messages_queue (Queue): Queue to hold incoming messages from the serial port.
             serial_outgoing_messages_queue (Queue): Queue to hold outgoing messages to the serial port.
             writer_messages_queue (Queue): Queue to hold log messages.
-            movement (bool): Flag to indicate if the pilot should handle movement. Defaults to True.
+            bno08x_yaw_deg (Value): Shared value for the BNO08X yaw angle in degrees.
+            bno08x_turns (Value): Shared value for the BNO08X turns.
+            movement (bool): Flag to indicate if the pilot should handle movement.
+            photographer_capture_image_event (Optional[Event]): Event to signal when the photographer should capture an image.
+            detector_model_g_inferences_queue (Optional[Queue]): Queue for model G inferences.
+            detector_model_m_inferences_queue (Optional[Queue]): Queue for model M inferences.
+            detector_model_r_inferences_queue (Optional[Queue]): Queue for model R inferences.
         """
+        # Initialize the values, queues and events
+        self.__start_event = start_event
+        self.__parking_event = parking_event
+        self.__stop_event = stop_event
+        self.__rplidar_update_measures_event = rplidar_update_measures_event
+        self.__rplidar_measures_queue = rplidar_measures_queue
+        self.__photographer_capture_image_event = photographer_capture_image_event
+        self.__detector_model_g_inferences_queue = detector_model_g_inferences_queue
+        self.__detector_model_m_inferences_queue = detector_model_m_inferences_queue
+        self.__detector_model_r_inferences_queue = detector_model_r_inferences_queue
+        self.__bno08x_yaw_deg = bno08x_yaw_deg
+        self.__bno08x_turns = bno08x_turns
+        self.__opened_event = Event()
+
         # Initialize the serial communication dispatcher
         self.__serial_dispatcher = SerialDispatcher(
             serial_incoming_messages_queue,

@@ -89,7 +89,7 @@ class App:
             pygame.draw.circle(
                 self.__screen, color,
                 (self.CENTER_X, self.CENTER_Y), radius, width
-                )
+            )
 
         # Draw external static circle
         if not is_exact:
@@ -97,14 +97,14 @@ class App:
                 self.__screen, self.EXTERNAL_STATIC_CIRCLE_COLOR,
                 (self.CENTER_X, self.CENTER_Y), self.RADIUS,
                 self.EXTERNAL_STATIC_CIRCLE_WIDTH
-                )
+            )
 
         # Draw central point
         pygame.draw.circle(
             self.__screen, self.CENTRAL_POINT_COLOR,
             (self.CENTER_X, self.CENTER_Y),
             self.CENTRAL_POINT_RADIUS
-            )
+        )
 
     def update_points(self):
         """
@@ -126,12 +126,12 @@ class App:
                 self.CENTER_X + measure.distance * math.cos(
                     radian_angle
                 ) * self.MAX_DISTANCE_RADIUS_FACTOR
-                )
+            )
             y = int(
                 self.CENTER_Y + measure.distance * math.sin(
                     radian_angle
                 ) * self.MAX_DISTANCE_RADIUS_FACTOR
-                )
+            )
             self.__point_positions[measure.angle] = (x, y)
 
         """
@@ -151,13 +151,13 @@ class App:
             pygame.draw.circle(
                 self.__screen, self.POINT_COLOR, pos,
                 self.POINT_RADIUS
-                )
+            )
 
             # Draw border around the point
             pygame.draw.circle(
                 self.__screen, self.POINT_BORDER_COLOR, pos,
                 self.POINT_RADIUS, self.POINT_BORDER_WIDTH
-                )
+            )
 
     def run(self):
         """
@@ -229,6 +229,6 @@ if __name__ == "__main__":
     ws_thread = Thread(
         target=asyncio.run, args=(app.ws_listener(),),
         daemon=True
-        )
+    )
     ws_thread.start()
     app.run()

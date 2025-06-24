@@ -11,7 +11,8 @@ if __name__ == "__main__":
     writer_stop_event = Event()
     serial_incoming_messages_queue = Queue()
     serial_outgoing_messages_queue = Queue()
-    bno08x_turns = Value("i", 0)  # Shared value for BNO08x turns
+    bno08x_yaw_deg = Value("f", 0)
+    bno08x_turns = Value("f", 0)
     photographer_capture_image_event = Event()
     start_event = Event()
     parking_event = Event()
@@ -21,7 +22,7 @@ if __name__ == "__main__":
     writer_process = Process(
         target=writer_target, args=(
             writer_messages_queue, writer_stop_event)
-        )
+    )
     writer_process.start()
 
     # Create an instance of Logger
@@ -30,9 +31,10 @@ if __name__ == "__main__":
     # Create a process for the serial communication
     serial_communication_process = Process(
         target=serial_communication_target,
-        args=(serial_incoming_messages_queue, serial_outgoing_messages_queue,
-              photographer_capture_image_event, start_event, parking_event,
-              stop_event, writer_messages_queue)
+        args=(start_event, parking_event, stop_event,
+              serial_incoming_messages_queue, serial_outgoing_messages_queue,
+              writer_messages_queue, bno08x_yaw_deg, bno08x_turns,
+              photographer_capture_image_event)
     )
     serial_communication_process.start()
 

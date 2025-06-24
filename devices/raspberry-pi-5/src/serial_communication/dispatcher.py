@@ -1,8 +1,8 @@
 from multiprocessing import Queue
 from typing import final
 
-from .constants import STOP_MESSAGE
 from .abstracts import DispatcherABC
+from .constants import STOP_MESSAGE
 from .enums import OutgoingCategory
 from .message import IncomingMessage, OutgoingMessage
 from ..log import Logger
@@ -42,7 +42,7 @@ class Dispatcher(DispatcherABC):
         self.__logger = Logger(
             writer_messages_queue, self.LOGGER_TAG,
             unique_tag=True
-            )
+        )
 
     @final
     def receive_message(self) -> IncomingMessage | None:

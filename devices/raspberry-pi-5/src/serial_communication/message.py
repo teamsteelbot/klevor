@@ -1,7 +1,8 @@
-from .enums import IncomingCategory, OutgoingCategory, Status
+from .constants import (
+    INCOMING_OK_MESSAGE, START_MESSAGE,
+)
+from .enums import IncomingCategory, OutgoingCategory
 from ..utils import is_instance
-from .constants import (INCOMING_OK_MESSAGE, OUTGOING_OK_MESSAGE,
-                        START_MESSAGE, STOP_MESSAGE)
 
 
 class IncomingMessage:
