@@ -347,6 +347,16 @@ class SerialCommunication(SerialCommunicationABC):
                     # Continue to wait for the start event
                     continue
 
+                elif msg.is_error():
+                    # Log
+                    self.__logger.error(
+                        f"Received error message: {msg.content}"
+                    )
+
+                    raise RuntimeError(
+                        f"Received error message: {msg.content}"
+                    )
+
         while self.is_open():
             if self.__console_serial.in_waiting == 0:
                 sleep(self.INCOMING_DELAY)

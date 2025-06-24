@@ -1,6 +1,9 @@
 from abc import ABC, abstractmethod
 
 from .constants import MOTOR_SPEED_RANGE, SERVO_ACTUATION_RANGE
+from ..rplidar.enums import Direction
+from ..rplidar.measure import Measure
+
 
 class PilotABC(ABC):
     """
@@ -23,7 +26,8 @@ class PilotABC(ABC):
         """
         if not (0 < speed <= MOTOR_SPEED_RANGE[1]):
             raise ValueError(
-                f"Speed must be between 0 and {MOTOR_SPEED_RANGE[1]}")
+                f"Speed must be between 0 and {MOTOR_SPEED_RANGE[1]}"
+            )
 
     @staticmethod
     def _check_motor_speed_full_range(speed: float):
@@ -38,7 +42,8 @@ class PilotABC(ABC):
         """
         if not (MOTOR_SPEED_RANGE[0] <= speed <= MOTOR_SPEED_RANGE[1]):
             raise ValueError(
-                f"Speed must be between {MOTOR_SPEED_RANGE[0]} and {MOTOR_SPEED_RANGE[1]}")
+                f"Speed must be between {MOTOR_SPEED_RANGE[0]} and {MOTOR_SPEED_RANGE[1]}"
+            )
 
     @abstractmethod
     async def _set_motor_speed(self, speed: float):
@@ -90,7 +95,8 @@ class PilotABC(ABC):
         """
         if not 0 <= angle <= SERVO_ACTUATION_RANGE:
             raise ValueError(
-                f"Angle must be between 0 and {SERVO_ACTUATION_RANGE} degrees")
+                f"Angle must be between 0 and {SERVO_ACTUATION_RANGE} degrees"
+            )
 
     @abstractmethod
     async def _set_servo_angle(self, angle: int):
@@ -160,5 +166,48 @@ class PilotABC(ABC):
 
         Returns:
             bool: True if the servo is not centered, False otherwise.
+        """
+        pass
+
+    @abstractmethod
+    def _get_rplidar_measures(self) -> dict[int, Measure]:
+        """
+        Gets the RPLidar measures.
+
+        Returns:
+            dict[int, Measure]: A dictionary containing the RPLidar measures.
+        Raises:
+            TimeoutError: If the RPLidar measures cannot be retrieved within a timeout.
+        """
+        pass
+
+    @abstractmethod
+    def _get_rplidar_average_distances(self) -> dict[Direction, float]:
+        """
+        Gets the average distances from the RPLidar measures.
+
+        Returns:
+            dict[Direction, float]: A dictionary containing the average distances for each direction.
+        """
+        pass
+
+    @abstractmethod
+    def _challenge_without_obstacles(self):
+        """
+        Handles the challenge without obstacles.
+        """
+        pass
+
+    @abstractmethod
+    def _challenge_with_obstacles(self):
+        """
+        Handles the challenge with obstacles.
+        """
+        pass
+
+    @abstractmethod
+    def run(self):
+        """
+        Runs the pilot handler.
         """
         pass

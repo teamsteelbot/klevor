@@ -1,9 +1,9 @@
 import os
 
-# RPLIDAR C1 baud rate
+# RPLidar C1 baud rate
 RPLIDAR_C1_BAUDRATE = 460800
 
-# Default port
+# RPLidar C1 default port
 RPLIDAR_C1_PORT = "/dev/ttyUSB0"
 
 # Max distance limit

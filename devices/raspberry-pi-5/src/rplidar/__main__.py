@@ -10,7 +10,7 @@ from ..server.multiprocessing import websocket_server_target
 
 if __name__ == "__main__":
     parser = ArgumentParser(
-        description="Script to test the RPLIDAR functionality and start it."
+        description="Script to test the RPLidar functionality and start it."
     )
     Args.add_server_argument(parser)
     args = Args.parse_args_as_dict(parser)
@@ -50,7 +50,7 @@ if __name__ == "__main__":
         )
         server_process.start()
 
-    # Create a process for the RPLIDAR
+    # Create a process for the RPLidar
     rplidar_process = Process(
         target=rplidar_target,
         args=(rplidar_update_measures_event, rplidar_measures_queue,
@@ -61,17 +61,17 @@ if __name__ == "__main__":
 
     try:
         # Wait indefinitely to keep the serial communication running
-        print("RPLIDAR is running. Press Ctrl+C to stop.")
+        print("RPLidar is running. Press Ctrl+C to stop.")
         while True:
             sleep(1)  # Sleep to prevent busy-waiting
 
     except KeyboardInterrupt:
         # Handle keyboard interrupt to stop the processes gracefully
         print(
-            "KeyboardInterrupt received. Stopping RPLIDAR, server and writer process..."
+            "KeyboardInterrupt received. Stopping RPLidar, server and writer process..."
         )
         logger.warning(
-            "KeyboardInterrupt received. Stopping RPLIDAR, server and writer process..."
+            "KeyboardInterrupt received. Stopping RPLidar, server and writer process..."
         )
 
     except Exception as e:
@@ -79,7 +79,7 @@ if __name__ == "__main__":
         logger.error(f"An error occurred: {e}")
 
     finally:
-        # Stop the RPLIDAR, server and writer process and clean up
+        # Stop the RPLidar, server and writer process and clean up
         stop_event.set()
         rplidar_process.join()
         server_process.join() if arg_server else None

@@ -5,7 +5,7 @@ from ..utils import is_instance
 
 class Measure:
     """
-    Class that represents a single measurement from the RPLIDAR.
+    Class that represents a single measurement from the RPLidar.
     """
 
     # Measure attributes separator

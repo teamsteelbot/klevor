@@ -2,7 +2,7 @@ import os
 from multiprocessing import Event, Queue
 from typing import Optional
 
-from . import RPLIDAR
+from . import RPLidar
 from .constants import (
     RPLIDAR_C1_BAUDRATE, RPLIDAR_C1_PORT,
 )
@@ -22,26 +22,26 @@ def rplidar_target(
     is_upside_down: bool = True
 ) -> None:
     """
-    Target function for a multiprocessing process that handles the RPLIDAR.
+    Target function for a multiprocessing process that handles the RPLidar.
 
     Args:
-        update_measures_event (Event): Event to signal when the RPLIDAR should update measures.
-        measures_queue (Queue): Queue to hold the measures from the RPLIDAR.
-        start_event (Event): Event to signal when the RPLIDAR should start.
-        stop_event (Event): Event to signal when the RPLIDAR should stop.
+        update_measures_event (Event): Event to signal when the RPLidar should update measures.
+        measures_queue (Queue): Queue to hold the measures from the RPLidar.
+        start_event (Event): Event to signal when the RPLidar should start.
+        stop_event (Event): Event to signal when the RPLidar should stop.
         writer_messages_queue (Queue): Queue to hold log messages.
         server_messages_queue (Optional[Queue]): Queue to broadcast messages through the websockets server.
         baudrate (int): Baud rate for the serial communication.
-        port (str): SerialCommunication port for the RPLIDAR.
-        is_upside_down (bool): If True, the RPLIDAR is upside down, and angles will be adjusted accordingly.
+        port (str): SerialCommunication port for the RPLidar.
+        is_upside_down (bool): If True, the RPLidar is upside down, and angles will be adjusted accordingly.
     """
     print(
-        "Initializing RPLIDAR in multiprocessing mode. Process ID: ",
+        "Initializing RPLidar in multiprocessing mode. Process ID: ",
         os.getpid()
     )
 
-    # Initialize the RPLIDAR
-    rplidar = RPLIDAR(
+    # Initialize the RPLidar
+    rplidar = RPLidar(
         update_measures_event=update_measures_event,
         measures_queue=measures_queue,
         start_event=start_event,
@@ -53,5 +53,5 @@ def rplidar_target(
         is_upside_down=is_upside_down
     )
 
-    # Run the RPLIDAR
+    # Run the RPLidar
     rplidar.run()

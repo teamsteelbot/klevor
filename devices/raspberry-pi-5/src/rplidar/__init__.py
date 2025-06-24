@@ -3,7 +3,7 @@ from multiprocessing import Event, Queue, RLock
 from threading import Thread
 from typing import Optional, final
 
-from .abstracts import RPLIDARABC
+from .abstracts import RPLidarABC
 from .constants import (
     DISTANCE_DIFF,
     RPLIDAR_C1_BAUDRATE,
@@ -17,13 +17,13 @@ from ..server.dispatcher import Dispatcher as WebSocketServerDispatcher
 from ..utils import is_instance
 
 
-class RPLIDAR(RPLIDARABC):
+class RPLidar(RPLidarABC):
     """
-    Class to handle RPLIDAR operations.
+    Class to handle RPLidar operations.
     """
 
     # Logger configuration
-    LOGGER_TAG = "RPLIDAR"
+    LOGGER_TAG = "RPLidar"
 
     # Process wait timeout
     PROCESS_WAIT_TIMEOUT = 5
@@ -41,18 +41,18 @@ class RPLIDAR(RPLIDARABC):
         is_upside_down: bool = True
     ):
         """
-        Initialize the RPLIDAR.
+        Initialize the RPLidar.
 
         Args:
-            update_measures_event (Event): Event to signal when the RPLIDAR should update measures.
-            measures_queue (Queue): Queue to hold the measures from the RPLIDAR.
-            start_event (Event): Event to signal when the RPLIDAR should start.
-            stop_event (Event): Event to signal when the RPLIDAR should stop.
+            update_measures_event (Event): Event to signal when the RPLidar should update measures.
+            measures_queue (Queue): Queue to hold the measures from the RPLidar.
+            start_event (Event): Event to signal when the RPLidar should start.
+            stop_event (Event): Event to signal when the RPLidar should stop.
             writer_messages_queue (Queue): Queue to hold log messages.
             server_messages_queue (Optional[Queue]): Queue to broadcast messages through the websockets server.
             baudrate (int): Baud rate for the serial communication.
-            port (str): SerialCommunication port for the RPLIDAR.
-            is_upside_down (bool): If True, the RPLIDAR is upside down, and angles will be adjusted accordingly.
+            port (str): SerialCommunication port for the RPLidar.
+            is_upside_down (bool): If True, the RPLidar is upside down, and angles will be adjusted accordingly.
         """
         # Initialize the queues and events
         self.__update_measures_event = update_measures_event
@@ -99,16 +99,6 @@ class RPLIDAR(RPLIDARABC):
 
         # Initialize the listener thread for measures updates
         self.__update_measures_listener_thread = None
-
-    @final
-    def _calculate_average_distance(self, angles: list[int]) -> float:
-        total_distance = 0.0
-        count = 0
-        for angle in angles:
-            if angle in self.__distances_dict:
-                total_distance += self.__distances_dict[angle].distance
-                count += 1
-        return total_distance / count if count > 0 else 0.0
 
     @final
     def _read_output(self):
@@ -164,7 +154,7 @@ class RPLIDAR(RPLIDARABC):
         # Floor the angle to a float with no decimal places
         angle = round(angle, 0)
 
-        # Adjust the angle if the RPLIDAR is upside down
+        # Adjust the angle if the RPLidar is upside down
         if self.__is_upside_down:
             # Subtract the angle from 360
             angle = 360 - angle
@@ -196,7 +186,7 @@ class RPLIDAR(RPLIDARABC):
 
         # Log
         self.__logger.debug(
-            "RPLIDAR measure: " + str(
+            "RPLidar measure: " + str(
                 self.__distances_dict[
                     angle]
             )
@@ -225,26 +215,26 @@ class RPLIDAR(RPLIDARABC):
             # Check if the stop event is set
             if self.__stop_event.is_set():
                 self.__logger.warning(
-                    "Stop event is set. RPLIDAR will not run."
+                    "Stop event is set. RPLidar will not run."
                 )
                 return
 
-            # Check if the RPLIDAR is already running
+            # Check if the RPLidar is already running
             if self.__started_event.is_set():
                 self.__logger.warning(
-                    "RPLIDAR is already running. Cannot start again."
+                    "RPLidar is already running. Cannot start again."
                 )
                 return
 
         # Wait for the start event to be set
         self.__start_event.wait()
 
-        # Set the started event to signal that the RPLIDAR has started
+        # Set the started event to signal that the RPLidar has started
         with self.__rlock:
             self.__started_event.set()
 
         # Log
-        self.__logger.info("RPLIDAR's starting...")
+        self.__logger.info("RPLidar's starting...")
 
         command = [
             ULTRA_SIMPLE_PATH,
@@ -265,12 +255,12 @@ class RPLIDAR(RPLIDARABC):
 
         except FileNotFoundError:
             raise ValueError(
-                f"The RPLIDAR ultra_simple executable was not found at {ULTRA_SIMPLE_PATH}. Please ensure it is installed correctly."
+                f"The RPLidar ultra_simple executable was not found at {ULTRA_SIMPLE_PATH}. Please ensure it is installed correctly."
             )
 
         except Exception as e:
             raise RuntimeError(
-                f"An error occurred while starting the RPLIDAR process: {e}"
+                f"An error occurred while starting the RPLidar process: {e}"
             )
 
         # Read the output in a loop until the process ends or stop event is set
@@ -299,7 +289,7 @@ class RPLIDAR(RPLIDARABC):
             self.__start_event.clear()
 
         # Log the stop message
-        self.__logger.info("RPLIDAR process stopped.")
+        self.__logger.info("RPLidar process stopped.")
 
     @final
     def is_running(self) -> bool:
@@ -313,11 +303,11 @@ class RPLIDAR(RPLIDARABC):
 
     def __del__(self):
         """
-        Destructor to clean up resources when the RPLIDAR is no longer needed.
+        Destructor to clean up resources when the RPLidar is no longer needed.
         """
         self.__stop_event.set()
 
         # Log
         self.__logger.info(
-            "RPLIDAR instance is being deleted. Resources will be cleaned up."
+            "RPLidar instance is being deleted. Resources will be cleaned up."
         )

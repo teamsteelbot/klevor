@@ -14,7 +14,7 @@ from ..server.message import Message, Tag
 
 class App:
     """
-    Klevor RPLIDAR GUI Application.
+    Klevor RPLidar GUI Application.
     """
     # IP and port for the WebSocket server
     IP = "0.0.0.0"
@@ -61,7 +61,7 @@ class App:
         # Initialize the GUI
         pygame.init()
         self.__screen = pygame.display.set_mode((self.APP_SIZE, self.APP_SIZE))
-        pygame.display.set_caption("Klevor RPLIDAR GUI")
+        pygame.display.set_caption("Klevor RPLidar GUI")
         self.__clock = pygame.time.Clock()
         self.__running = True
 
@@ -193,7 +193,7 @@ class App:
                     msg_str = await ws.recv()
                     msg = Message.from_string(msg_str)
 
-                    # Check if the message is a valid RPLIDAR message
+                    # Check if the message is a valid RPLidar message
                     if not msg.tag == Tag.RPLIDAR_MEASURES:
                         continue
 
@@ -213,7 +213,7 @@ class App:
 
 if __name__ == "__main__":
     parser = ArgumentParser(
-        description="Script to run the Klevor RPLIDAR GUI application.",
+        description="Script to run the Klevor RPLidar GUI application.",
     )
     Args.add_ip_argument(parser, default=App.IP)
     Args.add_port_argument(parser, default=App.PORT)

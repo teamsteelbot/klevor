@@ -1,13 +1,18 @@
 from abc import ABC, abstractmethod
 
+from .measure import Measure
 
-class RPLIDARABC(ABC):
+
+class RPLidarABC(ABC):
     """
-    Abstract class to handle RPLIDAR operations.
+    Abstract class to handle RPLidar operations.
     """
 
-    @abstractmethod
-    def _calculate_average_distance(self, angles: list[int]) -> float:
+    @staticmethod
+    def calculate_average_distance(
+        measures: dict[int, Measure],
+        angles: list[int]
+    ) -> float:
         """
         Calculate the average distance for a given list of angles.
 
@@ -17,42 +22,48 @@ class RPLIDARABC(ABC):
         Returns:
             float: The average distance for the specified angles.
         """
-        pass
+        total_distance = 0.0
+        count = 0
+        for angle in angles:
+            if angle in measures:
+                total_distance += measures[angle].distance
+                count += 1
+        return total_distance / count if count > 0 else 0.0
 
     @abstractmethod
     def _read_output(self):
         """
-        Read the output from the RPLIDAR process.
+        Read the output from the RPLidar process.
         """
         pass
 
     @abstractmethod
     def run(self):
         """
-        Run the RPLIDAR process.
+        Run the RPLidar process.
 
         Raises:
             ValueError: If the ultra_simple file is not found.
-            RuntimeError: If the RPLIDAR process fails to start.
+            RuntimeError: If the RPLidar process fails to start.
         """
         pass
 
     @abstractmethod
     def is_running(self) -> bool:
         """
-        Check if the RPLIDAR is running.
+        Check if the RPLidar is running.
 
         Returns:
-            bool: True if the RPLIDAR is running, False otherwise.
+            bool: True if the RPLidar is running, False otherwise.
         """
         pass
 
     @abstractmethod
     def is_stopped(self) -> bool:
         """
-        Check if the RPLIDAR is stopped.
+        Check if the RPLidar is stopped.
 
         Returns:
-            bool: True if the RPLIDAR is stopped, False otherwise.
+            bool: True if the RPLidar is stopped, False otherwise.
         """
         pass

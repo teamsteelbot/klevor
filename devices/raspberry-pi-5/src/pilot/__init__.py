@@ -1,10 +1,30 @@
-from multiprocessing import Queue, Event, Value
-from typing import final, Optional
+from multiprocessing import Event, Queue, RLock, Value
+from time import monotonic, sleep
+from typing import Optional, final
 
-from ..log import Logger
-from .constants import SERVO_CENTER_ANGLE, SERVO_RIGHT_LIMIT, SERVO_LEFT_LIMIT
-from ..serial_communication.dispatcher import Dispatcher as SerialDispatcher
 from .abstracts import PilotABC
+from .constants import (
+    FRONT_DISTANCE_THRESHOLD,
+    MOTOR_SPEED_NORMAL,
+    MOTOR_SPEED_SLOW,
+    SERVO_BIG_TURN_ANGLE,
+    SERVO_CENTER_ANGLE,
+    SERVO_LEFT_LIMIT,
+    SERVO_RIGHT_LIMIT,
+    SERVO_SMALL_TURN_ANGLE,
+    SIDE_DISTANCE_DIFFERENCE_PERCENTAGE,
+    SIDE_DISTANCE_THRESHOLD,
+    STOP_DISTANCE_THRESHOLD,
+    TURNS,
+)
+from ..env import Env
+from ..env.enums import Challenge
+from ..log import Logger
+from ..rplidar import RPLidar
+from ..rplidar.enums import Direction
+from ..rplidar.measure import Measure
+from ..serial_communication.dispatcher import Dispatcher as SerialDispatcher
+
 
 class Pilot(PilotABC):
     """
@@ -17,23 +37,29 @@ class Pilot(PilotABC):
     # Logger configuration
     LOGGER_TAG = "Pilot"
 
+    # Wait delay
+    WAIT_DELAY = 0.1
+
+    # Update delay
+    UPDATE_DELAY = 0.2
+
     def __init__(
-            self,
-            start_event: Event,
-            parking_event: Event,
-            stop_event: Event,
-            rplidar_update_measures_event: Event,
-            rplidar_measures_queue: Queue,
-            serial_incoming_messages_queue: Queue,
-            serial_outgoing_messages_queue: Queue,
-            writer_messages_queue: Queue,
-            bno08x_yaw_deg: Value,
-            bno08x_turns: Value,
-            movement: bool = True,
-            photographer_capture_image_event: Optional[Event] = None,
-            detector_model_g_inferences_queue: Optional[Queue] = None,
-            detector_model_m_inferences_queue: Optional[Queue] = None,
-            detector_model_r_inferences_queue: Optional[Queue] = None,
+        self,
+        start_event: Event,
+        parking_event: Event,
+        stop_event: Event,
+        rplidar_update_measures_event: Event,
+        rplidar_measures_queue: Queue,
+        serial_incoming_messages_queue: Queue,
+        serial_outgoing_messages_queue: Queue,
+        writer_messages_queue: Queue,
+        bno08x_yaw_deg: Value,
+        bno08x_turns: Value,
+        movement: bool = True,
+        photographer_capture_image_event: Optional[Event] = None,
+        detector_model_g_inferences_queue: Optional[Queue] = None,
+        detector_model_m_inferences_queue: Optional[Queue] = None,
+        detector_model_r_inferences_queue: Optional[Queue] = None,
     ):
         """
         Initialize the Pilot class.
@@ -43,8 +69,8 @@ class Pilot(PilotABC):
             parking_event (Event): Event to signal the parking state of the robot.
             stop_event (Event): Event to signal when the pilot should stop.
             rplidar_update_measures_event (Event): Event to signal when the
-            RPLIDAR should update measures.
-            rplidar_measures_queue (Queue): Queue to hold RPLIDAR measures.
+            RPLidar should update measures.
+            rplidar_measures_queue (Queue): Queue to hold RPLidar measures.
             serial_incoming_messages_queue (Queue): Queue to hold incoming messages from the serial port.
             serial_outgoing_messages_queue (Queue): Queue to hold outgoing messages to the serial port.
             writer_messages_queue (Queue): Queue to hold log messages.
@@ -57,6 +83,7 @@ class Pilot(PilotABC):
             detector_model_r_inferences_queue (Optional[Queue]): Queue for model R inferences.
         """
         # Initialize the values, queues and events
+        self.__started_event = Event()
         self.__start_event = start_event
         self.__parking_event = parking_event
         self.__stop_event = stop_event
@@ -68,7 +95,6 @@ class Pilot(PilotABC):
         self.__detector_model_r_inferences_queue = detector_model_r_inferences_queue
         self.__bno08x_yaw_deg = bno08x_yaw_deg
         self.__bno08x_turns = bno08x_turns
-        self.__opened_event = Event()
 
         # Initialize the serial communication dispatcher
         self.__serial_dispatcher = SerialDispatcher(
@@ -80,11 +106,16 @@ class Pilot(PilotABC):
         # Initialize the logger
         self.__logger = Logger(writer_messages_queue, self.LOGGER_TAG)
 
+        # Initialize the reentrant lock
+        self.__rlock = RLock()
+
         # Initialize the motor speed, servo angle and movement state
         self.__motor_speed = 0.0
         self.__servo_angle = SERVO_CENTER_ANGLE
         self.__movement = movement
 
+        # Initialize the challenge
+        self.__challenge = None
 
     @final
     async def _set_motor_speed(self, speed: float):
@@ -98,7 +129,9 @@ class Pilot(PilotABC):
 
         # Send the speed message to the serial communication
         if self.__movement:
-            self.__serial_dispatcher.send_motor_speed_message(self.__motor_speed)
+            self.__serial_dispatcher.send_motor_speed_message(
+                self.__motor_speed
+                )
 
         # Log
         self.__logger.info(f"Set motor speed to: {speed}")
@@ -131,7 +164,9 @@ class Pilot(PilotABC):
         self.__servo_angle = angle
 
         if self.__movement:
-            self.__serial_dispatcher.send_servo_angle_message(self.__servo_angle)
+            self.__serial_dispatcher.send_servo_angle_message(
+                self.__servo_angle
+                )
 
         # Log
         self.__logger.info(f"Set servo angle to: {angle}deg")
@@ -141,7 +176,8 @@ class Pilot(PilotABC):
         if not (SERVO_LEFT_LIMIT <= relative_angle <= SERVO_RIGHT_LIMIT):
             raise ValueError(
                 f"Relative angle must be between {SERVO_LEFT_LIMIT} and"
-                f" {SERVO_RIGHT_LIMIT} degrees")
+                f" {SERVO_RIGHT_LIMIT} degrees"
+            )
 
         await self._set_servo_angle(SERVO_CENTER_ANGLE + relative_angle)
 
@@ -153,7 +189,8 @@ class Pilot(PilotABC):
     async def _set_servo_to_right(self, angle):
         if not 0 < angle <= SERVO_RIGHT_LIMIT:
             raise ValueError(
-                f"Angle must be between 0 and {SERVO_RIGHT_LIMIT} degrees for right movement")
+                f"Angle must be between 0 and {SERVO_RIGHT_LIMIT} degrees for right movement"
+            )
 
         await self._set_servo_angle(SERVO_CENTER_ANGLE + angle)
 
@@ -161,8 +198,8 @@ class Pilot(PilotABC):
     async def _set_servo_to_left(self, angle):
         if not 0 < angle <= abs(SERVO_LEFT_LIMIT):
             raise ValueError(
-                f"Angle must be between 0 and {abs(SERVO_LEFT_LIMIT)} degrees for left "
-                f"movement")
+                f"Angle must be between 0 and {abs(SERVO_LEFT_LIMIT)} degrees for left movement"
+            )
 
         await self._set_servo_angle(SERVO_CENTER_ANGLE - angle)
 
@@ -170,89 +207,196 @@ class Pilot(PilotABC):
     def _is_servo_turning(self):
         return self.__servo_angle != SERVO_CENTER_ANGLE
 
-"""
-after rotation
+    @final
+    def _get_rplidar_measures(self) -> dict[int, Measure]:
+        # Set the event to signal that the RPLidar should update measures
+        self.__rplidar_update_measures_event.set()
 
+        # Get the measures from the queue
+        measures = self.__rplidar_measures_queue.get(timeout=self.WAIT_DELAY)
+        if not measures:
+            raise TimeoutError(
+                "No RPLidar measures received within the timeout period."
+            )
+        return measures
 
-# Put the parsed line in the server
-        if self.__server:
-            for angle, measure in self.__distances_dict.items():
-                measure_str = str(measure)
-                self.__server.broadcast_rplidar_measures(str(measure))
+    @final
+    def _get_rplidar_average_distances(self) -> dict[Direction, float]:
+        # Get the RPLidar measures
+        measures = self._get_rplidar_measures()
 
-        # Send the measure string to the serial communication
-        if self.__serial_communication:
-            if self.__challenge == Challenge.WITHOUT_OBSTACLES:
-                # Calculate the average front, left and right distances by 5 degrees to each side
-                avg_front_dist = self._calculate_average_distance(
-                    [*range(355, 360), *range(0, 6)])
-                avg_left_dist = self._calculate_average_distance(
-                    [*range(265, 276)])
-                avg_right_dist = self._calculate_average_distance(
-                    [*range(85, 96)])
+        # Calculate the average distances according to the challenge
+        if self.__challenge == Challenge.WITHOUT_OBSTACLES:
+            # Calculate the average front, left and right distances by 5 degrees to each side
+            avg_front_dist = RPLidar.calculate_average_distance(
+                measures, [*range(355, 360), *range(0, 6)]
+            )
+            avg_left_dist = RPLidar.calculate_average_distance(
+                measures, [*range(265, 276)]
+            )
+            avg_right_dist = RPLidar.calculate_average_distance(
+                measures, [*range(85, 96)]
+            )
 
-                # Create a dictionary with the average distances
-                avg_distances = {
-                    RPLIDARKey.FRONT: avg_front_dist,
-                    RPLIDARKey.LEFT: avg_left_dist,
-                    RPLIDARKey.RIGHT: avg_right_dist
-                }
+            # Create a dictionary with the average distances
+            return {
+                Direction.FRONT: avg_front_dist,
+                Direction.LEFT: avg_left_dist,
+                Direction.RIGHT: avg_right_dist
+            }
+        elif self.__challenge == Challenge.WITH_OBSTACLES:
+            raise NotImplementedError(
+                "Challenge with obstacles is not implemented yet."
+            )
 
-                # Send the average distances to the serial communication
-                self.__serial_communication.send_rplidar_measures(avg_distances)
-                
-                
-                
-                
-                 # Check for the current turn and center the servo if necessary
-            if self.__servo.is_turning():
-                if self.__bno08x.turns != last_known_turns:
-                    tasks.append(create_task(self.__servo.center()))
+        else:
+            raise ValueError(f"Unknown challenge: {self.__challenge}")
+
+    def _calculate_sleep_delay(self, start_time: float) -> float:
+        """
+        Calculate the sleep delay based on the start time and the update delay.
+
+        Args:
+            start_time (float): The start time in seconds.
+
+        Returns:
+            float: The calculated sleep delay.
+        """
+        elapsed_time = monotonic() - start_time
+        delay = self.UPDATE_DELAY - elapsed_time
+        if delay < 0:
+            return 0.0
+        return delay
+
+    def _sleep(self, start_time: float):
+        """
+        Sleep for the calculated delay based on the start time.
+
+        Args:
+            start_time (float): The start time in seconds.
+        """
+        sleep(self._calculate_sleep_delay(start_time))
+
+    @final
+    def _challenge_with_obstacles(self):
+        raise NotImplementedError(
+            "Challenge with obstacles is not implemented yet."
+        )
+
+    @final
+    def _challenge_without_obstacles(self):
+        # Initialize the last turns
+        last_turns = self.__bno08x_turns.value
+
+        while True:
+            # Get the start time
+            start_time = monotonic()
+
+            # Check for the current turn and center the servo if necessary
+            if self._is_servo_turning():
+                turns = self.__bno08x_turns.value
+                if turns != last_turns:
+                    self._set_servo_to_center()
 
                     # Update for the next check
-                    last_known_turns = self.__bno08x.turns
+                    last_turns = turns
+
+                # Sleep
+                self._sleep(start_time)
                 continue
 
-            # Overall Mission Completion Check
-            if last_known_turns == 12:
-                tasks.append(create_task(self.__motor.set_speed(self.__motor.SPEED_NORMAL)))
-
-                # Gather the tasks and wait for them to complete
-                await gather(*tasks)
+            # Check if it's almost time to stop
+            if last_turns == TURNS:
+                self._set_servo_to_center()
+                self._set_motor_speed(MOTOR_SPEED_SLOW)
 
                 while True:
-                    # Receive messages from the serial communication
-                    msgs = await self.__serial_communication.receive_messages()
+                    # Update the start time
+                    start_time = monotonic()
 
-                    # Process the received messages (must be only RPLIDAR messages) on reverse order
-                    await self._calculate_distances(msgs)
+                    # Get the average distances
+                    avg_distances = self._get_rplidar_average_distances()
 
-                    if self.__avg_front_dist <= self.STOP_DISTANCE_THRESHOLD:
-                        
+                    if (avg_distances[Direction.FRONT] <=
+                            STOP_DISTANCE_THRESHOLD):
                         return
 
+                    # Sleep for a short time before checking again
+                    self._sleep(start_time)
+
+            # Get the average distances from the RPLidar
+            avg_distances = self._get_rplidar_average_distances()
+            left_avg_dist = avg_distances[Direction.LEFT]
+            right_avg_dist = avg_distances[Direction.RIGHT]
+            front_avg_dist = avg_distances[Direction.FRONT]
+
             # Check if the robot should move forward or turn
-            if self.__avg_front_dist >= self.FRONT_DISTANCE_THRESHOLD:
-                tasks.append(create_task(self.__motor.set_speed(self.__motor.SPEED_NORMAL)))
+            if front_avg_dist >= FRONT_DISTANCE_THRESHOLD:
+                self._set_motor_speed(MOTOR_SPEED_NORMAL)
 
                 # Check if the servo should make a little turn to the left or right in order to center the robot
-                if self.__avg_right_dist >= self.__avg_left_dist * (1 + self.SIDE_DISTANCE_DIFFERENCE_PERCENTAGE):
-                    tasks.append(create_task(self.__servo.right(self.__servo.SMALL_TURN_ANGLE)))
+                if right_avg_dist >= left_avg_dist * (
+                        1 + SIDE_DISTANCE_DIFFERENCE_PERCENTAGE):
+                    self._set_servo_to_right(SERVO_SMALL_TURN_ANGLE)
 
-                elif self.__avg_left_dist >= self.__avg_right_dist * (1 + self.SIDE_DISTANCE_DIFFERENCE_PERCENTAGE):
-                    tasks.append(create_task(self.__servo.left(self.__servo.SMALL_TURN_ANGLE)))
+                elif left_avg_dist >= right_avg_dist * (
+                        1 + SIDE_DISTANCE_DIFFERENCE_PERCENTAGE):
+                    self._set_servo_to_left(SERVO_SMALL_TURN_ANGLE)
 
                 else:
-                    tasks.append(create_task(self.__servo.center()))
+                    self._set_servo_to_center()
 
             else:
-                tasks.append(create_task(self.__motor.set_speed(self.__motor.SPEED_SLOW)))
+                self._set_motor_speed(MOTOR_SPEED_SLOW)
 
                 # Check if the robot should turn left or right based on the side distances
-                if self.__avg_right_dist >= self.SIDE_DISTANCE_THRESHOLD:
-                    tasks.append(create_task(self.__servo.right(self.__servo.BIG_TURN_ANGLE)))
+                if right_avg_dist >= SIDE_DISTANCE_THRESHOLD:
+                    self._set_servo_to_right(SERVO_BIG_TURN_ANGLE)
 
-                elif self.__avg_left_dist >= self.SIDE_DISTANCE_THRESHOLD:
-                    tasks.append(create_task(self.__servo.left(self.__servo.BIG_TURN_ANGLE)))
+                elif left_avg_dist >= SIDE_DISTANCE_THRESHOLD:
+                    self._set_servo_to_left(SERVO_BIG_TURN_ANGLE)
 
-"""
+    @final
+    def run(self):
+        with self.__rlock:
+            # Check if the stop event is set
+            if self.__stop_event.is_set():
+                self.__logger.warning(
+                    "Stop event is set. Pilot will not run."
+                )
+                return
+
+            # Check if the Pilot is already running
+            if self.__started_event.is_set():
+                self.__logger.warning(
+                    "Pilot is already running. Cannot start again."
+                )
+                return
+
+            # Set the started event to signal that the Pilot has started
+            self.__started_event.set()
+
+        # Wait for the start event to be set
+        self.__start_event.wait()
+
+        # Get the challenge from the environment variables
+        self.__challenge = Env.get_challenge()
+
+        # Start the corresponding challenge handler
+        self.__logger.debug("Pilot is starting...")
+        if self.__challenge == Challenge.WITHOUT_OBSTACLES:
+            self._challenge_without_obstacles()
+        elif self.__challenge == Challenge.WITH_OBSTACLES:
+            self._challenge_with_obstacles()
+        else:
+            raise ValueError(f"Unknown challenge: {self.__challenge}")
+
+        # Send the stop event to signal that the Pilot should stop
+        self.__stop_event.set()
+
+        # Clear the started event
+        with self.__rlock:
+            self.__started_event.clear()
+
+        # Log
+        self.__logger.info("Pilot stopped.")
