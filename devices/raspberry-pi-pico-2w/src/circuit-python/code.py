@@ -3,7 +3,8 @@ from busio import I2C
 from asyncio import run, create_task, gather
 
 from lib.bno08x import BNO08XHandler
-from lib.env import Env, Challenge
+from lib.env import Env
+from lib.enums import Challenge
 from lib.esc_motor import ESCMotorHandler
 from lib.led import LEDHandler
 from lib.serial_communication import SerialCommunication
@@ -23,14 +24,23 @@ SERVO_PIN = GP13
 SWITCH_PIN = GP11
 
 # Robot's components handlers
-led: LEDHandler = LEDHandler(led_pin=LED)
-serial_communication: SerialCommunication = SerialCommunication(console_port_enabled=True, data_port_enabled=True,
-                                                                led=led)
-servo: ServoHandler = ServoHandler(servo_pin=SERVO_PIN, serial_communication=serial_communication)
-motor: ESCMotorHandler = ESCMotorHandler(motor_pin=ESC_MOTOR_PIN, serial_communication=serial_communication,
-                                         movement=MOVEMENT)
-bno08x: BNO08XHandler = BNO08XHandler(i2c=I2C_BUS, serial_communication=serial_communication)
-switch: SwitchHandler = SwitchHandler(switch_pin=SWITCH_PIN, serial_communication=serial_communication, led=led)
+led = LEDHandler(led_pin=LED)
+serial_communication = SerialCommunication(
+    console_port_enabled=True,
+    data_port_enabled=True,
+    led=led
+)
+servo = ServoHandler(servo_pin=SERVO_PIN, movement=MOVEMENT)
+motor = ESCMotorHandler(motor_pin=ESC_MOTOR_PIN, movement=MOVEMENT)
+bno08x = BNO08XHandler(
+    i2c=I2C_BUS,
+    serial_communication=serial_communication
+)
+switch = SwitchHandler(
+    switch_pin=SWITCH_PIN,
+    serial_communication=serial_communication,
+    led=led
+)
 
 async def main():
     """
@@ -53,16 +63,24 @@ async def main():
         # Start the challenge based on the challenge type
         if CHALLENGE == Challenge.WITH_OBSTACLES:
             # Initialize the WithObstacles challenge handler
-            with_obstacles = WithObstacles(bno08x=bno08x, servo=servo, motor=motor,
-                                           serial_communication=serial_communication)
+            with_obstacles = WithObstacles(
+                bno08x=bno08x,
+                servo=servo,
+                motor=motor,
+                serial_communication=serial_communication
+            )
 
             # Start the main loop for the challenge with obstacles
             await with_obstacles.loop()
 
         elif CHALLENGE == Challenge.WITHOUT_OBSTACLES:
             # Initialize the WithoutObstacles challenge handler
-            without_obstacles = WithoutObstacles(bno08x=bno08x, servo=servo, motor=motor,
-                                                 serial_communication=serial_communication)
+            without_obstacles = WithoutObstacles(
+                bno08x=bno08x,
+                servo=servo,
+                motor=motor,
+                serial_communication=serial_communication
+            )
 
             # Start the main loop for the challenge without obstacles
             await without_obstacles.loop()

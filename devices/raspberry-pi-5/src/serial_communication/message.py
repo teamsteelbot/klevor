@@ -136,6 +136,18 @@ class IncomingMessage:
         """
         return self.category == IncomingCategory.ERROR
 
+    def __eq__(self, other: 'IncomingMessage') -> bool:
+        """
+        Check equality of two IncomingMessage objects.
+
+        Args:
+            other (IncomingMessage): The other IncomingMessage object to compare with.
+
+        Returns:
+            bool: True if both messages have the same category and content, False otherwise.
+        """
+        return self.category == other.category and self.content == other.content
+
 
 class OutgoingMessage:
     """
@@ -239,3 +251,15 @@ class OutgoingMessage:
         # Check the type of content
         is_instance(content, str)
         self.__content = content
+
+    def __eq__(self, other: 'OutgoingMessage') -> bool:
+        """
+        Check equality of two OutgoingMessage objects.
+
+        Args:
+            other (OutgoingMessage): The other OutgoingMessage object to compare with.
+
+        Returns:
+            bool: True if both messages have the same category and content, False otherwise.
+        """
+        return self.category == other.category and self.content == other.content

@@ -6,45 +6,12 @@ from .message import IncomingMessage, IncomingCategory
 from .esc_motor import ESCMotorHandler
 from .serial_communication import SerialCommunication
 
-class Challenge:
-    """
-    Class to represent the enum challenge messages sent and received from the Raspberry Pi Pico.
-    """
-
-    WITH_OBSTACLES = "with_obstacles"
-    WITHOUT_OBSTACLES = "without_obstacles"
-
-    @classmethod
-    def from_string(cls, challenge_str: str) -> str:
-        """
-        Convert a string to a Challenge enum value.
-
-        Args:
-            challenge_str (str): The string representation of the challenge.
-
-        Returns:
-            str: The corresponding Challenge enum value.
-        """
-        challenge_name = challenge_str.upper()
-        for challenge in [cls.WITH_OBSTACLES, cls.WITHOUT_OBSTACLES]:
-            if challenge_name == challenge:
-                return challenge
-
-        raise ValueError(f"Invalid challenge: {challenge_str}")
-
 
 class WithoutObstacles:
     """
     Class for the WRO 2025 Challenge without Obstacles in the Future Engineers Car category.
     This class contains constants and methods related to the challenge.
     """
-
-    # Distance constants
-    FRONT_DISTANCE_THRESHOLD = 500
-    SIDE_DISTANCE_DIFFERENCE_PERCENTAGE = 0.2
-    SIDE_DISTANCE_THRESHOLD = 1500
-    STOP_DISTANCE_THRESHOLD = 1500
-    TARGET_DISTANCE_STOP_START = 200
 
     def __init__(self, bno08x: BNO08XHandler, servo: ServoHandler, motor: ESCMotorHandler,
                  serial_communication: SerialCommunication):
@@ -62,32 +29,6 @@ class WithoutObstacles:
         self.__motor = motor
         self.__serial_communication = serial_communication
 
-        # Initialize the average distances
-        self.__avg_front_dist, self.__avg_left_dist, self.__avg_right_dist = 0.0, 0.0, 0.0
-
-    async def _calculate_distances(self, msgs: list[IncomingMessage]) -> None:
-        """
-        Calculate the average distances from the received RPLIDAR messages.
-
-        Args:
-            msgs (list[IncomingMessage]): List of incoming messages from the serial communication.
-        """
-        # Process the received messages (must be only RPLIDAR messages) on reverse order
-        for msg in msgs[::-1]:
-            if msg.category == IncomingCategory.RPLIDAR:
-                # Split the message content to extract distance
-                parts = msg.content.split(IncomingMessage.CONTENT_HEADER_SEPARATOR)
-
-                # Check the type of distance
-                if parts[0] == RPLIDAR.FRONT:
-                    self.__avg_front_dist = float(parts[1])
-
-                elif parts[0] == RPLIDAR.LEFT:
-                    self.__avg_left_dist = float(parts[1])
-
-                elif parts[0] == RPLIDAR.RIGHT:
-                    self.__avg_right_dist = float(parts[1])
-
     async def loop(self):
         """
         Main loop for the challenge without obstacles.
@@ -96,76 +37,59 @@ class WithoutObstacles:
         # Set the last known turns to zero
         last_known_turns = 0
 
-        while True:
+        # Set the exit condition to False
+        to_exit = False
+
+        while not to_exit:
             # Create the update quaternion and receive serial messages tasks
             update_quaternion_task = create_task(self.__bno08x.update_quaternion())
             receive_serial_task = create_task(self.__serial_communication.receive_messages())
 
             # Wait for the tasks to complete
             results = await gather(update_quaternion_task, receive_serial_task)
-            msgs = results[1]
+            msgs: list[IncomingMessage] = results[1]
 
-            # Process the received messages (must be only RPLIDAR messages) on reverse order
-            await self._calculate_distances(msgs)
-
-            # Algorithm tasks
+            # Algortihm tasks
             tasks = []
 
-            # Check for the current turn and center the servo if necessary
-            if self.__servo.is_turning():
-                if self.__bno08x.turns != last_known_turns:
+            # Process the received messages
+            motor_speed = None
+            servo_angle = None
+            for msg in msgs:
+                if msg == SerialCommunication.STOP_MESSAGE:
+                    # Set the exit condition to True
+                    to_exit = True
+
+                    # Stop the motor and center the servo
+                    tasks.append(create_task(self.__motor.stop()))
                     tasks.append(create_task(self.__servo.center()))
 
-                    # Update for the next check
-                    last_known_turns = self.__bno08x.turns
-                continue
+                    # Send a confirmation message to the serial communication
+                    tasks.append(create_task(
+                        self.__serial_communication.send_confirmation_message()))
+                    break
 
-            # Overall Mission Completion Check
-            if last_known_turns == 12:
-                tasks.append(create_task(self.__motor.set_speed(self.__motor.SPEED_NORMAL)))
+                elif msg.category == IncomingCategory.MOTOR_SPEED:
+                    # Set the motor speed
+                    motor_speed = float(msg.content)
 
-                # Gather the tasks and wait for them to complete
-                await gather(*tasks)
+                elif msg.category == IncomingCategory.SERVO_ANGLE:
+                    # Set the servo angle
+                    servo_angle = int(msg.content)
 
-                while True:
-                    # Receive messages from the serial communication
-                    msgs = await self.__serial_communication.receive_messages()
+            # Add the set motor speed task and set servo angle task if the exit flag is not set
+            if not to_exit:
+                if motor_speed is not None:
+                    tasks.append(create_task(self.__motor.set_speed(motor_speed)))
 
-                    # Process the received messages (must be only RPLIDAR messages) on reverse order
-                    await self._calculate_distances(msgs)
-
-                    if self.__avg_front_dist <= self.STOP_DISTANCE_THRESHOLD:
-                        await self.__motor.stop()
-                        await self.__serial_communication.stop()
-                        return
-
-            # Check if the robot should move forward or turn
-            if self.__avg_front_dist >= self.FRONT_DISTANCE_THRESHOLD:
-                tasks.append(create_task(self.__motor.set_speed(self.__motor.SPEED_NORMAL)))
-
-                # Check if the servo should make a little turn to the left or right in order to center the robot
-                if self.__avg_right_dist >= self.__avg_left_dist * (1 + self.SIDE_DISTANCE_DIFFERENCE_PERCENTAGE):
-                    tasks.append(create_task(self.__servo.right(self.__servo.SMALL_TURN_ANGLE)))
-
-                elif self.__avg_left_dist >= self.__avg_right_dist * (1 + self.SIDE_DISTANCE_DIFFERENCE_PERCENTAGE):
-                    tasks.append(create_task(self.__servo.left(self.__servo.SMALL_TURN_ANGLE)))
-
-                else:
-                    tasks.append(create_task(self.__servo.center()))
-
-            else:
-                tasks.append(create_task(self.__motor.set_speed(self.__motor.SPEED_SLOW)))
-
-                # Check if the robot should turn left or right based on the side distances
-                if self.__avg_right_dist >= self.SIDE_DISTANCE_THRESHOLD:
-                    tasks.append(create_task(self.__servo.right(self.__servo.BIG_TURN_ANGLE)))
-
-                elif self.__avg_left_dist >= self.SIDE_DISTANCE_THRESHOLD:
-                    tasks.append(create_task(self.__servo.left(self.__servo.BIG_TURN_ANGLE)))
+                if servo_angle is not None:
+                    tasks.append(create_task(self.__servo.set_angle(servo_angle)))
 
             # Gather the tasks and wait for them to complete
-            if tasks:
-                await gather(*tasks)
+            await gather(*tasks) if tasks else None
+
+        # Stop the serial communication when exiting the loop
+        await self.__serial_communication.stop()
 
 class WithObstacles:
     """

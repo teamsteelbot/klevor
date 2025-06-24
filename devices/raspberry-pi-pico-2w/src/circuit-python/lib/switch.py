@@ -13,14 +13,14 @@ class SwitchHandler:
     SWITCH_PIN = GP11
     DELAY = 0.01
 
-    def __init__(self, switch_pin: int = SWITCH_PIN, serial_communication: SerialCommunication = None,
+    def __init__(self, serial_communication: SerialCommunication, switch_pin: int = SWITCH_PIN,
                  led: LEDHandler = None):
         """
         Initializes the switch handler with the specified pin.
 
         Args:
+            serial_communication (SerialCommunication): Serial communication handler.
             switch_pin (int): The GPIO number where the switch is connected.
-            serial_communication (SerialCommunication | None): Optional serial communication handler.
             led (LEDHandler | None): Optional LED handler for visual feedback when the switch is pressed.
         """
         # Set up the switch pin as input with pull-up resistor
@@ -44,11 +44,7 @@ class SwitchHandler:
             await sleep(self.DELAY)
 
         # Create the tasks to signal the start of the robot's operation
-        start_tasks = []
-
-        # If serial communication is provided, signal the start
-        if self.__serial_communication:
-            start_tasks.append(create_task(self.__serial_communication.start()))
+        start_tasks = [create_task(self.__serial_communication.start())]
 
         # Blink the LED if provided
         if self.__led:

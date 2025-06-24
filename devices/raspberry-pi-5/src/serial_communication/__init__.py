@@ -280,6 +280,7 @@ class SerialCommunication(SerialCommunicationABC):
             msg_str = self.__console_serial.readline().decode(ENCODE).strip()
             msg = IncomingMessage.from_string(msg_str)
 
+            """
             if msg.is_stop():
                 # Send a confirmation stop message
                 self._send_confirmation_message()
@@ -291,8 +292,9 @@ class SerialCommunication(SerialCommunicationABC):
                 # Wait for a short time to ensure the message is sent
                 sleep(self.STOP_DELAY)
                 break
+            """
 
-            elif msg.is_error():
+            if msg.is_error():
                 # Log the error message
                 self.__logger.error(
                     f"Received error message: {msg.content}") if self.__logger else None

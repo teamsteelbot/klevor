@@ -1,108 +1,5 @@
-class IncomingCategory:
-    """
-    Class to represent the enum categories of incoming messages from the Raspberry Pi 5.
-    """
-    STATUS = "status"
-    MOTOR_SPEED = "motor_speed"
-    SERVO_ANGLE = "servo_angle"
+from .enums import OutgoingCategory, IncomingCategory
 
-    @classmethod
-    def from_string(cls, category_str: str) -> str:
-        """
-        Convert a string to a IncomingCategory enum value.
-
-        Args:
-            category_str (str): The string representation of the category.
-
-        Returns:
-            str: The corresponding IncomingCategory enum value.
-        """
-        category_name = category_str.upper()
-        for category in [cls.STATUS, cls.MOTOR_SPEED, cls.SERVO_ANGLE]:
-            if category_name == category:
-                return category
-
-        raise ValueError(f"Invalid incoming category: {category_str}")
-
-class OutgoingCategory:
-    """
-    Class to represent the enum categories of outgoing messages to the Raspberry Pi 5.
-    """
-    CHALLENGE = "challenge"
-    STATUS = "status"
-    BNO08X_YAW = "bno08x_yaw"
-    BNO08X_TURNS = "bno08x_turns"
-    ERROR = "error"
-
-    @classmethod
-    def from_string(cls, category_str: str) -> str:
-        """
-        Convert a string to a OutgoingCategory enum value.
-
-        Args:
-            category_str (str): The string representation of the category.
-
-        Returns:
-            str: The corresponding OutgoingCategory enum value.
-        """
-        category_name = category_str.upper()
-        for category in [cls.CHALLENGE, cls.STATUS, cls.BNO08X_YAW,
-                         cls.BNO08X_TURNS, cls.ERROR]:
-            if category_name == category:
-                return category
-
-        raise ValueError(f"Invalid outgoing category: {category_str}")
-
-class Status:
-    """
-    Class to represent the enum status messages sent and received to the Raspberry Pi 5.
-    """
-    START = "start"
-    STOP = "stop"
-    OK = "ok"
-
-    @classmethod
-    def from_string(cls, status_str: str) -> str:
-        """
-        Convert a string to a Status enum value.
-
-        Args:
-            status_str (str): The string representation of the status.
-
-        Returns:
-            str: The corresponding Status enum value.
-        """
-        status_name = status_str.upper()
-        for status in [cls.START, cls.STOP, cls.OK]:
-            if status_name == status:
-                return status
-
-        raise ValueError(f"Invalid status: {status_str}")
-
-class Request:
-    """
-    Class to represent the enum request messages sent to the Raspberry Pi 5.
-    """
-
-    INFERENCE = "inference"
-
-    @classmethod
-    def from_string(cls, request_str: str) -> str:
-        """
-        Convert a string to a Request enum value.
-
-        Args:
-            request_str (str): The string representation of the request.
-
-        Returns:
-            str: The corresponding Request enum value.
-        """
-        request_name = request_str.upper()
-        for request in [cls.INFERENCE]:
-            if request_name == request:
-                return request
-
-        raise ValueError(f"Invalid request: {request_str}")
 
 class IncomingMessage:
     """
@@ -295,3 +192,16 @@ class OutgoingMessage:
             content (str): The content of the message.
         """
         self.__content = content
+
+    def __eq__(self, other: 'OutgoingMessage') -> bool:
+        """
+        Check if two messages are equal.
+
+        Args:
+            other (OutgoingMessage): The other message to compare with.
+
+        Returns:
+            bool: True if the messages are equal, False otherwise.
+        """
+        return (self.category == other.category and
+                self.content == other.content)

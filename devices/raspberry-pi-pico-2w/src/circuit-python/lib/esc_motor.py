@@ -3,7 +3,6 @@ from pwmio import PWMOut
 from adafruit_motor.servo import ContinuousServo
 from asyncio import sleep
 
-from .serial_communication import SerialCommunication
 
 class ESCMotorError(Exception):
     """
@@ -49,7 +48,7 @@ class ESCMotorHandler:
 
     def __init__(self, motor_pin: int = MOTOR_PIN, frequency: int = PWM_FREQUENCY,
                  min_pulse: int = MIN_PULSE, max_pulse: int = MAX_PULSE,
-                 serial_communication: SerialCommunication = None, movement: bool = True):
+                 movement: bool = True):
         """
         Initializes the ESC motor handler with the specified parameters.
 
@@ -58,15 +57,11 @@ class ESCMotorHandler:
             frequency (int): The PWM frequency for the ESC motor.
             min_pulse (int): Minimum pulse width for the ESC motor.
             max_pulse (int): Maximum pulse width for the ESC motor.
-            serial_communication (SerialCommunication | None): Optional serial communication handler.
             movement (bool): If True, the motor will be controlled for movement; if False, it will not.
         """
         # Setup PWM output for the ESC motor
         self.__esc_pwm = PWMOut(motor_pin, duty_cycle=0, frequency=frequency)
         self.__esc_motor = ContinuousServo(self.__esc_pwm, min_pulse=min_pulse, max_pulse=max_pulse)
-
-        # If a serial communication handler is provided, use it
-        self.__serial_communication = serial_communication
 
         # Set the movement flag
         self.__movement = movement

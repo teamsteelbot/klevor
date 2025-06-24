@@ -163,4 +163,59 @@ after rotation
 
                 # Send the average distances to the serial communication
                 self.__serial_communication.send_rplidar_measures(avg_distances)
+                
+                
+                
+                
+                 # Check for the current turn and center the servo if necessary
+            if self.__servo.is_turning():
+                if self.__bno08x.turns != last_known_turns:
+                    tasks.append(create_task(self.__servo.center()))
+
+                    # Update for the next check
+                    last_known_turns = self.__bno08x.turns
+                continue
+
+            # Overall Mission Completion Check
+            if last_known_turns == 12:
+                tasks.append(create_task(self.__motor.set_speed(self.__motor.SPEED_NORMAL)))
+
+                # Gather the tasks and wait for them to complete
+                await gather(*tasks)
+
+                while True:
+                    # Receive messages from the serial communication
+                    msgs = await self.__serial_communication.receive_messages()
+
+                    # Process the received messages (must be only RPLIDAR messages) on reverse order
+                    await self._calculate_distances(msgs)
+
+                    if self.__avg_front_dist <= self.STOP_DISTANCE_THRESHOLD:
+                        
+                        return
+
+            # Check if the robot should move forward or turn
+            if self.__avg_front_dist >= self.FRONT_DISTANCE_THRESHOLD:
+                tasks.append(create_task(self.__motor.set_speed(self.__motor.SPEED_NORMAL)))
+
+                # Check if the servo should make a little turn to the left or right in order to center the robot
+                if self.__avg_right_dist >= self.__avg_left_dist * (1 + self.SIDE_DISTANCE_DIFFERENCE_PERCENTAGE):
+                    tasks.append(create_task(self.__servo.right(self.__servo.SMALL_TURN_ANGLE)))
+
+                elif self.__avg_left_dist >= self.__avg_right_dist * (1 + self.SIDE_DISTANCE_DIFFERENCE_PERCENTAGE):
+                    tasks.append(create_task(self.__servo.left(self.__servo.SMALL_TURN_ANGLE)))
+
+                else:
+                    tasks.append(create_task(self.__servo.center()))
+
+            else:
+                tasks.append(create_task(self.__motor.set_speed(self.__motor.SPEED_SLOW)))
+
+                # Check if the robot should turn left or right based on the side distances
+                if self.__avg_right_dist >= self.SIDE_DISTANCE_THRESHOLD:
+                    tasks.append(create_task(self.__servo.right(self.__servo.BIG_TURN_ANGLE)))
+
+                elif self.__avg_left_dist >= self.SIDE_DISTANCE_THRESHOLD:
+                    tasks.append(create_task(self.__servo.left(self.__servo.BIG_TURN_ANGLE)))
+
 """

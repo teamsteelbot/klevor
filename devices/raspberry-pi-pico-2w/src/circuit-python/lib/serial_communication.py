@@ -4,8 +4,8 @@ from digitalio import DigitalInOut, Direction
 from time import monotonic
 
 from .led import LEDHandler
-from .message import IncomingMessage, IncomingCategory, OutgoingMessage, OutgoingCategory, Status
-from .challenge import Challenge
+from .message import IncomingMessage, IncomingCategory, OutgoingMessage, OutgoingCategory
+from .enums import Challenge, Status
 
 class SerialCommunicationError(Exception):
     """
@@ -29,8 +29,9 @@ class SerialCommunication:
 
     # Status messages
     START_MESSAGE = OutgoingMessage(OutgoingCategory.STATUS, Status.START.get_name())
-    STOP_MESSAGE = OutgoingMessage(OutgoingCategory.STATUS, Status.STOP.get_name())
-    OK_MESSAGE = IncomingMessage(IncomingCategory.STATUS, Status.OK.get_name())
+    STOP_MESSAGE = IncomingMessage(OutgoingCategory.STATUS, Status.STOP.get_name())
+    INCOMING_OK_MESSAGE = IncomingMessage(IncomingCategory.STATUS, Status.OK.get_name())
+    OUTGOING_OK_MESSAGE = OutgoingMessage(OutgoingCategory.STATUS, Status.OK.get_name())
 
     # Challenge messages
     CHALLENGE_WITH_OBSTACLES = OutgoingMessage(OutgoingCategory.CHALLENGE, Challenge.WITH_OBSTACLES.get_challenge_name())
@@ -111,7 +112,13 @@ class SerialCommunication:
         except Exception as e:
             raise SerialCommunicationError(f"Error sending message: {e}")
 
-    async def wait_for_confirmation(self, timeout: float = CONFIRMATION_TIMEOUT) -> bool:
+    async def send_confirmation_message(self):
+        """
+        Sends a confirmation message through the data port.
+        """
+        self.send_message(self.OUTGOING_OK_MESSAGE)
+
+    async def wait_for_confirmation_message(self, timeout: float = CONFIRMATION_TIMEOUT) -> bool:
         """
         Wait for a confirmation message from the console port.
 
@@ -125,8 +132,7 @@ class SerialCommunication:
         while monotonic() - start_time < timeout:
             msgs = await self.receive_messages()
             for msg in msgs:
-                # If the message is a confirmation message, return True
-                if msg and msg.category == IncomingCategory.STATUS and msg.content == Status.OK.get_name():
+                if msg == self.INCOMING_OK_MESSAGE:
                     return True
         return False
 
@@ -142,7 +148,7 @@ class SerialCommunication:
         self.send_message(challenge_message)
 
         # Wait for confirmation of the challenge message
-        if not await self.wait_for_confirmation():
+        if not await self.wait_for_confirmation_message():
             raise SerialCommunicationError("Failed to receive confirmation for challenge message.")
 
     def send_bno08x_yaw_message(self, yaw: float):
@@ -186,23 +192,19 @@ class SerialCommunication:
         self.send_message(self.START_MESSAGE)
 
         # Wait for confirmation of the start message
-        if not await self.wait_for_confirmation():
+        if not await self.wait_for_confirmation_message():
             raise SerialCommunicationError("Failed to receive confirmation for start message.")
 
     async def stop(self):
         """
-        Send the stop message to the console port and wait for confirmation.
-
-        Raises:
-            SerialCommunicationError: If the console port is not enabled or if confirmation is not received.
+        Close the serial communication.
         """
-        # Send the stop message
-        self.send_message(self.STOP_MESSAGE)
+        if self.__console_port:
+            self.__console_port.deinit()
 
-        # Wait for confirmation of the stop message
-        if not await self.wait_for_confirmation():
-            raise SerialCommunicationError("Failed to receive confirmation for stop message.")
+        if self.__data_port:
+            self.__data_port.deinit()
 
-        # Turn off the LED if it was toggled on receive
+        # Turn off the LED if it exists
         if self.__led:
             self.__led.off()
