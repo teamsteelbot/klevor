@@ -3,6 +3,7 @@ import random
 import time
 from typing import Optional
 
+from PIL.Image import Image
 import cv2
 import numpy as np
 
@@ -128,28 +129,72 @@ class OpenCV:
     @classmethod
     def preprocess(
         cls,
-        image_path: str,
-        image_size: tuple[int, int] = (SIZE, SIZE)
-    ) -> tuple:
+        image: np.ndarray,
+    ) -> np.ndarray:
         """
         Preprocess the image.
 
         Args:
-            image_path (str): Path to the image file.
-            image_size (tuple[int, int]): Size to resize the image to.
+            image (np.ndarray): Image to preprocess.
         Returns:
-            tuple: Original image and preprocessed image tensor.
+            np.ndarray: Preprocessed image tensor.
         """
-        # Resize the image and convert it to RGB
-        image = cls.load_image(image_path, image_size)
-
         # Normalize the image and transpose it
         image_normalized = image.astype(np.float32) / 255.0
         image_transposed = np.transpose(image_normalized, (2, 0, 1))
 
         # Expand the dimensions
         image_expanded = np.expand_dims(image_transposed, axis=0)
-        return image, image_expanded
+        return image_expanded
+
+    @classmethod
+    def load_and_preprocess_image(
+        cls,
+        image_path: str | os.PathLike[str],
+        image_size: tuple[int, int] = (SIZE, SIZE),
+        to_rgb: bool = True,
+        interpolation=cv2.INTER_LINEAR
+    ) -> np.ndarray:
+        """
+        Load and preprocess an image.
+
+        Args:
+            image_path (str|os.PathLike[str]): Path to the image file.
+            image_size (tuple[int, int]): Size to resize the image to.
+            to_rgb (bool): Whether to convert the image to RGB format.
+            interpolation: Interpolation method used for resizing.
+        Returns:
+            tuple[np.ndarray, np.ndarray]: Original image and preprocessed image tensor.
+        """
+        # Load the image
+        original_image = cls.load_image(
+            image_path, image_size, to_rgb, interpolation
+            )
+
+        # Resize the image and convert it to RGB
+        return cls.preprocess(original_image)
+
+    @classmethod
+    def preprocess_pil_image(
+        cls,
+        image: Image,
+    ) -> np.ndarray:
+        """
+        Preprocess a PIL image.
+
+        Args:
+            image (Image): PIL image to preprocess.
+        Returns:
+            np.ndarray: Preprocessed image tensor.
+        """
+        # Check the type of image
+        is_instance(image, Image)
+
+        # Convert the PIL image to a numpy array
+        image_np = np.array(image)
+
+        # Resize the image and convert it to RGB
+        return cls.preprocess(image_np)
 
     @classmethod
     def resize_images(

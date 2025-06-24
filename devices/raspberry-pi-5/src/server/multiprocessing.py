@@ -14,7 +14,7 @@ def websocket_server_target(
     writer_messages_queue: Queue,
     host: str = HOST,
     port: int = PORT
-):
+) -> None:
     """
     Target function for a multiprocessing process that handles the WebSocket server.
 

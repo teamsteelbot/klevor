@@ -226,12 +226,11 @@ class RPLidar(RPLidarABC):
                 )
                 return
 
+            # Set the started event to signal that the RPLidar has started
+            self.__started_event.set()
+
         # Wait for the start event to be set
         self.__start_event.wait()
-
-        # Set the started event to signal that the RPLidar has started
-        with self.__rlock:
-            self.__started_event.set()
 
         # Log
         self.__logger.info("RPLidar's starting...")

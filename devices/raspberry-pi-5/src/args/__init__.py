@@ -272,6 +272,21 @@ class Args:
             choices=VERSIONS
         )
 
+    @classmethod
+    def add_movement_argument(
+        cls,
+        parser: ArgumentParser,
+        default: bool = True
+    ) -> None:
+        """
+        Add movement argument to the parser.
+
+        Args:
+            parser (ArgumentParser): The argument parser instance.
+            default (bool): Default value for the movement argument.
+        """
+        cls._add_boolean_argument(parser, Flag.MOVEMENT, default=default)
+
     @staticmethod
     def check_model_name(model_name: str) -> None:
         """

@@ -400,3 +400,14 @@ class Pilot(PilotABC):
 
         # Log
         self.__logger.info("Pilot stopped.")
+
+    def __del__(self):
+        """
+        Destructor to clean up resources when the Pilot is no longer needed.
+        """
+        self.__stop_event.set()
+
+        # Log
+        self.__logger.debug(
+            "Pilot instance is being deleted. Resources will be cleaned up."
+        )

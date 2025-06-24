@@ -30,7 +30,7 @@ def serial_communication_target(
     data_port: Optional[str] = RASPBERRY_PI_PICO_DATA_PORT,
     data_port_alt: Optional[str] = RASPBERRY_PI_PICO_DATA_PORT_ALT,
     baudrate: Optional[int] = RASPBERRY_PI_PICO_BAUDRATE
-):
+) -> None:
     """
     Target function for a multiprocessing process that handles the serial
     communication.

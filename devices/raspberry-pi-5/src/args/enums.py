@@ -14,6 +14,7 @@ class Flag(Enum):
     SERIAL = 5
     IP = 6
     PORT = 7
+    MOVEMENT = 8
 
     @property
     def parsed_name(self) -> str:
