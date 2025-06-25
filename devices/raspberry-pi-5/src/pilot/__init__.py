@@ -1,5 +1,7 @@
 from queue import Empty
-from multiprocessing import Event, Queue, RLock, Value
+from multiprocessing import Event, Queue, RLock
+from multiprocessing.synchronize import Event as EventCls
+from multiprocessing.sharedctypes import Value as ValueCls
 from time import monotonic, sleep
 from typing import Optional, final
 
@@ -47,18 +49,18 @@ class Pilot(PilotABC):
 
     def __init__(
         self,
-        start_event: Event,
-        parking_event: Event,
-        stop_event: Event,
-        rplidar_update_measures_event: Event,
+        start_event: EventCls,
+        parking_event: EventCls,
+        stop_event: EventCls,
+        rplidar_update_measures_event: EventCls,
         rplidar_measures_queue: Queue,
         serial_incoming_messages_queue: Queue,
         serial_outgoing_messages_queue: Queue,
         writer_messages_queue: Queue,
-        bno08x_yaw_deg: Value,
-        bno08x_turns: Value,
+        bno08x_yaw_deg: ValueCls,
+        bno08x_turns: ValueCls,
         movement: bool = True,
-        photographer_capture_image_event: Optional[Event] = None,
+        photographer_capture_image_event: Optional[EventCls] = None,
         detector_model_g_inferences_queue: Optional[Queue] = None,
         detector_model_m_inferences_queue: Optional[Queue] = None,
         detector_model_r_inferences_queue: Optional[Queue] = None,
@@ -67,19 +69,19 @@ class Pilot(PilotABC):
         Initialize the Pilot class.
 
         Args:
-            start_event (Event): Event to signal when the pilot should start.
-            parking_event (Event): Event to signal the parking state of the robot.
-            stop_event (Event): Event to signal when the pilot should stop.
-            rplidar_update_measures_event (Event): Event to signal when the
+            start_event (EventCls): Event to signal when the pilot should start.
+            parking_event (EventCls): Event to signal the parking state of the robot.
+            stop_event (EventCls): Event to signal when the pilot should stop.
+            rplidar_update_measures_event (EventCls): Event to signal when the
             RPLidar should update measures.
             rplidar_measures_queue (Queue): Queue to hold RPLidar measures.
             serial_incoming_messages_queue (Queue): Queue to hold incoming messages from the serial port.
             serial_outgoing_messages_queue (Queue): Queue to hold outgoing messages to the serial port.
             writer_messages_queue (Queue): Queue to hold log messages.
-            bno08x_yaw_deg (Value): Shared value for the BNO08X yaw angle in degrees.
-            bno08x_turns (Value): Shared value for the BNO08X turns.
+            bno08x_yaw_deg (ValueCls): Shared value for the BNO08X yaw angle in degrees.
+            bno08x_turns (ValueCls): Shared value for the BNO08X turns.
             movement (bool): Flag to indicate if the pilot should handle movement.
-            photographer_capture_image_event (Optional[Event]): Event to signal when the photographer should capture an image.
+            photographer_capture_image_event (Optional[EventCls]): Event to signal when the photographer should capture an image.
             detector_model_g_inferences_queue (Optional[Queue]): Queue for model G inferences.
             detector_model_m_inferences_queue (Optional[Queue]): Queue for model M inferences.
             detector_model_r_inferences_queue (Optional[Queue]): Queue for model R inferences.

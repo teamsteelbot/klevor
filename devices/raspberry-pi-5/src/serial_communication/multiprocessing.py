@@ -1,5 +1,7 @@
 import os
 from multiprocessing import Event, Queue, Value
+from multiprocessing.synchronize import Event as EventCls
+from multiprocessing.sharedctypes import Value as ValueCls
 from typing import Optional
 
 from . import SerialCommunication
@@ -13,15 +15,15 @@ from .constants import (
 
 
 def serial_communication_target(
-    start_event: Event,
-    parking_event: Event,
-    stop_event: Event,
+    start_event: EventCls,
+    parking_event: EventCls,
+    stop_event: EventCls,
     incoming_messages_queue: Queue,
     outgoing_messages_queue: Queue,
     writer_messages_queue: Queue,
-    bno08x_yaw_deg: Value,
-    bno08x_turns: Value,
-    photographer_capture_image_event: Event,
+    bno08x_yaw_deg: ValueCls,
+    bno08x_turns: ValueCls,
+    photographer_capture_image_event: EventCls,
     server_messages_queue: Optional[Queue] = None,
     console_port: Optional[str] = RASPBERRY_PI_PICO_CONSOLE_PORT,
     console_port_alt: Optional[str] = RASPBERRY_PI_PICO_CONSOLE_PORT_ALT,
@@ -34,15 +36,15 @@ def serial_communication_target(
     communication.
 
     Args:
-        start_event (Event): Event to signal when the serial communication has started.
-        parking_event (Event): Event to signal the parking state of the robot.
-        stop_event (Event): Event to signal when the serial communication should stop sending and receiving messages.
+        start_event (EventCls): Event to signal when the serial communication has started.
+        parking_event (EventCls): Event to signal the parking state of the robot.
+        stop_event (EventCls): Event to signal when the serial communication should stop sending and receiving messages.
         incoming_messages_queue (Queue): Queue to hold incoming messages from the serial port.
         outgoing_messages_queue (Queue): Queue to hold outgoing messages to the serial port.
         writer_messages_queue (Queue): Queue to hold log messages.
-        bno08x_yaw_deg (Value): Shared value for the BNO08X yaw angle in degrees.
-        bno08x_turns (Value): Shared value for the BNO08X turns.
-        photographer_capture_image_event (Event): Event to signal when an image should be captured.
+        bno08x_yaw_deg (ValueCls): Shared value for the BNO08X yaw angle in degrees.
+        bno08x_turns (ValueCls): Shared value for the BNO08X turns.
+        photographer_capture_image_event (EventCls): Event to signal when an image should be captured.
         server_messages_queue (Optional[Queue]): Queue to broadcast the messages through the websockets server.
         console_port (Optional[str]): Serial port used for receiving data from Pico.
         console_port_alt (Optional[str]): Alternative serial port used for receiving data from Pico.

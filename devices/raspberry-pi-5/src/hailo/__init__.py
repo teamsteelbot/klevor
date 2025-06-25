@@ -2,6 +2,7 @@ import os
 from functools import partial
 from queue import Empty
 from multiprocessing import Event, Queue, RLock
+from multiprocessing.synchronize import Event as EventCls
 from typing import Optional, final
 
 import cv2
@@ -50,7 +51,7 @@ class Hailo(HailoABC):
         class_colors: tuple[tuple[int, int, int]],
         processed_images_queue: Queue,
         inferences_queue: Queue,
-        stop_event: Event,
+        stop_event: EventCls,
         writer_messages_queue: Queue,
         multi_threading: bool = True,
         multiprocessing: bool = False,
@@ -68,7 +69,7 @@ class Hailo(HailoABC):
             class_colors (tuple[tuple[int, int, int]]): Tuple mapping class IDs to RGB colors.
             processed_images_queue (Queue): Queue to hold input images for processing.
             inferences_queue (Queue): Queue to hold the inferences from the Hailo handlers.
-            stop_event (Event): Event to signal when the Hailo handler should stop.
+            stop_event (EventCls): Event to signal when the Hailo handler should stop.
             writer_messages_queue (Queue): Queue to hold log messages.
             multi_threading (bool): Whether to enable multi-threading.
             multiprocessing (bool): Whether to enable multiprocessing.

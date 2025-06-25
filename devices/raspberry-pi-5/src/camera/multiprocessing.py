@@ -1,5 +1,6 @@
 import os
-from multiprocessing import Event, Queue
+from multiprocessing import Queue
+from multiprocessing.synchronize import Event as EventCls
 from typing import Callable, Optional
 
 import numpy as np
@@ -11,8 +12,8 @@ from .photographer import Photographer
 
 def photographer_target(
     images_queue: Queue,
-    capture_image_event: Event,
-    stop_event: Event,
+    capture_image_event: EventCls,
+    stop_event: EventCls,
     writer_messages_queue: Queue,
     preprocess_fn: Callable[[Image], np.ndarray],
     server_messages_queue: Optional[Queue] = None
@@ -22,8 +23,8 @@ def photographer_target(
 
     Args:
         images_queue (Queue): Queue to hold input images for processing.
-        capture_image_event (Event): Event to signal when an image should be captured.
-        stop_event (Event): Event to signal when the logger should stop.
+        capture_image_event (EventCls): Event to signal when an image should be captured.
+        stop_event (EventCls): Event to signal when the logger should stop.
         writer_messages_queue (Queue): Queue to hold log messages.
         preprocess_fn: Callable[[Image], np.ndarray]: Function to preprocess images before inference.
         server_messages_queue (Optional[Queue]): Queue to broadcast messages through the websockets server, if any.

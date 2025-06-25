@@ -1,5 +1,6 @@
 from queue import Empty
 from multiprocessing import Event, Queue, RLock
+from multiprocessing.synchronize import Event as EventCls
 from typing import TextIO, final
 
 from .abstracts import WriterABC
@@ -18,13 +19,13 @@ class Writer(WriterABC):
     # Wait timeout for processing messages
     WAIT_TIMEOUT = 0.1
 
-    def __init__(self, messages_queue: Queue, stop_event: Event) -> None:
+    def __init__(self, messages_queue: Queue, stop_event: EventCls) -> None:
         """
         Initialize the Logger class.
 
         Args:
             messages_queue (Queue): Queue to hold log messages.
-            stop_event (Event): Event to signal when the logger should stop.
+            stop_event (EventCls): Event to signal when the logger should stop.
         """
         # Initialize the messages queue and events
         self.__messages_queue = messages_queue

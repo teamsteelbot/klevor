@@ -1,5 +1,6 @@
 from queue import Empty
 from multiprocessing import Event, Queue, RLock
+from multiprocessing.synchronize import Event as EventCls
 from threading import Thread
 from typing import final
 
@@ -29,9 +30,9 @@ class ObjectDetector(ObjectDetectorABC):
         model_g_inferences_queue: Queue,
         model_m_inferences_queue: Queue,
         model_r_inferences_queue: Queue,
-        start_event: Event,
-        parking_event: Event,
-        stop_event: Event,
+        start_event: EventCls,
+        parking_event: EventCls,
+        stop_event: EventCls,
         photographer_images_queue: Queue,
         writer_messages_queue: Queue,
     ) -> None:
@@ -42,9 +43,9 @@ class ObjectDetector(ObjectDetectorABC):
             model_g_inferences_queue (Queue): Queue to hold inferences for model G.
             model_m_inferences_queue (Queue): Queue to hold inferences for model M.
             model_r_inferences_queue (Queue): Queue to hold inferences for model R.
-            start_event (Event): Event to signal when the object detector should start.
-            parking_event (Event): Event to signal the parking state of the robot.
-            stop_event (Event): Event to signal when the object detector should stop.
+            start_event (EventCls): Event to signal when the object detector should start.
+            parking_event (EventCls): Event to signal the parking state of the robot.
+            stop_event (EventCls): Event to signal when the object detector should stop.
             photographer_images_queue (Queue): Queue to hold input images for processing.
             writer_messages_queue (Queue): Queue to hold log messages.
         """

@@ -1,5 +1,6 @@
 import os
-from multiprocessing import Event, Queue
+from multiprocessing import Queue
+from multiprocessing.synchronize import Event as EventCls
 
 from . import WebSocketServer
 from .constants import HOST, PORT
@@ -7,8 +8,8 @@ from .constants import HOST, PORT
 
 def websocket_server_target(
     messages_queue: Queue,
-    parking_event: Event,
-    stop_event: Event,
+    parking_event: EventCls,
+    stop_event: EventCls,
     writer_messages_queue: Queue,
     host: str = HOST,
     port: int = PORT
@@ -18,8 +19,8 @@ def websocket_server_target(
 
     Args:
         messages_queue (Queue): Queue to broadcast messages through the websockets server.
-        parking_event (Event): Event to signal the parking state of the server.
-        stop_event (Event): Event to signal when the websockets server should stop.
+        parking_event (EventCls): Event to signal the parking state of the server.
+        stop_event (EventCls): Event to signal when the websockets server should stop.
         writer_messages_queue (Queue): Queue to hold log messages.
         host (str): The host address for the WebSocket server.
         port (int): The port number for the WebSocket server.

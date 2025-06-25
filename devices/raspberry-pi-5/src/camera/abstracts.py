@@ -1,7 +1,6 @@
 import io
 from abc import ABC, abstractmethod
 
-import numpy as np
 from PIL import ImageEnhance
 from PIL.Image import Image
 
