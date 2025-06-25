@@ -30,3 +30,5 @@
 /**/*/yolo/**/*.zip
 /**/*/yolo/hailo/suite/libs/**/*
 
+# Structurizr
+/**/*/.structurizr/**/*
