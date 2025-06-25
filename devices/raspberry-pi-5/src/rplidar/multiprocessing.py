@@ -6,10 +6,8 @@ from . import RPLidar
 from .constants import (
     RPLIDAR_C1_BAUDRATE, RPLIDAR_C1_PORT,
 )
-from ..utils.decorators import ignore_sigint
 
 
-@ignore_sigint
 def rplidar_target(
     update_measures_event: Event,
     measures_queue: Queue,

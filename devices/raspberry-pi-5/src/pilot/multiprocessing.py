@@ -3,10 +3,8 @@ from multiprocessing import Event, Queue, Value
 from typing import Optional
 
 from . import Pilot
-from ..utils.decorators import ignore_sigint
 
 
-@ignore_sigint
 def pilot_target(
     start_event: Event,
     parking_event: Event,

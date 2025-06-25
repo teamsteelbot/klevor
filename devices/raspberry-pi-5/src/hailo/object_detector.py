@@ -1,3 +1,4 @@
+from queue import Empty
 from multiprocessing import Event, Queue, RLock
 from threading import Thread
 from typing import final
@@ -9,6 +10,7 @@ from ..env import Env
 from ..files import Files
 from ..log import Logger
 from ..opencv import OpenCV
+from ..utils.decorators import ignore_sigint
 
 
 class ObjectDetector(ObjectDetectorABC):
@@ -119,6 +121,7 @@ class ObjectDetector(ObjectDetectorABC):
         return not self.is_running()
 
     @final
+    @ignore_sigint
     def run(self) -> None:
         with self.__rlock:
             # Check if the stop event is set
@@ -156,11 +159,14 @@ class ObjectDetector(ObjectDetectorABC):
         # Process images for G and R models
         self.__logger.info("Starting Hailo handlers for G and R models...")
         while self.is_running() and not self.__parking_event.is_set():
-            # Get the image from the photographer images queue
-            image = self.__photographer_images_queue.get(
-                timeout=self.WAIT_TIMEOUT
-            )
-            if image is None:
+            try:
+                # Get the image from the photographer images queue
+                image = self.__photographer_images_queue.get(
+                    timeout=self.WAIT_TIMEOUT
+                )
+
+            except Empty:
+                # If the queue is empty, continue to the next iteration
                 continue
 
             # Put the model G and R images in the Hailo handler processed images queues

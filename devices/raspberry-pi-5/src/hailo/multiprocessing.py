@@ -2,10 +2,8 @@ import os
 from multiprocessing import Event, Queue
 
 from .object_detector import ObjectDetector
-from ..utils.decorators import ignore_sigint
 
 
-@ignore_sigint
 def object_detector_target(
     model_g_inferences_queue: Queue,
     model_m_inferences_queue: Queue,

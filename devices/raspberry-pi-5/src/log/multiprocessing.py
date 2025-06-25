@@ -2,10 +2,8 @@ import os
 from multiprocessing import Event, Queue
 
 from .writer import Writer
-from ..utils.decorators import ignore_sigint
 
 
-@ignore_sigint
 def writer_target(
     messages_queue: Queue,
     stop_event: Event

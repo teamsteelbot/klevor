@@ -1,3 +1,4 @@
+from queue import Empty
 from multiprocessing import Event, Queue, RLock, Value
 from threading import Thread
 from time import sleep
@@ -22,6 +23,7 @@ from ..env.enums import Challenge
 from ..log import Logger
 from ..server.dispatcher import Dispatcher
 from ..utils import is_instance
+from ..utils.decorators import ignore_sigint
 
 
 class SerialCommunication(SerialCommunicationABC):
@@ -217,11 +219,14 @@ class SerialCommunication(SerialCommunicationABC):
 
     @final
     def _get_outgoing_message(self) -> OutgoingMessage | None:
-        # Get the message from the queue
-        msg = self.__outgoing_messages_queue.get(
-            timeout=self.OUTGOING_WAIT_TIMEOUT
-        )
-        if msg is None:
+        try:
+            # Get the message from the queue
+            msg = self.__outgoing_messages_queue.get(
+                timeout=self.OUTGOING_WAIT_TIMEOUT
+            )
+
+        except Empty:
+            # If the queue is empty, return None
             return None
 
         # Log
@@ -454,6 +459,7 @@ class SerialCommunication(SerialCommunicationABC):
         )
 
     @final
+    @ignore_sigint
     def run(self) -> None:
         with self.__rlock:
             # Check if the stop event is set

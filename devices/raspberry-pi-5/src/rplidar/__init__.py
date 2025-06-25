@@ -15,6 +15,7 @@ from ..env import Env
 from ..log import Logger
 from ..server.dispatcher import Dispatcher as WebSocketServerDispatcher
 from ..utils import is_instance
+from ..utils.decorators import ignore_sigint
 
 
 class RPLidar(RPLidarABC):
@@ -210,6 +211,7 @@ class RPLidar(RPLidarABC):
             self.__update_measures_event.clear()
 
     @final
+    @ignore_sigint
     def run(self):
         with self.__rlock:
             # Check if the stop event is set

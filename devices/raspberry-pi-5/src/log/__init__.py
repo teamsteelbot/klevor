@@ -1,5 +1,6 @@
 from multiprocessing import Queue
 from typing import Optional, final
+from types import NoneType
 
 from .abstracts import LoggerABC
 from .enums import Category
@@ -30,7 +31,7 @@ class Logger(LoggerABC):
         self.__writer_messages_queue = writer_messages_queue
 
         # Check the type of tag
-        is_instance(tag, (str, None,))
+        is_instance(tag, (str, NoneType,))
         self.__tag = self.get_unique_tag(tag) if unique_tag or not tag else tag
 
         # Log the initialization if a tag is provided

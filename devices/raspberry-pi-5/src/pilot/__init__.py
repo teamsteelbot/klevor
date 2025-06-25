@@ -1,3 +1,4 @@
+from queue import Empty
 from multiprocessing import Event, Queue, RLock, Value
 from time import monotonic, sleep
 from typing import Optional, final
@@ -24,6 +25,7 @@ from ..rplidar import RPLidar
 from ..rplidar.enums import Direction
 from ..rplidar.measure import Measure
 from ..serial_communication.dispatcher import Dispatcher as SerialDispatcher
+from ..utils.decorators import ignore_sigint
 
 
 class Pilot(PilotABC):
@@ -213,12 +215,13 @@ class Pilot(PilotABC):
         self.__rplidar_update_measures_event.set()
 
         # Get the measures from the queue
-        measures = self.__rplidar_measures_queue.get(timeout=self.WAIT_DELAY)
-        if not measures:
+        try:
+            return self.__rplidar_measures_queue.get(timeout=self.WAIT_DELAY)
+
+        except Empty:
             raise TimeoutError(
                 "No RPLidar measures received within the timeout period."
             )
-        return measures
 
     @final
     def _get_rplidar_average_distances(self) -> dict[Direction, float]:
@@ -357,6 +360,7 @@ class Pilot(PilotABC):
                     self._set_servo_to_left(SERVO_BIG_TURN_ANGLE)
 
     @final
+    @ignore_sigint
     def run(self):
         with self.__rlock:
             # Check if the stop event is set

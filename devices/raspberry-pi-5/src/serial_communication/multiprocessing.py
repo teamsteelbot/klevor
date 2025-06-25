@@ -10,10 +10,8 @@ from .constants import (
     RASPBERRY_PI_PICO_DATA_PORT,
     RASPBERRY_PI_PICO_DATA_PORT_ALT,
 )
-from ..utils.decorators import ignore_sigint
 
 
-@ignore_sigint
 def serial_communication_target(
     start_event: Event,
     parking_event: Event,

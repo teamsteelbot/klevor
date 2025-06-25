@@ -1,5 +1,6 @@
 import os
 from functools import partial
+from queue import Empty
 from multiprocessing import Event, Queue, RLock
 from typing import Optional, final
 
@@ -14,6 +15,7 @@ from ..files import Files
 from ..log import Logger
 from ..model import ImageBoundingBoxes
 from ..utils import is_instance
+from ..utils.decorators import ignore_sigint
 
 
 class Hailo(HailoABC):
@@ -200,6 +202,7 @@ class Hailo(HailoABC):
         self.__inferences_queue.put(ImageBoundingBoxes.from_hailo(result))
 
     @final
+    @ignore_sigint
     def run(self) -> None:
         with self.__rlock:
             # Check if the stop event is set
@@ -251,11 +254,14 @@ class Hailo(HailoABC):
 
         with self.__infer_model.configure() as configured_infer_model:
             while self.is_running():
-                # Get a preprocessed image from the input queue
-                preprocessed_image = self.__processed_images_queue.get(
-                    timeout=self.WAIT_TIMEOUT
-                )
-                if preprocessed_image is None:
+                try:
+                    # Get a preprocessed image from the input queue
+                    preprocessed_image = self.__processed_images_queue.get(
+                        timeout=self.WAIT_TIMEOUT
+                    )
+
+                except Empty:
+                    # If the queue is empty, continue to the next iteration
                     continue
 
                 # Create the bindings for the input and output buffers

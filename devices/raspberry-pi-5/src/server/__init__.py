@@ -1,3 +1,4 @@
+from queue import Empty
 import asyncio
 from multiprocessing import Event, Queue, RLock
 from threading import Thread
@@ -12,6 +13,7 @@ from .enums import Tag
 from .message import Message
 from ..log import Logger
 from ..utils import get_local_ip, is_instance
+from ..utils.decorators import ignore_sigint
 
 
 class WebSocketServer(WebSocketServerABC):
@@ -187,13 +189,16 @@ class WebSocketServer(WebSocketServerABC):
 
     @final
     async def _broadcast_last_message(self) -> None:
-        # Process any remaining messages in the queue
-        msg = self.__messages_queue.get(timeout=self.WAIT_TIMEOUT)
-        if msg is None:
-            return None
+        try:
+            # Process any remaining messages in the queue
+            msg = self.__messages_queue.get(timeout=self.WAIT_TIMEOUT)
 
-        # Broadcast the last message to all connected clients
-        await self._broadcast_message(msg)
+            # Broadcast the last message to all connected clients
+            await self._broadcast_message(msg)
+
+        except Empty:
+            # If the queue is empty, do nothing
+            return None
 
     @final
     async def _broadcast_handler(self):
@@ -207,6 +212,7 @@ class WebSocketServer(WebSocketServerABC):
             await self._broadcast_last_message()
 
     @final
+    @ignore_sigint
     async def run(self):
         with self.__rlock:
             # Check if the stop event is set

@@ -1,3 +1,4 @@
+from queue import Empty
 from multiprocessing import Event, Queue, RLock
 from typing import TextIO, final
 
@@ -6,6 +7,7 @@ from .enums import Category
 from .message import Message
 from ..files import Files
 from ..utils import is_instance
+from ..utils.decorators import ignore_sigint
 
 
 class Writer(WriterABC):
@@ -38,21 +40,20 @@ class Writer(WriterABC):
 
     @final
     def _write_last_message(self) -> None:
-        # Process any remaining messages in the queue
-        msg = self.__messages_queue.get(timeout=self.WAIT_TIMEOUT)
-        if msg is None:
+        try:
+            # Process any remaining messages in the queue
+            msg = self.__messages_queue.get(timeout=self.WAIT_TIMEOUT)
+
+            # Write the message to the log file
+            self._write(self.__file, msg)
+
+        except Empty:
+            # If the queue is empty, do nothing
             return None
 
-        # Write the message to the log file
-        self._write(self.__file, msg)
-
+    @final
+    @ignore_sigint
     def run(self, file_path: str = Files.get_log_file_path()) -> None:
-        """
-        Main loop for the logger to write messages to the log file.
-
-        Args:
-            file_path (str): Path to the log file.
-        """
         with self.__rlock:
             # Check if the stop event is set
             if self.__stop_event.is_set():

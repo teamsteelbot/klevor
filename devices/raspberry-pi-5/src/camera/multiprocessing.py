@@ -7,10 +7,8 @@ from PIL.Image import Image
 
 from . import Camera
 from .photographer import Photographer
-from ..utils.decorators import ignore_sigint
 
 
-@ignore_sigint
 def photographer_target(
     images_queue: Queue,
     capture_image_event: Event,

@@ -1,3 +1,4 @@
+from queue import Empty
 from multiprocessing import Event, Queue, RLock
 from typing import Callable, Optional, final
 
@@ -8,6 +9,7 @@ from .abstracts import CameraABC, PhotographerABC
 from ..log import Logger
 from ..server.dispatcher import Dispatcher
 from ..utils import is_instance
+from ..utils.decorators import ignore_sigint
 
 
 class Photographer(PhotographerABC):
@@ -73,6 +75,7 @@ class Photographer(PhotographerABC):
         self.__imager_counter = 0
 
     @final
+    @ignore_sigint
     def run(self):
         with self.__rlock:
             # Check if the stop event is set
@@ -95,11 +98,16 @@ class Photographer(PhotographerABC):
         # Start the photographer
         self.__logger.debug("Photographer's starting...")
         while self.is_running():
-            # Wait for the capture image event
-            capture_image = self.__capture_image_event.wait(
-                timeout=self.WAIT_TIMEOUT
-            )
-            if not capture_image:
+            try:
+                # Wait for the capture image event
+                capture_image = self.__capture_image_event.wait(
+                    timeout=self.WAIT_TIMEOUT
+                )
+                if not capture_image:
+                    continue
+
+            except Empty:
+                # If the queue is empty, continue to the next iteration
                 continue
 
             # Capture image stream from camera

@@ -3,10 +3,8 @@ from multiprocessing import Event, Queue
 
 from . import WebSocketServer
 from .constants import HOST, PORT
-from ..utils.decorators import ignore_sigint
 
 
-@ignore_sigint
 def websocket_server_target(
     messages_queue: Queue,
     parking_event: Event,
