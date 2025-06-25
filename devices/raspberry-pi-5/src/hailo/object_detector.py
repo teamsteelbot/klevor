@@ -10,7 +10,7 @@ from ..env import Env
 from ..files import Files
 from ..log import Logger
 from ..opencv import OpenCV
-from ..utils.decorators import ignore_sigint
+from ..utils.decorators import ignore_sigint, log_method_error
 
 
 class ObjectDetector(ObjectDetectorABC):
@@ -122,6 +122,7 @@ class ObjectDetector(ObjectDetectorABC):
 
     @final
     @ignore_sigint
+    @log_method_error('__logger')
     def run(self) -> None:
         with self.__rlock:
             # Check if the stop event is set

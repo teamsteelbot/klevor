@@ -9,7 +9,7 @@ from .abstracts import CameraABC, PhotographerABC
 from ..log import Logger
 from ..server.dispatcher import Dispatcher
 from ..utils import is_instance
-from ..utils.decorators import ignore_sigint
+from ..utils.decorators import ignore_sigint, log_method_error
 
 
 class Photographer(PhotographerABC):
@@ -76,6 +76,7 @@ class Photographer(PhotographerABC):
 
     @final
     @ignore_sigint
+    @log_method_error('__logger')
     def run(self):
         with self.__rlock:
             # Check if the stop event is set

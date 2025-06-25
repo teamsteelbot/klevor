@@ -23,7 +23,7 @@ from ..env.enums import Challenge
 from ..log import Logger
 from ..server.dispatcher import Dispatcher
 from ..utils import is_instance
-from ..utils.decorators import ignore_sigint
+from ..utils.decorators import ignore_sigint, log_method_error
 
 
 class SerialCommunication(SerialCommunicationABC):
@@ -291,6 +291,7 @@ class SerialCommunication(SerialCommunicationABC):
         self._wait_confirmation_message(STOP_MESSAGE)
 
     @final
+    @log_method_error('__logger')
     def _receiving_message_handler(self) -> None:
         # Log
         self.__logger.info(
@@ -415,6 +416,7 @@ class SerialCommunication(SerialCommunicationABC):
         )
 
     @final
+    @log_method_error('__logger')
     def _sending_message_handler(self) -> None:
         # Log 
         self.__logger.info(

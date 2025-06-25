@@ -15,7 +15,7 @@ from ..files import Files
 from ..log import Logger
 from ..model import ImageBoundingBoxes
 from ..utils import is_instance
-from ..utils.decorators import ignore_sigint
+from ..utils.decorators import ignore_sigint, log_method_error
 
 
 class Hailo(HailoABC):
@@ -203,6 +203,7 @@ class Hailo(HailoABC):
 
     @final
     @ignore_sigint
+    @log_method_error('__logger')
     def run(self) -> None:
         with self.__rlock:
             # Check if the stop event is set

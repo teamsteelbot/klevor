@@ -13,7 +13,7 @@ from .enums import Tag
 from .message import Message
 from ..log import Logger
 from ..utils import get_local_ip, is_instance
-from ..utils.decorators import ignore_sigint
+from ..utils.decorators import ignore_sigint, log_method_error
 
 
 class WebSocketServer(WebSocketServerABC):
@@ -213,6 +213,7 @@ class WebSocketServer(WebSocketServerABC):
 
     @final
     @ignore_sigint
+    @log_method_error('__logger')
     async def run(self):
         with self.__rlock:
             # Check if the stop event is set
