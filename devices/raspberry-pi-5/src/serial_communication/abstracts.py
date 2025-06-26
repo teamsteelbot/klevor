@@ -21,9 +21,9 @@ class SerialCommunicationABC(ABC):
         pass
 
     @abstractmethod
-    def _open(self) -> None:
+    def _start(self) -> None:
         """
-        Open the communication.
+        Start the serial communication.
 
         Raises:
             RuntimeError: If the serial port cannot be opened.
@@ -31,52 +31,30 @@ class SerialCommunicationABC(ABC):
         pass
 
     @abstractmethod
-    def is_open(self) -> bool:
+    def _stop(self) -> None:
         """
-        Check if the serial port is open, and it's processing outgoing and incoming messages.
-
-        Returns:
-            bool: True if the serial port is open and processing messages, False otherwise.
+        Stop the serial communication.
         """
         pass
 
     @abstractmethod
-    def is_closed(self) -> bool:
+    def _receive_latest_message(self, readline: bool = True) -> (
+            IncomingMessage | None):
         """
-        Check if the serial port is closed and communication is stopped.
-
-        Returns:
-            bool: True if the serial port is closed and communication is stopped, False otherwise.
-        """
-        pass
-
-    @abstractmethod
-    def has_started(self) -> bool:
-        """
-        Check if the communication has started.
-
-        Returns:
-            bool: True if the communication has started, False otherwise.
-        """
-        pass
-
-    @abstractmethod
-    def _put_incoming_message(self, msg: IncomingMessage) -> None:
-        """
-        Put a message in the incoming messages queue.
+        Receive the latest message from the serial port.
 
         Args:
-            msg (IncomingMessage): The message to put in the queue.
+            readline (bool): If True, read the message line by line.
+                             If False, read the message as a whole.
+        Returns:
+            IncomingMessage | None: The latest incoming message or None if no message is available.
         """
         pass
 
     @abstractmethod
-    def _get_outgoing_message(self) -> OutgoingMessage | None:
+    def _send_latest_message(self) -> None:
         """
-        Get a message from the outgoing messages queue.
-
-        Returns:
-            OutgoingMessage|None: The message from the outgoing messages queue or None if no message is available.
+        Sends the latest message from the outgoing messages queue.
         """
         pass
 

@@ -92,6 +92,7 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
         self.__started_event = Event()
         self.__start_event = start_event
         self.__parking_event = parking_event
+        self.__deleted_event = Event()
         self.__stop_event = stop_event
         self.__rplidar_update_measures_event = rplidar_update_measures_event
         self.__rplidar_measures_queue = rplidar_measures_queue
@@ -299,7 +300,7 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
         # Initialize the last turns
         last_turns = self.__bno08x_turns.value
 
-        while True:
+        while not self.__deleted_event.is_set():
             # Get the start time
             start_time = monotonic()
 
@@ -368,59 +369,80 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
                     self._set_servo_to_left(SERVO_BIG_TURN_ANGLE)
 
     @final
-    @ignore_sigint
-    @log_on_error()
-    def run(self):
+    def _start(self):
         with self.__rlock:
             # Check if the stop event is set
             if self.__stop_event.is_set():
-                self.__logger.warning(
+                raise RuntimeError(
                     "Stop event is set. Pilot will not run."
                 )
-                return
 
             # Check if the Pilot is already running
             if self.__started_event.is_set():
-                self.__logger.warning(
+                raise RuntimeError(
                     "Pilot is already running. Cannot start again."
                 )
-                return
 
             # Set the started event to signal that the Pilot has started
             self.__started_event.set()
 
+        # Log
+        self.__logger.info("Initialized.")
+
+    @final
+    def _stop(self):
+        with self.__rlock:
+            # Clear the started event
+            self.__started_event.clear()
+
+            # Clear the deleted event
+            self.__deleted_event.clear()
+
+            # Set the stop event
+            self.__stop_event.set()
+
+        # Log
+        self.__logger.info("Stopped.")
+
+    @final
+    @ignore_sigint
+    @log_on_error()
+    def run(self):
+        # Start the pilot
+        self._start()
+
         # Wait for the start event to be set
+        self.__logger.info("Waiting for the start event...")
         self.__start_event.wait()
+        self.__logger.info("Started.")
 
         # Get the challenge from the environment variables
         self.__challenge = Env.get_challenge()
 
-        # Start the corresponding challenge handler
-        self.__logger.debug("Pilot is starting...")
-        if self.__challenge == Challenge.WITHOUT_OBSTACLES:
-            self._challenge_without_obstacles()
-        elif self.__challenge == Challenge.WITH_OBSTACLES:
-            self._challenge_with_obstacles()
-        else:
-            raise ValueError(f"Unknown challenge: {self.__challenge}")
+        try:
+            # Start the corresponding challenge handler
+            if self.__challenge == Challenge.WITHOUT_OBSTACLES:
+                self._challenge_without_obstacles()
+            elif self.__challenge == Challenge.WITH_OBSTACLES:
+                self._challenge_with_obstacles()
+            else:
+                raise ValueError(f"Unknown challenge: {self.__challenge}")
 
-        # Send the stop event to signal that the Pilot should stop
-        self.__stop_event.set()
+            # Stop the Pilot
+            self._stop()
 
-        # Clear the started event
-        with self.__rlock:
-            self.__started_event.clear()
-
-        # Log
-        self.__logger.info("Pilot stopped.")
+        except Exception as e:
+            # Stop the Pilot in case of an exception
+            self._stop()
+            raise e
 
     def __del__(self):
         """
         Destructor to clean up resources when the Pilot is no longer needed.
         """
-        self.__stop_event.set()
+        self.__deleted_event.set()
 
         # Log
-        self.__logger.debug(
-            "Pilot instance is being deleted. Resources will be cleaned up."
+        self.__logger.info(
+            "Instance is being deleted. Resources will be cleaned up."
         )

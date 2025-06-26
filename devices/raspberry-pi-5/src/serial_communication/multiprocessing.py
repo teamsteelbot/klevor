@@ -18,8 +18,7 @@ def serial_communication_target(
     start_event: EventCls,
     parking_event: EventCls,
     stop_event: EventCls,
-    incoming_messages_queue: Queue,
-    outgoing_messages_queue: Queue,
+    messages_queue: Queue,
     writer_messages_queue: Queue,
     bno08x_yaw_deg: ValueCls,
     bno08x_turns: ValueCls,
@@ -39,8 +38,7 @@ def serial_communication_target(
         start_event (EventCls): Event to signal when the serial communication has started.
         parking_event (EventCls): Event to signal the parking state of the robot.
         stop_event (EventCls): Event to signal when the serial communication should stop sending and receiving messages.
-        incoming_messages_queue (Queue): Queue to hold incoming messages from the serial port.
-        outgoing_messages_queue (Queue): Queue to hold outgoing messages to the serial port.
+        messages_queue (Queue): Queue to hold outgoing messages to the serial port.
         writer_messages_queue (Queue): Queue to hold log messages.
         bno08x_yaw_deg (ValueCls): Shared value for the BNO08X yaw angle in degrees.
         bno08x_turns (ValueCls): Shared value for the BNO08X turns.
@@ -62,8 +60,7 @@ def serial_communication_target(
         start_event=start_event,
         parking_event=parking_event,
         stop_event=stop_event,
-        incoming_messages_queue=incoming_messages_queue,
-        outgoing_messages_queue=outgoing_messages_queue,
+        messages_queue=messages_queue,
         writer_messages_queue=writer_messages_queue,
         bno08x_yaw_deg=bno08x_yaw_deg,
         bno08x_turns=bno08x_turns,

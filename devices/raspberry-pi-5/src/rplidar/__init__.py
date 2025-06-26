@@ -63,6 +63,7 @@ class RPLidar(RPLidarABC, LoggerConsumerProtocol):
         self.__measures_queue = measures_queue
         self.__started_event = Event()
         self.__start_event = start_event
+        self.__deleted_event = Event()
         self.__stop_event = stop_event
 
         # Initialize the logger
@@ -218,32 +219,70 @@ class RPLidar(RPLidarABC, LoggerConsumerProtocol):
             self.__update_measures_event.clear()
 
     @final
-    @ignore_sigint
-    @log_on_error()
-    def run(self):
+    def _start(self) -> None:
         with self.__rlock:
             # Check if the stop event is set
             if self.__stop_event.is_set():
-                self.__logger.warning(
+                raise RuntimeError(
                     "Stop event is set. RPLidar will not run."
                 )
-                return
 
             # Check if the RPLidar is already running
             if self.__started_event.is_set():
-                self.__logger.warning(
+                raise RuntimeError(
                     "RPLidar is already running. Cannot start again."
                 )
-                return
 
             # Set the started event to signal that the RPLidar has started
             self.__started_event.set()
 
-        # Wait for the start event to be set
-        self.__start_event.wait()
-
         # Log
-        self.__logger.info("RPLidar's starting...")
+        self.__logger.info("Initialized.")
+
+    def _stop(self) -> None:
+        # Ensure the process is cleaned up even if an error occurs
+        if self.__process and self.__process.poll() is None:
+            # Terminate the process gracefully
+            self.__process.terminate()
+            self.__process.wait(timeout=self.PROCESS_WAIT_TIMEOUT)
+
+            # If the process is still running, kill it
+            if self.__process.poll() is None:
+                self.__process.kill()
+
+            # Wait for the process to finish
+            self.__process.wait()
+            self.__process = None
+
+        # Wait for the listener for measures updates to finish
+        if self.__update_measures_listener_thread:
+            self.__update_measures_listener_thread.join()
+            self.__update_measures_listener_thread = None
+
+        with self.__rlock:
+            # Clear the started event
+            self.__started_event.clear()
+
+            # Clear the deleted event
+            self.__deleted_event.clear()
+
+            # Reset the messages counter
+            self.__messages_counter = 0
+
+        # Log the stop message
+        self.__logger.info("Stopped.")
+
+    @final
+    @ignore_sigint
+    @log_on_error()
+    def run(self):
+        # Start the RPLidar
+        self._start()
+
+        # Wait for the start event to be set
+        self.__logger.info("Waiting for the start event...")
+        self.__start_event.wait()
+        self.__logger.info("Started.")
 
         command = [
             ULTRA_SIMPLE_PATH,
@@ -252,6 +291,7 @@ class RPLidar(RPLidarABC, LoggerConsumerProtocol):
             self.__port,
             str(self.__baudrate)
         ]
+
         try:
             self.__process = subprocess.Popen(
                 command,
@@ -272,51 +312,26 @@ class RPLidar(RPLidarABC, LoggerConsumerProtocol):
                 f"An error occurred while starting the RPLidar process: {e}"
             )
 
-        # Read the output in a loop until the process ends or stop event is set
-        while self.__process.poll() is None and self.is_running():
-            self._read_output()
+        try:
+            # Read the output in a loop until the process ends or stop event is set
+            while self.__process.poll() is None and not self.__stop_event.is_set() and not self.__deleted_event.is_set():
+                self._read_output()
 
-        # Ensure the process is cleaned up even if an error occurs
-        if self.__process and self.__process.poll() is None:
-            self.__logger.info(
-                "Ensuring process is terminated in finally block..."
-            )
-            self.__process.terminate()
-            self.__process.wait(timeout=self.PROCESS_WAIT_TIMEOUT)
-            if self.__process.poll() is None:
-                self.__process.kill()
-            self.__process.wait()
-            self.__process = None
+            # Stop the RPLidar process
+            self._stop()
 
-        # Wait for the listener for measures updates to finish
-        if self.__update_measures_listener_thread:
-            self.__update_measures_listener_thread.join()
-            self.__update_measures_listener_thread = None
-
-        # Clear the started event
-        with self.__rlock:
-            self.__start_event.clear()
-
-        # Log the stop message
-        self.__logger.info("RPLidar process stopped.")
-
-    @final
-    def is_running(self) -> bool:
-        with self.__rlock:
-            return not self.__stop_event.is_set() and (
-                    self.__process is not None and self.__process.poll() is None)
-
-    @final
-    def is_stopped(self) -> bool:
-        return not self.is_running()
+        except Exception as e:
+            # Stop the RPLidar in case of an exception
+            self._stop()
+            raise e
 
     def __del__(self):
         """
         Destructor to clean up resources when the RPLidar is no longer needed.
         """
-        self.__stop_event.set()
+        self.__deleted_event.set()
 
         # Log
-        self.__logger.debug(
-            "RPLidar instance is being deleted. Resources will be cleaned up."
+        self.__logger.info(
+            "Instance is being deleted. Resources will be cleaned up."
         )

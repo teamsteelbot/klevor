@@ -29,7 +29,8 @@ class Writer(WriterABC):
         """
         # Initialize the messages queue and events
         self.__messages_queue = messages_queue
-        self.__opened_event = Event()
+        self.__started_event = Event()
+        self.__deleted_event = Event()
         self.__stop_event = stop_event
 
         # Initialize the reentrant lock
@@ -45,28 +46,54 @@ class Writer(WriterABC):
             # Process any remaining messages in the queue
             msg = self.__messages_queue.get(timeout=self.WAIT_TIMEOUT)
 
-            # Write the message to the log file
-            self._write(self.__file, msg)
-
         except Empty:
-            # If the queue is empty, do nothing
             return None
+
+        # Check if the message is an instance of Message
+        is_instance(msg, Message)
+
+        # Write the message to the log file
+        if not self.__file:
+            raise RuntimeError("Log file is not open. Must open it first.")
+        self._write(self.__file, msg)
+
+    @final
+    def _start(self) -> None:
+        with self.__rlock:
+            # Check if the stop event is set
+            if self.__stop_event.is_set():
+                raise RuntimeError("Stop event is set. Logger will not run.")
+
+            # Check if the logger is already running
+            if self.__started_event.is_set():
+                raise RuntimeError("Logger is already running. Cannot start again.")
+
+            # Set the started event
+            self.__started_event.set()
+
+        # Log
+        print("Writer initialized.")
+
+    @final
+    def _stop(self) -> None:
+        # Check if there are any remaining messages in the queue
+        while not self.__messages_queue.empty():
+            self._write_last_message()
+
+        with self.__rlock:
+            # Clear the started event
+            self.__started_event.clear()
+
+            # Clear the deleted event
+            self.__deleted_event.clear()
+
+        # Write the stop message to the log file
+        self._write(self.__file, Message("Writer stopped.", Category.DEBUG))
 
     @final
     @ignore_sigint
     def run(self, file_path: str = Files.get_log_file_path()) -> None:
         try:
-            with self.__rlock:
-                # Check if the stop event is set
-                if self.__stop_event.is_set():
-                    print("Stop event is set. Logger will not run.")
-                    return
-
-                # Check if the logger is already running
-                if self.is_running():
-                    print("Logger is already running. Cannot start again.")
-                    return
-
             # Check the type of file_path
             is_instance(file_path, str)
             self.__file_path = file_path
@@ -74,65 +101,41 @@ class Writer(WriterABC):
             # Ensure the file exists
             Files.ensure_file_exists(self.__file_path)
 
+            # Start the writer
+            self._start()
+
+        except Exception as e:
+            print(f"An error occurred while starting the Writer: {e}")
+            raise e
+
+        try:
             # Open the log file in append mode
             print(f"Opening log file at {self.__file_path}...")
             with open(self.__file_path, 'a') as file:
                 # Set the file
                 self.__file = file
 
-                # Set the opened event
-                with self.__rlock:
-                    self.__opened_event.set()
-
-                # Write the initial message to the log file
-                self._write(
-                    self.__file,
-                    Message(
-                        f"Log file opened at {self.__file_path}.",
-                        Category.DEBUG
-                    )
-                )
-
-                # Main loop to write messages to the log file
-                self._write(
-                    self.__file,
-                    Message("Writer's starting...", Category.DEBUG)
-                )
-                while not self.__stop_event.is_set():
+                # Process messages from the queue
+                while not self.__stop_event.is_set() and not self.__deleted_event.is_set():
                     # Write the last message if available
                     self._write_last_message()
 
-                # Check if there are any remaining messages in the queue
-                while not self.__messages_queue.empty():
-                    # Write the last message if available
-                    self._write_last_message()
-
-                # Write the stop message to the log file
-                self._write(self.__file, Message("Writer stopped.", Category.DEBUG))
+                # Stop the writer
+                self._stop()
 
         except Exception as e:
+            # Stop the writer in case of an exception
+            self._stop()
+
             # Log any exceptions that occur
-            print(f"An error occurred: {e}")
-            self._write(self.__file, Message(f"Error: {e}", Category.ERROR))
-
-        # Clear the opened event
-        with self.__rlock:
-            self.__opened_event.clear()
-
-    @final
-    def is_running(self) -> bool:
-        with self.__rlock:
-            return self.__opened_event.is_set() and not self.__stop_event.is_set()
-
-    @final
-    def is_stopped(self) -> bool:
-        return not self.is_running()
+            print(f"An error occurred while running the Writer: {e}")
+            raise e
 
     def __del__(self):
         """
         Destructor to clean up resources when the photographer is no longer needed.
         """
-        self.__stop_event.set()
+        self.__deleted_event.set()
 
         # Log
         print("Writer instance is being deleted. Resources will be cleaned up.")

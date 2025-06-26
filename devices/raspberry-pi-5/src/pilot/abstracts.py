@@ -218,6 +218,23 @@ class PilotABC(ABC):
         pass
 
     @abstractmethod
+    def _start(self):
+        """
+        Starts the pilot handler.
+
+        Raises:
+            RuntimeError: If the pilot handler cannot be started.
+        """
+        pass
+
+    @abstractmethod
+    def _stop(self):
+        """
+        Stops the pilot handler.
+        """
+        pass
+
+    @abstractmethod
     def run(self):
         """
         Runs the pilot handler.

@@ -114,6 +114,26 @@ class WriterABC(ABC):
     def _write_last_message(self) -> None:
         """
         Write the last message to the log file if available.
+
+        Raises:
+            RuntimeError: If the log file is not open.
+        """
+        pass
+
+    @abstractmethod
+    def _start(self) -> None:
+        """
+        Start the writer.
+
+        Raises:
+            RuntimeError: If the writer fails to start.
+        """
+        pass
+
+    @abstractmethod
+    def _stop(self) -> None:
+        """
+        Stop the writer.
         """
         pass
 
@@ -124,25 +144,5 @@ class WriterABC(ABC):
 
         Args:
             file_path (str): Path to the log file.
-        """
-        pass
-
-    @abstractmethod
-    def is_running(self) -> bool:
-        """
-        Check if the stop event is not set, indicating that's allowed to log messages.
-
-        Returns:
-            bool: True if the stop event is not set, False otherwise.
-        """
-        pass
-
-    @abstractmethod
-    def is_stopped(self) -> bool:
-        """
-        Check if the logger is stopped by checking if the stop event is set.
-
-        Returns:
-            bool: True if the stop event is set (indicating the logger is stopped), False otherwise.
         """
         pass

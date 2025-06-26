@@ -1,7 +1,7 @@
-from queue import Empty
 import asyncio
 from multiprocessing import Event, Queue, RLock
 from multiprocessing.synchronize import Event as EventCls
+from queue import Empty
 from threading import Thread
 from typing import final
 
@@ -13,10 +13,10 @@ from .constants import HOST, PORT
 from .enums import Tag
 from .message import Message
 from ..log import Logger
-from ..utils import get_local_ip, is_instance
-from ..utils.decorators import ignore_sigint
 from ..log.decorators import log_on_error
 from ..log.protocols import LoggerConsumerProtocol
+from ..utils import get_local_ip, is_instance
+from ..utils.decorators import ignore_sigint
 
 
 class WebSocketServer(WebSocketServerABC, LoggerConsumerProtocol):
@@ -51,8 +51,9 @@ class WebSocketServer(WebSocketServerABC, LoggerConsumerProtocol):
         """
         # Initialize the messages queue and events
         self.__messages_queue = messages_queue
-        self.__opened_event = Event()
+        self.__started_event = Event()
         self.__parking_event = parking_event
+        self.__deleted_event = Event()
         self.__stop_event = stop_event
 
         # Initialize the logger
@@ -217,6 +218,35 @@ class WebSocketServer(WebSocketServerABC, LoggerConsumerProtocol):
         while not self.__messages_queue.empty():
             # Broadcast the last message if available
             await self._broadcast_last_message()
+            
+    @final
+    def _start(self) -> None:
+        with self.__rlock:
+            # Check if the stop event is set
+            if self.__stop_event.is_set():
+                raise RuntimeError("Stop event is set. WebSocket server will not run.")
+
+            # Check if the websocket server is already running
+            if self.__started_event.is_set():
+                raise RuntimeError("WebSocket server is already running. Cannot start again.")
+
+            # Set the opened event to signal that the websocket server is ready
+            self.__started_event.set()
+
+        # Log
+        self.__logger.info("Initialized.")
+
+    @final
+    def _stop(self) -> None:
+        with self.__rlock:
+            # Clear the started event
+            self.__started_event.clear()
+
+            # Clear the deleted event
+            self.__deleted_event.clear()
+
+        # Log
+        self.__logger.info("Stopped.")
 
     @final
     @ignore_sigint
@@ -238,7 +268,7 @@ class WebSocketServer(WebSocketServerABC, LoggerConsumerProtocol):
                 return
 
             # Set the opened event to signal that the websocket server is ready
-            self.__opened_event.set()
+            self.__started_event.set()
 
         # Get the local IP address
         local_ip = get_local_ip()
@@ -251,14 +281,24 @@ class WebSocketServer(WebSocketServerABC, LoggerConsumerProtocol):
 
         # Start the WebSocket server
         self.__logger.debug("WebSocket server is starting...")
-        async with serve(self._reactive_handler, self.__host, self.__port):
-            self.__logger.info(
-                f"WebSocket server started successfully on ws://{local_ip}:{self.__port}"
+
+        async def monitor_events():
+            await asyncio.wait(
+                [asyncio.to_thread(self.__stop_event.wait),
+                 asyncio.to_thread(self.__deleted_event.wait)],
+                return_when=asyncio.FIRST_COMPLETED
             )
-            await asyncio.get_running_loop().run_in_executor(
-                None,
-                self.__stop_event.wait
-            )
+
+        monitor_task = asyncio.create_task(monitor_events())
+
+        try:
+            async with serve(self._reactive_handler, self.__host, self.__port):
+                self.__logger.info(
+                    f"WebSocket server started successfully on ws://{local_ip}:{self.__port}"
+                )
+                await monitor_task
+        finally:
+            monitor_task.cancel()
 
         # Wait for the broadcast thread to finish
         self.__broadcast_thread.join()
@@ -266,27 +306,18 @@ class WebSocketServer(WebSocketServerABC, LoggerConsumerProtocol):
 
         # Clear the opened event
         with self.__rlock:
-            self.__opened_event.clear()
+            self.__started_event.clear()
 
         # Log the stopping of the server
         self.__logger.info("WebSocket server stopped.")
-
-    @final
-    def is_running(self) -> bool:
-        with self.__rlock:
-            return not self.__stop_event.is_set() and self.__opened_event.is_set()
-
-    @final
-    def is_stopped(self) -> bool:
-        return not self.is_running()
 
     def __del__(self):
         """
         Destructor to clean up resources when the websockets server is no longer needed.
         """
-        self.__stop_event.set()
+        self.__deleted_event.set()
 
         # Log
         self.__logger.debug(
-            "WebSocket server instance is being deleted. Resources will be cleaned up."
+            "Instance is being deleted. Resources will be cleaned up."
         )

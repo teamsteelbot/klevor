@@ -5,9 +5,9 @@ from typing import final
 from PIL.Image import Image
 
 from .abstracts import DispatcherABC
+from ..common.measure import Measure
 from ..constants import IMAGE_FORMAT, MODEL_G, MODEL_M, MODEL_R
 from ..log import Logger
-from ..common.measure import Measure
 from ..server.enums import Tag
 from ..server.message import Message
 from ..utils import is_instance

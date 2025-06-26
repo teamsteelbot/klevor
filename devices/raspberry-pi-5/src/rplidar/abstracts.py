@@ -50,6 +50,23 @@ class RPLidarABC(ABC):
         pass
 
     @abstractmethod
+    def _start(self) -> None:
+        """
+        Start the RPLidar process.
+
+        Raises:
+            RuntimeError: If the RPLidar process fails to start.
+        """
+        pass
+
+    @abstractmethod
+    def _stop(self) -> None:
+        """
+        Stop the RPLidar process.
+        """
+        pass
+
+    @abstractmethod
     def run(self):
         """
         Run the RPLidar process.
@@ -57,25 +74,5 @@ class RPLidarABC(ABC):
         Raises:
             ValueError: If the ultra_simple file is not found.
             RuntimeError: If the RPLidar process fails to start.
-        """
-        pass
-
-    @abstractmethod
-    def is_running(self) -> bool:
-        """
-        Check if the RPLidar is running.
-
-        Returns:
-            bool: True if the RPLidar is running, False otherwise.
-        """
-        pass
-
-    @abstractmethod
-    def is_stopped(self) -> bool:
-        """
-        Check if the RPLidar is stopped.
-
-        Returns:
-            bool: True if the RPLidar is stopped, False otherwise.
         """
         pass

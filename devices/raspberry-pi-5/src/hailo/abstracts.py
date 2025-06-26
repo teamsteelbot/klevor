@@ -143,32 +143,39 @@ class HailoABC(ABC):
         pass
 
     @abstractmethod
+    def _start(self) -> None:
+        """
+        Start the Hailo handler.
+
+        Raises:
+            RuntimeError: If the Hailo handler cannot be started.
+        """
+        pass
+
+    @abstractmethod
+    def _stop(self) -> None:
+        """
+        Stop the Hailo handler.
+        """
+        pass
+
+    @abstractmethod
+    def _infer_latest_preprocessed_image(self, configured_infer_model) -> None:
+        """
+        Run inference on the latest preprocessed image.
+
+        Args:
+            configured_infer_model: The configured inference model to run.
+        """
+        pass
+
+    @abstractmethod
     def run(self) -> None:
         """
         Run the inference loop.
 
         This method continuously retrieves batches of images from the input queue,
         preprocesses them, and runs inference using the configured infer model.
-        """
-        pass
-
-    @abstractmethod
-    def is_running(self) -> bool:
-        """
-        Check if the Hailo handler is running.
-
-        Returns:
-            True if the handler is running, False otherwise.
-        """
-        pass
-
-    @abstractmethod
-    def is_stopped(self) -> bool:
-        """
-        Check if the Hailo handler is stopped.
-
-        Returns:
-            True if the handler is stopped, False otherwise.
         """
         pass
 
@@ -190,22 +197,19 @@ class ObjectDetectorABC(ABC):
         pass
 
     @abstractmethod
-    def is_running(self) -> bool:
+    def _start(self) -> None:
         """
-        Check if the object detection is running.
+        Start the object detection process.
 
-        Returns:
-            bool: True if running, False otherwise.
+        Raises:
+            RuntimeError: If the object detection process cannot be started.
         """
         pass
 
     @abstractmethod
-    def is_stopped(self) -> bool:
+    def _stop(self) -> None:
         """
-        Check if the object detection is stopped.
-
-        Returns:
-            bool: True if stopped, False otherwise.
+        Stop the object detection process.
         """
         pass
 

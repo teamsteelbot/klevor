@@ -53,6 +53,7 @@ class Hailo(HailoABC, LoggerConsumerProtocol):
         class_colors: tuple[tuple[int, int, int]],
         processed_images_queue: Queue,
         inferences_queue: Queue,
+        start_event: EventCls,
         stop_event: EventCls,
         writer_messages_queue: Queue,
         multi_threading: bool = True,
@@ -71,6 +72,7 @@ class Hailo(HailoABC, LoggerConsumerProtocol):
             class_colors (tuple[tuple[int, int, int]]): Tuple mapping class IDs to RGB colors.
             processed_images_queue (Queue): Queue to hold input images for processing.
             inferences_queue (Queue): Queue to hold the inferences from the Hailo handlers.
+            start_event (EventCls): Event to signal when the Hailo handler should start.
             stop_event (EventCls): Event to signal when the Hailo handler should stop.
             writer_messages_queue (Queue): Queue to hold log messages.
             multi_threading (bool): Whether to enable multi-threading.
@@ -82,7 +84,9 @@ class Hailo(HailoABC, LoggerConsumerProtocol):
         # Initialize the queues and events
         self.__processed_images_queue = processed_images_queue
         self.__inferences_queue = inferences_queue
+        self.__start_event = start_event
         self.__started_event = Event()
+        self.__deleted_event = Event()
         self.__stop_event = stop_event
 
         # Initialize the logger
@@ -127,10 +131,11 @@ class Hailo(HailoABC, LoggerConsumerProtocol):
         # Initialize the output type
         self.__output_type: Optional[dict[str, str]] = output_type
 
-        # Initialize the target, HEF, and infer model
+        # Initialize the target, HEF, infer model and job
         self.__target = None
         self.__hef = None
         self.__infer_model = None
+        self.__job = None
 
     @final
     def logger(self) -> Logger:
@@ -191,7 +196,7 @@ class Hailo(HailoABC, LoggerConsumerProtocol):
         self, completion_info, bindings, preprocessed_image: np.ndarray
     ) -> None:
         if completion_info.exception:
-            self.__logger.log(f'Inference error: {completion_info.exception}')
+            self.__logger.warning(f'Inference error: {completion_info.exception}')
             return
 
         # If the model has a single output, return the output buffer.
@@ -209,106 +214,135 @@ class Hailo(HailoABC, LoggerConsumerProtocol):
         self.__inferences_queue.put(ImageBoundingBoxes.from_hailo(result))
 
     @final
-    @ignore_sigint
-    @log_on_error()
-    def run(self) -> None:
+    def _start(self):
         with self.__rlock:
             # Check if the stop event is set
             if self.__stop_event.is_set():
-                self.__logger.warning(
+                raise RuntimeError(
                     f"Stop event is set. Hailo handler for model '{self.__model_name}' will not run."
                 )
-                return
 
             # Check if the Hailo handler for the given model name is already running
             if self.__started_event.is_set():
-                self.__logger.warning(
+                raise RuntimeError(
                     f"Hailo handler for model '{self.__model_name}' is already running. Cannot start again."
                 )
-                return
 
             # Set the started event to signal that the Hailo handler has started
             self.__started_event.set()
 
-        # Create the VDevice parameters
-        params = VDevice.create_params()
+        # Log
+        self.__logger.info(f"Initialized.")
 
-        # Set the scheduling algorithm to round-robin to activate the scheduler
-        params.scheduling_algorithm = HailoSchedulingAlgorithm.ROUND_ROBIN
+    @final
+    def _stop(self) -> None:
+        # Check if there are any remaining jobs
+        self.__job.wait(self.JOB_TIMEOUT) if self.__job else None
 
-        # Set the group ID to SHARED
-        if self.__multi_threading or self.__multiprocessing:
-            params.group_id = "SHARED"
-
-        # Enable multi-processing service
-        if self.__multiprocessing:
-            params.multi_process_service = True
-
-        # Set the VDevice parameters
-        self.__target = VDevice(params)
-
-        # Set the HEF model
-        self.__hef = HEF(self.__hef_file_path)
-        self.__infer_model = self.__target.create_infer_model(
-            self.__hef_file_path
-        )
-        self.__infer_model.set_batch_size(self.__batch_size)
-
-        # Set the input and output types
-        self._set_input_type(self.__input_type) if self.__input_type else None
-        self._set_output_type(
-            self.__output_type
-        ) if self.__output_type else None
-
-        with self.__infer_model.configure() as configured_infer_model:
-            while self.is_running():
-                try:
-                    # Get a preprocessed image from the input queue
-                    preprocessed_image = self.__processed_images_queue.get(
-                        timeout=self.WAIT_TIMEOUT
-                    )
-
-                except Empty:
-                    # If the queue is empty, continue to the next iteration
-                    continue
-
-                # Create the bindings for the input and output buffers
-                bindings = self._create_bindings(configured_infer_model)
-                bindings.input().set_buffer(np.array(preprocessed_image))
-
-                configured_infer_model.wait_for_async_ready(
-                    timeout_ms=self.JOB_TIMEOUT
-                )
-                job = configured_infer_model.run_async(
-                    bindings, partial(
-                        self._callback,
-                        preprocessed_image=preprocessed_image,
-                        bindings=bindings
-                    )
-                )
-
-            # Wait for the last job
-            job.wait(self.JOB_TIMEOUT)
-
-        # Clear the started event
         with self.__rlock:
+            # Clear the started event
             self.__started_event.clear()
 
-    @final
-    def is_running(self) -> bool:
-        return not self.__stop_event.is_set()
+            # Clear the deleted event
+            self.__deleted_event.clear()
+
+            # Clear the job
+            self.__job = None
+
+        # Log
+        self.__logger.info("Stopped.")
 
     @final
-    def is_stopped(self) -> bool:
-        return not self.is_running()
+    def _infer_latest_preprocessed_image(self, configured_infer_model) -> None:
+        try:
+            # Get a preprocessed image from the input queue
+            preprocessed_image = self.__processed_images_queue.get(
+                timeout=self.WAIT_TIMEOUT
+            )
+
+        except Empty:
+            return None
+
+        # Check the type of preprocessed_image
+        is_instance(preprocessed_image, np.ndarray)
+
+        # Create the bindings for the input and output buffers
+        bindings = self._create_bindings(configured_infer_model)
+        bindings.input().set_buffer(np.array(preprocessed_image))
+
+        configured_infer_model.wait_for_async_ready(
+            timeout_ms=self.JOB_TIMEOUT
+        )
+        self.__job = configured_infer_model.run_async(
+            bindings, partial(
+                self._callback,
+                preprocessed_image=preprocessed_image,
+                bindings=bindings
+            )
+        )
+
+    @final
+    @ignore_sigint
+    @log_on_error()
+    def run(self) -> None:
+        # Start the hailo handler
+        self._start()
+
+        # Wait for the start event
+        self.__logger.info("Waiting for the start event...")
+        self.__start_event.wait()
+        self.__logger.info("Started.")
+
+        try:
+            # Create the VDevice parameters
+            params = VDevice.create_params()
+
+            # Set the scheduling algorithm to round-robin to activate the scheduler
+            params.scheduling_algorithm = HailoSchedulingAlgorithm.ROUND_ROBIN
+
+            # Set the group ID to SHARED
+            if self.__multi_threading or self.__multiprocessing:
+                params.group_id = "SHARED"
+
+            # Enable multi-processing service
+            if self.__multiprocessing:
+                params.multi_process_service = True
+
+            # Set the VDevice parameters
+            self.__target = VDevice(params)
+
+            # Set the HEF model
+            self.__hef = HEF(self.__hef_file_path)
+            self.__infer_model = self.__target.create_infer_model(
+                self.__hef_file_path
+            )
+            self.__infer_model.set_batch_size(self.__batch_size)
+
+            # Set the input and output types
+            self._set_input_type(self.__input_type) if self.__input_type else None
+            self._set_output_type(
+                self.__output_type
+            ) if self.__output_type else None
+
+            with self.__infer_model.configure() as configured_infer_model:
+                while not self.__stop_event.is_set() and not self.__deleted_event.is_set():
+                    self._infer_latest_preprocessed_image(configured_infer_model)
+
+            # Stop the Hailo handler
+            self._stop()
+
+        except Exception as e:
+            # Stop the Hailo handler in case of an exception
+            self._stop()
+            raise e
 
     def __del__(self):
         """
         Destructor to clean up resources when the Hailo handler is no longer needed.
         """
-        self.__stop_event.set()
+        self.__deleted_event.set()
 
         # Log
-        self.__logger.debug(
-            f"Hailo handler instance for model '{self.__model_name}' is being deleted. Resources will be cleaned up."
+        self.__logger.info(
+            "Instance is being deleted. Resources will be cleaned up."
         )

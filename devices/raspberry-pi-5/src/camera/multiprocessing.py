@@ -13,6 +13,7 @@ from .photographer import Photographer
 def photographer_target(
     images_queue: Queue,
     capture_image_event: EventCls,
+    start_event: EventCls,
     stop_event: EventCls,
     writer_messages_queue: Queue,
     preprocess_fn: Callable[[Image], np.ndarray],
@@ -24,6 +25,7 @@ def photographer_target(
     Args:
         images_queue (Queue): Queue to hold input images for processing.
         capture_image_event (EventCls): Event to signal when an image should be captured.
+        start_event (EventCls): Event to signal when the photographer should start.
         stop_event (EventCls): Event to signal when the logger should stop.
         writer_messages_queue (Queue): Queue to hold log messages.
         preprocess_fn: Callable[[Image], np.ndarray]: Function to preprocess images before inference.
@@ -42,6 +44,7 @@ def photographer_target(
         camera=camera,
         images_queue=images_queue,
         capture_image_event=capture_image_event,
+        start_event=start_event,
         stop_event=stop_event,
         writer_messages_queue=writer_messages_queue,
         preprocess_fn=preprocess_fn,

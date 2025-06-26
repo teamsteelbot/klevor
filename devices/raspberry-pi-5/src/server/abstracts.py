@@ -71,29 +71,26 @@ class WebSocketServerABC(ABC):
         pass
 
     @abstractmethod
+    def _start(self) -> None:
+        """
+        Starts the WebSocket server and initializes necessary components.
+
+        Raises:
+            RuntimeError: If the WebSocket server fails to start.
+        """
+        pass
+
+    @abstractmethod
+    def _stop(self) -> None:
+        """
+        Stops the WebSocket server and cleans up resources.
+        """
+        pass
+
+    @abstractmethod
     async def run(self):
         """
         Starts the WebSocket server and listens for incoming connections and messages.
-        """
-        pass
-
-    @abstractmethod
-    def is_running(self) -> bool:
-        """
-        Checks if the WebSocket server is running.
-
-        Returns:
-            bool: True if the server is running, False otherwise.
-        """
-        pass
-
-    @abstractmethod
-    def is_stopped(self) -> bool:
-        """
-        Checks if the WebSocket server is stopped.
-
-        Returns:
-            bool: True if the server is stopped, False otherwise.
         """
         pass
 

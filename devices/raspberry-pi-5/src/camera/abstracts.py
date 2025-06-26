@@ -121,28 +121,32 @@ class PhotographerABC(ABC):
         pass
 
     @abstractmethod
+    def _start(self) -> None:
+        """
+        Start the photographer.
+
+        Raises:
+            RuntimeError: If the photographer fails to start.
+        """
+        pass
+
+    @abstractmethod
+    def _stop(self) -> None:
+        """
+        Stop the photographer.
+        """
+        pass
+
+    @abstractmethod
+    def _capture_image(self) -> None:
+        """
+        Capture an image from the camera and sends it to the corresponding queue.
+        """
+        pass
+
+    @abstractmethod
     def run(self):
         """
-        Loop to capture images and put them in the input image processing queue.
-        """
-        pass
-
-    @abstractmethod
-    def is_running(self) -> bool:
-        """
-        Check if the image processing queue is running.
-
-        Returns:
-            bool: True if the image processing queue is running, False otherwise.
-        """
-        pass
-
-    @abstractmethod
-    def is_stopped(self) -> bool:
-        """
-        Check if the image processing queue is stopped.
-
-        Returns:
-            bool: True if the image processing queue is not running, False otherwise.
+        Loop to capture images and put them in the input photographer.
         """
         pass
