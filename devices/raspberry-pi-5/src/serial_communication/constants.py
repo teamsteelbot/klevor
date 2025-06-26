@@ -1,6 +1,3 @@
-from .enums import OutgoingCategory, Status
-from .message import IncomingMessage, OutgoingMessage
-
 # Raspberry Pi Pico baud rate
 RASPBERRY_PI_PICO_BAUDRATE = 115200
 

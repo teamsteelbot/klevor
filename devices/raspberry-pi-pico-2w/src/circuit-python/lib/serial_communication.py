@@ -68,18 +68,18 @@ class SerialCommunication:
 
     def __init__(
         self,
+        challenge: Challenge,
         console_port_enabled: bool = CONSOLE_PORT_ENABLED,
         data_port_enabled: bool = DATA_PORT_ENABLED,
-        challenge: Challenge = Challenge.WITHOUT_OBSTACLES,
         led: LEDHandler = None
     ):
         """
         Initialize the SerialCommunication instance.
 
         Args:
+            challenge (Challenge): The challenge type for the robot.
             console_port_enabled (bool): Whether to enable the console port for sending messages.
             data_port_enabled (bool): Whether to enable the data port for receiving messages.
-            challenge (Challenge): The challenge type for the robot.
             led (LEDHandler | None): Optional LED handler for toggling the LED on message receive.
         """
         self.__console_port = console if console_port_enabled else None

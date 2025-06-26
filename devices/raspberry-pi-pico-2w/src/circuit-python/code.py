@@ -32,6 +32,7 @@ serial_communication = SerialCommunication(
     console_port_enabled=True,
     data_port_enabled=True,
     led=led,
+    challenge=CHALLENGE,
 )
 servo = ServoHandler(servo_pin=SERVO_PIN, movement=MOVEMENT)
 motor = ESCMotorHandler(motor_pin=ESC_MOTOR_PIN, movement=MOVEMENT)
@@ -61,7 +62,7 @@ async def main():
         motor_stop = create_task(motor.stop())
         servo_center = create_task(servo.center())
         serial_communication_send_challenge = create_task(
-            serial_communication.send_challenge(CHALLENGE)
+            serial_communication.send_challenge_message()
         )
 
         # Wait for all initialization tasks to complete
