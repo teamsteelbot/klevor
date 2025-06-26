@@ -57,14 +57,11 @@ class SerialCommunicationABC(ABC):
         pass
 
     @abstractmethod
-    def _receive_latest_message(self, readline: bool = True) -> (
+    def _receive_latest_message(self) -> (
             IncomingMessage | None):
         """
         Receive the latest message from the serial port.
 
-        Args:
-            readline (bool): If True, read the message line by line.
-                             If False, read the message as a whole.
         Returns:
             IncomingMessage | None: The latest incoming message or None if no message is available.
         """

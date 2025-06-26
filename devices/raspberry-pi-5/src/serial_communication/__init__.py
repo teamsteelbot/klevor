@@ -1,5 +1,5 @@
 from queue import Empty
-from multiprocessing import Event, Queue, RLock, Value
+from multiprocessing import Event, Queue, RLock
 from multiprocessing.synchronize import Event as EventCls
 from multiprocessing.sharedctypes import Value as ValueCls
 from threading import Thread
@@ -16,6 +16,7 @@ from .constants import (
     RASPBERRY_PI_PICO_CONSOLE_PORT_ALT,
     RASPBERRY_PI_PICO_DATA_PORT,
     RASPBERRY_PI_PICO_DATA_PORT_ALT,
+    END_CHAR
 )
 from .enums import OutgoingCategory, Status
 from .message import IncomingMessage, OutgoingMessage
@@ -290,21 +291,25 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
         self.__logger.info("Stopped.")
 
     @final
-    def _receive_latest_message(self, readline: bool = True) -> (IncomingMessage | None):
+    def _receive_latest_message(self) -> (IncomingMessage | None):
         if self.__console_serial.in_waiting == 0:
             sleep(self.INCOMING_DELAY)
             return None
 
         # Parse the message from the serial port
-        if readline:
-            msg_str = self.__console_serial.readline().decode(ENCODE).strip()
-        else:
-            msg_str = self.__console_serial.read(self.__console_serial.in_waiting).decode(ENCODE).strip()
-        
+        buffer = ""
+        while True:
+            data = self.__console_serial.read(1).decode("utf-8", errors="ignore")
+            if not data:
+                continue
+            if data == END_CHAR:
+                break
+            buffer += data
+        msg_str = buffer.strip()
+
         # Log
-        first_line = str(msg_str).split('\n')[0]
         self.__receiver_logger.debug(
-            f"Received message: '{first_line}'"
+            f"Received message: '{msg_str}'"
         ) if self.__debug else None
 
         # Get the message from the string
@@ -329,12 +334,11 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
             return None
 
         # Send the message to the serial port
-        first_line = str(msg).split('\n')[0]
         self._send_message(msg)
 
         # If the server is set, send the message to the server
         self.__server_dispatcher.broadcast_serial_outgoing_message(
-            first_line
+            str(msg).split(END_CHAR, 1)[0]
         ) if self.__server_dispatcher else None
 
     def _send_message(
@@ -408,10 +412,18 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
             "Waiting for start event..."
         )
 
-        # Check if there is an initialization message received
+        # Wait for the first END_CHAR message to be received to ensure the serial port is ready
+        while not self.__stop_event.is_set() and not self.__deleted_event.is_set():
+            char = self.__console_serial.read(1).decode(ENCODE, errors="ignore")
+            if not char:
+                continue
+            if char == END_CHAR:
+                break
+            
+        # Wait for the start message
         while not self.__stop_event.is_set() and not self.__deleted_event.is_set():
             try:
-                msg = self._receive_latest_message(False)
+                msg = self._receive_latest_message()
                 if msg is None:
                     continue
 

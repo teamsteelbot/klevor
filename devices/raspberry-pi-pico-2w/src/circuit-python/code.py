@@ -11,7 +11,6 @@ from lib.enums import Challenge
 from lib.env import Env
 from lib.esc_motor import ESCMotorHandler
 from lib.led import LEDHandler
-from lib.log import Logger
 from lib.serial_communication import SerialCommunication
 from lib.servo import ServoHandler
 from lib.switch import SwitchHandler
@@ -28,13 +27,11 @@ SERVO_PIN = GP13
 SWITCH_PIN = GP11
 
 # Robot's components handlers
-logger = Logger()
 led = LEDHandler(led_pin=LED)
 serial_communication = SerialCommunication(
     console_port_enabled=True,
     data_port_enabled=True,
     led=led,
-    logger=logger,
 )
 servo = ServoHandler(servo_pin=SERVO_PIN, movement=MOVEMENT)
 motor = ESCMotorHandler(motor_pin=ESC_MOTOR_PIN, movement=MOVEMENT)
@@ -56,13 +53,19 @@ async def main():
     global bno08x, servo, motor, serial_communication, switch
 
     try:
+        # Send initialization message
+        serial_communication.send_initialization_message()
+
         # Create tasks for initialization
         bno08x_calibrate = create_task(bno08x.calibrate())
         motor_stop = create_task(motor.stop())
         servo_center = create_task(servo.center())
+        serial_communication_send_challenge = create_task(
+            serial_communication.send_challenge(CHALLENGE)
+        )
 
         # Wait for all initialization tasks to complete
-        await gather(bno08x_calibrate, motor_stop, servo_center)
+        await gather(bno08x_calibrate, motor_stop, servo_center, serial_communication_send_challenge)
 
         # Wait for the switch to be pressed
         await switch.wait()
@@ -74,7 +77,6 @@ async def main():
                 bno08x=bno08x,
                 servo=servo,
                 motor=motor,
-                logger=logger,
                 serial_communication=serial_communication
             )
 
@@ -87,7 +89,6 @@ async def main():
                 bno08x=bno08x,
                 servo=servo,
                 motor=motor,
-                logger=logger,
                 serial_communication=serial_communication
             )
 

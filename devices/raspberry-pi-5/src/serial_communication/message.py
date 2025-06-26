@@ -1,3 +1,4 @@
+from .constants import HEADER_SEPARATOR_CHAR, END_CHAR
 from .enums import IncomingCategory, OutgoingCategory, Status
 from ..utils import is_instance
 
@@ -6,12 +7,6 @@ class IncomingMessage:
     """
     Class to handle the messages received from the Raspberry Pi Pico 2W.
     """
-
-    # Message header separator
-    HEADER_SEPARATOR = ':'
-
-    # Message end character
-    END = '\n'
 
     def __init__(self, category: IncomingCategory, content: str):
         """
@@ -28,7 +23,7 @@ class IncomingMessage:
         """
         String representation of the message.
         """
-        return f"{self.__category}{self.HEADER_SEPARATOR}{self.__content}{self.END}"
+        return f"{self.__category}{HEADER_SEPARATOR_CHAR}{self.__content}{END_CHAR}"
 
     def _eq_(self, other: 'IncomingMessage') -> bool:
         """
@@ -41,8 +36,8 @@ class IncomingMessage:
         """
         return self.category == other.category and self.content == other.content
 
-    @classmethod
-    def from_string(cls, msg_str: str) -> 'IncomingMessage':
+    @staticmethod
+    def from_string(msg_str: str) -> 'IncomingMessage':
         """
         Create a Message object from a string.
 
@@ -54,11 +49,11 @@ class IncomingMessage:
             ValueError: If the string does not match the expected format.
         """
         # Remove the end character if present
-        if msg_str.endswith(cls.END):
+        if msg_str.endswith(END_CHAR):
             msg_str = msg_str[:-1]
 
         # Split the string into category and content
-        parts = msg_str.strip().split(cls.HEADER_SEPARATOR, 1)
+        parts = msg_str.strip().split(HEADER_SEPARATOR_CHAR, 1)
         if len(parts) != 2:
             raise ValueError("Invalid incoming message format")
 
@@ -175,17 +170,6 @@ class OutgoingMessage:
     """
     Class to handle the messages sent to the Raspberry Pi Pico 2W.
     """
-    # Message header separator
-    HEADER_SEPARATOR = ':'
-
-    # Content header separator
-    CONTENT_HEADER_SEPARATOR = '='
-
-    # Content separator
-    CONTENT_SEPARATOR = ','
-
-    # Message end character
-    END = '\n'
 
     def __init__(self, category: OutgoingCategory, content: str):
         """
@@ -202,7 +186,7 @@ class OutgoingMessage:
         """
         String representation of the message.
         """
-        return f"{self.__category}{self.HEADER_SEPARATOR}{self.__content}{self.END}"
+        return f"{self.__category}{HEADER_SEPARATOR_CHAR}{self.__content}{END_CHAR}"
 
     def _eq_(self, other: 'OutgoingMessage') -> bool:
         """
@@ -226,11 +210,11 @@ class OutgoingMessage:
             Message: The Message object created from the string.
         """
         # Remove the end character if present
-        if msg_str.endswith(OutgoingMessage.END):
+        if msg_str.endswith(END_CHAR):
             msg_str = msg_str[:-1]
 
         # Split the string into category and content
-        parts = msg_str.strip().split(OutgoingMessage.HEADER_SEPARATOR, 1)
+        parts = msg_str.strip().split(HEADER_SEPARATOR_CHAR, 1)
         if len(parts) != 2:
             raise ValueError("Invalid outgoing message format")
 

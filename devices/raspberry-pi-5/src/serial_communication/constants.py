@@ -14,3 +14,9 @@ RASPBERRY_PI_PICO_DATA_PORT_ALT = '/dev/ttyACM3'
 
 # Encode
 ENCODE = 'utf-8'
+
+# Message header separator
+HEADER_SEPARATOR_CHAR = ':'
+
+# Message end character
+END_CHAR = '\x04'

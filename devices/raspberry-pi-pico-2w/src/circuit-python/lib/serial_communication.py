@@ -4,12 +4,12 @@ from usb_cdc import console, data
 
 from .enums import Challenge, Status
 from .led import LEDHandler
-from .log import Logger
 from .message import (
     IncomingCategory,
     IncomingMessage,
     OutgoingCategory,
     OutgoingMessage,
+    END_CHAR
 )
 
 
@@ -68,7 +68,6 @@ class SerialCommunication:
 
     def __init__(
         self,
-        logger: Logger,
         console_port_enabled: bool = CONSOLE_PORT_ENABLED,
         data_port_enabled: bool = DATA_PORT_ENABLED,
         challenge: Challenge = Challenge.WITHOUT_OBSTACLES,
@@ -78,7 +77,6 @@ class SerialCommunication:
         Initialize the SerialCommunication instance.
 
         Args:
-            logger (Logger): Logger instance for logging messages.
             console_port_enabled (bool): Whether to enable the console port for sending messages.
             data_port_enabled (bool): Whether to enable the data port for receiving messages.
             challenge (Challenge): The challenge type for the robot.
@@ -87,7 +85,6 @@ class SerialCommunication:
         self.__console_port = console if console_port_enabled else None
         self.__data_port = data if data_port_enabled else None
         self.__challenge = challenge
-        self.__logger = logger
         self.__led = led
 
     async def receive_messages(self) -> list[IncomingMessage] | []:
@@ -116,18 +113,24 @@ class SerialCommunication:
             self.__led.on()
 
         msgs = []
+        buffer = b""
         while self.__data_port.in_waiting > 0:
-            # Read a line from the data port
-            msg_str = self.__data_port.readline().strip().decode("utf-8")
-
+            byte = self.__data_port.read(1)
+            if not byte:
+                continue
+            if byte != END_CHAR.encode("utf-8"):
+                buffer += byte
+                continue
+                
             try:
+                msg_str = buffer.decode("utf-8").strip()
                 msg = IncomingMessage.from_string(msg_str)
                 msgs.append(msg)
-
-            except ValueError as e:
+            except (UnicodeDecodeError, ValueError) as e:
                 raise SerialCommunicationError(
-                    f"Invalid message format: {msg_str}"
+                    f"Invalid message format or undecodable bytes: {buffer} ({e})"
                 ) from e
+            buffer = b""
 
         return msgs
 
@@ -181,6 +184,19 @@ class SerialCommunication:
         raise SerialCommunicationError(
             f"Confirmation message '{msg_to_confirm}' not received within {timeout} seconds."
         )
+    
+    def send_initialization_message(self):
+        """
+        Send an END_CHAR message to the console port to indicate initialization.
+        """
+        if not self.__console_port:
+            raise SerialCommunicationError("Console port is not enabled.")
+
+        try:
+            self.__console_port.write(END_CHAR.encode("utf-8"))
+
+        except Exception as e:
+            raise SerialCommunicationError(f"Error sending initialization message: {e}")
 
     async def send_challenge_message(self):
         """
@@ -244,7 +260,6 @@ class SerialCommunication:
             await self.wait_for_confirmation_message(self.START_MESSAGE)
 
         except Exception as e:
-            self.__logger.log(f"Error starting serial communication: {e}")
             raise e
 
     async def stop(self):
