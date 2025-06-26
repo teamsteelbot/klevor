@@ -392,8 +392,16 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
 
         # Check if there is an initialization message received
         while not self.__stop_event.is_set() and not self.__deleted_event.is_set():
-            msg = self._receive_latest_message(False)
-            if msg is None:
+            try:
+                msg = self._receive_latest_message(False)
+                if msg is None:
+                    continue
+
+            except ValueError as e:
+                # May receive some garbage data, so we catch the exception
+                self.__receiver_logger.warning(
+                    f"Received invalid message, may be garbage data: {msg}"
+                )
                 continue
 
             if msg.is_error():
@@ -431,8 +439,16 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
                 break
 
         while not self.__stop_event.is_set() and not self.__deleted_event.is_set():
-            msg = self._receive_latest_message()
-            if msg is None:
+            try:
+                msg = self._receive_latest_message()
+                if msg is None:
+                    continue
+
+            except ValueError as e:
+                # May signal a bad code on the Pico or garbage data
+                self.__logger.warning(
+                    f"Received invalid message error, skipping: {msg}"
+                )
                 continue
 
             if msg.is_error():

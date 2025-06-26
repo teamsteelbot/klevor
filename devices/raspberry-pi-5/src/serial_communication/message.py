@@ -13,7 +13,7 @@ class IncomingMessage:
     # Message end character
     END = '\n'
 
-    def __init__(self, category: IncomingCategory, content: str):
+    def _init_(self, category: IncomingCategory, content: str):
         """
         Initialize the incoming message class.
 
@@ -24,19 +24,18 @@ class IncomingMessage:
         self.category = category
         self.content = content
 
-    def __str__(self) -> str:
+    def _str_(self) -> str:
         """
         String representation of the message.
         """
         return f"{self.__category}{self.HEADER_SEPARATOR}{self.__content}{self.END}"
 
-    def __eq__(self, other: 'IncomingMessage') -> bool:
+    def _eq_(self, other: 'IncomingMessage') -> bool:
         """
         Check equality of two IncomingMessage objects.
 
         Args:
             other (IncomingMessage): The other IncomingMessage object to compare with.
-
         Returns:
             bool: True if both messages have the same category and content, False otherwise.
         """
@@ -49,9 +48,10 @@ class IncomingMessage:
 
         Args:
             msg_str (str): The string representation of the message.
-
         Returns:
             Message: The Message object created from the string.
+        Raises:
+            ValueError: If the string does not match the expected format.
         """
         # Remove the end character if present
         if msg_str.endswith(cls.END):
@@ -63,7 +63,11 @@ class IncomingMessage:
             raise ValueError("Invalid incoming message format")
 
         # Convert the category string to a Category enum value
-        category = IncomingCategory.from_string(parts[0])
+        try:
+            category = IncomingCategory.from_string(parts[0])
+
+        except ValueError:
+            raise ValueError(f"Invalid category in incoming message: {parts[0]}")
 
         # Create and return the Message object
         return IncomingMessage(category, parts[1])
@@ -183,7 +187,7 @@ class OutgoingMessage:
     # Message end character
     END = '\n'
 
-    def __init__(self, category: OutgoingCategory, content: str):
+    def _init_(self, category: OutgoingCategory, content: str):
         """
         Initialize the outgoing message class.
 
@@ -194,19 +198,18 @@ class OutgoingMessage:
         self.category = category
         self.content = content
 
-    def __str__(self) -> str:
+    def _str_(self) -> str:
         """
         String representation of the message.
         """
         return f"{self.__category}{self.HEADER_SEPARATOR}{self.__content}{self.END}"
 
-    def __eq__(self, other: 'OutgoingMessage') -> bool:
+    def _eq_(self, other: 'OutgoingMessage') -> bool:
         """
         Check equality of two OutgoingMessage objects.
 
         Args:
             other (OutgoingMessage): The other OutgoingMessage object to compare with.
-
         Returns:
             bool: True if both messages have the same category and content, False otherwise.
         """
@@ -219,7 +222,6 @@ class OutgoingMessage:
 
         Args:
             msg_str (str): The string representation of the message.
-
         Returns:
             Message: The Message object created from the string.
         """

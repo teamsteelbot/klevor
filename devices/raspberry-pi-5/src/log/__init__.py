@@ -35,9 +35,7 @@ class Logger(LoggerABC):
         self.__tag = self.get_unique_tag(tag) if unique_tag or not tag else tag
 
         # Log the initialization if a tag is provided
-        self.debug(
-            f"Initializing Logger with tag: {self.__tag}"
-        ) if self.__tag else None
+        self.debug("Initializing new Logger") if self.__tag else None
 
     @final
     def get_unique_tag(self, tag: str):

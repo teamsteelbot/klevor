@@ -104,10 +104,8 @@ def map_string_to_enum(string: str, enum_class: type[Enum]) -> Any:
     Args:
         string (str): The string to map.
         enum_class (type[Enum]): The enum class to map the string to.
-
     Returns:
         Any: The corresponding enum value.
-
     Raises:
         ValueError: If the string does not match any enum value.
     """

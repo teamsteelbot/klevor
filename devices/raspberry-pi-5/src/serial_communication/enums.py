@@ -31,7 +31,6 @@ class IncomingCategory(Enum):
 
         Args:
             category_str (str): The string representation of the incoming category.
-
         Returns:
             IncomingCategory: The corresponding IncomingCategory enum value.
         """
@@ -64,7 +63,6 @@ class Status(Enum):
 
         Args:
             status_str (str): The string representation of the status.
-
         Returns:
             Status: The corresponding Status enum value.
         """
@@ -97,7 +95,6 @@ class OutgoingCategory(Enum):
 
         Args:
             category_str (str): The string representation of the outgoing category.
-
         Returns:
             OutgoingCategory: The corresponding OutgoingCategory enum value.
         """
