@@ -30,4 +30,8 @@ if __name__ == "__main__":
     spawner = Spawner(movement=arg_movement)
 
     # Spawn the processes
-    spawner.run()
+    try:
+        spawner.run()
+    
+    except Exception as e:
+        pass

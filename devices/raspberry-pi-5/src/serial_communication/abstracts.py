@@ -9,8 +9,8 @@ class SerialCommunicationABC(ABC):
     Abstract class to handle the serial communication through USB.
     """
 
-    @abstractmethod
     @property
+    @abstractmethod
     def logger(self) -> Logger:
         """
         Get the logger instance for the SerialCommunication.

@@ -111,6 +111,15 @@ class Spawner:
         # Wait for the start event to be set
         self.__start_event.wait()
 
+        # Check if the stop event is set
+        if self.__stop_event.is_set():
+            # Set the writer stop event to stop the writer process
+            self.__writer_stop_event.set()
+
+            print("Stop event is set. Spawner will not run.")
+            return
+        print("Start event is set. Spawner will run.")
+
         # Get the challenge from the environment variables
         challenge = Env.get_challenge()
 

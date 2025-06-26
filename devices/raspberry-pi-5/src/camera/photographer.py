@@ -12,9 +12,10 @@ from ..server.dispatcher import Dispatcher
 from ..utils import is_instance
 from ..utils.decorators import ignore_sigint
 from ..log.decorators import log_on_error
+from ..log.protocols import LoggerConsumerProtocol
 
 
-class Photographer(PhotographerABC):
+class Photographer(PhotographerABC, LoggerConsumerProtocol):
     """
     Class to handle image processing for the camera.
     """

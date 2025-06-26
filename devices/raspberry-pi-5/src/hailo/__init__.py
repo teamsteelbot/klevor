@@ -18,9 +18,10 @@ from ..model import ImageBoundingBoxes
 from ..utils import is_instance
 from ..utils.decorators import ignore_sigint
 from ..log.decorators import log_on_error
+from ..log.protocols import LoggerConsumerProtocol
 
 
-class Hailo(HailoABC):
+class Hailo(HailoABC, LoggerConsumerProtocol):
     """
     Class to handle Hailo inferences.
     """

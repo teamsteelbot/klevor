@@ -28,8 +28,8 @@ class CameraABC(ABC):
         image_stream.seek(0)
         return Image.open(image_stream)
     
-    @abstractmethod
     @property
+    @abstractmethod
     def logger(self) -> Logger:
         """
         Get the logger instance for the Camera.
@@ -109,8 +109,8 @@ class PhotographerABC(ABC):
     Abstract class to handle image processing for the camera.
     """
 
-    @abstractmethod
     @property
+    @abstractmethod
     def logger(self) -> Logger:
         """
         Get the logger instance for the Photographer.

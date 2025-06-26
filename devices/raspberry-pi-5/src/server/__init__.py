@@ -16,9 +16,10 @@ from ..log import Logger
 from ..utils import get_local_ip, is_instance
 from ..utils.decorators import ignore_sigint
 from ..log.decorators import log_on_error
+from ..log.protocols import LoggerConsumerProtocol
 
 
-class WebSocketServer(WebSocketServerABC):
+class WebSocketServer(WebSocketServerABC, LoggerConsumerProtocol):
     """
     Class for a WebSocket server that handles real-time tracking updates.
     It allows clients to connect and receive messages about tracking events.

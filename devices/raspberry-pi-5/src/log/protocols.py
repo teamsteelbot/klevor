@@ -1,13 +1,15 @@
-from typing import Protocol
+from typing import Protocol, runtime_checkable
 
 from ..log import Logger
 
+@runtime_checkable
 class LoggerConsumerProtocol(Protocol):
     """
     Protocol for classes that consume a logger instance.
     """
 
-    def logger(self) -> 'Logger':
+    @property
+    def logger(self) -> Logger:
         """
         Get the logger instance for the consumer.
 

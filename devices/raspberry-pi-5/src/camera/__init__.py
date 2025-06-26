@@ -12,9 +12,10 @@ from .abstracts import CameraABC
 from .constants import ADJUST_DURATION
 from ..constants import HEIGHT, IMAGE_FORMAT, WIDTH
 from ..log import Logger
+from ..log.protocols import LoggerConsumerProtocol
 
 
-class Camera(CameraABC):
+class Camera(CameraABC, LoggerConsumerProtocol):
     """
     Class implementation that wraps the functionality required for the Raspberry Pi Camera.
     """

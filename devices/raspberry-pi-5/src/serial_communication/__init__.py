@@ -6,7 +6,7 @@ from threading import Thread
 from time import sleep
 from typing import Optional, final
 
-from serial import Serial, SerialException
+from serial import Serial
 
 from .abstracts import SerialCommunicationABC
 from .constants import (
@@ -26,9 +26,10 @@ from ..server.dispatcher import Dispatcher
 from ..utils import is_instance
 from ..utils.decorators import ignore_sigint
 from ..log.decorators import log_on_error
+from ..log.protocols import LoggerConsumerProtocol
 
 
-class SerialCommunication(SerialCommunicationABC):
+class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
     """
     Class to handle the serial communication through USB.
     """
@@ -48,6 +49,12 @@ class SerialCommunication(SerialCommunicationABC):
     # Confirmation timeout
     CONFIRMATION_TIMEOUT = 5.0
     CONFIRMATION_ATTEMPTS = CONFIRMATION_TIMEOUT // INCOMING_DELAY
+
+    # Attempts to connect to the serial port
+    CONNECTION_ATTEMPTS = 5
+
+    # Attempts delay
+    ATTEMPTS_DELAY = 1
 
     def __init__(
         self,
@@ -139,6 +146,7 @@ class SerialCommunication(SerialCommunicationABC):
         self.__debug = Env.get_debug_mode()
 
     @final
+    @property
     def logger(self) -> Logger:
         return self.__logger
 
@@ -147,45 +155,70 @@ class SerialCommunication(SerialCommunicationABC):
         # Clear the start event
         self.__start_event.clear()
 
-        # Open the console port
         try:
-            self.__console_serial = Serial(self.__console_port, self.__baudrate)
+            # Open the console port
+            for _ in range(self.CONNECTION_ATTEMPTS):
+                try:
+                    self.__console_serial = Serial(self.__console_port, self.__baudrate)
 
-        except SerialException as port_e:
-            # Try its alternative port
-            try:
-                self.__console_serial = Serial(
-                    self.__console_port_alt,
-                    self.__baudrate
-                )
+                except Exception as port_e:
+                    # Try its alternative port
+                    try:
+                        self.__console_serial = Serial(
+                            self.__console_port_alt,
+                            self.__baudrate
+                        )
 
-            except SerialException as port_alt_e:
-                raise RuntimeError(
-                    f"Error opening serial console port: {port_e} and alternative port: {port_alt_e}"
-                )
+                    except Exception as port_alt_e:
+                        raise RuntimeError(
+                            f"Error opening serial console port: {port_e} and alternative port: {port_alt_e}"
+                        )
 
-            raise RuntimeError(
-                f"Error opening serial console port: {port_e}"
-            )
+                    raise RuntimeError(
+                        f"Error opening serial console port: {port_e}"
+                    )
+                
+                if self.__console_serial.is_open:
+                    # Flush the console serial port to ensure it is ready
+                    self.__console_serial.flush()
+                    break
+                sleep(self.ATTEMPTS_DELAY)
 
-        # Open the data port
-        try:
-            self.__data_serial = Serial(self.__data_port, self.__baudrate)
+            # Open the data port
+            for _ in range(self.CONNECTION_ATTEMPTS):
+                try:
+                    self.__data_serial = Serial(self.__data_port, self.__baudrate)
 
-        except SerialException as port_e:
-            # Try its alternative port
-            try:
-                self.__data_serial = Serial(
-                    self.__data_port_alt,
-                    self.__baudrate
-                )
+                except Exception as port_e:
+                    # Try its alternative port
+                    try:
+                        self.__data_serial = Serial(
+                            self.__data_port_alt,
+                            self.__baudrate
+                        )
 
-            except SerialException as port_alt_e:
-                raise RuntimeError(
-                    f"Error opening serial data port: {port_e} and alternative port: {port_alt_e}"
-                )
+                    except Exception as port_alt_e:
+                        raise RuntimeError(
+                            f"Error opening serial data port: {port_e} and alternative port: {port_alt_e}"
+                        )
 
-            raise RuntimeError(f"Error opening serial data port: {port_e}")
+                    raise RuntimeError(f"Error opening serial data port: {port_e}")
+                
+                if self.__data_serial.is_open:
+                    # Flush the data serial port to ensure it is ready
+                    self.__data_serial.flush()
+                    break
+                sleep(self.ATTEMPTS_DELAY)
+                
+        except Exception as e:
+            # If there is an error opening the serial ports, set the stop event
+            self.__stop_event.set()
+
+            # Set the start event to unblock the waiting threads
+            self.__start_event.set()
+
+            # Raise the error to be handled by the caller
+            raise e
 
         # Log
         self.__logger.info(
@@ -195,7 +228,7 @@ class SerialCommunication(SerialCommunicationABC):
     @final
     def is_open(self) -> bool:
         with (self.__rlock):
-            return not self.__stop_event.is_set()
+            return not self.__stop_event.is_set() and self.__opened_event.is_set()
 
     @final
     def is_closed(self) -> bool:
@@ -297,7 +330,6 @@ class SerialCommunication(SerialCommunicationABC):
         self._wait_confirmation_message()
 
     @final
-    @log_on_error()
     def _receiving_message_handler(self) -> None:
         # Log
         self.__logger.info(
@@ -422,7 +454,6 @@ class SerialCommunication(SerialCommunicationABC):
         )
 
     @final
-    @log_on_error()
     def _sending_message_handler(self) -> None:
         # Log 
         self.__logger.info(
@@ -468,6 +499,7 @@ class SerialCommunication(SerialCommunicationABC):
 
     @final
     @ignore_sigint
+    @log_on_error()
     def run(self) -> None:
         with self.__rlock:
             # Check if the stop event is set
@@ -486,6 +518,9 @@ class SerialCommunication(SerialCommunicationABC):
 
             # Set the opened event to signal that the websocket server is ready
             self.__opened_event.set()
+
+        # Open the serial ports
+        self._open()
 
         # Create the receiving thread
         self.__receiving_thread = Thread(

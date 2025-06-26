@@ -29,9 +29,10 @@ from ..common.measure import Measure
 from ..serial_communication.dispatcher import Dispatcher as SerialDispatcher
 from ..utils.decorators import ignore_sigint
 from ..log.decorators import log_on_error
+from ..log.protocols import LoggerConsumerProtocol
 
 
-class Pilot(PilotABC):
+class Pilot(PilotABC, LoggerConsumerProtocol):
     """
     Class for the Pilot handler.
 

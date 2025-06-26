@@ -13,8 +13,8 @@ class WebSocketServerABC(ABC):
     Abstract class for a WebSocket server that handles real-time tracking updates.
     """
 
-    @abstractmethod
     @property
+    @abstractmethod
     def logger(self) -> Logger:
         """
         Get the logger instance for the WebSocketServer.

@@ -31,8 +31,8 @@ class RPLidarABC(ABC):
                 count += 1
         return total_distance / count if count > 0 else 0.0
 
-    @abstractmethod
     @property
+    @abstractmethod
     def logger(self) -> Logger:
         """
         Get the logger instance for the RPLidar.

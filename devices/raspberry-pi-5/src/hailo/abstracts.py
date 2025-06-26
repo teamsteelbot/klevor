@@ -56,8 +56,8 @@ class HailoABC(ABC):
         x_offset:x_offset + new_img_width] = image
         return padded_image
     
-    @abstractmethod
     @property
+    @abstractmethod
     def logger(self) -> Logger:
         """
         Get the logger instance for the Hailo.
@@ -178,8 +178,8 @@ class ObjectDetectorABC(ABC):
     Abstract class to handle object detection using Hailo handlers.
     """
 
-    @abstractmethod
     @property
+    @abstractmethod
     def logger(self) -> Logger:
         """
         Get the logger instance for the ObjectDetector.

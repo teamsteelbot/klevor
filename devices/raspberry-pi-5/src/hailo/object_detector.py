@@ -13,9 +13,10 @@ from ..log import Logger
 from ..opencv import OpenCV
 from ..utils.decorators import ignore_sigint
 from ..log.decorators import log_on_error
+from ..log.protocols import LoggerConsumerProtocol
 
 
-class ObjectDetector(ObjectDetectorABC):
+class ObjectDetector(ObjectDetectorABC, LoggerConsumerProtocol):
     """
     Class to handle object detection using Hailo handlers.
     """

@@ -18,9 +18,10 @@ from ..server.dispatcher import Dispatcher as WebSocketServerDispatcher
 from ..utils import is_instance
 from ..utils.decorators import ignore_sigint
 from ..log.decorators import log_on_error
+from ..log.protocols import LoggerConsumerProtocol
 
 
-class RPLidar(RPLidarABC):
+class RPLidar(RPLidarABC, LoggerConsumerProtocol):
     """
     Class to handle RPLidar operations.
     """
@@ -316,6 +317,6 @@ class RPLidar(RPLidarABC):
         self.__stop_event.set()
 
         # Log
-        self.__logger.info(
+        self.__logger.debug(
             "RPLidar instance is being deleted. Resources will be cleaned up."
         )
