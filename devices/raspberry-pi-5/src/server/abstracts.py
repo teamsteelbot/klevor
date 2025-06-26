@@ -4,13 +4,25 @@ from PIL.Image import Image
 
 from .enums import Tag
 from .message import Message
-from ..rplidar import Measure
+from ..common.measure import Measure
+from ..log import Logger
 
 
 class WebSocketServerABC(ABC):
     """
     Abstract class for a WebSocket server that handles real-time tracking updates.
     """
+
+    @abstractmethod
+    @property
+    def logger(self) -> Logger:
+        """
+        Get the logger instance for the WebSocketServer.
+
+        Returns:
+            Logger: The logger instance.
+        """
+        pass
 
     @abstractmethod
     async def _reactive_handler(self, connection) -> None:

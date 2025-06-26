@@ -7,6 +7,7 @@ from PIL.Image import Image
 
 from ..constants import HEIGHT, WIDTH
 from ..opencv.constants import PADDING_COLOR
+from ..log import Logger
 
 
 class HailoABC(ABC):
@@ -54,6 +55,17 @@ class HailoABC(ABC):
         padded_image[y_offset:y_offset + new_img_height,
         x_offset:x_offset + new_img_width] = image
         return padded_image
+    
+    @abstractmethod
+    @property
+    def logger(self) -> Logger:
+        """
+        Get the logger instance for the Hailo.
+
+        Returns:
+            Logger: The logger instance.
+        """
+        pass
 
     @abstractmethod
     def _set_input_type(self, input_type: Optional[str] = None) -> None:
@@ -165,6 +177,17 @@ class ObjectDetectorABC(ABC):
     """
     Abstract class to handle object detection using Hailo handlers.
     """
+
+    @abstractmethod
+    @property
+    def logger(self) -> Logger:
+        """
+        Get the logger instance for the ObjectDetector.
+
+        Returns:
+            Logger: The logger instance.
+        """
+        pass
 
     @abstractmethod
     def is_running(self) -> bool:

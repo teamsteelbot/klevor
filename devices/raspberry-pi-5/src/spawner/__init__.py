@@ -23,9 +23,6 @@ class Spawner:
         Args:
             movement (bool): Flag to indicate if the pilot should handle movement.
         """
-        # Get the debug mode form environment variables
-        self.__debug = Env.get_debug_mode()
-
         # Initialize the reentrant lock
         self.__rlock = RLock()
 
@@ -37,7 +34,7 @@ class Spawner:
         self.__started_event = Event()
         self.__parking_event = Event()
         self.__stop_event = Event()
-        self.__writer_messages_queue = Event()
+        self.__writer_messages_queue = Queue()
         self.__writer_stop_event = Event()
         self.__serial_incoming_messages_queue = Queue()
         self.__serial_outgoing_messages_queue = Queue()
@@ -133,7 +130,7 @@ class Spawner:
                       self.__photographer_capture_image_event,
                       self.__stop_event,
                       self.__writer_messages_queue,
-                      OpenCV.preprocess_pil_image)
+                      self.__photographer_preprocess_fn,)
             )
             self.__photographer_process.start()
 

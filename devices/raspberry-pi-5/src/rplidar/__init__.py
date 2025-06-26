@@ -11,12 +11,13 @@ from .constants import (
     RPLIDAR_C1_PORT,
     ULTRA_SIMPLE_PATH,
 )
-from .measure import Measure
+from ..common.measure import Measure
 from ..env import Env
 from ..log import Logger
 from ..server.dispatcher import Dispatcher as WebSocketServerDispatcher
 from ..utils import is_instance
-from ..utils.decorators import ignore_sigint, log_method_error
+from ..utils.decorators import ignore_sigint
+from ..log.decorators import log_on_error
 
 
 class RPLidar(RPLidarABC):
@@ -101,6 +102,10 @@ class RPLidar(RPLidarABC):
 
         # Initialize the listener thread for measures updates
         self.__update_measures_listener_thread = None
+
+    @final
+    def logger(self) -> Logger:
+        return self.__logger
 
     @final
     def _read_output(self):
@@ -213,7 +218,7 @@ class RPLidar(RPLidarABC):
 
     @final
     @ignore_sigint
-    @log_method_error('__logger')
+    @log_on_error()
     def run(self):
         with self.__rlock:
             # Check if the stop event is set

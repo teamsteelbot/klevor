@@ -2,7 +2,8 @@ from abc import ABC, abstractmethod
 
 from .constants import MOTOR_SPEED_RANGE, SERVO_ACTUATION_RANGE
 from ..rplidar.enums import Direction
-from ..rplidar.measure import Measure
+from ..common.measure import Measure
+from ..log import Logger
 
 
 class PilotABC(ABC):
@@ -44,6 +45,17 @@ class PilotABC(ABC):
             raise ValueError(
                 f"Speed must be between {MOTOR_SPEED_RANGE[0]} and {MOTOR_SPEED_RANGE[1]}"
             )
+        
+    @abstractmethod
+    @property
+    def logger(self) -> Logger:
+        """
+        Get the logger instance for the Pilot.
+
+        Returns:
+            Logger: The logger instance.
+        """
+        pass
 
     @abstractmethod
     async def _set_motor_speed(self, speed: float):

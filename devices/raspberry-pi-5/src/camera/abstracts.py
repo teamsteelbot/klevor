@@ -6,6 +6,7 @@ from PIL.Image import Image
 
 from .constants import ADJUST_DURATION
 from ..constants import IMAGE_FORMAT
+from ..log import Logger
 
 
 class CameraABC(ABC):
@@ -26,6 +27,17 @@ class CameraABC(ABC):
         # Convert the image stream to a PIL image
         image_stream.seek(0)
         return Image.open(image_stream)
+    
+    @abstractmethod
+    @property
+    def logger(self) -> Logger:
+        """
+        Get the logger instance for the Camera.
+
+        Returns:
+            Logger: The logger instance.
+        """
+        pass
 
     @abstractmethod
     def _start_preview(self) -> None:
@@ -96,6 +108,17 @@ class PhotographerABC(ABC):
     """
     Abstract class to handle image processing for the camera.
     """
+
+    @abstractmethod
+    @property
+    def logger(self) -> Logger:
+        """
+        Get the logger instance for the Photographer.
+
+        Returns:
+            Logger: The logger instance.
+        """
+        pass
 
     @abstractmethod
     def run(self):

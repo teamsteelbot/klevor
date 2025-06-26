@@ -11,7 +11,8 @@ from ..env import Env
 from ..files import Files
 from ..log import Logger
 from ..opencv import OpenCV
-from ..utils.decorators import ignore_sigint, log_method_error
+from ..utils.decorators import ignore_sigint
+from ..log.decorators import log_on_error
 
 
 class ObjectDetector(ObjectDetectorABC):
@@ -113,6 +114,10 @@ class ObjectDetector(ObjectDetectorABC):
             self.__hailo_handler_threads[model_name] = None
 
     @final
+    def logger(self) -> Logger:
+        return self.__logger
+
+    @final
     def is_running(self) -> bool:
         with self.__rlock:
             return not self.__stop_event.is_set()
@@ -123,7 +128,7 @@ class ObjectDetector(ObjectDetectorABC):
 
     @final
     @ignore_sigint
-    @log_method_error('__logger')
+    @log_on_error()
     def run(self) -> None:
         with self.__rlock:
             # Check if the stop event is set

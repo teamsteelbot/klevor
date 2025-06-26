@@ -11,21 +11,21 @@ from serial import Serial, SerialException
 from .abstracts import SerialCommunicationABC
 from .constants import (
     ENCODE,
-    OUTGOING_OK_MESSAGE,
     RASPBERRY_PI_PICO_BAUDRATE,
     RASPBERRY_PI_PICO_CONSOLE_PORT,
     RASPBERRY_PI_PICO_CONSOLE_PORT_ALT,
     RASPBERRY_PI_PICO_DATA_PORT,
     RASPBERRY_PI_PICO_DATA_PORT_ALT,
-    STOP_MESSAGE,
 )
+from .enums import OutgoingCategory, Status
 from .message import IncomingMessage, OutgoingMessage
 from ..env import Env
 from ..env.enums import Challenge
 from ..log import Logger
 from ..server.dispatcher import Dispatcher
 from ..utils import is_instance
-from ..utils.decorators import ignore_sigint, log_method_error
+from ..utils.decorators import ignore_sigint
+from ..log.decorators import log_on_error
 
 
 class SerialCommunication(SerialCommunicationABC):
@@ -139,6 +139,10 @@ class SerialCommunication(SerialCommunicationABC):
         self.__debug = Env.get_debug_mode()
 
     @final
+    def logger(self) -> Logger:
+        return self.__logger
+
+    @final
     def _open(self) -> None:
         # Clear the start event
         self.__start_event.clear()
@@ -246,7 +250,7 @@ class SerialCommunication(SerialCommunicationABC):
 
     @final
     def _send_confirmation_message(self) -> None:
-        self.__outgoing_messages_queue.put(OUTGOING_OK_MESSAGE)
+        self.__outgoing_messages_queue.put(OutgoingMessage(OutgoingCategory.STATUS, Status.OK))
 
     @final
     def _wait_confirmation_message(
@@ -287,13 +291,13 @@ class SerialCommunication(SerialCommunicationABC):
 
     @final
     def _send_stop_message(self) -> None:
-        self.__outgoing_messages_queue.put(STOP_MESSAGE)
+        self.__outgoing_messages_queue.put(OutgoingMessage(OutgoingCategory.STATUS, Status.STOP))
 
         # Wait for the confirmation message
-        self._wait_confirmation_message(STOP_MESSAGE)
+        self._wait_confirmation_message()
 
     @final
-    @log_method_error('__logger')
+    @log_on_error()
     def _receiving_message_handler(self) -> None:
         # Log
         self.__logger.info(
@@ -418,7 +422,7 @@ class SerialCommunication(SerialCommunicationABC):
         )
 
     @final
-    @log_method_error('__logger')
+    @log_on_error()
     def _sending_message_handler(self) -> None:
         # Log 
         self.__logger.info(

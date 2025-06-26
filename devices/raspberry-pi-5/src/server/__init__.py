@@ -14,7 +14,8 @@ from .enums import Tag
 from .message import Message
 from ..log import Logger
 from ..utils import get_local_ip, is_instance
-from ..utils.decorators import ignore_sigint, log_method_error
+from ..utils.decorators import ignore_sigint
+from ..log.decorators import log_on_error
 
 
 class WebSocketServer(WebSocketServerABC):
@@ -72,6 +73,10 @@ class WebSocketServer(WebSocketServerABC):
 
         # Initialize the broadcast thread
         self.__broadcast_thread = None
+
+    @final
+    def logger(self) -> Logger:
+        return self.__logger
 
     @final
     async def _reactive_handler(self, connection) -> None:
@@ -214,7 +219,7 @@ class WebSocketServer(WebSocketServerABC):
 
     @final
     @ignore_sigint
-    @log_method_error('__logger')
+    @log_on_error()
     async def run(self):
         with self.__rlock:
             # Check if the stop event is set

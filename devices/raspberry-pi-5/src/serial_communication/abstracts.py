@@ -1,12 +1,24 @@
 from abc import ABC, abstractmethod
 
 from .message import IncomingMessage, OutgoingMessage
+from ..log import Logger
 
 
 class SerialCommunicationABC(ABC):
     """
     Abstract class to handle the serial communication through USB.
     """
+
+    @abstractmethod
+    @property
+    def logger(self) -> Logger:
+        """
+        Get the logger instance for the SerialCommunication.
+
+        Returns:
+            Logger: The logger instance.
+        """
+        pass
 
     @abstractmethod
     def _open(self) -> None:

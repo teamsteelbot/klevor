@@ -2,8 +2,7 @@ from multiprocessing import Queue
 from typing import final
 
 from .abstracts import DispatcherABC
-from .constants import STOP_MESSAGE
-from .enums import OutgoingCategory
+from .enums import OutgoingCategory, Status
 from .message import IncomingMessage, OutgoingMessage
 from ..log import Logger
 from ..utils import is_instance
@@ -77,4 +76,6 @@ class Dispatcher(DispatcherABC):
 
     @final
     def send_stop_message(self) -> None:
-        self._send_message(STOP_MESSAGE)
+        self._send_message(OutgoingMessage(
+            OutgoingCategory.STATUS, Status.STOP
+        ))

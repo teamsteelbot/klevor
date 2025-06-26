@@ -65,6 +65,10 @@ class Camera(CameraABC):
         self.__started_preview = False
 
     @final
+    def logger(self) -> Logger:
+        return self.__logger
+
+    @final
     def _start_preview(self) -> None:
         with self.__rlock:
             # Check if the preview is already started

@@ -25,9 +25,10 @@ from ..env.enums import Challenge
 from ..log import Logger
 from ..rplidar import RPLidar
 from ..rplidar.enums import Direction
-from ..rplidar.measure import Measure
+from ..common.measure import Measure
 from ..serial_communication.dispatcher import Dispatcher as SerialDispatcher
-from ..utils.decorators import ignore_sigint, log_method_error
+from ..utils.decorators import ignore_sigint
+from ..log.decorators import log_on_error
 
 
 class Pilot(PilotABC):
@@ -120,6 +121,10 @@ class Pilot(PilotABC):
 
         # Initialize the challenge
         self.__challenge = None
+
+    @final
+    def logger(self) -> Logger:
+        return self.__logger
 
     @final
     async def _set_motor_speed(self, speed: float):
@@ -363,7 +368,7 @@ class Pilot(PilotABC):
 
     @final
     @ignore_sigint
-    @log_method_error('__logger')
+    @log_on_error()
     def run(self):
         with self.__rlock:
             # Check if the stop event is set

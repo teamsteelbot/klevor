@@ -1,7 +1,4 @@
-from .constants import (
-    INCOMING_OK_MESSAGE, START_MESSAGE,
-)
-from .enums import IncomingCategory, OutgoingCategory
+from .enums import IncomingCategory, OutgoingCategory, Status
 from ..utils import is_instance
 
 
@@ -122,7 +119,7 @@ class IncomingMessage:
         Returns:
             bool: True if the message is a start message, False otherwise.
         """
-        return self == START_MESSAGE
+        return self.category == OutgoingCategory.STATUS and self.content == Status.START
 
     def is_challenge(self) -> bool:
         """
@@ -149,7 +146,7 @@ class IncomingMessage:
         Returns:
             bool: True if the message is a confirmation message, False otherwise.
         """
-        return self == INCOMING_OK_MESSAGE
+        return self.category == OutgoingCategory.STATUS and self.content == Status.OK
 
     def is_bno08x_yaw(self) -> bool:
         """

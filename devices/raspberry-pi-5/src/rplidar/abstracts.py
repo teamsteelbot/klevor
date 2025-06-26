@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 
-from .measure import Measure
+from ..common.measure import Measure
+from ..log import Logger
 
 
 class RPLidarABC(ABC):
@@ -29,6 +30,17 @@ class RPLidarABC(ABC):
                 total_distance += measures[angle].distance
                 count += 1
         return total_distance / count if count > 0 else 0.0
+
+    @abstractmethod
+    @property
+    def logger(self) -> Logger:
+        """
+        Get the logger instance for the RPLidar.
+
+        Returns:
+            Logger: The logger instance.
+        """
+        pass
 
     @abstractmethod
     def _read_output(self):

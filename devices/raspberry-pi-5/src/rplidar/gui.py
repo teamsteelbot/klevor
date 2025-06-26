@@ -7,7 +7,7 @@ import pygame
 from websockets import connect
 
 from .constants import MAX_DISTANCE_LIMIT
-from .measure import Measure
+from ..common.measure import Measure
 from ..args import Args, Flag
 from ..server.message import Message, Tag
 
