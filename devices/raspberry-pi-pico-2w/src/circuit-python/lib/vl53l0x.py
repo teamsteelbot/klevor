@@ -1,7 +1,6 @@
 from time import sleep
 
 from adafruit_vl53l0x import VL53L0X
-from board import (GP0, GP1, GP13, GP16, GP17, GP22, GP28, GP4, GP5, GP7)
 from busio import I2C
 from digitalio import DigitalInOut, Direction
 
@@ -30,9 +29,6 @@ class VL53L0XHandler:
     This class handles the initialization and reading of multiple VL53L0X ToF sensors.
     """
     # Default configuration
-    I2C_SCL_PIN = GP1
-    I2C_SDA_PIN = GP0
-    XSHUT_PINS = (GP4, GP5, GP22, GP7, GP28, GP13, GP16, GP17)
     SHORT_SETUP_DELAY = 0.05  # Short delay for sensor power-up
     SETUP_DELAY = 0.1  # Delay to ensure all sensors are off before starting
     MEASUREMENT_LIMIT_MM = 3000  # Maximum distance for ToF measurement in mm
@@ -42,8 +38,8 @@ class VL53L0XHandler:
 
     def __init__(
         self,
-        i2c: I2C = I2C(I2C_SCL_PIN, I2C_SDA_PIN),
-        xshut_pins: tuple = XSHUT_PINS
+        i2c: I2C,
+        xshut_pins: tuple[int, ...]
     ):
         """
         Initializes the VL53L0XHandler with default settings.

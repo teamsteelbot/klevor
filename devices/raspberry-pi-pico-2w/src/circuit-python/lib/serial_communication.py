@@ -1,11 +1,10 @@
 from time import monotonic
 
-from board import LED
-from digitalio import DigitalInOut, Direction
 from usb_cdc import console, data
 
 from .enums import Challenge, Status
 from .led import LEDHandler
+from .log import Logger
 from .message import (
     IncomingCategory,
     IncomingMessage,
@@ -39,29 +38,29 @@ class SerialCommunication:
     # Status messages
     START_MESSAGE = OutgoingMessage(
         OutgoingCategory.STATUS,
-        Status.START.get_name()
+        Status.START
     )
     STOP_MESSAGE = IncomingMessage(
         OutgoingCategory.STATUS,
-        Status.STOP.get_name()
+        Status.STOP
     )
     INCOMING_OK_MESSAGE = IncomingMessage(
         IncomingCategory.STATUS,
-        Status.OK.get_name()
+        Status.OK
     )
     OUTGOING_OK_MESSAGE = OutgoingMessage(
         OutgoingCategory.STATUS,
-        Status.OK.get_name()
+        Status.OK
     )
 
     # Challenge messages
     CHALLENGE_WITH_OBSTACLES = OutgoingMessage(
         OutgoingCategory.CHALLENGE,
-        Challenge.WITH_OBSTACLES.get_challenge_name()
+        Challenge.WITH_OBSTACLES
     )
     CHALLENGE_WITHOUT_OBSTACLES = OutgoingMessage(
         OutgoingCategory.CHALLENGE,
-        Challenge.WITHOUT_OBSTACLES.get_challenge_name()
+        Challenge.WITHOUT_OBSTACLES
     )
 
     # Confirmation timeout
@@ -69,6 +68,7 @@ class SerialCommunication:
 
     def __init__(
         self,
+        logger: Logger,
         console_port_enabled: bool = CONSOLE_PORT_ENABLED,
         data_port_enabled: bool = DATA_PORT_ENABLED,
         challenge: Challenge = Challenge.WITHOUT_OBSTACLES,
@@ -78,6 +78,7 @@ class SerialCommunication:
         Initialize the SerialCommunication instance.
 
         Args:
+            logger (Logger): Logger instance for logging messages.
             console_port_enabled (bool): Whether to enable the console port for sending messages.
             data_port_enabled (bool): Whether to enable the data port for receiving messages.
             challenge (Challenge): The challenge type for the robot.
@@ -86,26 +87,29 @@ class SerialCommunication:
         self.__console_port = console if console_port_enabled else None
         self.__data_port = data if data_port_enabled else None
         self.__challenge = challenge
+        self.__logger = logger
         self.__led = led
 
-    async def receive_messages(self) -> list[IncomingMessage] | None:
+    async def receive_messages(self) -> list[IncomingMessage] | []:
         """
         Receive messages from the USB CDC data stream.
 
         Returns:
-            list[IncomingMessage] | None: A list of received messages or None if no messages are waiting.
+            list[IncomingMessage] | []: A list of received messages or None if no messages are waiting.
 
         Raises:
             SerialCommunicationError: If the data port is not enabled or if there is an error in reading messages.
         """
         if not self.__data_port:
-            raise SerialCommunicationError("Data port is not enabled.")
+            msg = "Data port is not enabled."
+            self.__logger.log(msg)
+            raise SerialCommunicationError(msg)
 
         if self.__data_port.in_waiting == 0:
             # Turn off the LED if no data is waiting
             if self.__led and self.__led.is_on():
                 self.__led.off()
-            return None
+            return []
 
         # Turn on the LED to indicate a message has been received
         if self.__led and self.__led.is_off():
@@ -137,7 +141,9 @@ class SerialCommunication:
             SerialCommunicationError: If the console port is not enabled or if there is an error in sending the message.
         """
         if not self.__console_port:
-            raise SerialCommunicationError("Console port is not enabled.")
+            msg = "Console port is not enabled."
+            self.__logger.log(msg)
+            raise SerialCommunicationError(msg)
 
         try:
             self.__console_port.write(str(message).encode("utf-8"))
@@ -230,11 +236,16 @@ class SerialCommunication:
         Raises:
             SerialCommunicationError: If the console port is not enabled or if confirmation is not received.
         """
-        # Send the start message
-        self.send_message(self.START_MESSAGE)
+        try:
+            # Send the start message
+            self.send_message(self.START_MESSAGE)
 
-        # Wait for confirmation of the start message
-        await self.wait_for_confirmation_message(self.START_MESSAGE)
+            # Wait for confirmation of the start message
+            await self.wait_for_confirmation_message(self.START_MESSAGE)
+
+        except Exception as e:
+            self.__logger.log(f"Error starting serial communication: {e}")
+            raise e
 
     async def stop(self):
         """

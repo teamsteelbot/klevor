@@ -4,6 +4,7 @@ from time import monotonic
 from .bno08x import BNO08XHandler
 from .esc_motor import ESCMotorHandler
 from .message import IncomingCategory, IncomingMessage
+from .log import Logger
 from .serial_communication import SerialCommunication
 from .servo import ServoHandler
 
@@ -21,6 +22,7 @@ class WithoutObstacles:
         bno08x: BNO08XHandler,
         servo: ServoHandler,
         motor: ESCMotorHandler,
+        logger: Logger,
         serial_communication: SerialCommunication
     ):
         """
@@ -30,11 +32,13 @@ class WithoutObstacles:
             bno08x (BNO08XHandler): Handler for the BNO08X sensor.
             servo (ServoHandler): Handler for the servo motor.
             motor (ESCMotorHandler): Handler for the ESC motor.
+            logger (Logger): Logger instance for logging messages.
             serial_communication (SerialCommunication): Handler for serial communication.
         """
         self.__bno08x = bno08x
         self.__servo = servo
         self.__motor = motor
+        self.__logger = logger
         self.__serial_communication = serial_communication
 
     async def loop(self):

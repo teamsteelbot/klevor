@@ -13,7 +13,7 @@ class IncomingMessage:
     # Message end character
     END = '\n'
 
-    def _init_(self, category: IncomingCategory, content: str):
+    def __init__(self, category: IncomingCategory, content: str):
         """
         Initialize the incoming message class.
 
@@ -187,7 +187,7 @@ class OutgoingMessage:
     # Message end character
     END = '\n'
 
-    def _init_(self, category: OutgoingCategory, content: str):
+    def __init__(self, category: OutgoingCategory, content: str):
         """
         Initialize the outgoing message class.
 

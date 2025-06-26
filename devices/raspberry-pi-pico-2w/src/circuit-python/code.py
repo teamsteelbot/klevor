@@ -1,4 +1,6 @@
 from asyncio import create_task, gather, run
+from io import StringIO
+from traceback import print_exception
 
 from board import (GP0, GP1, GP11, GP13, GP2, LED)
 from busio import I2C
@@ -9,6 +11,7 @@ from lib.enums import Challenge
 from lib.env import Env
 from lib.esc_motor import ESCMotorHandler
 from lib.led import LEDHandler
+from lib.log import Logger
 from lib.serial_communication import SerialCommunication
 from lib.servo import ServoHandler
 from lib.switch import SwitchHandler
@@ -25,11 +28,13 @@ SERVO_PIN = GP13
 SWITCH_PIN = GP11
 
 # Robot's components handlers
+logger = Logger()
 led = LEDHandler(led_pin=LED)
 serial_communication = SerialCommunication(
     console_port_enabled=True,
     data_port_enabled=True,
-    led=led
+    led=led,
+    logger=logger,
 )
 servo = ServoHandler(servo_pin=SERVO_PIN, movement=MOVEMENT)
 motor = ESCMotorHandler(motor_pin=ESC_MOTOR_PIN, movement=MOVEMENT)
@@ -69,6 +74,7 @@ async def main():
                 bno08x=bno08x,
                 servo=servo,
                 motor=motor,
+                logger=logger,
                 serial_communication=serial_communication
             )
 
@@ -81,6 +87,7 @@ async def main():
                 bno08x=bno08x,
                 servo=servo,
                 motor=motor,
+                logger=logger,
                 serial_communication=serial_communication
             )
 
@@ -91,8 +98,13 @@ async def main():
             raise ValueError(f"Unsupported challenge type: {CHALLENGE}")
 
     except Exception as e:
+        # Get the traceback as string
+        buf = StringIO()
+        print_exception(e, e, e.__traceback__, file=buf)
+        tb_str = buf.getvalue()
+    
         # Send error message to the serial communication
-        serial_communication.send_error_message(e)
+        serial_communication.send_error_message(tb_str)
 
 
 # Start the asyncio event loop

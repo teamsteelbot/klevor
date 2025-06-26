@@ -1,6 +1,5 @@
 from asyncio import create_task, gather, sleep
 
-from board import GP11
 from digitalio import DigitalInOut, Direction, Pull
 
 from .led import LEDHandler
@@ -12,13 +11,12 @@ class SwitchHandler:
     A class to handle a switch connected to a Raspberry Pi Pico.
     """
     # Default configuration
-    SWITCH_PIN = GP11
     DELAY = 0.01
 
     def __init__(
         self,
         serial_communication: SerialCommunication,
-        switch_pin: int = SWITCH_PIN,
+        switch_pin: int,
         led: LEDHandler = None
     ):
         """

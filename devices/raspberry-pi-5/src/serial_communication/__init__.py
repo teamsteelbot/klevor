@@ -163,7 +163,6 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
         try:
             self.__console_serial = Serial(port, self.__baudrate)
             self.__console_serial.flush()
-            self.__logger.info(f"Console port opened on {port}.")
 
         except Exception as e:
             raise RuntimeError(f"Error opening console port {port}: {e}")
@@ -179,7 +178,6 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
         try:
             self.__data_serial = Serial(port, self.__baudrate)
             self.__data_serial.flush()
-            self.__logger.info(f"Data port opened on {port}.")
 
         except Exception as e:
             raise RuntimeError(f"Error opening data {port}: {e}")
@@ -205,13 +203,13 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
         # Open the console port
         for i in range(self.CONNECTION_ATTEMPTS):
             try:
-                self._open_console_port(self.__console_port, self.__baudrate)
+                self._open_console_port(self.__console_port)
                 if self.__console_serial.is_open:
                     break
 
             except Exception as port_e:
                 try:
-                    self._open_console_port(self.__console_port_alt, self.__baudrate)
+                    self._open_console_port(self.__console_port_alt)
                     if self.__console_serial.is_open:
                         break
 
@@ -237,13 +235,13 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
         # Open the data port
         for i in range(self.CONNECTION_ATTEMPTS):
             try:
-                self._open_data_port(self.__data_port, self.__baudrate)
+                self._open_data_port(self.__data_port)
                 if self.__data_serial.is_open:
                     break
 
             except Exception as port_e:
                 try:
-                    self._open_data_port(self.__data_port_alt, self.__baudrate)
+                    self._open_data_port(self.__data_port_alt)
                     if self.__data_serial.is_open:
                         break
 
@@ -264,11 +262,6 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
         # Log
         self.__logger.info(
             f"Serial data port opened on {self.__data_port} after {i + 1} {'attempts' if i != 0 else 'attempt'}."
-        )
-
-        # Log
-        self.__logger.info(
-            f"Serial console port and data port opened with baudrate {self.__baudrate}."
         )
 
     @final
@@ -307,13 +300,15 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
             msg_str = self.__console_serial.readline().decode(ENCODE).strip()
         else:
             msg_str = self.__console_serial.read(self.__console_serial.in_waiting).decode(ENCODE).strip()
-        msg = IncomingMessage.from_string(msg_str)
-
+        
         # Log
         first_line = str(msg_str).split('\n')[0]
         self.__receiver_logger.debug(
-            f"Received message: {first_line}"
+            f"Received message: '{first_line}'"
         ) if self.__debug else None
+
+        # Get the message from the string
+        msg = IncomingMessage.from_string(msg_str)
 
         # If the server is set, send the message to the server
         self.__server_dispatcher.broadcast_serial_incoming_message(
@@ -410,7 +405,7 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
     def _receiving_message_handler(self) -> None:
         # Log
         self.__receiver_logger.info(
-            "Waiting for start event on receiving handler..."
+            "Waiting for start event..."
         )
 
         # Check if there is an initialization message received
@@ -423,13 +418,13 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
             except ValueError as e:
                 # May receive some garbage data, so we catch the exception
                 self.__receiver_logger.warning(
-                    f"Received invalid message, may be garbage data: {e}"
+                    f"Received invalid message, may be garbage data: '{e}'"
                 )
                 continue
 
             if msg.is_error():
                 raise RuntimeError(
-                    f"Received error message: {msg.content}"
+                    f"Received error message: '{msg.content}'"
                 )
 
             elif msg.is_challenge():
@@ -470,13 +465,13 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
             except ValueError as e:
                 # May signal a bad code on the Pico or garbage data
                 self.__logger.warning(
-                    f"Received invalid message error, skipping: {e}"
+                    f"Received invalid message error, skipping: '{e}'"
                 )
                 continue
 
             if msg.is_error():
                 raise RuntimeError(
-                    f"Received error message: {msg.content}"
+                    f"Received error message: '{msg.content}'"
                 )
 
             elif msg.is_bno08x_yaw():

@@ -1,7 +1,6 @@
 from asyncio import sleep
 
 from adafruit_motor.servo import ContinuousServo
-from board import GP2
 from pwmio import PWMOut
 
 
@@ -29,7 +28,6 @@ class ESCMotorHandler:
     A class to handle ESC (Electronic Speed Controller) motor operations.
     """
     # Default configuration
-    MOTOR_PIN = GP2
     PWM_FREQUENCY = 50
     MIN_PULSE = 1000
     MAX_PULSE = 2000
@@ -49,7 +47,7 @@ class ESCMotorHandler:
     DELAY = 0.15
 
     def __init__(
-        self, motor_pin: int = MOTOR_PIN, frequency: int = PWM_FREQUENCY,
+        self, motor_pin: int, frequency: int = PWM_FREQUENCY,
         min_pulse: int = MIN_PULSE, max_pulse: int = MAX_PULSE,
         movement: bool = True
     ):

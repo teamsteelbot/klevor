@@ -1,6 +1,5 @@
 from asyncio import sleep
 
-import board
 from adafruit_motor.servo import Servo
 from pwmio import PWMOut
 
@@ -29,7 +28,6 @@ class ServoHandler:
     A class to handle servo motor operations.
     """
     # Default configuration
-    SERVO_PIN = board.GP13
     PWM_FREQUENCY = 50
     MIN_PULSE = 500
     MAX_PULSE = 2500
@@ -50,7 +48,7 @@ class ServoHandler:
     DELAY = 0.05
 
     def __init__(
-        self, servo_pin: int = SERVO_PIN, frequency: int = PWM_FREQUENCY,
+        self, servo_pin: int, frequency: int = PWM_FREQUENCY,
         min_pulse: int = MIN_PULSE, max_pulse: int = MAX_PULSE,
         actuation_range: int = ACTUATION_RANGE, movement: bool = True
     ):

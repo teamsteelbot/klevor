@@ -1,6 +1,5 @@
 from asyncio import sleep
 
-from board import LED
 from digitalio import DigitalInOut, Direction
 
 
@@ -9,7 +8,7 @@ class LEDHandler:
     A class to manage the onboard LED of the Raspberry Pi Pico 2W.
     """
 
-    def __init__(self, led_pin: int = LED):
+    def __init__(self, led_pin: int):
         """
         Initializes the LED on the specified GPIO pin.
 

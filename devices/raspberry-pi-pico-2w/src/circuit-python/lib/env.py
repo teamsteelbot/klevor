@@ -1,6 +1,6 @@
 from os import getenv
 
-from .challenge import Challenge
+from .enums import Challenge
 
 
 class Env:

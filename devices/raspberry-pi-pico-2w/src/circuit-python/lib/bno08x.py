@@ -3,7 +3,6 @@ from math import (asin, atan2, degrees, pi)
 
 from adafruit_bno08x import (BNO_REPORT_GYROSCOPE, BNO_REPORT_ROTATION_VECTOR)
 from adafruit_bno08x.i2c import BNO08X_I2C
-from board import GP0, GP1
 from busio import I2C
 
 from .serial_communication import SerialCommunication
@@ -33,9 +32,7 @@ class BNO08XHandler:
     A class to handle BNO08X sensor operations.
     """
     # Default configuration
-    I2C_SDA_PIN = GP0
-    I2C_SCL_PIN = GP1
-    I2C_ADDRESS = 0x4B
+    I2C_ADDRESS = 0x4b
     INITIAL_SAMPLES = 10  # Number of samples to gather for initial calibration
 
     # Delay between readings in seconds
@@ -44,7 +41,7 @@ class BNO08XHandler:
     def __init__(
         self,
         serial_communication: SerialCommunication,
-        i2c: I2C = I2C(I2C_SCL_PIN, I2C_SDA_PIN),
+        i2c: I2C,
         address: int = I2C_ADDRESS
     ):
         """

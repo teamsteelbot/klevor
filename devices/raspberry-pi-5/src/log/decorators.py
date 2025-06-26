@@ -1,3 +1,5 @@
+import traceback
+
 from .protocols import LoggerConsumerProtocol
 from functools import wraps
 from ..utils import is_instance
@@ -18,11 +20,15 @@ def log_on_error():
             try:
                 return func(self, *args, **kwargs)
             
-            except Exception as e:
-                # Log the error using the logger's error method
-                self.logger.error(f"Error in {func.__name__}: {e}")
-
-                print(f"Error in '{self.__class__.__name__}' class on '{func.__name__}' function: {e}")
+            except Exception as e:  
+                tb = traceback.extract_tb(e.__traceback__)
+                if tb:
+                    filename, lineno, _, _ = tb[-1]
+                    self.logger.error(
+                        f"Error in {func.__name__} at {filename}:{lineno}: {e}"
+                    )
+                else:
+                    self.logger.error(f"Error in {func.__name__}: {e}")
 
         return wrapper
     return decorator
