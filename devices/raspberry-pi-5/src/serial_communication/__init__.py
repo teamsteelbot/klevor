@@ -298,13 +298,23 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
 
         # Parse the message from the serial port
         buffer = ""
-        while True:
+        while not self.__stop_event.is_set() and not self.__deleted_event.is_set():
             data = self.__console_serial.read(1).decode("utf-8", errors="ignore")
             if not data:
                 continue
             if data == END_CHAR:
                 break
             buffer += data
+
+        # Check if the stop event is set or the deleted event is set
+        if self.__stop_event.is_set() or self.__deleted_event.is_set():
+            return None
+        
+        # If the buffer is empty, return None
+        if not buffer:
+            return None
+        
+        # Strip the buffer to remove any leading or trailing whitespace and convert it to a string
         msg_str = buffer.strip()
 
         # Log
@@ -418,6 +428,10 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
             if not char:
                 continue
             if char == END_CHAR:
+                # Log
+                self.__receiver_logger.info(
+                    "Received initial END_CHAR message. Serial communication is ready."
+                )
                 break
             
         # Wait for the start message

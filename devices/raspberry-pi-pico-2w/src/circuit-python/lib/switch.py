@@ -47,6 +47,12 @@ class SwitchHandler:
         while self.__switch.value:
             await sleep(self.DELAY)
 
+        # Send initialization message
+        self.__serial_communication.send_initialization_message()
+        
+        # Send challenge message
+        await self.__serial_communication.send_challenge_message()
+
         # Create the tasks to signal the start of the robot's operation
         start_tasks = [create_task(self.__serial_communication.start())]
 

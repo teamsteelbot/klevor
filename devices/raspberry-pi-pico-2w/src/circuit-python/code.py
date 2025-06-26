@@ -54,19 +54,13 @@ async def main():
     global bno08x, servo, motor, serial_communication, switch
 
     try:
-        # Send initialization message
-        serial_communication.send_initialization_message()
-
         # Create tasks for initialization
         bno08x_calibrate = create_task(bno08x.calibrate())
         motor_stop = create_task(motor.stop())
         servo_center = create_task(servo.center())
-        serial_communication_send_challenge = create_task(
-            serial_communication.send_challenge_message()
-        )
 
         # Wait for all initialization tasks to complete
-        await gather(bno08x_calibrate, motor_stop, servo_center, serial_communication_send_challenge)
+        await gather(bno08x_calibrate, motor_stop, servo_center)
 
         # Wait for the switch to be pressed
         await switch.wait()
