@@ -117,6 +117,7 @@ class ObjectDetector(ObjectDetectorABC, LoggerConsumerProtocol):
             self.__hailo_handler_threads[model_name] = None
 
     @final
+    @property
     def logger(self) -> Logger:
         return self.__logger
 

@@ -9,7 +9,6 @@ class SerialCommunicationABC(ABC):
     Abstract class to handle the serial communication through USB.
     """
 
-    @property
     @abstractmethod
     def logger(self) -> Logger:
         """
@@ -17,6 +16,26 @@ class SerialCommunicationABC(ABC):
 
         Returns:
             Logger: The logger instance.
+        """
+        pass
+
+    @abstractmethod
+    def _open_console_port(self) -> None:
+        """
+        Open the serial port for communication.
+
+        Raises:
+            RuntimeError: If the serial port cannot be opened.
+        """
+        pass
+
+    @abstractmethod
+    def _open_data_port(self) -> None:
+        """
+        Open the data port for communication.
+
+        Raises:
+            RuntimeError: If the data port cannot be opened.
         """
         pass
 

@@ -77,6 +77,7 @@ class WebSocketServer(WebSocketServerABC, LoggerConsumerProtocol):
         self.__broadcast_thread = None
 
     @final
+    @property
     def logger(self) -> Logger:
         return self.__logger
 

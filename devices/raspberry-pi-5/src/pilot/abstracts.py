@@ -46,7 +46,6 @@ class PilotABC(ABC):
                 f"Speed must be between {MOTOR_SPEED_RANGE[0]} and {MOTOR_SPEED_RANGE[1]}"
             )
         
-    @property
     @abstractmethod
     def logger(self) -> Logger:
         """

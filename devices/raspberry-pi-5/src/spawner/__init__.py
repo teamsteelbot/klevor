@@ -85,6 +85,17 @@ class Spawner:
         Stop the spawner and clean up resources.
         """
         with self.__rlock:
+            # Wait for all processes to finish
+            self.__serial_communication_process.join() if self.__serial_communication_process else None
+            self.__rplidar_process.join() if self.__rplidar_process else None
+            self.__photographer_process.join() if self.__photographer_process else None
+            self.__object_detector_process.join() if self.__object_detector_process else None
+            self.__pilot_process.join() if self.__pilot_process else None
+
+            # Set the writer stop event to stop the writer process
+            self.__writer_stop_event.set()
+            self.__writer_process.join() if self.__writer_process else None
+
             # Clear the events
             self.__start_event.clear()
             self.__started_event.clear()
@@ -98,124 +109,130 @@ class Spawner:
         """
         Run the spawner to initialize and manage the challenge processes.
         """
-        # Start the spawner
-        self._start()
+        try:
+            # Start the spawner
+            self._start()
 
-        # Start the writer process
-        self.__writer_process = Process(
-            target=writer_target,
-            args=(self.__writer_messages_queue, self.__writer_stop_event)
-        )
-        self.__writer_process.start()
+            # Start the writer process
+            self.__writer_process = Process(
+                target=writer_target,
+                args=(self.__writer_messages_queue, self.__writer_stop_event)
+            )
+            self.__writer_process.start()
 
-        # Start the serial communication process
-        self.__serial_communication_process = Process(
-            target=serial_communication_target,
-            args=(self.__start_event,
-                  self.__parking_event,
-                  self.__stop_event,
-                  self.__serial_messages_queue,
-                  self.__writer_messages_queue,
-                  self.__bno08x_yaw_deg,
-                  self.__bno08x_turns,
-                  self.__photographer_capture_image_event)
-        )
-        self.__serial_communication_process.start()
+            # Start the serial communication process
+            self.__serial_communication_process = Process(
+                target=serial_communication_target,
+                args=(self.__start_event,
+                    self.__parking_event,
+                    self.__stop_event,
+                    self.__serial_messages_queue,
+                    self.__writer_messages_queue,
+                    self.__bno08x_yaw_deg,
+                    self.__bno08x_turns,
+                    self.__photographer_capture_image_event)
+            )
+            self.__serial_communication_process.start()
 
-        # Initialize the RPLidar process
-        self.__rplidar_process = Process(
-            target=rplidar_target,
-            args=(self.__rplidar_update_measures_event,
-                  self.__rplidar_measures_queue,
-                  self.__start_event,
-                  self.__stop_event,
-                  self.__writer_messages_queue)
-        )
-        self.__rplidar_process.start()
+            # Initialize the RPLidar process
+            self.__rplidar_process = Process(
+                target=rplidar_target,
+                args=(self.__rplidar_update_measures_event,
+                    self.__rplidar_measures_queue,
+                    self.__start_event,
+                    self.__stop_event,
+                    self.__writer_messages_queue)
+            )
+            self.__rplidar_process.start()
 
-        # Wait for the start event to be set
-        self.__start_event.wait()
+            # Wait for the start event to be set
+            self.__start_event.wait()
 
-        # Check if the stop event is set
-        if self.__stop_event.is_set():
-            print("Stop event is set. Spawner will not run.")
+            # Check if the stop event is set
+            if self.__stop_event.is_set():
+                print("Stop event is set. Spawner will not run.")
 
-            # Stop the spawner if the stop event is set
+                # Stop the spawner if the stop event is set
+                self._stop()
+                return
+            print("Spawner started.")
+
+            # Get the challenge from the environment variables
+            challenge = Env.get_challenge()
+
+            # Check if the challenge requires the photographer and the object detector
+            if challenge == Challenge.WITH_OBSTACLES:
+                # Initialize the required queues and events for the photographer and object detector
+                self.__photographer_capture_image_event = Event()
+                self.__photographer_images_queue = Queue()
+                self.__object_detector_model_g_inferences_queue = Queue()
+                self.__object_detector_model_m_inferences_queue = Queue()
+                self.__object_detector_model_r_inferences_queue = Queue()
+
+                # Initialize the photographer process
+                self.__photographer_process = Process(
+                    target=photographer_target,
+                    args=(self.__photographer_images_queue,
+                        self.__photographer_capture_image_event,
+                        self.__start_event,
+                        self.__stop_event,
+                        self.__writer_messages_queue,
+                        self.__photographer_preprocess_fn,)
+                )
+                self.__photographer_process.start()
+
+                # Initialize the object detector process
+                self.__object_detector_process = Process(
+                    target=object_detector_target,
+                    args=(self.__object_detector_model_g_inferences_queue,
+                        self.__object_detector_model_m_inferences_queue,
+                        self.__object_detector_model_r_inferences_queue,
+                        self.__start_event,
+                        self.__parking_event,
+                        self.__stop_event,
+                        self.__photographer_images_queue,
+                        self.__writer_messages_queue)
+                )
+                self.__object_detector_process.start()
+
+            # Initialize the pilot process
+            self.__pilot_process = Process(
+                target=pilot_target,
+                args=(self.__start_event,
+                    self.__parking_event,
+                    self.__stop_event,
+                    self.__rplidar_update_measures_event,
+                    self.__rplidar_measures_queue,
+                    self.__serial_messages_queue,
+                    self.__writer_messages_queue,
+                    self.__bno08x_yaw_deg,
+                    self.__bno08x_turns,
+                    self.__movement,
+                    self.__photographer_capture_image_event,
+                    self.__object_detector_model_g_inferences_queue,
+                    self.__object_detector_model_m_inferences_queue,
+                    self.__object_detector_model_r_inferences_queue)
+            )
+            self.__pilot_process.start()
+
+            # Stop the spawner
             self._stop()
-            return
-        print("Spawner started.")
 
-        # Get the challenge from the environment variables
-        challenge = Env.get_challenge()
+        except KeyboardInterrupt:
+            print("Spawner interrupted by user (Ctrl+C). Shutting down...")
 
-        # Check if the challenge requires the photographer and the object detector
-        if challenge == Challenge.WITH_OBSTACLES:
-            # Initialize the required queues and events for the photographer and object detector
-            self.__photographer_capture_image_event = Event()
-            self.__photographer_images_queue = Queue()
-            self.__object_detector_model_g_inferences_queue = Queue()
-            self.__object_detector_model_m_inferences_queue = Queue()
-            self.__object_detector_model_r_inferences_queue = Queue()
+            # Set the start event to stop the processes
+            self.__start_event.set()
 
-            # Initialize the photographer process
-            self.__photographer_process = Process(
-                target=photographer_target,
-                args=(self.__photographer_images_queue,
-                      self.__photographer_capture_image_event,
-                      self.__start_event,
-                      self.__stop_event,
-                      self.__writer_messages_queue,
-                      self.__photographer_preprocess_fn,)
-            )
-            self.__photographer_process.start()
+            # Set the stop event
+            self.__stop_event.set()
 
-            # Initialize the object detector process
-            self.__object_detector_process = Process(
-                target=object_detector_target,
-                args=(self.__object_detector_model_g_inferences_queue,
-                      self.__object_detector_model_m_inferences_queue,
-                      self.__object_detector_model_r_inferences_queue,
-                      self.__start_event,
-                      self.__parking_event,
-                      self.__stop_event,
-                      self.__photographer_images_queue,
-                      self.__writer_messages_queue)
-            )
-            self.__object_detector_process.start()
+            # Stop the spawner
+            self._stop()
 
-        # Initialize the pilot process
-        self.__pilot_process = Process(
-            target=pilot_target,
-            args=(self.__start_event,
-                  self.__parking_event,
-                  self.__stop_event,
-                  self.__rplidar_update_measures_event,
-                  self.__rplidar_measures_queue,
-                  self.__serial_messages_queue,
-                  self.__writer_messages_queue,
-                  self.__bno08x_yaw_deg,
-                  self.__bno08x_turns,
-                  self.__movement,
-                  self.__photographer_capture_image_event,
-                  self.__object_detector_model_g_inferences_queue,
-                  self.__object_detector_model_m_inferences_queue,
-                  self.__object_detector_model_r_inferences_queue)
-        )
-        self.__pilot_process.start()
-
-        # Wait for all processes to finish
-        self.__serial_communication_process.join() if self.__serial_communication_process else None
-        self.__rplidar_process.join() if self.__rplidar_process else None
-        self.__photographer_process.join() if self.__photographer_process else None
-        self.__object_detector_process.join() if self.__object_detector_process else None
-        self.__pilot_process.join() if self.__pilot_process else None
-
-        # Set the writer stop event to stop the writer process
-        self.__writer_stop_event.set()
-        self.__writer_process.join() if self.__writer_process else None
-
-        # Stop the spawner
-        self._stop()
+        except Exception as e:
+            print(f"An error occurred in the Spawner: {e}")
+            self._stop()
 
     def __del__(self):
         """

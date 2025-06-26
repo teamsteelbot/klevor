@@ -151,6 +151,38 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
     @property
     def logger(self) -> Logger:
         return self.__logger
+    
+    @final
+    def _open_console_port(self, port: str) -> None:
+        """
+        Open the console port for serial communication.
+
+        Args:
+            port (str): The serial port to open.
+        """
+        try:
+            self.__console_serial = Serial(port, self.__baudrate)
+            self.__console_serial.flush()
+            self.__logger.info(f"Console port opened on {port}.")
+
+        except Exception as e:
+            raise RuntimeError(f"Error opening console port {port}: {e}")
+        
+    @final
+    def _open_data_port(self, port: str) -> None:
+        """
+        Open the data port for serial communication.
+
+        Args:
+            port (str): The serial port to open.
+        """
+        try:
+            self.__data_serial = Serial(port, self.__baudrate)
+            self.__data_serial.flush()
+            self.__logger.info(f"Data port opened on {port}.")
+
+        except Exception as e:
+            raise RuntimeError(f"Error opening data {port}: {e}")
 
     @final
     def _start(self) -> None:
@@ -170,78 +202,69 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
             # Set the started event
             self.__started_event.set()
 
-        try:
-            # Open the console port
-            for i in range(self.CONNECTION_ATTEMPTS):
-                try:
-                    self.__console_serial = Serial(self.__console_port, self.__baudrate)
-
-                except Exception as port_e:
-                    # Try its alternative port
-                    try:
-                        self.__console_serial = Serial(
-                            self.__console_port_alt,
-                            self.__baudrate
-                        )
-
-                    except Exception as port_alt_e:
-                        raise RuntimeError(
-                            f"Error opening serial console port: {port_e} and alternative port: {port_alt_e}"
-                        )
-
-                    raise RuntimeError(
-                        f"Error opening serial console port: {port_e}"
-                    )
-                
+        # Open the console port
+        for i in range(self.CONNECTION_ATTEMPTS):
+            try:
+                self._open_console_port(self.__console_port, self.__baudrate)
                 if self.__console_serial.is_open:
-                    # Flush the console serial port to ensure it is ready
-                    self.__console_serial.flush()
-
-                    # Log
-                    self.__logger.info(
-                        f"Serial console port opened on {self.__console_port} after {i + 1} attempts."
-                    )
                     break
-                sleep(self.ATTEMPTS_DELAY)
 
-            # Open the data port
-            for i in range(self.CONNECTION_ATTEMPTS):
+            except Exception as port_e:
                 try:
-                    self.__data_serial = Serial(self.__data_port, self.__baudrate)
+                    self._open_console_port(self.__console_port_alt, self.__baudrate)
+                    if self.__console_serial.is_open:
+                        break
 
-                except Exception as port_e:
-                    # Try its alternative port
-                    try:
-                        self.__data_serial = Serial(
-                            self.__data_port_alt,
-                            self.__baudrate
-                        )
-
-                    except Exception as port_alt_e:
-                        raise RuntimeError(
-                            f"Error opening serial data port: {port_e} and alternative port: {port_alt_e}"
-                        )
-
-                    raise RuntimeError(f"Error opening serial data port: {port_e}")
+                except Exception as port_alt_e:
+                    pass
                 
+            sleep(self.ATTEMPTS_DELAY)
+
+        # Check if the console serial port is opened
+        if not self.__console_serial or not self.__console_serial.is_open:
+            raise RuntimeError(
+                f"Failed to open console serial port on {self.__console_port} or {self.__console_port_alt} after {self.CONNECTION_ATTEMPTS} attempts."
+            )
+
+        # Flush the console serial port to ensure it is ready
+        self.__console_serial.flush()
+
+        # Log
+        self.__logger.info(
+            f"Serial console port opened on {self.__console_port} after {i + 1} {'attempts' if i != 0 else 'attempt'}."
+        )
+
+        # Open the data port
+        for i in range(self.CONNECTION_ATTEMPTS):
+            try:
+                self._open_data_port(self.__data_port, self.__baudrate)
                 if self.__data_serial.is_open:
-                    # Flush the data serial port to ensure it is ready
-                    self.__data_serial.flush()
-
-                    # Log
-                    self.__logger.info(
-                        f"Serial data port opened on {self.__data_port} after {i + 1} attempts."
-                    )
                     break
-                sleep(self.ATTEMPTS_DELAY)
-                
-        except Exception as e:
-            # If there is an error opening the serial ports, set the stop event
-            self.__stop_event.set()
 
-            # Set the start event to unblock the waiting threads
-            self.__start_event.set()
-            raise e
+            except Exception as port_e:
+                try:
+                    self._open_data_port(self.__data_port_alt, self.__baudrate)
+                    if self.__data_serial.is_open:
+                        break
+
+                except Exception as port_alt_e:
+                    pass
+                
+            sleep(self.ATTEMPTS_DELAY)
+
+        # Check if the data serial port is opened
+        if not self.__data_serial or not self.__data_serial.is_open:
+            raise RuntimeError(
+                f"Failed to open data serial port on {self.__data_port} or {self.__data_port_alt} after {self.CONNECTION_ATTEMPTS} attempts."
+            )
+
+        # Flush the data serial port to ensure it is ready
+        self.__data_serial.flush()
+
+        # Log
+        self.__logger.info(
+            f"Serial data port opened on {self.__data_port} after {i + 1} {'attempts' if i != 0 else 'attempt'}."
+        )
 
         # Log
         self.__logger.info(
@@ -400,7 +423,7 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
             except ValueError as e:
                 # May receive some garbage data, so we catch the exception
                 self.__receiver_logger.warning(
-                    f"Received invalid message, may be garbage data: {msg}"
+                    f"Received invalid message, may be garbage data: {e}"
                 )
                 continue
 
@@ -447,7 +470,7 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
             except ValueError as e:
                 # May signal a bad code on the Pico or garbage data
                 self.__logger.warning(
-                    f"Received invalid message error, skipping: {msg}"
+                    f"Received invalid message error, skipping: {e}"
                 )
                 continue
 

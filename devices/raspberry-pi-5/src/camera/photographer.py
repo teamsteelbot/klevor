@@ -82,6 +82,7 @@ class Photographer(PhotographerABC, LoggerConsumerProtocol):
         self.__imager_counter = 0
 
     @final
+    @property
     def logger(self) -> Logger:
         return self.__logger
 

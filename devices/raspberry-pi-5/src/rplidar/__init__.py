@@ -106,6 +106,7 @@ class RPLidar(RPLidarABC, LoggerConsumerProtocol):
         self.__update_measures_listener_thread = None
 
     @final
+    @property
     def logger(self) -> Logger:
         return self.__logger
 

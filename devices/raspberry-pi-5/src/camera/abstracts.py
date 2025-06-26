@@ -109,7 +109,6 @@ class PhotographerABC(ABC):
     Abstract class to handle image processing for the camera.
     """
 
-    @property
     @abstractmethod
     def logger(self) -> Logger:
         """

@@ -138,6 +138,7 @@ class Hailo(HailoABC, LoggerConsumerProtocol):
         self.__job = None
 
     @final
+    @property
     def logger(self) -> Logger:
         return self.__logger
 

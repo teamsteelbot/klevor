@@ -125,6 +125,7 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
         self.__challenge = None
 
     @final
+    @property
     def logger(self) -> Logger:
         return self.__logger
 
