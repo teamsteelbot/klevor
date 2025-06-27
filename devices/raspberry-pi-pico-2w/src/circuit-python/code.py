@@ -16,6 +16,7 @@ from lib.servo import ServoHandler
 from lib.switch import SwitchHandler
 
 # Constants
+CHUNK_SIZE = 64
 MOVEMENT = Env.get_movement_mode()
 DEBUG = Env.get_debug_mode()
 CHALLENGE = Env.get_challenge()
@@ -100,7 +101,11 @@ async def main():
         tb_str = buf.getvalue()
     
         # Send error message to the serial communication
-        serial_communication.send_error_message(tb_str)
+        tb_len = len(tb_str)
+        for i in range(0, tb_len+1, CHUNK_SIZE):
+            is_last = (i + CHUNK_SIZE) >= tb_len+1
+            chunk = tb_str[i:i+CHUNK_SIZE] if not is_last else tb_str[i:i+CHUNK_SIZE-1]
+            serial_communication.send_error_message(chunk, end_char=is_last)
 
 
 # Start the asyncio event loop

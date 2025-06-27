@@ -99,7 +99,6 @@ class SerialCommunication:
         """
         if not self.__data_port:
             msg = "Data port is not enabled."
-            self.__logger.log(msg)
             raise SerialCommunicationError(msg)
 
         if self.__data_port.in_waiting == 0:
@@ -126,7 +125,8 @@ class SerialCommunication:
                 msg_str = buffer.decode("utf-8").strip()
                 msg = IncomingMessage.from_string(msg_str)
                 msgs.append(msg)
-            except (UnicodeDecodeError, ValueError) as e:
+                
+            except Exception as e:
                 raise SerialCommunicationError(
                     f"Invalid message format or undecodable bytes: {buffer} ({e})"
                 ) from e
@@ -145,11 +145,33 @@ class SerialCommunication:
         """
         if not self.__console_port:
             msg = "Console port is not enabled."
-            self.__logger.log(msg)
             raise SerialCommunicationError(msg)
 
         try:
             self.__console_port.write(str(message).encode("utf-8"))
+
+        except Exception as e:
+            raise SerialCommunicationError(f"Error sending message: {e}")
+        
+    def send_message_by_chunks(self, message: str, is_last_chunk: bool = False):
+        """
+        Send a message in chunks to the USB CDC console stream.
+
+        Args:
+            message (str): The message to send.
+            is_last_chunk (bool): Whether this is the last chunk of the message.
+        Raises:
+            SerialCommunicationError: If the console port is not enabled or if there is an error in sending the message.
+        """
+        if not self.__console_port:
+            msg = "Console port is not enabled."
+            raise SerialCommunicationError(msg)
+
+        try:
+            if is_last_chunk:
+                self.__console_port.write((message + END_CHAR).encode("utf-8"))
+            else:
+                self.__console_port.write(message.encode("utf-8"))
 
         except Exception as e:
             raise SerialCommunicationError(f"Error sending message: {e}")

@@ -356,19 +356,20 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
         msg: OutgoingMessage
     ) -> None:
         # Log
+        msg_str = str(msg)
         self.__sender_logger.debug(
-            f"Sending message: {msg}"
+            f"Sending message: {msg_str}"
         ) if self.__debug else None
 
         # Send the message to the serial port
-        self.__data_serial.write(str(msg).encode(ENCODE))
+        self.__data_serial.write(msg_str.encode(ENCODE))
 
         # Flush the serial port to ensure the message is sent
         self.__data_serial.flush()
 
     @final
     def _send_confirmation_message(self) -> None:
-        self._send_message(OutgoingMessage(OutgoingCategory.STATUS, Status.OK))
+        self._send_message(OutgoingMessage(OutgoingCategory.STATUS, Status.OK.parsed_name))
 
     @final
     def _wait_confirmation_message(
@@ -406,7 +407,7 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
     @final
     def _send_stop_message(self) -> None:
         stop_msg = OutgoingMessage(
-            OutgoingCategory.STATUS, Status.STOP
+            OutgoingCategory.STATUS, Status.STOP.parsed_name
         )
 
         # Send the message to the serial port
@@ -417,13 +418,11 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
 
     @final
     def _receiving_message_handler(self) -> None:
-        # Log
-        self.__receiver_logger.info(
-            "Waiting for start event..."
-        )
-
         # Wait for the first END_CHAR message to be received to ensure the serial port is ready
-        while not self.__stop_event.is_set() and not self.__deleted_event.is_set():
+        self.__receiver_logger.info(
+            "Waiting for initial END_CHAR message to confirm serial communication is ready..."
+        )
+        while not self.__stop_event.is_set() and not self.__deleted_event.is_set() and self.__console_serial.in_waiting > 0:
             char = self.__console_serial.read(1).decode(ENCODE, errors="ignore")
             if not char:
                 continue
@@ -435,6 +434,9 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
                 break
             
         # Wait for the start message
+        self.__receiver_logger.info(
+            "Waiting for start event..."
+        )
         while not self.__stop_event.is_set() and not self.__deleted_event.is_set():
             try:
                 msg = self._receive_latest_message()
@@ -454,18 +456,22 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
                 )
 
             elif msg.is_challenge():
+                # Log
+                self.__receiver_logger.info("Received challenge message.")
+
                 # Send a confirmation message
                 self._send_confirmation_message()
 
                 # Set the challenge as an environment variable
                 Env.set_challenge(Challenge.from_string(msg.content))
 
-                # Log
-                self.__receiver_logger.info("Received challenge message.")
                 # Continue to wait for the start event
                 continue
 
             elif msg.is_start():
+                # Log
+                self.__receiver_logger.info("Received start event.")
+
                 # Check if the challenge is set
                 if not Env.has_challenge():
                     raise RuntimeError(
@@ -477,9 +483,6 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
 
                 # Set the start event
                 self.__start_event.set()
-
-                # Log
-                self.__receiver_logger.info("Received start event.")
                 break
 
         while not self.__stop_event.is_set() and not self.__deleted_event.is_set():
@@ -574,6 +577,6 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
         self.__deleted_event.set()
 
         # Log
-        self.__logger.debug(
+        self.__logger.info(
             "Instance is being deleted. Resources will be cleaned up."
         )

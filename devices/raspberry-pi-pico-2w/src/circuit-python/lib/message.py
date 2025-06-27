@@ -27,6 +27,19 @@ class IncomingMessage:
         String representation of the message.
         """
         return f"{self.__category}{HEADER_SEPARATOR_CHAR}{self.__content}{END_CHAR}"
+    
+    def __eq__(self, other: 'IncomingMessage') -> bool:
+        """
+        Check if two messages are equal.
+
+        Args:
+            other (IncomingMessage): The other message to compare with.
+
+        Returns:
+            bool: True if the messages are equal, False otherwise.
+        """
+        return (self.category == other.category and
+                self.content == other.content)
 
     @staticmethod
     def from_string(msg_str: str) -> 'IncomingMessage':
@@ -116,6 +129,19 @@ class OutgoingMessage:
         String representation of the message.
         """
         return f"{self.__category}{HEADER_SEPARATOR_CHAR}{self.__content}{END_CHAR}"
+    
+    def __eq__(self, other: 'OutgoingMessage') -> bool:
+        """
+        Check if two messages are equal.
+
+        Args:
+            other (OutgoingMessage): The other message to compare with.
+
+        Returns:
+            bool: True if the messages are equal, False otherwise.
+        """
+        return (self.category == other.category and
+                self.content == other.content)
 
     @staticmethod
     def from_string(msg_str: str) -> 'OutgoingMessage':
@@ -182,16 +208,3 @@ class OutgoingMessage:
             content (str): The content of the message.
         """
         self.__content = content
-
-    def __eq__(self, other: 'OutgoingMessage') -> bool:
-        """
-        Check if two messages are equal.
-
-        Args:
-            other (OutgoingMessage): The other message to compare with.
-
-        Returns:
-            bool: True if the messages are equal, False otherwise.
-        """
-        return (self.category == other.category and
-                self.content == other.content)

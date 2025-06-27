@@ -44,6 +44,11 @@ class SwitchHandler:
 
         This method blocks until the switch is pressed (i.e., the pin reads LOW).
         """
+        # Check if the switch is already pressed
+        if not self.__switch.value:
+            while not self.__switch.value:
+                await sleep(self.DELAY)
+
         while self.__switch.value:
             await sleep(self.DELAY)
 

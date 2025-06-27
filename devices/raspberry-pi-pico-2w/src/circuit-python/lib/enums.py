@@ -17,7 +17,7 @@ class IncomingCategory:
         Returns:
             str: The corresponding IncomingCategory enum value.
         """
-        category_name = category_str.upper()
+        category_name = category_str.lower()
         for category in [cls.STATUS, cls.MOTOR_SPEED, cls.SERVO_ANGLE]:
             if category_name == category:
                 return category
@@ -46,7 +46,7 @@ class OutgoingCategory:
         Returns:
             str: The corresponding OutgoingCategory enum value.
         """
-        category_name = category_str.upper()
+        category_name = category_str.lower()
         for category in [cls.CHALLENGE, cls.STATUS, cls.BNO08X_YAW,
                          cls.BNO08X_TURNS, cls.ERROR]:
             if category_name == category:
@@ -74,7 +74,7 @@ class Status:
         Returns:
             str: The corresponding Status enum value.
         """
-        status_name = status_str.upper()
+        status_name = status_str.lower()
         for status in [cls.START, cls.STOP, cls.OK]:
             if status_name == status:
                 return status
@@ -101,7 +101,7 @@ class Challenge:
         Returns:
             str: The corresponding Challenge enum value.
         """
-        challenge_name = challenge_str.upper()
+        challenge_name = challenge_str.lower()
         for challenge in [cls.WITH_OBSTACLES, cls.WITHOUT_OBSTACLES]:
             if challenge_name == challenge:
                 return challenge

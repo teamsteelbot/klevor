@@ -19,13 +19,13 @@ class IncomingMessage:
         self.category = category
         self.content = content
 
-    def _str_(self) -> str:
+    def __str__(self) -> str:
         """
         String representation of the message.
         """
-        return f"{self.__category}{HEADER_SEPARATOR_CHAR}{self.__content}{END_CHAR}"
+        return f"{self.__category.parsed_name}{HEADER_SEPARATOR_CHAR}{self.__content}{END_CHAR}"
 
-    def _eq_(self, other: 'IncomingMessage') -> bool:
+    def __eq__(self, other: 'IncomingMessage') -> bool:
         """
         Check equality of two IncomingMessage objects.
 
@@ -118,7 +118,7 @@ class IncomingMessage:
         Returns:
             bool: True if the message is a start message, False otherwise.
         """
-        return self.category == OutgoingCategory.STATUS and self.content == Status.START
+        return self.category == IncomingCategory.STATUS and self.content == Status.START.parsed_name
 
     def is_challenge(self) -> bool:
         """
@@ -145,7 +145,7 @@ class IncomingMessage:
         Returns:
             bool: True if the message is a confirmation message, False otherwise.
         """
-        return self.category == OutgoingCategory.STATUS and self.content == Status.OK
+        return self.category == OutgoingCategory.STATUS and self.content == Status.OK.parsed_name
 
     def is_bno08x_yaw(self) -> bool:
         """
@@ -182,13 +182,13 @@ class OutgoingMessage:
         self.category = category
         self.content = content
 
-    def _str_(self) -> str:
+    def __str__(self) -> str:
         """
         String representation of the message.
         """
-        return f"{self.__category}{HEADER_SEPARATOR_CHAR}{self.__content}{END_CHAR}"
+        return f"{self.__category.parsed_name}{HEADER_SEPARATOR_CHAR}{self.__content}{END_CHAR}"
 
-    def _eq_(self, other: 'OutgoingMessage') -> bool:
+    def __eq__(self, other: 'OutgoingMessage') -> bool:
         """
         Check equality of two OutgoingMessage objects.
 
