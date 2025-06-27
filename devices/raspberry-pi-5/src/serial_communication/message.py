@@ -145,7 +145,7 @@ class IncomingMessage:
         Returns:
             bool: True if the message is a confirmation message, False otherwise.
         """
-        return self.category == OutgoingCategory.STATUS and self.content == Status.OK.parsed_name
+        return self.category == IncomingCategory.STATUS and self.content == Status.OK.parsed_name
 
     def is_bno08x_yaw(self) -> bool:
         """
