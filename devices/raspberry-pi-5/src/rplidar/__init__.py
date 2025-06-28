@@ -12,7 +12,6 @@ from .constants import (
     ULTRA_SIMPLE_PATH,
 )
 from ..common.measure import Measure
-from ..env import Env
 from ..log import Logger
 from ..server.dispatcher import Dispatcher as WebSocketServerDispatcher
 from ..utils import is_instance
@@ -34,6 +33,7 @@ class RPLidar(RPLidarABC, LoggerConsumerProtocol):
 
     def __init__(
         self,
+        debug: bool,
         update_measures_event: EventCls,
         measures_queue: Queue,
         start_event: EventCls,
@@ -48,6 +48,7 @@ class RPLidar(RPLidarABC, LoggerConsumerProtocol):
         Initialize the RPLidar.
 
         Args:
+            debug (bool): Flag to indicate if the RPLidar is in debug mode.
             update_measures_event (EventCls): Event to signal when the RPLidar should update measures.
             measures_queue (Queue): Queue to hold the measures from the RPLidar.
             start_event (EventCls): Event to signal when the RPLidar should start.
@@ -58,6 +59,9 @@ class RPLidar(RPLidarABC, LoggerConsumerProtocol):
             port (str): SerialCommunication port for the RPLidar.
             is_upside_down (bool): If True, the RPLidar is upside down, and angles will be adjusted accordingly.
         """
+        # Initialize the debug flag
+        self.__debug = debug
+
         # Initialize the queues and events
         self.__update_measures_event = update_measures_event
         self.__measures_queue = measures_queue
@@ -98,9 +102,6 @@ class RPLidar(RPLidarABC, LoggerConsumerProtocol):
 
         # Initialize the process
         self.__process = None
-
-        # Get the debug environment variable
-        self.__debug = Env.get_debug_mode()
 
         # Initialize the listener thread for measures updates
         self.__update_measures_listener_thread = None
@@ -209,7 +210,7 @@ class RPLidar(RPLidarABC, LoggerConsumerProtocol):
         """
         Listen for the update measures event and process the measures.
         """
-        while self.is_running():
+        while not self.__stop_event.is_set() and not self.__deleted_event.is_set():
             # Wait for the update measures event to be set
             self.__update_measures_event.wait()
 

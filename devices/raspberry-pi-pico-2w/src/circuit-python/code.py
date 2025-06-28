@@ -7,7 +7,7 @@ from busio import I2C
 
 from lib.bno08x import BNO08XHandler
 from lib.challenge import WithObstacles, WithoutObstacles
-from lib.enums import Challenge
+from lib.enums import Challenge, QuaternionAxis
 from lib.env import Env
 from lib.esc_motor import ESCMotorHandler
 from lib.led import LEDHandler
@@ -20,6 +20,7 @@ CHUNK_SIZE = 64
 MOVEMENT = Env.get_movement_mode()
 DEBUG = Env.get_debug_mode()
 CHALLENGE = Env.get_challenge()
+QUATERNION_HORIZONTAL_AXIS = QuaternionAxis.ROLL
 
 # Pins
 I2C_BUS = I2C(GP1, GP0)
@@ -38,6 +39,7 @@ serial_communication = SerialCommunication(
 servo = ServoHandler(servo_pin=SERVO_PIN, movement=MOVEMENT)
 motor = ESCMotorHandler(motor_pin=ESC_MOTOR_PIN, movement=MOVEMENT)
 bno08x = BNO08XHandler(
+    horizontal_axis=QUATERNION_HORIZONTAL_AXIS,
     i2c=I2C_BUS,
     serial_communication=serial_communication
 )
@@ -105,7 +107,7 @@ async def main():
         for i in range(0, tb_len+1, CHUNK_SIZE):
             is_last = (i + CHUNK_SIZE) >= tb_len+1
             chunk = tb_str[i:i+CHUNK_SIZE] if not is_last else tb_str[i:i+CHUNK_SIZE-1]
-            serial_communication.send_error_message(chunk, end_char=is_last)
+            serial_communication.send_message_by_chunks(chunk, is_last_chunk=is_last)
 
 
 # Start the asyncio event loop

@@ -1,8 +1,7 @@
 from multiprocessing import Event, Process, Queue, RLock, Value
 
 from ..camera.multiprocessing import photographer_target
-from ..env import Env
-from ..env.enums import Challenge
+from ..enums import Challenge
 from ..hailo.multiprocessing import object_detector_target
 from ..log.multiprocessing import writer_target
 from ..opencv import OpenCV
@@ -16,18 +15,22 @@ class Spawner:
     Class that spawns processes for the challenge.
     """
 
-    def __init__(self, movement: bool = True):
+    def __init__(self, debug: bool, yolo_version: str, movement: bool = True):
         """
         Initialize the Spawner class.
 
         Args:
+            debug (bool): Flag to indicate if the spawner is in debug mode.
+            yolo_version (str): The version of YOLO to use for object detection.
             movement (bool): Flag to indicate if the pilot should handle movement.
         """
+        # Initialize the flags
+        self.__debug = debug
+        self.__yolo_version = yolo_version
+        self.__movement = movement
+
         # Initialize the reentrant lock
         self.__rlock = RLock()
-
-        # Initialize the movement flag
-        self.__movement = movement
 
         # Initialize the queues, values and events
         self.__start_event = Event()
@@ -37,8 +40,9 @@ class Spawner:
         self.__writer_messages_queue = Queue()
         self.__writer_stop_event = Event()
         self.__serial_messages_queue = Queue()
-        self.__bno08x_yaw_deg = Value('d', 0.0)
+        self.__bno08x_horizontal_axis_deg = Value('d', 0.0)
         self.__bno08x_turns = Value('i', 0)
+        self.__challenge = Value('c', '')
         self.__rplidar_update_measures_event = Event()
         self.__rplidar_measures_queue = Queue()
         self.__photographer_capture_image_event = None
@@ -116,19 +120,23 @@ class Spawner:
             # Start the writer process
             self.__writer_process = Process(
                 target=writer_target,
-                args=(self.__writer_messages_queue, self.__writer_stop_event)
+                args=(self.__debug,
+                    self.__writer_messages_queue,
+                    self.__writer_stop_event)
             )
             self.__writer_process.start()
 
             # Start the serial communication process
             self.__serial_communication_process = Process(
                 target=serial_communication_target,
-                args=(self.__start_event,
+                args=(self.__debug,
+                    self.__challenge,
+                    self.__start_event,
                     self.__parking_event,
                     self.__stop_event,
                     self.__serial_messages_queue,
                     self.__writer_messages_queue,
-                    self.__bno08x_yaw_deg,
+                    self.__bno08x_horizontal_axis_deg,
                     self.__bno08x_turns,
                     self.__photographer_capture_image_event)
             )
@@ -137,7 +145,8 @@ class Spawner:
             # Initialize the RPLidar process
             self.__rplidar_process = Process(
                 target=rplidar_target,
-                args=(self.__rplidar_update_measures_event,
+                args=(self.__debug,
+                    self.__rplidar_update_measures_event,
                     self.__rplidar_measures_queue,
                     self.__start_event,
                     self.__stop_event,
@@ -157,55 +166,58 @@ class Spawner:
                 return
             print("Spawner started.")
 
-            # Get the challenge from the environment variables
-            challenge = Env.get_challenge()
-
             # Check if the challenge requires the photographer and the object detector
-            if challenge == Challenge.WITH_OBSTACLES:
-                # Initialize the required queues and events for the photographer and object detector
-                self.__photographer_capture_image_event = Event()
-                self.__photographer_images_queue = Queue()
-                self.__object_detector_model_g_inferences_queue = Queue()
-                self.__object_detector_model_m_inferences_queue = Queue()
-                self.__object_detector_model_r_inferences_queue = Queue()
+            with self.__challenge.get_lock():
+                if self.__challenge.value == Challenge.WITH_OBSTACLES.as_char:
+                    # Initialize the required queues and events for the photographer and object detector
+                    self.__photographer_capture_image_event = Event()
+                    self.__photographer_images_queue = Queue()
+                    self.__object_detector_model_g_inferences_queue = Queue()
+                    self.__object_detector_model_m_inferences_queue = Queue()
+                    self.__object_detector_model_r_inferences_queue = Queue()
 
-                # Initialize the photographer process
-                self.__photographer_process = Process(
-                    target=photographer_target,
-                    args=(self.__photographer_images_queue,
-                        self.__photographer_capture_image_event,
-                        self.__start_event,
-                        self.__stop_event,
-                        self.__writer_messages_queue,
-                        self.__photographer_preprocess_fn,)
-                )
-                self.__photographer_process.start()
+                    # Initialize the photographer process
+                    self.__photographer_process = Process(
+                        target=photographer_target,
+                        args=(self.__debug,
+                            self.__photographer_images_queue,
+                            self.__photographer_capture_image_event,
+                            self.__start_event,
+                            self.__stop_event,
+                            self.__writer_messages_queue,
+                            self.__photographer_preprocess_fn,)
+                    )
+                    self.__photographer_process.start()
 
-                # Initialize the object detector process
-                self.__object_detector_process = Process(
-                    target=object_detector_target,
-                    args=(self.__object_detector_model_g_inferences_queue,
-                        self.__object_detector_model_m_inferences_queue,
-                        self.__object_detector_model_r_inferences_queue,
-                        self.__start_event,
-                        self.__parking_event,
-                        self.__stop_event,
-                        self.__photographer_images_queue,
-                        self.__writer_messages_queue)
-                )
-                self.__object_detector_process.start()
+                    # Initialize the object detector process
+                    self.__object_detector_process = Process(
+                        target=object_detector_target,
+                        args=(self.__debug,
+                            self.__yolo_version,
+                            self.__object_detector_model_g_inferences_queue,
+                            self.__object_detector_model_m_inferences_queue,
+                            self.__object_detector_model_r_inferences_queue,
+                            self.__start_event,
+                            self.__parking_event,
+                            self.__stop_event,
+                            self.__photographer_images_queue,
+                            self.__writer_messages_queue)
+                    )
+                    self.__object_detector_process.start()
 
             # Initialize the pilot process
             self.__pilot_process = Process(
                 target=pilot_target,
-                args=(self.__start_event,
+                args=(self.__debug,
+                    self.__challenge,
+                    self.__start_event,
                     self.__parking_event,
                     self.__stop_event,
                     self.__rplidar_update_measures_event,
                     self.__rplidar_measures_queue,
                     self.__serial_messages_queue,
                     self.__writer_messages_queue,
-                    self.__bno08x_yaw_deg,
+                    self.__bno08x_horizontal_axis_deg,
                     self.__bno08x_turns,
                     self.__movement,
                     self.__photographer_capture_image_event,

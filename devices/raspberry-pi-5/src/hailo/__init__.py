@@ -47,6 +47,7 @@ class Hailo(HailoABC, LoggerConsumerProtocol):
 
     def __init__(
         self,
+        debug: bool,
         model_name: str,
         hef_file_path: str | os.PathLike[str],
         labels_path: str | os.PathLike[str],
@@ -66,6 +67,7 @@ class Hailo(HailoABC, LoggerConsumerProtocol):
         Initialize the Hailo handler class.
 
         Args:
+            debug (bool): Flag to indicate if the Hailo handler is in debug mode.
             model_name (str): Name of the YOLO model.
             hef_file_path (str | os.PathLike[str]): Path to the HEF file.
             labels_path (str | os.PathLike[str]): Path to the labels file.
@@ -81,6 +83,9 @@ class Hailo(HailoABC, LoggerConsumerProtocol):
             input_type (Optional[str]): Format type of the input stream.
             output_type (Optional[dict[str, str]]): Format type of the output stream.
         """
+        # Initialize the debug flag
+        self.__debug = debug
+
         # Initialize the queues and events
         self.__processed_images_queue = processed_images_queue
         self.__inferences_queue = inferences_queue

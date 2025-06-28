@@ -6,6 +6,8 @@ from .object_detector import ObjectDetector
 
 
 def object_detector_target(
+    debug: bool,
+    yolo_version: str,
     model_g_inferences_queue: Queue,
     model_m_inferences_queue: Queue,
     model_r_inferences_queue: Queue,
@@ -20,6 +22,8 @@ def object_detector_target(
     ObjectDetector.
 
     Args:
+        debug (bool): Flag to indicate if the object detector is in debug mode.
+        yolo_version (str): The version of YOLO to use for object detection.
         model_g_inferences_queue (Queue): Queue to hold inferences for model G.
         model_m_inferences_queue (Queue): Queue to hold inferences for model M.
         model_r_inferences_queue (Queue): Queue to hold inferences for model R.
@@ -36,6 +40,8 @@ def object_detector_target(
 
     # Initialize the object detector
     object_detector = ObjectDetector(
+        debug=debug,
+        yolo_version=yolo_version,
         model_g_inferences_queue=model_g_inferences_queue,
         model_m_inferences_queue=model_m_inferences_queue,
         model_r_inferences_queue=model_r_inferences_queue,

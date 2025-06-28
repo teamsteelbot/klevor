@@ -68,7 +68,7 @@ class SerialCommunication:
 
     def __init__(
         self,
-        challenge: Challenge,
+        challenge: str,
         console_port_enabled: bool = CONSOLE_PORT_ENABLED,
         data_port_enabled: bool = DATA_PORT_ENABLED,
         led: LEDHandler = None
@@ -77,7 +77,7 @@ class SerialCommunication:
         Initialize the SerialCommunication instance.
 
         Args:
-            challenge (Challenge): The challenge type for the robot.
+            challenge (str): The challenge type for the robot.
             console_port_enabled (bool): Whether to enable the console port for sending messages.
             data_port_enabled (bool): Whether to enable the data port for receiving messages.
             led (LEDHandler | None): Optional LED handler for toggling the LED on message receive.
@@ -234,14 +234,15 @@ class SerialCommunication:
         # Wait for confirmation of the challenge message
         await self.wait_for_confirmation_message(challenge_message)
 
-    def send_bno08x_yaw_message(self, yaw: float):
+    def send_bno08x_horizontal_axis_message(self, horizontal_axis_deg: float):
         """
-        Send a BNO08x yaw message to the console port.
+        Send a BNO08x horizontal axis message to the console port.
 
         Args:
-            yaw (float): The yaw value to send.
+            horizontal_axis_deg (float): The yaw value to send.
         """
-        bno08x_message = OutgoingMessage(OutgoingCategory.BNO08X_YAW, str(yaw))
+        bno08x_message = OutgoingMessage(OutgoingCategory.BNO08X_HORIZONTAL_AXIS,
+                                         str(horizontal_axis_deg))
         self.send_message(bno08x_message)
 
     def send_bno08x_turns_message(self, turns: int):

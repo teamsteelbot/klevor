@@ -192,6 +192,6 @@ class Camera(CameraABC, LoggerConsumerProtocol):
         self.__picam2.close()
 
         # Log
-        self.__logger.debug(
+        self.__logger.info(
             "Camera instance is being deleted. Resources will be cleaned up."
         )

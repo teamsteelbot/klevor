@@ -20,8 +20,7 @@ from .constants import (
     STOP_DISTANCE_THRESHOLD,
     TURNS,
 )
-from ..env import Env
-from ..env.enums import Challenge
+from ..enums import Challenge
 from ..log import Logger
 from ..rplidar import RPLidar
 from ..rplidar.enums import Direction
@@ -51,6 +50,8 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
 
     def __init__(
         self,
+        debug: bool,
+        challenge: ValueCls,
         start_event: EventCls,
         parking_event: EventCls,
         stop_event: EventCls,
@@ -59,7 +60,7 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
         serial_incoming_messages_queue: Queue,
         serial_outgoing_messages_queue: Queue,
         writer_messages_queue: Queue,
-        bno08x_yaw_deg: ValueCls,
+        bno08x_horizontal_axis_deg: ValueCls,
         bno08x_turns: ValueCls,
         movement: bool = True,
         photographer_capture_image_event: Optional[EventCls] = None,
@@ -71,6 +72,8 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
         Initialize the Pilot class.
 
         Args:
+            debug (bool): Flag to indicate if the pilot is in debug mode.
+            challenge (ValueCls): Shared value to hold the current challenge.
             start_event (EventCls): Event to signal when the pilot should start.
             parking_event (EventCls): Event to signal the parking state of the robot.
             stop_event (EventCls): Event to signal when the pilot should stop.
@@ -80,7 +83,7 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
             serial_incoming_messages_queue (Queue): Queue to hold incoming messages from the serial port.
             serial_outgoing_messages_queue (Queue): Queue to hold outgoing messages to the serial port.
             writer_messages_queue (Queue): Queue to hold log messages.
-            bno08x_yaw_deg (ValueCls): Shared value for the BNO08X yaw angle in degrees.
+            bno08x_horizontal_axis_deg (ValueCls): Shared value for the BNO08X horizontal axis angle in degrees.
             bno08x_turns (ValueCls): Shared value for the BNO08X turns.
             movement (bool): Flag to indicate if the pilot should handle movement.
             photographer_capture_image_event (Optional[EventCls]): Event to signal when the photographer should capture an image.
@@ -88,7 +91,11 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
             detector_model_m_inferences_queue (Optional[Queue]): Queue for model M inferences.
             detector_model_r_inferences_queue (Optional[Queue]): Queue for model R inferences.
         """
+        # Initialize the debug flag
+        self.__debug = debug
+
         # Initialize the values, queues and events
+        self.__challenge = challenge
         self.__started_event = Event()
         self.__start_event = start_event
         self.__parking_event = parking_event
@@ -100,7 +107,7 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
         self.__detector_model_g_inferences_queue = detector_model_g_inferences_queue
         self.__detector_model_m_inferences_queue = detector_model_m_inferences_queue
         self.__detector_model_r_inferences_queue = detector_model_r_inferences_queue
-        self.__bno08x_yaw_deg = bno08x_yaw_deg
+        self.__bno08x_horizontal_axis_deg = bno08x_horizontal_axis_deg
         self.__bno08x_turns = bno08x_turns
 
         # Initialize the serial communication dispatcher
@@ -120,9 +127,6 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
         self.__motor_speed = 0.0
         self.__servo_angle = SERVO_CENTER_ANGLE
         self.__movement = movement
-
-        # Initialize the challenge
-        self.__challenge = None
 
     @final
     @property
@@ -239,7 +243,7 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
         measures = self._get_rplidar_measures()
 
         # Calculate the average distances according to the challenge
-        if self.__challenge == Challenge.WITHOUT_OBSTACLES:
+        if self.__challenge.value == Challenge.WITHOUT_OBSTACLES.as_char:
             # Calculate the average front, left and right distances by 5 degrees to each side
             avg_front_dist = RPLidar.calculate_average_distance(
                 measures, [*range(355, 360), *range(0, 6)]
@@ -257,13 +261,13 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
                 Direction.LEFT: avg_left_dist,
                 Direction.RIGHT: avg_right_dist
             }
-        elif self.__challenge == Challenge.WITH_OBSTACLES:
+        elif self.__challenge.value == Challenge.WITH_OBSTACLES.as_char:
             raise NotImplementedError(
                 "Challenge with obstacles is not implemented yet."
             )
 
         else:
-            raise ValueError(f"Unknown challenge: {self.__challenge}")
+            raise ValueError(f"Unknown challenge: {self.__challenge.value}")
 
     def _calculate_sleep_delay(self, start_time: float) -> float:
         """
@@ -277,9 +281,7 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
         """
         elapsed_time = monotonic() - start_time
         delay = self.UPDATE_DELAY - elapsed_time
-        if delay < 0:
-            return 0.0
-        return delay
+        return 0.0 if delay < 0 else delay
 
     def _sleep(self, start_time: float):
         """
@@ -417,17 +419,14 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
         self.__start_event.wait()
         self.__logger.info("Started.")
 
-        # Get the challenge from the environment variables
-        self.__challenge = Env.get_challenge()
-
         try:
             # Start the corresponding challenge handler
-            if self.__challenge == Challenge.WITHOUT_OBSTACLES:
+            if self.__challenge.value == Challenge.WITHOUT_OBSTACLES.as_char:
                 self._challenge_without_obstacles()
-            elif self.__challenge == Challenge.WITH_OBSTACLES:
+            elif self.__challenge.value == Challenge.WITH_OBSTACLES.as_char:
                 self._challenge_with_obstacles()
             else:
-                raise ValueError(f"Unknown challenge: {self.__challenge}")
+                raise ValueError(f"Unknown challenge: {self.__challenge.value}")
 
             # Stop the Pilot
             self._stop()

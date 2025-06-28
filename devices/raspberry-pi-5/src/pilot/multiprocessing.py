@@ -8,6 +8,8 @@ from . import Pilot
 
 
 def pilot_target(
+    debug: bool,
+    challenge: ValueCls,
     start_event: EventCls,
     parking_event: EventCls,
     stop_event: EventCls,
@@ -16,7 +18,7 @@ def pilot_target(
     serial_incoming_messages_queue: Queue,
     serial_outgoing_messages_queue: Queue,
     writer_messages_queue: Queue,
-    bno08x_yaw_deg: ValueCls,
+    bno08x_horizontal_axis_deg: ValueCls,
     bno08x_turns: ValueCls,
     movement: bool = True,
     photographer_capture_image_event: Optional[EventCls] = None,
@@ -28,6 +30,8 @@ def pilot_target(
     Target function for a multiprocessing process that handles the Pilot.
 
     Args:
+        debug (bool): Flag to indicate if the pilot is in debug mode.
+        challenge (ValueCls): Shared value to hold the current challenge.
         start_event (EventCls): Event to signal when the pilot should start.
         parking_event (EventCls): Event to signal the parking state of the robot.
         stop_event (EventCls): Event to signal when the pilot should stop.
@@ -36,7 +40,7 @@ def pilot_target(
         serial_incoming_messages_queue (Queue): Queue to hold incoming messages from the serial port.
         serial_outgoing_messages_queue (Queue): Queue to hold outgoing messages to the serial port.
         writer_messages_queue (Queue): Queue to hold log messages.
-        bno08x_yaw_deg (ValueCls): Shared value for the BNO08X yaw angle in degrees.
+        bno08x_horizontal_axis_deg (ValueCls): Shared value for the BNO08X horizontal axis angle in degrees.
         bno08x_turns (ValueCls): Shared value for the BNO08X turns.
         movement (bool): Flag to indicate if the pilot should handle movement.
         photographer_capture_image_event (Optional[EventCls]): Event to signal when the photographer should capture an image.
@@ -51,6 +55,8 @@ def pilot_target(
 
     # Initialize the Pilot
     pilot = Pilot(
+        debug=debug,
+        challenge=challenge,
         start_event=start_event,
         parking_event=parking_event,
         stop_event=stop_event,
@@ -59,7 +65,7 @@ def pilot_target(
         serial_incoming_messages_queue=serial_incoming_messages_queue,
         serial_outgoing_messages_queue=serial_outgoing_messages_queue,
         writer_messages_queue=writer_messages_queue,
-        bno08x_yaw_deg=bno08x_yaw_deg,
+        bno08x_horizontal_axis_deg=bno08x_horizontal_axis_deg,
         bno08x_turns=bno08x_turns,
         movement=movement,
         photographer_capture_image_event=photographer_capture_image_event,

@@ -10,6 +10,7 @@ from .constants import (
 
 
 def rplidar_target(
+    debug: bool,
     update_measures_event: EventCls,
     measures_queue: Queue,
     start_event: EventCls,
@@ -24,6 +25,7 @@ def rplidar_target(
     Target function for a multiprocessing process that handles the RPLidar.
 
     Args:
+        debug (bool): Flag to indicate if the RPLidar is in debug mode.
         update_measures_event (EventCls): Event to signal when the RPLidar should update measures.
         measures_queue (Queue): Queue to hold the measures from the RPLidar.
         start_event (EventCls): Event to signal when the RPLidar should start.
@@ -41,6 +43,7 @@ def rplidar_target(
 
     # Initialize the RPLidar
     rplidar = RPLidar(
+        debug=debug,
         update_measures_event=update_measures_event,
         measures_queue=measures_queue,
         start_event=start_event,

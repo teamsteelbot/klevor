@@ -2,18 +2,6 @@ from enum import Enum, unique
 
 from ..utils import map_string_to_enum
 
-
-@unique
-class Key(Enum):
-    """
-    Enum for environment variable keys.
-    """
-
-    DEBUG = 1
-    YOLO_VERSION = 2
-    CHALLENGE = 3
-
-
 @unique
 class Challenge(Enum):
     """
@@ -35,3 +23,14 @@ class Challenge(Enum):
             Challenge: The corresponding Challenge enum value.
         """
         return map_string_to_enum(challenge_str.upper(), cls)
+
+
+    @property
+    def as_char(self) -> str:
+        """
+        Get the challenge as a character.
+
+        Returns:
+            str: The challenge as a character.
+        """
+        return 'y' if self == Challenge.WITH_OBSTACLES else 'n'

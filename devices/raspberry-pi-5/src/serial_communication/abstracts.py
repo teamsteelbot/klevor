@@ -20,20 +20,24 @@ class SerialCommunicationABC(ABC):
         pass
 
     @abstractmethod
-    def _open_console_port(self) -> None:
+    def _open_console_port(self, port: str) -> None:
         """
         Open the serial port for communication.
 
+        Args:
+            port (str): The serial port to open.
         Raises:
             RuntimeError: If the serial port cannot be opened.
         """
         pass
 
     @abstractmethod
-    def _open_data_port(self) -> None:
+    def _open_data_port(self, port: str) -> None:
         """
         Open the data port for communication.
 
+        Args:
+            port (str): The data port to open.
         Raises:
             RuntimeError: If the data port cannot be opened.
         """

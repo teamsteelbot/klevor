@@ -7,7 +7,6 @@ from typing import final
 from . import Hailo
 from .abstracts import ObjectDetectorABC
 from ..constants import (MODELS_NAME, MODEL_G, MODEL_M, MODEL_R)
-from ..env import Env
 from ..files import Files
 from ..log import Logger
 from ..opencv import OpenCV
@@ -29,6 +28,8 @@ class ObjectDetector(ObjectDetectorABC, LoggerConsumerProtocol):
 
     def __init__(
         self,
+        debug: bool,
+        yolo_version: str,
         model_g_inferences_queue: Queue,
         model_m_inferences_queue: Queue,
         model_r_inferences_queue: Queue,
@@ -42,6 +43,8 @@ class ObjectDetector(ObjectDetectorABC, LoggerConsumerProtocol):
         Initialize the ObjectDetector class.
 
         Args:
+            debug (bool): Flag to indicate if the object detector is in debug mode.
+            yolo_version (str): The version of YOLO to use for object detection.
             model_g_inferences_queue (Queue): Queue to hold inferences for model G.
             model_m_inferences_queue (Queue): Queue to hold inferences for model M.
             model_r_inferences_queue (Queue): Queue to hold inferences for model R.
@@ -51,6 +54,9 @@ class ObjectDetector(ObjectDetectorABC, LoggerConsumerProtocol):
             photographer_images_queue (Queue): Queue to hold input images for processing.
             writer_messages_queue (Queue): Queue to hold log messages.
         """
+        # Initialize the debug flag
+        self.__debug = debug
+
         # Initialize the queues and events
         self.__photographer_images_queue = photographer_images_queue
         self.__started_event = Event
@@ -78,9 +84,6 @@ class ObjectDetector(ObjectDetectorABC, LoggerConsumerProtocol):
         # Initialize the thread
         self.__thread = None
 
-        # Get the YOLO version from the environment variables
-        yolo_version = Env.get_yolo_version()
-
         # Create the Hailo handlers
         self.__hailo_handlers = {}
         self.__hailo_handler_threads: dict[str, Thread | None] = {}
@@ -100,6 +103,7 @@ class ObjectDetector(ObjectDetectorABC, LoggerConsumerProtocol):
 
             # Create the Hailo handler
             hailo_handler = Hailo(
+                debug=debug,
                 model_name=model_name,
                 hef_file_path=hef_file_path,
                 labels_path=labels_file_path,

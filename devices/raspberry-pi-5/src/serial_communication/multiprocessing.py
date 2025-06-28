@@ -15,12 +15,14 @@ from .constants import (
 
 
 def serial_communication_target(
+    debug: bool,
+    challenge: ValueCls,
     start_event: EventCls,
     parking_event: EventCls,
     stop_event: EventCls,
     messages_queue: Queue,
     writer_messages_queue: Queue,
-    bno08x_yaw_deg: ValueCls,
+    bno08x_horizontal_axis_deg: ValueCls,
     bno08x_turns: ValueCls,
     photographer_capture_image_event: EventCls,
     server_messages_queue: Optional[Queue] = None,
@@ -35,12 +37,14 @@ def serial_communication_target(
     communication.
 
     Args:
+        debug (bool): Flag to indicate if the serial communication is in debug mode.
+        challenge (ValueCls): Shared value to hold the current challenge.
         start_event (EventCls): Event to signal when the serial communication has started.
         parking_event (EventCls): Event to signal the parking state of the robot.
         stop_event (EventCls): Event to signal when the serial communication should stop sending and receiving messages.
         messages_queue (Queue): Queue to hold outgoing messages to the serial port.
         writer_messages_queue (Queue): Queue to hold log messages.
-        bno08x_yaw_deg (ValueCls): Shared value for the BNO08X yaw angle in degrees.
+        bno08x_horizontal_axis_deg (ValueCls): Shared value for the BNO08X horizontal axis angle in degrees.
         bno08x_turns (ValueCls): Shared value for the BNO08X turns.
         photographer_capture_image_event (EventCls): Event to signal when an image should be captured.
         server_messages_queue (Optional[Queue]): Queue to broadcast the messages through the websockets server.
@@ -57,12 +61,14 @@ def serial_communication_target(
 
     # Initialize the serial communication
     serial_communication = SerialCommunication(
+        debug=debug,
+        challenge=challenge,
         start_event=start_event,
         parking_event=parking_event,
         stop_event=stop_event,
         messages_queue=messages_queue,
         writer_messages_queue=writer_messages_queue,
-        bno08x_yaw_deg=bno08x_yaw_deg,
+        bno08x_horizontal_axis_deg=bno08x_horizontal_axis_deg,
         bno08x_turns=bno08x_turns,
         photographer_capture_image_event=photographer_capture_image_event,
         server_messages_queue=server_messages_queue,

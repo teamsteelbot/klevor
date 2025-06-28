@@ -1,4 +1,3 @@
-from queue import Empty
 from multiprocessing import Queue, RLock, Event
 from multiprocessing.synchronize import Event as EventCls
 from typing import Callable, Optional, final
@@ -28,6 +27,7 @@ class Photographer(PhotographerABC, LoggerConsumerProtocol):
 
     def __init__(
         self,
+        debug: bool,
         camera: CameraABC,
         images_queue: Queue,
         capture_image_event: EventCls,
@@ -41,6 +41,7 @@ class Photographer(PhotographerABC, LoggerConsumerProtocol):
         Initialize the Photographer class.
 
         Args:
+            debug (bool): Flag to indicate if the photographer is in debug mode.
             camera (CameraABC): Camera instance for capturing images.
             images_queue (Queue): Queue to hold input images for processing.
             capture_image_event (EventCls): Event to signal when an image should be captured.
@@ -50,6 +51,9 @@ class Photographer(PhotographerABC, LoggerConsumerProtocol):
             preprocess_fn: Callable[[Image], np.ndarray]: Function to preprocess images before inference.
             server_messages_queue (Optional[Queue]): Queue to broadcast messages through the websockets server, if any.
         """
+        # Initialize the debug flag
+        self.__debug = debug
+
         # Initialize the queues and events
         self.__images_queue = images_queue
         self.__capture_image_event = capture_image_event
@@ -150,7 +154,7 @@ class Photographer(PhotographerABC, LoggerConsumerProtocol):
         self.__imager_counter += 1
 
         # Log
-        self.__logger.debug(f"Image {self.__imager_counter} added to images queue.")
+        self.__logger.debug(f"Image {self.__imager_counter} added to images queue.") if self.__debug else None
 
         # Clear the capture image event
         self.__capture_image_event.clear()

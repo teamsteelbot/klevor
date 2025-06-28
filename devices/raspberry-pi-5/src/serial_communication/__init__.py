@@ -20,8 +20,7 @@ from .constants import (
 )
 from .enums import OutgoingCategory, Status
 from .message import IncomingMessage, OutgoingMessage
-from ..env import Env
-from ..env.enums import Challenge
+from ..enums import Challenge
 from ..log import Logger
 from ..server.dispatcher import Dispatcher
 from ..utils import is_instance
@@ -61,12 +60,14 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
 
     def __init__(
         self,
+        debug: bool,
+        challenge: ValueCls,
         start_event: EventCls,
         parking_event: EventCls,
         stop_event: EventCls,
         messages_queue: Queue,
         writer_messages_queue: Queue,
-        bno08x_yaw_deg: ValueCls,
+        bno08x_horizontal_axis_deg: ValueCls,
         bno08x_turns: ValueCls,
         photographer_capture_image_event: EventCls,
         server_messages_queue: Optional[Queue] = None,
@@ -81,13 +82,15 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
         Initialize the serial communication class.
 
         Args:
+            debug (bool): Flag to indicate if the serial communication is in debug mode.
+            challenge (ValueCls): Shared value for the challenge.
             start_event (EventCls): Event to signal when the serial communication has started.
             parking_event (EventCls): Event to signal the parking state of the robot.
             stop_event (EventCls): Event to signal when the serial communication should stop sending and receiving messages.
             messages_queue (Queue): Queue to hold outgoing messages to the serial port.
             writer_messages_queue (Queue): Queue to hold log messages.
             photographer_capture_image_event (EventCls): Event to signal when an image should be captured.
-            bno08x_yaw_deg (ValueCls): Shared value for the BNO08X yaw angle in degrees.
+            bno08x_horizontal_axis_deg (ValueCls): Shared value for the BNO08X horizontal axis angle in degrees.
             bno08x_turns (ValueCls): Shared value for the BNO08X turns.
             server_messages_queue (Optional[Queue]): Queue to broadcast the messages through the websockets server.
             console_port (Optional[str]): Serial port used for receiving data from Pico.
@@ -96,14 +99,18 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
             data_port_alt (Optional[str]): Alternative serial port used for sending data to Pico.
             baudrate (Optional[int]): Baud rate for the serial communication.
         """
+        # Initialize the debug flag
+        self.__debug = debug
+
         # Initialize the values, queues and events
+        self.__challenge = challenge
         self.__started_event = Event()
         self.__start_event = start_event
         self.__parking_event = parking_event
         self.__deleted_event = Event()
         self.__stop_event = stop_event
         self.__messages_queue = messages_queue
-        self.__bno08x_yaw_deg = bno08x_yaw_deg
+        self.__bno08x_horizontal_axis_deg = bno08x_horizontal_axis_deg
         self.__bno08x_turns = bno08x_turns
         self.__photographer_capture_image_event = photographer_capture_image_event
 
@@ -144,9 +151,6 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
         # Initialize the threads
         self.__receiving_thread = None
         self.__sending_thread = None
-
-        # Get the debug environment variable
-        self.__debug = Env.get_debug_mode()
 
     @final
     @property
@@ -202,19 +206,22 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
             self.__started_event.set()
 
         # Open the console port
+        attempt = 0
         for i in range(self.CONNECTION_ATTEMPTS):
             try:
                 self._open_console_port(self.__console_port)
                 if self.__console_serial.is_open:
+                    attempt = i
                     break
 
-            except Exception as port_e:
+            except Exception:
                 try:
                     self._open_console_port(self.__console_port_alt)
                     if self.__console_serial.is_open:
+                        attempt = i
                         break
 
-                except Exception as port_alt_e:
+                except Exception:
                     pass
                 
             sleep(self.ATTEMPTS_DELAY)
@@ -230,7 +237,7 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
 
         # Log
         self.__logger.info(
-            f"Serial console port opened on {self.__console_port} after {i + 1} {'attempts' if i != 0 else 'attempt'}."
+            f"Serial console port opened on {self.__console_port} after {attempt + 1} {'attempts' if attempt != 0 else 'attempt'}."
         )
 
         # Open the data port
@@ -238,15 +245,17 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
             try:
                 self._open_data_port(self.__data_port)
                 if self.__data_serial.is_open:
+                    attempt = i
                     break
 
-            except Exception as port_e:
+            except Exception:
                 try:
                     self._open_data_port(self.__data_port_alt)
                     if self.__data_serial.is_open:
+                        attempt = i
                         break
 
-                except Exception as port_alt_e:
+                except Exception:
                     pass
                 
             sleep(self.ATTEMPTS_DELAY)
@@ -262,7 +271,7 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
 
         # Log
         self.__logger.info(
-            f"Serial data port opened on {self.__data_port} after {i + 1} {'attempts' if i != 0 else 'attempt'}."
+            f"Serial data port opened on {self.__data_port} after {attempt + 1} {'attempts' if attempt != 0 else 'attempt'}."
         )
 
     @final
@@ -463,7 +472,8 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
                 self._send_confirmation_message()
 
                 # Set the challenge as an environment variable
-                Env.set_challenge(Challenge.from_string(msg.content))
+                with self.__challenge.get_lock():
+                    self.__challenge = Challenge.from_string(msg.content).as_char
 
                 # Continue to wait for the start event
                 continue
@@ -473,10 +483,11 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
                 self.__receiver_logger.info("Received start event.")
 
                 # Check if the challenge is set
-                if not Env.has_challenge():
-                    raise RuntimeError(
-                        "Challenge not set. Stopping communication."
-                    )
+                with self.__challenge.get_lock():
+                    if self.__challenge.value != '':
+                        raise RuntimeError(
+                            "Challenge not set. Stopping communication."
+                        )
 
                 # Send a confirmation message
                 self._send_confirmation_message()
@@ -510,8 +521,8 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
                 )
 
                 # Update the BNO08X yaw angle
-                with self.__bno08x_yaw_deg.get_lock():
-                    self.__bno08x_yaw_deg.value = float(msg.content)
+                with self.__bno08x_horizontal_axis_deg.get_lock():
+                    self.__bno08x_horizontal_axis_deg.value = float(msg.content)
 
             elif msg.is_bno08x_turns():
                 # Log

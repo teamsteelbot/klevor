@@ -19,14 +19,22 @@ class Writer(WriterABC):
     # Wait timeout for processing messages
     WAIT_TIMEOUT = 0.1
 
-    def __init__(self, messages_queue: Queue, stop_event: EventCls) -> None:
+    def __init__(self,
+                debug: bool,
+                messages_queue: Queue,
+                stop_event: EventCls
+        ) -> None:
         """
         Initialize the Logger class.
 
         Args:
+            debug (bool): Flag to indicate if the logger is in debug mode.
             messages_queue (Queue): Queue to hold log messages.
             stop_event (EventCls): Event to signal when the logger should stop.
         """
+        # Initialize the debug flag
+        self.__debug = debug
+
         # Initialize the messages queue and events
         self.__messages_queue = messages_queue
         self.__started_event = Event()

@@ -262,7 +262,7 @@ class WebSocketServer(WebSocketServerABC, LoggerConsumerProtocol):
                 return
 
             # Check if the websocket server is already running
-            if self.is_running():
+            if self.__started_event.is_set():
                 self.__logger.warning(
                     "WebSocket server is already running. Cannot start again."
                 )

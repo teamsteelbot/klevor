@@ -11,6 +11,7 @@ from .photographer import Photographer
 
 
 def photographer_target(
+    debug: bool,
     images_queue: Queue,
     capture_image_event: EventCls,
     start_event: EventCls,
@@ -23,6 +24,7 @@ def photographer_target(
     Target function for a multiprocessing process that handles photography tasks.
 
     Args:
+        debug (bool): Flag to indicate if the photographer is in debug mode.
         images_queue (Queue): Queue to hold input images for processing.
         capture_image_event (EventCls): Event to signal when an image should be captured.
         start_event (EventCls): Event to signal when the photographer should start.
@@ -41,6 +43,7 @@ def photographer_target(
 
     # Initialize the photographer
     photographer = Photographer(
+        debug=debug,
         camera=camera,
         images_queue=images_queue,
         capture_image_event=capture_image_event,
