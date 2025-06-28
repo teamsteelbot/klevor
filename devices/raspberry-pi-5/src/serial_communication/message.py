@@ -147,14 +147,14 @@ class IncomingMessage:
         """
         return self.category == IncomingCategory.STATUS and self.content == Status.OK.parsed_name
 
-    def is_bno08x_yaw(self) -> bool:
+    def is_bno08x_horizontal_axis(self) -> bool:
         """
-        Check if the message is a BNO08X yaw message.
+        Check if the message is a BNO08X horizontal axis message.
 
         Returns:
-            bool: True if the message is a BNO08X yaw message, False otherwise.
+            bool: True if the message is a BNO08X horizontal axis message, False otherwise.
         """
-        return self.category == IncomingCategory.BNO08X_YAW
+        return self.category == IncomingCategory.BNO08X_HORIZONTAL_AXIS
 
     def is_bno08x_turns(self) -> bool:
         """

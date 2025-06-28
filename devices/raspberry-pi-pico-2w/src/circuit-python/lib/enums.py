@@ -32,7 +32,7 @@ class OutgoingCategory:
     """
     CHALLENGE = "challenge"
     STATUS = "status"
-    BNO08X_HORIZONTAL_AXIS = "bno08x_haxis"
+    BNO08X_HORIZONTAL_AXIS = "bno08x_horizontal_axis"
     BNO08X_TURNS = "bno08x_turns"
     ERROR = "error"
 

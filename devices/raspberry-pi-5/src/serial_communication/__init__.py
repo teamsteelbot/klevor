@@ -426,6 +426,7 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
         self._wait_confirmation_message(stop_msg)
 
     @final
+    @log_on_error()
     def _receiving_message_handler(self) -> None:
         # Wait for the first END_CHAR message to be received to ensure the serial port is ready
         self.__receiver_logger.info(
@@ -514,21 +515,21 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
                     f"Received error message: '{msg.content}'"
                 )
 
-            elif msg.is_bno08x_yaw():
+            elif msg.is_bno08x_horizontal_axis():
                 # Log
-                self.__receiver_logger.info(
-                    f"Received BNO08X yaw message: {msg.content}"
-                )
+                self.__receiver_logger.debug(
+                    f"Received BNO08X horizontal axis message: {msg.content}"
+                ) if self.__debug else None
 
-                # Update the BNO08X yaw angle
+                # Update the BNO08X horizontal axis angle
                 with self.__bno08x_horizontal_axis_deg.get_lock():
                     self.__bno08x_horizontal_axis_deg.value = float(msg.content)
 
             elif msg.is_bno08x_turns():
                 # Log
-                self.__receiver_logger.info(
+                self.__receiver_logger.debug(
                     f"Received BNO08X turns message: {msg.content}"
-                )
+                ) if self.__debug else None
 
                 # Update the BNO08X turns
                 with self.__bno08x_turns.get_lock():
@@ -538,6 +539,7 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
         self.__receiver_logger.info("Stopped.")
 
     @final
+    @log_on_error()
     def _sending_message_handler(self) -> None:
         # Wait for start event to be set
         self.__sender_logger.info("Waiting for start event...")
@@ -552,7 +554,6 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
 
     @final
     @ignore_sigint
-    @log_on_error()
     def run(self) -> None:
         # Start the serial communication
         self._start()

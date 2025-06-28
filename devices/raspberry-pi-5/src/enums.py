@@ -1,6 +1,6 @@
 from enum import Enum, unique
 
-from ..utils import map_string_to_enum
+from .utils import map_string_to_enum
 
 @unique
 class Challenge(Enum):
@@ -10,6 +10,7 @@ class Challenge(Enum):
 
     WITH_OBSTACLES = 1
     WITHOUT_OBSTACLES = 2
+    UNKNOWN = 3
 
     @classmethod
     def from_string(cls, challenge_str: str) -> 'Challenge':
@@ -33,4 +34,9 @@ class Challenge(Enum):
         Returns:
             str: The challenge as a character.
         """
-        return 'y' if self == Challenge.WITH_OBSTACLES else 'n'
+        if self == Challenge.WITH_OBSTACLES:
+            return b'y'
+        elif self == Challenge.WITHOUT_OBSTACLES:
+            return b'n'
+        else:
+            return b'u'

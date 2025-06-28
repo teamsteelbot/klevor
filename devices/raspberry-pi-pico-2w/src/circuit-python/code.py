@@ -1,17 +1,18 @@
 from asyncio import create_task, gather, run
 from io import StringIO
 from traceback import print_exception
+from time import monotonic
 
 from board import (GP0, GP1, GP11, GP13, GP2, LED)
 from busio import I2C
 
 from lib.bno08x import BNO08XHandler
-from lib.challenge import WithObstacles, WithoutObstacles
-from lib.enums import Challenge, QuaternionAxis
+from lib.enums import QuaternionAxis
 from lib.env import Env
 from lib.esc_motor import ESCMotorHandler
 from lib.led import LEDHandler
 from lib.serial_communication import SerialCommunication
+from lib.message import IncomingCategory, IncomingMessage
 from lib.servo import ServoHandler
 from lib.switch import SwitchHandler
 
@@ -21,6 +22,7 @@ MOVEMENT = Env.get_movement_mode()
 DEBUG = Env.get_debug_mode()
 CHALLENGE = Env.get_challenge()
 QUATERNION_HORIZONTAL_AXIS = QuaternionAxis.ROLL
+RECEIVING_MESSAGE_TIMEOUT = 10.0
 
 # Pins
 I2C_BUS = I2C(GP1, GP0)
@@ -68,33 +70,82 @@ async def main():
         # Wait for the switch to be pressed
         await switch.wait()
 
-        # Start the challenge based on the challenge type
-        if CHALLENGE == Challenge.WITH_OBSTACLES:
-            # Initialize the WithObstacles challenge handler
-            with_obstacles = WithObstacles(
-                bno08x=bno08x,
-                servo=servo,
-                motor=motor,
-                serial_communication=serial_communication
+        # Set the exit condition to False
+        to_exit = False
+
+        # Get start time to compare with the timeout
+        start_time = monotonic()
+
+        while not to_exit:
+            # Create the update quaternion and receive serial messages tasks
+            update_quaternion_task = create_task(
+                bno08x.update_quaternion()
+            )
+            receive_serial_task = create_task(
+                serial_communication.receive_messages()
             )
 
-            # Start the main loop for the challenge with obstacles
-            await with_obstacles.loop()
+            # Wait for the tasks to complete
+            results = await gather(update_quaternion_task, receive_serial_task)
+            msgs: list[IncomingMessage] = results[1]
+            if len(msgs) == 0:
+                # If no messages were received, check if the timeout has been reached
+                if monotonic() - start_time > RECEIVING_MESSAGE_TIMEOUT:
+                    raise TimeoutError(
+                        "No messages received within the timeout period."
+                    )
+            else:
+                # Reset the start time if messages are received
+                start_time = monotonic()
 
-        elif CHALLENGE == Challenge.WITHOUT_OBSTACLES:
-            # Initialize the WithoutObstacles challenge handler
-            without_obstacles = WithoutObstacles(
-                bno08x=bno08x,
-                servo=servo,
-                motor=motor,
-                serial_communication=serial_communication
-            )
+            # Algortihm tasks
+            tasks = []
 
-            # Start the main loop for the challenge without obstacles
-            await without_obstacles.loop()
+            # Process the received messages
+            motor_speed = None
+            servo_angle = None
+            for msg in msgs:
+                if msg == SerialCommunication.STOP_MESSAGE:
+                    # Set the exit condition to True
+                    to_exit = True
 
-        else:
-            raise ValueError(f"Unsupported challenge type: {CHALLENGE}")
+                    # Stop the motor and center the servo
+                    tasks.append(create_task(motor.stop()))
+                    tasks.append(create_task(servo.center()))
+
+                    # Send a confirmation message to the serial communication
+                    tasks.append(
+                        create_task(
+                            serial_communication.send_confirmation_message()
+                        )
+                    )
+                    break
+
+                elif msg.category == IncomingCategory.MOTOR_SPEED:
+                    # Set the motor speed
+                    motor_speed = float(msg.content)
+
+                elif msg.category == IncomingCategory.SERVO_ANGLE:
+                    # Set the servo angle
+                    servo_angle = int(msg.content)
+
+            # Add the set motor speed task and set servo angle task if the exit flag is not set
+            if not to_exit:
+                if motor_speed is not None:
+                    tasks.append(
+                        create_task(motor.set_speed(motor_speed))
+                    )
+
+                if servo_angle is not None:
+                    tasks.append(
+                        create_task(servo.set_angle(servo_angle))
+                    )
+
+            # Gather the tasks and wait for them to complete
+            await gather(*tasks) if tasks else None
+
+        # Stop the serial communication when exiting the loop
+        await serial_communication.stop()
 
     except Exception as e:
         # Get the traceback as string
