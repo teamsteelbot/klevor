@@ -36,24 +36,26 @@ class SerialCommunication:
     CONSOLE_PORT_ENABLED = True
     CHUNK_SIZE = 64
 
-    # Status messages
+    # Status outgoing messages
     START_MESSAGE = OutgoingMessage(
         OutgoingCategory.STATUS,
         Status.START
     )
-    STOP_MESSAGE = IncomingMessage(
+    OUTGOING_OK_MESSAGE = OutgoingMessage(
         OutgoingCategory.STATUS,
+        Status.OK
+    )
+    
+    # Status incoming messages
+    STOP_MESSAGE = IncomingMessage(
+        IncomingCategory.STATUS,
         Status.STOP
     )
     INCOMING_OK_MESSAGE = IncomingMessage(
         IncomingCategory.STATUS,
         Status.OK
     )
-    OUTGOING_OK_MESSAGE = OutgoingMessage(
-        OutgoingCategory.STATUS,
-        Status.OK
-    )
-    HEARTBEAT_MESSAGE = OutgoingMessage(
+    HEARTBEAT_MESSAGE = IncomingMessage(
         OutgoingCategory.STATUS,
         Status.HEARTBEAT
     )

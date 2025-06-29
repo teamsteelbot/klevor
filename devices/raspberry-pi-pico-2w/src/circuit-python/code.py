@@ -10,7 +10,7 @@ from lib.bno08x import BNO08XHandler
 from lib.env import Env
 from lib.esc_motor import ESCMotorHandler
 from lib.led import LEDHandler
-from lib.serial_communication import SerialCommunication
+from lib.serial_communication import SerialCommunication, SerialCommunicationError
 from lib.enums import IncomingCategory, OutgoingCategory
 from lib.message import IncomingMessage, OutgoingMessage
 from lib.servo import ServoHandler
@@ -131,6 +131,9 @@ async def main():
                     elif msg.category == IncomingCategory.SERVO_ANGLE:
                         # Set the servo angle
                         servo_angle = int(msg.content)
+                    
+                    else:
+                        raise SerialCommunicationError(f"Unknown message: {msg.format_to_send_with_error_message()}")
 
                 # Add the set motor speed task and set servo angle task if the exit flag is not set
                 if not to_exit:

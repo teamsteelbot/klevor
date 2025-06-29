@@ -25,7 +25,7 @@ from .constants import (
 )
 from ..utils import is_instance
 from ..log.protocols import LoggerConsumerProtocol
-from .common_messages import INCOMING_OK_MESSAGE
+from .common_messages import STOP_MESSAGE
 
 class Receiver(ReceiverABC, LoggerConsumerProtocol):
     """
@@ -214,7 +214,7 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
                 self.__stop_sent_event.clear()
 
                 # Wait for the stop confirmation event to be set
-                self._wait_confirmation_message(INCOMING_OK_MESSAGE)
+                self._wait_confirmation_message(STOP_MESSAGE)
 
                 # Set the stop confirmation event
                 self.__stop_confirmation_event.set()

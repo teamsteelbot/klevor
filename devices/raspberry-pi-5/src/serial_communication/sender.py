@@ -187,7 +187,7 @@ class Sender(SenderABC, LoggerConsumerProtocol):
                 self.__stop_sent_event.set()
 
                 # Wait for the confirmation message
-                confirmation = self.__stop_confirmation_event.wait(STOP_TIMEOUT)
+                confirmation = self.__stop_confirmation_event.wait(timeout=STOP_TIMEOUT)
                 if not confirmation:
                     self.__logger.warning(
                         "Stop confirmation event not set within the timeout."
