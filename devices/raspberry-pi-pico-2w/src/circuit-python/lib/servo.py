@@ -3,6 +3,10 @@ from asyncio import sleep
 from adafruit_motor.servo import Servo
 from pwmio import PWMOut
 
+from .message import OutgoingMessage
+from .enums import IncomingCategory, OutgoingCategory
+from .serial_communication import SerialCommunication
+
 
 class ServoError(Exception):
     """
@@ -50,7 +54,8 @@ class ServoHandler:
     def __init__(
         self, servo_pin: int, frequency: int = PWM_FREQUENCY,
         min_pulse: int = MIN_PULSE, max_pulse: int = MAX_PULSE,
-        actuation_range: int = ACTUATION_RANGE, movement: bool = True
+        actuation_range: int = ACTUATION_RANGE, movement: bool = True,
+        debug: bool = False, serial_communication: SerialCommunication = None
     ):
         """
         Initializes the servo handler with the specified parameters.
@@ -62,6 +67,8 @@ class ServoHandler:
             max_pulse (int): The maximum pulse width in microseconds.
             actuation_range (int): The range of motion of the servo in degrees.
             movement (bool): If True, the servo will be controlled for movement; if False, it will not.
+            debug (bool): If True, debug messages will be sent.
+            serial_communication (SerialCommunication): An instance of SerialCommunication for sending debug messages.
         """
         # Setup PWM output for the servo motor
         self.__servo_pwm = PWMOut(servo_pin, duty_cycle=0, frequency=frequency)
@@ -70,8 +77,12 @@ class ServoHandler:
             min_pulse=min_pulse, max_pulse=max_pulse
         )
 
-        # Set the movement flag
+        # Set the movement flag and debug mode
         self.__movement = movement
+        self.__debug = debug
+
+        # Set the serial communication instance
+        self.__serial_communication = serial_communication
 
         # Set the servo to center position
         self.__angle = self.CENTER_ANGLE
@@ -119,6 +130,13 @@ class ServoHandler:
         self.__angle = angle
         if self.__movement:
             self.__servo_motor.angle = self.__angle
+        if self.__debug and self.__serial_communication:
+            self.__serial_communication.send_message(
+                OutgoingMessage(
+                    OutgoingCategory.DEBUG,
+                    f"{IncomingCategory.SERVO_ANGLE}={self.__angle}"
+                )
+            )
 
         # Add a small delay to allow the servo to move
         await sleep(self.DELAY)

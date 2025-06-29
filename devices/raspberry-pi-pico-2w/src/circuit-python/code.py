@@ -39,8 +39,18 @@ serial_communication = SerialCommunication(
     led=led,
     challenge=CHALLENGE,
 )
-servo = ServoHandler(servo_pin=SERVO_PIN, movement=MOVEMENT)
-motor = ESCMotorHandler(motor_pin=ESC_MOTOR_PIN, movement=MOVEMENT)
+servo = ServoHandler(
+    servo_pin=SERVO_PIN,
+    movement=MOVEMENT,
+    debug=DEBUG,
+    serial_communication=serial_communication,
+)
+motor = ESCMotorHandler(
+    motor_pin=ESC_MOTOR_PIN,
+    movement=MOVEMENT,
+    debug=DEBUG,
+    serial_communication=serial_communication,
+)
 bno08x = BNO08XHandler(
     i2c=I2C_BUS,
     serial_communication=serial_communication
@@ -128,19 +138,10 @@ async def main():
                     elif msg.category == IncomingCategory.MOTOR_SPEED:
                         # Set the motor speed
                         motor_speed = float(msg.content)
-                        
-                        # Send the received message
-                        if DEBUG:
-                            serial_communication.send_message(OutgoingMessage(OutgoingCategory.DEBUG, f"{IncomingCategory.MOTOR_SPEED}={motor_speed}"))
-                    
 
                     elif msg.category == IncomingCategory.SERVO_ANGLE:
                         # Set the servo angle
                         servo_angle = int(msg.content)
-                        
-                        # Send the received message
-                        if DEBUG:
-                            serial_communication.send_message(OutgoingMessage(OutgoingCategory.DEBUG, f"{IncomingCategory.SERVO_ANGLE}={servo_angle}"))
 
                     else:
                         raise SerialCommunicationError(

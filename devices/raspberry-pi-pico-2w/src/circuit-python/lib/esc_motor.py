@@ -3,6 +3,9 @@ from asyncio import sleep
 from adafruit_motor.servo import ContinuousServo
 from pwmio import PWMOut
 
+from .message import OutgoingMessage
+from .enums import IncomingCategory, OutgoingCategory
+from .serial_communication import SerialCommunication
 
 class ESCMotorError(Exception):
     """
@@ -49,7 +52,8 @@ class ESCMotorHandler:
     def __init__(
         self, motor_pin: int, frequency: int = PWM_FREQUENCY,
         min_pulse: int = MIN_PULSE, max_pulse: int = MAX_PULSE,
-        movement: bool = True
+        movement: bool = True, debug: bool = False,
+        serial_communication: SerialCommunication = None
     ):
         """
         Initializes the ESC motor handler with the specified parameters.
@@ -60,6 +64,8 @@ class ESCMotorHandler:
             min_pulse (int): Minimum pulse width for the ESC motor.
             max_pulse (int): Maximum pulse width for the ESC motor.
             movement (bool): If True, the motor will be controlled for movement; if False, it will not.
+            debug (bool): If True, debug messages will be sent.
+            serial_communication (SerialCommunication): An instance of SerialCommunication for sending debug messages.
         """
         # Setup PWM output for the ESC motor
         self.__esc_pwm = PWMOut(motor_pin, duty_cycle=0, frequency=frequency)
@@ -69,8 +75,12 @@ class ESCMotorHandler:
             max_pulse=max_pulse
         )
 
-        # Set the movement flag
+        # Set the movement flag and debug mode
         self.__movement = movement
+        self.__debug = debug
+
+        # Set the serial communication instance
+        self.__serial_communication = serial_communication
 
         # Initialize the speed to 0
         self.__speed = 0.0
@@ -134,6 +144,14 @@ class ESCMotorHandler:
         self.__speed = speed * self.SPEED_FACTOR
         if self.__movement:
             self.__esc_motor.throttle = self.__speed
+            # Send the received message
+        if self.__debug and self.__serial_communication:
+            self.__serial_communication.send_message(
+                OutgoingMessage(
+                    OutgoingCategory.DEBUG,
+                    f"{IncomingCategory.MOTOR_SPEED}={self.__speed}"
+                )
+            )
 
         # Add a delay to allow the motor to respond
         await sleep(self.DELAY)
