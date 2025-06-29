@@ -104,12 +104,11 @@ async def main():
                     # Reset the start time if messages are received
                     start_time = monotonic()
 
-                # Algortihm tasks
-                tasks = []
-
                 # Process the received messages
                 motor_speed = None
                 servo_angle = None
+                motor_speed_task = None
+                servo_angle_task = None
                 for msg in msgs:
                     if msg == SerialCommunication.HEARTBEAT_MESSAGE:
                         continue
@@ -119,24 +118,29 @@ async def main():
                         to_exit = True
 
                         # Stop the motor and center the servo
-                        tasks.append(create_task(motor.stop()))
-                        tasks.append(create_task(servo.center()))
+                        motor_speed_task = create_task(motor.stop())
+                        servo_angle_task = create_task(servo.center())
 
                         # Send a confirmation message to the serial communication
-                        tasks.append(
-                            create_task(
-                                serial_communication.send_confirmation_message()
-                            )
-                        )
+                        serial_communication.send_confirmation_message()
                         break
 
                     elif msg.category == IncomingCategory.MOTOR_SPEED:
                         # Set the motor speed
                         motor_speed = float(msg.content)
+                        
+                        # Send the received message
+                        if DEBUG:
+                            serial_communication.send_message(OutgoingMessage(OutgoingCategory.DEBUG, f"{IncomingCategory.MOTOR_SPEED}={motor_speed}"))
+                    
 
                     elif msg.category == IncomingCategory.SERVO_ANGLE:
                         # Set the servo angle
                         servo_angle = int(msg.content)
+                        
+                        # Send the received message
+                        if DEBUG:
+                            serial_communication.send_message(OutgoingMessage(OutgoingCategory.DEBUG, f"{IncomingCategory.SERVO_ANGLE}={servo_angle}"))
 
                     else:
                         raise SerialCommunicationError(
@@ -146,17 +150,16 @@ async def main():
                 # Add the set motor speed task and set servo angle task if the exit flag is not set
                 if not to_exit:
                     if motor_speed is not None:
-                        tasks.append(
-                            create_task(motor.set_speed(motor_speed))
-                        )
+                        motor_speed_task = create_task(motor.set_speed(motor_speed))
 
                     if servo_angle is not None:
-                        tasks.append(
-                            create_task(servo.set_angle(servo_angle))
-                        )
+                        servo_angle_task = create_task(servo.set_angle(servo_angle))
 
-                # Gather the tasks and wait for them to complete
-                await gather(*tasks) if tasks else None
+                # Wait for the motor speed and servo angle tasks to complete
+                if motor_speed_task is not None:
+                    await motor_speed_task
+                if servo_angle_task is not None:
+                    await servo_angle_task
 
             # Stop the serial communication when exiting the loop
             repeat = False
@@ -173,7 +176,5 @@ async def main():
             msg = OutgoingMessage(OutgoingCategory.ERROR, buf.getvalue())
             serial_communication.send_message_by_chunks(msg)
 
-        # Start the asyncio event loop
-
-
+# Start the asyncio event loop
 run(main())

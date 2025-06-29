@@ -166,6 +166,15 @@ class IncomingMessage:
             bool: True if the message is a BNO08X turns message, False otherwise.
         """
         return self.category == IncomingCategory.BNO08X_TURNS
+    
+    def is_debug(self) -> bool:
+        """
+        Check if the message is a debug message.
+
+        Returns:
+            bool: True if the message is a debug message, False otherwise.
+        """
+        return self.category == IncomingCategory.DEBUG
 
 
 class OutgoingMessage:

@@ -35,6 +35,7 @@ class OutgoingCategory:
     BNO08X_YAW_DEG = "bno08x_yaw_deg"
     BNO08X_TURNS = "bno08x_turns"
     ERROR = "error"
+    DEBUG = "debug"
 
     @classmethod
     def from_string(cls, category_str: str) -> str:
@@ -50,7 +51,7 @@ class OutgoingCategory:
         """
         category_name = category_str.lower()
         for category in [cls.CHALLENGE, cls.STATUS, cls.BNO08X_YAW_DEG,
-                         cls.BNO08X_TURNS, cls.ERROR]:
+                         cls.BNO08X_TURNS, cls.ERROR, cls.DEBUG]:
             if category_name == category:
                 return category
 

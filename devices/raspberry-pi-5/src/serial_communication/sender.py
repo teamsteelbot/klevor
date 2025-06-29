@@ -142,39 +142,35 @@ class Sender(SenderABC, LoggerConsumerProtocol):
             self.__started_event.set()
 
         # Open the data port
-        attempt = 0
         for i in range(CONNECTION_ATTEMPTS):
             for port in self.__data_ports:
                 try:
                     self._open_port(port)
-                    if self.__data_serial.is_open:
-                        attempt = i
-                        break
+
+                    # Log
+                    self.__logger.info(
+                        f"Data port opened on {self.__data_port} after {i + 1} {'attempts' if i != 0 else 'attempt'}."
+                    )
+                    return
 
                 except Exception:
                     pass
 
             sleep(ATTEMPTS_DELAY)
 
-        # Check if the data serial port is opened
-        if not self.__data_serial or not self.__data_serial.is_open:
-            raise RuntimeError(
-                f"Failed to open data port after {CONNECTION_ATTEMPTS} attempts."
-            )
-
-        # Log
-        self.__logger.info(
-            f"Data port opened on {self.__data_port} after {attempt + 1} {'attempts' if attempt != 0 else 'attempt'}."
+        raise RuntimeError(
+            f"Failed to open data port after {CONNECTION_ATTEMPTS} attempts."
         )
+
 
     @final
     def _stop(self) -> None:
         with self.__rlock:
-            # Clear the started event
-            self.__started_event.clear()
-
             # Check if the start event is set
-            if self.__start_event.is_set():
+            if self.__started_event.is_set():
+                # Clear the started event
+                self.__started_event.clear()
+
                 # Send the message to the serial port
                 self._send_message(STOP_MESSAGE)
 
@@ -182,10 +178,7 @@ class Sender(SenderABC, LoggerConsumerProtocol):
                 self.__stop_sent_event.set()
 
                 # Wait for the confirmation message
-                confirmation = self.__stop_confirmation_event.wait(
-                    timeout=STOP_TIMEOUT
-                    )
-                if not confirmation:
+                if not self.__stop_confirmation_event.wait(timeout=STOP_TIMEOUT):
                     self.__logger.warning(
                         "Stop confirmation event not set within the timeout."
                     )
@@ -196,6 +189,9 @@ class Sender(SenderABC, LoggerConsumerProtocol):
 
                 # Clear the stop confirmation event
                 self.__stop_confirmation_event.clear()
+
+            # Clear the deleted event
+            self.__deleted_event.clear()
 
             # Set the stop event
             self.__stop_event.set()

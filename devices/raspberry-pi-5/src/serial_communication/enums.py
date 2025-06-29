@@ -13,6 +13,7 @@ class IncomingCategory(Enum):
     BNO08X_YAW_DEG = 3
     BNO08X_TURNS = 4
     ERROR = 5
+    DEBUG = 6
 
     @property
     def parsed_name(self) -> str:

@@ -40,7 +40,7 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
 
     # Confirmation timeout
     CONFIRMATION_TIMEOUT = 5.0
-    CONFIRMATION_ATTEMPTS = CONFIRMATION_TIMEOUT // INCOMING_DELAY
+    CONFIRMATION_ATTEMPTS = CONFIRMATION_TIMEOUT / INCOMING_DELAY
 
     def __init__(
         self,
@@ -156,42 +156,35 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
             self.__started_event.set()
 
         # Open the console port
-        attempt = 0
         for i in range(CONNECTION_ATTEMPTS):
             for port in self.__console_ports:
                 try:
                     self._open_port(port)
-                    if self.__console_serial.is_open:
-                        attempt = i
-                        break
+
+                    # Log
+                    self.__logger.info(
+                        f"Console port opened on {self.__console_port} after {i + 1} {'attempts' if i != 0 else 'attempt'}."
+                    )
+                    return
 
                 except Exception:
                     pass
 
             sleep(ATTEMPTS_DELAY)
 
-        # Check if the console serial port is opened
-        if not self.__console_serial or not self.__console_serial.is_open:
-            raise RuntimeError(
-                f"Failed to open console port after {CONNECTION_ATTEMPTS} attempts."
-            )
-
-        # Log
-        self.__logger.info(
-            f"Console port opened on {self.__console_port} after {attempt + 1} {'attempts' if attempt != 0 else 'attempt'}."
+        raise RuntimeError(
+            f"Failed to open console port after {CONNECTION_ATTEMPTS} attempts."
         )
+        
 
     @final
     def _stop(self) -> None:
         with self.__rlock:
-            # Clear the started event
-            self.__started_event.clear()
-
-            # Clear the deleted event
-            self.__deleted_event.clear()
-
             # Check if the start event is set
-            if self.__start_event.is_set():
+            if self.__started_event.is_set():
+                # Clear the started event
+                self.__started_event.clear()
+
                 # Wait for the stop sent event to be set
                 if not self.__stop_sent_event.wait(timeout=STOP_TIMEOUT):
                     self.__logger.warning(
@@ -211,6 +204,9 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
 
                 # Set the stop confirmation event
                 self.__stop_confirmation_event.set()
+
+            # Clear the deleted event
+            self.__deleted_event.clear()
 
             # Set the stop event
             self.__stop_event.set()
@@ -259,6 +255,14 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
         # Get the message from the string
         msg = IncomingMessage.from_string(msg_str)
 
+        # Check if it's a debug message
+        if msg.is_debug():
+            # Log the debug message
+            self.__logger.debug(
+                f"Received debug message: {msg.content}"
+            )
+            return None
+
         # If the server is set, send the message to the server
         self.__server_dispatcher.broadcast_serial_incoming_message(
             msg_str
@@ -294,6 +298,12 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
                     f"Received confirmation message: {msg.content}"
                 )
                 return
+
+            else:
+                # Log the received message
+                self.__logger.debug(
+                    f"Received message while waiting for confirmation: {msg.content}"
+                )
 
         raise RuntimeError(
             f"Confirmation message for {msg_to_confirm} not received within timeout."
@@ -410,7 +420,7 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
                 elif msg.is_bno08x_yaw_deg():
                     # Log
                     self.__logger.debug(
-                        f"Received BNO08X horizontal axis message: {msg.content}"
+                        f"Received BNO08X yaw degrees message: {msg.content}"
                     )
 
                     # Update the BNO08X horizontal axis angle

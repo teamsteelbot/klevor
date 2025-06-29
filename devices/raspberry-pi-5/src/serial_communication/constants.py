@@ -13,10 +13,10 @@ RASPBERRY_PI_PICO_DATA_PORTS = [f"/dev/ttyACM{i * 2 + 1}" for i in
                                 range(POSSIBLE_RASPBERRY_PI_PICO_PORTS)]
 
 # Attempts to connect to the serial port
-CONNECTION_ATTEMPTS = 5
+CONNECTION_ATTEMPTS = 10
 
 # Attempts delay
-ATTEMPTS_DELAY = 0.25
+ATTEMPTS_DELAY = 1
 
 # Stop timeout
 STOP_TIMEOUT = 5

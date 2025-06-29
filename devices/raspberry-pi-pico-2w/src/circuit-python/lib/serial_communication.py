@@ -182,7 +182,7 @@ class SerialCommunication:
         except Exception as e:
             raise SerialCommunicationError(f"Error sending message: {e}")
 
-    async def send_confirmation_message(self):
+    def send_confirmation_message(self):
         """
         Sends a confirmation message through the data port.
         """

@@ -44,7 +44,7 @@ class ESCMotorHandler:
     SPEED_SLOW = 0.25
 
     # Delay for motor operations
-    DELAY = 0.15
+    DELAY = 0.2
 
     def __init__(
         self, motor_pin: int, frequency: int = PWM_FREQUENCY,

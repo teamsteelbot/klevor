@@ -166,8 +166,8 @@ class Spawner:
 
                 # Wait for the start event to be set
                 while not self.__stop_event.is_set():
-                    if not self.__start_event.wait(timeout=self.START_WAIT_TIMEOUT):
-                        continue
+                    if self.__start_event.wait(timeout=self.START_WAIT_TIMEOUT):
+                        break
                 if self.__stop_event.is_set():
                     self._stop()
                     continue
