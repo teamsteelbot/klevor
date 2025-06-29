@@ -1,4 +1,4 @@
-from asyncio import run, create_task
+from asyncio import run
 from board import GP0, GP1
 from busio import I2C
 

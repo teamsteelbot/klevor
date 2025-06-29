@@ -166,10 +166,7 @@ class Sender(SenderABC, LoggerConsumerProtocol):
             raise RuntimeError(
                 f"Failed to open data port on {self.__data_port} or {self.__data_port_alt} after {CONNECTION_ATTEMPTS} attempts."
             )
-
-        # Flush the data serial port to ensure it is ready
-        self.__data_serial.flush()
-
+        
         # Log
         self.__logger.info(
             f"Data port opened on {self.__data_port} after {attempt + 1} {'attempts' if attempt != 0 else 'attempt'}."

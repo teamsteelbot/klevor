@@ -18,6 +18,9 @@ class Spawner:
     # Wait timeout for the start event
     START_WAIT_TIMEOUT = 0.1
 
+    # Wait timeout for the stop event
+    STOP_WAIT_TIMEOUT = 0.1
+
     def __init__(self, debug: bool, yolo_version: str, movement: bool = True):
         """
         Initialize the Spawner class.
@@ -92,6 +95,8 @@ class Spawner:
         """
         Stop the spawner and clean up resources.
         """
+        print("Stopping Spawner...")
+
         with self.__rlock:
             # Wait for all processes to finish
             self.__serial_communication_process.join() if self.__serial_communication_process else None
@@ -229,6 +234,10 @@ class Spawner:
                         self.__object_detector_model_r_inferences_queue)
                 )
                 self.__pilot_process.start()
+
+                # Wait for the stop event to be set
+                while not self.__stop_event.wait(timeout=self.STOP_WAIT_TIMEOUT):
+                    continue
 
                 # Stop the spawner
                 self._stop()

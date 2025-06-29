@@ -34,6 +34,7 @@ class SerialCommunication:
     TOGGLE_LED_ON_RECEIVE = False
     DATA_PORT_ENABLED = True
     CONSOLE_PORT_ENABLED = True
+    CHUNK_SIZE = 64
 
     # Status messages
     START_MESSAGE = OutgoingMessage(
@@ -102,8 +103,7 @@ class SerialCommunication:
             SerialCommunicationError: If the data port is not enabled or if there is an error in reading messages.
         """
         if not self.__data_port:
-            msg = "Data port is not enabled."
-            raise SerialCommunicationError(msg)
+            raise SerialCommunicationError("Data port is not enabled.")
 
         if self.__data_port.in_waiting == 0:
             # Turn off the LED if no data is waiting
@@ -138,44 +138,44 @@ class SerialCommunication:
 
         return msgs
 
-    def send_message(self, message: OutgoingMessage):
+    def send_message(self, msg: OutgoingMessage):
         """
         Send a message to the USB CDC console stream.
 
         Args:
-            message (OutgoingMessage): The message to send.
+            msg (OutgoingMessage): The message to send.
         Raises:
             SerialCommunicationError: If the console port is not enabled or if there is an error in sending the message.
         """
         if not self.__console_port:
-            msg = "Console port is not enabled."
-            raise SerialCommunicationError(msg)
+            raise SerialCommunicationError("Console port is not enabled.")
 
         try:
-            self.__console_port.write(str(message).encode("utf-8"))
+            self.__console_port.write(str(msg).encode("utf-8"))
 
         except Exception as e:
             raise SerialCommunicationError(f"Error sending message: {e}")
         
-    def send_message_by_chunks(self, message: str, is_last_chunk: bool = False):
+    def send_message_by_chunks(self, msg: OutgoingMessage):
         """
         Send a message in chunks to the USB CDC console stream.
 
         Args:
-            message (str): The message to send.
+            msg (OutgoingMessage): The message to send.
             is_last_chunk (bool): Whether this is the last chunk of the message.
         Raises:
             SerialCommunicationError: If the console port is not enabled or if there is an error in sending the message.
         """
         if not self.__console_port:
-            msg = "Console port is not enabled."
-            raise SerialCommunicationError(msg)
+            raise SerialCommunicationError("Console port is not enabled.")
 
         try:
-            if is_last_chunk:
-                self.__console_port.write((message + END_CHAR).encode("utf-8"))
-            else:
-                self.__console_port.write(message.encode("utf-8"))
+            msg_str = str(msg)
+        
+            # Send error message to the serial communication
+            for i in range(0, len(msg_str), self.CHUNK_SIZE):
+                chunk = msg_str[i:i+self.CHUNK_SIZE]
+                self.__console_port.write(chunk.encode("utf-8"))
 
         except Exception as e:
             raise SerialCommunicationError(f"Error sending message: {e}")

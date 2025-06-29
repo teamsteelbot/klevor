@@ -11,12 +11,12 @@ from lib.env import Env
 from lib.esc_motor import ESCMotorHandler
 from lib.led import LEDHandler
 from lib.serial_communication import SerialCommunication
-from lib.message import IncomingCategory, IncomingMessage
+from lib.enums import IncomingCategory, OutgoingCategory
+from lib.message import IncomingMessage, OutgoingMessage
 from lib.servo import ServoHandler
 from lib.switch import SwitchHandler
 
 # Constants
-CHUNK_SIZE = 64
 MOVEMENT = Env.get_movement_mode()
 DEBUG = Env.get_debug_mode()
 CHALLENGE = Env.get_challenge()
@@ -155,18 +155,12 @@ async def main():
             # Set the speed to 0 and center the servo in case of an exception
             await motor.stop()
             await servo.center()
-
+            
             # Get the traceback as string
             buf = StringIO()
             print_exception(e, e, e.__traceback__, file=buf)
-            tb_str = buf.getvalue()
-        
-            # Send error message to the serial communication
-            tb_len = len(tb_str)
-            for i in range(0, tb_len+1, CHUNK_SIZE):
-                is_last = (i + CHUNK_SIZE) >= tb_len+1
-                chunk = tb_str[i:i+CHUNK_SIZE] if not is_last else tb_str[i:i+CHUNK_SIZE-1]
-                serial_communication.send_message_by_chunks(chunk, is_last_chunk=is_last)
+            msg = OutgoingMessage(OutgoingCategory.ERROR, buf.getvalue())
+            serial_communication.send_message_by_chunks(msg)            
 
 
 # Start the asyncio event loop

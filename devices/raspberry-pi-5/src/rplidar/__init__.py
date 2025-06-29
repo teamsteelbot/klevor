@@ -302,7 +302,6 @@ class RPLidar(RPLidarABC, LoggerConsumerProtocol):
             # Stop the RPLidar if the stop or deleted event is set
             self._stop()
             return
-        self.__start_event.wait()
         self.__logger.info("Started.")
 
         command = [

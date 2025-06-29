@@ -182,10 +182,7 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
             raise RuntimeError(
                 f"Failed to open console port on {self.__console_port} or {self.__console_port_alt} after {CONNECTION_ATTEMPTS} attempts."
             )
-
-        # Flush the console serial port to ensure it is ready
-        self.__console.flush()
-
+        
         # Log
         self.__logger.info(
             f"Console port opened on {self.__console_port} after {attempt + 1} {'attempts' if attempt != 0 else 'attempt'}."
@@ -264,7 +261,7 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
         msg_str = buffer.strip()
 
         # Log
-        self.__logger.debug(f"Received message: '{msg_str}'")
+        # self.__logger.debug(f"Received message: '{msg_str}'")
 
         # Get the message from the string
         msg = IncomingMessage.from_string(msg_str)
@@ -414,9 +411,9 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
 
                 elif msg.is_bno08x_yaw_deg():
                     # Log
-                    # self.__logger.debug(
-                    #     f"Received BNO08X horizontal axis message: {msg.content}"
-                    # )
+                    self.__logger.debug(
+                        f"Received BNO08X horizontal axis message: {msg.content}"
+                    )
 
                     # Update the BNO08X horizontal axis angle
                     with self.__bno08x_yaw_deg.get_lock():
@@ -424,9 +421,9 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
 
                 elif msg.is_bno08x_turns():
                     # Log
-                    # self.__logger.debug(
-                    #     f"Received BNO08X turns message: {msg.content}"
-                    # )
+                    self.__logger.debug(
+                        f"Received BNO08X turns message: {msg.content}"
+                    )
 
                     # Update the BNO08X turns
                     with self.__bno08x_turns.get_lock():
