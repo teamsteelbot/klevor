@@ -331,8 +331,6 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
                     continue
                 if char == END_CHAR:
                     break
-
-            # Check if the stop event is set or the deleted event is set
             if self.__stop_event.is_set() or self.__deleted_event.is_set():
                 # Stop the serial communication receiver
                 self._stop()

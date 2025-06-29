@@ -15,6 +15,9 @@ class Spawner:
     Class that spawns processes for the challenge.
     """
 
+    # Wait timeout for the start event
+    START_WAIT_TIMEOUT = 0.1
+
     def __init__(self, debug: bool, yolo_version: str, movement: bool = True):
         """
         Initialize the Spawner class.
@@ -153,13 +156,10 @@ class Spawner:
             self.__rplidar_process.start()
 
             # Wait for the start event to be set
-            self.__start_event.wait()
-
-            # Check if the stop event is set
+            while not self.__stop_event.is_set():
+                if not self.__start_event.wait(timeout=self.START_WAIT_TIMEOUT):
+                    continue
             if self.__stop_event.is_set():
-                print("Stop event is set. Spawner will not run.")
-
-                # Stop the spawner if the stop event is set
                 self._stop()
                 return
             print("Spawner started.")

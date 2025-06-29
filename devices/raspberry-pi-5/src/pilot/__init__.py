@@ -51,6 +51,9 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
     # Update delay
     UPDATE_DELAY = 0.2
 
+    # Wait timeout for the start event
+    START_WAIT_TIMEOUT = 0.1
+
     def __init__(
         self,
         debug: bool,
@@ -414,7 +417,13 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
 
         # Wait for the start event to be set
         self.__logger.info("Waiting for the start event...")
-        self.__start_event.wait()
+        while not self.__stop_event.is_set() and not self.__deleted_event.is_set():
+            if not self.__start_event.wait(timeout=self.START_WAIT_TIMEOUT):
+                continue
+        if self.__stop_event.is_set() or self.__deleted_event.is_set():
+            # Stop the Pilot if the stop or deleted event is set
+            self._stop()
+            return
         self.__logger.info("Started.")
 
         try:

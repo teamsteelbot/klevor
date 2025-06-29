@@ -222,7 +222,7 @@ class WebSocketServer(WebSocketServerABC, LoggerConsumerProtocol):
 
     @final
     async def _broadcast_handler(self):
-        while not self.__stop_event.is_set():
+        while not self.__stop_event.is_set() and not self.__deleted_event.is_set():
             # Broadcast the last message if available
             await self._broadcast_last_message()
 
@@ -295,11 +295,15 @@ class WebSocketServer(WebSocketServerABC, LoggerConsumerProtocol):
         self.__logger.debug("WebSocket server is starting...")
 
         async def monitor_events():
-            await asyncio.wait(
-                [asyncio.to_thread(self.__stop_event.wait),
-                 asyncio.to_thread(self.__deleted_event.wait)],
-                return_when=asyncio.FIRST_COMPLETED
-            )
+            try:
+                await asyncio.wait(
+                    [asyncio.to_thread(self.__stop_event.wait),
+                     asyncio.to_thread(self.__deleted_event.wait)],
+                    return_when=asyncio.FIRST_COMPLETED
+                )
+
+            except asyncio.CancelledError:
+                pass
 
         monitor_task = asyncio.create_task(monitor_events())
 
