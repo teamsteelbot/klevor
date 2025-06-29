@@ -179,8 +179,8 @@ class Photographer(PhotographerABC, LoggerConsumerProtocol):
         # Wait for the start event
         self.__logger.info("Waiting for the start event...")
         while not self.__stop_event.is_set() and not self.__deleted_event.is_set():
-            if not self.__start_event.wait(timeout=self.START_WAIT_TIMEOUT):
-                continue
+            if self.__start_event.wait(timeout=self.START_WAIT_TIMEOUT):
+                break
         if self.__stop_event.is_set() or self.__deleted_event.is_set():
             # Stop the photographer if the stop or deleted event is set
             self._stop()

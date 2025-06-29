@@ -200,7 +200,7 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
             # Check if the start event is set
             if self.__start_event.is_set():
                 # Wait for the stop sent event to be set
-                if not self.__stop_sent_event.wait(STOP_TIMEOUT):
+                if not self.__stop_sent_event.wait(timeout=STOP_TIMEOUT):
                     self.__logger.warning(
                         "Stop sent event not set within timeout. "
                     )
