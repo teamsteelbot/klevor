@@ -250,6 +250,10 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
     def _get_rplidar_average_distances(self) -> dict[Direction, float]:
         # Get the RPLidar measures
         measures = self._get_rplidar_measures()
+        if measures is None:
+            raise TimeoutError(
+                "RPLidar measures could not be retrieved within the timeout."
+            )
 
         # Calculate the average distances according to the challenge
         if self.__challenge.value == Challenge.WITHOUT_OBSTACLES.as_char:
@@ -312,7 +316,7 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
         # Initialize the last turns
         last_turns = self.__bno08x_turns.value
 
-        while not self.__deleted_event.is_set():
+        while not self.__stop_event.is_set() and not self.__deleted_event.is_set():
             # Get the start time
             start_time = monotonic()
 

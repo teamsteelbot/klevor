@@ -167,15 +167,14 @@ async def main():
             await serial_communication.stop()
 
         except Exception as e:
-            # Set the speed to 0 and center the servo in case of an exception
-            await motor.stop()
-            await servo.center()
-
             # Get the traceback as string
             buf = StringIO()
             print_exception(e, e, e.__traceback__, file=buf)
-            msg = OutgoingMessage(OutgoingCategory.ERROR, buf.getvalue())
-            serial_communication.send_message_by_chunks(msg)
+            serial_communication.send_buffer_message(OutgoingCategory.ERROR, buf)
+
+            # Set the speed to 0 and center the servo in case of an exception
+            await motor.stop()
+            await servo.center()
 
 # Start the asyncio event loop
 run(main())

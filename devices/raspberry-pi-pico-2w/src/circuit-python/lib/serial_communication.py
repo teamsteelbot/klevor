@@ -1,3 +1,4 @@
+from io import StringIO
 from time import monotonic
 
 from usb_cdc import console, data
@@ -10,6 +11,7 @@ from .message import (
     IncomingMessage,
     OutgoingCategory,
     OutgoingMessage,
+    HEADER_SEPARATOR_CHAR
 )
 
 
@@ -158,13 +160,13 @@ class SerialCommunication:
         except Exception as e:
             raise SerialCommunicationError(f"Error sending message: {e}")
 
-    def send_message_by_chunks(self, msg: OutgoingMessage):
+    def send_buffer_message(self, category: str, msg: StringIO):
         """
         Send a message in chunks to the USB CDC console stream.
 
         Args:
-            msg (OutgoingMessage): The message to send.
-            is_last_chunk (bool): Whether this is the last chunk of the message.
+            category (str): The category of the message.
+            msg (StringIO): The message to send as a StringIO object.
         Raises:
             SerialCommunicationError: If the console port is not enabled or if there is an error in sending the message.
         """
@@ -172,12 +174,17 @@ class SerialCommunication:
             raise SerialCommunicationError("Console port is not enabled.")
 
         try:
-            msg_str = str(msg)
+            # Send the category header
+            self.__console_port.write(f"{category}{HEADER_SEPARATOR_CHAR}".encode("utf-8"))
 
             # Send error message to the serial communication
+            msg_str = msg.getvalue()
             for i in range(0, len(msg_str), self.CHUNK_SIZE):
-                chunk = msg_str[i:i + self.CHUNK_SIZE]
+                chunk = msg_str[i:i + self.CHUNK_SIZE] if i + self.CHUNK_SIZE < len(msg_str) else msg_str[i:]
                 self.__console_port.write(chunk.encode("utf-8"))
+            
+            # Send the end character
+            self.__console_port.write(END_CHAR.encode("utf-8"))
 
         except Exception as e:
             raise SerialCommunicationError(f"Error sending message: {e}")

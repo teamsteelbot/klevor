@@ -39,6 +39,9 @@ class Sender(SenderABC, LoggerConsumerProtocol):
     # Outgoing wait timeout
     OUTGOING_WAIT_TIMEOUT = 0.1
 
+    # Write timeout
+    WRITE_TIMEOUT = 0.5
+
     def __init__(
         self,
         debug: bool,
@@ -116,7 +119,7 @@ class Sender(SenderABC, LoggerConsumerProtocol):
     def _open_port(self, port: str) -> None:
         try:
             # Create a new Serial instance for the data port
-            self.__data_serial = Serial(port, self.__baudrate)
+            self.__data_serial = Serial(port, self.__baudrate, write_timeout=self.WRITE_TIMEOUT)
             self.__data_port = port
             self.__data_serial.flush()
 
@@ -166,38 +169,48 @@ class Sender(SenderABC, LoggerConsumerProtocol):
     @final
     def _stop(self) -> None:
         with self.__rlock:
-            # Check if the start event is set
-            if self.__started_event.is_set():
-                # Clear the started event
-                self.__started_event.clear()
+            # Set the stop event
+            self.__stop_event.set()
 
-                # Send the message to the serial port
-                self._send_message(STOP_MESSAGE)
+            try:
+                # Check if the start event is set
+                if self.__started_event.is_set():
+                    # Clear the started event
+                    self.__started_event.clear()
 
-                # Set the stop sent event
-                self.__stop_sent_event.set()
+                    # Send the message to the serial port
+                    self._send_message(STOP_MESSAGE)
 
-                # Wait for the confirmation message
-                if not self.__stop_confirmation_event.wait(timeout=STOP_TIMEOUT):
-                    self.__logger.warning(
-                        "Stop confirmation event not set within the timeout."
-                    )
-                else:
-                    self.logger.info(
-                        "Stop confirmation event set."
-                    )
+                    # Set the stop sent event
+                    self.__stop_sent_event.set()
 
-                # Clear the stop confirmation event
-                self.__stop_confirmation_event.clear()
+                    # Wait for the confirmation message
+                    if not self.__stop_confirmation_event.wait(timeout=STOP_TIMEOUT):
+                        self.__logger.warning(
+                            "Stop confirmation event not set within the timeout."
+                        )
+                    else:
+                        self.logger.info(
+                            "Stop confirmation event set."
+                        )
+
+                    # Clear the stop confirmation event
+                    self.__stop_confirmation_event.clear()
+            
+            except Exception as e:
+                # Log the error
+                self.__logger.error(
+                    f"Error while stopping the serial communication sender: {e}"
+                )
 
             # Clear the deleted event
             self.__deleted_event.clear()
 
-            # Set the stop event
-            self.__stop_event.set()
-
             # Close the data serial port
             if self.__data_serial and self.__data_serial.is_open:
+                self.__logger.info(
+                    f"Closing data serial port: {self.__data_port}"
+                )
                 self.__data_serial.close()
                 self.__data_serial = None
 
