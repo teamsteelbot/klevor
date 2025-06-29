@@ -116,133 +116,136 @@ class Spawner:
         """
         Run the spawner to initialize and manage the challenge processes.
         """
-        try:
-            # Start the spawner
-            self._start()
+        # Loop to ensure the spawner runs until stopped
+        repeat = True
+        while repeat:
+            try:
+                # Start the spawner
+                self._start()
 
-            # Start the writer process
-            self.__writer_process = Process(
-                target=writer_target,
-                args=(self.__debug,
-                    self.__writer_messages_queue,
-                    self.__writer_stop_event)
-            )
-            self.__writer_process.start()
+                # Start the writer process
+                self.__writer_process = Process(
+                    target=writer_target,
+                    args=(self.__debug,
+                        self.__writer_messages_queue,
+                        self.__writer_stop_event)
+                )
+                self.__writer_process.start()
 
-            # Start the serial communication process
-            self.__serial_communication_process = Process(
-                target=serial_communication_target,
-                args=(self.__debug,
-                    self.__challenge,
-                    self.__start_event,
-                    self.__stop_event,
-                    self.__bno08x_yaw_deg,
-                    self.__bno08x_turns,
-                    self.__serial_sender_messages_queue,
-                    self.__writer_messages_queue)
-            )
-            self.__serial_communication_process.start()
+                # Start the serial communication process
+                self.__serial_communication_process = Process(
+                    target=serial_communication_target,
+                    args=(self.__debug,
+                        self.__challenge,
+                        self.__start_event,
+                        self.__stop_event,
+                        self.__bno08x_yaw_deg,
+                        self.__bno08x_turns,
+                        self.__serial_sender_messages_queue,
+                        self.__writer_messages_queue)
+                )
+                self.__serial_communication_process.start()
 
-            # Initialize the RPLidar process
-            self.__rplidar_process = Process(
-                target=rplidar_target,
-                args=(self.__debug,
-                    self.__rplidar_update_measures_event,
-                    self.__rplidar_measures_queue,
-                    self.__start_event,
-                    self.__stop_event,
-                    self.__writer_messages_queue)
-            )
-            self.__rplidar_process.start()
+                # Initialize the RPLidar process
+                self.__rplidar_process = Process(
+                    target=rplidar_target,
+                    args=(self.__debug,
+                        self.__rplidar_update_measures_event,
+                        self.__rplidar_measures_queue,
+                        self.__start_event,
+                        self.__stop_event,
+                        self.__writer_messages_queue)
+                )
+                self.__rplidar_process.start()
 
-            # Wait for the start event to be set
-            while not self.__stop_event.is_set():
-                if not self.__start_event.wait(timeout=self.START_WAIT_TIMEOUT):
-                    continue
-            if self.__stop_event.is_set():
+                # Wait for the start event to be set
+                while not self.__stop_event.is_set():
+                    if not self.__start_event.wait(timeout=self.START_WAIT_TIMEOUT):
+                        continue
+                if self.__stop_event.is_set():
+                    self._stop()
+                    return
+                print("Spawner started.")
+
+                # Check if the challenge requires the photographer and the object detector
+                with self.__challenge.get_lock():
+                    if self.__challenge.value == Challenge.WITH_OBSTACLES.as_char:
+                        # Initialize the required queues and events for the photographer and object detector
+                        self.__photographer_capture_image_event = Event()
+                        self.__photographer_images_queue = Queue()
+                        self.__object_detector_model_g_inferences_queue = Queue()
+                        self.__object_detector_model_m_inferences_queue = Queue()
+                        self.__object_detector_model_r_inferences_queue = Queue()
+
+                        # Initialize the photographer process
+                        self.__photographer_process = Process(
+                            target=photographer_target,
+                            args=(self.__debug,
+                                self.__photographer_images_queue,
+                                self.__photographer_capture_image_event,
+                                self.__start_event,
+                                self.__stop_event,
+                                self.__writer_messages_queue,
+                                self.__photographer_preprocess_fn,)
+                        )
+                        self.__photographer_process.start()
+
+                        # Initialize the object detector process
+                        self.__object_detector_process = Process(
+                            target=object_detector_target,
+                            args=(self.__debug,
+                                self.__yolo_version,
+                                self.__object_detector_model_g_inferences_queue,
+                                self.__object_detector_model_m_inferences_queue,
+                                self.__object_detector_model_r_inferences_queue,
+                                self.__start_event,
+                                self.__parking_event,
+                                self.__stop_event,
+                                self.__photographer_images_queue,
+                                self.__writer_messages_queue)
+                        )
+                        self.__object_detector_process.start()
+
+                # Initialize the pilot process
+                self.__pilot_process = Process(
+                    target=pilot_target,
+                    args=(self.__debug,
+                        self.__challenge,
+                        self.__start_event,
+                        self.__parking_event,
+                        self.__stop_event,
+                        self.__rplidar_update_measures_event,
+                        self.__rplidar_measures_queue,
+                        self.__serial_sender_messages_queue,
+                        self.__writer_messages_queue,
+                        self.__bno08x_yaw_deg,
+                        self.__bno08x_turns,
+                        self.__movement,
+                        self.__photographer_capture_image_event,
+                        self.__object_detector_model_g_inferences_queue,
+                        self.__object_detector_model_m_inferences_queue,
+                        self.__object_detector_model_r_inferences_queue)
+                )
+                self.__pilot_process.start()
+
+                # Stop the spawner
                 self._stop()
-                return
-            print("Spawner started.")
 
-            # Check if the challenge requires the photographer and the object detector
-            with self.__challenge.get_lock():
-                if self.__challenge.value == Challenge.WITH_OBSTACLES.as_char:
-                    # Initialize the required queues and events for the photographer and object detector
-                    self.__photographer_capture_image_event = Event()
-                    self.__photographer_images_queue = Queue()
-                    self.__object_detector_model_g_inferences_queue = Queue()
-                    self.__object_detector_model_m_inferences_queue = Queue()
-                    self.__object_detector_model_r_inferences_queue = Queue()
+                # Set the repeat flag to False to exit the loop
+                repeat = False
 
-                    # Initialize the photographer process
-                    self.__photographer_process = Process(
-                        target=photographer_target,
-                        args=(self.__debug,
-                            self.__photographer_images_queue,
-                            self.__photographer_capture_image_event,
-                            self.__start_event,
-                            self.__stop_event,
-                            self.__writer_messages_queue,
-                            self.__photographer_preprocess_fn,)
-                    )
-                    self.__photographer_process.start()
+            except KeyboardInterrupt:
+                print("Spawner interrupted by user (Ctrl+C). Shutting down...")
+                
+                # Set the stop event
+                self.__stop_event.set()
 
-                    # Initialize the object detector process
-                    self.__object_detector_process = Process(
-                        target=object_detector_target,
-                        args=(self.__debug,
-                            self.__yolo_version,
-                            self.__object_detector_model_g_inferences_queue,
-                            self.__object_detector_model_m_inferences_queue,
-                            self.__object_detector_model_r_inferences_queue,
-                            self.__start_event,
-                            self.__parking_event,
-                            self.__stop_event,
-                            self.__photographer_images_queue,
-                            self.__writer_messages_queue)
-                    )
-                    self.__object_detector_process.start()
+                # Stop the spawner
+                self._stop()
 
-            # Initialize the pilot process
-            self.__pilot_process = Process(
-                target=pilot_target,
-                args=(self.__debug,
-                    self.__challenge,
-                    self.__start_event,
-                    self.__parking_event,
-                    self.__stop_event,
-                    self.__rplidar_update_measures_event,
-                    self.__rplidar_measures_queue,
-                    self.__serial_sender_messages_queue,
-                    self.__writer_messages_queue,
-                    self.__bno08x_yaw_deg,
-                    self.__bno08x_turns,
-                    self.__movement,
-                    self.__photographer_capture_image_event,
-                    self.__object_detector_model_g_inferences_queue,
-                    self.__object_detector_model_m_inferences_queue,
-                    self.__object_detector_model_r_inferences_queue)
-            )
-            self.__pilot_process.start()
-
-            # Stop the spawner
-            self._stop()
-
-        except KeyboardInterrupt:
-            print("Spawner interrupted by user (Ctrl+C). Shutting down...")
-
-            # Set the start event to stop the processes
-            self.__start_event.set()
-
-            # Set the stop event
-            self.__stop_event.set()
-
-            # Stop the spawner
-            self._stop()
-
-        except Exception as e:
-            print(f"An error occurred in the Spawner: {e}")
-            self._stop()
+            except Exception as e:
+                print(f"An error occurred in the Spawner: {e}")
+                self._stop()
 
     def __del__(self):
         """
