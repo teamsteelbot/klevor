@@ -11,8 +11,7 @@ from .message import OutgoingMessage
 from ..log import Logger
 from ..log.decorators import log_on_error
 from .constants import (
-    RASPBERRY_PI_PICO_DATA_PORT,
-    RASPBERRY_PI_PICO_DATA_PORT_ALT,
+    RASPBERRY_PI_PICO_DATA_PORTS,
     RASPBERRY_PI_PICO_BAUDRATE,
     CONNECTION_ATTEMPTS,
     ATTEMPTS_DELAY,
@@ -47,8 +46,7 @@ class Sender(SenderABC, LoggerConsumerProtocol):
         messages_queue: Queue,
         writer_messages_queue: Queue,
         server_messages_queue: Optional[Queue] = None,
-        data_port: Optional[str] = RASPBERRY_PI_PICO_DATA_PORT,
-        data_port_alt: Optional[str] = RASPBERRY_PI_PICO_DATA_PORT_ALT,
+        data_ports: Optional[list[str]] = RASPBERRY_PI_PICO_DATA_PORTS,
         baudrate: Optional[int] = RASPBERRY_PI_PICO_BAUDRATE
     ):
         """
@@ -63,8 +61,7 @@ class Sender(SenderABC, LoggerConsumerProtocol):
             messages_queue (Queue): Queue to hold outgoing messages of the serial port.
             writer_messages_queue (Queue): Queue to hold log messages.
             server_messages_queue (Optional[Queue]): Queue to broadcast the messages through the websockets server.
-            data_port (Optional[str]): Serial port used for sending data to Pico.
-            data_port_alt (Optional[str]): Alternative serial port used for sending data to Pico.
+            data_ports (Optional[list[str]]): List of serial ports used for sending data to Pico.
             baudrate (Optional[int]): Baud rate for the serial communication.
         """
         # Initialize the debug flag
@@ -95,17 +92,16 @@ class Sender(SenderABC, LoggerConsumerProtocol):
         # Initialize the reentrant lock
         self.__rlock = RLock()
 
-        # Check the type of data port and its alternative port
-        is_instance(data_port, str)
-        self.__data_port = data_port
-        is_instance(data_port_alt, str)
-        self.__data_port_alt = data_port_alt
+        # Check the type of data ports
+        is_instance(data_ports, list)
+        self.__data_ports = data_ports
 
         # Check the type of baudrate
         is_instance(baudrate, int)
         self.__baudrate = baudrate
 
         # Initialize the data serial port
+        self.__data_port = None
         self.__data_serial = None
 
     @final
@@ -116,7 +112,9 @@ class Sender(SenderABC, LoggerConsumerProtocol):
     @final
     def _open_port(self, port: str) -> None:
         try:
+            # Create a new Serial instance for the data port
             self.__data_serial = Serial(port, self.__baudrate)
+            self.__data_port = port
             self.__data_serial.flush()
 
         except Exception as e:
@@ -143,15 +141,9 @@ class Sender(SenderABC, LoggerConsumerProtocol):
         # Open the data port
         attempt = 0
         for i in range(CONNECTION_ATTEMPTS):
-            try:
-                self._open_port(self.__data_port)
-                if self.__data_serial.is_open:
-                    attempt = i
-                    break
-
-            except Exception:
+            for port in self.__data_ports:
                 try:
-                    self._open_port(self.__data_port_alt)
+                    self._open_port(port)
                     if self.__data_serial.is_open:
                         attempt = i
                         break
@@ -164,7 +156,7 @@ class Sender(SenderABC, LoggerConsumerProtocol):
         # Check if the data serial port is opened
         if not self.__data_serial or not self.__data_serial.is_open:
             raise RuntimeError(
-                f"Failed to open data port on {self.__data_port} or {self.__data_port_alt} after {CONNECTION_ATTEMPTS} attempts."
+                f"Failed to open data port after {CONNECTION_ATTEMPTS} attempts."
             )
         
         # Log

@@ -7,10 +7,8 @@ from typing import Optional, final
 from .abstracts import SerialCommunicationABC
 from .constants import (
     RASPBERRY_PI_PICO_BAUDRATE,
-    RASPBERRY_PI_PICO_CONSOLE_PORT,
-    RASPBERRY_PI_PICO_CONSOLE_PORT_ALT,
-    RASPBERRY_PI_PICO_DATA_PORT,
-    RASPBERRY_PI_PICO_DATA_PORT_ALT,
+    RASPBERRY_PI_PICO_CONSOLE_PORTS,
+    RASPBERRY_PI_PICO_DATA_PORTS,
 )
 from ..log import Logger
 from ..utils.decorators import ignore_sigint
@@ -38,10 +36,8 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
         sender_messages_queue: Queue,
         writer_messages_queue: Queue,
         server_messages_queue: Optional[Queue] = None,
-        console_port: Optional[str] = RASPBERRY_PI_PICO_CONSOLE_PORT,
-        console_port_alt: Optional[str] = RASPBERRY_PI_PICO_CONSOLE_PORT_ALT,
-        data_port: Optional[str] = RASPBERRY_PI_PICO_DATA_PORT,
-        data_port_alt: Optional[str] = RASPBERRY_PI_PICO_DATA_PORT_ALT,
+        console_ports: Optional[list[str]] = RASPBERRY_PI_PICO_CONSOLE_PORTS,
+        data_ports: Optional[list[str]] = RASPBERRY_PI_PICO_DATA_PORTS,
         baudrate: Optional[int] = RASPBERRY_PI_PICO_BAUDRATE
     ):
         """
@@ -57,10 +53,8 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
             sender_messages_queue (Queue): Queue to hold outgoing messages of the serial port.
             writer_messages_queue (Queue): Queue to hold log messages.
             server_messages_queue (Optional[Queue]): Queue to broadcast the messages through the websockets server.
-            console_port (Optional[str]): Serial port used for receiving data from Pico.
-            console_port_alt (Optional[str]): Alternative serial port used for receiving data from Pico.
-            data_port (Optional[str]): Serial port used for sending data to Pico.
-            data_port_alt (Optional[str]): Alternative serial port used for sending data to Pico.
+            console_ports (Optional[list[str]]): List of serial ports used for receiving data from Pico.
+            data_ports (Optional[list[str]]): List of serial ports used for sending data to Pico.
             baudrate (Optional[int]): Baud rate for the serial communication.
         """
         # Initialize the events
@@ -81,8 +75,7 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
             sender_messages_queue=sender_messages_queue,
             writer_messages_queue=writer_messages_queue,
             server_messages_queue=server_messages_queue,
-            console_port=console_port,
-            console_port_alt=console_port_alt,
+            console_ports=console_ports,
             baudrate=baudrate
         )
 
@@ -96,8 +89,7 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
             messages_queue=sender_messages_queue,
             writer_messages_queue=writer_messages_queue,
             server_messages_queue=server_messages_queue,
-            data_port=data_port,
-            data_port_alt=data_port_alt,
+            data_ports=data_ports,
             baudrate=baudrate
         )
 

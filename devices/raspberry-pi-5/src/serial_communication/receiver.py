@@ -17,8 +17,7 @@ from .constants import (
     END_CHAR,
     ENCODE,
     RASPBERRY_PI_PICO_BAUDRATE,
-    RASPBERRY_PI_PICO_CONSOLE_PORT,
-    RASPBERRY_PI_PICO_CONSOLE_PORT_ALT,
+    RASPBERRY_PI_PICO_CONSOLE_PORTS,
     CONNECTION_ATTEMPTS,
     ATTEMPTS_DELAY,
     STOP_TIMEOUT
@@ -55,8 +54,7 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
         sender_messages_queue: Queue,
         writer_messages_queue: Queue,
         server_messages_queue: Optional[Queue] = None,
-        console_port: Optional[str] = RASPBERRY_PI_PICO_CONSOLE_PORT,
-        console_port_alt: Optional[str] = RASPBERRY_PI_PICO_CONSOLE_PORT_ALT,
+        console_ports: Optional[list[str]] = RASPBERRY_PI_PICO_CONSOLE_PORTS,
         baudrate: Optional[int] = RASPBERRY_PI_PICO_BAUDRATE
     ):
         """
@@ -74,8 +72,7 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
             sender_messages_queue (Queue): Queue to hold outgoing messages of the serial port.
             writer_messages_queue (Queue): Queue to hold log messages.
             server_messages_queue (Optional[Queue]): Queue to broadcast the messages through the websockets server.
-            console_port (Optional[str]): Serial port used for receiving data from Pico.
-            console_port_alt (Optional[str]): Alternative serial port used for receiving data from Pico.
+            console_ports (Optional[list[str]]): List of serial ports used for receiving data from Pico.
             baudrate (Optional[int]): Baud rate for the serial communication.
         """
         # Initialize the debug flag
@@ -111,18 +108,17 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
         # Initialize the reentrant lock
         self.__rlock = RLock()
 
-        # Check the type of console port and its alternative port
-        is_instance(console_port, str)
-        self.__console_port = console_port
-        is_instance(console_port_alt, str)
-        self.__console_port_alt = console_port_alt
+        # Check the type of console ports
+        is_instance(console_ports, list)
+        self.__console_ports = console_ports
 
         # Check the type of baudrate
         is_instance(baudrate, int)
         self.__baudrate = baudrate
 
         # Initialize the console serial port
-        self.__console = None
+        self.__console_port = None
+        self.__console_serial = None
 
     @final
     @property
@@ -132,8 +128,10 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
     @final
     def _open_port(self, port: str) -> None:
         try:
-            self.__console = Serial(port, self.__baudrate)
-            self.__console.flush()
+            # Create a new Serial instance for the console port
+            self.__console_serial = Serial(port, self.__baudrate)
+            self.__console_port = port
+            self.__console_serial.flush()
 
         except Exception as e:
             raise RuntimeError(f"Error opening console port {port}: {e}")
@@ -159,16 +157,10 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
         # Open the console port
         attempt = 0
         for i in range(CONNECTION_ATTEMPTS):
-            try:
-                self._open_port(self.__console_port)
-                if self.__console.is_open:
-                    attempt = i
-                    break
-
-            except Exception:
+            for port in self.__console_ports:
                 try:
-                    self._open_port(self.__console_port_alt)
-                    if self.__console.is_open:
+                    self._open_port(port)
+                    if self.__console_serial.is_open:
                         attempt = i
                         break
 
@@ -178,9 +170,9 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
             sleep(ATTEMPTS_DELAY)
 
         # Check if the console serial port is opened
-        if not self.__console or not self.__console.is_open:
+        if not self.__console_serial or not self.__console_serial.is_open:
             raise RuntimeError(
-                f"Failed to open console port on {self.__console_port} or {self.__console_port_alt} after {CONNECTION_ATTEMPTS} attempts."
+                f"Failed to open console port after {CONNECTION_ATTEMPTS} attempts."
             )
         
         # Log
@@ -223,23 +215,23 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
             self.__stop_event.set()
 
             # Close the console serial port
-            if self.__console and self.__console.is_open:
-                self.__console.close()
-                self.__console = None
+            if self.__console_serial and self.__console_serial.is_open:
+                self.__console_serial.close()
+                self.__console_serial = None
 
         # Log
         self.__logger.info("Stopped.")
 
     @final
     def _receive_latest_message(self) -> (IncomingMessage | None):
-        if self.__console.in_waiting == 0:
+        if self.__console_serial.in_waiting == 0:
             sleep(self.INCOMING_DELAY)
             return None
 
         # Parse the message from the serial port
         buffer = ""
         while not self.__stop_event.is_set() and not self.__deleted_event.is_set():
-            data = self.__console.read(1).decode(
+            data = self.__console_serial.read(1).decode(
                 ENCODE,
                 errors="ignore"
                 )
@@ -318,12 +310,12 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
                 f"Waiting for initial {repr(END_CHAR)} message to confirm serial communication is ready..."
             )
             while not self.__stop_event.is_set() and not self.__deleted_event.is_set():
-                if self.__console.in_waiting == 0:
+                if self.__console_serial.in_waiting == 0:
                     sleep(self.INCOMING_DELAY)
                     continue
 
                 # Read a single character from the console
-                char = self.__console.read(1).decode(ENCODE, errors="ignore")
+                char = self.__console_serial.read(1).decode(ENCODE, errors="ignore")
                 if not char:
                     continue
                 if char == END_CHAR:

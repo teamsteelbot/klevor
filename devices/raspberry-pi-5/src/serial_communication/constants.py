@@ -1,19 +1,20 @@
 # Raspberry Pi Pico baud rate
 RASPBERRY_PI_PICO_BAUDRATE = 115200
 
-# Raspberry PI Pico console port
-RASPBERRY_PI_PICO_CONSOLE_PORT = '/dev/ttyACM0'
-RASPBERRY_PI_PICO_CONSOLE_PORT_ALT = '/dev/ttyACM2'
+# Number of possible Raspberry Pi Pico ports for either console or data communication
+POSSIBLE_RASPBERRY_PI_PICO_PORTS = 5
 
-# Raspberry PI Pico data port
-RASPBERRY_PI_PICO_DATA_PORT = '/dev/ttyACM1'
-RASPBERRY_PI_PICO_DATA_PORT_ALT = '/dev/ttyACM3'
+# Raspberry PI Pico console ports
+RASPBERRY_PI_PICO_CONSOLE_PORTS = [f"/dev/ttyACM{i*2}" for i in range(POSSIBLE_RASPBERRY_PI_PICO_PORTS)]
+
+# Raspberry PI Pico data ports
+RASPBERRY_PI_PICO_DATA_PORTS = [f"/dev/ttyACM{i*2 + 1}" for i in range(POSSIBLE_RASPBERRY_PI_PICO_PORTS)]
 
 # Attempts to connect to the serial port
 CONNECTION_ATTEMPTS = 5
 
 # Attempts delay
-ATTEMPTS_DELAY = 1
+ATTEMPTS_DELAY = 0.25
 
 # Stop timeout
 STOP_TIMEOUT = 5
