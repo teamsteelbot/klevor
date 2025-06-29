@@ -2,6 +2,7 @@ from typing import Protocol, runtime_checkable
 
 from ..log import Logger
 
+
 @runtime_checkable
 class LoggerConsumerProtocol(Protocol):
     """

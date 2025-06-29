@@ -10,7 +10,7 @@ i2c1 = I2C(
     scl=Pin(3),
     sda=Pin(2),
     freq=100000
-    )  # Using default pins for I2C1
+)  # Using default pins for I2C1
 
 # Define XSHUT pins for the six sensors
 xshut_pins = [
@@ -93,7 +93,7 @@ try:
             "mm, Sensor 3:",
             dist3,
             "mm"
-            )
+        )
         print(
             "I2C1 - Sensor 4:",
             dist4,
@@ -102,7 +102,7 @@ try:
             "mm, Sensor 6:",
             dist6,
             "mm"
-            )
+        )
         time.sleep(1)
 
 except KeyboardInterrupt:

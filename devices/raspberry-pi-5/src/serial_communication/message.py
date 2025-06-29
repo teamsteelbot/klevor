@@ -1,6 +1,7 @@
-from .constants import HEADER_SEPARATOR_CHAR, END_CHAR
+from .constants import END_CHAR, HEADER_SEPARATOR_CHAR
 from .enums import IncomingCategory, OutgoingCategory, Status
 from ..utils import is_instance
+
 
 class IncomingMessage:
     """
@@ -61,7 +62,9 @@ class IncomingMessage:
             category = IncomingCategory.from_string(parts[0])
 
         except ValueError:
-            raise ValueError(f"Invalid category in incoming message: {parts[0]}")
+            raise ValueError(
+                f"Invalid category in incoming message: {parts[0]}"
+                )
 
         # Create and return the Message object
         return IncomingMessage(category, parts[1])

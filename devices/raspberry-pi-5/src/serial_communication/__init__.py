@@ -1,6 +1,6 @@
 from multiprocessing import Event, Queue
-from multiprocessing.synchronize import Event as EventCls
 from multiprocessing.sharedctypes import Value as ValueCls
+from multiprocessing.synchronize import Event as EventCls
 from threading import Thread
 from typing import Optional, final
 
@@ -10,11 +10,11 @@ from .constants import (
     RASPBERRY_PI_PICO_CONSOLE_PORTS,
     RASPBERRY_PI_PICO_DATA_PORTS,
 )
-from ..log import Logger
-from ..utils.decorators import ignore_sigint
-from ..log.protocols import LoggerConsumerProtocol
-from .sender import Sender
 from .receiver import Receiver
+from .sender import Sender
+from ..log import Logger
+from ..log.protocols import LoggerConsumerProtocol
+from ..utils.decorators import ignore_sigint
 
 
 class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):

@@ -1,28 +1,31 @@
-from typing import Optional, final
-from queue import Empty, Queue
 from multiprocessing import Event, RLock
 from multiprocessing.synchronize import Event as EventCls
+from queue import Empty, Queue
 from time import sleep
+from typing import Optional, final
 
 from serial import Serial
 
-from .common_messages import STOP_MESSAGE, OUTGOING_OK_MESSAGE, HEARTBEAT_MESSAGE
-from .message import OutgoingMessage
-from ..log import Logger
-from ..log.decorators import log_on_error
+from .abstracts import SenderABC
+from .common_messages import (
+    HEARTBEAT_MESSAGE,
+    OUTGOING_OK_MESSAGE,
+    STOP_MESSAGE,
+)
 from .constants import (
-    RASPBERRY_PI_PICO_DATA_PORTS,
-    RASPBERRY_PI_PICO_BAUDRATE,
-    CONNECTION_ATTEMPTS,
     ATTEMPTS_DELAY,
+    CONNECTION_ATTEMPTS,
     ENCODE,
     END_CHAR,
-    STOP_TIMEOUT
+    RASPBERRY_PI_PICO_BAUDRATE,
+    RASPBERRY_PI_PICO_DATA_PORTS,
+    STOP_TIMEOUT,
 )
-from ..log.decorators import LoggerConsumerProtocol
-from ..utils import is_instance
+from .message import OutgoingMessage
+from ..log import Logger
+from ..log.decorators import LoggerConsumerProtocol, log_on_error
 from ..server.dispatcher import Dispatcher as ServerDispatcher
-from .abstracts import SenderABC
+from ..utils import is_instance
 
 
 class Sender(SenderABC, LoggerConsumerProtocol):
@@ -158,7 +161,7 @@ class Sender(SenderABC, LoggerConsumerProtocol):
             raise RuntimeError(
                 f"Failed to open data port after {CONNECTION_ATTEMPTS} attempts."
             )
-        
+
         # Log
         self.__logger.info(
             f"Data port opened on {self.__data_port} after {attempt + 1} {'attempts' if attempt != 0 else 'attempt'}."
@@ -179,7 +182,9 @@ class Sender(SenderABC, LoggerConsumerProtocol):
                 self.__stop_sent_event.set()
 
                 # Wait for the confirmation message
-                confirmation = self.__stop_confirmation_event.wait(timeout=STOP_TIMEOUT)
+                confirmation = self.__stop_confirmation_event.wait(
+                    timeout=STOP_TIMEOUT
+                    )
                 if not confirmation:
                     self.__logger.warning(
                         "Stop confirmation event not set within the timeout."
@@ -271,4 +276,6 @@ class Sender(SenderABC, LoggerConsumerProtocol):
         self.__deleted_event.set()
 
         # Log the deletion
-        self.__logger.info("Instance will be deleted. Resources will be cleaned up.")
+        self.__logger.info(
+            "Instance will be deleted. Resources will be cleaned up."
+            )

@@ -1,18 +1,21 @@
 from asyncio import create_task, gather, run
 from io import StringIO
-from traceback import print_exception
 from time import monotonic
+from traceback import print_exception
 
 from board import (GP0, GP1, GP11, GP13, GP2, LED)
 from busio import I2C
 
 from lib.bno08x import BNO08XHandler
+from lib.enums import IncomingCategory, OutgoingCategory
 from lib.env import Env
 from lib.esc_motor import ESCMotorHandler
 from lib.led import LEDHandler
-from lib.serial_communication import SerialCommunication, SerialCommunicationError
-from lib.enums import IncomingCategory, OutgoingCategory
 from lib.message import IncomingMessage, OutgoingMessage
+from lib.serial_communication import (
+    SerialCommunication,
+    SerialCommunicationError,
+)
 from lib.servo import ServoHandler
 from lib.switch import SwitchHandler
 
@@ -86,7 +89,10 @@ async def main():
                 )
 
                 # Wait for the tasks to complete
-                results = await gather(update_quaternion_task, receive_serial_task)
+                results = await gather(
+                    update_quaternion_task,
+                    receive_serial_task
+                    )
                 msgs: list[IncomingMessage] = results[1]
                 if len(msgs) == 0:
                     # If no messages were received, check if the timeout has been reached
@@ -123,7 +129,7 @@ async def main():
                             )
                         )
                         break
-            
+
                     elif msg.category == IncomingCategory.MOTOR_SPEED:
                         # Set the motor speed
                         motor_speed = float(msg.content)
@@ -131,9 +137,11 @@ async def main():
                     elif msg.category == IncomingCategory.SERVO_ANGLE:
                         # Set the servo angle
                         servo_angle = int(msg.content)
-                    
+
                     else:
-                        raise SerialCommunicationError(f"Unknown message: {msg.format_to_send_with_error_message()}")
+                        raise SerialCommunicationError(
+                            f"Unknown message: {msg.format_to_send_with_error_message()}"
+                            )
 
                 # Add the set motor speed task and set servo angle task if the exit flag is not set
                 if not to_exit:
@@ -158,13 +166,14 @@ async def main():
             # Set the speed to 0 and center the servo in case of an exception
             await motor.stop()
             await servo.center()
-            
+
             # Get the traceback as string
             buf = StringIO()
             print_exception(e, e, e.__traceback__, file=buf)
             msg = OutgoingMessage(OutgoingCategory.ERROR, buf.getvalue())
-            serial_communication.send_message_by_chunks(msg)            
+            serial_communication.send_message_by_chunks(msg)
+
+        # Start the asyncio event loop
 
 
-# Start the asyncio event loop
 run(main())

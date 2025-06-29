@@ -1,5 +1,5 @@
-from .enums import OutgoingCategory, Status, IncomingCategory
-from .message import OutgoingMessage, IncomingMessage
+from .enums import IncomingCategory, OutgoingCategory, Status
+from .message import IncomingMessage, OutgoingMessage
 
 # Stop message
 STOP_MESSAGE = OutgoingMessage(

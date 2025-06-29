@@ -1,8 +1,6 @@
 <h1 id="indice">Índice</h1>
 
-1. *
-   *[Configuración Básica de la Raspberry Pi](#configuracion-basica-de-la-raspberry-pi)
-   **
+1. **[Configuración Básica de la Raspberry Pi](#configuracion-basica-de-la-raspberry-pi)**
     1. [Instalación de Raspberry Pi OS](#instalacion-de-raspberry-pi-os)
     2. [Instalación de la cámara](#instalacion-de-la-camara)
 2. **[Machine Learning](#machine-learning)**

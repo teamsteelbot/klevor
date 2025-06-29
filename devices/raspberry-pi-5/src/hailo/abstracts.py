@@ -6,8 +6,8 @@ import numpy as np
 from PIL.Image import Image
 
 from ..constants import HEIGHT, WIDTH
-from ..opencv.constants import PADDING_COLOR
 from ..log import Logger
+from ..opencv.constants import PADDING_COLOR
 
 
 class HailoABC(ABC):
@@ -55,7 +55,7 @@ class HailoABC(ABC):
         padded_image[y_offset:y_offset + new_img_height,
         x_offset:x_offset + new_img_width] = image
         return padded_image
-    
+
     @abstractmethod
     def logger(self) -> Logger:
         """

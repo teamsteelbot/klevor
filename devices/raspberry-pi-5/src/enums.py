@@ -2,6 +2,7 @@ from enum import Enum, unique
 
 from .utils import map_string_to_enum
 
+
 @unique
 class Challenge(Enum):
     """
@@ -24,7 +25,6 @@ class Challenge(Enum):
             Challenge: The corresponding Challenge enum value.
         """
         return map_string_to_enum(challenge_str.upper(), cls)
-
 
     @property
     def as_char(self) -> str:

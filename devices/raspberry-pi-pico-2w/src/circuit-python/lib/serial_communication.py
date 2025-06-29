@@ -5,11 +5,11 @@ from usb_cdc import console, data
 from .enums import Challenge, Status
 from .led import LEDHandler
 from .message import (
+    END_CHAR,
     IncomingCategory,
     IncomingMessage,
     OutgoingCategory,
     OutgoingMessage,
-    END_CHAR
 )
 
 
@@ -45,7 +45,7 @@ class SerialCommunication:
         OutgoingCategory.STATUS,
         Status.OK
     )
-    
+
     # Status incoming messages
     STOP_MESSAGE = IncomingMessage(
         IncomingCategory.STATUS,
@@ -126,12 +126,12 @@ class SerialCommunication:
             if byte != END_CHAR.encode("utf-8"):
                 buffer += byte
                 continue
-                
+
             try:
                 msg_str = buffer.decode("utf-8").strip()
                 msg = IncomingMessage.from_string(msg_str)
                 msgs.append(msg)
-                
+
             except Exception as e:
                 raise SerialCommunicationError(
                     f"Invalid message format or undecodable bytes: {buffer} ({e})"
@@ -157,7 +157,7 @@ class SerialCommunication:
 
         except Exception as e:
             raise SerialCommunicationError(f"Error sending message: {e}")
-        
+
     def send_message_by_chunks(self, msg: OutgoingMessage):
         """
         Send a message in chunks to the USB CDC console stream.
@@ -173,10 +173,10 @@ class SerialCommunication:
 
         try:
             msg_str = str(msg)
-        
+
             # Send error message to the serial communication
             for i in range(0, len(msg_str), self.CHUNK_SIZE):
-                chunk = msg_str[i:i+self.CHUNK_SIZE]
+                chunk = msg_str[i:i + self.CHUNK_SIZE]
                 self.__console_port.write(chunk.encode("utf-8"))
 
         except Exception as e:
@@ -212,7 +212,7 @@ class SerialCommunication:
         raise SerialCommunicationError(
             f"Confirmation message '{msg_to_confirm.format_to_send_with_error_message()}' not received within {timeout} seconds."
         )
-    
+
     def send_initialization_message(self):
         """
         Send an END_CHAR message to the console port to indicate initialization.
@@ -224,7 +224,9 @@ class SerialCommunication:
             self.__console_port.write(END_CHAR.encode("utf-8"))
 
         except Exception as e:
-            raise SerialCommunicationError(f"Error sending initialization message: {e}")
+            raise SerialCommunicationError(
+                f"Error sending initialization message: {e}"
+                )
 
     async def send_challenge_message(self):
         """
@@ -247,8 +249,10 @@ class SerialCommunication:
         Args:
             yaw_deg (float): The yaw value to send.
         """
-        bno08x_message = OutgoingMessage(OutgoingCategory.BNO08X_YAW_DEG,
-                                         str(yaw_deg))
+        bno08x_message = OutgoingMessage(
+            OutgoingCategory.BNO08X_YAW_DEG,
+            str(yaw_deg)
+            )
         self.send_message(bno08x_message)
 
     def send_bno08x_turns_message(self, turns: int):

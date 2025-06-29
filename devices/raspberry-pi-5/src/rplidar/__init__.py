@@ -7,18 +7,18 @@ from typing import Optional, final
 from .abstracts import RPLidarABC
 from .constants import (
     DISTANCE_DIFF,
+    MAX_DISTANCE_LIMIT,
     RPLIDAR_C1_BAUDRATE,
     RPLIDAR_C1_PORT,
     ULTRA_SIMPLE_PATH,
-    MAX_DISTANCE_LIMIT
 )
 from ..common.measure import Measure
 from ..log import Logger
+from ..log.decorators import log_on_error
+from ..log.protocols import LoggerConsumerProtocol
 from ..server.dispatcher import Dispatcher as WebSocketServerDispatcher
 from ..utils import is_instance
 from ..utils.decorators import ignore_sigint
-from ..log.decorators import log_on_error
-from ..log.protocols import LoggerConsumerProtocol
 
 
 class RPLidar(RPLidarABC, LoggerConsumerProtocol):
@@ -78,9 +78,11 @@ class RPLidar(RPLidarABC, LoggerConsumerProtocol):
         self.__stop_event = stop_event
 
         # Initialize the logger
-        self.__logger = Logger(writer_messages_queue,
-                               tag=self.LOGGER_TAG,
-                               debug=self.__debug)
+        self.__logger = Logger(
+            writer_messages_queue,
+            tag=self.LOGGER_TAG,
+            debug=self.__debug
+            )
 
         # Initialize the server dispatcher
         self.__server_dispatcher = WebSocketServerDispatcher(
@@ -104,7 +106,8 @@ class RPLidar(RPLidarABC, LoggerConsumerProtocol):
         self.__is_upside_down = is_upside_down
 
         # Initialize measures dictionary
-        self.__measures = {angle: Measure(angle*1.0, 0.0, 0) for angle in range(361)}
+        self.__measures = {angle: Measure(angle * 1.0, 0.0, 0) for angle in
+                           range(361)}
 
         # Messages counter
         self.__messages_counter = 0
@@ -222,7 +225,9 @@ class RPLidar(RPLidarABC, LoggerConsumerProtocol):
         self.__logger.info("Starting the measures update listener thread...")
         while not self.__stop_event.is_set() and not self.__deleted_event.is_set():
             # Wait for the update measures event to be set
-            update = self.__update_measures_event.wait(timeout=self.WAIT_TIMEOUT)
+            update = self.__update_measures_event.wait(
+                timeout=self.WAIT_TIMEOUT
+                )
             if not update:
                 continue
 

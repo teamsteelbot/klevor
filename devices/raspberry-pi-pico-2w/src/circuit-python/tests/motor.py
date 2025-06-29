@@ -1,6 +1,6 @@
 from time import sleep
-from board import GP2
 
+from board import GP2
 from lib.env import Env
 from lib.esc_motor import ESCMotorHandler
 

@@ -1,9 +1,9 @@
+from argparse import ArgumentParser
 from multiprocessing import Event, Process, Queue
 from time import sleep
-from argparse import ArgumentParser
 
-from .args import Args
 from . import Logger
+from .args import Args
 from .multiprocessing import writer_target
 
 if __name__ == "__main__":

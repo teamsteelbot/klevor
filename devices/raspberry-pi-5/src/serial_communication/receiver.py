@@ -1,30 +1,31 @@
-from typing import final, Optional
-from time import sleep
 from multiprocessing import Event, Queue, RLock
-from multiprocessing.synchronize import Event as EventCls
 from multiprocessing.sharedctypes import Value as ValueCls
+from multiprocessing.synchronize import Event as EventCls
+from time import sleep
+from typing import Optional, final
 
 from serial import Serial
 
-from ..enums import Challenge
 from .abstracts import ReceiverABC
-from .dispatcher import Dispatcher as SerialDispatcher
-from ..server.dispatcher import Dispatcher as ServerDispatcher
-from ..log import Logger
-from ..log.decorators import log_on_error
-from .message import IncomingMessage, OutgoingMessage
+from .common_messages import STOP_MESSAGE
 from .constants import (
-    END_CHAR,
+    ATTEMPTS_DELAY,
+    CONNECTION_ATTEMPTS,
     ENCODE,
+    END_CHAR,
     RASPBERRY_PI_PICO_BAUDRATE,
     RASPBERRY_PI_PICO_CONSOLE_PORTS,
-    CONNECTION_ATTEMPTS,
-    ATTEMPTS_DELAY,
-    STOP_TIMEOUT
+    STOP_TIMEOUT,
 )
-from ..utils import is_instance
+from .dispatcher import Dispatcher as SerialDispatcher
+from .message import IncomingMessage, OutgoingMessage
+from ..enums import Challenge
+from ..log import Logger
+from ..log.decorators import log_on_error
 from ..log.protocols import LoggerConsumerProtocol
-from .common_messages import STOP_MESSAGE
+from ..server.dispatcher import Dispatcher as ServerDispatcher
+from ..utils import is_instance
+
 
 class Receiver(ReceiverABC, LoggerConsumerProtocol):
     """
@@ -174,7 +175,7 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
             raise RuntimeError(
                 f"Failed to open console port after {CONNECTION_ATTEMPTS} attempts."
             )
-        
+
         # Log
         self.__logger.info(
             f"Console port opened on {self.__console_port} after {attempt + 1} {'attempts' if attempt != 0 else 'attempt'}."
@@ -234,7 +235,7 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
             data = self.__console_serial.read(1).decode(
                 ENCODE,
                 errors="ignore"
-                )
+            )
             if not data:
                 continue
             if data == END_CHAR:
@@ -315,7 +316,10 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
                     continue
 
                 # Read a single character from the console
-                char = self.__console_serial.read(1).decode(ENCODE, errors="ignore")
+                char = self.__console_serial.read(1).decode(
+                    ENCODE,
+                    errors="ignore"
+                    )
                 if not char:
                     continue
                 if char == END_CHAR:
@@ -361,7 +365,9 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
 
                     # Set the challenge as an environment variable
                     with self.__challenge.get_lock():
-                        self.__challenge.value = Challenge.from_string(msg.content).as_char
+                        self.__challenge.value = Challenge.from_string(
+                            msg.content
+                            ).as_char
 
                     # Continue to wait for the start event
                     continue
@@ -437,4 +443,6 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
         self.__deleted_event.set()
 
         # Log the deletion
-        self.__logger.info("Instance will be deleted. Resources will be cleaned up.")
+        self.__logger.info(
+            "Instance will be deleted. Resources will be cleaned up."
+            )

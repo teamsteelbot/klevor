@@ -1,8 +1,8 @@
 import os
 from functools import partial
-from queue import Empty
 from multiprocessing import Event, Queue, RLock
 from multiprocessing.synchronize import Event as EventCls
+from queue import Empty
 from typing import Optional, final
 
 import cv2
@@ -14,11 +14,11 @@ from .abstracts import HailoABC
 from ..constants import MODEL_G, MODEL_M, MODEL_R
 from ..files import Files
 from ..log import Logger
+from ..log.decorators import log_on_error
+from ..log.protocols import LoggerConsumerProtocol
 from ..model import ImageBoundingBoxes
 from ..utils import is_instance
 from ..utils.decorators import ignore_sigint
-from ..log.decorators import log_on_error
-from ..log.protocols import LoggerConsumerProtocol
 
 
 class Hailo(HailoABC, LoggerConsumerProtocol):
@@ -99,9 +99,11 @@ class Hailo(HailoABC, LoggerConsumerProtocol):
 
         # Initialize the logger
         self.__logger_tag = f"{self.LOGGER_TAG}_{model_name}"
-        self.__logger = Logger(writer_messages_queue,
-                               tag=self.__logger_tag,
-                               debug=self.__debug)
+        self.__logger = Logger(
+            writer_messages_queue,
+            tag=self.__logger_tag,
+            debug=self.__debug
+            )
 
         # Initialize the reentrant lock
         self.__rlock = RLock()
@@ -207,7 +209,9 @@ class Hailo(HailoABC, LoggerConsumerProtocol):
         self, completion_info, bindings, preprocessed_image: np.ndarray
     ) -> None:
         if completion_info.exception:
-            self.__logger.warning(f'Inference error: {completion_info.exception}')
+            self.__logger.warning(
+                f'Inference error: {completion_info.exception}'
+                )
             return
 
         # If the model has a single output, return the output buffer.
@@ -336,14 +340,18 @@ class Hailo(HailoABC, LoggerConsumerProtocol):
             self.__infer_model.set_batch_size(self.__batch_size)
 
             # Set the input and output types
-            self._set_input_type(self.__input_type) if self.__input_type else None
+            self._set_input_type(
+                self.__input_type
+                ) if self.__input_type else None
             self._set_output_type(
                 self.__output_type
             ) if self.__output_type else None
 
             with self.__infer_model.configure() as configured_infer_model:
                 while not self.__stop_event.is_set() and not self.__deleted_event.is_set():
-                    self._infer_latest_preprocessed_image(configured_infer_model)
+                    self._infer_latest_preprocessed_image(
+                        configured_infer_model
+                        )
 
             # Stop the Hailo handler
             self._stop()

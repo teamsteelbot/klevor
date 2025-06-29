@@ -7,8 +7,8 @@ import pygame
 from websockets import connect
 
 from .constants import MAX_DISTANCE_LIMIT
-from ..common.measure import Measure
 from ..args import Args
+from ..common.measure import Measure
 from ..server.message import Message, Tag
 
 
@@ -66,8 +66,10 @@ class App:
 
         # Initialize the measures and points-related objects
         self.__measures = [Measure(angle * 1.0, 0.0, 0) for angle in range(361)]
-        self.__previous_measures = {angle: Measure(angle * 1.0, 0.0, 0) for angle in range(361)}
-        self.__point_positions = {angle: (self.CENTER_X, self.CENTER_Y) for angle in range(361)}
+        self.__previous_measures = {angle: Measure(angle * 1.0, 0.0, 0) for
+                                    angle in range(361)}
+        self.__point_positions = {angle: (self.CENTER_X, self.CENTER_Y) for
+                                  angle in range(361)}
 
         # Initialize the WebSocket server connection parameters
         self.__ip = ip
@@ -82,7 +84,9 @@ class App:
         n = int(self.MAX_DISTANCE_RADIUS / self.STATIC_CIRCLE_RADIUS)
         is_exact = self.MAX_DISTANCE_RADIUS % self.STATIC_CIRCLE_RADIUS == 0
         for i in range(1, n + 1):
-            radius = int(i * self.STATIC_CIRCLE_RADIUS * self.MAX_DISTANCE_RADIUS_FACTOR)
+            radius = int(
+                i * self.STATIC_CIRCLE_RADIUS * self.MAX_DISTANCE_RADIUS_FACTOR
+                )
             color = self.INTERNAL_STATIC_CIRCLE_COLOR if not is_exact or i < n else self.EXTERNAL_STATIC_CIRCLE_COLOR
             width = self.INTERNAL_STATIC_CIRCLE_WIDTH if not is_exact or i < n else self.EXTERNAL_STATIC_CIRCLE_WIDTH
             pygame.draw.circle(

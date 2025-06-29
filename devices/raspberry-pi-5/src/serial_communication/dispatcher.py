@@ -1,8 +1,8 @@
 from multiprocessing import Queue
 from typing import final
 
-from .common_messages import STOP_MESSAGE, OUTGOING_OK_MESSAGE
 from .abstracts import DispatcherABC
+from .common_messages import OUTGOING_OK_MESSAGE, STOP_MESSAGE
 from .enums import OutgoingCategory
 from .message import OutgoingMessage
 from ..utils import is_instance

@@ -1,6 +1,6 @@
-from queue import Empty
 from multiprocessing import Event, Queue, RLock
 from multiprocessing.synchronize import Event as EventCls
+from queue import Empty
 from threading import Thread
 from typing import final
 
@@ -9,10 +9,10 @@ from .abstracts import ObjectDetectorABC
 from ..constants import (MODELS_NAME, MODEL_G, MODEL_M, MODEL_R)
 from ..files import Files
 from ..log import Logger
-from ..opencv import OpenCV
-from ..utils.decorators import ignore_sigint
 from ..log.decorators import log_on_error
 from ..log.protocols import LoggerConsumerProtocol
+from ..opencv import OpenCV
+from ..utils.decorators import ignore_sigint
 
 
 class ObjectDetector(ObjectDetectorABC, LoggerConsumerProtocol):
@@ -79,9 +79,11 @@ class ObjectDetector(ObjectDetectorABC, LoggerConsumerProtocol):
             self.__stop_events[model_name] = Event()
 
         # Initialize the logger
-        self.__logger = Logger(writer_messages_queue,
-                               tag=self.LOGGER_TAG,
-                               debug=self.__debug)
+        self.__logger = Logger(
+            writer_messages_queue,
+            tag=self.LOGGER_TAG,
+            debug=self.__debug
+            )
 
         # Initialize the reentrant lock
         self.__rlock = RLock()
@@ -210,7 +212,7 @@ class ObjectDetector(ObjectDetectorABC, LoggerConsumerProtocol):
             # Process images for G and R models
             self.__logger.info("Starting Hailo handlers for G and R models...")
             while (not self.__stop_event.is_set() and not
-                self.__deleted_event.is_set() and not self.__parking_event.is_set()):
+            self.__deleted_event.is_set() and not self.__parking_event.is_set()):
                 try:
                     # Get the image from the photographer images queue
                     image = self.__photographer_images_queue.get(

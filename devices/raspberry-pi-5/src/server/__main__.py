@@ -1,6 +1,6 @@
+from argparse import ArgumentParser
 from multiprocessing import Event, Process, Queue
 from time import sleep
-from argparse import ArgumentParser
 
 from .args import Args
 from .multiprocessing import websocket_server_target

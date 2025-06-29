@@ -5,10 +5,12 @@ RASPBERRY_PI_PICO_BAUDRATE = 115200
 POSSIBLE_RASPBERRY_PI_PICO_PORTS = 5
 
 # Raspberry PI Pico console ports
-RASPBERRY_PI_PICO_CONSOLE_PORTS = [f"/dev/ttyACM{i*2}" for i in range(POSSIBLE_RASPBERRY_PI_PICO_PORTS)]
+RASPBERRY_PI_PICO_CONSOLE_PORTS = [f"/dev/ttyACM{i * 2}" for i in
+                                   range(POSSIBLE_RASPBERRY_PI_PICO_PORTS)]
 
 # Raspberry PI Pico data ports
-RASPBERRY_PI_PICO_DATA_PORTS = [f"/dev/ttyACM{i*2 + 1}" for i in range(POSSIBLE_RASPBERRY_PI_PICO_PORTS)]
+RASPBERRY_PI_PICO_DATA_PORTS = [f"/dev/ttyACM{i * 2 + 1}" for i in
+                                range(POSSIBLE_RASPBERRY_PI_PICO_PORTS)]
 
 # Attempts to connect to the serial port
 CONNECTION_ATTEMPTS = 5

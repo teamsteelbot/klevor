@@ -1,7 +1,7 @@
-from queue import Empty
 from multiprocessing import Event, Queue, RLock
-from multiprocessing.synchronize import Event as EventCls
 from multiprocessing.sharedctypes import Value as ValueCls
+from multiprocessing.synchronize import Event as EventCls
+from queue import Empty
 from time import monotonic, sleep
 from typing import Optional, final
 
@@ -20,15 +20,15 @@ from .constants import (
     STOP_DISTANCE_THRESHOLD,
     TURNS,
 )
+from ..common.measure import Measure
 from ..enums import Challenge
 from ..log import Logger
-from ..rplidar import RPLidar
-from ..rplidar.enums import Direction
-from ..common.measure import Measure
-from ..serial_communication.dispatcher import Dispatcher as SerialDispatcher
-from ..utils.decorators import ignore_sigint
 from ..log.decorators import log_on_error
 from ..log.protocols import LoggerConsumerProtocol
+from ..rplidar import RPLidar
+from ..rplidar.enums import Direction
+from ..serial_communication.dispatcher import Dispatcher as SerialDispatcher
+from ..utils.decorators import ignore_sigint
 
 
 class Pilot(PilotABC, LoggerConsumerProtocol):
@@ -117,12 +117,16 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
         self.__bno08x_turns = bno08x_turns
 
         # Initialize the serial communication dispatcher
-        self.__serial_dispatcher = SerialDispatcher(serial_sender_messages_queue)
+        self.__serial_dispatcher = SerialDispatcher(
+            serial_sender_messages_queue
+            )
 
         # Initialize the logger
-        self.__logger = Logger(writer_messages_queue,
-                               tag=self.LOGGER_TAG,
-                               debug=self.__debug)
+        self.__logger = Logger(
+            writer_messages_queue,
+            tag=self.LOGGER_TAG,
+            debug=self.__debug
+            )
 
         # Initialize the reentrant lock
         self.__rlock = RLock()
@@ -235,7 +239,9 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
         # Get the measures from the queue
         while not self.__stop_event.is_set() and not self.__deleted_event.is_set():
             try:
-                return self.__rplidar_measures_queue.get(timeout=self.WAIT_DELAY)
+                return self.__rplidar_measures_queue.get(
+                    timeout=self.WAIT_DELAY
+                    )
 
             except Empty:
                 continue
@@ -440,7 +446,7 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
                 raise ValueError(
                     f"Unknown challenge: {self.__challenge.value}"
                 )
-            
+
             # Stop the Pilot
             self._stop()
 

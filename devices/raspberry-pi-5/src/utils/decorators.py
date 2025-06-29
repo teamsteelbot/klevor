@@ -1,5 +1,6 @@
-from signal import SIGINT, SIG_IGN, signal
 from functools import wraps
+from signal import SIGINT, SIG_IGN, signal
+
 
 def ignore_sigint(func):
     """

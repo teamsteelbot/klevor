@@ -1,6 +1,6 @@
 from multiprocessing import Queue
-from typing import Optional, final
 from types import NoneType
+from typing import Optional, final
 
 from .abstracts import LoggerABC
 from .enums import Category

@@ -22,9 +22,11 @@ if __name__ == "__main__":
     arg_movement = args.get_movement()
 
     # Create the spawner instance
-    spawner = Spawner(movement=arg_movement,
-                        yolo_version=arg_yolo_version,
-                        debug=arg_debug)
+    spawner = Spawner(
+        movement=arg_movement,
+        yolo_version=arg_yolo_version,
+        debug=arg_debug
+        )
 
     # Spawn the processes
     spawner.run()

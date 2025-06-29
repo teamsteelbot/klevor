@@ -1,7 +1,7 @@
 import os
 from multiprocessing import Queue
-from multiprocessing.synchronize import Event as EventCls
 from multiprocessing.sharedctypes import Value as ValueCls
+from multiprocessing.synchronize import Event as EventCls
 from typing import Optional
 
 from . import Pilot

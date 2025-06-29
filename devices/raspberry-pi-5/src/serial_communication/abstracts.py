@@ -91,6 +91,7 @@ class ReceiverABC(ABC):
         """
         pass
 
+
 class SenderABC(ABC):
     """
     Sender abstract class to handle sending messages through serial communication.

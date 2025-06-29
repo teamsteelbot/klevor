@@ -295,7 +295,9 @@ class BNO08XHandler:
 
         # If serial communication is enabled, send the yaw degrees message
         if self.__serial_communication:
-            self.__serial_communication.send_bno08x_yaw_deg_message(self.__yaw_deg)
+            self.__serial_communication.send_bno08x_yaw_deg_message(
+                self.__yaw_deg
+                )
 
         # Compute relative yaw degrees
         relative_yaw_deg = self.__yaw_deg - self.__initial_yaw_deg

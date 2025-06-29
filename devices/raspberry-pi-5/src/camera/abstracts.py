@@ -27,7 +27,7 @@ class CameraABC(ABC):
         # Convert the image stream to a PIL image
         image_stream.seek(0)
         return Image.open(image_stream)
-    
+
     @property
     @abstractmethod
     def logger(self) -> Logger:

@@ -6,6 +6,7 @@ HEADER_SEPARATOR_CHAR = ':'
 # Message end character
 END_CHAR = '\x04'
 
+
 class IncomingMessage:
     """
     Class to handle the messages received from the Raspberry Pi 5.
@@ -27,7 +28,7 @@ class IncomingMessage:
         String representation of the message.
         """
         return f"{self.__category}{HEADER_SEPARATOR_CHAR}{self.__content}{END_CHAR}"
-    
+
     def __eq__(self, other: 'IncomingMessage') -> bool:
         """
         Check if two messages are equal.
@@ -129,7 +130,7 @@ class OutgoingMessage:
         String representation of the message.
         """
         return f"{self.__category}{HEADER_SEPARATOR_CHAR}{self.__content}{END_CHAR}"
-    
+
     def __eq__(self, other: 'OutgoingMessage') -> bool:
         """
         Check if two messages are equal.

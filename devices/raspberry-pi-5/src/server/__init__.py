@@ -66,9 +66,11 @@ class WebSocketServer(WebSocketServerABC, LoggerConsumerProtocol):
         self.__stop_event = stop_event
 
         # Initialize the logger
-        self.__logger = Logger(writer_messages_queue,
-                               tag=self.LOGGER_TAG,
-                               debug=self.__debug)
+        self.__logger = Logger(
+            writer_messages_queue,
+            tag=self.LOGGER_TAG,
+            debug=self.__debug
+            )
 
         # Check the type of host
         is_instance(host, str)
@@ -230,17 +232,21 @@ class WebSocketServer(WebSocketServerABC, LoggerConsumerProtocol):
         while not self.__messages_queue.empty():
             # Broadcast the last message if available
             await self._broadcast_last_message()
-            
+
     @final
     def _start(self) -> None:
         with self.__rlock:
             # Check if the stop event is set
             if self.__stop_event.is_set():
-                raise RuntimeError("Stop event is set. WebSocket server will not run.")
+                raise RuntimeError(
+                    "Stop event is set. WebSocket server will not run."
+                    )
 
             # Check if the websocket server is already running
             if self.__started_event.is_set():
-                raise RuntimeError("WebSocket server is already running. Cannot start again.")
+                raise RuntimeError(
+                    "WebSocket server is already running. Cannot start again."
+                    )
 
             # Set the opened event to signal that the websocket server is ready
             self.__started_event.set()

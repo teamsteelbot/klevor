@@ -54,7 +54,7 @@ class SwitchHandler:
 
         # Send initialization message
         self.__serial_communication.send_initialization_message()
-        
+
         # Send challenge message
         await self.__serial_communication.send_challenge_message()
 

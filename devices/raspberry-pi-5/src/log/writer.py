@@ -1,6 +1,6 @@
-from queue import Empty
 from multiprocessing import Event, Queue, RLock
 from multiprocessing.synchronize import Event as EventCls
+from queue import Empty
 from typing import TextIO, final
 
 from .abstracts import WriterABC
@@ -19,10 +19,11 @@ class Writer(WriterABC):
     # Wait timeout for processing messages
     WAIT_TIMEOUT = 0.1
 
-    def __init__(self,
-                debug: bool,
-                messages_queue: Queue,
-                stop_event: EventCls
+    def __init__(
+        self,
+        debug: bool,
+        messages_queue: Queue,
+        stop_event: EventCls
         ) -> None:
         """
         Initialize the Logger class.
@@ -74,7 +75,9 @@ class Writer(WriterABC):
 
             # Check if the logger is already running
             if self.__started_event.is_set():
-                raise RuntimeError("Logger is already running. Cannot start again.")
+                raise RuntimeError(
+                    "Logger is already running. Cannot start again."
+                    )
 
             # Set the started event
             self.__started_event.set()
