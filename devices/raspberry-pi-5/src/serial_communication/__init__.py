@@ -33,7 +33,7 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
         challenge: ValueCls,
         start_event: EventCls,
         stop_event: EventCls,
-        bno08x_horizontal_axis_deg: ValueCls,
+        bno08x_yaw_deg: ValueCls,
         bno08x_turns: ValueCls,
         sender_messages_queue: Queue,
         writer_messages_queue: Queue,
@@ -52,7 +52,7 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
             challenge (ValueCls): Shared value to hold the current challenge.
             start_event (EventCls): Event to signal when the serial communication has started.
             stop_event (EventCls): Event to signal when the serial communication should stop sending and receiving messages.
-            bno08x_horizontal_axis_deg (ValueCls): Shared value for the BNO08X horizontal axis angle in degrees.
+            bno08x_yaw_deg (ValueCls): Shared value for the BNO08X yaw angle in degrees.
             bno08x_turns (ValueCls): Shared value for the BNO08X turns.
             sender_messages_queue (Queue): Queue to hold outgoing messages of the serial port.
             writer_messages_queue (Queue): Queue to hold log messages.
@@ -76,7 +76,7 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
             stop_sent_event=self.__stop_sent_event,
             stop_confirmation_event=self.__stop_confirmation_event,
             stop_event=stop_event,
-            bno08x_horizontal_axis_deg=bno08x_horizontal_axis_deg,
+            bno08x_yaw_deg=bno08x_yaw_deg,
             bno08x_turns=bno08x_turns,
             sender_messages_queue=sender_messages_queue,
             writer_messages_queue=writer_messages_queue,

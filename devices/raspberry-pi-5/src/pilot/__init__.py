@@ -62,7 +62,7 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
         rplidar_measures_queue: Queue,
         serial_sender_messages_queue: Queue,
         writer_messages_queue: Queue,
-        bno08x_horizontal_axis_deg: ValueCls,
+        bno08x_yaw_deg: ValueCls,
         bno08x_turns: ValueCls,
         movement: bool = True,
         photographer_capture_image_event: Optional[EventCls] = None,
@@ -84,7 +84,7 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
             rplidar_measures_queue (Queue): Queue to hold RPLidar measures.
             serial_sender_messages_queue (Queue): Queue to hold outgoing messages to the serial port.
             writer_messages_queue (Queue): Queue to hold log messages.
-            bno08x_horizontal_axis_deg (ValueCls): Shared value for the BNO08X horizontal axis angle in degrees.
+            bno08x_yaw_deg (ValueCls): Shared value for the BNO08X yaw angle in degrees.
             bno08x_turns (ValueCls): Shared value for the BNO08X turns.
             movement (bool): Flag to indicate if the pilot should handle movement.
             photographer_capture_image_event (Optional[EventCls]): Event to signal when the photographer should capture an image.
@@ -108,7 +108,7 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
         self.__detector_model_g_inferences_queue = detector_model_g_inferences_queue
         self.__detector_model_m_inferences_queue = detector_model_m_inferences_queue
         self.__detector_model_r_inferences_queue = detector_model_r_inferences_queue
-        self.__bno08x_horizontal_axis_deg = bno08x_horizontal_axis_deg
+        self.__bno08x_yaw_deg = bno08x_yaw_deg
         self.__bno08x_turns = bno08x_turns
 
         # Initialize the serial communication dispatcher
@@ -223,7 +223,7 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
         return self.__servo_angle != SERVO_CENTER_ANGLE
 
     @final
-    def _get_rplidar_measures(self) -> dict[int, Measure]:
+    def _get_rplidar_measures(self) -> dict[int, Measure] | None:
         # Set the event to signal that the RPLidar should update measures
         self.__rplidar_update_measures_event.set()
 

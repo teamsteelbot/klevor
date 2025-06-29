@@ -32,7 +32,7 @@ class OutgoingCategory:
     """
     CHALLENGE = "challenge"
     STATUS = "status"
-    BNO08X_HORIZONTAL_AXIS = "bno08x_horizontal_axis"
+    BNO08X_YAW_DEG = "bno08x_yaw_deg"
     BNO08X_TURNS = "bno08x_turns"
     ERROR = "error"
 
@@ -49,7 +49,7 @@ class OutgoingCategory:
             ValueError: If the category string does not match any known category.
         """
         category_name = category_str.lower()
-        for category in [cls.CHALLENGE, cls.STATUS, cls.BNO08X_HORIZONTAL_AXIS,
+        for category in [cls.CHALLENGE, cls.STATUS, cls.BNO08X_YAW_DEG,
                          cls.BNO08X_TURNS, cls.ERROR]:
             if category_name == category:
                 return category
@@ -110,40 +110,3 @@ class Challenge:
                 return challenge
 
         raise ValueError(f"Invalid challenge: {challenge_str}")
-
-class QuaternionAxis:
-    """
-    Class to represent the enum axes of the quaternion.
-    """
-    YAW = "yaw"
-    PITCH = "pitch"
-    ROLL = "roll"
-
-    @classmethod
-    def from_string(cls, axis_str: str) -> str:
-        """
-        Convert a string to a QuaternionAxis enum value.
-
-        Args:
-            axis_str (str): The string representation of the axis.
-        Returns:
-            str: The corresponding QuaternionAxis enum value.
-        Raises:
-            ValueError: If the axis string does not match any known axis.
-        """
-        axis_name = axis_str.lower()
-        for axis in [cls.YAW, cls.PITCH, cls.ROLL]:
-            if axis_name == axis:
-                return axis
-
-        # Compare by X, Y, Z
-        if axis_name == "z":
-            return cls.YAW
-
-        if axis_name == "y":
-            return cls.PITCH
-
-        if axis_name == "x":
-            return cls.ROLL
-
-        raise ValueError(f"Invalid quaternion axis: {axis_str}")

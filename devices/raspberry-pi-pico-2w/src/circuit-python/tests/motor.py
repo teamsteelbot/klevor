@@ -1,9 +1,20 @@
 from time import sleep
+from board import GP2
 
+from lib.env import Env
 from lib.esc_motor import ESCMotorHandler
 
+# Constants
+MOVEMENT = Env.get_movement_mode()
+
+# Pins
+ESC_MOTOR_PIN = GP2
+
 # Create an instance of the ESCMotorHandler
-motor_handler = ESCMotorHandler()
+motor_handler = ESCMotorHandler(
+    motor_pin=ESC_MOTOR_PIN,
+    movement=MOVEMENT
+)
 
 motor_handler.speed = 0
 sleep(1)

@@ -17,7 +17,7 @@ def pilot_target(
     rplidar_measures_queue: Queue,
     serial_sender_messages_queue: Queue,
     writer_messages_queue: Queue,
-    bno08x_horizontal_axis_deg: ValueCls,
+    bno08x_yaw_deg: ValueCls,
     bno08x_turns: ValueCls,
     movement: bool = True,
     photographer_capture_image_event: Optional[EventCls] = None,
@@ -38,7 +38,7 @@ def pilot_target(
         rplidar_measures_queue (Queue): Queue to hold RPLidar measures.
         serial_sender_messages_queue (Queue): Queue to hold outgoing messages to the serial port.
         writer_messages_queue (Queue): Queue to hold log messages.
-        bno08x_horizontal_axis_deg (ValueCls): Shared value for the BNO08X horizontal axis angle in degrees.
+        bno08x_yaw_deg (ValueCls): Shared value for the BNO08X yaw angle in degrees.
         bno08x_turns (ValueCls): Shared value for the BNO08X turns.
         movement (bool): Flag to indicate if the pilot should handle movement.
         photographer_capture_image_event (Optional[EventCls]): Event to signal when the photographer should capture an image.
@@ -62,7 +62,7 @@ def pilot_target(
         rplidar_measures_queue=rplidar_measures_queue,
         serial_sender_messages_queue=serial_sender_messages_queue,
         writer_messages_queue=writer_messages_queue,
-        bno08x_horizontal_axis_deg=bno08x_horizontal_axis_deg,
+        bno08x_yaw_deg=bno08x_yaw_deg,
         bno08x_turns=bno08x_turns,
         movement=movement,
         photographer_capture_image_event=photographer_capture_image_event,

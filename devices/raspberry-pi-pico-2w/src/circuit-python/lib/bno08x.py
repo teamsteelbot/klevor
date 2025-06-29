@@ -41,19 +41,19 @@ class BNO08XHandler:
 
     def __init__(
         self,
-        horizontal_axis: str,
         i2c: I2C,
         address: int = I2C_ADDRESS,
         serial_communication: SerialCommunication = None,
+        is_upside_down: bool = False,
     ):
         """
         Initializes the BNO08X handler with the specified I2C bus and address.
 
         Args:
-            horizontal_axis (str): The horizontal axis to use ('x', 'y', 'z', 'yaw', 'pitch', 'roll').
             i2c (I2C): The I2C bus to use for communication with the BNO08X sensor.
             address (int): The I2C address of the BNO08X sensor.
             serial_communication (SerialCommunication | None): Optional serial communication handler.
+            is_upside_down (bool): If True, the sensor is mounted upside down.
         """
         # Initialize the I2C bus and BNO08X sensor
         self.__bno = BNO08X_I2C(i2c, address=address)
@@ -63,12 +63,12 @@ class BNO08XHandler:
         # Check the type of serial communication
         self.__serial_communication = serial_communication
 
-        # Set the relative horizontal axis
-        self.__horizontal_axis = QuaternionAxis.from_string(horizontal_axis)
+        # Check if the sensor is mounted upside down
+        self.YAW_FACTOR = -1.0 if is_upside_down else 1.0
 
         # Set accumulated values to zero
-        self.__accumulated_horizontal_deg = 0.0
-        self.__last_horizontal_deg = 0.0
+        self.__accumulated_yaw_deg = 0.0
+        self.__last_yaw_deg = 0.0
         self.__accumulated_90_deg_turns = 0
         self.__last_segment_count = 0
 
@@ -176,11 +176,11 @@ class BNO08XHandler:
         return self.__initial_yaw_deg
 
     @property
-    def accumulated_horizontal_axis(self):
+    def accumulated_yaw_deg(self):
         """
-        Returns the accumulated horizontal axis value since the last reset.
+        Returns the accumulated yaw degrees value since the last reset.
         """
-        return self.__accumulated_horizontal_deg
+        return self.__accumulated_yaw_deg
 
     @property
     def accumulated_90_deg_turns(self):
@@ -294,45 +294,38 @@ class BNO08XHandler:
             *self.__quaternion
         )
 
-        # If serial communication is enabled, send the horizontal axis message
-        if self.__horizontal_axis == QuaternionAxis.YAW:
-            horizontal_axis_deg = self.__yaw_deg
-            initial_horizontal_axis_deg = self.__initial_yaw_deg
-        elif self.__horizontal_axis == QuaternionAxis.PITCH:
-            horizontal_axis_deg = self.__pitch_deg
-            initial_horizontal_axis_deg = self.__initial_pitch_deg
-        else:
-            horizontal_axis_deg = self.__roll_deg
-            initial_horizontal_axis_deg = self.__initial_roll_deg
-        self.__serial_communication.send_bno08x_horizontal_axis_message(horizontal_axis_deg)
+        # If serial communication is enabled, send the yaw degrees message
+        if self.__serial_communication:
+            self.__serial_communication.send_bno08x_yaw_deg_message(self.__yaw_deg)
 
-        # Compute relative horizontal axis
-        relative_deg = horizontal_axis_deg - initial_horizontal_axis_deg
-        if relative_deg > 180:
-            relative_deg -= 360
-        elif relative_deg < -180:
-            relative_deg += 360
+        # Compute relative yaw degrees
+        relative_yaw_deg = self.__yaw_deg - self.__initial_yaw_deg
+        if relative_yaw_deg > 180:
+            relative_yaw_deg -= 360
+        elif relative_yaw_deg < -180:
+            relative_yaw_deg += 360
 
-        # Calculate the change in horizontal axis since the last update
-        delta_raw_deg = relative_deg - self.__last_horizontal_deg
-        if delta_raw_deg > 180:
-            delta_raw_deg -= 360
-        elif delta_raw_deg < -180:
-            delta_raw_deg += 360
+        # Calculate the change in yaw degrees since the last update
+        delta_raw_yaw_deg = relative_yaw_deg - self.__last_yaw_deg
+        if delta_raw_yaw_deg > 180:
+            delta_raw_yaw_deg -= 360
+        elif delta_raw_yaw_deg < -180:
+            delta_raw_yaw_deg += 360
 
         # Update accumulated yaw and segment count
-        self.__accumulated_horizontal_deg += delta_raw_deg
-        current_segment_count = int(self.__accumulated_horizontal_deg / 90)
+        self.__accumulated_yaw_deg += delta_raw_yaw_deg
+        current_segment_count = int(self.__accumulated_yaw_deg / 90)
         if current_segment_count != self.__last_segment_count:
             self.__accumulated_90_deg_turns += current_segment_count - self.__last_segment_count
             self.__last_segment_count = current_segment_count
 
             # If serial communication is enabled, send the turn message
-            self.__serial_communication.send_bno08x_turns_message(
-                self.__accumulated_90_deg_turns
-            )
+            if self.__serial_communication:
+                self.__serial_communication.send_bno08x_turns_message(
+                    self.__accumulated_90_deg_turns
+                )
 
-        self.__last_horizontal_deg = relative_deg
+        self.__last_yaw_deg = relative_yaw_deg
 
     @property
     def turns(self):

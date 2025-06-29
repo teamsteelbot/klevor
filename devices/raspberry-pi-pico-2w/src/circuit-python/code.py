@@ -7,7 +7,6 @@ from board import (GP0, GP1, GP11, GP13, GP2, LED)
 from busio import I2C
 
 from lib.bno08x import BNO08XHandler
-from lib.enums import QuaternionAxis
 from lib.env import Env
 from lib.esc_motor import ESCMotorHandler
 from lib.led import LEDHandler
@@ -21,7 +20,6 @@ CHUNK_SIZE = 64
 MOVEMENT = Env.get_movement_mode()
 DEBUG = Env.get_debug_mode()
 CHALLENGE = Env.get_challenge()
-QUATERNION_HORIZONTAL_AXIS = QuaternionAxis.YAW
 RECEIVING_MESSAGE_TIMEOUT = 1.0
 
 # Pins
@@ -41,7 +39,6 @@ serial_communication = SerialCommunication(
 servo = ServoHandler(servo_pin=SERVO_PIN, movement=MOVEMENT)
 motor = ESCMotorHandler(motor_pin=ESC_MOTOR_PIN, movement=MOVEMENT)
 bno08x = BNO08XHandler(
-    horizontal_axis=QUATERNION_HORIZONTAL_AXIS,
     i2c=I2C_BUS,
     serial_communication=serial_communication
 )

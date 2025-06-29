@@ -238,15 +238,15 @@ class SerialCommunication:
         # Wait for confirmation of the challenge message
         await self.wait_for_confirmation_message(challenge_message)
 
-    def send_bno08x_horizontal_axis_message(self, horizontal_axis_deg: float):
+    def send_bno08x_yaw_deg_message(self, yaw_deg: float):
         """
-        Send a BNO08x horizontal axis message to the console port.
+        Send a BNO08x yaw degrees message to the console port.
 
         Args:
-            horizontal_axis_deg (float): The yaw value to send.
+            yaw_deg (float): The yaw value to send.
         """
-        bno08x_message = OutgoingMessage(OutgoingCategory.BNO08X_HORIZONTAL_AXIS,
-                                         str(horizontal_axis_deg))
+        bno08x_message = OutgoingMessage(OutgoingCategory.BNO08X_YAW_DEG,
+                                         str(yaw_deg))
         self.send_message(bno08x_message)
 
     def send_bno08x_turns_message(self, turns: int):

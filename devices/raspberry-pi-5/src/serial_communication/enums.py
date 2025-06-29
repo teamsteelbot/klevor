@@ -10,7 +10,7 @@ class IncomingCategory(Enum):
     """
     CHALLENGE = 1
     STATUS = 2
-    BNO08X_HORIZONTAL_AXIS = 3
+    BNO08X_YAW_DEG = 3
     BNO08X_TURNS = 4
     ERROR = 5
 

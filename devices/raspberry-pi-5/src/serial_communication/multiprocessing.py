@@ -19,7 +19,7 @@ def serial_communication_target(
     challenge: ValueCls,
     start_event: EventCls,
     stop_event: EventCls,
-    bno08x_horizontal_axis_deg: ValueCls,
+    bno08x_yaw_deg: ValueCls,
     bno08x_turns: ValueCls,
     sender_messages_queue: Queue,
     writer_messages_queue: Queue,
@@ -38,10 +38,8 @@ def serial_communication_target(
         debug (bool): Flag to indicate if the receiver is in debug mode.
         challenge (ValueCls): Shared value to hold the current challenge.
         start_event (EventCls): Event to signal when the serial communication has started.
-        stop_sent_event (EventCls): Event to signal when the stop message has been sent.
-        stop_confirmation_event (EventCls): Event to signal when stop messages has been confirmed.
         stop_event (EventCls): Event to signal when the serial communication should stop sending and receiving messages.
-        bno08x_horizontal_axis_deg (ValueCls): Shared value for the BNO08X horizontal axis angle in degrees.
+        bno08x_yaw_deg (ValueCls): Shared value for the BNO08X yaw angle in degrees.
         bno08x_turns (ValueCls): Shared value for the BNO08X turns.
         sender_messages_queue (Queue): Queue to hold outgoing messages of the serial port.
         writer_messages_queue (Queue): Queue to hold log messages.
@@ -65,7 +63,7 @@ def serial_communication_target(
         stop_event=stop_event,
         sender_messages_queue=sender_messages_queue,
         writer_messages_queue=writer_messages_queue,
-        bno08x_horizontal_axis_deg=bno08x_horizontal_axis_deg,
+        bno08x_yaw_deg=bno08x_yaw_deg,
         bno08x_turns=bno08x_turns,
         server_messages_queue=server_messages_queue,
         console_port=console_port,
