@@ -34,14 +34,20 @@ class WebSocketServer(WebSocketServerABC, LoggerConsumerProtocol):
     WAIT_TIMEOUT = 0.1
 
     def __init__(
-        self, messages_queue: Queue, parking_event: EventCls,
-        stop_event: EventCls, writer_messages_queue: Queue,
-        host: str = HOST, port: int = PORT
+        self,
+        debug: bool,
+        messages_queue: Queue,
+        parking_event: EventCls,
+        stop_event: EventCls,
+        writer_messages_queue: Queue,
+        host: str = HOST,
+        port: int = PORT
     ):
         """
         Initializes the WebSocket server with the specified host and port.
 
         Args:
+            debug (bool): Flag to indicate if the WebSocket server is in debug mode.
             messages_queue (Queue): Queue to broadcast messages through the websockets server.
             parking_event (EventCls): Event to signal the parking state of the robot.
             stop_event (EventCls): Event to signal when the websockets server should stop.
@@ -49,6 +55,9 @@ class WebSocketServer(WebSocketServerABC, LoggerConsumerProtocol):
             host (str): The host address for the WebSocket server.
             port (int): The port number for the WebSocket server.
         """
+        # Initialize the debug flag
+        self.__debug = debug
+
         # Initialize the messages queue and events
         self.__messages_queue = messages_queue
         self.__started_event = Event()
@@ -57,7 +66,9 @@ class WebSocketServer(WebSocketServerABC, LoggerConsumerProtocol):
         self.__stop_event = stop_event
 
         # Initialize the logger
-        self.__logger = Logger(writer_messages_queue, self.LOGGER_TAG)
+        self.__logger = Logger(writer_messages_queue,
+                               tag=self.LOGGER_TAG,
+                               debug=self.__debug)
 
         # Check the type of host
         is_instance(host, str)

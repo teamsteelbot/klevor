@@ -10,13 +10,17 @@ from ..server.multiprocessing import websocket_server_target
 
 if __name__ == "__main__":
     parser = ArgumentParser(
-        description="Script to test the RPLidar functionality and start it."
+        description="Script to test the RPLidar."
     )
     args = Args(parser)
     args.add_server_argument()
+    args.add_debug_argument()
 
     # Get the server argument
     arg_server = args.get_server()
+
+    # Get the debug mode
+    arg_debug = args.get_debug()
 
     # Create the required queues and events
     writer_messages_queue = Queue()
@@ -31,12 +35,12 @@ if __name__ == "__main__":
     # Create a process for the writer
     writer_process = Process(
         target=writer_target, args=(
-            writer_messages_queue, writer_stop_event)
+            arg_debug, writer_messages_queue, writer_stop_event)
     )
     writer_process.start()
 
     # Create an instance of Logger
-    logger = Logger(writer_messages_queue)
+    logger = Logger(writer_messages_queue, debug=arg_debug)
 
     # Create a process for the WebSocket server
     if not arg_server:
@@ -45,7 +49,7 @@ if __name__ == "__main__":
     else:
         server_process = Process(
             target=websocket_server_target, args=(
-                server_messages_queue, parking_event, stop_event,
+                arg_debug, server_messages_queue, parking_event, stop_event,
                 writer_messages_queue)
         )
         server_process.start()
@@ -53,7 +57,7 @@ if __name__ == "__main__":
     # Create a process for the RPLidar
     rplidar_process = Process(
         target=rplidar_target,
-        args=(rplidar_update_measures_event, rplidar_measures_queue,
+        args=(arg_debug, rplidar_update_measures_event, rplidar_measures_queue,
               start_event, stop_event, writer_messages_queue,
               server_messages_queue if arg_server else None,)
     )

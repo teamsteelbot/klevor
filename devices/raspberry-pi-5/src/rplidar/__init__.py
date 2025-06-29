@@ -10,6 +10,7 @@ from .constants import (
     RPLIDAR_C1_BAUDRATE,
     RPLIDAR_C1_PORT,
     ULTRA_SIMPLE_PATH,
+    MAX_DISTANCE_LIMIT
 )
 from ..common.measure import Measure
 from ..log import Logger
@@ -71,7 +72,9 @@ class RPLidar(RPLidarABC, LoggerConsumerProtocol):
         self.__stop_event = stop_event
 
         # Initialize the logger
-        self.__logger = Logger(writer_messages_queue, self.LOGGER_TAG)
+        self.__logger = Logger(writer_messages_queue,
+                               tag=self.LOGGER_TAG,
+                               debug=self.__debug)
 
         # Initialize the server dispatcher
         self.__server_dispatcher = WebSocketServerDispatcher(
@@ -94,14 +97,17 @@ class RPLidar(RPLidarABC, LoggerConsumerProtocol):
         is_instance(is_upside_down, bool)
         self.__is_upside_down = is_upside_down
 
-        # Initialize distances dictionary
-        self.__distances_dict = {}
+        # Initialize measures dictionary
+        self.__measures = {i: Measure(i, 0.0, 0) for i in range(361)}
 
         # Messages counter
         self.__messages_counter = 0
 
         # Initialize the process
         self.__process = None
+
+        # Initialize the rotation flag
+        self.__rotation = False
 
         # Initialize the listener thread for measures updates
         self.__update_measures_listener_thread = None
@@ -149,6 +155,9 @@ class RPLidar(RPLidarABC, LoggerConsumerProtocol):
         if rotation:
             parts = parts[1:]
 
+            # Log the end of the rotation
+            self.__logger.info("Full rotation completed.")
+
         # Get the angle, distance and quality
         angle = float(parts[1])
         distance = float(parts[3])
@@ -156,11 +165,15 @@ class RPLidar(RPLidarABC, LoggerConsumerProtocol):
 
         # Check the quality
         if quality == 0:
+            if rotation:
+                self.__rotation = True
             return
 
         # Check if the distance is within the maximum limit
-        # if distance < 0 or distance > self.MAX_DISTANCE_LIMIT:
-        #    return
+        if distance < 0 or distance > MAX_DISTANCE_LIMIT:
+            if rotation:
+                self.__rotation = True
+            return
 
         # Floor the angle to a float with no decimal places
         angle = round(angle, 0)
@@ -171,37 +184,26 @@ class RPLidar(RPLidarABC, LoggerConsumerProtocol):
             angle = 360 - angle
 
         # Check if the angle is already in the distances dictionary
-        if angle in self.__distances_dict:
-            self.__measure = Measure(angle, distance, quality)
-            self.__distances_dict[angle] = self.__measure
-
-        elif (abs(self.__distances_dict[angle].distance - distance) >
-              DISTANCE_DIFF) and (
-                abs(self.__distances_dict[angle].distance - distance) >
-                DISTANCE_DIFF):
+        measure = self.__measures.get(int(angle), None)
+        if measure and abs(measure.distance - distance) < DISTANCE_DIFF:
+            if rotation:
+                self.__rotation = True
             return
 
-        else:
-            # If it is, update the distance and quality
-            self.__measure = self.__distances_dict[angle]
-            self.__measure.distance = distance
-            self.__measure.quality = quality
-
-        # Log the end of the rotation
-        self.__logger.info("Full rotation completed.") if rotation else None
+        measure = Measure(angle, distance, quality)
+        self.__measures[int(angle)] = measure
 
         # Send the measure to the server
         self.__server_dispatcher.broadcast_rplidar_measure(
-            self.__measure
+            measure
         ) if self.__server_dispatcher else None
 
+        # Check if the rotation is complete
+        if rotation or self.__rotation:
+            self.__rotation = False
+
         # Log
-        self.__logger.debug(
-            "RPLidar measure: " + str(
-                self.__distances_dict[
-                    angle]
-            )
-        ) if self.__debug else None
+        self.__logger.debug("RPLidar measure: " + str(measure))
 
         # Increment the messages counter
         self.__messages_counter += 1
@@ -215,7 +217,7 @@ class RPLidar(RPLidarABC, LoggerConsumerProtocol):
             self.__update_measures_event.wait()
 
             # Put the measure in the measures queue
-            self.__measures_queue.put(self.__distances_dict)
+            self.__measures_queue.put(self.__measures)
 
             # Clear the update measures event
             self.__update_measures_event.clear()

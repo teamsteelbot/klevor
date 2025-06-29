@@ -96,7 +96,9 @@ class Hailo(HailoABC, LoggerConsumerProtocol):
 
         # Initialize the logger
         self.__logger_tag = f"{self.LOGGER_TAG}_{model_name}"
-        self.__logger = Logger(writer_messages_queue, self.__logger_tag)
+        self.__logger = Logger(writer_messages_queue,
+                               tag=self.__logger_tag,
+                               debug=self.__debug)
 
         # Initialize the reentrant lock
         self.__rlock = RLock()

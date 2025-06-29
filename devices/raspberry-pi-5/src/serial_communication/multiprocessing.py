@@ -16,15 +16,13 @@ from .constants import (
 
 def serial_communication_target(
     debug: bool,
-    challenge: ValueCls,
+    challenge: EventCls,
     start_event: EventCls,
-    parking_event: EventCls,
     stop_event: EventCls,
-    messages_queue: Queue,
-    writer_messages_queue: Queue,
     bno08x_horizontal_axis_deg: ValueCls,
     bno08x_turns: ValueCls,
-    photographer_capture_image_event: EventCls,
+    sender_messages_queue: Queue,
+    writer_messages_queue: Queue,
     server_messages_queue: Optional[Queue] = None,
     console_port: Optional[str] = RASPBERRY_PI_PICO_CONSOLE_PORT,
     console_port_alt: Optional[str] = RASPBERRY_PI_PICO_CONSOLE_PORT_ALT,
@@ -37,16 +35,16 @@ def serial_communication_target(
     communication.
 
     Args:
-        debug (bool): Flag to indicate if the serial communication is in debug mode.
-        challenge (ValueCls): Shared value to hold the current challenge.
+        debug (bool): Flag to indicate if the receiver is in debug mode.
+        challenge (EventCls): Shared value to hold the current challenge.
         start_event (EventCls): Event to signal when the serial communication has started.
-        parking_event (EventCls): Event to signal the parking state of the robot.
+        stop_sent_event (EventCls): Event to signal when the stop message has been sent.
+        stop_confirmation_event (EventCls): Event to signal when stop messages has been confirmed.
         stop_event (EventCls): Event to signal when the serial communication should stop sending and receiving messages.
-        messages_queue (Queue): Queue to hold outgoing messages to the serial port.
-        writer_messages_queue (Queue): Queue to hold log messages.
         bno08x_horizontal_axis_deg (ValueCls): Shared value for the BNO08X horizontal axis angle in degrees.
         bno08x_turns (ValueCls): Shared value for the BNO08X turns.
-        photographer_capture_image_event (EventCls): Event to signal when an image should be captured.
+        sender_messages_queue (Queue): Queue to hold outgoing messages of the serial port.
+        writer_messages_queue (Queue): Queue to hold log messages.
         server_messages_queue (Optional[Queue]): Queue to broadcast the messages through the websockets server.
         console_port (Optional[str]): Serial port used for receiving data from Pico.
         console_port_alt (Optional[str]): Alternative serial port used for receiving data from Pico.
@@ -64,13 +62,11 @@ def serial_communication_target(
         debug=debug,
         challenge=challenge,
         start_event=start_event,
-        parking_event=parking_event,
         stop_event=stop_event,
-        messages_queue=messages_queue,
+        sender_messages_queue=sender_messages_queue,
         writer_messages_queue=writer_messages_queue,
         bno08x_horizontal_axis_deg=bno08x_horizontal_axis_deg,
         bno08x_turns=bno08x_turns,
-        photographer_capture_image_event=photographer_capture_image_event,
         server_messages_queue=server_messages_queue,
         console_port=console_port,
         console_port_alt=console_port_alt,

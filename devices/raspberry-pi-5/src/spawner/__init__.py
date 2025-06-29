@@ -39,7 +39,7 @@ class Spawner:
         self.__stop_event = Event()
         self.__writer_messages_queue = Queue()
         self.__writer_stop_event = Event()
-        self.__serial_messages_queue = Queue()
+        self.__serial_sender_messages_queue = Queue()
         self.__bno08x_horizontal_axis_deg = Value('d', 0.0)
         self.__bno08x_turns = Value('i', 0)
         self.__challenge = Value('c', Challenge.UNKNOWN.as_char)
@@ -132,13 +132,11 @@ class Spawner:
                 args=(self.__debug,
                     self.__challenge,
                     self.__start_event,
-                    self.__parking_event,
                     self.__stop_event,
-                    self.__serial_messages_queue,
-                    self.__writer_messages_queue,
                     self.__bno08x_horizontal_axis_deg,
                     self.__bno08x_turns,
-                    self.__photographer_capture_image_event)
+                    self.__serial_sender_messages_queue,
+                    self.__writer_messages_queue)
             )
             self.__serial_communication_process.start()
 
@@ -215,7 +213,7 @@ class Spawner:
                     self.__stop_event,
                     self.__rplidar_update_measures_event,
                     self.__rplidar_measures_queue,
-                    self.__serial_messages_queue,
+                    self.__serial_sender_messages_queue,
                     self.__writer_messages_queue,
                     self.__bno08x_horizontal_axis_deg,
                     self.__bno08x_turns,

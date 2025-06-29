@@ -7,6 +7,7 @@ from .constants import HOST, PORT
 
 
 def websocket_server_target(
+    debug: bool,
     messages_queue: Queue,
     parking_event: EventCls,
     stop_event: EventCls,
@@ -18,6 +19,7 @@ def websocket_server_target(
     Target function for a multiprocessing process that handles the WebSocket server.
 
     Args:
+        debug (bool): Flag to indicate if the WebSocket server is in debug mode.
         messages_queue (Queue): Queue to broadcast messages through the websockets server.
         parking_event (EventCls): Event to signal the parking state of the server.
         stop_event (EventCls): Event to signal when the websockets server should stop.
@@ -32,6 +34,7 @@ def websocket_server_target(
 
     # Initialize the websocket server
     server = WebSocketServer(
+        debug=debug,
         messages_queue=messages_queue,
         parking_event=parking_event,
         stop_event=stop_event,

@@ -8,7 +8,7 @@ from websockets import connect
 
 from .constants import MAX_DISTANCE_LIMIT
 from ..common.measure import Measure
-from ..args import Args, Flag
+from ..args import Args
 from ..server.message import Message, Tag
 
 
@@ -63,12 +63,11 @@ class App:
         self.__screen = pygame.display.set_mode((self.APP_SIZE, self.APP_SIZE))
         pygame.display.set_caption("Klevor RPLidar GUI")
         self.__clock = pygame.time.Clock()
-        self.__running = True
 
         # Initialize the measures and points-related objects
         self.__measures = [Measure(angle * 1.0, 0.0, 0) for angle in range(361)]
-        self.__previous_measures = {}
-        self.__point_positions = {}
+        self.__previous_measures = {angle: Measure(angle * 1.0, 0.0, 0) for angle in range(361)}
+        self.__point_positions = {angle: (self.CENTER_X, self.CENTER_Y) for angle in range(361)}
 
         # Initialize the WebSocket server connection parameters
         self.__ip = ip
@@ -83,7 +82,7 @@ class App:
         n = int(self.MAX_DISTANCE_RADIUS / self.STATIC_CIRCLE_RADIUS)
         is_exact = self.MAX_DISTANCE_RADIUS % self.STATIC_CIRCLE_RADIUS == 0
         for i in range(1, n + 1):
-            radius = i * self.STATIC_CIRCLE_RADIUS * self.MAX_DISTANCE_RADIUS_FACTOR
+            radius = int(i * self.STATIC_CIRCLE_RADIUS * self.MAX_DISTANCE_RADIUS_FACTOR)
             color = self.INTERNAL_STATIC_CIRCLE_COLOR if not is_exact or i < n else self.EXTERNAL_STATIC_CIRCLE_COLOR
             width = self.INTERNAL_STATIC_CIRCLE_WIDTH if not is_exact or i < n else self.EXTERNAL_STATIC_CIRCLE_WIDTH
             pygame.draw.circle(
@@ -113,12 +112,12 @@ class App:
         of each measure, and stores them in the __point_positions dictionary.
         """
         for measure in self.__measures:
-            prev = self.__previous_measures.get(measure.angle)
+            prev = self.__previous_measures.get(int(measure.angle))
             if prev and abs(
                     prev.distance - measure.distance
             ) < self.DISTANCE_MINIMUM_DIFFERENCE:
                 continue
-            self.__previous_measures[measure.angle] = measure
+            self.__previous_measures[int(measure.angle)] = measure
 
             # Adjust angle to match the coordinate system
             radian_angle = math.radians(int(measure.angle + 270) % 360)
@@ -132,15 +131,7 @@ class App:
                     radian_angle
                 ) * self.MAX_DISTANCE_RADIUS_FACTOR
             )
-            self.__point_positions[measure.angle] = (x, y)
-
-        """
-        # Optionally, remove old points
-        current_angles = set(m.angle for m in self.__measures)
-        for angle in list(self.__point_positions):
-            if angle not in current_angles:
-                del self.__point_positions[angle]
-        """
+            self.__point_positions[int(measure.angle)] = (x, y)
 
     def draw_points(self):
         """
@@ -164,10 +155,10 @@ class App:
         Main loop of the application that handles events, updates the display, and draws the GUI.
         This method runs until the application is closed.
         """
-        while self.__running:
+        while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    self.__running = False
+                    break
 
             self.__screen.fill(self.BACKGROUND_COLOR)
             self.draw_static()
@@ -215,15 +206,15 @@ if __name__ == "__main__":
     parser = ArgumentParser(
         description="Script to run the Klevor RPLidar GUI application.",
     )
-    Args.add_ip_argument(parser, default=App.IP)
-    Args.add_port_argument(parser, default=App.PORT)
-    args = Args.parse_args_as_dict(parser)
+    args = Args(parser)
+    args.add_ip_argument(default=App.IP)
+    args.add_port_argument(default=App.PORT)
 
     # Get the IP address from the arguments
-    ip = Args.get_attribute_from_args_dict(args, Flag.IP)
+    ip = args.get_ip()
 
     # Get the port from the arguments
-    port = Args.get_attribute_from_args_dict(args, Flag.PORT)
+    port = args.get_port()
 
     app = App(ip, port)
     ws_thread = Thread(

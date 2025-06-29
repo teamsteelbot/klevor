@@ -17,6 +17,7 @@ class Logger(LoggerABC):
         self,
         writer_messages_queue: Queue,
         tag: Optional[str] = None,
+        debug: bool = False,
         unique_tag: bool = False
     ) -> None:
         """
@@ -25,8 +26,13 @@ class Logger(LoggerABC):
         Args:
             writer_messages_queue (Queue): Queue to hold log messages.
             tag (Optional[str]): Tag to identify the logger instance.
-            unique_tag (bool): Whether to generate a unique tag for the logger instance.
+            debug (Optional[bool]): Flag to indicate if the logger is in debug mode.
+            unique_tag (Optional[bool]): Whether to generate a unique tag for the logger instance.
         """
+        # Check the type of debug
+        is_instance(debug, bool)
+        self.__debug = debug
+
         # Initialize the messages queue and events
         self.__writer_messages_queue = writer_messages_queue
 
@@ -69,4 +75,4 @@ class Logger(LoggerABC):
 
     @final
     def debug(self, content: str) -> None:
-        self.log(content, Category.DEBUG)
+        self.log(content, Category.DEBUG) if self.__debug else None

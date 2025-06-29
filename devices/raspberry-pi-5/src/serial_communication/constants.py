@@ -9,6 +9,15 @@ RASPBERRY_PI_PICO_CONSOLE_PORT_ALT = '/dev/ttyACM2'
 RASPBERRY_PI_PICO_DATA_PORT = '/dev/ttyACM1'
 RASPBERRY_PI_PICO_DATA_PORT_ALT = '/dev/ttyACM3'
 
+# Attempts to connect to the serial port
+CONNECTION_ATTEMPTS = 5
+
+# Attempts delay
+ATTEMPTS_DELAY = 1
+
+# Stop timeout
+STOP_TIMEOUT = 5
+
 # Encode
 ENCODE = 'utf-8'
 

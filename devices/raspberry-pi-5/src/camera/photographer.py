@@ -70,7 +70,9 @@ class Photographer(PhotographerABC, LoggerConsumerProtocol):
         self.__rlock = RLock()
 
         # Initialize the logger
-        self.__logger = Logger(writer_messages_queue, self.LOGGER_TAG)
+        self.__logger = Logger(writer_messages_queue,
+                               tag=self.LOGGER_TAG,
+                               debug=self.__debug)
 
         # Check the type of preprocess function
         is_instance(preprocess_fn, Callable)
@@ -154,7 +156,7 @@ class Photographer(PhotographerABC, LoggerConsumerProtocol):
         self.__imager_counter += 1
 
         # Log
-        self.__logger.debug(f"Image {self.__imager_counter} added to images queue.") if self.__debug else None
+        self.__logger.debug(f"Image {self.__imager_counter} added to images queue.")
 
         # Clear the capture image event
         self.__capture_image_event.clear()

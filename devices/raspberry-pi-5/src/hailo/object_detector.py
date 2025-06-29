@@ -76,7 +76,9 @@ class ObjectDetector(ObjectDetectorABC, LoggerConsumerProtocol):
             self.__stop_events[model_name] = Event()
 
         # Initialize the logger
-        self.__logger = Logger(writer_messages_queue, self.LOGGER_TAG)
+        self.__logger = Logger(writer_messages_queue,
+                               tag=self.LOGGER_TAG,
+                               debug=self.__debug)
 
         # Initialize the reentrant lock
         self.__rlock = RLock()

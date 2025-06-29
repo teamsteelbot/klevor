@@ -2,7 +2,6 @@ from .constants import HEADER_SEPARATOR_CHAR, END_CHAR
 from .enums import IncomingCategory, OutgoingCategory, Status
 from ..utils import is_instance
 
-
 class IncomingMessage:
     """
     Class to handle the messages received from the Raspberry Pi Pico 2W.

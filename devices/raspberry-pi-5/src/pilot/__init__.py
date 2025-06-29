@@ -57,8 +57,7 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
         stop_event: EventCls,
         rplidar_update_measures_event: EventCls,
         rplidar_measures_queue: Queue,
-        serial_incoming_messages_queue: Queue,
-        serial_outgoing_messages_queue: Queue,
+        serial_messages_queue: Queue,
         writer_messages_queue: Queue,
         bno08x_horizontal_axis_deg: ValueCls,
         bno08x_turns: ValueCls,
@@ -80,8 +79,7 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
             rplidar_update_measures_event (EventCls): Event to signal when the
             RPLidar should update measures.
             rplidar_measures_queue (Queue): Queue to hold RPLidar measures.
-            serial_incoming_messages_queue (Queue): Queue to hold incoming messages from the serial port.
-            serial_outgoing_messages_queue (Queue): Queue to hold outgoing messages to the serial port.
+            serial_messages_queue (Queue): Queue to hold outgoing messages to the serial port.
             writer_messages_queue (Queue): Queue to hold log messages.
             bno08x_horizontal_axis_deg (ValueCls): Shared value for the BNO08X horizontal axis angle in degrees.
             bno08x_turns (ValueCls): Shared value for the BNO08X turns.
@@ -111,14 +109,12 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
         self.__bno08x_turns = bno08x_turns
 
         # Initialize the serial communication dispatcher
-        self.__serial_dispatcher = SerialDispatcher(
-            serial_incoming_messages_queue,
-            serial_outgoing_messages_queue,
-            writer_messages_queue
-        )
+        self.__serial_dispatcher = SerialDispatcher(serial_messages_queue)
 
         # Initialize the logger
-        self.__logger = Logger(writer_messages_queue, self.LOGGER_TAG)
+        self.__logger = Logger(writer_messages_queue,
+                               tag=self.LOGGER_TAG,
+                               debug=self.__debug)
 
         # Initialize the reentrant lock
         self.__rlock = RLock()

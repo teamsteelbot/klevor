@@ -1,10 +1,21 @@
 from multiprocessing import Event, Process, Queue
 from time import sleep
+from argparse import ArgumentParser
 
+from .args import Args
 from . import Logger
 from .multiprocessing import writer_target
 
 if __name__ == "__main__":
+    parser = ArgumentParser(
+        description="Script to test the Witer."
+    )
+    args = Args(parser)
+    args.add_debug_argument()
+
+    # Get the debug mode
+    arg_debug = args.get_debug()
+
     # Create the required queues and events
     writer_messages_queue = Queue()
     stop_event = Event()
@@ -12,12 +23,12 @@ if __name__ == "__main__":
     # Create a process for the writer
     writer_process = Process(
         target=writer_target, args=(
-            writer_messages_queue, stop_event)
+            arg_debug, writer_messages_queue, stop_event)
     )
     writer_process.start()
 
     # Create an instance of Logger
-    logger = Logger(writer_messages_queue)
+    logger = Logger(writer_messages_queue, debug=arg_debug)
 
     try:
         # Log a message using the logger
