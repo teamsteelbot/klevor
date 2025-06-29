@@ -13,6 +13,7 @@ def pilot_target(
     start_event: EventCls,
     parking_event: EventCls,
     stop_event: EventCls,
+    completed_event: EventCls,
     rplidar_update_measures_event: EventCls,
     rplidar_measures_queue: Queue,
     serial_sender_messages_queue: Queue,
@@ -34,6 +35,7 @@ def pilot_target(
         start_event (EventCls): Event to signal when the pilot should start.
         parking_event (EventCls): Event to signal the parking state of the robot.
         stop_event (EventCls): Event to signal when the pilot should stop.
+        completed_event (EventCls): Event to signal when the challenge has been completed successfully.
         rplidar_update_measures_event (Event): Event to signal when the RPLidar should update measures.
         rplidar_measures_queue (Queue): Queue to hold RPLidar measures.
         serial_sender_messages_queue (Queue): Queue to hold outgoing messages to the serial port.
@@ -58,6 +60,7 @@ def pilot_target(
         start_event=start_event,
         parking_event=parking_event,
         stop_event=stop_event,
+        completed_event=completed_event,
         rplidar_update_measures_event=rplidar_update_measures_event,
         rplidar_measures_queue=rplidar_measures_queue,
         serial_sender_messages_queue=serial_sender_messages_queue,

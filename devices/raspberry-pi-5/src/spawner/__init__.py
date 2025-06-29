@@ -40,6 +40,7 @@ class Spawner:
         self.__started_event = Event()
         self.__parking_event = Event()
         self.__stop_event = Event()
+        self.__completed_event = Event()
         self.__writer_messages_queue = Queue()
         self.__writer_stop_event = Event()
         self.__serial_sender_messages_queue = Queue()
@@ -108,6 +109,7 @@ class Spawner:
             self.__started_event.clear()
             self.__parking_event.clear()
             self.__stop_event.clear()
+            self.__writer_stop_event.clear()
 
         # Log
         print("Spawner stopped.")
@@ -117,8 +119,7 @@ class Spawner:
         Run the spawner to initialize and manage the challenge processes.
         """
         # Loop to ensure the spawner runs until stopped
-        repeat = True
-        while repeat:
+        while not self.__completed_event.is_set():
             try:
                 # Start the spawner
                 self._start()
@@ -164,7 +165,7 @@ class Spawner:
                         continue
                 if self.__stop_event.is_set():
                     self._stop()
-                    return
+                    continue
                 print("Spawner started.")
 
                 # Check if the challenge requires the photographer and the object detector
@@ -214,6 +215,7 @@ class Spawner:
                         self.__start_event,
                         self.__parking_event,
                         self.__stop_event,
+                        self.__completed_event,
                         self.__rplidar_update_measures_event,
                         self.__rplidar_measures_queue,
                         self.__serial_sender_messages_queue,
@@ -231,17 +233,15 @@ class Spawner:
                 # Stop the spawner
                 self._stop()
 
-                # Set the repeat flag to False to exit the loop
-                repeat = False
-
             except KeyboardInterrupt:
                 print("Spawner interrupted by user (Ctrl+C). Shutting down...")
-                
+
                 # Set the stop event
                 self.__stop_event.set()
 
                 # Stop the spawner
                 self._stop()
+                break
 
             except Exception as e:
                 print(f"An error occurred in the Spawner: {e}")

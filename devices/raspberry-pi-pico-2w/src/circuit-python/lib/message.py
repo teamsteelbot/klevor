@@ -107,15 +107,6 @@ class IncomingMessage:
         """
         self.__content = content
 
-    def format_to_send_with_error_message(self) -> str:
-        """
-        Format the message to send with an error message.
-
-        Returns:
-            str: The formatted message string.
-        """
-        return f"{self.__category}{HEADER_SEPARATOR_CHAR}{self.__content}"
-
 
 class OutgoingMessage:
     """
@@ -217,3 +208,12 @@ class OutgoingMessage:
             content (str): The content of the message.
         """
         self.__content = content
+
+    def format_to_send_with_error_message(self) -> str:
+        """
+        Format the message to send with an error message.
+
+        Returns:
+            str: The formatted message string.
+        """
+        return f"{self.__category}{HEADER_SEPARATOR_CHAR}{self.__content}"

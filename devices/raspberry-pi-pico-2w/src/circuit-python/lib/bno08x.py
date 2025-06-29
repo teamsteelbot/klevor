@@ -89,8 +89,8 @@ class BNO08XHandler:
             BNO08XError: If the sensor is already calibrated.
         """
         # Check if already calibrated
-        if self.__calibrated:
-            raise BNO08XError("BNO08X sensor is already calibrated.")
+        # if self.__calibrated:
+        #     raise BNO08XError("BNO08X sensor is already calibrated.")
 
         # Set the calibrated flag to True
         self.__calibrated = True

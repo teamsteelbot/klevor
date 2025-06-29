@@ -61,6 +61,7 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
         start_event: EventCls,
         parking_event: EventCls,
         stop_event: EventCls,
+        completed_event: EventCls,
         rplidar_update_measures_event: EventCls,
         rplidar_measures_queue: Queue,
         serial_sender_messages_queue: Queue,
@@ -82,8 +83,8 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
             start_event (EventCls): Event to signal when the pilot should start.
             parking_event (EventCls): Event to signal the parking state of the robot.
             stop_event (EventCls): Event to signal when the pilot should stop.
-            rplidar_update_measures_event (EventCls): Event to signal when the
-            RPLidar should update measures.
+            completed_event (EventCls): Event to signal when the challenge has been completed successfully.
+            rplidar_update_measures_event (EventCls): Event to signal when the RPLidar should update measures.
             rplidar_measures_queue (Queue): Queue to hold RPLidar measures.
             serial_sender_messages_queue (Queue): Queue to hold outgoing messages to the serial port.
             writer_messages_queue (Queue): Queue to hold log messages.
@@ -105,6 +106,7 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
         self.__parking_event = parking_event
         self.__deleted_event = Event()
         self.__stop_event = stop_event
+        self.__completed_event = completed_event
         self.__rplidar_update_measures_event = rplidar_update_measures_event
         self.__rplidar_measures_queue = rplidar_measures_queue
         self.__photographer_capture_image_event = photographer_capture_image_event
@@ -335,6 +337,8 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
 
                     if (avg_distances[Direction.FRONT] <=
                             STOP_DISTANCE_THRESHOLD):
+                        # Set the completed event
+                        self.__completed_event.set()
                         return
 
                     # Sleep for a short time before checking again

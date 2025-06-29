@@ -222,8 +222,8 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
                 # Set the stop confirmation event
                 self.__stop_confirmation_event.set()
 
-                # Set the stop event
-                self.__stop_event.set()
+            # Set the stop event
+            self.__stop_event.set()
 
             # Close the console serial port
             if self.__console and self.__console.is_open:
@@ -354,10 +354,9 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
 
                 except ValueError as e:
                     # May receive some garbage data, so we catch the exception
-                    self.__logger.warning(
+                    raise RuntimeError(
                         f"Received invalid message, may be garbage data: '{e}'"
                     )
-                    continue
 
                 if msg.is_error():
                     raise RuntimeError(

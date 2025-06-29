@@ -203,8 +203,8 @@ class Sender(SenderABC, LoggerConsumerProtocol):
                 # Clear the stop confirmation event
                 self.__stop_confirmation_event.clear()
 
-                # Set the stop event
-                self.__stop_event.set()
+            # Set the stop event
+            self.__stop_event.set()
 
             # Close the data serial port
             if self.__data_serial and self.__data_serial.is_open:
