@@ -5,7 +5,6 @@ from adafruit_bno08x import (BNO_REPORT_GYROSCOPE, BNO_REPORT_ROTATION_VECTOR)
 from adafruit_bno08x.i2c import BNO08X_I2C
 from busio import I2C
 
-from .enums import QuaternionAxis
 from .serial_communication import SerialCommunication
 
 
@@ -322,7 +321,7 @@ class BNO08XHandler:
             # If serial communication is enabled, send the turn message
             if self.__serial_communication:
                 self.__serial_communication.send_bno08x_turns_message(
-                    self.__accumulated_90_deg_turns
+                    abs(self.__accumulated_90_deg_turns)
                 )
 
         self.__last_yaw_deg = relative_yaw_deg
