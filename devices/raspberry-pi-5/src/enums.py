@@ -10,7 +10,7 @@ class Challenge(Enum):
 
     WITH_OBSTACLES = 1
     WITHOUT_OBSTACLES = 2
-    UNKNOWN = 3
+    NONE = 3
 
     @classmethod
     def from_string(cls, challenge_str: str) -> 'Challenge':
@@ -35,8 +35,8 @@ class Challenge(Enum):
             str: The challenge as a character.
         """
         if self == Challenge.WITH_OBSTACLES:
-            return b'y'
+            return b'Y'
         elif self == Challenge.WITHOUT_OBSTACLES:
+            return b'N'
+        elif self == Challenge.NONE:
             return b'n'
-        else:
-            return b'u'

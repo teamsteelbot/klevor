@@ -6,7 +6,7 @@ from time import sleep
 
 from serial import Serial
 
-from .common_messages import STOP_MESSAGE, OUTGOING_OK_MESSAGE
+from .common_messages import STOP_MESSAGE, OUTGOING_OK_MESSAGE, HEARTBEAT_MESSAGE
 from .message import OutgoingMessage
 from ..log import Logger
 from ..log.decorators import log_on_error
@@ -90,7 +90,7 @@ class Sender(SenderABC, LoggerConsumerProtocol):
         self.__server_dispatcher = ServerDispatcher(
             server_messages_queue,
             writer_messages_queue
-        )
+        ) if server_messages_queue else None
 
         # Initialize the reentrant lock
         self.__rlock = RLock()
@@ -106,7 +106,7 @@ class Sender(SenderABC, LoggerConsumerProtocol):
         self.__baudrate = baudrate
 
         # Initialize the data serial port
-        self.__data = None
+        self.__data_serial = None
 
     @final
     @property
@@ -243,6 +243,8 @@ class Sender(SenderABC, LoggerConsumerProtocol):
             )
 
         except Empty:
+            # Sent heartbeat message if the queue is empty
+            self._send_message(HEARTBEAT_MESSAGE)
             return None
 
         # Send the message to the serial port
@@ -257,6 +259,9 @@ class Sender(SenderABC, LoggerConsumerProtocol):
     @log_on_error()
     def run(self) -> None:
         try:
+            # Start the serial communication sender
+            self._start()
+
             while not self.__stop_event.is_set() and not self.__deleted_event.is_set():
                 self._send_latest_message()
 

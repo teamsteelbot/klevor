@@ -45,7 +45,7 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
     def __init__(
         self,
         debug: bool,
-        challenge: EventCls,
+        challenge: ValueCls,
         start_event: EventCls,
         stop_sent_event: EventCls,
         stop_confirmation_event: EventCls,
@@ -64,7 +64,7 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
 
         Args:
             debug (bool): Flag to indicate if the receiver is in debug mode.
-            challenge (EventCls): Shared value to hold the current challenge.
+            challenge (ValueCls): Shared value to hold the current challenge.
             start_event (EventCls): Event to signal when the serial communication has started.
             stop_sent_event (EventCls): Event to signal when the stop message has been sent.
             stop_confirmation_event (EventCls): Event to signal when stop messages has been confirmed.
@@ -106,7 +106,7 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
         self.__server_dispatcher = ServerDispatcher(
             server_messages_queue,
             writer_messages_queue
-        )
+        ) if server_messages_queue else None
 
         # Initialize the reentrant lock
         self.__rlock = RLock()
@@ -313,20 +313,29 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
     @log_on_error()
     def run(self) -> None:
         try:
+            # Start the serial communication receiver
+            self._start()
+
             # Wait for the first END_CHAR message to be received to ensure the serial port is ready
             self.__logger.info(
                 f"Waiting for initial {repr(END_CHAR)} message to confirm serial communication is ready..."
             )
-            while not self.__stop_event.is_set() and not self.__deleted_event.is_set() and self.__console.in_waiting > 0:
+            while not self.__stop_event.is_set() and not self.__deleted_event.is_set():
+                if self.__console.in_waiting == 0:
+                    sleep(self.INCOMING_DELAY)
+                    continue
+
+                # Read a single character from the console
                 char = self.__console.read(1).decode(ENCODE, errors="ignore")
                 if not char:
                     continue
                 if char == END_CHAR:
-                    # Log
-                    self.__logger.info(
-                        f"Received initial {repr(END_CHAR)} message. Serial communication is ready."
-                    )
                     break
+
+            # Log
+            self.__logger.info(
+                f"Received initial {repr(END_CHAR)} message. Serial communication is ready."
+            )
 
             # Wait for the start message
             self.__logger.info(
@@ -359,7 +368,7 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
 
                     # Set the challenge as an environment variable
                     with self.__challenge.get_lock():
-                        self.__challenge = Challenge.from_string(msg.content).as_char
+                        self.__challenge.value = Challenge.from_string(msg.content).as_char
 
                     # Continue to wait for the start event
                     continue
@@ -369,11 +378,10 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
                     self.__logger.info("Received start event.")
 
                     # Check if the challenge is set
-                    with self.__challenge.get_lock():
-                        if self.__challenge.value != '':
-                            raise RuntimeError(
-                                "Challenge not set. Stopping communication."
-                            )
+                    if self.__challenge.value == Challenge.NONE.as_char:
+                        raise RuntimeError(
+                            "Challenge not set. Stopping communication."
+                        )
 
                     # Send a confirmation message
                     self.__serial_dispatcher.send_confirmation_message()
@@ -402,9 +410,9 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
 
                 elif msg.is_bno08x_horizontal_axis():
                     # Log
-                    self.__logger.debug(
-                        f"Received BNO08X horizontal axis message: {msg.content}"
-                    )
+                    # self.__logger.debug(
+                    #     f"Received BNO08X horizontal axis message: {msg.content}"
+                    # )
 
                     # Update the BNO08X horizontal axis angle
                     with self.__bno08x_horizontal_axis_deg.get_lock():
@@ -412,9 +420,9 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
 
                 elif msg.is_bno08x_turns():
                     # Log
-                    self.__logger.debug(
-                        f"Received BNO08X turns message: {msg.content}"
-                    )
+                    # self.__logger.debug(
+                    #     f"Received BNO08X turns message: {msg.content}"
+                    # )
 
                     # Update the BNO08X turns
                     with self.__bno08x_turns.get_lock():

@@ -1,4 +1,4 @@
-from .enums import OutgoingCategory, Status
+from .enums import OutgoingCategory, Status, IncomingCategory
 from .message import OutgoingMessage, IncomingMessage
 
 # Stop message
@@ -11,5 +11,10 @@ OUTGOING_OK_MESSAGE = OutgoingMessage(
     OutgoingCategory.STATUS, Status.OK.parsed_name
 )
 INCOMING_OK_MESSAGE = IncomingMessage(
-    OutgoingCategory.STATUS, Status.OK.parsed_name
+    IncomingCategory.STATUS, Status.OK.parsed_name
+)
+
+# Heartbeat message
+HEARTBEAT_MESSAGE = OutgoingMessage(
+    OutgoingCategory.STATUS, Status.HEARTBEAT.parsed_name
 )

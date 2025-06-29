@@ -57,7 +57,7 @@ class PilotABC(ABC):
         pass
 
     @abstractmethod
-    async def _set_motor_speed(self, speed: float):
+    def _set_motor_speed(self, speed: float):
         """
         Sets the speed of the ESC motor.
 
@@ -67,14 +67,14 @@ class PilotABC(ABC):
         pass
 
     @abstractmethod
-    async def _set_motor_stop(self):
+    def _set_motor_stop(self):
         """
         Sets the speed of the ESC motor to 0.
         """
         pass
 
     @abstractmethod
-    async def _set_motor_forward(self, speed: float):
+    def _set_motor_forward(self, speed: float):
         """
         Sets the speed of the ESC motor forward.
 
@@ -84,7 +84,7 @@ class PilotABC(ABC):
         pass
 
     @abstractmethod
-    async def _set_motor_backward(self, speed: float):
+    def _set_motor_backward(self, speed: float):
         """
         Sets the speed of the ESC motor backward.
 
@@ -110,7 +110,7 @@ class PilotABC(ABC):
             )
 
     @abstractmethod
-    async def _set_servo_angle(self, angle: int):
+    def _set_servo_angle(self, angle: int):
         """
         Sets the angle of the servo motor.
 
@@ -123,7 +123,7 @@ class PilotABC(ABC):
         pass
 
     @abstractmethod
-    async def _set_servo_angle_relative_to_center(self, relative_angle: int):
+    def _set_servo_angle_relative_to_center(self, relative_angle: int):
         """
         Sets the angle of the servo motor relative to the center
         position.
@@ -138,14 +138,14 @@ class PilotABC(ABC):
         pass
 
     @abstractmethod
-    async def _set_servo_to_center(self):
+    def _set_servo_to_center(self):
         """
         Centers the servo motor to the middle position.
         """
         pass
 
     @abstractmethod
-    async def _set_servo_to_right(self, angle):
+    def _set_servo_to_right(self, angle):
         """
         Sets the servo motor to the right by a specified angle.
 
@@ -158,7 +158,7 @@ class PilotABC(ABC):
         pass
 
     @abstractmethod
-    async def _set_servo_to_left(self, angle):
+    def _set_servo_to_left(self, angle):
         """
         Sets the servo motor to the left by a specified angle.
 

@@ -1,10 +1,8 @@
-from multiprocessing import Event, Queue, RLock
+from multiprocessing import Event, Queue
 from multiprocessing.synchronize import Event as EventCls
 from multiprocessing.sharedctypes import Value as ValueCls
 from threading import Thread
 from typing import Optional, final
-
-from serial import Serial
 
 from .abstracts import SerialCommunicationABC
 from .constants import (
@@ -15,7 +13,6 @@ from .constants import (
     RASPBERRY_PI_PICO_DATA_PORT_ALT,
 )
 from ..log import Logger
-from ..utils import is_instance
 from ..utils.decorators import ignore_sigint
 from ..log.protocols import LoggerConsumerProtocol
 from .sender import Sender
@@ -33,7 +30,7 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
     def __init__(
         self,
         debug: bool,
-        challenge: EventCls,
+        challenge: ValueCls,
         start_event: EventCls,
         stop_event: EventCls,
         bno08x_horizontal_axis_deg: ValueCls,
@@ -52,7 +49,7 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
 
         Args:
             debug (bool): Flag to indicate if the receiver is in debug mode.
-            challenge (EventCls): Shared value to hold the current challenge.
+            challenge (ValueCls): Shared value to hold the current challenge.
             start_event (EventCls): Event to signal when the serial communication has started.
             stop_event (EventCls): Event to signal when the serial communication should stop sending and receiving messages.
             bno08x_horizontal_axis_deg (ValueCls): Shared value for the BNO08X horizontal axis angle in degrees.
@@ -66,15 +63,10 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
             data_port_alt (Optional[str]): Alternative serial port used for sending data to Pico.
             baudrate (Optional[int]): Baud rate for the serial communication.
         """
-        # Initialize the debug flag
-        self.__debug = debug
-
         # Initialize the events
         self.__stop_sent_event = Event()
         self.__stop_confirmation_event = Event()
         self.__stop_event = stop_event
-        self.__started_event = Event()
-        self.__deleted_event = Event()
 
         # Initialize the serial communication receiver
         self.__serial_receiver = Receiver(
@@ -111,9 +103,6 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
 
         # Initialize the logger
         self.__logger = Logger(writer_messages_queue, self.LOGGER_TAG)
-
-        # Initialize the reentrant lock
-        self.__rlock = RLock()
 
         # Initialize the threads
         self.__receiving_thread = None

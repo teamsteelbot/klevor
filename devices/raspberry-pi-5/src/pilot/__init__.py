@@ -42,6 +42,9 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
     # Logger configuration
     LOGGER_TAG = "Pilot"
 
+    # Start delay
+    START_DELAY = 5
+
     # Wait delay
     WAIT_DELAY = 0.1
 
@@ -57,7 +60,7 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
         stop_event: EventCls,
         rplidar_update_measures_event: EventCls,
         rplidar_measures_queue: Queue,
-        serial_messages_queue: Queue,
+        serial_sender_messages_queue: Queue,
         writer_messages_queue: Queue,
         bno08x_horizontal_axis_deg: ValueCls,
         bno08x_turns: ValueCls,
@@ -79,7 +82,7 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
             rplidar_update_measures_event (EventCls): Event to signal when the
             RPLidar should update measures.
             rplidar_measures_queue (Queue): Queue to hold RPLidar measures.
-            serial_messages_queue (Queue): Queue to hold outgoing messages to the serial port.
+            serial_sender_messages_queue (Queue): Queue to hold outgoing messages to the serial port.
             writer_messages_queue (Queue): Queue to hold log messages.
             bno08x_horizontal_axis_deg (ValueCls): Shared value for the BNO08X horizontal axis angle in degrees.
             bno08x_turns (ValueCls): Shared value for the BNO08X turns.
@@ -109,7 +112,7 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
         self.__bno08x_turns = bno08x_turns
 
         # Initialize the serial communication dispatcher
-        self.__serial_dispatcher = SerialDispatcher(serial_messages_queue)
+        self.__serial_dispatcher = SerialDispatcher(serial_sender_messages_queue)
 
         # Initialize the logger
         self.__logger = Logger(writer_messages_queue,
@@ -130,7 +133,7 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
         return self.__logger
 
     @final
-    async def _set_motor_speed(self, speed: float):
+    def _set_motor_speed(self, speed: float):
         # Check if the speed is the same as the current speed
         if self.__motor_speed == speed:
             return
@@ -149,24 +152,24 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
         self.__logger.info(f"Set motor speed to: {speed}")
 
     @final
-    async def _set_motor_stop(self):
+    def _set_motor_stop(self):
         """
         Sets the speed of the ESC motor to 0.
         """
-        await self._set_motor_speed(0.0)
+        self._set_motor_speed(0.0)
 
     @final
-    async def _set_motor_forward(self, speed: float):
+    def _set_motor_forward(self, speed: float):
         self._check_motor_speed_half_range(speed)
-        await self._set_motor_speed(speed)
+        self._set_motor_speed(speed)
 
     @final
-    async def _set_motor_backward(self, speed: float):
+    def _set_motor_backward(self, speed: float):
         self._check_motor_speed_half_range(speed)
-        await self._set_motor_speed(-speed)
+        self._set_motor_speed(-speed)
 
     @final
-    async def _set_servo_angle(self, angle: int):
+    def _set_servo_angle(self, angle: int):
         # Check if the angle is the same as the current angle
         if self.__servo_angle == angle:
             return
@@ -184,36 +187,36 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
         self.__logger.info(f"Set servo angle to: {angle}deg")
 
     @final
-    async def _set_servo_angle_relative_to_center(self, relative_angle: int):
+    def _set_servo_angle_relative_to_center(self, relative_angle: int):
         if not (SERVO_LEFT_LIMIT <= relative_angle <= SERVO_RIGHT_LIMIT):
             raise ValueError(
                 f"Relative angle must be between {SERVO_LEFT_LIMIT} and"
                 f" {SERVO_RIGHT_LIMIT} degrees"
             )
 
-        await self._set_servo_angle(SERVO_CENTER_ANGLE + relative_angle)
+        self._set_servo_angle(SERVO_CENTER_ANGLE + relative_angle)
 
     @final
-    async def _set_servo_to_center(self):
-        await self._set_servo_angle(SERVO_CENTER_ANGLE)
+    def _set_servo_to_center(self):
+        self._set_servo_angle(SERVO_CENTER_ANGLE)
 
     @final
-    async def _set_servo_to_right(self, angle):
+    def _set_servo_to_right(self, angle):
         if not 0 < angle <= SERVO_RIGHT_LIMIT:
             raise ValueError(
                 f"Angle must be between 0 and {SERVO_RIGHT_LIMIT} degrees for right movement"
             )
 
-        await self._set_servo_angle(SERVO_CENTER_ANGLE + angle)
+        self._set_servo_angle(SERVO_CENTER_ANGLE + angle)
 
     @final
-    async def _set_servo_to_left(self, angle):
+    def _set_servo_to_left(self, angle):
         if not 0 < angle <= abs(SERVO_LEFT_LIMIT):
             raise ValueError(
                 f"Angle must be between 0 and {abs(SERVO_LEFT_LIMIT)} degrees for left movement"
             )
 
-        await self._set_servo_angle(SERVO_CENTER_ANGLE - angle)
+        self._set_servo_angle(SERVO_CENTER_ANGLE - angle)
 
     @final
     def _is_servo_turning(self):
@@ -225,13 +228,12 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
         self.__rplidar_update_measures_event.set()
 
         # Get the measures from the queue
-        try:
-            return self.__rplidar_measures_queue.get(timeout=self.WAIT_DELAY)
+        while not self.__stop_event.is_set() and not self.__deleted_event.is_set():
+            try:
+                return self.__rplidar_measures_queue.get(timeout=self.WAIT_DELAY)
 
-        except Empty:
-            raise TimeoutError(
-                "No RPLidar measures received within the timeout period."
-            )
+            except Empty:
+                continue
 
     @final
     def _get_rplidar_average_distances(self) -> dict[Direction, float]:
@@ -422,8 +424,10 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
             elif self.__challenge.value == Challenge.WITH_OBSTACLES.as_char:
                 self._challenge_with_obstacles()
             else:
-                raise ValueError(f"Unknown challenge: {self.__challenge.value}")
-
+                raise ValueError(
+                    f"Unknown challenge: {self.__challenge.value}"
+                )
+            
             # Stop the Pilot
             self._stop()
 

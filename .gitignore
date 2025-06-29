@@ -13,7 +13,7 @@
 /**/*/settings.toml
 
 # Logs
-/**/*/log/logs/**/*
+/**/*/raspberry-pi-5/logs/**/*
 
 # YOLO
 /**/*/yolo/data/local/*.yaml

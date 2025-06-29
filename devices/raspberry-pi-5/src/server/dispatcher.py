@@ -22,7 +22,8 @@ class Dispatcher(DispatcherABC):
     LOGGER_TAG = "Dispatcher"
 
     def __init__(
-        self, server_messages_queue: Queue,
+        self,
+        server_messages_queue: Queue,
         writer_messages_queue: Queue
     ):
         """

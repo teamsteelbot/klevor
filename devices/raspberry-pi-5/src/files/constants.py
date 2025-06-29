@@ -16,7 +16,7 @@ HAILO_MODEL_ZOO_DIR = os.path.join(HAILO_LIBS_DIR, 'model_zoo')
 
 # Log-related folders
 LOG_DIR = os.path.join(ROOT_DIR, 'log')
-LOGS_DIR = os.path.abspath(os.path.join(LOG_DIR, 'logs'))
+LOGS_DIR = os.path.abspath(os.path.join(ROOT_DIR, '..', 'logs'))
 
 # YOLO folder
 YOLO_DIR = os.path.abspath(os.path.dirname(__file__))

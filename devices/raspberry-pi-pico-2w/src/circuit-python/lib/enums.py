@@ -64,6 +64,7 @@ class Status:
     START = "start"
     STOP = "stop"
     OK = "ok"
+    HEARTBEAT = "heartbeat"
 
     @classmethod
     def from_string(cls, status_str: str) -> str:
@@ -76,7 +77,7 @@ class Status:
             str: The corresponding Status enum value.
         """
         status_name = status_str.lower()
-        for status in [cls.START, cls.STOP, cls.OK]:
+        for status in [cls.START, cls.STOP, cls.OK, cls.HEARTBEAT]:
             if status_name == status:
                 return status
 

@@ -45,6 +45,7 @@ class Status(Enum):
     START = 1
     STOP = 2
     OK = 3
+    HEARTBEAT = 4
 
     @property
     def parsed_name(self) -> str:

@@ -21,8 +21,8 @@ CHUNK_SIZE = 64
 MOVEMENT = Env.get_movement_mode()
 DEBUG = Env.get_debug_mode()
 CHALLENGE = Env.get_challenge()
-QUATERNION_HORIZONTAL_AXIS = QuaternionAxis.ROLL
-RECEIVING_MESSAGE_TIMEOUT = 10.0
+QUATERNION_HORIZONTAL_AXIS = QuaternionAxis.YAW
+RECEIVING_MESSAGE_TIMEOUT = 1.0
 
 # Pins
 I2C_BUS = I2C(GP1, GP0)
@@ -105,6 +105,9 @@ async def main():
             motor_speed = None
             servo_angle = None
             for msg in msgs:
+                if msg == SerialCommunication.HEARTBEAT_MESSAGE:
+                    continue
+
                 if msg == SerialCommunication.STOP_MESSAGE:
                     # Set the exit condition to True
                     to_exit = True

@@ -15,8 +15,7 @@ def pilot_target(
     stop_event: EventCls,
     rplidar_update_measures_event: EventCls,
     rplidar_measures_queue: Queue,
-    serial_incoming_messages_queue: Queue,
-    serial_outgoing_messages_queue: Queue,
+    serial_sender_messages_queue: Queue,
     writer_messages_queue: Queue,
     bno08x_horizontal_axis_deg: ValueCls,
     bno08x_turns: ValueCls,
@@ -37,8 +36,7 @@ def pilot_target(
         stop_event (EventCls): Event to signal when the pilot should stop.
         rplidar_update_measures_event (Event): Event to signal when the RPLidar should update measures.
         rplidar_measures_queue (Queue): Queue to hold RPLidar measures.
-        serial_incoming_messages_queue (Queue): Queue to hold incoming messages from the serial port.
-        serial_outgoing_messages_queue (Queue): Queue to hold outgoing messages to the serial port.
+        serial_sender_messages_queue (Queue): Queue to hold outgoing messages to the serial port.
         writer_messages_queue (Queue): Queue to hold log messages.
         bno08x_horizontal_axis_deg (ValueCls): Shared value for the BNO08X horizontal axis angle in degrees.
         bno08x_turns (ValueCls): Shared value for the BNO08X turns.
@@ -62,8 +60,7 @@ def pilot_target(
         stop_event=stop_event,
         rplidar_update_measures_event=rplidar_update_measures_event,
         rplidar_measures_queue=rplidar_measures_queue,
-        serial_incoming_messages_queue=serial_incoming_messages_queue,
-        serial_outgoing_messages_queue=serial_outgoing_messages_queue,
+        serial_sender_messages_queue=serial_sender_messages_queue,
         writer_messages_queue=writer_messages_queue,
         bno08x_horizontal_axis_deg=bno08x_horizontal_axis_deg,
         bno08x_turns=bno08x_turns,

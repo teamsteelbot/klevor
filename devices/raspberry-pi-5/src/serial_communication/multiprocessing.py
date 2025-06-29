@@ -16,7 +16,7 @@ from .constants import (
 
 def serial_communication_target(
     debug: bool,
-    challenge: EventCls,
+    challenge: ValueCls,
     start_event: EventCls,
     stop_event: EventCls,
     bno08x_horizontal_axis_deg: ValueCls,
@@ -36,7 +36,7 @@ def serial_communication_target(
 
     Args:
         debug (bool): Flag to indicate if the receiver is in debug mode.
-        challenge (EventCls): Shared value to hold the current challenge.
+        challenge (ValueCls): Shared value to hold the current challenge.
         start_event (EventCls): Event to signal when the serial communication has started.
         stop_sent_event (EventCls): Event to signal when the stop message has been sent.
         stop_confirmation_event (EventCls): Event to signal when stop messages has been confirmed.

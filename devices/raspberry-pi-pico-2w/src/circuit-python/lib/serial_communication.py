@@ -52,6 +52,10 @@ class SerialCommunication:
         OutgoingCategory.STATUS,
         Status.OK
     )
+    HEARTBEAT_MESSAGE = OutgoingMessage(
+        OutgoingCategory.STATUS,
+        Status.HEARTBEAT
+    )
 
     # Challenge messages
     CHALLENGE_WITH_OBSTACLES = OutgoingMessage(

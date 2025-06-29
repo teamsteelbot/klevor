@@ -42,7 +42,7 @@ class Spawner:
         self.__serial_sender_messages_queue = Queue()
         self.__bno08x_horizontal_axis_deg = Value('d', 0.0)
         self.__bno08x_turns = Value('i', 0)
-        self.__challenge = Value('c', Challenge.UNKNOWN.as_char)
+        self.__challenge = Value('c', Challenge.NONE.as_char)
         self.__rplidar_update_measures_event = Event()
         self.__rplidar_measures_queue = Queue()
         self.__photographer_capture_image_event = None

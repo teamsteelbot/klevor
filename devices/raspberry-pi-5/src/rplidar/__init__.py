@@ -32,6 +32,9 @@ class RPLidar(RPLidarABC, LoggerConsumerProtocol):
     # Process wait timeout
     PROCESS_WAIT_TIMEOUT = 5
 
+    # Wait timeout
+    WAIT_TIMEOUT = 0.1
+
     def __init__(
         self,
         debug: bool,
@@ -98,7 +101,7 @@ class RPLidar(RPLidarABC, LoggerConsumerProtocol):
         self.__is_upside_down = is_upside_down
 
         # Initialize measures dictionary
-        self.__measures = {i: Measure(i, 0.0, 0) for i in range(361)}
+        self.__measures = {angle: Measure(angle*1.0, 0.0, 0) for angle in range(361)}
 
         # Messages counter
         self.__messages_counter = 0
@@ -203,7 +206,7 @@ class RPLidar(RPLidarABC, LoggerConsumerProtocol):
             self.__rotation = False
 
         # Log
-        self.__logger.debug("RPLidar measure: " + str(measure))
+        # self.__logger.debug("RPLidar measure: " + str(measure))
 
         # Increment the messages counter
         self.__messages_counter += 1
@@ -212,9 +215,13 @@ class RPLidar(RPLidarABC, LoggerConsumerProtocol):
         """
         Listen for the update measures event and process the measures.
         """
+        # Start the listener thread
+        self.__logger.info("Starting the measures update listener thread...")
         while not self.__stop_event.is_set() and not self.__deleted_event.is_set():
             # Wait for the update measures event to be set
-            self.__update_measures_event.wait()
+            update = self.__update_measures_event.wait(timeout=self.WAIT_TIMEOUT)
+            if not update:
+                continue
 
             # Put the measure in the measures queue
             self.__measures_queue.put(self.__measures)
