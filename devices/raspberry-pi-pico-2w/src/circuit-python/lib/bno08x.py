@@ -42,18 +42,18 @@ class BNO08XHandler:
     def __init__(
         self,
         horizontal_axis: str,
-        serial_communication: SerialCommunication,
         i2c: I2C,
-        address: int = I2C_ADDRESS
+        address: int = I2C_ADDRESS,
+        serial_communication: SerialCommunication = None,
     ):
         """
         Initializes the BNO08X handler with the specified I2C bus and address.
 
         Args:
             horizontal_axis (str): The horizontal axis to use ('x', 'y', 'z', 'yaw', 'pitch', 'roll').
-            serial_communication (SerialCommunication): Optional serial communication handler.
             i2c (I2C): The I2C bus to use for communication with the BNO08X sensor.
             address (int): The I2C address of the BNO08X sensor.
+            serial_communication (SerialCommunication | None): Optional serial communication handler.
         """
         # Initialize the I2C bus and BNO08X sensor
         self.__bno = BNO08X_I2C(i2c, address=address)
@@ -62,7 +62,7 @@ class BNO08XHandler:
 
         # Check the type of serial communication
         self.__serial_communication = serial_communication
-        
+
         # Set the relative horizontal axis
         self.__horizontal_axis = QuaternionAxis.from_string(horizontal_axis)
 
