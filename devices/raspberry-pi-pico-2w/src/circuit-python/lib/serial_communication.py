@@ -208,7 +208,7 @@ class SerialCommunication:
                     return
 
         raise SerialCommunicationError(
-            f"Confirmation message '{msg_to_confirm}' not received within {timeout} seconds."
+            f"Confirmation message '{msg_to_confirm.format_to_send_with_error_message()}' not received within {timeout} seconds."
         )
     
     def send_initialization_message(self):

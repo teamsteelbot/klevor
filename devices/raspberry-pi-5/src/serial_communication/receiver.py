@@ -332,6 +332,12 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
                 if char == END_CHAR:
                     break
 
+            # Check if the stop event is set or the deleted event is set
+            if self.__stop_event.is_set() or self.__deleted_event.is_set():
+                # Stop the serial communication receiver
+                self._stop()
+                return
+
             # Log
             self.__logger.info(
                 f"Received initial {repr(END_CHAR)} message. Serial communication is ready."
@@ -344,6 +350,7 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
             while not self.__stop_event.is_set() and not self.__deleted_event.is_set():
                 try:
                     msg = self._receive_latest_message()
+                    # If no message is received, continue to wait
                     if msg is None:
                         continue
 

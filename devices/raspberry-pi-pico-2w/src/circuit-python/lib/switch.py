@@ -44,6 +44,9 @@ class SwitchHandler:
 
         This method blocks until the switch is pressed (i.e., the pin reads LOW).
         """
+        # Send initialization message
+        self.__serial_communication.send_initialization_message()
+
         # Check if the switch is already pressed
         if not self.__switch.value:
             while not self.__switch.value:
@@ -51,9 +54,6 @@ class SwitchHandler:
 
         while self.__switch.value:
             await sleep(self.DELAY)
-
-        # Send initialization message
-        self.__serial_communication.send_initialization_message()
         
         # Send challenge message
         await self.__serial_communication.send_challenge_message()

@@ -244,7 +244,8 @@ class Sender(SenderABC, LoggerConsumerProtocol):
 
         except Empty:
             # Sent heartbeat message if the queue is empty
-            self._send_message(HEARTBEAT_MESSAGE)
+            if self.__start_event.is_set():
+                self._send_message(HEARTBEAT_MESSAGE)
             return None
 
         # Send the message to the serial port
