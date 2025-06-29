@@ -2,7 +2,24 @@
 
 1. **[Introducción](#introduccion)**
 2. **[Descripción de la Mecánica](v-photos/prototype1/README.md)**
-3. **[Lista de Componentes](#lista-de-componentes)**
+3. **[Código](devices/README.md)**
+   1. **[Dispositivos](/devices)**
+      1. [Raspberry Pi 5](devices/raspberry-pi-5/README.md)
+      2. [Raspberry Pi Pico 2 WH](devices/raspberry-pi-pico-2w/README.md)
+         1. [CircuitPython](devices/raspberry-pi-pico-2w/src/circuit-python/README.md)
+         2. [MicroPython](devices/raspberry-pi-pico-2w/src/micro-python/README.md)
+   2. **[Lenguajes de Programación](#lenguajes-de-programacion)**
+      1. [Python](#python)
+      2. [MicroPython](#micropython)
+      3. [CircuitPython](#circuitpython)
+   3. **[Librerías](#librerias)**
+      1. [Ultralytics YOLO](#ultralytics-yolo)
+      2. [OpenCV](#opencv)
+      3. [NumPy](#numpy)
+      4. [PyTorch](#pytorch)
+      5. [PiCamera2](#picamera-2)
+      6. [Hailo Platform](#hailo-platform)
+4. **[Lista de Componentes](#lista-de-componentes)**
     1. [Raspberry Pi 5](#componentes-raspberry-pi-5)
     2. [Raspberry Pi Camera Module 3 Wide](#componentes-raspberry-pi-camera-module-3-wide)
     3. [Raspberry Pi AI HAT+ (26 TOPS)](#componentes-raspberry-pi-ai-hat-26-tops)
@@ -15,28 +32,12 @@
     10. [INJORA 7KG 2065 Micro Servo](#componentes-injora-7kg-2065-micro-servo)
     11. [HiLetgo Time-of-Flight Sensor VL53L0X](#sensor-tof-hiletgo)
     12. [9-Axis IMU Gyroscope GY-BNO085](#gyroscope-gy-bno085)
-4. **[Esquemas y Diagramas](#esquemas)**
-    1. [Esquemas de Conexiones](schemes/detailed-klevor-wiring-diagram.png)
-    2. [Diagrama de Flujo](schemes/open-challenge-flowchart.png)
-5. **[Lenguajes de Programación](#lenguajes-de-programacion)**
-    1. [Python](#python)
-    2. [MicroPython](#micropython)
-    3. [CircuitPython](#circuitpython)
-6. **[Código](devices/README.md)**
-    1. [Raspberry Pi 5](devices/raspberry-pi-5/README.md)
-    2. [Raspberry Pi Pico 2 WH](devices/raspberry-pi-pico-2w/README.md)
-        1. [CircuitPython](devices/raspberry-pi-pico-2w/src/circuit-python/README.md)
-        2. [MicroPython](devices/raspberry-pi-pico-2w/src/micro-python/README.md)
-7. **[Librerías](#librerias)**
-    1. [Ultralytics YOLO](#ultralytics-yolo)
-    2. [OpenCV](#opencv)
-    3. [NumPy](#numpy)
-    4. [PyTorch](#pytorch)
-    5. [PiCamera2](#picamera-2)
-    6. [Hailo Platform](#hailo-platform)
-8. **[Fotos del equipo](t-photos/README.md)**
-9. **[Vídeos](video/README.md)**
-10. **[Recursos Externos](#recursos-externos)**
+5. **[Esquemas y Diagramas](#esquemas)**
+   1. [Esquemas de Conexiones](schemes/prototype1/wiring-diagram.png)
+   2. [Diagrama de Flujo](schemes/prototype2/open-challenge-flowchart.png)
+6. **[Fotos del equipo](t-photos/README.md)**
+7. **[Vídeos](video/README.md)**
+8. **[Recursos Externos](#recursos-externos)**
 
 *NOTA: Este listado contiene todo el contenido respectivo al desarrollo de
 Klevor; sin embargo, no todo está presente en este README.md, asegúrese de hacer
