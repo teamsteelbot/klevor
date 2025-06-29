@@ -83,7 +83,7 @@ class ESCMotorHandler:
         self.__serial_communication = serial_communication
 
         # Initialize the speed to 0
-        self.__speed = 0.0
+        self.__speed = None
         self.stop()
 
     @classmethod

@@ -85,7 +85,7 @@ class ServoHandler:
         self.__serial_communication = serial_communication
 
         # Set the servo to center position
-        self.__angle = self.CENTER_ANGLE
+        self.__angle = None
         self.center()
 
     @staticmethod

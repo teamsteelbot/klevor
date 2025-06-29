@@ -1,3 +1,4 @@
+from asyncio import run
 from time import sleep
 
 from board import GP2
@@ -16,18 +17,15 @@ motor_handler = ESCMotorHandler(
     movement=MOVEMENT
 )
 
-motor_handler.speed = 0
-sleep(1)
+run(motor_handler.set_speed(0))
+sleep(2)
 
 # Test different speeds
 i = 0.5
-while i >= -0.5:
+while i >=  -0.5:
     # Set the motor speed
-    motor_handler.speed = i
+    run(motor_handler.set_speed(i))
     print(i)
-    i -= 0.1
+    i -= 0.01
 
-    # Wait a bit to observe the speed change
-    sleep(0.2)
-
-motor_handler.speed = 0
+run(motor_handler.set_speed(0))
