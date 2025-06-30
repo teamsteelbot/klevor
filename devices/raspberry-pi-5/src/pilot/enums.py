@@ -8,9 +8,19 @@ class Direction(Enum):
     """
     Enum to represent the different directions that RPLidar can face.
     """
-    FRONT = 1
-    LEFT = 2
-    RIGHT = 3
+    NORTH = 1
+    WEST = 2
+    EAST = 3
+    NORTHWEST = 4
+    NORTHEAST = 5
+    SOUTHWEST = 6
+    SOUTHEAST = 7
+    WEST_NORTHWEST = 8
+    NORTH_NORTHWEST = 9
+    EAST_NORTHEAST = 10
+    NORTH_NORTHEAST = 11
+    WEST_SOUTHWEST = 12
+    EAST_SOUTHEAST = 13
 
     def get_name(self) -> str:
         """

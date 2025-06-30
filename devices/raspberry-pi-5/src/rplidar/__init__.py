@@ -107,7 +107,7 @@ class RPLidar(RPLidarABC, LoggerConsumerProtocol):
 
         # Initialize measures dictionary
         self.__measures = {angle: Measure(angle * 1.0, 0.0, 0) for angle in
-                           range(361)}
+                           range(360)}
 
         # Messages counter
         self.__messages_counter = 0
@@ -184,13 +184,14 @@ class RPLidar(RPLidarABC, LoggerConsumerProtocol):
                 self.__rotation = True
             return
 
-        # Floor the angle to a float with no decimal places
-        angle = round(angle, 0)
+        # Check if the angle is within the valid range
+        angle = angle - 360 if angle >= 360 else angle
 
         # Adjust the angle if the RPLidar is upside down
-        if self.__is_upside_down:
-            # Subtract the angle from 360
-            angle = 360 - angle
+        angle = 360 - angle if self.__is_upside_down else angle
+
+        # Floor the angle to a float with no decimal places
+        angle = round(angle, 0)
 
         # Check if the angle is already in the distances dictionary
         measure = self.__measures.get(int(angle), None)

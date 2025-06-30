@@ -1,3 +1,5 @@
+from .enums import Direction
+
 # Motor speed range
 MOTOR_SPEED_RANGE = (-1.0, 1.0)
 
@@ -29,3 +31,23 @@ SIDE_DISTANCE_DIFFERENCE_PERCENTAGE = 0.2
 SIDE_DISTANCE_THRESHOLD = 1500
 STOP_DISTANCE_THRESHOLD = 1500
 TARGET_DISTANCE_STOP_START = 200
+
+# Angle widths
+ANGLE_WIDTH = 5
+
+# Map directions to angles
+DIRECTION_TO_ANGLE = {
+    Direction.NORTH: 0,
+    Direction.NORTH_NORTHEAST: 22.5,
+    Direction.NORTH_EAST: 45,
+    Direction.EAST_NORTHEAST: 67.5,
+    Direction.EAST: 90,
+    Direction.EAST_SOUTHEAST: 112.5,
+    Direction.SOUTHEAST: 135,
+    Direction.SOUTHWEST: 225,
+    Direction.WEST_SOUTHWEST: 247.5,
+    Direction.WEST: 270,
+    Direction.WEST_NORTHWEST: 292.5,
+    Direction.NORTHWEST: 315,
+    Direction.NORTH_NORTHWEST: 337.5,
+}

@@ -25,8 +25,7 @@ from ..enums import Challenge
 from ..log import Logger
 from ..log.decorators import log_on_error
 from ..log.protocols import LoggerConsumerProtocol
-from ..rplidar import RPLidar
-from ..rplidar.enums import Direction
+from .enums import Direction
 from ..serial_communication.dispatcher import Dispatcher as SerialDispatcher
 from ..utils.decorators import ignore_sigint
 
@@ -257,23 +256,14 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
 
         # Calculate the average distances according to the challenge
         if self.__challenge.value == Challenge.WITHOUT_OBSTACLES.as_char:
-            # Calculate the average front, left and right distances by 5 degrees to each side
-            avg_front_dist = RPLidar.calculate_average_distance(
-                measures, [*range(355, 360), *range(0, 6)]
-            )
-            avg_left_dist = RPLidar.calculate_average_distance(
-                measures, [*range(265, 276)]
-            )
-            avg_right_dist = RPLidar.calculate_average_distance(
-                measures, [*range(85, 96)]
+            # Calculate the average north, west and east distances
+            return self._calculate_average_distance(
+                measures,
+                Direction.NORTH,
+                Direction.WEST,
+                Direction.EAST
             )
 
-            # Create a dictionary with the average distances
-            return {
-                Direction.FRONT: avg_front_dist,
-                Direction.LEFT: avg_left_dist,
-                Direction.RIGHT: avg_right_dist
-            }
         elif self.__challenge.value == Challenge.WITH_OBSTACLES.as_char:
             raise NotImplementedError(
                 "Challenge with obstacles is not implemented yet."
@@ -345,7 +335,7 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
                     # Get the average distances
                     avg_distances = self._get_rplidar_average_distances()
 
-                    if (avg_distances[Direction.FRONT] <=
+                    if (avg_distances[Direction.NORTH] <=
                             STOP_DISTANCE_THRESHOLD):
                         # Set the completed event
                         self.__completed_event.set()
@@ -356,20 +346,33 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
 
             # Get the average distances from the RPLidar
             avg_distances = self._get_rplidar_average_distances()
-            left_avg_dist = avg_distances[Direction.LEFT]
-            right_avg_dist = avg_distances[Direction.RIGHT]
-            front_avg_dist = avg_distances[Direction.FRONT]
+            west_avg_dist = avg_distances[Direction.WEST]
+            east_avg_dist = avg_distances[Direction.EAST]
+            north_avg_dist = avg_distances[Direction.NORTH]
+            self.__logger.debug(
+                f"North: {north_avg_dist}, West: {west_avg_dist}, East: {east_avg_dist}"
+            )
+
+            # Check if one of them is 0
+            if (north_avg_dist == 0 or
+                    west_avg_dist == 0 or east_avg_dist == 0):
+                self.__logger.warning(
+                    "One of the average distances is 0. This may cause unexpected behavior. Waiting for new measures..."
+                )
+                # Sleep
+                self._sleep(start_time)
+                continue
 
             # Check if the robot should move forward or turn
-            if front_avg_dist >= FRONT_DISTANCE_THRESHOLD:
+            if north_avg_dist >= FRONT_DISTANCE_THRESHOLD:
                 self._set_motor_speed(MOTOR_SPEED_NORMAL)
 
                 # Check if the servo should make a little turn to the left or right in order to center the robot
-                if right_avg_dist >= left_avg_dist * (
+                if east_avg_dist >= west_avg_dist * (
                         1 + SIDE_DISTANCE_DIFFERENCE_PERCENTAGE):
                     self._set_servo_to_right(SERVO_SMALL_TURN_ANGLE)
 
-                elif left_avg_dist >= right_avg_dist * (
+                elif west_avg_dist >= east_avg_dist * (
                         1 + SIDE_DISTANCE_DIFFERENCE_PERCENTAGE):
                     self._set_servo_to_left(SERVO_SMALL_TURN_ANGLE)
 
@@ -380,10 +383,10 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
                 self._set_motor_speed(MOTOR_SPEED_SLOW)
 
                 # Check if the robot should turn left or right based on the side distances
-                if right_avg_dist >= SIDE_DISTANCE_THRESHOLD:
+                if east_avg_dist >= SIDE_DISTANCE_THRESHOLD:
                     self._set_servo_to_right(SERVO_BIG_TURN_ANGLE)
 
-                elif left_avg_dist >= SIDE_DISTANCE_THRESHOLD:
+                elif west_avg_dist >= SIDE_DISTANCE_THRESHOLD:
                     self._set_servo_to_left(SERVO_BIG_TURN_ANGLE)
 
     @final

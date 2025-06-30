@@ -9,28 +9,6 @@ class RPLidarABC(ABC):
     Abstract class to handle RPLidar operations.
     """
 
-    @staticmethod
-    def calculate_average_distance(
-        measures: dict[int, Measure],
-        angles: list[int]
-    ) -> float:
-        """
-        Calculate the average distance for a given list of angles.
-
-        Args:
-            angles (list[int]): List of angles to calculate the average distance for.
-
-        Returns:
-            float: The average distance for the specified angles.
-        """
-        total_distance = 0.0
-        count = 0
-        for angle in angles:
-            if angle in measures:
-                total_distance += measures[angle].distance
-                count += 1
-        return total_distance / count if count > 0 else 0.0
-
     @abstractmethod
     def logger(self) -> Logger:
         """
