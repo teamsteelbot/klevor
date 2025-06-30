@@ -69,8 +69,7 @@ async def main():
     global bno08x, servo, motor, serial_communication, switch
 
     # Loop to handle exceptions and retry initialization
-    repeat = True
-    while repeat:
+    while True:
         try:
             # Create tasks for initialization
             bno08x_calibrate = create_task(bno08x.calibrate())
@@ -163,7 +162,6 @@ async def main():
                     await servo_angle_task
 
             # Stop the serial communication when exiting the loop
-            repeat = False
             await serial_communication.stop()
 
         except Exception as e:

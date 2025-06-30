@@ -130,6 +130,8 @@ class ServoHandler:
         self.__angle = angle
         if self.__movement:
             self.__servo_motor.angle = self.__angle
+
+        # Send debug message if debug mode is enabled
         if self.__debug and self.__serial_communication:
             self.__serial_communication.send_message(
                 OutgoingMessage(

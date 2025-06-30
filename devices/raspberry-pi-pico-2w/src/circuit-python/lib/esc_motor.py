@@ -144,7 +144,8 @@ class ESCMotorHandler:
         self.__speed = speed * self.SPEED_FACTOR
         if self.__movement:
             self.__esc_motor.throttle = self.__speed
-            # Send the received message
+        
+        # Send debug message if debug mode is enabled
         if self.__debug and self.__serial_communication:
             self.__serial_communication.send_message(
                 OutgoingMessage(

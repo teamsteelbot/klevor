@@ -39,7 +39,7 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
     INCOMING_DELAY = 0.01
 
     # Confirmation timeout
-    CONFIRMATION_TIMEOUT = 1.0
+    CONFIRMATION_TIMEOUT = 5.0
     CONFIRMATION_ATTEMPTS = CONFIRMATION_TIMEOUT / INCOMING_DELAY
 
     # Read timeout
@@ -90,6 +90,7 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
         self.__started_event = Event()
         self.__stop_sent_event = stop_sent_event
         self.__stop_confirmation_event = stop_confirmation_event
+        self.__stop_waiting_confirmation_event = Event()
         self.__stop_event = stop_event
         self.__deleted_event = Event()
 
@@ -183,9 +184,6 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
     @final
     def _stop(self) -> None:
         with self.__rlock:
-            # Set the stop event
-            self.__stop_event.set()
-
             try:
                 # Check if the start event is set
                 if self.__started_event.is_set():
@@ -203,20 +201,29 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
                             "Stop sent event set."
                         )
 
-                    # Cleat the stop sent event
+                    # Clear the stop sent event
                     self.__stop_sent_event.clear()
 
+                    # Set the stop waiting confirmation event
+                    self.__stop_waiting_confirmation_event.set()
+
                     # Wait for the stop confirmation event to be set
-                    self._wait_confirmation_message(STOP_MESSAGE)
+                    self._wait_confirmation_message(STOP_MESSAGE, attempts=STOP_TIMEOUT/self.INCOMING_DELAY)
 
                     # Set the stop confirmation event
                     self.__stop_confirmation_event.set()
+
+                    # Clear the stop waiting confirmation event
+                    self.__stop_waiting_confirmation_event.clear()
 
             except Exception as e:
                 # Log the error
                 self.__logger.error(
                     f"Error while stopping the serial communication receiver: {e}"
                 )
+
+            # Set the stop event
+            self.__stop_event.set()
 
             # Clear the deleted event
             self.__deleted_event.clear()
@@ -240,7 +247,7 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
 
         # Parse the message from the serial port
         buffer = ""
-        while not self.__stop_event.is_set() and not self.__deleted_event.is_set():
+        while (not self.__stop_event.is_set() and not self.__deleted_event.is_set()) or self.__stop_waiting_confirmation_event.is_set():
             data = self.__console_serial.read(1).decode(
                 ENCODE,
                 errors="ignore"
@@ -252,7 +259,7 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
             buffer += data
 
         # Check if the stop event is set or the deleted event is set
-        if self.__stop_event.is_set() or self.__deleted_event.is_set():
+        if (self.__stop_event.is_set() or self.__deleted_event.is_set()) and not self.__stop_waiting_confirmation_event.is_set():
             return None
 
         # If the buffer is empty, return None
@@ -283,22 +290,31 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
 
         return msg
 
-    @final
     def _wait_confirmation_message(
         self,
-        msg_to_confirm: OutgoingMessage
+        msg_to_confirm: OutgoingMessage,
+        attempts: int = CONFIRMATION_ATTEMPTS
     ) -> None:
+        """
+        Wait for a confirmation message from the serial port.
+        
+        Args:
+            msg_to_confirm (OutgoingMessage): The message to confirm.
+            attempts (int): The number of attempts to wait for the confirmation message.
+        Raises:
+            RuntimeError: If the confirmation message is not received within the timeout.
+        """
         # Log
         self.__logger.debug(
-            f"Waiting for confirmation message for: {msg_to_confirm}"
+            f"Waiting confirmation message for: {msg_to_confirm}"
         )
 
         # Wait for the confirmation message
-        attempts = 0
-        while attempts < self.CONFIRMATION_ATTEMPTS:
+        i = 0
+        while i < attempts:
             msg = self._receive_latest_message()
             if msg is None:
-                attempts += 1
+                i += 1
                 continue
 
             if msg.is_error():
@@ -315,7 +331,7 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
             else:
                 # Log the received message
                 self.__logger.debug(
-                    f"Received message while waiting for confirmation: {msg.content}"
+                    f"Received message while waiting for confirmation: {msg}"
                 )
 
         raise RuntimeError(
@@ -412,6 +428,12 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
                     self.__start_event.set()
                     break
 
+                else:
+                    # Log the received message
+                    self.__logger.debug(
+                        f"Received message while waiting for start event: {msg}"
+                    )
+
             while not self.__stop_event.is_set() and not self.__deleted_event.is_set():
                 try:
                     msg = self._receive_latest_message()
@@ -449,6 +471,12 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
                     # Update the BNO08X turns
                     with self.__bno08x_turns.get_lock():
                         self.__bno08x_turns.value = int(msg.content)
+
+                else:
+                    # Log the received message
+                    self.__logger.debug(
+                        f"Received message: {msg}"
+                    )
 
             # Stop
             self._stop()

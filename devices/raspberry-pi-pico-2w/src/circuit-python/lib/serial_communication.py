@@ -96,13 +96,12 @@ class SerialCommunication:
         self.__challenge = challenge
         self.__led = led
 
-    async def receive_messages(self) -> list[IncomingMessage] | []:
+    async def receive_messages(self) -> list[IncomingMessage]:
         """
         Receive messages from the USB CDC data stream.
 
         Returns:
-            list[IncomingMessage] | []: A list of received messages or None if no messages are waiting.
-
+            list[IncomingMessage]: A list of received messages or None if no messages are waiting.
         Raises:
             SerialCommunicationError: If the data port is not enabled or if there is an error in reading messages.
         """
@@ -157,6 +156,9 @@ class SerialCommunication:
         try:
             self.__console_port.write(str(msg).encode("utf-8"))
 
+            # Flush the console port to ensure the message is sent
+            self.__console_port.flush()
+
         except Exception as e:
             raise SerialCommunicationError(f"Error sending message: {e}")
 
@@ -185,6 +187,9 @@ class SerialCommunication:
             
             # Send the end character
             self.__console_port.write(END_CHAR.encode("utf-8"))
+
+            # Flush the console port to ensure the message is sent
+            self.__console_port.flush()
 
         except Exception as e:
             raise SerialCommunicationError(f"Error sending message: {e}")

@@ -169,9 +169,6 @@ class Sender(SenderABC, LoggerConsumerProtocol):
     @final
     def _stop(self) -> None:
         with self.__rlock:
-            # Set the stop event
-            self.__stop_event.set()
-
             try:
                 # Check if the start event is set
                 if self.__started_event.is_set():
@@ -202,6 +199,9 @@ class Sender(SenderABC, LoggerConsumerProtocol):
                 self.__logger.error(
                     f"Error while stopping the serial communication sender: {e}"
                 )
+
+            # Set the stop event
+            self.__stop_event.set()
 
             # Clear the deleted event
             self.__deleted_event.clear()

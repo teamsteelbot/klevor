@@ -19,7 +19,7 @@ CONNECTION_ATTEMPTS = 10
 ATTEMPTS_DELAY = 1
 
 # Stop timeout
-STOP_TIMEOUT = 1.0
+STOP_TIMEOUT = 5.0
 
 # Encode
 ENCODE = 'utf-8'
