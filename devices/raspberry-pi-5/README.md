@@ -12,9 +12,7 @@
     2. [YOLO](#yolo)
     3. [NPU](#npu)
         1. [Características Clave de las NPU](#npu-caracteristicas-clave)
-4. *
-   *[Montaje del Modelo de Detección de Objetos](#montaje-del-modelo-de-deteccion-de-objetos)
-   **
+4. **[Montaje del Modelo de Detección de Objetos](#montaje-del-modelo-de-deteccion-de-objetos)**
     1. [Creación del Conjunto de Datos](#creacion-del-conjunto-de-datos)
     2. [Entrenamiento del Modelo](#entrenamiento-del-modelo)
     3. [Entrenamiento del Modelo](#entrenamiento-del-modelo)
@@ -27,7 +25,6 @@
         2. [Cómo Convertir el Modelo a un Formato Compatible al Hailo 8](#como-convertir-el-modelo-a-un-formato-compatible-al-hailo-8l)
     6. [Prueba del Funcionamiento](#prueba-del-funcionamiento)
 5. **[Recursos Externos](#recursos-externos)**
-6. **[Recursos Externos](#recursos-externos)**
 
 <!--
 2. [Multiprocesamiento](#multiprocesamiento)

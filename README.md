@@ -33,7 +33,7 @@
     11. [HiLetgo Time-of-Flight Sensor VL53L0X](#sensor-tof-hiletgo)
     12. [9-Axis IMU Gyroscope GY-BNO085](#gyroscope-gy-bno085)
 5. **[Esquemas y Diagramas](#esquemas)**
-   1. [Esquemas de Conexiones](schemes/prototype1/wiring-diagram.png)
+   1. [Esquemas de Conexiones](schemes/prototype2/wiring-diagram.png)
    2. [Diagrama de Flujo](schemes/prototype2/open-challenge-flowchart.png)
 6. **[Fotos del equipo](t-photos/README.md)**
 7. **[Vídeos](video/README.md)**
@@ -61,21 +61,18 @@ Actualmente, este equipo está conformado por 3 miembros:
 
 <h1 id="estructura-de-archivos">Estructura de archivos</h1>
 
+- `devices` contiene todo el código el cual fue utilizado para poder controlar este robot de manera autónoma, además de su correspondiente explicación.
+
 - `models` contiene todos los archivos en 3D que se utilizaron para poder
   construir a nuestro robot (Klevor).
 
-- `schemes` contiene todos los esquemas y diagramas de todas las conexiones de
-  nuestro robot (Klevor).
-
-- `src` contiene todo el código el cual fue utilizado para poder controlar este
-  robot de manera autónoma.
+- `schemes` contiene todos los esquemas y diagramas de todas las conexiones de nuestro robot (Klevor).
 
 - `t-photos` contiene las fotos del equipo.
 
 - `v-photos` contiene las fotos de Klevor.
 
-- `video` contiene los vídeos de Klevor en la pista, tanto en el Desafío Abierto
-  como en el Desafío con Obstáculos (Desafío Cerrado).
+- `video` contiene los vídeos de Klevor en la pista, tanto en el Desafío Abierto como en el Desafío con Obstáculos (Desafío Cerrado).
 
 <h1 id="lista-de-componentes">Lista de Componentes</h1>
 
