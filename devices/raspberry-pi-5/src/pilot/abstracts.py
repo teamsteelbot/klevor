@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
-from functools import singledispatchmethod
 from typing import Dict
+from math import ceil, floor
 
 from .constants import (
     MOTOR_SPEED_RANGE,
@@ -53,18 +53,12 @@ class PilotABC(ABC):
                 f"Speed must be between {MOTOR_SPEED_RANGE[0]} and {MOTOR_SPEED_RANGE[1]}"
             )
 
-    @singledispatchmethod
-    def _calculate_average_distance(self, value):
-        raise NotImplementedError(
-            f"Unsupported type for calculating average distance: {type(value)}"
-        )
-
-    @_calculate_average_distance.register
-    def _calculate_average_distance(
-        self,
+    @classmethod
+    def _calculate_average_distance_from_angle(
+        cls,
         measures: Dict[int, Measure],
         middle_angle: int,
-        width: int = 10
+        width: int = ANGLE_WIDTH
     ) -> float:
         """
         Calculate the average distance for a given list of angles.
@@ -134,9 +128,9 @@ class PilotABC(ABC):
             count += 1
         return total_distance / count if count > 0 else 0.0
 
-    @_calculate_average_distance.register
-    def _calculate_average_distance(
-        self,
+    @classmethod
+    def _calculate_average_distance_from_direction(
+        cls,
         measures: Dict[int, Measure],
         direction: Direction,
         width: int = ANGLE_WIDTH
@@ -146,8 +140,8 @@ class PilotABC(ABC):
 
         Args:
             measures (Dict[int, Measure]): Dictionary of measures indexed by angle.
-            direction (Direction): Direction to calculate the average distance for.
             width (int): The sum of the angles to consider with both sides and the middle angle.
+            direction (Direction): Direction to calculate the average distance for.
         Returns:
             float: The average distance for the specified angles.
         Raises:
@@ -157,15 +151,18 @@ class PilotABC(ABC):
         if direction_angle is None:
             raise ValueError(f"No angle found for direction: {direction}")
 
-        return self._calculate_average_distance(
+        # Round the angle
+        direction_angle = ceil(direction_angle) if direction_angle >= 180 else floor(direction_angle)
+
+        return cls._calculate_average_distance_from_angle(
             measures,
-            direction_angle,
+            int(direction_angle),
             width
         )
 
-    @_calculate_average_distance.register
+    @classmethod
     def _calculate_average_distance(
-        self,
+        cls,
         measures: Dict[int, Measure],
         *directions: Direction,
     ) -> Dict[Direction, float]:
@@ -180,7 +177,7 @@ class PilotABC(ABC):
         """
         avg_distances = {}
         for direction in directions:
-            avg_distances[direction] = self._calculate_average_distance(
+            avg_distances[direction] = cls._calculate_average_distance_from_direction(
                 measures, direction
             )
         return avg_distances
