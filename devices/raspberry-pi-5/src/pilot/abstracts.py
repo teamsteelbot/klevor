@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from functools import singledispatch
+from functools import singledispatchmethod
+from typing import Dict
 
 from .constants import (
     MOTOR_SPEED_RANGE,
@@ -52,18 +53,16 @@ class PilotABC(ABC):
                 f"Speed must be between {MOTOR_SPEED_RANGE[0]} and {MOTOR_SPEED_RANGE[1]}"
             )
 
-    @staticmethod
-    @singledispatch
-    def _calculate_average_distance(value):
+    @singledispatchmethod
+    def _calculate_average_distance(self, value):
         raise NotImplementedError(
             f"Unsupported type for calculating average distance: {type(value)}"
         )
 
-    @classmethod
     @_calculate_average_distance.register
     def _calculate_average_distance(
-        cls,
-        measures: dict[int, Measure],
+        self,
+        measures: Dict[int, Measure],
         middle_angle: int,
         width: int = 10
     ) -> float:
@@ -71,7 +70,7 @@ class PilotABC(ABC):
         Calculate the average distance for a given list of angles.
 
         Args:
-            measures (dict[int, Measure]): Dictionary of measures indexed by angle.
+            measures (Dict[int, Measure]): Dictionary of measures indexed by angle.
             middle_angle (int): The middle angle to start the averaging from.
             width (int): The sum of the angles to consider with both sides and the middle angle.
         Returns:
@@ -135,11 +134,10 @@ class PilotABC(ABC):
             count += 1
         return total_distance / count if count > 0 else 0.0
 
-    @classmethod
     @_calculate_average_distance.register
     def _calculate_average_distance(
-        cls,
-        measures: dict[int, Measure],
+        self,
+        measures: Dict[int, Measure],
         direction: Direction,
         width: int = ANGLE_WIDTH
     ) -> float:
@@ -147,7 +145,7 @@ class PilotABC(ABC):
         Calculate the average distance for a given list of angles.
 
         Args:
-            measures (dict[int, Measure]): Dictionary of measures indexed by angle.
+            measures (Dict[int, Measure]): Dictionary of measures indexed by angle.
             direction (Direction): Direction to calculate the average distance for.
             width (int): The sum of the angles to consider with both sides and the middle angle.
         Returns:
@@ -159,31 +157,30 @@ class PilotABC(ABC):
         if direction_angle is None:
             raise ValueError(f"No angle found for direction: {direction}")
 
-        return cls._calculate_average_distance(
+        return self._calculate_average_distance(
             measures,
             direction_angle,
             width
         )
 
-    @classmethod
     @_calculate_average_distance.register
     def _calculate_average_distance(
-        cls,
-        measures: dict[int, Measure],
+        self,
+        measures: Dict[int, Measure],
         *directions: Direction,
-    ) -> dict[Direction, float]:
+    ) -> Dict[Direction, float]:
         """
         Calculate the average distances for the specified directions.
 
         Args:
-            measures (dict[int, Measure]): Dictionary of measures indexed by angle.
+            measures (Dict[int, Measure]): Dictionary of measures indexed by angle.
             *directions (Direction): Directions to calculate the average distances for.
         Returns:
-            dict[Direction, float]: Dictionary with directions as keys and their average distances as values.
+            Dict[Direction, float]: Dictionary with directions as keys and their average distances as values.
         """
         avg_distances = {}
         for direction in directions:
-            avg_distances[direction] = cls._calculate_average_distance(
+            avg_distances[direction] = self._calculate_average_distance(
                 measures, direction
             )
         return avg_distances
@@ -323,12 +320,12 @@ class PilotABC(ABC):
         pass
 
     @abstractmethod
-    def _get_rplidar_measures(self) -> dict[int, Measure]:
+    def _get_rplidar_measures(self) -> Dict[int, Measure]:
         """
         Gets the RPLidar measures.
 
         Returns:
-            dict[int, Measure]: A dictionary containing the RPLidar measures.
+            Dict[int, Measure]: A dictionary containing the RPLidar measures.
         Raises:
             TimeoutError: If the RPLidar measures cannot be retrieved within a timeout.
         """

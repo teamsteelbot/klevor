@@ -1,3 +1,5 @@
+from typing import List
+
 from .enums import Flag
 from ..constants import FORMATS, FORMAT_PT
 from ...args import Args as A
@@ -137,12 +139,12 @@ class Args(A):
             nargs="*"
         )
 
-    def get_yolo_classes(self) -> list[str]:
+    def get_yolo_classes(self) -> List[str]:
         """
         Get the YOLO classes argument.
 
         Returns:
-            list[str]: The YOLO classes.
+            List[str]: The YOLO classes.
         """
         return self._get_attribute_from_args_dict(Flag.CLASSES)
 
@@ -164,12 +166,12 @@ class Args(A):
             nargs="*"
         )
 
-    def get_yolo_ignore_classes(self) -> list[str]:
+    def get_yolo_ignore_classes(self) -> List[str]:
         """
         Get the YOLO ignore classes argument.
 
         Returns:
-            list[str]: The YOLO ignore classes.
+            List[str]: The YOLO ignore classes.
         """
         return self._get_attribute_from_args_dict(Flag.IGNORE_CLASSES)
 

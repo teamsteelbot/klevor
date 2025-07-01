@@ -2,6 +2,7 @@ import json
 import os
 import shutil
 from argparse import ArgumentParser
+from typing import List
 
 from ..args import Args
 from ..files import Files
@@ -23,7 +24,7 @@ def create_dataset_with_removed_classes(
     output_dir: str | os.PathLike[str],
     output_to_process_dir: str |
                            os.PathLike[str],
-    ignore_classes: list
+    ignore_classes: List
 ):
     """
     Create a new dataset with the labeled classes removed.
@@ -33,7 +34,7 @@ def create_dataset_with_removed_classes(
         input_to_process_dir (str | os.PathLike[str]): The path to the input dataset directory to process.
         output_dir (str | os.PathLike[str]): The path to the output dataset directory.
         output_to_process_dir (str | os.PathLike[str]): The path to the output dataset directory to process.
-        ignore_classes (list): List of class names to ignore from the dataset.
+        ignore_classes (List): List of class names to ignore from the dataset.
     """
     # Create the output directory if it doesn't exist
     Files.ensure_directory_exists(output_dir)

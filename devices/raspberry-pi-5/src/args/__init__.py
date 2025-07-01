@@ -1,5 +1,5 @@
 from argparse import ArgumentParser, FileType
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, List
 
 from .enums import Flag
 from .protocols import FlagProtocol
@@ -160,7 +160,7 @@ class Args:
         type: Callable[[str], Any] | FileType | str,
         default: Optional[Any] = None,
         required: bool = False,
-        choices: Optional[list[Any]] = None,
+        choices: Optional[List[Any]] = None,
         help: Optional[str] = None,
         nargs: Optional[str] = None
     ) -> None:
@@ -172,7 +172,7 @@ class Args:
             type (Callable[[str], Any] | FileType | str): The type of the argument.
             default (Optional[Any]): Default value for the argument.
             required (bool): If True, the argument is required.
-            choices (Optional[list[Any]]): List of valid choices for the argument.
+            choices (Optional[List[Any]]): List of valid choices for the argument.
             help (Optional[str]): Help text for the argument.
             nargs (Optional[str]): Number of arguments expected.
         """

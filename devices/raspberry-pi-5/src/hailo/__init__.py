@@ -3,11 +3,9 @@ from functools import partial
 from multiprocessing import Event, Queue, RLock
 from multiprocessing.synchronize import Event as EventCls
 from queue import Empty
-from typing import Optional, final
+from typing import Optional, final, Dict
 
-import cv2
 import numpy as np
-from PIL.Image import Image
 from hailo_platform import (FormatType, HEF, HailoSchedulingAlgorithm, VDevice)
 
 from .abstracts import HailoABC
@@ -64,7 +62,7 @@ class Hailo(HailoABC, LoggerConsumerProtocol):
         multiprocessing: bool = False,
         batch_size: int = BATCH_SIZE,
         input_type: Optional[str] = None,
-        output_type: Optional[dict[str, str]] = None
+        output_type: Optional[Dict[str, str]] = None
     ) -> None:
         """
         Initialize the Hailo handler class.
@@ -84,7 +82,7 @@ class Hailo(HailoABC, LoggerConsumerProtocol):
             multiprocessing (bool): Whether to enable multiprocessing.
             batch_size (int): Batch size for inference.
             input_type (Optional[str]): Format type of the input stream.
-            output_type (Optional[dict[str, str]]): Format type of the output stream.
+            output_type (Optional[Dict[str, str]]): Format type of the output stream.
         """
         # Initialize the debug flag
         self.__debug = debug
@@ -123,7 +121,7 @@ class Hailo(HailoABC, LoggerConsumerProtocol):
         self.__labels = Files.get_labels_from_txt(labels_path)
 
         # Check the type of class colors
-        is_instance(class_colors, dict)
+        is_instance(class_colors, Dict)
         self.__class_colors = class_colors
 
         # Check the type of batch size
@@ -141,7 +139,7 @@ class Hailo(HailoABC, LoggerConsumerProtocol):
         self.__input_type = input_type
 
         # Initialize the output type
-        self.__output_type: Optional[dict[str, str]] = output_type
+        self.__output_type: Optional[Dict[str, str]] = output_type
 
         # Initialize the target, HEF, infer model and job
         self.__target = None
@@ -163,7 +161,7 @@ class Hailo(HailoABC, LoggerConsumerProtocol):
     @final
     def _set_output_type(
         self, output_type_dict: Optional[
-            dict[str, str]] = None
+            Dict[str, str]] = None
     ) -> None:
         for output_name, output_type in output_type_dict.items():
             self.__infer_model.output(output_name).set_format_type(

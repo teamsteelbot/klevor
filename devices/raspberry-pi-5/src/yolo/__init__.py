@@ -1,5 +1,6 @@
 import os
 import time
+from typing import Dict, List
 
 import torch
 from ultralytics import YOLO
@@ -34,14 +35,14 @@ class Yolo:
         return YOLO(model_path, task=task, verbose=True)
 
     @staticmethod
-    def get_class_names(model: YOLO) -> dict[int, str]:
+    def get_class_names(model: YOLO) -> Dict[int, str]:
         """
         Get YOLO PyTorch model class names.
 
         Args:
             model (YOLO): Loaded YOLO model.
         Returns:
-            dict[int, str]: Dictionary mapping class indices to class names.
+            Dict[int, str]: Dictionary mapping class indices to class names.
         """
         return model.names
 
@@ -87,7 +88,7 @@ class Yolo:
     def run_inference(
         model: YOLO,
         preprocessed_image: torch.Tensor
-    ) -> tuple[list, float]:
+    ) -> tuple[List, float]:
         """
         Run inference from PyTorch model.
 
@@ -95,7 +96,7 @@ class Yolo:
             model (YOLO): Loaded YOLO model.
             preprocessed_image (torch.Tensor): Preprocessed image tensor.
         Returns:
-            tuple(list, float): Inferences and elapsed time in seconds.
+            tuple(List, float): Inferences and elapsed time in seconds.
         """
         # Get time
         start_time = time.time()

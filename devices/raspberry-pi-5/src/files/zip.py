@@ -1,6 +1,6 @@
 import os
 from re import Pattern
-from typing import Optional
+from typing import Optional, List
 from zipfile import ZipFile
 
 from . import Files
@@ -16,10 +16,10 @@ class Zip:
     @staticmethod
     def zip_files(
         zipf: ZipFile,
-        filenames: list,
+        filenames: List,
         input_file_base_path: str | os.PathLike[str],
         input_base_path: str | os.PathLike[str],
-        ignore_filenames_regex: Optional[list[Pattern]] = None,
+        ignore_filenames_regex: Optional[List[Pattern]] = None,
         debug: bool = False
     ) -> None:
         """
@@ -27,10 +27,10 @@ class Zip:
 
         Args:
             zipf (ZipFile): ZipFile object to write to.
-            filenames (list): List of filenames to zip.
+            filenames (List): List of filenames to zip.
             input_file_base_path (str | os.PathLike[str]): Base path of the files to be zipped.
             input_base_path (str | os.PathLike[str]): Base path for relative file paths in the zip.
-            ignore_filenames_regex (Optional[list[Pattern]]): List of regex patterns to ignore certain files.
+            ignore_filenames_regex (Optional[List[Pattern]]): List of regex patterns to ignore certain files.
             debug (bool): If True, prints debug information.
         """
         for filename in filenames:
@@ -54,7 +54,7 @@ class Zip:
         zipf: ZipFile,
         input_base_path: str | os.PathLike[str],
         input_folder_path: str | os.PathLike[str],
-        ignore_filenames_regex: list = None,
+        ignore_filenames_regex: List = None,
         debug: bool = False
     ) -> None:
         """
@@ -64,7 +64,7 @@ class Zip:
             zipf (ZipFile): ZipFile object to write to.
             input_base_path (str | os.PathLike[str]): Base path for relative file paths in the zip.
             input_folder_path (str | os.PathLike[str]): Path of the folder to be zipped.
-            ignore_filenames_regex (Optional[list[Pattern]]): List of regex patterns to ignore certain files.
+            ignore_filenames_regex (Optional[List[Pattern]]): List of regex patterns to ignore certain files.
             debug (bool): If True, prints debug information.
         """
         # Get the list of files in the specified folder
@@ -90,8 +90,8 @@ class Zip:
         zipf: ZipFile,
         input_base_path: str | os.PathLike[str],
         input_folder_path: str | os.PathLike[str],
-        ignore_dirs: list[str] = None,
-        ignore_filenames_regex: list[Pattern] = None,
+        ignore_dirs: List[str] = None,
+        ignore_filenames_regex: List[Pattern] = None,
         debug: bool = False
     ) -> None:
         """
@@ -101,8 +101,8 @@ class Zip:
             zipf (ZipFile): ZipFile object to write to.
             input_base_path (str | os.PathLike[str]): Base path for relative file paths in the zip.
             input_folder_path (str | os.PathLike[str]): Path of the folder to be zipped.
-            ignore_dirs (Optional[list[str]]): List of directories to ignore.
-            ignore_filenames_regex (Optional[list[Pattern]]): List of regex patterns to ignore certain files.
+            ignore_dirs (Optional[List[str]]): List of directories to ignore.
+            ignore_filenames_regex (Optional[List[Pattern]]): List of regex patterns to ignore certain files.
             debug (bool): If True, prints debug information.
         """
         # Added to ignore directories the list of directories that should be always ignored

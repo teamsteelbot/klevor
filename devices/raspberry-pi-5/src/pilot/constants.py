@@ -40,7 +40,7 @@ ANGLE_WIDTH = 5
 DIRECTION_TO_ANGLE = {
     Direction.NORTH: 0,
     Direction.NORTH_NORTHEAST: 22.5,
-    Direction.NORTH_EAST: 45,
+    Direction.NORTHEAST: 45,
     Direction.EAST_NORTHEAST: 67.5,
     Direction.EAST: 90,
     Direction.EAST_SOUTHEAST: 112.5,

@@ -3,7 +3,7 @@ from multiprocessing.sharedctypes import Value as ValueCls
 from multiprocessing.synchronize import Event as EventCls
 from queue import Empty
 from time import monotonic, sleep
-from typing import Optional, final
+from typing import Optional, final, Dict
 
 from .abstracts import PilotABC
 from .constants import (
@@ -243,7 +243,7 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
         return self.__servo_angle != SERVO_CENTER_ANGLE
 
     @final
-    def _get_rplidar_measures(self) -> dict[int, Measure] | None:
+    def _get_rplidar_measures(self) -> Dict[int, Measure] | None:
         # Set the event to signal that the RPLidar should update measures
         self.__rplidar_update_measures_event.set()
 
@@ -346,6 +346,17 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
                 f"North: {north_avg_dist}, West: {west_avg_dist}, East: {east_avg_dist}"
             )
 
+            # Check if one of them is 0
+            if (north_avg_dist == 0 or
+                    west_avg_dist == 0 or east_avg_dist == 0):
+                self.__logger.warning(
+                    "One of the average distances is 0. This may cause unexpected behavior. Waiting for new measures..."
+                )
+
+                # Sleep
+                self._sleep(start_time)
+                continue
+
             # Check if the front distance is below the safety threshold
             if north_avg_dist < SAFETY_FRONT_DISTANCE_THRESHOLD:
                 self.__logger.warning(
@@ -401,17 +412,6 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
 
                     # Sleep for a short time before checking again
                     self._sleep(start_time)
-
-            # Check if one of them is 0
-            if (north_avg_dist == 0 or
-                    west_avg_dist == 0 or east_avg_dist == 0):
-                self.__logger.warning(
-                    "One of the average distances is 0. This may cause unexpected behavior. Waiting for new measures..."
-                )
-
-                # Sleep
-                self._sleep(start_time)
-                continue
 
             # Check if the robot should move forward or turn
             if north_avg_dist >= FRONT_DISTANCE_THRESHOLD:

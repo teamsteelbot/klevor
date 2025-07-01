@@ -2,7 +2,7 @@ from multiprocessing import Event, Queue
 from multiprocessing.sharedctypes import Value as ValueCls
 from multiprocessing.synchronize import Event as EventCls
 from threading import Thread
-from typing import Optional, final
+from typing import Optional, final, List
 
 from .abstracts import SerialCommunicationABC
 from .constants import (
@@ -36,8 +36,8 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
         sender_messages_queue: Queue,
         writer_messages_queue: Queue,
         server_messages_queue: Optional[Queue] = None,
-        console_ports: Optional[list[str]] = RASPBERRY_PI_PICO_CONSOLE_PORTS,
-        data_ports: Optional[list[str]] = RASPBERRY_PI_PICO_DATA_PORTS,
+        console_ports: Optional[List[str]] = RASPBERRY_PI_PICO_CONSOLE_PORTS,
+        data_ports: Optional[List[str]] = RASPBERRY_PI_PICO_DATA_PORTS,
         baudrate: Optional[int] = RASPBERRY_PI_PICO_BAUDRATE
     ):
         """
@@ -53,8 +53,8 @@ class SerialCommunication(SerialCommunicationABC, LoggerConsumerProtocol):
             sender_messages_queue (Queue): Queue to hold outgoing messages of the serial port.
             writer_messages_queue (Queue): Queue to hold log messages.
             server_messages_queue (Optional[Queue]): Queue to broadcast the messages through the websockets server.
-            console_ports (Optional[list[str]]): List of serial ports used for receiving data from Pico.
-            data_ports (Optional[list[str]]): List of serial ports used for sending data to Pico.
+            console_ports (Optional[List[str]]): List of serial ports used for receiving data from Pico.
+            data_ports (Optional[List[str]]): List of serial ports used for sending data to Pico.
             baudrate (Optional[int]): Baud rate for the serial communication.
         """
         # Initialize the events

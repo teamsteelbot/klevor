@@ -2,7 +2,7 @@ from multiprocessing import Event, Queue, RLock
 from multiprocessing.synchronize import Event as EventCls
 from queue import Empty
 from threading import Thread
-from typing import final
+from typing import final, Dict
 
 from . import Hailo
 from .abstracts import ObjectDetectorABC
@@ -93,7 +93,7 @@ class ObjectDetector(ObjectDetectorABC, LoggerConsumerProtocol):
 
         # Create the Hailo handlers
         self.__hailo_handlers = {}
-        self.__hailo_handler_threads: dict[str, Thread | None] = {}
+        self.__hailo_handler_threads: Dict[str, Thread | None] = {}
         for model_name in MODELS_NAME:
             # Get the HEF file paths
             hef_file_path = Files.get_model_hailo_suite_compiled_hef_file_path(
