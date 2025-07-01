@@ -7,7 +7,8 @@ from typing import Optional, final, Dict
 
 from .abstracts import PilotABC
 from .constants import (
-    FRONT_DISTANCE_THRESHOLD,
+    FRONT_START_TURN_DISTANCE_THRESHOLD,
+    FRONT_STOP_TURN_DISTANCE_THRESHOLD,
     MOTOR_SPEED_NORMAL,
     MOTOR_SPEED_SLOW,
     SERVO_BIG_TURN_ANGLE,
@@ -19,7 +20,8 @@ from .constants import (
     SIDE_DISTANCE_THRESHOLD,
     STOP_DISTANCE_THRESHOLD,
     TURNS,
-    SAFETY_FRONT_DISTANCE_THRESHOLD,
+    SAFETY_FRONT_DISTANCE_START_THRESHOLD,
+    SAFETY_FRONT_DISTANCE_STOP_THRESHOLD,
     MOTOR_SPEED_FAST
 )
 from ..common.measure import Measure
@@ -223,7 +225,7 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
         self._set_servo_angle(SERVO_CENTER_ANGLE)
 
     @final
-    def _set_servo_to_right(self, angle):
+    def _set_servo_to_right(self, angle: int):
         if not 0 < angle <= SERVO_RIGHT_LIMIT:
             raise ValueError(
                 f"Angle must be between 0 and {SERVO_RIGHT_LIMIT} degrees for right movement"
@@ -232,13 +234,33 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
         self._set_servo_angle(SERVO_CENTER_ANGLE - angle)
 
     @final
-    def _set_servo_to_left(self, angle):
+    def _is_servo_to_right(self) -> bool:
+        return self.__servo_angle < SERVO_CENTER_ANGLE
+
+    @final
+    def _set_servo_to_left(self, angle: int):
         if not 0 < angle <= abs(SERVO_LEFT_LIMIT):
             raise ValueError(
                 f"Angle must be between 0 and {abs(SERVO_LEFT_LIMIT)} degrees for left movement"
             )
 
         self._set_servo_angle(SERVO_CENTER_ANGLE + angle)
+
+    @final
+    def _is_servo_to_left(self) -> bool:
+        return self.__servo_angle > SERVO_CENTER_ANGLE
+
+    @final
+    def _set_servo_to_opposite(self, angle: int):
+        if angle == SERVO_CENTER_ANGLE:
+            return
+
+        # Calculate the opposite angle
+        angle_diff = abs(self.__servo_angle - SERVO_CENTER_ANGLE)
+        if self._is_servo_to_right(angle):
+            self._set_servo_to_left(angle_diff)
+        elif self._is_servo_to_left(angle):
+            self._set_servo_to_right(angle_diff)
 
     @final
     def _get_rplidar_measures(self) -> Dict[int, Measure] | None:
@@ -264,23 +286,11 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
                 "RPLidar measures could not be retrieved within the timeout."
             )
 
-        # Calculate the average distances according to the challenge
-        if self.__challenge.value == Challenge.WITHOUT_OBSTACLES.as_char:
-            # Calculate the average north, west and east distances
-            self.__average_distances = self._calculate_average_distance(
-                measures,
-                Direction.NORTH,
-                Direction.WEST,
-                Direction.EAST
-            )
-
-        elif self.__challenge.value == Challenge.WITH_OBSTACLES.as_char:
-            raise NotImplementedError(
-                "Challenge with obstacles is not implemented yet."
-            )
-
-        else:
-            raise ValueError(f"Unknown challenge: {self.__challenge.value}")
+        # Calculate the average north, west and east distances
+        self.__average_distances = self._calculate_average_distance(
+            measures,
+            *Direction
+        )
 
     def _calculate_sleep_delay(
             self,
@@ -320,6 +330,21 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
         """
         sleep(self._calculate_sleep_delay(start_time))
 
+    
+    def _get_distance(
+        self,
+        direction: Direction,
+    ) -> float:
+        """
+        Get the distance for a specific direction from the measures.
+
+        Args:
+            direction (Direction): The direction to get the distance for.
+        Returns:
+            float: The distance for the specified direction.
+        """
+        return self.__average_distances.get(direction, 0.0)
+
     @final
     def _challenge_with_obstacles(self):
         raise NotImplementedError(
@@ -331,15 +356,20 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
         # Initialize the last turns
         last_turns = self.__bno08x_turns.value
 
+        # Turns counter with RPLidar 
+        rplidar_turns_counter = 0
+
         while not self.__stop_event.is_set() and not self.__deleted_event.is_set():
             # Get the start time
             start_time = monotonic()
 
             # Get the average distances from the RPLidar
             self._update_rplidar_average_distances()
-            west_avg_dist = self.__average_distances[Direction.WEST]
-            east_avg_dist = self.__average_distances[Direction.EAST]
-            north_avg_dist = self.__average_distances[Direction.NORTH]
+            west_avg_dist = self._get_distance(Direction.WEST)
+            east_avg_dist = self._get_distance(Direction.EAST)
+            north_avg_dist = self._get_distance(Direction.NORTH)
+            north_northeast_avg_dist = self._get_distance(Direction.NORTH_NORTHEAST)
+            north_northwest_avg_dist = self._get_distance(Direction.NORTH_NORTHWEST)
             self.__logger.debug(
                 f"North: {north_avg_dist}, West: {west_avg_dist}, East: {east_avg_dist}"
             )
@@ -356,37 +386,91 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
                 continue
 
             # Check if the front distance is below the safety threshold
-            if north_avg_dist < SAFETY_FRONT_DISTANCE_THRESHOLD:
+            if north_avg_dist < SAFETY_FRONT_DISTANCE_START_THRESHOLD:
+                # Store the current servo angle
+                previous_servo_angle = self.__servo_angle
+                previous_motor_speed = self.__motor_speed
+
+                # Log the warning
                 self.__logger.warning(
                     f"Front distance {north_avg_dist} is below the safety threshold."
                 )
-                self._set_motor_backward(MOTOR_SPEED_NORMAL)
                 self._set_servo_to_center()
+                self._set_motor_backward(MOTOR_SPEED_NORMAL)
 
                 # Sleep for a short time before checking again
                 self._sleep(start_time)
+
+                while not self.__stop_event.is_set() and not self.__deleted_event.is_set():
+                    # Update the start time
+                    start_time = monotonic()
+
+                    # Get the average distances again
+                    self._update_rplidar_average_distances()
+                    north_avg_dist = self.__average_distances[Direction.NORTH]
+
+                    if north_avg_dist >= SAFETY_FRONT_DISTANCE_STOP_THRESHOLD:
+                        # Stop the motor
+                        self._set_motor_stop()
+                        self.__logger.info(
+                            "Safety front distance threshold reached. Stopping the robot."
+                        )
+                        break
+
+                    # Sleep for a short time before checking again
+                    self._sleep(start_time)
+
+                # Log the recovery
+                self.__logger.info(
+                    "Front distance is now safe. Recovering the robot."
+                )
+
+                # Update the start time
+                start_time = monotonic()
+
+                # Set previous servo angle and motor speed back to normal
+                if self.__is_turning:
+                    self._set_servo_angle(previous_servo_angle)
+                else:
+                    self._set_servo_to_opposite(previous_servo_angle)
+                self._set_motor_speed(previous_motor_speed)
+
+                # Sleep for a short time before continuing
+                self._sleep(start_time)
                 continue
+
 
             # Check for the current turn and center the servo if necessary
             if self.__is_turning:
+                # Check if the front distance is safe to stop turning
                 turns = self.__bno08x_turns.value
-                if turns != last_turns:
+                if turns > last_turns:
+                    self.__logger.info(
+                        f"Detected a turn. Current turns: {turns}, Last turns: {last_turns}"
+                    )
                     self._set_servo_to_center()
                     self.__is_turning = False
 
                     # Update for the next check
                     last_turns = turns
+                
+                elif north_avg_dist >= FRONT_STOP_TURN_DISTANCE_THRESHOLD:
+                    self.__logger.info(
+                        "Front distance is safe. Stopping the turning state."
+                    )
+                    self._set_servo_to_center()
+                    self.__is_turning = False
 
                 # Sleep
                 self._sleep(start_time)
                 continue
 
             # Check if it's almost time to stop
-            if last_turns == TURNS:
+            if last_turns >= TURNS or rplidar_turns_counter >= TURNS:
                 self._set_servo_to_center()
-                self._set_motor_speed(MOTOR_SPEED_SLOW)
+                self._set_motor_speed(MOTOR_SPEED_NORMAL)
 
-                while True:
+                while not self.__stop_event.is_set() and not self.__deleted_event.is_set():
                     # Update the start time
                     start_time = monotonic()
 
@@ -413,8 +497,12 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
                     self._sleep(start_time)
 
             # Check if the robot should move forward or turn
-            if north_avg_dist >= FRONT_DISTANCE_THRESHOLD:
-                self._set_motor_speed(MOTOR_SPEED_NORMAL)
+            if north_avg_dist >= FRONT_START_TURN_DISTANCE_THRESHOLD:
+                if (north_northeast_avg_dist >= SIDE_DISTANCE_THRESHOLD and
+                        north_northwest_avg_dist >= SIDE_DISTANCE_THRESHOLD):
+                    self._set_motor_speed(MOTOR_SPEED_FAST)
+                else:
+                    self._set_motor_speed(MOTOR_SPEED_NORMAL)
 
                 # Check if the servo should make a little turn to the left or right in order to center the robot
                 if east_avg_dist >= west_avg_dist * (
@@ -429,16 +517,18 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
                     self._set_servo_to_center()
 
             else:
-                self._set_motor_speed(MOTOR_SPEED_SLOW)
+                self._set_motor_speed(MOTOR_SPEED_NORMAL)
 
                 # Check if the robot should turn left or right based on the side distances
                 if east_avg_dist >= SIDE_DISTANCE_THRESHOLD:
                     self._set_servo_to_right(SERVO_BIG_TURN_ANGLE)
                     self.__is_turning = True
+                    rplidar_turns_counter += 1
 
                 elif west_avg_dist >= SIDE_DISTANCE_THRESHOLD:
                     self._set_servo_to_left(SERVO_BIG_TURN_ANGLE)
                     self.__is_turning = True
+                    rplidar_turns_counter += 1
 
             # Sleep for the calculated delay
             self._sleep(start_time)

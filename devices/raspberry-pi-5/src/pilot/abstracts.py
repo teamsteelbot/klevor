@@ -281,7 +281,7 @@ class PilotABC(ABC):
         pass
 
     @abstractmethod
-    def _set_servo_to_right(self, angle):
+    def _set_servo_to_right(self, angle: int):
         """
         Sets the servo motor to the right by a specified angle.
 
@@ -294,7 +294,17 @@ class PilotABC(ABC):
         pass
 
     @abstractmethod
-    def _set_servo_to_left(self, angle):
+    def _is_servo_to_right(self) -> bool:
+        """
+        Check if the servo is in the right position.
+
+        Returns:
+            bool: True if the servo is in the right position, False otherwise.
+        """
+        pass
+
+    @abstractmethod
+    def _set_servo_to_left(self, angle: int):
         """
         Sets the servo motor to the left by a specified angle.
 
@@ -303,6 +313,26 @@ class PilotABC(ABC):
 
         Raises:
             ValueError: If the angle is not within the left limit.
+        """
+        pass
+
+    @abstractmethod
+    def _is_servo_to_right(self) -> bool:
+        """
+        Check if the servo is in the right position.
+
+        Returns:
+            bool: True if the servo is in the right position, False otherwise.
+        """
+        pass
+
+    @abstractmethod
+    def _set_servo_to_opposite(self, angle: int):
+        """
+        Sets the servo angle to the opposite direction.
+
+        Args:
+            angle (int): The angle to set the servo to.
         """
         pass
 
