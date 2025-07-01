@@ -19,6 +19,7 @@ from .constants import (
     SIDE_DISTANCE_THRESHOLD,
     STOP_DISTANCE_THRESHOLD,
     TURNS,
+    SAFETY_FRONT_DISTANCE_THRESHOLD,
 )
 from ..common.measure import Measure
 from ..enums import Challenge
@@ -44,11 +45,13 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
     # Start delay
     START_DELAY = 5
 
-    # Wait delay
-    WAIT_DELAY = 0.1
+    # RPLidar wait delay
+    RPLIDAR_WAIT_DELAY = 0.1
 
     # Update delay
-    UPDATE_DELAY = 0.2
+    MOTOR_DELAY = 0.2
+    SERVO_DELAY = 0.05
+    GYROSCOPE_DELAY = 0.05
 
     # Wait timeout for the start event
     START_WAIT_TIMEOUT = 0.1
@@ -135,6 +138,13 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
         self.__servo_angle = SERVO_CENTER_ANGLE
         self.__movement = movement
 
+        # Initialize the updated flags
+        self.__motor_speed_updated = False
+        self.__servo_angle_updated = False
+
+        # Initialize the average distances dictionary
+        self.__average_distances = {direction: 0.0 for direction in Direction}
+
     @final
     @property
     def logger(self) -> Logger:
@@ -155,6 +165,7 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
             self.__serial_dispatcher.send_motor_speed_message(
                 self.__motor_speed
             )
+            self.__motor_speed_updated = True
 
         # Log
         self.__logger.info(f"Set motor speed to: {speed}")
@@ -190,6 +201,7 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
             self.__serial_dispatcher.send_servo_angle_message(
                 self.__servo_angle
             )
+            self.__servo_angle_updated = True
 
         # Log
         self.__logger.info(f"Set servo angle to: {angle}deg")
@@ -239,14 +251,14 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
         while not self.__stop_event.is_set() and not self.__deleted_event.is_set():
             try:
                 return self.__rplidar_measures_queue.get(
-                    timeout=self.WAIT_DELAY
+                    timeout=self.RPLIDAR_WAIT_DELAY
                     )
 
             except Empty:
                 continue
 
     @final
-    def _get_rplidar_average_distances(self) -> dict[Direction, float]:
+    def _update_rplidar_average_distances(self) -> None:
         # Get the RPLidar measures
         measures = self._get_rplidar_measures()
         if measures is None:
@@ -257,7 +269,7 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
         # Calculate the average distances according to the challenge
         if self.__challenge.value == Challenge.WITHOUT_OBSTACLES.as_char:
             # Calculate the average north, west and east distances
-            return self._calculate_average_distance(
+            self.__average_distances = self._calculate_average_distance(
                 measures,
                 Direction.NORTH,
                 Direction.WEST,
@@ -272,18 +284,33 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
         else:
             raise ValueError(f"Unknown challenge: {self.__challenge.value}")
 
-    def _calculate_sleep_delay(self, start_time: float) -> float:
+    def _calculate_sleep_delay(
+            self,
+            start_time: float
+        ) -> float:
         """
         Calculate the sleep delay based on the start time and the update delay.
 
         Args:
             start_time (float): The start time in seconds.
-
         Returns:
             float: The calculated sleep delay.
         """
+        # Determine the update delay based on the commands sent
+        if self.__motor_speed_updated:
+            update_delay = self.MOTOR_DELAY
+        elif self.__servo_angle_updated:
+            update_delay = self.SERVO_DELAY
+        else:
+            update_delay = self.GYROSCOPE_DELAY
+
+        # Reset the updated flags
+        self.__motor_speed_updated = False
+        self.__servo_angle_updated = False
+
+        # Calculate the elapsed time since the start time
         elapsed_time = monotonic() - start_time
-        delay = self.UPDATE_DELAY - elapsed_time
+        delay = update_delay - elapsed_time
         return 0.0 if delay < 0 else delay
 
     def _sleep(self, start_time: float):
@@ -310,6 +337,27 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
             # Get the start time
             start_time = monotonic()
 
+            # Get the average distances from the RPLidar
+            self._update_rplidar_average_distances()
+            west_avg_dist = self.__average_distances[Direction.WEST]
+            east_avg_dist = self.__average_distances[Direction.EAST]
+            north_avg_dist = self.__average_distances[Direction.NORTH]
+            self.__logger.debug(
+                f"North: {north_avg_dist}, West: {west_avg_dist}, East: {east_avg_dist}"
+            )
+
+            # Check if the front distance is below the safety threshold
+            if north_avg_dist < SAFETY_FRONT_DISTANCE_THRESHOLD:
+                self.__logger.warning(
+                    f"Front distance {north_avg_dist} is below the safety threshold."
+                )
+                self._set_motor_backward(MOTOR_SPEED_NORMAL)
+                self._set_servo_to_center()
+
+                # Sleep for a short time before checking again
+                self._sleep(start_time)
+                continue
+
             # Check for the current turn and center the servo if necessary
             if self._is_servo_turning():
                 turns = self.__bno08x_turns.value
@@ -333,25 +381,26 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
                     start_time = monotonic()
 
                     # Get the average distances
-                    avg_distances = self._get_rplidar_average_distances()
+                    self._update_rplidar_average_distances()
+                    north_avg_dist = self.__average_distances[Direction.NORTH]
 
-                    if (avg_distances[Direction.NORTH] <=
-                            STOP_DISTANCE_THRESHOLD):
+                    if north_avg_dist <= STOP_DISTANCE_THRESHOLD:
                         # Set the completed event
                         self.__completed_event.set()
+
+                        # Stop the motor
+                        self._set_motor_stop()
+
+                        self.__logger.info(
+                            "Challenge completed successfully. Stopping the robot."
+                        )
+
+                        # Sleep for a short time before exiting
+                        self._sleep(start_time)
                         return
 
                     # Sleep for a short time before checking again
                     self._sleep(start_time)
-
-            # Get the average distances from the RPLidar
-            avg_distances = self._get_rplidar_average_distances()
-            west_avg_dist = avg_distances[Direction.WEST]
-            east_avg_dist = avg_distances[Direction.EAST]
-            north_avg_dist = avg_distances[Direction.NORTH]
-            self.__logger.debug(
-                f"North: {north_avg_dist}, West: {west_avg_dist}, East: {east_avg_dist}"
-            )
 
             # Check if one of them is 0
             if (north_avg_dist == 0 or
@@ -359,6 +408,7 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
                 self.__logger.warning(
                     "One of the average distances is 0. This may cause unexpected behavior. Waiting for new measures..."
                 )
+
                 # Sleep
                 self._sleep(start_time)
                 continue
@@ -388,6 +438,9 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
 
                 elif west_avg_dist >= SIDE_DISTANCE_THRESHOLD:
                     self._set_servo_to_left(SERVO_BIG_TURN_ANGLE)
+
+            # Sleep for the calculated delay
+            self._sleep(start_time)
 
     @final
     def _start(self):

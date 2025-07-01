@@ -335,12 +335,9 @@ class PilotABC(ABC):
         pass
 
     @abstractmethod
-    def _get_rplidar_average_distances(self) -> dict[Direction, float]:
+    def _update_rplidar_average_distances(self) -> None:
         """
-        Gets the average distances from the RPLidar measures.
-
-        Returns:
-            dict[Direction, float]: A dictionary containing the average distances for each direction.
+        Updates the average distances from the RPLidar measures.
         """
         pass
 
