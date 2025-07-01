@@ -307,16 +307,6 @@ class PilotABC(ABC):
         pass
 
     @abstractmethod
-    def _is_servo_turning(self):
-        """
-        Checks if the servo motor is currently turning.
-
-        Returns:
-            bool: True if the servo is not centered, False otherwise.
-        """
-        pass
-
-    @abstractmethod
     def _get_rplidar_measures(self) -> Dict[int, Measure]:
         """
         Gets the RPLidar measures.

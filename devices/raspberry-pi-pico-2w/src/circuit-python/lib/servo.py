@@ -1,4 +1,5 @@
 from asyncio import sleep
+import time
 
 from adafruit_motor.servo import Servo
 from pwmio import PWMOut
@@ -36,7 +37,7 @@ class ServoHandler:
     MIN_PULSE = 500
     MAX_PULSE = 2500
     ACTUATION_RANGE = 180
-    CENTER_ANGLE = 90
+    CENTER_ANGLE = 75
     LEFT_LIMIT = -(ACTUATION_RANGE - CENTER_ANGLE)
     RIGHT_LIMIT = (ACTUATION_RANGE - (ACTUATION_RANGE - CENTER_ANGLE))
 
@@ -86,7 +87,8 @@ class ServoHandler:
 
         # Set the servo to center position
         self.__angle = None
-        self.center()
+        self.__servo_motor.angle = self.CENTER_ANGLE
+        time.sleep(self.DELAY)
 
     @staticmethod
     def _check_angle(angle: int):
@@ -130,8 +132,6 @@ class ServoHandler:
         self.__angle = angle
         if self.__movement:
             self.__servo_motor.angle = self.__angle
-
-        # Send debug message if debug mode is enabled
         if self.__debug and self.__serial_communication:
             self.__serial_communication.send_message(
                 OutgoingMessage(

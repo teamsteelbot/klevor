@@ -20,6 +20,7 @@ from .constants import (
     STOP_DISTANCE_THRESHOLD,
     TURNS,
     SAFETY_FRONT_DISTANCE_THRESHOLD,
+    MOTOR_SPEED_FAST
 )
 from ..common.measure import Measure
 from ..enums import Challenge
@@ -137,6 +138,7 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
         self.__motor_speed = 0.0
         self.__servo_angle = SERVO_CENTER_ANGLE
         self.__movement = movement
+        self.__is_turning = False
 
         # Initialize the updated flags
         self.__motor_speed_updated = False
@@ -227,7 +229,7 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
                 f"Angle must be between 0 and {SERVO_RIGHT_LIMIT} degrees for right movement"
             )
 
-        self._set_servo_angle(SERVO_CENTER_ANGLE + angle)
+        self._set_servo_angle(SERVO_CENTER_ANGLE - angle)
 
     @final
     def _set_servo_to_left(self, angle):
@@ -236,11 +238,7 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
                 f"Angle must be between 0 and {abs(SERVO_LEFT_LIMIT)} degrees for left movement"
             )
 
-        self._set_servo_angle(SERVO_CENTER_ANGLE - angle)
-
-    @final
-    def _is_servo_turning(self):
-        return self.__servo_angle != SERVO_CENTER_ANGLE
+        self._set_servo_angle(SERVO_CENTER_ANGLE + angle)
 
     @final
     def _get_rplidar_measures(self) -> Dict[int, Measure] | None:
@@ -370,10 +368,11 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
                 continue
 
             # Check for the current turn and center the servo if necessary
-            if self._is_servo_turning():
+            if self.__is_turning:
                 turns = self.__bno08x_turns.value
                 if turns != last_turns:
                     self._set_servo_to_center()
+                    self.__is_turning = False
 
                     # Update for the next check
                     last_turns = turns
@@ -435,9 +434,11 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
                 # Check if the robot should turn left or right based on the side distances
                 if east_avg_dist >= SIDE_DISTANCE_THRESHOLD:
                     self._set_servo_to_right(SERVO_BIG_TURN_ANGLE)
+                    self.__is_turning = True
 
                 elif west_avg_dist >= SIDE_DISTANCE_THRESHOLD:
                     self._set_servo_to_left(SERVO_BIG_TURN_ANGLE)
+                    self.__is_turning = True
 
             # Sleep for the calculated delay
             self._sleep(start_time)
