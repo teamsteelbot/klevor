@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+from typing import List
 
 import torch
 
@@ -6,14 +7,14 @@ from ..args import Args
 from ..files import Files
 
 
-def update_classes(model_name: str, model_version: str, new_classes: list[str]):
+def update_classes(model_name: str, model_version: str, new_classes: List[str]):
     """
     Update classes from a PyTorch model.
 
     Args:
         model_name (str): Name of the YOLO model.
         model_version (str): Version of the YOLO model.
-        new_classes (list): List of new class names to update in the model.
+        new_classes (List): List of new class names to update in the model.
     """
     # Get the model path
     model_path = Files.get_model_best_pt_path(model_name, model_version)

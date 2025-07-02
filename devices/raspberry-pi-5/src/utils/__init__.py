@@ -2,7 +2,7 @@ import socket
 from enum import Enum
 from re import Pattern
 from types import UnionType
-from typing import Any
+from typing import Any, List
 
 
 def is_instance(
@@ -50,12 +50,12 @@ def is_subclass(
         )
 
 
-def match_any(regex_list: list[Pattern], string: str) -> bool:
+def match_any(regex_list: List[Pattern], string: str) -> bool:
     """
-    Match any regex pattern in a list.
+    Match any regex pattern in a List.
 
     Args:
-        regex_list (list[Pattern]): List of compiled regex patterns.
+        regex_list (List[Pattern]): List of compiled regex patterns.
         string (str): String to match against the regex patterns.
     Returns:
         bool: True if any regex matches the string, False otherwise.
@@ -63,14 +63,14 @@ def match_any(regex_list: list[Pattern], string: str) -> bool:
     return any(regex.match(string) for regex in regex_list)
 
 
-def add_single_quotes_to_list_elements(lst: list | tuple) -> list:
+def add_single_quotes_to_list_elements(lst: List | tuple) -> List:
     """
     Add single quotes to each element in a list or tuple.
 
     Args:
-        lst (list | tuple): List or tuple of elements to be quoted.
+        lst (List | tuple): List or tuple of elements to be quoted.
     Returns:
-        list: List of elements with single quotes added.
+        List: List of elements with single quotes added.
     """
     return [f"'{item}'" for item in lst]
 

@@ -1,6 +1,7 @@
 import cv2
 import matplotlib as plt
 import numpy as np
+from typing import Dict, List
 
 from .constants import FONT
 from ..model import ImageBoundingBoxes
@@ -16,7 +17,7 @@ class Plot:
     @staticmethod
     def draw_detection(
         image: np.ndarray,
-        box: list,
+        box: List,
         class_name: str,
         score: float,
         color: tuple,
@@ -27,7 +28,7 @@ class Plot:
 
         Args:
             image (np.ndarray): Image to draw on.
-            box (list): Bounding box coordinates.
+            box (List): Bounding box coordinates.
             class_name (str): Class label of the detection.
             score (float): Detection score.
             color (tuple): Color for the bounding box.
@@ -48,23 +49,23 @@ class Plot:
 
     @staticmethod
     def denormalize_and_remove_padding(
-        box: list,
+        box: List,
         size: int,
         padding_length: int,
         input_height: int,
         input_width: int
-    ) -> list:
+    ) -> List:
         """
         Denormalize bounding box coordinates and remove padding.
 
         Args:
-            box (list): Normalized bounding box coordinates.
+            box (List): Normalized bounding box coordinates.
             size (int): Size to scale the coordinates.
             padding_length (int): Length of padding to remove.
             input_height (int): Height of the input image.
             input_width (int): Width of the input image.
         Returns:
-            list: Denormalized bounding box coordinates with padding removed.
+            List: Denormalized bounding box coordinates with padding removed.
         """
         for i, x in enumerate(box):
             box[i] = int(x * size)
@@ -78,7 +79,7 @@ class Plot:
     @classmethod
     def draw_detections(
         cls,
-        colors: dict[int, tuple[int, int, int]],
+        colors: Dict[int, tuple[int, int, int]],
         image_bounding_boxes: ImageBoundingBoxes,
         image: np.ndarray,
         min_score: float = 0.45,
@@ -88,7 +89,7 @@ class Plot:
         Draw detections on the image.
 
         Args:
-            colors (dict[int, tuple[int, int, int]): Dictionary mapping class names to RGB colors.
+            colors (Dict[int, tuple[int, int, int]): Dictionary mapping class names to RGB colors.
             image_bounding_boxes (ImageBoundingBoxes): Object containing bounding boxes, classes, and scores.
             image (np.ndarray): Image to draw on.
             min_score (float): Minimum score threshold. Defaults to 0.45.
@@ -129,8 +130,8 @@ class Plot:
 
     @staticmethod
     def display_detections(
-        class_names: dict[int, str],
-        preprocessed_image: list[np.ndarray],
+        class_names: Dict[int, str],
+        preprocessed_image: List[np.ndarray],
         image_bounding_boxes: ImageBoundingBoxes,
         draw_labels_name=False,
         font=FONT,
@@ -144,8 +145,8 @@ class Plot:
         Function to display the preprocessed image and the image with detections.
 
         Args:
-            class_names (dict[int, str]): Dictionary mapping class numbers to class names.
-            preprocessed_image (list[np.ndarray]): Preprocessed image in CHW format.
+            class_names (Dict[int, str]): Dictionary mapping class numbers to class names.
+            preprocessed_image (List[np.ndarray]): Preprocessed image in CHW format.
             image_bounding_boxes (ImageBoundingBoxes): Object containing bounding boxes, classes, and scores.
             draw_labels_name (bool): Whether to draw class names instead of class numbers. Defaults to False.
             font (int): Font type for text. Defaults to FONT.

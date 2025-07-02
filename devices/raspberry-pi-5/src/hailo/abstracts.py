@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Optional, Dict
 
 import cv2
 import numpy as np
@@ -80,14 +80,14 @@ class HailoABC(ABC):
     @abstractmethod
     def _set_output_type(
         self,
-        output_type_dict: Optional[dict[str, str]] = None
+        output_type_dict: Optional[Dict[str, str]] = None
     ) -> None:
         """
         Set the output type for the HEF model. If the model has multiple outputs,
         it will set the same type for all of them.
 
         Args:
-            output_type_dict (Optional[dict[str, str]]): Format type of the output stream.
+            output_type_dict (Optional[Dict[str, str]]): Format type of the output stream.
         """
         pass
 

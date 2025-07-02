@@ -1,7 +1,7 @@
 import os
 import random
 from argparse import ArgumentParser
-from typing import Callable, Optional
+from typing import Callable, Optional, List, Dict
 
 import torch
 from ultralytics import YOLO
@@ -22,9 +22,9 @@ from ...plot import Plot
 
 
 def test_random_images(
-    model, model_class_names: dict,
+    model, model_class_names: Dict,
     run_inference_fn: Callable[
-        [YOLO, torch.Tensor], tuple[list, float]],
+        [YOLO, torch.Tensor], tuple[List, float]],
     input_organized_dir: str | os.PathLike[str],
     draw_labels_name: bool,
     rgb_colors: Optional[tuple[tuple[int, int, int]]] = None,
@@ -35,7 +35,7 @@ def test_random_images(
 
     Args:
         model: The YOLO model to use for inference.
-        model_class_names (dict): Dictionary mapping class indices to class names.
+        model_class_names (Dict): Dictionary mapping class indices to class names.
         run_inference_fn (Callable): Function to run inference on the model.
         input_organized_dir (str | os.PathLike[str]): Directory containing organized dataset images.
         draw_labels_name (bool): Whether to draw labels on the detections.

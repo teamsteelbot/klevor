@@ -1,4 +1,5 @@
 from asyncio import sleep
+import time
 
 from adafruit_motor.servo import ContinuousServo
 from pwmio import PWMOut
@@ -84,7 +85,8 @@ class ESCMotorHandler:
 
         # Initialize the speed to 0
         self.__speed = None
-        self.stop()
+        self.__esc_motor.throttle = 0
+        time.sleep(self.DELAY)
 
     @classmethod
     def _check_speed_half_range(cls, speed: float):
@@ -144,8 +146,8 @@ class ESCMotorHandler:
         self.__speed = speed * self.SPEED_FACTOR
         if self.__movement:
             self.__esc_motor.throttle = self.__speed
-        
-        # Send debug message if debug mode is enabled
+            
+        # Send the received message
         if self.__debug and self.__serial_communication:
             self.__serial_communication.send_message(
                 OutgoingMessage(

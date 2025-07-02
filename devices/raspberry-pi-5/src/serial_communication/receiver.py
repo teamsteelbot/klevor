@@ -2,7 +2,7 @@ from multiprocessing import Event, Queue, RLock
 from multiprocessing.sharedctypes import Value as ValueCls
 from multiprocessing.synchronize import Event as EventCls
 from time import sleep
-from typing import Optional, final
+from typing import Optional, final, List
 
 from serial import Serial
 
@@ -58,7 +58,7 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
         sender_messages_queue: Queue,
         writer_messages_queue: Queue,
         server_messages_queue: Optional[Queue] = None,
-        console_ports: Optional[list[str]] = RASPBERRY_PI_PICO_CONSOLE_PORTS,
+        console_ports: Optional[List[str]] = RASPBERRY_PI_PICO_CONSOLE_PORTS,
         baudrate: Optional[int] = RASPBERRY_PI_PICO_BAUDRATE
     ):
         """
@@ -76,7 +76,7 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
             sender_messages_queue (Queue): Queue to hold outgoing messages of the serial port.
             writer_messages_queue (Queue): Queue to hold log messages.
             server_messages_queue (Optional[Queue]): Queue to broadcast the messages through the websockets server.
-            console_ports (Optional[list[str]]): List of serial ports used for receiving data from Pico.
+            console_ports (Optional[List[str]]): List of serial ports used for receiving data from Pico.
             baudrate (Optional[int]): Baud rate for the serial communication.
         """
         # Initialize the debug flag
@@ -114,7 +114,7 @@ class Receiver(ReceiverABC, LoggerConsumerProtocol):
         self.__rlock = RLock()
 
         # Check the type of console ports
-        is_instance(console_ports, list)
+        is_instance(console_ports, List)
         self.__console_ports = console_ports
 
         # Check the type of baudrate

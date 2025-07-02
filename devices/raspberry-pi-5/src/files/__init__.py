@@ -1,6 +1,7 @@
 import os
 import shutil
 from datetime import datetime as dt
+from typing import List
 
 from .constants import (
     HAILO_CALIB,
@@ -508,14 +509,14 @@ class Files:
         return os.path.join(HAILO_LABELS_DIR, model_name + '.txt')
 
     @staticmethod
-    def get_labels_from_txt(labels_path: str | os.PathLike[str]) -> list:
+    def get_labels_from_txt(labels_path: str | os.PathLike[str]) -> List:
         """
         Load labels from a text file.
 
         Args:
             labels_path (str | os.PathLike[str]): Path to the labels file.
         Returns:
-            list: List of class names.
+            List: List of class names.
         Raises:
             ValueError: If the labels file does not exist or is not a text file.
         """

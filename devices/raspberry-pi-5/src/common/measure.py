@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 from ..utils import is_instance
 
@@ -152,24 +152,24 @@ class Measure:
         return cls(angle, distance, quality)
 
     @classmethod
-    def measures_to_string(cls, measures: list) -> str:
+    def measures_to_string(cls, measures: List) -> str:
         """
         Convert a list of Measure objects to a string representation.
         
         Args:
-            measures (list): List of Measure objects.
+            measures (List): List of Measure objects.
         
         Returns:
             str: String representation of the measures.
         """
         # Check the type of measures
-        is_instance(measures, list)
+        is_instance(measures, List)
 
         # Convert each measure to string and join them with spaces
         return cls.MEASURES_SEPARATOR.join(str(measure) for measure in measures)
 
     @classmethod
-    def from_string_to_measures(cls, measures_str: str) -> list:
+    def from_string_to_measures(cls, measures_str: str) -> List:
         """
         Convert a string representation of measures back to a list of Measure objects.
 
@@ -177,7 +177,7 @@ class Measure:
             measures_str (str): String representation of measures.
 
         Returns:
-            list: List of Measure objects.
+            List: List of Measure objects.
         """
         # Check the type of measures_str
         is_instance(measures_str, str)
