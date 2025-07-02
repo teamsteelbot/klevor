@@ -30,4 +30,61 @@ Se puede apreciar con claridad el drástico cambio que tuvo la parte superior de
 
 Adicionalmente, aprovechamos la estructura y ubicación del [RPLidar C1](../../README.md/#componentes-rplidar-c1) para usarlo de soporte sin interferir en su función, al este estar colocado al revés, nos permite colocar en la parte superior la [Raspberry Pi Pico 2](../../README.md/#componentes-raspberry-pi-pico-2-wh), y en la parte posterior de este la [Raspberry Cam Module 3 Wide](../../README.md/#componentes-raspberry-pi-camera-module-3-wide). 
 
-Esto ayudó enormemente a solucionar nuestro problema con el peso, ya que esta modificación nos ahorró el soporte impreso de todos los componentes antes mencionados. En total, pudimos pasar de tener una capa de 42g a una de tan solo 18g, lo que se traduce en un Klevor que cumple con el peso reglamentario, alcanzando un peso total de __g.
+Esto ayudó enormemente a solucionar nuestro problema con el peso, ya que esta modificación nos ahorró el soporte impreso de todos los componentes antes mencionados. En total, pudimos pasar de tener una capa de 42g a una de tan solo 18g, lo que se traduce en un Klevor que cumple con el peso reglamentario, alcanzando un peso total de 1570g aproximadamente.
+
+<table>
+     <tr>
+         <td>
+             <p align="center">
+                 <img src="front-view.png" alt="Vista delantera">
+             </p>
+             <p align="center">
+                 <i>Vista delantera</i>
+             </p>
+         </td>
+         <td>
+             <p align="center">
+                 <img src="back-view.png" alt="Vista Trasera">
+             </p>
+             <p align="center">
+                 <i>Vista trasera</i>
+             </p>
+         </td>
+     </tr>
+     <tr>
+         <td>
+             <p align="center">
+                 <img src="right-view.png" alt="Vista derecha">
+             </p>
+             <p align="center">
+                 <i>Vista derecha</i>
+             </p>
+         </td>
+         <td>
+             <p align="center">
+                 <img src="left-view.png" alt="Vista izquierda">
+             </p>
+             <p align="center">
+                 <i>Vista izquierda</i>
+             </p>
+         </td>
+     </tr>
+     <tr>
+       <td>
+             <p align="center">
+                 <img src="top-view.png" alt="Vista superior">
+             </p>
+             <p align="center">
+                 <i>Vista superior</i>
+             </p>
+         </td>
+         <td>
+             <p align="center">
+                 <img src="bottom-view.png" alt="Vista inferior">
+             </p>
+             <p align="center">
+                 <i>Vista inferior</i>
+             </p>
+         </td>
+     </tr>
+ </table>
