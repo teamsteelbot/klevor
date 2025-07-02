@@ -24,13 +24,11 @@ Redujimos significativamente el tamaño de esta capa, ajustándola a los compone
 
 <h2 id="capa-supeior">Capa Superior</h2>
 
-Esta fué la capa que tuvo más cambios, adjuntaremos una vista superior de esta y la que estaba previamente a modo de comparación, para que se note más la diferencia.
-
 Se puede apreciar con claridad el drástico cambio que tuvo la parte superior de Klevor, donde reemplazamos la capa anterior por un soporte nuevo, hecho específicamente para que se acople la Shargeek Storm 2, sobre esta misma base, y encima de este powerbank, se colocó estratégicamente la [Raspberry Pi 5](../../README.md/#componentes-raspberry-pi-5).
 
 Adicionalmente, aprovechamos la estructura y ubicación del [RPLidar C1](../../README.md/#componentes-rplidar-c1) para usarlo de soporte sin interferir en su función, al este estar colocado al revés, nos permite colocar en la parte superior la [Raspberry Pi Pico 2](../../README.md/#componentes-raspberry-pi-pico-2-wh), y en la parte posterior de este la [Raspberry Cam Module 3 Wide](../../README.md/#componentes-raspberry-pi-camera-module-3-wide). 
 
-Esto ayudó enormemente a solucionar nuestro problema con el peso, ya que esta modificación nos ahorró el soporte impreso de todos los componentes antes mencionados. En total, pudimos pasar de tener una capa de 42g a una de tan solo 18g, lo que se traduce en un Klevor que cumple con el peso reglamentario, alcanzando un peso total de 1570g aproximadamente.
+Esto ayudó enormemente a solucionar nuestro problema con el peso, ya que esta modificación nos ahorró el soporte impreso de todos los componentes antes mencionados. En total, pudimos pasar de tener una capa de 42g a una de tan solo 18g, lo que se traduce en un Klevor que cumple con el peso reglamentario, alcanzando un peso total de 1470g aproximadamente.
 
 <table>
      <tr>
