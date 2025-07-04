@@ -54,13 +54,14 @@
     <i>Raspberry Pi OS</i>
 </p>
 
-*TIP: Por experiencia propia, recomendamos la configuración de la aplicación
+> [!IMPORTANT]
+> Por experiencia propia, recomendamos la configuración de la aplicación
 oficial de Raspberry Pi para conexión remota, Raspberry Pi Connect, que permite
 acceder a la Raspberry Pi desde cualquier lugar y sin necesidad de estar
 conectado a la misma red wifi [[3](#raspberry-pi-connect)]. En nuestro caso, en
 reiteradas ocasiones nos permitió de forma remota, a través del modo Remote
 Shell, eliminar procesos que han producido un crash o han limitado la repuesta
-de la Raspberry Pi.*
+de la Raspberry Pi.
 
 <h1 id="instalacion-de-la-camara">Instalación de la cámara</h1>
 
@@ -73,10 +74,11 @@ de la Raspberry Pi.*
 3. Si la cámara funciona correctamente, se mostrará una vista previa de la
    cámara en la pantalla por unos segundos.
 
-*NOTA: En caso de estar interesado en adquirir algún tipo de Raspberry Pi
+> [!IMPORTANT]
+> En caso de estar interesado en adquirir algún tipo de Raspberry Pi
 Camera, se debe comprar un cable aparte dependiendo del proveedor, ya que
 normalmente estas vienen con el cable para la Raspberry Pi 4, el cual no es el
-mismo.*
+mismo.
 
 <!--
 <h1 id="multiprocesamiento">Multiprocesamiento</h1>
@@ -303,7 +305,8 @@ Label Studio, una herramienta de etiquetado de datos de código abierto que
 permite crear conjuntos de datos personalizados para el entrenamiento de modelos
 de aprendizaje automático [[11](#label-studio)].
 
-*TIP: Si el número de imágenes por anotar es muy grande, notaremos que la
+> [!IMPORTANT]
+> Si el número de imágenes por anotar es muy grande, notaremos que la
 herramienta Label Studio arrojará un
 error ```The number of files exceeded settings.DATA_UPLOAD_MAX_NUMBER_FILES```.
 Para solucionarlo, si Label Studio fue instalado como un paquete de Python, se
@@ -313,7 +316,7 @@ de ```DATA_UPLOAD_MAX_NUMBER_FILES``` a un número mayor al número de imágenes
 por anotar o ```None``` si se desea un número ilimitado. En caso de no encontrar
 este archivo, se puede buscar en la
 carpeta ```site-packages/label_studio/core/settings.py``` dentro del entorno
-virtual de Python donde fue instalado Label Studio.*
+virtual de Python donde fue instalado Label Studio.
 
 <p align="center">
    <img src="https://i.postimg.cc/DyFZ1ryX/Screenshot-162.png" alt="Anotación de imágenes con Label Studio" width="800">
@@ -387,7 +390,8 @@ modificará o eliminará las carpetas [
 ```yolo/dataset/g/labeled/to_process```](yolo/dataset/g/labeled/to_process) y [
 ```yolo/dataset/g/labeled/processed```](yolo/dataset/g/labeled/processed).
 
-*NOTA: Se puede observar, que en cada una de las rutas, se encuentra la
+> [!INFO]
+> Se puede observar, que en cada una de las rutas, se encuentra la
 carpeta ```to_process```, la cual es una carpeta temporal, que se utiliza para
 guardar las imágenes que se están procesando. Una vez que se han procesado las
 imágenes, los archivos dentro de las mismas se mueven a una
@@ -398,7 +402,7 @@ necesidad de volver a procesar las mismas imágenes. Así mismo, se puede observ
 que tanto para ```augmented``` y ```organized```, no existe la
 carpeta ```to_process```, ya que, después de ser procesadas estas imágenes, son
 eliminadas debido al gran número de estas al momento de realizar
-el ```data augmentation```.*
+el ```data augmentation```.
 
 <h1 id="entrenamiento-del-modelo">Entrenamiento del Modelo</h1>
 
@@ -415,9 +419,10 @@ las etiquetas a las rutas correspondientes. En este caso, se debe modificar el
 archivo [```g.yaml```](yolo/data/colab/g.yaml) para el modelo de 1 clase, cuya
 carpeta padre variará entre ```colab``` y ```local``` dependiendo del entorno.
 
-*NOTA: Al momento de clonar este repositorio, se suministran archivos plantilla
+> [!IMPORTANT]
+> Al momento de clonar este repositorio, se suministran archivos plantilla
 para los ```.yaml```, los cuales terminan en ```.yaml.example```. A los cuales
-posterior a su modificación, se les debe cambiar la extensión a ```.yaml```.*
+posterior a su modificación, se les debe cambiar la extensión a ```.yaml```.
 
 Existen dos maneras de entrenar el modelo dependiendo del equipo disponible en
 el momento:
@@ -487,12 +492,13 @@ el momento:
 5. **Limpieza**: Finalmente, ejecutamos el script [```yolo/scripts/after_training_with_calib_set.py```](yolo/scripts/after_training_with_calib_set.py) para crear un set de calibración en la carpeta [```hailo/suite/calib```](hailo/suite/calib), para eliminar la carpeta [```yolo/dataset/g/organized/train```](yolo/dataset/g/organized/train) y [```yolo/dataset/g/organized/val```](yolo/dataset/g/organized/val), ya que estas no serán necesarias para los próximos pasos, así como moverá los pesos de formato ```ONNX``` con mejor resultado correspondiente al modelo. 
 -->
 
-*TIP: En el caso de emplear Google Colab y que se desconecte la sesión del
+> [!TIP]
+> En el caso de emplear Google Colab y que se desconecte la sesión del
 entorno de ejecución durante el entrenamiento del modelo, se puede retomar el
 mismo, al modificar la ruta del modelo o el nombre del modelo a emplear en la
 función ```train_model``` del Notebook, por la ruta donde se guardó los mejores
 pesos del entrenamiento, en nuestro
-caso: ```g_to_train/yolo/v11/runs/m/weights/best.pt```.*
+caso: ```g_to_train/yolo/v11/runs/m/weights/best.pt```.
 
 <p align="center">
    <img src="https://mediasysdubai.com/wp-content/uploads/2023/12/L4_Front.png" alt="Vista frontal de la GPU Tesla L4 de NVIDIA" width="400">
@@ -500,12 +506,13 @@ caso: ```g_to_train/yolo/v11/runs/m/weights/best.pt```.*
     <i>Vista frontal de la GPU Tesla L4 de NVIDIA</i>
 </p>
 
-*NOTA: Durante esta sección se menciona la versión 11 de YOLO, pero, de la misma
+> [!IMPORTANT]
+> Durante esta sección se menciona la versión 11 de YOLO, pero, de la misma
 forma que se menciona el dataset **G** a fines didácticos, se puede utilizar
 cualquier versión de YOLO, así como cualquier dataset, ya que el proceso es el
 mismo. Sin embargo, se recomienda utilizar la versión 11 de YOLO, debido a que
 es la más reciente y cuenta con mejoras significativas en comparación con
-versiones anteriores.*
+versiones anteriores.
 
 <h1 id="instalacion-de-hailo-ai-hat">Instalación de Hailo AI HAT+</h1>
 
@@ -671,16 +678,18 @@ descargamos los siguientes paquetes necesarios [[16](#custom-dataset-medium)]:
 - Hailo Dataflow Compiler, para la arquitectura donde está siendo ejecutado el
   Docker (en nuestro caso, ```x86_64```). Versión recomendada: 3.30.0.
 
-*NOTA: En el caso de emplear una GPU NVIDIA para la optimización del
+> [!IMPORTANT]
+> En el caso de emplear una GPU NVIDIA para la optimización del
 formato ```.har```, también debemos instalar
-el [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html)*
+el [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html)
 
-*NOTA: En el caso de no conseguir uno de los paquetes, en el portal para
+> [!IMPORTANT]
+> En el caso de no conseguir uno de los paquetes, en el portal para
 descargar software de Hailo, se tienen dos formas para buscar los
 paquetes: ```Latest releases``` (o últimas versiones), y ```Archive``` (o
 archivados); el primero de ellos es el predeterminado. De no conseguir el
 respectivo paquete en ```Latest releases```, este probablemente esté
-en ```Archive```*
+en ```Archive```
 
 Posteriormente, cambiamos de nuevo el directorio actual:
 
@@ -714,8 +723,9 @@ docker run -it --name compile_onnx_file --gpus all --ipc=host -v {path}:/home/ha
 docker run -it --name compile_onnx_file --ipc=host -v {path}:/home/hailo/shared hailo_compiler:v0
 ```
 
-*NOTA: Sustituimos ```path``` por la ruta absoluta de la
-carpeta [```hailo/suite```](hailo/suite).*
+> [!NOTE]
+> Sustituimos ```path``` por la ruta absoluta de la
+carpeta [```hailo/suite```](hailo/suite).
 
 Dentro del contenedor, nos movemos al directorio [
 ```/home/hailo/shared/libs```](hailo/suite). En el mismo terminal, creamos un
@@ -747,19 +757,20 @@ nos movemos del directorio actual al correspondiente del repositorio
 
 Instalamos todas las dependencias requeridas: ```pip install -e .```
 
-*NOTA: En el caso de obtener un error similar a:*
-
-```
-ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.
-tensorflow 2.12.0 requires numpy<1.24,>=1.22, but you have numpy 2.2.6 which is incompatible.
-hailo-dataflow-compiler 3.30.0 requires numpy==1.23.3, but you have numpy 2.2.6 which is incompatible.
-```
-
-*Debemos modificar el archivo ```setup.py``` que se encuentra dentro del
-repositorio, y en la línea 44, dentro de la función ```main```,
-sustituimos ```"numpy"``` por ```"numpy==1.23.3"```, así como en la línea 46,
-sustituimos ```"scipy"``` por ```"scipy==1.9.3"```. Reintentamos el
-comando: ```pip install -e .```*
+> [!IMPORTANT]
+> En el caso de obtener un error similar a:
+> ```
+> ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.
+> tensorflow 2.12.0 requires numpy<1.24,>=1.22, but you have numpy 2.2.6 
+> which is incompatible.
+> hailo-dataflow-compiler 3.30.0 requires numpy==1.23.3, but you have numpy 2.
+> 2.6 which is incompatible.
+> ```
+> Debemos modificar el archivo ```setup.py``` que se encuentra dentro del 
+> repositorio, y en la línea 44, dentro de la función ```main```,
+> sustituimos ```"numpy"``` por ```"numpy==1.23.3"```, así como en la línea 46,
+> sustituimos ```"scipy"``` por ```"scipy==1.9.3"```. Reintentamos el
+> comando: ```pip install -e .```
 
 Evaluamos si los paquetes se han instalado correctamente con el siguiente
 comando: ```hailomz --version```
@@ -867,7 +878,8 @@ python basic_pipelines/detection.py --input rpi --labels-json ../labels/g.json -
 python basic_pipelines/detection.py --input {imagen} --labels-json ../labels/g.json --hef-path ../../v11/runs/g/weights/compiled.hef
 ```
 
-*NOTA: Sustituimos ```imagen``` por la ruta de la imagen a probar.*
+> [!IMPORTANT]
+> Sustituimos ```imagen``` por la ruta de la imagen a probar.
 
 Esto abrirá una ventana con la cámara, donde se mostrarán los cuadros
 delimitadores y las etiquetas de los objetos detectados. Si todo está

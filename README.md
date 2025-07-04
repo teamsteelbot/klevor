@@ -32,16 +32,17 @@
     10. [INJORA 7KG 2065 Micro Servo](#componentes-injora-7kg-2065-micro-servo)
     11. [HiLetgo Time-of-Flight Sensor VL53L0X](#sensor-tof-hiletgo)
     12. [9-Axis IMU Gyroscope GY-BNO085](#gyroscope-gy-bno085)
-5. **[Esquemas y Diagramas](#esquemas)**
-   1. [Esquemas de Conexiones](schemes/prototype2/wiring-diagram.png)
-   2. [Diagrama de Flujo](schemes/prototype2/open-challenge-flowchart.png)
+5. **[Esquemas y Diagramas](schemes/README.md)**
+   1. [Esquemas de Conexiones](schemes/prototype3/wiring-diagram.png)
+   2. [Diagrama de Flujo](schemes/prototype3/open-challenge-flowchart.png)
 6. **[Fotos del equipo](t-photos/README.md)**
 7. **[Vídeos](video/README.md)**
 8. **[Recursos Externos](#recursos-externos)**
 
-*NOTA: Este listado contiene todo el contenido respectivo al desarrollo de
+> [!IMPORTANT]
+> Este listado contiene todo el contenido respectivo al desarrollo de
 Klevor; sin embargo, no todo está presente en este README.md, asegúrese de hacer
-clic para poder ser redireccionado si es necesario.*
+clic para poder ser redireccionado si es necesario.
 
 <h1 id="introduccion">Introducción</h1>
 
