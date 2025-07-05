@@ -7,7 +7,11 @@ nav:
       - Viejos: electronic/components/old.md
     - Diagramas:
       - Diagramas de Conexiones: electronic/diagrams/wiring.md
-  - Mecánica
+  - Mecánica:
+    - Prototipos:
+      - Prototipo 1: mechanical/prototypes/prototype1.md
+      - Prototipo 2: mechanical/prototypes/prototype2.md
+      - Prototipo 3: mechanical/prototypes/prototype3.md
   - Programación:
     - Lenguajes: programming/languages.md
     - Librerías: programming/libraries.md

@@ -52,6 +52,18 @@ y facilitar la comprensión de los conceptos presentados.
             2. [Prototipo 2](electronic/diagrams/wiring.md#prototype2)
             3. [Prototipo 3](electronic/diagrams/wiring.md#prototype3)
 3. **Mecánica**
+    1. Prototipos
+        1. [Prototipo 1](mechanical/prototypes/prototype1.md#prototype1)
+            1. [Primera Capa](mechanical/prototypes/prototype1.md#first-layer)
+            2. [Segunda Capa](mechanical/prototypes/prototype1.md#second-layer)
+            3. [Tercera Capa](mechanical/prototypes/prototype1.md#third-layer)
+        2. [Prototipo 2](mechanical/prototypes/prototype2.md#prototype2)
+            1. [Primera Capa](mechanical/prototypes/prototype2.md#first-layer)
+            2. [Segunda Capa](mechanical/prototypes/prototype2.md#second-layer)
+        3. [Prototipo 3](mechanical/prototypes/prototype3.md#prototype3)
+            1. [Actualizaciones](mechanical/prototypes/prototype3.md#updates)
+            2. [Primera Capa](mechanical/prototypes/prototype3.md#first-layer)
+            3. [Segunda Capa](mechanical/prototypes/prototype3.md#second-layer)
 4. **Programación**
     1. [Lenguajes de Programación](programming/languages.md#programming-languages)
         1. [Python](programming/languages.md#python)

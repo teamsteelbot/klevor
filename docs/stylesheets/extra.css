@@ -26,6 +26,22 @@
     width: 600px;
 }
 
+.mechanical-image {
+    max-width: 100%;
+    width: 600px;
+}
+
+.vehicle-views-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+.vehicle-view-image {
+    max-width: 100%;
+    width: 600px;
+}
+
 .logo--3rd-party {
     max-width: 100%;
     width: 200px;
