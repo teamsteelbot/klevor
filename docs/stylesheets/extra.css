@@ -21,6 +21,11 @@
     width: 350px;
 }
 
+.diagrams-image {
+    max-width: 100%;
+    width: 600px;
+}
+
 .logo--3rd-party {
     max-width: 100%;
     width: 200px;
@@ -28,7 +33,7 @@
 
 .logo--team {
     max-width: 100%;
-    width: 400px;
+    width: 300px;
 }
 
 .picture--team {

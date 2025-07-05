@@ -1,14 +1,14 @@
-# Lenguajes de Programación {#programming-languages}
+# Lenguajes de Programación {:#programming-languages}
 
 Muchos robots autónomos, si no es que todos, necesitan de un lenguaje de 
 programación para poder llevar a cabo tareas complejas. En el caso de Klevor,
 utilizamos un lenguaje principal: Python, y una implementación para la
 Raspberry Pi Pico 2 WH: CircuitPython.
 
-## Python {#python}
+## Python {:#python}
 
 <div class="center">
-    <img src= "../assets/images/python.png" alt="Python" class="logo--3rd-party">
+    <img src= "../assets/images/logo/python.png" alt="Python" class="logo--3rd-party">
     <i>Logo de Python</i>
 </div>
 
@@ -37,10 +37,10 @@ podemos utilizar Python para todo, desde la detección de obstáculos hasta el
 control de los motores, lo que simplifica el proceso de desarrollo y reduce la
 complejidad del código.
 
-## MicroPython {#micro-python}
+## MicroPython {:#micro-python}
 
 <div class="center">
-    <img src= "../assets/images/micro-python.png" alt="MicroPython" class="logo--3rd-party">
+    <img src= "../assets/images/logo/micro-python.png" alt="MicroPython" class="logo--3rd-party">
     <i>Logo de MicroPython</i>
 </div>
 
@@ -57,10 +57,10 @@ con CircuitPython, lo que nos llevó a cambiar a CircuitPython para evitar estos
 problemas de compatibilidad y no tener que modificar la librería casi en su
 totalidad.
 
-## CircuitPython {#circuit-python}
+## CircuitPython {:#circuit-python}
 
 <div class="center">
-    <img src="../assets/images/circuit-python.png" alt="CircuitPython" 
+    <img src="../assets/images/logo/circuit-python.png" alt="CircuitPython" 
 class="logo--3rd-party">
     <i>Logo de CircuitPython</i>
 </div>

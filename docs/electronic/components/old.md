@@ -1,9 +1,9 @@
-# Lista de Componentes {#components-list}
+# Lista de Componentes {:#components-list}
 
-## HiLetgo Time-of-Flight Sensor VL53L0X {#sensor-tof-hiletgo}
+## HiLetgo Time-of-Flight Sensor VL53L0X {:#sensor-tof-hiletgo}
 
 <div class="center">
-    <img src="../../assets/images/vl53l0x.png" alt="Sensor VL53L0X" 
+    <img src="../../assets/images/components/vl53l0x.png" alt="Sensor VL53L0X" 
 class="component-image">
     <i>Sensor VL53L0X</i>
 </div>

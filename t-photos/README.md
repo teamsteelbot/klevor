@@ -1,3 +1,3 @@
 # Team Photos
 
-Esta carpeta contiene todas las fotos del equipo de desarrollo de Klevor.
+Esta carpeta contiene todas las fotos del equipo de Steel Bot.

@@ -1,12 +1,12 @@
-# Lista de Componentes {#components-list}
+# Lista de Componentes {:#components-list}
 
 A continuación, está la descripción de todos los componentes principales de
 Klevor.
 
-## Raspberry Pi 5 (16GB RAM) {#raspberry-pi-5}
+## Raspberry Pi 5 (16GB RAM) {:#raspberry-pi-5}
 
 <div class="center">
-    <img src="../../assets/images/raspberry-pi-5.png" alt="Raspberry Pi 5" 
+    <img src="../../assets/images/components/raspberry-pi-5.png" alt="Raspberry Pi 5" 
 class="component-image">
     <i>Raspberry Pi 5</i>
 </div>
@@ -35,10 +35,10 @@ la Raspberry Pi 5 debido a múltiples factores, entre ellos:
 | Ancho      | 56 mm     |
 | Peso       | 46 g      |
 
-## Raspberry Pi Camera Module 3 Wide {#raspberry-pi-camera-module-3-wide}
+## Raspberry Pi Camera Module 3 Wide {:#raspberry-pi-camera-module-3-wide}
 
 <div class="center">
-    <img src="../../assets/images/raspberry-pi-camera-module-3.png" alt="Raspberry 
+    <img src="../../assets/images/components/raspberry-pi-camera-module-3.png" alt="Raspberry 
 Pi Camera Module 3" class="component-image">
     <i>Raspberry Pi Camera Module 3</i>
 </div>
@@ -60,10 +60,10 @@ obstáculos de la pista.
 | Ancho      | 12.4 mm   |
 | Peso       | 4 g       |
 
-## Raspberry Pi AI HAT+ (26 TOPS) {#raspberry-pi-ai-hat-26-tops}
+## Raspberry Pi AI HAT+ (26 TOPS) {:#raspberry-pi-ai-hat-26-tops}
 
 <div class="center">
-    <img src="../../assets/images/raspberry-pi-ai-hat-plus.png" alt="Raspberry 
+    <img src="../../assets/images/components/raspberry-pi-ai-hat-plus.png" alt="Raspberry 
 Pi AI HAT+ 26 TOPS" class="component-image">
     <i>Raspberry Pi AI HAT+ 26 TOPS</i>
 </div>
@@ -87,10 +87,10 @@ por segundo con una resolución de 640 px × 640 px.
 | Ancho      | 56 mm     |
 | Peso       | 9.07 g    |
 
-## Raspberry Pi Pico 2 WH {#raspberry-pi-pico-2-wh}
+## Raspberry Pi Pico 2 WH {:#raspberry-pi-pico-2-wh}
 
 <div class="center">
-  <img src="../../assets/images/raspberry-pi-pico-2-w.png" alt="Raspberry Pi 
+  <img src="../../assets/images/components/raspberry-pi-pico-2-w.png" alt="Raspberry Pi 
 Pico 2 W" class="component-image">
   <i>Raspberry Pi Pico 2 W</i>
 </div>
@@ -120,10 +120,10 @@ final sea mucho más limpio.
 | Ancho      | 21 mm     |
 | Peso       | 6 g       |
 
-## RPLiDAR C1 {#rplidar-c1}
+## RPLiDAR C1 {:#rplidar-c1}
 
 <div class="center">
-    <img src="../../assets/images/rplidar-c1.png" alt="RPLiDAR C1" class="component-image">
+    <img src="../../assets/images/components/rplidar-c1.png" alt="RPLiDAR C1" class="component-image">
     <i>RPLiDAR C1</i>
 </div>
 
@@ -153,10 +153,10 @@ Especificaciones técnicas:
 | Resolución angular     | 0,72°                                                                              |
 | Ángulo de inclinación  | 0°-1,5°                                                                            |
 
-## Shargeek Storm 2 {#shargeek-storm-2}
+## Shargeek Storm 2 {:#shargeek-storm-2}
 
 <div class="center">
-    <img src="../../assets/images/shargeek-storm-2.png" alt="Shargeek Storm 2" 
+    <img src="../../assets/images/components/shargeek-storm-2.png" alt="Shargeek Storm 2" 
 class="component-image">
     <i>Shargeek Storm 2</i>
 </div>
@@ -182,10 +182,10 @@ incorporar
 | Ancho      | 45.9 mm   |
 | Peso       | 579 g     |
 
-## INJORA 180 Motor 48T {#injora-180-motor-48t}
+## INJORA 180 Motor 48T {:#injora-180-motor-48t}
 
 <div class="center">
-    <img src="../../assets/images/injora-180-motor-48t.png" alt="INJORA 180 Motor 
+    <img src="../../assets/images/components/injora-180-motor-48t.png" alt="INJORA 180 Motor 
 48T" class="component-image">
     <i>INJORA 180 Motor 48T</i>
 </div>
@@ -221,10 +221,10 @@ Especificaciones mecánicas:
 | Velocidad sin carga | 20500rpm  |
 | Corriente sin carga | 0.48A     |
 
-## INJORA MB100 20A mini ESC {#injora-mb100-20a-mini-esc}
+## INJORA MB100 20A mini ESC {:#injora-mb100-20a-mini-esc}
 
 <div class="center">
-    <img src="../../assets/images/injora-mb100-mini-esc-20a.png" alt="INJORA MB100 20A Mini ESC" 
+    <img src="../../assets/images/components/injora-mb100-mini-esc-20a.png" alt="INJORA MB100 20A Mini ESC" 
 class="component-image">
     <i>INJORA MB100 20A Mini ESC</i>
 </div>
@@ -263,10 +263,10 @@ Especificaciones mecánicas:
 | Tipo de motor compatible: | Motor Escobillado (030/050/130/**180**/370) |
 | Salida BEC                | 6V/3A (Modo Lineal)                         |
 
-## URGENEX 7.4 V Battery {#urgenex-7-4v-battery}
+## URGENEX 7.4 V Battery {:#urgenex-7-4v-battery}
 
 <div class="center">
-    <img src="../../assets/images/urgenex-7-4v-3000mah.png" alt="URGENEX 7.4V 
+    <img src="../../assets/images/components/urgenex-7-4v-3000mah.png" alt="URGENEX 7.4V 
 Battery" class="component-image">
     <i>URGENEX 7.4 V Battery</i>
 </div>
@@ -294,10 +294,10 @@ mAh [[16](#urgenex-3000-mah-amazon)].
 | Ancho      | 19 mm     |
 | Peso       | 103 g     |
 
-## INJORA 7 kg 2065 Micro Servo {#injora-7kg-2065-micro-servo}
+## INJORA 7 kg 2065 Micro Servo {:#injora-7kg-2065-micro-servo}
 
 <div class="center">
-    <img src="../../assets/images/injora-7kg-2065-micro-servo.png" alt="INJORA 
+    <img src="../../assets/images/components/injora-7kg-2065-micro-servo.png" alt="INJORA 
 Micro Servo" class="component-image">
     <i>INJORA 7 kg 2065 Micro Servo</i>
 </div>
@@ -323,10 +323,10 @@ de leer sin arriesgar el rendimiento del programa.
 | Ancho      | 13 mm     |
 | Peso       | 20 g      |
 
-## 9-Axis IMU Gyroscope GY-BNO085 {#gyroscope-gy-bno085}
+## 9-Axis IMU Gyroscope GY-BNO085 {:#gyroscope-gy-bno085}
 
 <div class="center">
-    <img src="../../assets/images/bno08x.png"
+    <img src="../../assets/images/components/bno08x.png"
   alt="BNO085" class="component-image">
     <i>BNO085</i>
 </div>

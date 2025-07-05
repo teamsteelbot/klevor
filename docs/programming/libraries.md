@@ -1,9 +1,9 @@
-# Librerías {#libraries}
+# Librerías {:#libraries}
 
-## PyTorch {#pytorch}
+## PyTorch {:#pytorch}
 
 <div class="center">
-    <img src="../assets/images/pytorch.png" alt="PyTorch" class="logo--3rd-party">
+    <img src="../assets/images/logo/pytorch.png" alt="PyTorch" class="logo--3rd-party">
     <i>Logo de PyTorch</i>
 </div>
 
@@ -17,10 +17,10 @@ cuando se trata de desarrollar un programa que involucre Visión por
 Computadoras, o el Aprendizaje por Refuerzo. Ya que, facilitan el desarrollo de
 modelos de Inteligencia Artificial.
 
-## Ultralytics YOLO {#ultralytics-yolo}
+## Ultralytics YOLO {:#ultralytics-yolo}
 
 <div class="center">
-    <img src="../assets/images/ultralytics.png" alt="Ultralytics" class="logo--3rd-party">
+    <img src="../assets/images/logo/ultralytics.png" alt="Ultralytics" class="logo--3rd-party">
     <i>Logo de Ultralytics</i>
 </div>
 
@@ -51,10 +51,10 @@ según las necesidades de rendimiento y precisión. Si bien la librería contien
 múltiples usos, en el caso de Klevor utilizamos la Detección de Objetos para
 poder detectar e identificar los obstáculos [[2](#ultralytics-yolo-docs)].
 
-## OpenCV {#opencv}
+## OpenCV {:#opencv}
 
 <div class="center">
-    <img src="../assets/images/opencv.png" alt="OpenCV" class="logo--3rd-party">
+    <img src="../assets/images/logo/opencv.png" alt="OpenCV" class="logo--3rd-party">
     <i>Logo de OpenCV</i>
 </div>
 
@@ -72,10 +72,10 @@ aplicaciones de visión por computadora y acelerar el uso de la percepción
 automática en productos comerciales, investigación y
 desarrollo [[3](#opencv-docs)].
 
-## NumPy {#numpy}
+## NumPy {:#numpy}
 
 <div class="center">
-    <img src="../assets/images/numpy.png" alt="Numpy" class="logo--3rd-party">
+    <img src="../assets/images/logo/numpy.png" alt="Numpy" class="logo--3rd-party">
     <i>Logo de NumPy</i>
 </div>
 
@@ -90,10 +90,10 @@ grandes cantidades de datos [[4](#numpy-docs)]. Estos cálculos tan
 extensos, se utilizan para el procesamiento de imágenes de Klevor, aunque
 también tiene usos como el análisis de datos.
 
-## PiCamera 2 {#picamera-2}
+## PiCamera 2 {:#picamera-2}
 
 <div class="center">
-    <img src="../assets/images/raspberry-pi.png" alt="Picamera 2" class="logo--3rd-party">
+    <img src="../assets/images/logo/raspberry-pi.png" alt="Picamera 2" class="logo--3rd-party">
     <i>Logo de Raspberry Pi</i>
 </div>
 
@@ -109,10 +109,10 @@ Obstáculos. Entre sus múltiples funciones se encuentran:
 
 Además de, obviamente, permitir la toma de imágenes y videos
 
-## Hailo Platform {#hailo-platform}
+## Hailo Platform {:#hailo-platform}
 
 <div class="center">
-    <img src="../assets/images/hailo.png" alt="Hailo Platform" class="logo--3rd-party">
+    <img src="../assets/images/logo/hailo.png" alt="Hailo Platform" class="logo--3rd-party">
     <i>Logo de Hailo Platform</i>
 </div>
 

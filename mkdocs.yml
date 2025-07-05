@@ -1,6 +1,4 @@
 site_name: Klevor
-markdown_extensions:
-  - attr_list
 nav:
   - Inicio: index.md
   - Nosotros: about.md
@@ -8,10 +6,15 @@ nav:
     - Componentes:
       - Actuales: electronic/components/current.md
       - Viejos: electronic/components/old.md
+    - Diagramas:
+      - Conexiones: electronic/diagrams/connections.md
   - Mecánica
   - Programación:
     - Lenguajes: programming/languages.md
     - Librerías: programming/libraries.md
+markdown_extensions:
+  - attr_list
+use_directory_urls: false
 extra_css:
   - stylesheets/extra.css
-use_directory_urls: false
+
