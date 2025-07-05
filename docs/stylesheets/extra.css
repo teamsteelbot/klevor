@@ -1,0 +1,39 @@
+:root {
+    --color-primary: #fcc419;
+    --color-secondary: #e9ecef;
+    --color-tertiary: #060000;
+    --color-accent: #868e96;
+    --border-radius: 4px;
+    --picture-outline: 4px solid var(--color-tertiary);
+    --margin: 1.2rem;
+}
+
+.center {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: var(--margin) 0;
+}
+
+.component-image {
+    max-width: 100%;
+    width: 350px;
+}
+
+.logo--3rd-party {
+    max-width: 100%;
+    width: 200px;
+}
+
+.logo--team {
+    max-width: 100%;
+    width: 400px;
+}
+
+.picture--team {
+    max-width: 100%;
+    width: 500px;
+    border-radius: var(--border-radius);
+    outline: var(--picture-outline);
+}
