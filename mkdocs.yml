@@ -1,17 +1,20 @@
 site_name: Klevor
 nav:
-  - Inicio: index.md
   - Nosotros: about.md
   - Electrónica:
     - Componentes:
       - Actuales: electronic/components/current.md
       - Viejos: electronic/components/old.md
     - Diagramas:
-      - Conexiones: electronic/diagrams/connections.md
+      - Diagramas de Conexiones: electronic/diagrams/wiring.md
   - Mecánica
   - Programación:
     - Lenguajes: programming/languages.md
     - Librerías: programming/libraries.md
+    - Diagramas:
+        - Diagramas de Flujo: programming/diagrams/flowcharts.md
+  - GitHub: github.md
+  - Videos: videos.md
 markdown_extensions:
   - attr_list
 use_directory_urls: false

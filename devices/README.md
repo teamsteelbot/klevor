@@ -11,7 +11,7 @@ Abierto?</h2>
 
 Durante el Desafío Abierto, Klevor prioriza cumplir una serie de pasos antes de
 dar una vuelta, esto está mejor definido en
-el [Diagrama de Flujo](../schemes/prototype3/open-challenge-flowchart.png).
+el [Diagrama de Flujo](../schemes/flowcharts/open-challenge-flowchart.png).
 
 <p align="center">
     <img src="../schemes/prototype2/open-challenge-flowchart.png" alt="Diagrama de Flujo" width=500>

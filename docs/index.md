@@ -46,6 +46,11 @@ y facilitar la comprensión de los conceptos presentados.
             11. [9-Axis IMU Gyroscope GY-BNO085](electronic/components/current.md#gyroscope-gy-bno085)
         2. Viejos
             1. [HiLetgo Time-of-Flight Sensor VL53L0X](#sensor-tof-hiletgo)
+    2. Diagramas
+        1. [Diagramas de Conexiones](electronic/diagrams/wiring.md#wiring-diagrams)
+            1. [Prototipo 1](electronic/diagrams/wiring.md#prototype1)
+            2. [Prototipo 2](electronic/diagrams/wiring.md#prototype2)
+            3. [Prototipo 3](electronic/diagrams/wiring.md#prototype3)
 3. **Mecánica**
 4. **Programación**
     1. [Lenguajes de Programación](programming/languages.md#programming-languages)
@@ -59,6 +64,16 @@ y facilitar la comprensión de los conceptos presentados.
         4. [NumPy](programming/libraries.md#numpy)
         5. [PiCamera2](programming/libraries.md#picamera-2)
         6. [Hailo Platform](programming/libraries.md#hailo-platform)
+    3. Diagramas
+        1. [Diagramas de Flujo](programming/diagrams/flowcharts.md#flowcharts)
+            1. [Desafío sin Obstáculos](programming/diagrams/flowcharts.md#without-obstacles-challenge.md)
+            2. [Desafío con Obstáculos](programming/diagrams/flowcharts.md#obstacles-challenge.md)
+5. **[GitHub](github.md)**
+    1. [Repositorio](github.md#repository)
+    2. [Estructura del Repositorio](github.md#repository-structure)
+6. **[Vídeos](videos.md)**
+    1. [Desafío sin Obstáculos](videos.md#without-obstacles-challenge)
+        1. [Parte 1](videos.md#without-obstacles-challenge-part-1)
 5. **[Descripción de la Mecánica](v-photos/prototype1/README.md)**
 6. **[Código](devices/README.md)**
     1. **[Dispositivos](/devices)**
@@ -66,31 +81,3 @@ y facilitar la comprensión de los conceptos presentados.
         2. [Raspberry Pi Pico 2 WH](devices/raspberry-pi-pico-2w/README.md)
             1. [CircuitPython](devices/raspberry-pi-pico-2w/src/circuit-python/README.md)
             2. [MicroPython](devices/raspberry-pi-pico-2w/src/micro-python/README.md)
-7. **[Esquemas y Diagramas](schemes/README.md)**
-    1. [Esquemas de Conexiones](schemes/prototype3/wiring-diagram.png)
-    2. [Diagrama de Flujo](schemes/prototype3/open-challenge-flowchart.png)
-8. **[Fotos del equipo](t-photos/README.md)**
-9. **[Vídeos](video/README.md)**
-10. **[Recursos Externos](#recursos-externos)**
-
-> [!IMPORTANT]
-> Este listado contiene todo el contenido respectivo al desarrollo de
-Klevor; sin embargo, no todo está presente en este README.md, asegúrese de hacer
-clic para poder ser redireccionado si es necesario.
-
-
-
-<h1 id="estructura-de-archivos">Estructura de archivos</h1>
-
-- `devices` contiene todo el código el cual fue utilizado para poder controlar este robot de manera autónoma, además de su correspondiente explicación.
-
-- `models` contiene todos los archivos en 3D que se utilizaron para poder
-  construir a nuestro robot (Klevor).
-
-- `schemes` contiene todos los esquemas y diagramas de todas las conexiones de nuestro robot (Klevor).
-
-- `t-photos` contiene las fotos del equipo.
-
-- `v-photos` contiene las fotos de Klevor.
-
-- `video` contiene los vídeos de Klevor en la pista, tanto en el Desafío Abierto como en el Desafío con Obstáculos (Desafío Cerrado).

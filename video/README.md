@@ -1,3 +1,8 @@
 # Videos
 
-Esta carpeta contiene todos los videos correspondientes al desarrollo de Klevor.
+## Desafío sin Obstáculos
+
+### Parte I
+
+[![Watch on YouTube](https://img.youtube.com/vi/G6BuVhfz97A/0.jpg)](https://www.youtube.com/watch?v=G6BuVhfz97A)
+
