@@ -16,6 +16,12 @@ class="logo--3rd-party">
 
 A continuación se presenta un índice con los enlaces a las diferentes secciones de la documentación. Cada sección contiene información detallada sobre los aspectos técnicos y prácticos del robot, incluyendo la mecánica, el código, los dispositivos utilizados, los componentes, los esquemas y diagramas, las fotos del equipo y los vídeos de Klevor en acción. Además, se incluyen recursos externos para ampliar la información y facilitar la comprensión de los conceptos presentados.
 
+<div class="center">
+    <img src="assets/images/github/t-photos/salto-angel-regional-competition-photo.jpg" alt="Team Steel Bot en la competencia regional del Salto Ángel" 
+class="picture--team">
+    <i>Team Steel Bot en la competencia regional del Salto Ángel</i>
+</div>
+
 ## Índice
 
 1. **[Nosotros](about.md)**
@@ -88,6 +94,12 @@ A continuación se presenta un índice con los enlaces a las diferentes seccione
         3. [Raspberry Pi](programming/guides/raspberry-pi.md#raspberry-pi)
             1. [Instalación de Raspberry Pi OS](programming/guides/raspberry-pi.md#raspberry-pi-os-installation)
             2. [Instalación de la Cámara](programming/guides/raspberry-pi.md#camera-installation)
+            3. [Instalación de Raspberry Pi AI HAT+](programming/guides/raspberry-pi.md#raspberry-pi-ai-hat-plus-installation)
+        4. [Detección de Objetos](programming/guides/object-detection.md#object-detection)
+            1. [Creación del Modelo](programming/guides/object-detection.md#model-creation)
+            2. [Entrenamiento del Modelo](programming/guides/object-detection.md#model-training)
+            3. [Conversión del Modelo](programming/guides/object-detection.md#model-conversion)
+            4. [Prueba del Funcionamiento del Modelo](programming/guides/object-detection.md#model-testing) 
 5. **[GitHub](github.md)**
     1. [Repositorio](github.md#repository)
     2. [Estructura del Repositorio](github.md#repository-structure)

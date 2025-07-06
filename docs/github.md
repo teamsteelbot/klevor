@@ -10,6 +10,21 @@ class="logo--3rd-party">
 
 El presente proyecto puede ser encontrado en GitHub, donde se encuentra todo el código, documentación, modelos 3D y esquemas de Klevor, nuestro robot. El repositorio está organizado en varias carpetas y archivos, cada uno de los cuales contiene información específica sobre el robot y su desarrollo. Puedes acceder al repositorio a través del siguiente enlace: [https://github.com/teamsteelbot/klevor](https://github.com/teamsteelbot/klevor)
 
+También, puedes descargarlo directamente desde la terminal utilizando el siguiente comando:
+
+```bash
+git clone https://github.com/teamsteelbot/klevor.git
+```
+
+<div class="center">
+    <img src="assets/images/logo/git.png" alt="Logo de Git" 
+class="logo--3rd-party">
+    <i>Logo de Git</i>
+</div>
+
+> [!NOTE]
+> Para poder clonar el repositorio, es necesario tener instalado Git en tu computadora. Puedes descargarlo desde [aquí](https://git-scm.com/downloads).
+
 ## Estructura del Repositorio {:#repository-structure}
 
 - **devices**: contiene todo el código el cual fue utilizado para poder controlar este robot de manera autónoma.

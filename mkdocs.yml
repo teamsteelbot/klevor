@@ -22,6 +22,7 @@ nav:
         - Guía de CircuitPython: programming/guides/circuit-python.md
         - Guía de MicroPython: programming/guides/micro-python.md
         - Guía de Raspberry Pi: programming/guides/raspberry-pi.md
+        - Guía de Detección de Objetos: programming/guides/object-detection.md
   - GitHub: github.md
   - Videos: videos.md
 use_directory_urls: false
