@@ -21,9 +21,14 @@
     width: 350px;
 }
 
-.diagrams-image {
+.wiring-diagram-image {
     max-width: 100%;
-    width: 600px;
+    width: 850px;
+}
+
+.flowchart-image {
+    max-width: 100%;
+    width: 1000px;
 }
 
 .mechanical-image {

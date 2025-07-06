@@ -4,7 +4,7 @@
 
 <div class="center">
     <img src="../../assets/images/github/schemes/wiring/prototype1-wiring.png"
-alt="Diagrama de Conexiones del Prototipo 1" class="diagrams-image">
+alt="Diagrama de Conexiones del Prototipo 1" class="wiring-diagram-image">
     <i>Diagrama de Conexiones del Prototipo 1</i>
 </div>
 
@@ -12,7 +12,7 @@ alt="Diagrama de Conexiones del Prototipo 1" class="diagrams-image">
 
 <div class="center">
     <img src="../../assets/images/github/schemes/wiring/prototype2-wiring.png"
-alt="Diagrama de Conexiones del Prototipo 2" class="diagrams-image">
+alt="Diagrama de Conexiones del Prototipo 2" class="wiring-diagram-image">
     <i>Diagrama de Conexiones del Prototipo 2</i>
 </div>
 
@@ -20,6 +20,6 @@ alt="Diagrama de Conexiones del Prototipo 2" class="diagrams-image">
 
 <div class="center">
     <img src="../../assets/images/github/schemes/wiring/prototype3-wiring.png"
-alt="Diagrama de Conexiones del Prototipo 3" class="diagrams-image">
+alt="Diagrama de Conexiones del Prototipo 3" class="wiring-diagram-image">
     <i>Diagrama de Conexiones del Prototipo 3</i>
 </div>

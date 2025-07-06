@@ -4,7 +4,7 @@ nav:
   - Electrónica:
     - Componentes:
       - Actuales: electronic/components/current.md
-      - Viejos: electronic/components/old.md
+      - Previos: electronic/components/previous.md
     - Diagramas:
       - Diagramas de Conexiones: electronic/diagrams/wiring.md
   - Mecánica:
@@ -17,11 +17,21 @@ nav:
     - Librerías: programming/libraries.md
     - Diagramas:
         - Diagramas de Flujo: programming/diagrams/flowcharts.md
+    - Guías:
+        - Guía de CircuitPython: programming/guides/circuit-python.md
+        - Guía de MicroPython: programming/guides/micro-python.md
   - GitHub: github.md
   - Videos: videos.md
-markdown_extensions:
-  - attr_list
 use_directory_urls: false
 extra_css:
   - stylesheets/extra.css
+markdown_extensions:
+  - attr_list
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - nl2br
+plugins:
+  - search
+  - callouts
 

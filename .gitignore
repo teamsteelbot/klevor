@@ -28,7 +28,10 @@
 /**/*/yolo/**/*/runs/**/*
 /**/*/yolo/**/*/zip/**/*
 /**/*/yolo/**/*.zip
-/**/*/yolo/hailo/suite/libs/**/*
+
+# Hailo
+/**/*/hailort.log
+/**/*/hailo/suite/libs
 
 # Structurizr
 /**/*/.structurizr/**/*
