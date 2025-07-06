@@ -17,9 +17,11 @@ nav:
     - Librerías: programming/libraries.md
     - Diagramas:
         - Diagramas de Flujo: programming/diagrams/flowcharts.md
+    - Glosario de Términos: programming/glossary.md
     - Guías:
         - Guía de CircuitPython: programming/guides/circuit-python.md
         - Guía de MicroPython: programming/guides/micro-python.md
+        - Guía de Raspberry Pi: programming/guides/raspberry-pi.md
   - GitHub: github.md
   - Videos: videos.md
 use_directory_urls: false

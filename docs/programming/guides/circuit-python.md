@@ -19,4 +19,4 @@ Después del reinicio, tu Raspberry Pi Pico debería aparecer ahora como una nue
 
 # Referencias Bibliográficas
 
-1. *CircuitPython*. (2025). CircuitPython. <a id="circuit-python-docs">https://docs.circuitpython.org/en/latest/README.html</a>
+1. *CircuitPython*. (2025). CircuitPython. <a id="circuit-python-docs" href="https://docs.circuitpython.org/en/latest/README.html">https://docs.circuitpython.org/en/latest/README.html</a>

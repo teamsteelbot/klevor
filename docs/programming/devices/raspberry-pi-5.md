@@ -1,28 +1,11 @@
-<h1 id="indice">Índice</h1>
 
-1. **[Configuración Básica de la Raspberry Pi](#configuracion-basica-de-la-raspberry-pi)**
-    1. [Instalación de Raspberry Pi OS](#instalacion-de-raspberry-pi-os)
-    2. [Instalación de la cámara](#instalacion-de-la-camara)
-2. **[Machine Learning](#machine-learning)**
-3. **[Detección de Objetos](#deteccion-de-objetos)**
-    1. [Funcionamiento](#funcionamiento)
-        1. [Preprocesamiento de Imágenes](#funcionamiento-preprocesamiento-de-imagenes)
-        2. [Arquitectura del Modelo](#funcionamiento-arquitectura-del-modelo)
-        3. [Evaluación de Métricas](#funcionamiento-evaluacion-de-metricas)
-    2. [YOLO](#yolo)
-    3. [NPU](#npu)
-        1. [Características Clave de las NPU](#npu-caracteristicas-clave)
 4. **[Montaje del Modelo de Detección de Objetos](#montaje-del-modelo-de-deteccion-de-objetos)**
     1. [Creación del Conjunto de Datos](#creacion-del-conjunto-de-datos)
     2. [Entrenamiento del Modelo](#entrenamiento-del-modelo)
     3. [Entrenamiento del Modelo](#entrenamiento-del-modelo)
     4. [Instalación de Hailo AI HAT+](#instalacion-de-hailo-ai-hat)
     5. [Conversión del Modelo](#conversion-del-modelo)
-        1. [Docker](#que-es-docker)
-            1. [Dockerfile](#que-es-dockerfile)
-            2. [Docker Image](#que-es-docker-image)
-            3. [Docker Container](#que-es-docker-container)
-        2. [Cómo Convertir el Modelo a un Formato Compatible al Hailo 8](#como-convertir-el-modelo-a-un-formato-compatible-al-hailo-8l)
+       1. [Cómo Convertir el Modelo a un Formato Compatible al Hailo 8](#como-convertir-el-modelo-a-un-formato-compatible-al-hailo-8l)
     6. [Prueba del Funcionamiento](#prueba-del-funcionamiento)
 5. **[Recursos Externos](#recursos-externos)**
 
@@ -30,224 +13,9 @@
 2. [Multiprocesamiento](#multiprocesamiento)
 -->
 
-<h1 id="configuracion-basica-de-la-raspberry-pi">Configuración Básica de la Raspberry Pi</h1>
-
-<h1 id="instalacion-de-raspberry-pi-os">Instalación de Raspberry Pi OS</h1>
-
-1. Descargar la imagen de Raspberry Pi OS desde el sitio
-   oficial: [Raspberry Pi OS](https://www.raspberrypi.com/software/).
-2. Grabar la imagen en una tarjeta microSD utilizando un software como Balena
-   Etcher o Raspberry Pi Imager.
-3. Insertar la tarjeta microSD en la Raspberry Pi y encenderla.
-4. Configurar la Raspberry Pi siguiendo las instrucciones en pantalla,
-   incluyendo la conexión a una red wifi y la creación de un usuario.
-5. Actualizar el sistema operativo ejecutando los siguientes comandos en la
-   terminal:
-   ```bash
-   sudo apt update
-   sudo apt upgrade
-   ```
-
-<p align="center">
-    <img src="https://www.raspberrypi.com/documentation/computers/images/imager/welcome.png?hash=a351c2ba01f30809c2921de09be67683" alt="Raspberry Pi OS" width="600">
-    <br>
-    <i>Raspberry Pi OS</i>
-</p>
-
-> [!IMPORTANT]
-> Por experiencia propia, recomendamos la configuración de la aplicación
-oficial de Raspberry Pi para conexión remota, Raspberry Pi Connect, que permite
-acceder a la Raspberry Pi desde cualquier lugar y sin necesidad de estar
-conectado a la misma red wifi [[3](#raspberry-pi-connect)]. En nuestro caso, en
-reiteradas ocasiones nos permitió de forma remota, a través del modo Remote
-Shell, eliminar procesos que han producido un crash o han limitado la repuesta
-de la Raspberry Pi.
-
-<h1 id="instalacion-de-la-camara">Instalación de la cámara</h1>
-
-1. Conectar la cámara a la Raspberry Pi utilizando el conector CSI.
-2. Probar el correcto funcionamiento de la cámara ejecutando el siguiente
-   comando en la terminal:
-   ```bash
-   libcamera-hello
-   ```
-3. Si la cámara funciona correctamente, se mostrará una vista previa de la
-   cámara en la pantalla por unos segundos.
-
-> [!IMPORTANT]
-> En caso de estar interesado en adquirir algún tipo de Raspberry Pi
-Camera, se debe comprar un cable aparte dependiendo del proveedor, ya que
-normalmente estas vienen con el cable para la Raspberry Pi 4, el cual no es el
-mismo.
-
 <!--
 <h1 id="multiprocesamiento">Multiprocesamiento</h1>
 -->
-
-<h1 id="machine-learning">Machine Learning</h1>
-
-El Machine Learning (ML) es una rama de la inteligencia artificial enfocada en
-imitar la manera en que los humanos piensan en una computadora, para realizar
-tareas de forma autónoma, y para mejorar el rendimiento y precisión a medida que
-se expone a un mayor conjunto de datos.
-
-Normalmente, se divide en 3 partes el sistema de aprendizaje de un algoritmo de
-Machine Learning:
-
-1. **Proceso de decisión**: En general, los algoritmos de Machine Learning son
-   empleados para predecir o clasificar, a través de unos datos de entrada, que
-   pueden ser etiquetados o no etiquetados, los cuales producen un patrón
-   estimado de dicho conjunto de datos.
-2. **Función de error**: Una función de error que evalúa las predicciones del
-   modelo. Este emplea conjuntos de datos, de los cuales ya se conoce su
-   resultado, para poder comparar la precisión del modelo.
-3. **Proceso de optimización del modelo**: Si el modelo puede encajar mejor al
-   conjunto de los datos en el set de entrenamiento, los pesos son ajustados
-   para reducir la diferencia entre las estimaciones y los resultados conocidos.
-   Este proceso iterativo de evaluación y optimización, se repite de forma
-   autónoma hasta actualizar los pesos a un umbral de aceptación.
-
-<h1 id="deteccion-de-objetos">Detección de Objetos</h1>
-
-Para la presente competencia, debido a la necesidad de poder reconocer distintos
-prismas de diferentes colores, específicamente en el Desafío con Obstáculos, se
-optó por utilizar un modelo de detección de objetos.
-
-Dicha detección de objetos, es una tarea de visión por computadora que emplea
-redes neuronales para identificar y localizar objetos en imágenes o videos, al
-enmarcarlos con cuadros delimitadores y asignarles etiquetas.
-
-A través de esta técnica, se pueden clasificar y localizar múltiples objetos
-dentro de una sola imagen. Además, se considera una parte de la inteligencia
-artificial, ya que permite a las máquinas interpretar y comprender el contenido
-visual de manera similar a los humanos.
-
-<h2 id="funcionamiento">Funcionamiento</h2>
-
-Primeramente, debemos comprender distintos conceptos relacionados con la
-detección de objetos, como el preprocesamiento de imágenes, la arquitectura del
-modelo y las métricas de evaluación para la detección de objetos. A
-continuación, se presentan estos conceptos:
-
-<h3 id="funcionamiento-preprocesamiento-de-imagenes">Preprocesamiento de
-Imágenes</h3>
-
-Para la visión por computadora, las imágenes se expresan como funciones
-continuas en un plano de coordenadas 2D representadas como f(x, y). Cuando se
-digitalizan, las imágenes pasan por dos procesos primarios llamados muestreo y
-cuantización, que, en resumen, convierten la función de imagen continua en una
-estructura de cuadrícula discreta de elementos que representan
-píxeles [[9](#object-detection-ibm)].
-
-<p align="center">
-   <img src="https://assets-global.website-files.com/5d7b77b063a9066d83e1209c/627d121f86896a59aad78407_60f49c3f218440673e6baa97_apples1.png" alt="Imagen con distintas anotaciones de manzanas" width="400">
-   <br>
-   <i>Imagen con distintas anotaciones de manzanas</i>
-</p>
-
-Al ser anotada la imagen, el modelo de detección de objetos puede reconocer
-regiones con características similares a las definidas en el conjunto de datos
-de entrenamiento como el mismo objeto. Los modelos de detección de objetos no
-reconocen objetos per se, sino agregados de propiedades como tamaño, forma,
-color, etc., y clasifican regiones según patrones visuales inferidos a partir de
-datos de entrenamiento anotados manualmente [[9](#object-detection-ibm)].
-
-<h3 id="funcionamiento-arquitectura-del-modelo">Arquitectura del Modelo</h3>
-
-Los modelos de detección de objetos siguen una estructura general que incluye un
-modelo de fondo, cuello y cabeza [[9](#object-detection-ibm)].
-
-El modelo de fondo extrae características de una imagen de entrada. A menudo, el
-modelo de fondo se deriva de parte de un modelo de clasificación preentrenado.
-La extracción de características produce una miríada de mapas de características
-de diferentes resoluciones que el modelo de fondo pasa al cuello. Esta última
-parte de la estructura concatena los mapas de características para cada imagen.
-Luego, la arquitectura pasa los mapas de características en capas a la cabeza,
-que predice cuadros delimitadores y puntuaciones de clasificación para cada
-conjunto de características [[9](#object-detection-ibm)].
-
-<h3 id="funcionamiento-evaluacion-de-metricas">Evaluación de Métricas</h3>
-
-La evaluación de métricas es un paso crucial en el proceso de detección de
-objetos, ya que permite medir la precisión y efectividad del modelo. Existen
-varias métricas utilizadas para evaluar modelos de detección de objetos, entre
-las cuales se encuentran:
-
-- **Precisión**: Mide la proporción de verdaderos positivos (TP) entre el total
-  de predicciones positivas (TP + FP). Es decir, cuántas de las predicciones
-  realizadas por el modelo son correctas.
-- **Exhaustividad (Recall)**: Mide la proporción de verdaderos positivos (TP)
-  entre el total de casos positivos reales (TP + FN). Es decir, cuántos de los
-  objetos que realmente están presentes en la imagen fueron detectados por el
-  modelo.
-- **F1 Score**: Es la media armónica entre precisión y exhaustividad. Se utiliza
-  para evaluar el rendimiento del modelo en situaciones donde hay un desbalance
-  entre las clases.
-- **Mean Average Precision (mAP)**: Es una métrica que combina precisión y
-  exhaustividad en un solo valor. Se calcula promediando la precisión a
-  diferentes niveles de exhaustividad. El mAP se utiliza comúnmente para evaluar
-  modelos de detección de objetos, ya que proporciona una medida más completa
-  del rendimiento del modelo.
-
-<h2 id="yolo">YOLO</h2>
-
-YOLO, o "You Only Look Once" ("Solo Miras Una Vez"), consiste en una familia de
-modelos de una sola etapa que realizan detección de objetos en tiempo real. A
-diferencia de otros modelos de detección de objetos que utilizan un enfoque de
-dos etapas, YOLO divide la imagen en una cuadrícula y predice simultáneamente
-los cuadros delimitadores y las probabilidades de clase para cada celda de la
-cuadrícula. Esto permite que YOLO sea extremadamente rápido y
-eficiente [[9](#object-detection-ibm)].
-
-Para Klevor, la detección de objetos se basa en el modelo YOLOv11; la última
-versión de YOLO hasta la fecha [[18](#models-ultralytics)].
-
-<h2 id="npu">NPU</h2>
-
-Una unidad de procesamiento neuronal (NPU) es un microprocesador especializado
-diseñado para imitar la función de procesamiento del cerebro humano. Están
-optimizados para tareas y aplicaciones de inteligencia artificial (IA), redes
-neuronales, aprendizaje profundo y aprendizaje automático [[10](#npu-ibm)].
-
-<p align="center">
-   <img src="https://i.postimg.cc/6399NRt6/raspberry-pi-ai-hat-raspberry-pi-71328528531841-removebg-preview.png" alt="Raspberry Pi AI HAT+ 26 TOPS" width="400">
-   <br>
-   <i>Raspberry Pi AI HAT+ 26 TOPS</i>
-</p>
-
-A diferencia de las unidades de procesamiento gráfico (GPU) y las unidades de
-procesamiento central (CPU), que son procesadores de propósito general, las NPU
-están diseñadas para acelerar tareas y cargas de trabajo de IA, como el cálculo
-de capas de redes neuronales compuestas por matemáticas escalares, vectoriales y
-tensoriales [[10](#npu-ibm)].
-
-<h3 id="npu-caracteristicas-clave">Características Clave de las NPU</h3>
-
-Las NPU están diseñadas para realizar tareas que requieran una baja latencia y
-un alto rendimiento en paralelo, lo que las hace ideales para aplicaciones de
-inteligencia artificial. Estas tareas incluyen el procesamiento de algoritmos de
-aprendizaje profundo, reconocimiento de voz, procesamiento de lenguaje natural,
-procesamiento de fotos y videos, y detección de objetos [[10](#npu-ibm)].
-
-Entre las características clave de las NPU se encuentran:
-
-- **Procesamiento paralelo**: Las NPU están diseñadas para realizar cálculos en
-  paralelo, lo que les permite procesar múltiples operaciones simultáneamente.
-  Esto es especialmente útil para tareas de aprendizaje profundo, donde se
-  requieren grandes cantidades de cálculos en matrices y tensores.
-
-- **Baja precisión aritmética**: Las NPU a menudo admiten operaciones de 8
-  bits (o menos) para reducir la complejidad computacional y aumentar la
-  eficiencia energética.
-
-- **Memoria de alto ancho de banda**: Muchas NPU cuentan con memoria de alto
-  ancho de banda en el chip para realizar eficientemente tareas de procesamiento
-  de IA que requieren grandes conjuntos de datos.
-
-- **Aceleración por hardware**: Los avances en el diseño de NPU han llevado a la
-  incorporación de técnicas de aceleración por hardware, como arquitecturas de
-  matriz sistólica o procesamiento tensorial mejorado para optimizar el
-  rendimiento de las cargas de trabajo de IA.
 
 <h1 id="montaje-del-modelo-de-deteccion-de-objetos">Montaje del Modelo de Detección de Objetos</h1>
 
@@ -610,39 +378,6 @@ paquetes necesarios para su correcto funcionamiento.
    <i>Logo de Docker</i>
 </p>
 
-<h2 id="que-es-docker">Docker</h2>
-
-Docker es una plataforma open-source (o de código abierto), con el cual se puede
-empaquetar una aplicación así como todas las dependencias que esta requiere, en
-una unidad denominada *contenedor* [[19](#what-is-docker)]. Estas son ligeras en
-peso, lo cual permite su portabilidad. Así mismo, los contenedores están
-aislados de la infraestructura donde está siendo ejecutados, y por ende la
-imagen del contenedor puede ser ejecutada como un contenedor en cualquier
-sistema operativo donde esté instalado Docker [[19](#what-is-docker)].
-
-Si su sistema operativo es Windows, Docker Desktop se puede instalar con
-facilidad desde la Microsoft Store.
-
-<h3 id="que-es-dockerfile">Dockerfile</h3>
-
-Docker emplea archivos, denominados *Dockerfile*, los cuales usan DSL (Domain
-Specific Language) para describir todas las instrucciones necesarias para crear
-una imagen de forma rápida [[19](#que-es-dockerfile)].
-
-<h3 id="que-es-docker-image">Docker Image</h3>
-
-Es un archivo compuesto de múltiples capas, empleado para ejecutar un contenedor
-Docker [[19](#que-es-docker-image")]. Es un paquete de software ejecutable que
-contiene todo lo necesario para correr la aplicación. Esta imagen informa cómo
-un contenedor debe inicializarse, determinando qué software debe ejecutarse y de
-qué forma.
-
-<h3 id="que-es-docker-container">Docker Container</h3>
-
-Un contenedor Docker es una instancia *runtime* de una imagen
-Docker [[19](#que-es-docker-container")]. Contiene todo el kit requerido para
-una aplicación, y permite ser ejecutada de forma aislada.
-
 <h2 id="como-convertir-el-modelo-a-un-formato-compatible-al-hailo-8l">Cómo
 Convertir el Modelo a un Formato Compatible al Hailo 8</h2>
 
@@ -887,12 +622,6 @@ funcionando correctamente, deberíamos ver los objetos detectados en tiempo real
 
 <h1 id="recursos-externos">Recursos Externos</h1>
 
-1. *Raspberry Pi OS*. (2025). Raspberry
-   Pi. <a id="raspberry-pi-os">https://www.raspberrypi.com/software/</a>
-2. *Getting Started*. (2025). Raspberry
-   Pi. <a id="getting-started">https://www.raspberrypi.com/documentation/getting-started/</a>
-3. *Raspberry Pi Connect*. (2025). Raspberry
-   Pi. <a id="raspberry-pi-connect">https://www.raspberrypi.com/documentation/remote-access/raspberry-pi-connect.html</a>
 4. Python Software Foundation. (2025). *Multiprocessing*. Python
    documentation. <a id="multiprocessing">https://docs.python.org/3/library/multiprocessing.html</a>
 5. Brownlee, J. (28 de julio de 2022). *Use an Event in the Multiprocessing
@@ -904,11 +633,6 @@ funcionando correctamente, deberíamos ver los objetos detectados en tiempo real
    SuperFastPython. <a id="multiprocessing-manager">https://superfastpython.com/multiprocessing-manager/</a>
 8. *What is machine learning?*. (22 de septiembre de 2021).
    IBM. <a id="machine-learning-ibm">https://www.ibm.com/think/topics/machine-learning</a>
-9. Murel, J., Kavlakoglu, E. *What is object detection?*. (3 de enero de 2024)
-   IBM. <a id="object-detection-ibm">https://www.ibm.com/topics/object-detection</a>
-10. Schneider, J., Smalley, I. *What is neural processing unit (NPU)?*. (27 de
-    septiembre de 2024).
-    IBM. <a id="npu-ibm">https://www.ibm.com/topics/neural-processing-unit</a>
 11. *Label Studio*. (2025). Label
     Studio. <a id="label-studio">https://labelstud.io/</a>
 12. *AI Kit and AI HAT+ software*. (2025). Raspberry
@@ -924,10 +648,7 @@ funcionando correctamente, deberíamos ver los objetos detectados en tiempo real
     Medium. <a id="custom-dataset-medium">https://pub.towardsai.net/custom-dataset-with-hailo-ai-hat-yolo-raspberry-pi-5-and-docker-0d88ef5eb70f</a>
 17. *Google Colab*. (2025). Google
     Colab. <a id="google-colab">https://colab.research.google.com/</a>
-18. *Models*. (2025).
-    Ultralytics. <a id="models-ultralytics">https://docs.ultralytics.com/models/</a>
-19. *What is Docker?*. (22 de abril de 2025). Geeks for
-    Geeks. <a id="what-is-docker">https://www.geeksforgeeks.org/introduction-to-docker/</a>
+
 20. *ONNX*. (2025). ONNX. <a id="onnx">https://onnx.ai/</a>
 21. *2025-04 | Hailo*. (2025).
     Hailo. <a id="2025-04-hailo">https://hailo.ai/developer-zone/documentation/hailo-sw-suite-2025-04/?sp_referrer=suite/suite_changelog.html</a>

@@ -3,8 +3,8 @@
 .vscode
 
 # Virtual environment
+/.venv
 /**/*/.venv/**/*
-/**/*/.openchallenge/**/*
 
 # Python
 /**/*/__pycache__/**/*
@@ -32,6 +32,10 @@
 # Hailo
 /**/*/hailort.log
 /**/*/hailo/suite/libs
+/**/*/hailo/suite/v11
 
 # Structurizr
 /**/*/.structurizr/**/*
+
+# Logs
+/**/*/logs/**/*

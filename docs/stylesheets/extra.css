@@ -47,6 +47,11 @@
     width: 600px;
 }
 
+.app--image {
+    max-width: 100%;
+    width: 700px;
+}
+
 .logo--3rd-party {
     max-width: 100%;
     width: 200px;

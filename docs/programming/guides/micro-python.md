@@ -18,4 +18,5 @@ Por defecto, la Raspberry Pi Pico 2 WH viene con MicroPython preinstalado. Sin e
 # Referencias Bibliográficas
 
 1. *MicroPython*. (2025). MicroPython. <a id="micro-python-docs" href="https://micropython.org/">https://micropython.org/</a>
+
 2. *MicroPython*. (2025). Raspberry Pi. <a id="raspberry-pi-micro-python-docs" href="https://www.raspberrypi.com/documentation/micropython/">https://www.raspberrypi.com/documentation/micropython/</a>
