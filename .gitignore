@@ -39,3 +39,6 @@
 
 # Logs
 /**/*/logs/**/*
+
+# MkDocs
+/site
