@@ -100,6 +100,27 @@ class="picture--team">
             2. [Entrenamiento del Modelo](programming/guides/object-detection.md#model-training)
             3. [Conversión del Modelo](programming/guides/object-detection.md#model-conversion)
             4. [Prueba del Funcionamiento del Modelo](programming/guides/object-detection.md#model-testing) 
+    6. Referencia del Código
+        1. Raspberry Pi 5
+            1. [Args](programming/code/raspberry-pi-5/args.md)
+            2. [Camera](programming/code/raspberry-pi-5/camera.md)
+            3. [Common](programming/code/raspberry-pi-5/common.md)
+            4. [Files](programming/code/raspberry-pi-5/files.md)
+            5. [Hailo](programming/code/raspberry-pi-5/hailo.md)
+            6. [Log](programming/code/raspberry-pi-5/log.md)
+            7. [Model](programming/code/raspberry-pi-5/model.md)
+            8. [OpenCV](programming/code/raspberry-pi-5/opencv.md)
+            9. [Pilot](programming/code/raspberry-pi-5/pilot.md)
+            10. [Plot](programming/code/raspberry-pi-5/plot.md)
+            11. [RPLiDAR](programming/code/raspberry-pi-5/rplidar.md)
+            12. [Serial Communication](programming/code/raspberry-pi-5/serial-communication.md)
+            13. [Server](programming/code/raspberry-pi-5/server.md)
+            14. [Spawner](programming/code/raspberry-pi-5/spawner.md)
+            15. [Utils](programming/code/raspberry-pi-5/utils.md)
+            16. [YOLO](programming/code/raspberry-pi-5/yolo.md)
+        2. Raspberry Pi Pico 2W
+            1. [Lib](programming/code/raspberry-pi-pico-2w/lib.md)
+            2. [Code](programming/code/raspberry-pi-pico-2w/code.md)
 5. **[GitHub](github.md)**
     1. [Repositorio](github.md#repository)
     2. [Estructura del Repositorio](github.md#repository-structure)

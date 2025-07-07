@@ -2,6 +2,7 @@
 
 <p align="center">
     <img src="assets/images/logo/teamsteelbot.png" alt="Logo del Equipo" width="400">
+    <br>
     <i>Logo del Equipo</i>
 </p>
 
