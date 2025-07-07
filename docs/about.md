@@ -1,7 +1,7 @@
 # Nosotros
 
 <div class="center">
-    <img src="assets/images/logo/teamsteelbot.svg" alt="Logo del Equipo" 
+    <img src="assets/images/logo/teamsteelbot.png" alt="Logo del Equipo" 
 class="logo--team">
     <i>Logo del Equipo</i>
 </div>

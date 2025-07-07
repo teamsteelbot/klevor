@@ -1,5 +1,46 @@
 site_name: Klevor
+repo_url: https://github.com/teamsteelbot/klevor/
+repo_name: Klevor
+edit_uri: edit/main/docs/
+site_description: Klevor es la documentación oficial del equipo Steel Bot 
+  para la competencia de la World Robot Olympiad (WRO).
+site_author: Equipo Steel Bot
+use_directory_urls: false
+theme:
+  name: material
+  logo: assets/images/logo/teamsteelbot.png
+  favicon: assets/images/favicon/favicon.ico
+  language: es
+  features:
+    - header.autohide
+    - navigation.footer
+  font:
+    code: Fira Code
+    text: Fira Sans
+  icon:
+    repo: fontawesome/brands/github
+  palette:
+    # Palette toggle for automatic mode
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon:  material/brightness-auto
+        name: Switch to light mode
+
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
 nav:
+  - Inicio: index.md
   - Nosotros: about.md
   - Electrónica:
     - Componentes:
@@ -25,9 +66,17 @@ nav:
         - Guía de Detección de Objetos: programming/guides/object-detection.md
   - GitHub: github.md
   - Videos: videos.md
-use_directory_urls: false
 extra_css:
   - stylesheets/extra.css
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/teamsteelbot/klevor
+      name: Equipo Steel Bot en GitHub
+    - icon: fontawesome/brands/instagram
+      link: https://instagram.com/teamsteelbotsa
+      name: Equipo Steel Bot en Instagram
+copyright: Copyright &copy; 2025 Team Steel Bot
 markdown_extensions:
   - attr_list
   - admonition
@@ -37,4 +86,3 @@ markdown_extensions:
 plugins:
   - search
   - callouts
-

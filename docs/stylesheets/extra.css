@@ -1,11 +1,16 @@
 :root {
-    --color-primary: #fcc419;
-    --color-secondary: #e9ecef;
-    --color-tertiary: #060000;
-    --color-accent: #868e96;
+    --color-primary-foreground--light: #212529;
+    --color-primary-foreground--dark: #212529;
+    --color-primary-background--light: #f8f9fa;
+    --color-primary-background--dark: #f8f9fa;
     --border-radius: 4px;
     --margin: 1.2rem;
     --gap: 1rem;
+}
+
+:root > * {
+    --md-primary-fg-color: var(--color-primary-foreground--light);
+    --md-primary-bg-color: var(--color-primary-background--light);
 }
 
 .center {

@@ -107,15 +107,17 @@ Si su sistema operativo es Windows, Docker Desktop se puede instalar con facilid
 
 ### Dockerfile {:#dockerfile}
 
-Docker emplea archivos, denominados *Dockerfile*, los cuales usan DSL (Domain Specific Language) para describir todas las instrucciones necesarias para crear una imagen de forma rápida [[5](#que-es-dockerfile)].
+Docker emplea archivos, denominados *Dockerfile*, los cuales usan DSL (Domain Specific Language) para describir todas las instrucciones necesarias para crear una imagen de forma rápida [[5](#what-is-docker)].
 
 ### Docker Image {:#docker-image}
 
-Es un archivo compuesto de múltiples capas, empleado para ejecutar un contenedor Docker [[5](#que-es-docker-image")]. Es un paquete de software ejecutable que contiene todo lo necesario para correr la aplicación. Esta imagen informa cómo un contenedor debe inicializarse, determinando qué software debe ejecutarse y de qué forma.
+Es un archivo compuesto de múltiples capas, empleado para ejecutar un 
+contenedor Docker [[5](#what-is-docker)]. Es un paquete de software ejecutable 
+que contiene todo lo necesario para correr la aplicación. Esta imagen informa cómo un contenedor debe inicializarse, determinando qué software debe ejecutarse y de qué forma.
 
 ### Docker Container {:#docker-container}
 
-Un contenedor Docker es una instancia *runtime* de una imagen Docker [[5](#que-es-docker-container")]. Contiene todo el kit requerido para una aplicación, y permite ser ejecutada de forma aislada.
+Un contenedor Docker es una instancia *runtime* de una imagen Docker [[5](#what-is-docker)]. Contiene todo el kit requerido para una aplicación, y permite ser ejecutada de forma aislada.
 
 ## Multiprocesamiento {:#multiprocessing}
 

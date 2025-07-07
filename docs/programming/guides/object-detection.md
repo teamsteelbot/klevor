@@ -15,7 +15,7 @@ Después de haber descargado el repositorio, debemos dirigirnos a la carpeta `de
 cd devices/raspberry-pi-5/src
 ```
 
-> [!NOTE]
+> [!WARNING]
 > Para que dicho comando funcione correctamente, la ruta debe ser relativa a la carpeta donde se encuentra el repositorio clonado. En caso de no estar en la carpeta raíz del repositorio, se debe modificar la ruta acorde a la ubicación del mismo.
 
 Posteriormente, nos movemos a la carpeta `yolo/scripts`:
@@ -55,7 +55,7 @@ Luego, ejecutamos el script `yolo/scripts/resize.py` para redimensionar las imá
 
 Posteriormente, se realizó la anotación de las imágenes, donde se etiquetaron los prismas con sus respectivos colores. Para ello, se utilizó la herramienta Label Studio, una herramienta de etiquetado de datos de código abierto que permite crear conjuntos de datos personalizados para el entrenamiento de modelos de aprendizaje automático [[1](#label-studio)].
 
-> [!NOTE]
+> [!WARNING]
 > Si el número de imágenes por anotar es muy grande, notaremos que la herramienta Label Studio arrojará un error `The number of files exceeded settings.DATA_UPLOAD_MAX_NUMBER_FILES`. Para solucionarlo, si Label Studio fue instalado como un paquete de Python, se puede modificar el archivo `settings.py` que se encuentra en la carpeta `label_studio/core/settings.py`, donde se debe cambiar el valor de `DATA_UPLOAD_MAX_NUMBER_FILES` a un número mayor al número de imágenes por anotar o `None` si se desea un número ilimitado. En caso de no encontrar este archivo, se puede buscar en la carpeta `site-packages/label_studio/core/settings.py` dentro del entorno virtual de Python donde fue instalado Label Studio.
 
 <div class="center">
@@ -111,7 +111,7 @@ alt="Vista frontal de la GPU Tesla L4 de NVIDIA" class="component-image">
     <i>Vista frontal de la GPU Tesla L4 de NVIDIA</i>
 </div>
 
-> [!NOTE]
+> [!IMPORTANT]
 > Durante esta sección se menciona la versión 11 de YOLO, pero, de la misma forma que se menciona el dataset **G** a fines didácticos, se puede utilizar cualquier versión de YOLO, así como cualquier dataset, ya que el proceso es el mismo. Sin embargo, se recomienda utilizar la versión 11 de YOLO, debido a que es la más reciente y cuenta con mejoras significativas en comparación con versiones anteriores.
 
 ## Conversión del Modelo {:#model-conversion}
@@ -129,7 +129,7 @@ Al momento de la instalación de la AI HAT+, ejecutamos el comando `hailortcli f
 Firmware Version: 4.20.0 (release,app,extended context switch buffer)
 ```
 
-Como podemos observar, en nuestro caso, la versión del firmware es 4.20.0, por lo que debemos asegurarnos de que el Dataflow Compiler, sea compatible con esta versión. Por ejemplo, debido a un cambio en el Dataflow Compiler para la versión 3.31.0, donde se emplean mecanismos distintos para la detección del error de forma predeterminada, las versiones viejas (previas a la 4.21.0) del HailoRT no serán capaces de ejecutar archivos HEF compilados por la nueva versión del DataFlow Compiler [[4](#2025-04-hailo")]. Recomendamos revisar la [Tabla de Compatibilidad](https://hailo.ai/developer-zone/documentation/hailo-sw-suite-2025-04/?sp_referrer=suite/versions_compatibility.html), para así poder tener conocimiento de las versiones de los paquetes que debemos instalar para que todos sean compatibles entre sí.
+Como podemos observar, en nuestro caso, la versión del firmware es 4.20.0, por lo que debemos asegurarnos de que el Dataflow Compiler, sea compatible con esta versión. Por ejemplo, debido a un cambio en el Dataflow Compiler para la versión 3.31.0, donde se emplean mecanismos distintos para la detección del error de forma predeterminada, las versiones viejas (previas a la 4.21.0) del HailoRT no serán capaces de ejecutar archivos HEF compilados por la nueva versión del DataFlow Compiler [[4](#2025-04-hailo)]. Recomendamos revisar la [Tabla de Compatibilidad](https://hailo.ai/developer-zone/documentation/hailo-sw-suite-2025-04/?sp_referrer=suite/versions_compatibility.html), para así poder tener conocimiento de las versiones de los paquetes que debemos instalar para que todos sean compatibles entre sí.
 
 Primeramente, visitamos la página oficial de Hailo, en el cual debemos crearnos una cuenta, iniciar sesión y luego nos dirigimos al apartado de desarrolladores. Dentro de esta sección, seleccionamos el apartado de descargas de software, y descargamos los siguientes paquetes necesarios [[2](#custom-dataset-medium)]:
 
@@ -137,10 +137,10 @@ Primeramente, visitamos la página oficial de Hailo, en el cual debemos crearnos
 - Paquete de Python (whl) de HailoRT, para la arquitectura donde está siendo ejecutado el Docker (en nuestro caso, x86_64), y la versión de Python del contenedor (de no ser modificado, debe ser la versión 3.10). Versión recomendada: 4.20.0.
 - Hailo Dataflow Compiler, para la arquitectura donde está siendo ejecutado el Docker (en nuestro caso, `x86_64`). Versión recomendada: 3.30.0.
 
-> [!NOTE]
+> [!IMPORTANT]
 > En el caso de emplear una GPU NVIDIA para la optimización del formato `.har`, también debemos instalar el [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html)
 
-> [!NOTE]
+> [!IMPORTANT]
 > En el caso de no conseguir uno de los paquetes, en el portal para descargar software de Hailo, se tienen dos formas para buscar los paquetes: `Latest releases` (o últimas versiones), y `Archive` (o archivados); el primero de ellos es el predeterminado. De no conseguir el respectivo paquete en `Latest releases`, este probablemente esté en `Archive`.
 
 Posteriormente, cambiamos de nuevo el directorio actual:
@@ -216,20 +216,19 @@ Instalamos todas las dependencias requeridas:
 pip install -e .
 ```
 
-> [!NOTE]
+> [!WARNING]
 > En el caso de obtener un error similar a:
-> ```
+> ```bash
 > ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.
 > tensorflow 2.12.0 requires numpy<1.24,>=1.22, but you have numpy 2.2.6 
 > which is incompatible.
 > hailo-dataflow-compiler 3.30.0 requires numpy==1.23.3, but you have numpy 2.
 > 2.6 which is incompatible.
 > ```
-> Debemos modificar el archivo ```setup.py``` que se encuentra dentro del 
-> repositorio, y en la línea 44, dentro de la función ```main```,
-> sustituimos ```"numpy"``` por ```"numpy==1.23.3"```, así como en la línea 46,
-> sustituimos ```"scipy"``` por ```"scipy==1.9.3"```. Reintentamos el
-> comando: ```pip install -e .```
+> Debemos modificar el archivo `setup.py` que se encuentra dentro del repositorio, y en la línea 44, dentro de la función `main`, sustituimos `"numpy"` por `"numpy==1.23.3"`, así como en la línea 46, sustituimos `"scipy"` por`"scipy==1.9.3"`. Reintentamos el comando: 
+> ```bash
+> pip install -e .
+> ```
 
 Evaluamos si los paquetes se han instalado correctamente con el siguiente comando: 
 ```bash

@@ -75,7 +75,7 @@ alt="Segunda capa, vista superior" class="vehicle-view-image">
     </div>
 </div>
 
-Esta segunda capa está dedicada a la alimentación y los [sensores ToF](../../electronic/components/old.md#sensor-tof-hiletgo) (Time of Flight) del robot.
+Esta segunda capa está dedicada a la alimentación y los [sensores ToF](../../electronic/components/previous.md#sensor-tof-hiletgo) (Time of Flight) del robot.
 
 Klevor consta de ocho sensores colocados estratégicamente para medir la proximidad en diferentes ángulos mientras se mueve, como se puede ver en las fotos del robot, los sensores están fijados en unos soportes que diseñamos en 3D y luego imprimimos. Tiene dos de estos en cada lateral, tres al frente (uno colocado horizontalmente y otros dos a los lados que están puestos a 15 grados respecto al sensor central) y uno ubicado en el centro de la parte trasera de Klevor. Todos estos se conectan a una protoboard en la parte superior de Klevor.
 

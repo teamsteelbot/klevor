@@ -1,7 +1,7 @@
 # Klevor
 
 <div class="center">
-    <img src="assets/images/logo/teamsteelbot.svg" alt="Logo del Equipo" 
+    <img src="assets/images/logo/teamsteelbot.png" alt="Logo del Equipo" 
 class="logo--team">
     <i>Logo del Equipo</i>
 </div>
@@ -40,7 +40,7 @@ class="picture--team">
             10. [INJORA 7KG 2065 Micro Servo](electronic/components/current.md#injora-7kg-2065-micro-servo)
             11. [9-Axis IMU Gyroscope GY-BNO085](electronic/components/current.md#gyroscope-gy-bno085)
         2. Previos
-            1. [HiLetgo Time-of-Flight Sensor VL53L0X](#sensor-tof-hiletgo)
+            1. [HiLetgo Time-of-Flight Sensor VL53L0X](electronic/components/previous.md#sensor-tof-hiletgo)
     2. Diagramas
         1. [Diagramas de Conexiones](electronic/diagrams/wiring.md#wiring-diagrams)
             1. [Prototipo 1](electronic/diagrams/wiring.md#prototype1)
@@ -105,4 +105,4 @@ class="picture--team">
     2. [Estructura del Repositorio](github.md#repository-structure)
 6. **[Vídeos](videos.md)**
     1. [Desafío sin Obstáculos](videos.md#without-obstacles-challenge)
-        1. [Parte 1](videos.md#without-obstacles-challenge-part-1)
+        1. [Parte 1](videos.md#without-obstacles-challenge-part1)
