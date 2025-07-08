@@ -1,12 +1,16 @@
 from argparse import ArgumentParser
 from multiprocessing import Event, Process, Queue
-from time import sleep
+
+import matplotlib as plt
 
 from ..opencv import OpenCV
 from ..args import Args
 from .multiprocessing import photographer_target
 from ..log.multiprocessing import  writer_target
 from ..log import Logger
+
+# Constants
+ATTEMPTS = 5
 
 if __name__ == "__main__":
     parser = ArgumentParser(
@@ -47,7 +51,9 @@ if __name__ == "__main__":
     try:
         # Wait indefinitely to keep the photographer running
         print("Photographer is running. Press Ctrl+C to stop.")
-        while True:
+
+        attempts = 0
+        while attempts < ATTEMPTS:
             # Simulate capturing an image every second
             capture_image_event.set()
             logger.info("Capturing image...")
@@ -57,8 +63,12 @@ if __name__ == "__main__":
             logger.info(f"Image captured: {image}")
 
             # Visualize the image
+            plt.imshow(image)
+            plt.title("Image from Photographer")
+            plt.axis('off')
+            plt.show()
 
-            sleep(1)
+            attempts += 1
 
     except KeyboardInterrupt:
         # Handle keyboard interrupt to stop the processes gracefully
