@@ -11,16 +11,19 @@ class Direction(Enum):
     NORTH = 1
     WEST = 2
     EAST = 3
-    NORTHWEST = 4
-    NORTHEAST = 5
-    SOUTHWEST = 6
-    SOUTHEAST = 7
-    WEST_NORTHWEST = 8
-    NORTH_NORTHWEST = 9
-    EAST_NORTHEAST = 10
-    NORTH_NORTHEAST = 11
-    WEST_SOUTHWEST = 12
-    EAST_SOUTHEAST = 13
+    SOUTH = 4
+    NORTHWEST = 5
+    NORTHEAST = 6
+    SOUTHWEST = 7
+    SOUTHEAST = 8
+    WEST_NORTHWEST = 9
+    NORTH_NORTHWEST = 10
+    EAST_NORTHEAST = 11
+    NORTH_NORTHEAST = 12
+    WEST_SOUTHWEST = 13
+    EAST_SOUTHEAST = 14
+    SOUTH_SOUTHWEST = 15
+    SOUTH_SOUTHEAST = 16
 
     def get_name(self) -> str:
         """
