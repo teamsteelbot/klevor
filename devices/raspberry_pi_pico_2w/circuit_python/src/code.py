@@ -3,7 +3,7 @@ from io import StringIO
 from time import monotonic
 from traceback import print_exception
 
-from board import (GP0, GP1, GP11, GP13, GP2, LED)
+from board import (GP0, GP1, GP10, GP14, GP2, LED)
 from busio import I2C
 
 from lib.bno08x import BNO08XHandler
@@ -11,7 +11,7 @@ from lib.enums import IncomingCategory, OutgoingCategory
 from lib.env import Env
 from lib.esc_motor import ESCMotorHandler
 from lib.led import LEDHandler
-from lib.message import IncomingMessage, OutgoingMessage
+from lib.message import IncomingMessage
 from lib.serial_communication import (
     SerialCommunication,
     SerialCommunicationError,
@@ -28,8 +28,8 @@ RECEIVING_MESSAGE_TIMEOUT = 1.0
 # Pins
 I2C_BUS = I2C(GP1, GP0)
 ESC_MOTOR_PIN = GP2
-SERVO_PIN = GP13
-SWITCH_PIN = GP11
+SERVO_PIN = GP10
+SWITCH_PIN = GP14
 
 # Robot's components handlers
 led = LEDHandler(led_pin=LED)
