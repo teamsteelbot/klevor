@@ -2,6 +2,7 @@ import subprocess
 from multiprocessing import Event, Queue, RLock
 from multiprocessing.synchronize import Event as EventCls
 from threading import Thread
+from types import NoneType
 from typing import Optional, final
 
 from .abstracts import RPLidarABC
@@ -49,7 +50,8 @@ class RPLidar(RPLidarABC, LoggerConsumerProtocol):
         server_messages_queue: Optional[Queue] = None,
         baudrate: int = RPLIDAR_C1_BAUDRATE,
         port: str = RPLIDAR_C1_PORT,
-        is_upside_down: bool = True
+        is_upside_down: bool = True,
+        angle_rotation: Optional[float] = None
     ):
         """
         Initialize the RPLidar.
@@ -65,6 +67,7 @@ class RPLidar(RPLidarABC, LoggerConsumerProtocol):
             baudrate (int): Baud rate for the serial communication.
             port (str): SerialCommunication port for the RPLidar.
             is_upside_down (bool): If True, the RPLidar is upside down, and angles will be adjusted accordingly.
+            angle_rotation (Optional[float]): Optional angle rotation to apply to the measures.
         """
         # Initialize the debug flag
         self.__debug = debug
@@ -104,6 +107,10 @@ class RPLidar(RPLidarABC, LoggerConsumerProtocol):
         # Check the type of is_upside_down
         is_instance(is_upside_down, bool)
         self.__is_upside_down = is_upside_down
+
+        # Check the type of angle translation
+        is_instance(angle_rotation, (float, NoneType))
+        self.__angle_translation = angle_rotation
 
         # Initialize measures dictionary
         self.__measures = {angle: Measure(angle * 1.0, 0.0, 0) for angle in
@@ -190,18 +197,30 @@ class RPLidar(RPLidarABC, LoggerConsumerProtocol):
         # Adjust the angle if the RPLidar is upside down
         angle = 360 - angle if self.__is_upside_down else angle
 
+        # Apply angle translation if provided
+        if self.__angle_translation:
+            angle += self.__angle_translation
+
+            if angle >= 360:
+                angle -= 360
+            elif angle < 0:
+                angle += 360
+
         # Floor the angle to a float with no decimal places
         angle = round(angle, 0)
 
+        # Normalize angle to be between 0 and 359
+        normalize_angle = int(angle) % 360
+
         # Check if the angle is already in the distances dictionary
-        measure = self.__measures.get(int(angle), None)
+        measure = self.__measures.get(normalize_angle, None)
         if measure and abs(measure.distance - distance) < DISTANCE_DIFF:
             if rotation:
                 self.__rotation = True
             return
 
-        measure = Measure(angle, distance, quality)
-        self.__measures[int(angle)] = measure
+        measure = Measure(normalize_angle, distance, quality)
+        self.__measures[normalize_angle] = measure
 
         # Send the measure to the server
         self.__server_dispatcher.broadcast_rplidar_measure(

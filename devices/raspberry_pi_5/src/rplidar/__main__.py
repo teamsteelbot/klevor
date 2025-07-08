@@ -64,7 +64,7 @@ if __name__ == "__main__":
     rplidar_process.start()
 
     try:
-        # Wait indefinitely to keep the serial communication running
+        # Wait indefinitely to keep the RPLidar running
         print("RPLidar is running. Press Ctrl+C to stop.")
         while True:
             sleep(1)  # Sleep to prevent busy-waiting
@@ -72,10 +72,10 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         # Handle keyboard interrupt to stop the processes gracefully
         print(
-            "KeyboardInterrupt received. Stopping RPLidar, server and writer process..."
+            "KeyboardInterrupt received. Stopping RPLidar, server and writer processes..."
         )
         logger.warning(
-            "KeyboardInterrupt received. Stopping RPLidar, server and writer process..."
+            "KeyboardInterrupt received. Stopping RPLidar, server and writer processes..."
         )
 
     except Exception as e:

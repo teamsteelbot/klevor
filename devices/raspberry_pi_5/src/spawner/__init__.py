@@ -1,4 +1,5 @@
 from multiprocessing import Event, Process, Queue, RLock, Value
+from typing import Optional
 
 from ..camera.multiprocessing import photographer_target
 from ..enums import Challenge
@@ -21,7 +22,14 @@ class Spawner:
     # Wait timeout for the stop event
     STOP_WAIT_TIMEOUT = 0.1
 
-    def __init__(self, debug: bool, yolo_version: str, movement: bool = True):
+    def __init__(
+        self,
+        debug: bool,
+        yolo_version: str,
+        movement: bool = True,
+        rplidar_is_upside_down: bool = False,
+        rplidar_angle_rotation: Optional[float] = None,
+    ):
         """
         Initialize the Spawner class.
 
@@ -29,11 +37,17 @@ class Spawner:
             debug (bool): Flag to indicate if the spawner is in debug mode.
             yolo_version (str): The version of YOLO to use for object detection.
             movement (bool): Flag to indicate if the pilot should handle movement.
+            rplidar_is_upside_down (bool): Flag to indicate if the RPLidar is upside down.
+            rplidar_angle_rotation (Optional[float]): Angle rotation for the RPLidar, if any.
         """
         # Initialize the flags
         self.__debug = debug
         self.__yolo_version = yolo_version
         self.__movement = movement
+
+        # Initialize the RPLidar parameters
+        self.__rplidar_is_upside_down = rplidar_is_upside_down
+        self.__rplidar_angle_rotation = rplidar_angle_rotation
 
         # Initialize the reentrant lock
         self.__rlock = RLock()
@@ -160,7 +174,11 @@ class Spawner:
                         self.__rplidar_measures_queue,
                         self.__start_event,
                         self.__stop_event,
-                        self.__writer_messages_queue)
+                        self.__writer_messages_queue),
+                    kwargs={
+                        'is_upside_down': self.__rplidar_is_upside_down,
+                        'angle_rotation': self.__rplidar_angle_rotation
+                    }
                 )
                 self.__rplidar_process.start()
 

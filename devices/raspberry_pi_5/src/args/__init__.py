@@ -367,3 +367,51 @@ class Args:
             bool: The value of the movement argument.
         """
         return self._get_attribute_from_args_dict(Flag.MOVEMENT)
+
+    def add_rplidar_is_upside_down_argument(
+        self,
+        default: bool = False
+    ) -> None:
+        """
+        Add RPLidar upside down argument to the parser.
+
+        Args:
+            default (bool): Default value for the RPLidar upside down argument.
+        """
+        self._add_boolean_argument(Flag.RPLIDAR_IS_UPSIDE_DOWN, default=default)
+
+    def get_rplidar_is_upside_down(self) -> bool:
+        """
+        Get the RPLidar upside down argument from the parser.
+
+        Returns:
+            bool: The value of the RPLidar upside down argument.
+        """
+        return self._get_attribute_from_args_dict(Flag.RPLIDAR_IS_UPSIDE_DOWN)
+
+    def add_rplidar_angle_rotation_argument(
+        self,
+        default: float = 0.0
+    ) -> None:
+        """
+        Add RPLidar angle rotation argument to the parser.
+
+        Args:
+            default (float): Default value for the RPLidar angle rotation
+            argument.
+        """
+        self._add_non_boolean_argument(
+            Flag.RPLIDAR_ANGLE_ROTATION,
+            type=float,
+            default=default,
+            help='RPLidar angle rotation in degrees'
+        )
+
+    def get_rplidar_angle_rotation(self) -> float:
+        """
+        Get the RPLidar angle rotation argument from the parser.
+
+        Returns:
+            float: The value of the RPLidar angle rotation argument.
+        """
+        return self._get_attribute_from_args_dict(Flag.RPLIDAR_ANGLE_ROTATION)

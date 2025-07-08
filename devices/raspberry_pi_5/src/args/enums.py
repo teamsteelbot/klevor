@@ -15,6 +15,8 @@ class Flag(Enum):
     IP = 6
     PORT = 7
     MOVEMENT = 8
+    RPLIDAR_IS_UPSIDE_DOWN = 9
+    RPLIDAR_ANGLE_ROTATION = 10
 
     @property
     def parsed_name(self) -> str:

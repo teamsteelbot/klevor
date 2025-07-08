@@ -3,6 +3,7 @@ from functools import partial
 from multiprocessing import Event, Queue, RLock
 from multiprocessing.synchronize import Event as EventCls
 from queue import Empty
+from types import NoneType
 from typing import Optional, final, Dict
 
 import numpy as np
@@ -135,7 +136,7 @@ class Hailo(HailoABC, LoggerConsumerProtocol):
         self.__multiprocessing = multiprocessing
 
         # Initialize the input type
-        is_instance(input_type, (str, type(None)))
+        is_instance(input_type, (str, NoneType,))
         self.__input_type = input_type
 
         # Initialize the output type

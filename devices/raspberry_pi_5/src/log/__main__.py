@@ -3,12 +3,12 @@ from multiprocessing import Event, Process, Queue
 from time import sleep
 
 from . import Logger
-from .args import Args
+from ..args import Args
 from .multiprocessing import writer_target
 
 if __name__ == "__main__":
     parser = ArgumentParser(
-        description="Script to test the Witer."
+        description="Script to test the Writer."
     )
     args = Args(parser)
     args.add_debug_argument()

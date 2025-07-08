@@ -19,7 +19,8 @@ def rplidar_target(
     server_messages_queue: Optional[Queue] = None,
     baudrate: int = RPLIDAR_C1_BAUDRATE,
     port: str = RPLIDAR_C1_PORT,
-    is_upside_down: bool = True
+    is_upside_down: bool = True,
+    angle_rotation: Optional[float] = 0.0,
 ) -> None:
     """
     Target function for a multiprocessing process that handles the RPLidar.
@@ -35,6 +36,7 @@ def rplidar_target(
         baudrate (int): Baud rate for the serial communication.
         port (str): SerialCommunication port for the RPLidar.
         is_upside_down (bool): If True, the RPLidar is upside down, and angles will be adjusted accordingly.
+        angle_rotation (Optional[float]): Angle rotation to apply to the measures.
     """
     print(
         "Initializing RPLidar in multiprocessing mode. Process ID: ",
@@ -52,7 +54,8 @@ def rplidar_target(
         server_messages_queue=server_messages_queue,
         baudrate=baudrate,
         port=port,
-        is_upside_down=is_upside_down
+        is_upside_down=is_upside_down,
+        angle_rotation=angle_rotation,
     )
 
     # Run the RPLidar

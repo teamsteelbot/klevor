@@ -52,10 +52,10 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         # Handle keyboard interrupt to stop the processes gracefully
         print(
-            "KeyboardInterrupt received. Stopping websocket server and writer process..."
+            "KeyboardInterrupt received. Stopping websocket server and writer processes..."
         )
         logger.warning(
-            "KeyboardInterrupt received. Stopping websocket server and writer process."
+            "KeyboardInterrupt received. Stopping websocket server and writer processes."
         )
 
 
