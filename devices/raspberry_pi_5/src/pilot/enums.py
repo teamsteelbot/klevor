@@ -4,9 +4,9 @@ from ..utils import map_string_to_enum
 
 
 @unique
-class Direction(Enum):
+class CardinalDirection(Enum):
     """
-    Enum to represent the different directions that RPLidar can face.
+    Enum to represent the different cardinal directions that the RPLidar can face.
     """
     NORTH = 1
     WEST = 2
@@ -35,13 +35,22 @@ class Direction(Enum):
         return self.name.lower()
 
     @classmethod
-    def from_string(cls, direction_str: str) -> 'Direction':
+    def from_string(cls, direction_str: str) -> 'CardinalDirection':
         """
         Convert a string to a Direction enum value.
 
         Args:
             direction_str (str): The string representation of the direction.
         Returns:
-            Direction: The corresponding Direction enum value.
+            CardinalDirection: The corresponding Direction enum value.
         """
         return map_string_to_enum(direction_str.upper(), cls)
+
+class TurnDirection(Enum):
+    """
+    Enum to represent the direction of a turn.
+    """
+
+    LEFT = 1
+    RIGHT = 2
+    NONE = 3

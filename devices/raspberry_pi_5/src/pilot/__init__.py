@@ -29,7 +29,7 @@ from ..enums import Challenge
 from ..log import Logger
 from ..log.decorators import log_on_error
 from ..log.protocols import LoggerConsumerProtocol
-from .enums import Direction
+from .enums import CardinalDirection, TurnDirection
 from ..serial_communication.dispatcher import Dispatcher as SerialDispatcher
 from ..utils.decorators import ignore_sigint
 
@@ -140,6 +140,9 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
         self.__motor_speed = 0.0
         self.__servo_angle = SERVO_CENTER_ANGLE
         self.__movement = movement
+
+        # Initialize the turn flags
+        self.__turn_direction = TurnDirection.NONE
         self.__is_turning = False
 
         # Initialize the updated flags
@@ -147,7 +150,7 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
         self.__servo_angle_updated = False
 
         # Initialize the average distances dictionary
-        self.__average_distances = {direction: 0.0 for direction in Direction}
+        self.__average_distances = {direction: 0.0 for direction in CardinalDirection}
 
     @final
     @property
@@ -257,9 +260,9 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
 
         # Calculate the opposite angle
         angle_diff = abs(self.__servo_angle - SERVO_CENTER_ANGLE)
-        if self._is_servo_to_right(angle):
+        if self._is_servo_to_right():
             self._set_servo_to_left(angle_diff)
-        elif self._is_servo_to_left(angle):
+        elif self._is_servo_to_left():
             self._set_servo_to_right(angle_diff)
 
     @final
@@ -289,7 +292,7 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
         # Calculate the average north, west and east distances
         self.__average_distances = self._calculate_average_distance(
             measures,
-            *Direction
+            *CardinalDirection
         )
 
     def _calculate_sleep_delay(
@@ -333,13 +336,13 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
     
     def _get_distance(
         self,
-        direction: Direction,
+        direction: CardinalDirection,
     ) -> float:
         """
         Get the distance for a specific direction from the measures.
 
         Args:
-            direction (Direction): The direction to get the distance for.
+            direction (CardinalDirection): The direction to get the distance for.
         Returns:
             float: The distance for the specified direction.
         """
@@ -365,11 +368,11 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
 
             # Get the average distances from the RPLidar
             self._update_rplidar_average_distances()
-            west_avg_dist = self._get_distance(Direction.WEST)
-            east_avg_dist = self._get_distance(Direction.EAST)
-            north_avg_dist = self._get_distance(Direction.NORTH)
-            north_northeast_avg_dist = self._get_distance(Direction.NORTH_NORTHEAST)
-            north_northwest_avg_dist = self._get_distance(Direction.NORTH_NORTHWEST)
+            west_avg_dist = self._get_distance(CardinalDirection.WEST)
+            east_avg_dist = self._get_distance(CardinalDirection.EAST)
+            north_avg_dist = self._get_distance(CardinalDirection.NORTH)
+            north_northeast_avg_dist = self._get_distance(CardinalDirection.NORTH_NORTHEAST)
+            north_northwest_avg_dist = self._get_distance(CardinalDirection.NORTH_NORTHWEST)
             self.__logger.debug(
                 f"North: {north_avg_dist}, West: {west_avg_dist}, East: {east_avg_dist}"
             )
@@ -407,7 +410,7 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
 
                     # Get the average distances again
                     self._update_rplidar_average_distances()
-                    north_avg_dist = self.__average_distances[Direction.NORTH]
+                    north_avg_dist = self.__average_distances[CardinalDirection.NORTH]
 
                     if north_avg_dist >= SAFETY_FRONT_DISTANCE_STOP_THRESHOLD:
                         # Stop the motor
@@ -476,7 +479,7 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
 
                     # Get the average distances
                     self._update_rplidar_average_distances()
-                    north_avg_dist = self.__average_distances[Direction.NORTH]
+                    north_avg_dist = self.__average_distances[CardinalDirection.NORTH]
 
                     if north_avg_dist <= STOP_DISTANCE_THRESHOLD:
                         # Set the completed event
@@ -519,16 +522,32 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
             else:
                 self._set_motor_speed(MOTOR_SPEED_NORMAL)
 
-                # Check if the robot should turn left or right based on the side distances
-                if east_avg_dist >= SIDE_DISTANCE_THRESHOLD:
-                    self._set_servo_to_right(SERVO_BIG_TURN_ANGLE)
-                    self.__is_turning = True
-                    rplidar_turns_counter += 1
+                # Check if the turn direction is set
+                if self.__turn_direction == TurnDirection.RIGHT:
+                    if east_avg_dist >= FRONT_START_TURN_DISTANCE_THRESHOLD:
+                        self._set_servo_to_right(SERVO_BIG_TURN_ANGLE)
+                        self.__is_turning = True
+                        rplidar_turns_counter += 1
 
-                elif west_avg_dist >= SIDE_DISTANCE_THRESHOLD:
-                    self._set_servo_to_left(SERVO_BIG_TURN_ANGLE)
-                    self.__is_turning = True
-                    rplidar_turns_counter += 1
+                elif self.__turn_direction == TurnDirection.LEFT:
+                    if west_avg_dist >= FRONT_START_TURN_DISTANCE_THRESHOLD:
+                        self._set_servo_to_left(SERVO_BIG_TURN_ANGLE)
+                        self.__is_turning = True
+                        rplidar_turns_counter += 1
+
+                elif self.__turn_direction == TurnDirection.NONE:
+                    # Check if the robot should turn left or right based on the side distances
+                    if east_avg_dist >= SIDE_DISTANCE_THRESHOLD:
+                        self._set_servo_to_right(SERVO_BIG_TURN_ANGLE)
+                        self.__turn_direction = TurnDirection.RIGHT
+                        self.__is_turning = True
+                        rplidar_turns_counter += 1
+
+                    elif west_avg_dist >= SIDE_DISTANCE_THRESHOLD:
+                        self._set_servo_to_left(SERVO_BIG_TURN_ANGLE)
+                        self.__turn_direction = TurnDirection.LEFT
+                        self.__is_turning = True
+                        rplidar_turns_counter += 1
 
             # Sleep for the calculated delay
             self._sleep(start_time)
@@ -565,6 +584,22 @@ class Pilot(PilotABC, LoggerConsumerProtocol):
 
             # Set the stop event
             self.__stop_event.set()
+
+            # Clear the motor speed, servo angle and turning flag
+            self.__motor_speed = 0.0
+            self.__servo_angle = SERVO_CENTER_ANGLE
+
+            # Clear the turn flags
+            self.__turn_direction = TurnDirection.NONE
+            self.__is_turning = False
+
+            # Clear the updated flags
+            self.__motor_speed_updated = False
+            self.__servo_angle_updated = False
+
+            # Clear the average distances dictionary
+            self.__average_distances = {direction: 0.0 for direction in
+                                        CardinalDirection}
 
         # Log
         self.__logger.info("Stopped.")

@@ -10,7 +10,7 @@ from .constants import (
 )
 from ..common.measure import Measure
 from ..log import Logger
-from .enums import Direction
+from .enums import CardinalDirection
 
 
 class PilotABC(ABC):
@@ -132,7 +132,7 @@ class PilotABC(ABC):
     def _calculate_average_distance_from_direction(
         cls,
         measures: Dict[int, Measure],
-        direction: Direction,
+        direction: CardinalDirection,
         width: int = ANGLE_WIDTH
     ) -> float:
         """
@@ -141,7 +141,7 @@ class PilotABC(ABC):
         Args:
             measures (Dict[int, Measure]): Dictionary of measures indexed by angle.
             width (int): The sum of the angles to consider with both sides and the middle angle.
-            direction (Direction): Direction to calculate the average distance for.
+            direction (CardinalDirection): Direction to calculate the average distance for.
         Returns:
             float: The average distance for the specified angles.
         Raises:
@@ -164,14 +164,14 @@ class PilotABC(ABC):
     def _calculate_average_distance(
         cls,
         measures: Dict[int, Measure],
-        *directions: Direction,
-    ) -> Dict[Direction, float]:
+        *directions: CardinalDirection,
+    ) -> Dict[CardinalDirection, float]:
         """
         Calculate the average distances for the specified directions.
 
         Args:
             measures (Dict[int, Measure]): Dictionary of measures indexed by angle.
-            *directions (Direction): Directions to calculate the average distances for.
+            *directions (CardinalDirection): Directions to calculate the average distances for.
         Returns:
             Dict[Direction, float]: Dictionary with directions as keys and their average distances as values.
         """

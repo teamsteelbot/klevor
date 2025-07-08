@@ -1,4 +1,4 @@
-from .enums import Direction
+from .enums import CardinalDirection
 
 # Motor speed range
 MOTOR_SPEED_RANGE = (-1.0, 1.0)
@@ -39,20 +39,20 @@ ANGLE_WIDTH = 5
 
 # Map directions to angles
 DIRECTION_TO_ANGLE = {
-    Direction.NORTH: 0,
-    Direction.NORTH_NORTHEAST: 22.5,
-    Direction.NORTHEAST: 45,
-    Direction.EAST_NORTHEAST: 67.5,
-    Direction.EAST: 90,
-    Direction.EAST_SOUTHEAST: 112.5,
-    Direction.SOUTHEAST: 135,
-    Direction.SOUTH_SOUTHEAST: 157.5,
-    Direction.SOUTH: 180,
-    Direction.SOUTH_SOUTHWEST: 202.5,
-    Direction.SOUTHWEST: 225,
-    Direction.WEST_SOUTHWEST: 247.5,
-    Direction.WEST: 270,
-    Direction.WEST_NORTHWEST: 292.5,
-    Direction.NORTHWEST: 315,
-    Direction.NORTH_NORTHWEST: 337.5,
+    CardinalDirection.NORTH: 0,
+    CardinalDirection.NORTH_NORTHEAST: 22.5,
+    CardinalDirection.NORTHEAST: 45,
+    CardinalDirection.EAST_NORTHEAST: 67.5,
+    CardinalDirection.EAST: 90,
+    CardinalDirection.EAST_SOUTHEAST: 112.5,
+    CardinalDirection.SOUTHEAST: 135,
+    CardinalDirection.SOUTH_SOUTHEAST: 157.5,
+    CardinalDirection.SOUTH: 180,
+    CardinalDirection.SOUTH_SOUTHWEST: 202.5,
+    CardinalDirection.SOUTHWEST: 225,
+    CardinalDirection.WEST_SOUTHWEST: 247.5,
+    CardinalDirection.WEST: 270,
+    CardinalDirection.WEST_NORTHWEST: 292.5,
+    CardinalDirection.NORTHWEST: 315,
+    CardinalDirection.NORTH_NORTHWEST: 337.5,
 }
