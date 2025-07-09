@@ -75,6 +75,11 @@
     width: 200px;
 }
 
+.logo--sponsor {
+    max-width: 100%;
+    width: 500px;
+}
+
 .logo--team {
     max-width: 100%;
     width: 300px;

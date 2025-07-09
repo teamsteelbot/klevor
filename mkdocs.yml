@@ -87,6 +87,8 @@ nav:
             - Code: programming/code/raspberry-pi-pico-2w/code.md
   - GitHub: github.md
   - Videos: videos.md
+  - Sponsors: sponsors.md
+  - Contacto: contact.md
 extra_css:
   - stylesheets/extra.css
 extra:

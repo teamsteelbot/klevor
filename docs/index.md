@@ -128,3 +128,5 @@ class="picture--team">
 6. **[Vídeos](videos.md)**
     1. [Desafío sin Obstáculos](videos.md#without-obstacles-challenge)
         1. [Parte 1](videos.md#without-obstacles-challenge-part1)
+7. **[Patrocinadores](sponsors.md)**
+8. **[Contacto](contact.md)**
