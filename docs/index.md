@@ -46,7 +46,12 @@ class="picture--team">
             1. [Versión 1](electronic/diagrams/wiring.md#version1)
             2. [Versión 2](electronic/diagrams/wiring.md#version2)
 3. **Mecánica**
-    1. Prototipos
+   1. Piezas
+        1. [Piezas 3D Comunes](mechanical/parts/common.md#common-3d-parts)
+        2. [Piezas del Prototipo 1](mechanical/parts/prototype1.md#prototype1)
+        3. [Piezas del Prototipo 2](mechanical/parts/prototype2.md#prototype2)
+        4. [Piezas del Prototipo 3](mechanical/parts/prototype3.md#prototype3)
+   2. Prototipos
         1. [Prototipo 1](mechanical/prototypes/prototype1.md#prototype1)
             1. [Primera Capa](mechanical/prototypes/prototype1.md#first-layer)
             2. [Segunda Capa](mechanical/prototypes/prototype1.md#second-layer)
