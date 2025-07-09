@@ -43,9 +43,8 @@ class="picture--team">
             1. [HiLetgo Time-of-Flight Sensor VL53L0X](electronic/components/previous.md#sensor-tof-hiletgo)
     2. Diagramas
         1. [Diagramas de Conexiones](electronic/diagrams/wiring.md#wiring-diagrams)
-            1. [Prototipo 1](electronic/diagrams/wiring.md#prototype1)
-            2. [Prototipo 2](electronic/diagrams/wiring.md#prototype2)
-            3. [Prototipo 3](electronic/diagrams/wiring.md#prototype3)
+            1. [Versión 1](electronic/diagrams/wiring.md#version1)
+            2. [Versión 2](electronic/diagrams/wiring.md#version2)
 3. **Mecánica**
     1. Prototipos
         1. [Prototipo 1](mechanical/prototypes/prototype1.md#prototype1)
@@ -74,7 +73,9 @@ class="picture--team">
     3. Diagramas
         1. [Diagramas de Flujo](programming/diagrams/flowcharts.md#flowcharts)
             1. [Desafío sin Obstáculos](programming/diagrams/flowcharts.md#without-obstacles-challenge)
+                1. [Versión 1](programming/diagrams/flowcharts.md#without-obstacles-challenge-version1)
             2. [Desafío con Obstáculos](programming/diagrams/flowcharts.md#obstacles-challenge)
+                1. [Versión 1](programming/diagrams/flowcharts.md#obstacles-challenge-version1)
     4. [Glosario de Términos](programming/glossary.md#glossary)
         1. [Machine Learning](programming/glossary.md#machine-learning)
         2. [Detección de Objetos](programming/glossary.md#object-detection)

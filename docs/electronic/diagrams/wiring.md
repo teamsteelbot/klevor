@@ -1,25 +1,17 @@
 # Diagramas de Conexiones {:#wiring-diagrams}
 
-## Prototipo 1 {:#prototype1}
+## Versión 1: Empleada en el Prototipo 1 {:#version1}
 
 <div class="center">
-    <img src="../../assets/images/github/schemes/wiring/prototype1-wiring.png"
-alt="Diagrama de Conexiones del Prototipo 1" class="wiring-diagram-image">
-    <i>Diagrama de Conexiones del Prototipo 1</i>
+    <img src="../../assets/images/github/schemes/wiring/version1-wiring.png"
+alt="Versión 1 del diagrama de Conexiones" class="wiring-diagram-image">
+    <i>Versión 1 del diagrama de Conexiones</i>
 </div>
 
-## Prototipo 2 {:#prototype2}
+## Versión 2: Empleada en el Prototipo 2 y 3 {:#version2}
 
 <div class="center">
-    <img src="../../assets/images/github/schemes/wiring/prototype2-wiring.png"
-alt="Diagrama de Conexiones del Prototipo 2" class="wiring-diagram-image">
-    <i>Diagrama de Conexiones del Prototipo 2</i>
-</div>
-
-## Prototipo 3 {:#prototype3}
-
-<div class="center">
-    <img src="../../assets/images/github/schemes/wiring/prototype3-wiring.png"
-alt="Diagrama de Conexiones del Prototipo 3" class="wiring-diagram-image">
-    <i>Diagrama de Conexiones del Prototipo 3</i>
+    <img src="../../assets/images/github/schemes/wiring/version2-wiring.png"
+alt="Versión 2 del diagrama de Conexiones" class="wiring-diagram-image">
+    <i>Versión 2 del diagrama de Conexiones</i>
 </div>
