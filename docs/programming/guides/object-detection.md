@@ -26,13 +26,13 @@ cd yolo/scripts
 Creamos un entorno virtual de Python con los siguientes comandos:
 
 - Si el sistema operativo es Windows:
-    ```
+    ```cmd
     python -m venv .venv
     ./.venv/Scripts/activate
     pip install -r requirements.txt
     ```
 - Si el sistema operativo es Linux:
-    ```
+    ```bash
     python -m venv .venv
     source .venv/bin/activate
     pip install -r requirements.txt

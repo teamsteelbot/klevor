@@ -88,15 +88,18 @@ class="picture--team">
             3. [Docker Container](programming/glossary.md#docker-container)
         6. [Multiprocesamiento](programming/glossary.md#multiprocessing)
     5. Guías
-        1. [CircuitPython](programming/guides/circuit-python.md#circuit-python)
+        1. [Guía de MkDocs](programming/guides/mkdocs.md#mkdocs)
+            1. [Instalación](programming/guides/mkdocs.md#installation)
+            2. [Servir la Documentación](programming/guides/mkdocs.md#serve-documentation)
+        2. [Guía de CircuitPython](programming/guides/circuit-python.md#circuit-python)
             1. [Instalación](programming/guides/circuit-python.md#installation)
-        2. [MicroPython](programming/guides/micro-python.md#micro-python)
+        3. [Guía de MicroPython](programming/guides/micro-python.md#micro-python)
             1. [Instalación](programming/guides/micro-python.md#installation)
-        3. [Raspberry Pi](programming/guides/raspberry-pi.md#raspberry-pi)
+        4. [Guía de Raspberry Pi](programming/guides/raspberry-pi.md#raspberry-pi)
             1. [Instalación de Raspberry Pi OS](programming/guides/raspberry-pi.md#raspberry-pi-os-installation)
             2. [Instalación de la Cámara](programming/guides/raspberry-pi.md#camera-installation)
             3. [Instalación de Raspberry Pi AI HAT+](programming/guides/raspberry-pi.md#raspberry-pi-ai-hat-plus-installation)
-        4. [Detección de Objetos](programming/guides/object-detection.md#object-detection)
+        5. [Guía de Detección de Objetos](programming/guides/object-detection.md#object-detection)
             1. [Creación del Modelo](programming/guides/object-detection.md#model-creation)
             2. [Entrenamiento del Modelo](programming/guides/object-detection.md#model-training)
             3. [Conversión del Modelo](programming/guides/object-detection.md#model-conversion)
@@ -130,3 +133,23 @@ class="picture--team">
         1. [Parte 1](videos.md#without-obstacles-challenge-part1)
 7. **[Patrocinadores](sponsors.md)**
 8. **[Contacto](contact.md)**
+
+## Patrocinantes
+
+<div class="center">
+    <img src="assets/images/sponsors/viajes-giorgio.png" alt="Logo de Viajes Giorgio" 
+class="logo--sponsor">
+    <i>Logo de Viajes Giorgio</i>
+</div>
+
+<div class="center">
+    <img src="assets/images/sponsors/nathalys-star.png" alt="Logo de Nathaly's Star" 
+class="logo--sponsor">
+    <i>Logo de Nathaly's Star</i>
+</div>
+
+<div class="center">
+    <img src="assets/images/sponsors/steel-ca.jpg" alt="Logo de Steel C.A." 
+class="logo--sponsor">
+    <i>Logo de Steel C.A.</i>
+</div>
