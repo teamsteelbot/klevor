@@ -69,6 +69,7 @@ nav:
         - Guía de CircuitPython: programming/guides/circuit-python.md
         - Guía de MicroPython: programming/guides/micro-python.md
         - Guía de Raspberry Pi: programming/guides/raspberry-pi.md
+        - Guía de Raspberry Pi Pico 2W: programming/guides/raspberry-pi-pico-2w.md
         - Guía de Detección de Objetos: programming/guides/object-detection.md
     - Referencia del Código:
         - Raspberry Pi 5:
@@ -91,6 +92,7 @@ nav:
         - Raspberry Pi Pico 2W:
             - Lib: programming/code/raspberry-pi-pico-2w/lib.md
             - Code: programming/code/raspberry-pi-pico-2w/code.md
+  - Software: software.md
   - GitHub: github.md
   - Videos: videos.md
   - Sponsors: sponsors.md

@@ -8,7 +8,7 @@ alt="Logo de MicroPython" class="logo--3rd-party">
     <i>Logo de MicroPython</i>
 </div>
 
-Por defecto, la Raspberry Pi Pico 2 WH viene con MicroPython preinstalado. Sin embargo, si deseas instalar una versión diferente o actualizarla, puedes seguir estos pasos [[1](#micro-python-docs)][[2](#raspberry-pi-micro-python-docs)]:
+Por defecto, la Raspberry Pi Pico 2 WH viene con MicroPython preinstalado. Sin embargo, si deseas instalar una versión diferente o actualizarla, puedes seguir estos pasos [[1](#micro-python-docs)], [[2](#raspberry-pi-micro-python-docs)]:
 
 1. Descargar la última versión de MicroPython para Raspberry Pi Pico desde el sitio oficial: [MicroPython](https://micropython.org/download/rp2-pico-w/).
 2. Presionar el botón BOOTSEL en la Raspberry Pi Pico 2 WH y conectarla a la computadora mediante un cable USB (mantener presionado el botón hasta que se reconozca la Pico como un dispositivo de almacenamiento).
