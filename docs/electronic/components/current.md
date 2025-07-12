@@ -10,14 +10,13 @@ class="component-image">
     <i>Raspberry Pi 5</i>
 </div>
 
-Equipada con un procesador ARM Cortex-A76 de 64 bits a 2.4 GHz 
-[[1](#raspberry-pi-5-16gb-8gb-4gb-2gb-tiendatec)], [[2](#raspberry-pi-16gb-ram)], [[3](#raspberry-pi-5-datasheet)]. La Raspberry Pi 5 es nuestro controlador principal de elección, decidimos usar a la Raspberry Pi 5 debido a múltiples factores, entre ellos:
+Equipada con un procesador ARM Cortex-A76 de 64 bits a 2.4 GHz [[1](#raspberry-pi-5-16gb-8gb-4gb-2gb-tiendatec)][[2](#raspberry-pi-16gb-ram)][[3](#raspberry-pi-5-datasheet)]. La Raspberry Pi 5 es nuestro controlador principal de elección, decidimos usar a la Raspberry Pi 5 debido a múltiples factores, entre ellos:
 
 - **Compatibilidad**: Existen muchos componentes de Klevor (como la Camera Module 3 Wide) que a su vez pertenecen al ecosistema Raspberry, lo que hace que implementarlos a la Raspberry Pi 5 no requiera tanto esfuerzo.
 
-- **Potencia**: La Raspberry Pi 5 es uno de los controladores más potentes actualmente, gracias a esto, funciones demandantes como lo es el procesamiento de imágenes en tiempo real, son fácilmente realizables por una Raspberry Pi 5.
+- **Potencia**: La Raspberry Pi 5 es uno de los computadores portátiles más potentes actualmente, gracias a esto, funciones demandantes como lo es el procesamiento de imágenes en tiempo real, son fácilmente realizables por una Raspberry Pi 5.
 
-- **Portabilidad**: La Raspberry Pi 5 destaca entre los controladores, ya que no es una computadora bastante pesada, apenas llegando a los 60 g, hace que incorporarlo a Klevor sea una opción prácticamente segura.
+- **Portabilidad**: La Raspberry Pi 5 destaca entre los controladores, ya que no es una computadora bastante pesada, apenas llegando a los 60 g, hace que incorporarlo a Klevor sea una opción prácticamente segura [[2](#raspberry-pi-16gb-ram)].
 
 | **Medida** | **Valor** |
 |------------|-----------|
@@ -34,7 +33,7 @@ Pi Camera Module 3" class="component-image">
     <i>Raspberry Pi Camera Module 3</i>
 </div>
 
-La Raspberry Pi Camera Module 3 Wide es nuestra elección de preferencia, como los demás componentes Raspberry, esta se destaca por ser bastante ligera y portátil, ya que, pues es una cámara bastante pequeña, midiendo apenas 25 mm × 24 mm × 12.4 mm y pesando 4 gramos, sin perder absolutamente ni una pizca de eficiencia, porque puede grabar a 1536 x 864p120, ahora bien, decidimos utilizar la versión Wide por su campo de visión horizontal de 102 grados [[4](#raspberry-pi-camera-module-3-geek-factory)], porque nos permite tener un rango de visión óptimo para poder detectar todos los obstáculos de la pista [[5](#raspberry-pi-camera-documentation)].
+La Raspberry Pi Camera Module 3 Wide es nuestra elección de preferencia, como los demás componentes Raspberry, esta se destaca por ser bastante ligera y portátil, ya que, pues es una cámara bastante pequeña, midiendo apenas 25 mm × 24 mm × 12.4 mm y pesando 4 gramos, sin perder absolutamente ni una pizca de eficiencia, porque puede grabar a 1536 x 864p120, ahora bien, decidimos utilizar la versión Wide por su campo de visión horizontal de 102 grados [[4](#raspberry-pi-camera-module-3-geek-factory)][[5](#raspberry-pi-camera-documentation)], porque nos permite tener un rango de visión óptimo para poder detectar todos los obstáculos de la pista.
 
 | **Medida** | **Valor** |
 |------------|-----------|
@@ -53,7 +52,7 @@ Pi AI HAT+ 26 TOPS" class="component-image">
 
 Si bien la Raspberry Pi 5 es capaz de procesar imágenes en tiempo real, tuvimos en cuenta que necesitaba un poco más de poder, por lo cual decidimos incorporar la AI HAT+ a la Raspberry Pi 5 para poder alcanzar el nivel de procesamiento necesario.
 
-El Raspberry Pi AI HAT+ tiene dos versiones, una de 13 Trillones de Operaciones por Segundo (TOPS) y otra de 26 TOPS [[6](#kit-ai-ai-hat-plus-raspberry-pi-kubii)], [[7](#raspberry-pi-ai-hat-documentation)]. Como se menciona en el índice, Klevor posee un Raspberry Pi AI HAT+ de 26 TOPS, gracias a este procesador de imágenes, Klevor puede analizar hasta 30 imágenes por segundo con una resolución de 640 px × 640 px.
+El Raspberry Pi AI HAT+ tiene dos versiones, una de 13 Trillones de Operaciones por Segundo (TOPS) y otra de 26 TOPS [[6](#kit-ai-ai-hat-plus-raspberry-pi-kubii)][[7](#raspberry-pi-ai-hat-documentation)]. Como se menciona en el índice, Klevor posee un Raspberry Pi AI HAT+ de 26 TOPS, gracias a este procesador de imágenes, Klevor puede analizar hasta 30 imágenes por segundo con una resolución de 640 px × 640 px.
 
 | **Medida** | **Valor** |
 |------------|-----------|
@@ -70,7 +69,7 @@ Pico 2 W" class="component-image">
   <i>Raspberry Pi Pico 2 W</i>
 </div>
 
-Construido sobre el chip RP2350 [[8](#raspberry-pi-pico-2-2w-2h-2wh-kubii)], [[9](#raspberry-pi-pico-2-wh-datasheet)], la Raspberry Pi Pico 2 W es el microcontrolador de Klevor, además de ser un microcontrolador ligero y pequeño, este chip permite una fácil integración con el resto de los componentes Raspberry, debido a que establecer una comunicación serial con una Raspberry Pi 5 es mucho más fácil de hacer con una Raspberry Pi Pico que con algún otro microcontrolador de distinto fabricante.
+Construido sobre el chip RP2350 [[8](#raspberry-pi-pico-2-2w-2h-2wh-kubii)][[9](#raspberry-pi-pico-2-wh-datasheet)], la Raspberry Pi Pico 2 W es el microcontrolador de Klevor, además de ser un microcontrolador ligero y pequeño, este chip permite una fácil integración con el resto de los componentes Raspberry, debido a que establecer una comunicación serial con una Raspberry Pi 5 es mucho más fácil de hacer con una Raspberry Pi Pico que con algún otro microcontrolador de distinto fabricante.
 
 Además de ofrecer una frecuencia de procesamiento de 150 Mhz, superior a varios microcontroladores de similar tamaño, como, por ejemplo, el Arduino Nano el cual cuenta con una frecuencia de procesamiento de 20 Mhz.
 
@@ -90,7 +89,7 @@ La versión con el módulo de WiFi integrado ofrece una gran ventaja a la hora d
     <i>RPLiDAR C1</i>
 </div>
 
-El RPLiDAR C1 es un escáner de rango láser de 360 grados, el cual puede detectar superficies que están hasta 12 metros de distancia, su punto ciego es de tan solo 5 centímetros alrededor del mismo [[10](#rplidar-c1-robot-shop)], [[11](#rplidar-c1-datasheet)], todos estos factores hacen que el RPLiDAR C1 sea una gran opción para poder guíar a Klevor por la pista.
+El RPLiDAR C1 es un escáner de rango láser de 360 grados, el cual puede detectar superficies que están hasta 12 metros de distancia, su punto ciego es de tan solo 5 centímetros alrededor del mismo [[10](#rplidar-c1-robot-shop)][[11](#rplidar-c1-datasheet)], todos estos factores hacen que el RPLiDAR C1 sea una gran opción para poder guíar a Klevor por la pista.
 
 Este RPLiDAR C1 permite a Klevor poder identificar exactamente dónde está ubicado en la pista, gracias a la gran cantidad de datos que este LiDAR ofrece.
 
@@ -118,7 +117,7 @@ class="component-image">
     <i>Shargeek Storm 2</i>
 </div>
 
-El Shargeek Storm 2 es un Power Bank, con múltiples características interesantes [[12](#shargeek-storm-2-amazon)], [[13](#shargeek-storm-2-100w-power-bank)] como:
+El Shargeek Storm 2 es un Power Bank, con múltiples características interesantes [[12](#shargeek-storm-2-amazon)][[13](#shargeek-storm-2-100w-power-bank)] como:
 
 - 25600 mAh de almacenamiento.
 - Salida ajustable de hasta 100 W.

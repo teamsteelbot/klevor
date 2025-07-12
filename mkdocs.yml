@@ -95,7 +95,7 @@ nav:
   - Software: software.md
   - GitHub: github.md
   - Videos: videos.md
-  - Sponsors: sponsors.md
+  - Patrocinadores: sponsors.md
   - Contacto: contact.md
 extra_css:
   - stylesheets/extra.css
@@ -107,12 +107,25 @@ extra:
     - icon: fontawesome/brands/instagram
       link: https://instagram.com/teamsteelbotsa
       name: Equipo Steel Bot en Instagram
-copyright: Copyright &copy; 2025 Team Steel Bot
+    - icon: fontawesome/brands/telegram
+      link: https://t.me/ralvarezdev
+      name: Telegram del Capitan del Equipo Steel Bot
+    - icon: fontawesome/solid/paper-plane
+      link: mailto:<ralvarezdev@protonmail.com>
+      name: Enviar un correo al Capitán del Equipo Steel Bot
+copyright:
+  Copyright &copy; 2025 Team Steel Bot. All rights reserved.
+  Special thanks for Viajes Giorgio, Nathaly's Star and Steel C.A. for 
+  sponsoring our team.
 markdown_extensions:
   - attr_list
   - admonition
   - pymdownx.details
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - nl2br
 plugins:
   - search

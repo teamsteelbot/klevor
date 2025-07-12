@@ -26,3 +26,16 @@ class="picture--team">
     <i>De izquierda a derecha: Sebastián Álvarez, Ramón Álvarez y Otto 
 Piñero.</i>
 </div>
+
+<div class="image-horizontal-container">
+    <div class="center">
+        <img src="assets/images/logo/uru.png" alt="Logo de la Universidad Rafael Urdaneta" 
+    class="logo--education">
+        <i>Logo de la Universidad Rafael Urdaneta</i>
+    </div>
+    <div class="center">
+        <img src="assets/images/logo/colegio-salto-angel.png" alt="Logo del Colegio Salto Ángel" 
+    class="logo--education">
+        <i>Logo del Colegio Salto Ángel</i>
+    </div>
+</div>

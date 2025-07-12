@@ -8,10 +8,17 @@ class="logo--team">
 
 Bienvenidos a la documentación de Klevor, un robot autónomo diseñado para participar en el Desafío Abierto y el Desafío Cerrado de la competencia de robótica de la World Robot Olympiad 2025, en la categoría Futuros Ingenieros. Esta documentación contiene toda la información necesaria para entender su funcionamiento, los dispositivos utilizados, el código implementado, los componentes y más. Esperamos que la misma sea útil tanto para los jueces como para cualquier persona interesada en aprender sobre este proyecto.
 
-<div class="center">
-    <img src="assets/images/logo/wro.webp" alt="Logo de la World Robot Olympiad" 
-class="logo--3rd-party">
-    <i>Logo de la World Robot Olympiad</i>
+<div class="image-horizontal-container">
+    <div class="center">
+        <img src="assets/images/logo/wro.webp" alt="Logo de la World Robot Olympiad" 
+    class="logo--education">
+        <i>Logo de la World Robot Olympiad</i>
+    </div>
+    <div class="center">
+        <img src="assets/images/logo/mincyt.png" alt="Logo del MINCYT" 
+    class="logo--education">
+        <i>Logo del MINCYT</i>
+    </div>
 </div>
 
 A continuación se presenta un índice con los enlaces a las diferentes secciones de la documentación. Cada sección contiene información detallada sobre los aspectos técnicos y prácticos del robot, incluyendo la mecánica, el código, los dispositivos utilizados, los componentes, los esquemas y diagramas, las fotos del equipo y los vídeos de Klevor en acción. Además, se incluyen recursos externos para ampliar la información y facilitar la comprensión de los conceptos presentados.
@@ -79,6 +86,7 @@ class="picture--team">
         1. [Diagramas de Flujo](programming/diagrams/flowcharts.md#flowcharts)
             1. [Desafío sin Obstáculos](programming/diagrams/flowcharts.md#without-obstacles-challenge)
                 1. [Versión 1](programming/diagrams/flowcharts.md#without-obstacles-challenge-version1)
+                2. [Versión 2](programming/diagrams/flowcharts.md#without-obstacles-challenge-version2)
             2. [Desafío con Obstáculos](programming/diagrams/flowcharts.md#obstacles-challenge)
                 1. [Versión 1](programming/diagrams/flowcharts.md#obstacles-challenge-version1)
     4. [Glosario de Términos](programming/glossary.md#glossary)
