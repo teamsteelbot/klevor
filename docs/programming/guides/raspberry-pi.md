@@ -56,7 +56,7 @@ alt="Raspberry Pi AI HAT+ 26 TOPS" class="component-image">
    <i>Raspberry Pi AI HAT+ 26 TOPS</i>
 </div>
 
-Para la instalación, empleamos las dos guías de la documentación oficial de Raspberry Pi, donde se explica cómo instalar el Hailo AI HAT+ y cómo instalar el software necesario para su funcionamiento [[4](#getting-started-raspberry-pi)], [[5](#ai-hat-plus-raspberry-pi)].
+Para la instalación, empleamos las dos guías de la documentación oficial de Raspberry Pi, donde se explica cómo instalar el Hailo AI HAT+ [[4](#getting-started-raspberry-pi)] y cómo instalar el software necesario para su funcionamiento [[5](#ai-hat-plus-raspberry-pi)].
 
 1. Verificamos que la Raspberry Pi 5 esté actualizada, sino la actualizamos con el siguiente comando:
     ```bash
