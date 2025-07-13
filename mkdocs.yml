@@ -93,9 +93,10 @@ nav:
         - Raspberry Pi Pico 2W:
             - Lib: programming/code/raspberry-pi-pico-2w/lib.md
             - Code: programming/code/raspberry-pi-pico-2w/code.md
-  - Software: software.md
   - GitHub: github.md
   - Videos: videos.md
+  - Software: software.md
+  - Gadgets: gadgets.md
   - Patrocinadores: sponsors.md
   - Contacto: contact.md
 extra_css:

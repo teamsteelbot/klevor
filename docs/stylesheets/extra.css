@@ -26,6 +26,11 @@
     width: 350px;
 }
 
+.gadget-image {
+    max-width: 100%;
+    width: 400px;
+}
+
 .wiring-diagram-image {
     max-width: 100%;
     width: 850px;

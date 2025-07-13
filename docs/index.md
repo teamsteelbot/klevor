@@ -153,11 +153,27 @@ class="picture--team">
 6. **[Vídeos](videos.md)**
     1. [Desafío sin Obstáculos](videos.md#without-obstacles-challenge)
         1. [Parte 1](videos.md#without-obstacles-challenge-part1)
-7. **[Patrocinadores](sponsors.md)**
+7. **[Software](software.md#software)**
+    1. [Programación](software.md#programming)
+        1. [Label Studio](software.md#label-studio)
+        2. [Google Colab](software.md#google-colab)
+        3. [Visual Studio Code](software.md#visual-studio-code)
+        4. [PyCharm](software.md#pycharm)
+        5. [Thonny](software.md#thonny)
+    2. [Diseño](software.md#design)
+        1. [Canva](software.md#canva)
+        2. [Mermaid](software.md#mermaid)
+        3. [Draw.io](software.md#draw-io)
+        4. [Fusion 360](software.md#fusion-360)
+    3. [Planificación](software.md#planning)
+        1. [Jira](software.md#jira)
+8. [Gadgets](gadgets.md)
+    1. [Multímetro Digital con Puerto USB-C 4-30 V 0-12 A](gadgets.md#usbc-c-tester)
+9. **[Patrocinadores](sponsors.md)**
     1. [Viajes Giorgio](sponsors.md#viajes-giorgio)
     2. [Nathaly's Star](sponsors.md#nathalys-star)
     3. [Steel C.A.](sponsors.md#steel-ca)
-8. **[Contacto](contact.md)**
+10. **[Contacto](contact.md)**
 
 ## Patrocinadores {#sponsors}
 
