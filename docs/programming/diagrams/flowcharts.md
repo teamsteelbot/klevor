@@ -16,7 +16,7 @@ Como se puede apreciar, Klevor siempre intenta cumplir una serie de pasos:
 - Mientras está girando, empieza a leer los datos del giroscopio, cuando detecte que su orientación ha cambiado al menos 90° con respecto a como inició a girar, empieza a avanzar hacia adelante, sumándole 1 a su contador de giros, en caso contrario, es decir, que no ha girado 90°, simplemente sigue girando.
 - Tras completar los 12 giros, Klevor simplemente avanza hasta que detecte que la distancia al frente sea de alrededor de 1.25 m, tras esto simplemente para.
 
-### Versión 2: Empleada en el Prototipo 3 {:#without-obstacles-challenge-version2}
+### Versión 2: Empleada en el Prototipo 3 - Presente {:#without-obstacles-challenge-version2}
 
 <div class="center">
     <img src="../../assets/images/github/schemes/flowcharts/without-obstacles-challenge/version2-flowchart.png" 

@@ -52,6 +52,7 @@ class="picture--team">
         1. [Diagramas de Conexiones](electronic/diagrams/wiring.md#wiring-diagrams)
             1. [Versión 1](electronic/diagrams/wiring.md#version1)
             2. [Versión 2](electronic/diagrams/wiring.md#version2)
+            3. [Versión 3](electronic/diagrams/wiring.md#version3)
 3. **Mecánica**
    1. Piezas
         1. [Piezas 3D Comunes](mechanical/parts/common.md#common-3d-parts)
