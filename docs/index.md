@@ -118,7 +118,8 @@ class="picture--team">
             1. [Instalación de Raspberry Pi OS](programming/guides/raspberry-pi.md#raspberry-pi-os-installation)
             2. [Instalación de la Cámara](programming/guides/raspberry-pi.md#camera-installation)
             3. [Instalación de Raspberry Pi AI HAT+](programming/guides/raspberry-pi.md#raspberry-pi-ai-hat-plus-installation)
-        5. [Guía de Raspberry Pi Pico 2W](programming/guides/raspberry-pi-pico-2w.md)
+        5. [Guía de Raspberry Pi Pico 2 W](programming/guides/raspberry-pi-pico-2w.md#raspberry-pi-pico-2w)
+            1. [Configuración](programming/guides/raspberry-pi-pico-2w.md#configuration)
         6. [Guía de Detección de Objetos](programming/guides/object-detection.md#object-detection)
             1. [Creación del Modelo](programming/guides/object-detection.md#model-creation)
             2. [Entrenamiento del Modelo](programming/guides/object-detection.md#model-training)
@@ -160,19 +161,25 @@ class="picture--team">
 ## Patrocinadores {#sponsors}
 
 <div class="center">
-    <img src="assets/images/sponsors/viajes-giorgio.png" alt="Logo de Viajes Giorgio" 
+    <a href="sponsors.html#viajes-giorgio">
+        <img src="assets/images/sponsors/viajes-giorgio.png" alt="Logo de Viajes Giorgio" 
 class="logo--sponsor">
+    </a>
     <i>Logo de Viajes Giorgio</i>
 </div>
 
 <div class="center">
-    <img src="assets/images/sponsors/nathalys-star.png" alt="Logo de Nathaly's Star" 
+    <a href="sponsors.html#nathalys-star">
+        <img src="assets/images/sponsors/nathalys-star.png" alt="Logo de Nathaly's Star" 
 class="logo--sponsor">
+    </a>
     <i>Logo de Nathaly's Star</i>
 </div>
 
 <div class="center">
-    <img src="assets/images/sponsors/steel-ca.jpg" alt="Logo de Steel C.A." 
+    <a href="sponsors.html#steel-ca">
+        <img src="assets/images/sponsors/steel-ca.jpg" alt="Logo de Steel C.A." 
 class="logo--sponsor">
+    </a>
     <i>Logo de Steel C.A.</i>
 </div>
