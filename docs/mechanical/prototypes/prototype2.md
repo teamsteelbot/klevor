@@ -92,7 +92,3 @@ La parte superior cambió drásticamente en cuanto a diseño, los cambios que hi
 - **Soporte Raspberry Pi Camera 3**: Luego de probar qué ángulo de colocación era el mejor para la cámara decidimos hacer un soporte completamente fijo. Aunque pensamos cambiarlo más adelante.
 
 Decidimos eliminar también la tercera capa que tenía el primer prototipo, ya que pudimos resumir todos los componentes en una única superficie.
-
-Cabe destacar que todos nuestros diseños 3D fueron hechos en el programa "Fusion360". Fusion360 es un programa de Autodesk, que se utiliza para el diseño y la fabricación de productos. Es muy versátil para dibujantes, ingenieros, fabricantes y para la creación de equipos, ya que tiene funciones de renderizado, diseño, pesaje de componentes, diseño de PCB, simulaciones, modelado de forma libre, etc.
-
-Elegimos este programa porque es una solución "todo en uno" que combina el diseño, la fabricación, la ingeniería y el diseño de PCB, todo esto asistido por computadora, lo que hace todo mucho más cómodo.

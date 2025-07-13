@@ -1,4 +1,4 @@
-# Klevor
+# Klevor {:#klevor}
 
 <div class="center">
     <img src="assets/images/logo/teamsteelbot.png" alt="Logo del Equipo" 
@@ -29,7 +29,7 @@ class="picture--team">
     <i>Team Steel Bot en la competencia regional del Salto Ángel</i>
 </div>
 
-## Índice
+## Índice {#index}
 
 1. **[Nosotros](about.md)**
 2. **Electrónica**
@@ -152,7 +152,7 @@ class="picture--team">
     3. [Steel C.A.](sponsors.md#steel-ca)
 8. **[Contacto](contact.md)**
 
-## Patrocinantes
+## Patrocinadores {#sponsors}
 
 <div class="center">
     <img src="assets/images/sponsors/viajes-giorgio.png" alt="Logo de Viajes Giorgio" 
