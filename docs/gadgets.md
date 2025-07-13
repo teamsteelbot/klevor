@@ -1,4 +1,4 @@
-# Gadgets
+# Gadgets {:#gadgets}
 
 ## Multímetro Digital con Puerto USB-C 4-30 V 0-12 A {:#usb-c-tester}
 

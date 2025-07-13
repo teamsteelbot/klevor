@@ -1,10 +1,10 @@
-# Software {:software}
+# Software {:#software}
 
 Aquí se encuentran todos los programas que utilizamos como Team Steel Bot para poder desarrollar a Klevor.
 
-## Programación {:programming}
+## Programación {:#programming}
 
-### Label Studio {:label-studio}
+### Label Studio {:#label-studio}
 
 <div class="center">
     <img src="assets/images/logo/label-studio.png" alt="Logo de Label Studio" 
@@ -16,7 +16,7 @@ class="logo--3rd-party">
 
 En el caso de Klevor, este programa se utilizó para [remarcar](programming/guides/object-detection.md#model-creation) dónde están los bloques en las fotos de entrenamiento para que así, después de dejar el modelo entrenando un rato (ya sea de manera local o en la nube), este pueda reconocer los bloques por sí solo.
 
-### Google Colab {:google-colab}
+### Google Colab {:#google-colab}
 
 <div class="center">
     <img src="assets/images/logo/google-colab.png" alt="Logo de Google Colab" 
@@ -28,7 +28,7 @@ Como se mencionó anteriormente, un modelo de Inteligencia Artificial debe ser e
 
 En el caso de Klevor, utilizamos esta plataforma para poder [entrenar el modelo YOLO](programming/guides/object-detection.md#model-training) que se mencionó anteriormente, mediante el uso de una GPU Nvidia A100, la cual es una de las más potentes del mercado, lo que nos permitió entrenar el modelo en un tiempo relativamente corto por un costo muy bajo.
 
-### Visual Studio Code {:visual-studio-code}
+### Visual Studio Code {:#visual-studio-code}
 
 <div class="center">
     <img src="assets/images/logo/visual-studio-code.png" alt="Logo de Visual Studio Code" class="logo--3rd-party">
@@ -39,7 +39,7 @@ En el caso de Klevor, utilizamos esta plataforma para poder [entrenar el modelo 
 
 En el caso de Klevor, nosotros utilizamos Visual Studio Code principalmente en la Raspberry Pi 5, como en los computadores del equipo menos potentes, ya que este programa es más ligero que otros programas de desarrollo, como PyCharm, y permite trabajar con múltiples lenguajes de programación, lo que lo hace ideal para el desarrollo de Klevor.
 
-### PyCharm {:pycharm}
+### PyCharm {:#pycharm}
 
 <div class="center">
     <img src="assets/images/logo/pycharm.png" alt="Logo de PyCharm" 
@@ -51,7 +51,7 @@ class="logo--3rd-party">
 
 En nuestro caso, empleamos PyCharm para verificar y depurar con más profundida el código de Klevor, ya que este programa cuenta con herramientas avanzadas de depuración y análisis de código, lo que nos permitió identificar y corregir errores en el código de manera más eficiente.
 
-### Thonny {:thonny}
+### Thonny {:#thonny}
 
 <div class="center">
     <img src="assets/images/logo/thonny.png" alt="Logo de Thonny" 
@@ -61,9 +61,9 @@ class="logo--3rd-party">
 
 [Thonny](https://thonny.org/) es otro programa de desarrollo integrado, utilizado principalmente para poder ejecutar código directamente en la Raspberry Pi Pico 2 W, tanto para probar, como para utilizarlo en los Desafíos. Cabe destacar que, a diferencia de las anteriores soluciones, Thonny es un IDE diseñado específicamente para principiantes en Python, lo que lo hace más fácil de usar y entender para aquellos que están empezando a aprender el lenguaje. Además, Thonny tiene una interfaz más simple y menos abrumadora que PyCharm o Visual Studio Code, así como integra funcionalidades específicas para trabajar con microcontroladores, en nuestro caso, la Raspberry Pi Pico 2 W.
 
-## Diseño {:design}
+## Diseño {:#design}
 
-### Canva {:canva}
+### Canva {:#canva}
 
 <div class="center">
     <img src="assets/images/logo/canva.png" alt="Logo de Canva" 
@@ -73,7 +73,7 @@ class="logo--3rd-party">
 
 [Canva](https://www.canva.com/) es una plataforma de diseño en línea, la cual te permite diseñar cualquier cosa en 2D, decidimos utilizar Canva principalmente para la elaboración de los diagramas de conexiones y diagramas de flujo, como una solución rápida y efectiva para la documentación, sin embargo, notamos que nuestros diagramas eran muy complejos y tomaban mucho tiempo de hacer, por lo que cambiamos a otras soluciones en línea.
 
-### Mermaid {:mermaid}
+### Mermaid {:#mermaid}
 
 <div class="center">
     <img src="assets/images/logo/mermaid.png" alt="Logo de Mermaid" 
@@ -83,7 +83,7 @@ class="logo--3rd-party">
 
 Después de no lograr los resultados esperados con Canva, decidimos optar por [Mermaid](https://www.mermaidchart.com/), el cual es un programa open-source (de código abierto) que se especializa principalmente en la creación de diagramas con texto, con un sistema parecido a Markdown, con el objetivo de elaborar los diagramas de flujo.
 
-### Draw.io {:draw-io}
+### Draw.io {:#draw-io}
 
 <div class="center">
     <img src="assets/images/logo/draw.io.png" alt="Logo de Draw.io" 
@@ -93,7 +93,7 @@ class="logo--3rd-party">
 
 [Draw.io](https://www.drawio.com/) es una página web que permite la creación de diagramas en línea, con la posibilidad de que varios usuarios lo puedan modificar al mismo tiempo, con una interfaz muy similar a la de Microsoft Visio, pero con la ventaja de que es completamente gratuita y open-source (de código abierto). Decidimos utilizar Draw.io para la creación de los diagramas de conexiones y esquemas eléctricos, ya que nos permitió crear diagramas más complejos y detallados, además de ser más fácil de usar que Canva.
 
-### Fusion 360 {:fusion-360}
+### Fusion 360 {:#fusion-360}
 
 <div class="center">
     <img src="assets/images/logo/fusion-360.png" alt="Logo de Fusion 360" 
@@ -105,9 +105,9 @@ class="logo--3rd-party">
 
 Elegimos este programa porque es una solución "todo en uno" que combina el diseño, la fabricación, la ingeniería y el diseño de PCB, todo esto asistido por computadora, lo que hace todo mucho más cómodo.
 
-## Planificación {:planning}
+## Planificación {:#planning}
 
-### Jira {:jira}
+### Jira {:#jira}
 
 <div class="center">
     <img src="assets/images/logo/jira.png" alt="Logo de Jira" 

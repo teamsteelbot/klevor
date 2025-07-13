@@ -59,12 +59,12 @@ class="picture--team">
             2. [Versión 2](electronic/diagrams/wiring.md#version2)
             3. [Versión 3](electronic/diagrams/wiring.md#version3)
 3. **Mecánica**
-   1. Piezas
+    1. Piezas
         1. [Piezas 3D Comunes](mechanical/parts/common.md#common-3d-parts)
         2. [Piezas del Prototipo 1](mechanical/parts/prototype1.md#prototype1)
         3. [Piezas del Prototipo 2](mechanical/parts/prototype2.md#prototype2)
         4. [Piezas del Prototipo 3](mechanical/parts/prototype3.md#prototype3)
-   2. Prototipos
+    2. Prototipos
         1. [Prototipo 1](mechanical/prototypes/prototype1.md#prototype1)
             1. [Primera Capa](mechanical/prototypes/prototype1.md#first-layer)
             2. [Segunda Capa](mechanical/prototypes/prototype1.md#second-layer)
@@ -114,7 +114,7 @@ class="picture--team">
             1. [Instalación](programming/guides/circuit-python.md#installation)
         3. [Guía de MicroPython](programming/guides/micro-python.md#micro-python)
             1. [Instalación](programming/guides/micro-python.md#installation)
-        4. [Guía de Raspberry Pi 5](programming/guides/raspberry-pi-5.md#raspberry-pi)
+        4. [Guía de Raspberry Pi 5](programming/guides/raspberry-pi-5.md#raspberry-pi-5)
             1. [Instalación de Raspberry Pi OS](programming/guides/raspberry-pi-5.md#raspberry-pi-os-installation)
             2. [Instalación de la Cámara](programming/guides/raspberry-pi-5.md#camera-installation)
             3. [Instalación de Raspberry Pi AI HAT+](programming/guides/raspberry-pi-5.md#raspberry-pi-ai-hat-plus-installation)
@@ -168,7 +168,7 @@ class="picture--team">
     3. [Planificación](software.md#planning)
         1. [Jira](software.md#jira)
 8. [Gadgets](gadgets.md)
-    1. [Multímetro Digital con Puerto USB-C 4-30 V 0-12 A](gadgets.md#usbc-c-tester)
+    1. [Multímetro Digital con Puerto USB-C 4-30 V 0-12 A](gadgets.md#usb-c-tester)
 9. **[Patrocinadores](sponsors.md)**
     1. [Viajes Giorgio](sponsors.md#viajes-giorgio)
     2. [Nathaly's Star](sponsors.md#nathalys-star)
