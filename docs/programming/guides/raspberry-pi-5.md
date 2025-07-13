@@ -1,11 +1,11 @@
-# Raspberry Pi {:#raspberry-pi}
+# Raspberry Pi 5 {:#raspberry-pi-5}
 
 ## Instalación de Raspberry Pi OS {:#raspberry-pi-os-installation}
 
 <div class="center">
-    <img src="../../assets/images/components/raspberry-pi-5.png" alt="Raspberry Pi 5" 
-class="component-image">
-    <i>Raspberry Pi 5</i>
+    <img src="../../assets/images/logo/raspberry-pi.png" alt="Logo de Raspberry Pi" 
+class="logo--3rd-party">
+    <i>Logo de Raspberry Pi</i>
 </div>
 
 Raspberry Pi OS es el sistema operativo oficial para las Raspberry Pi, basado en Debian Linux, y es ampliamente utilizado para proyectos de programación y robótica debido a su facilidad de uso y amplia comunidad de soporte [[1](#raspberry-pi-os)]. A continuación, se detallan los pasos para instalarlo en una Raspberry Pi:
@@ -123,13 +123,139 @@ Para la instalación, empleamos las dos guías de la documentación oficial de R
     Part Number: <N/A>
     Product Name: <N/A>
     ```
+    
+## Configuración de la Raspberry Pi {:#raspberry-pi-configuration}
+
+<div class="center">
+    <img src="../../assets/images/components/raspberry-pi-5.png" alt="Raspberry Pi 5"
+class="component-image">
+    <i>Raspberry Pi 5</i>
+</div>
+
+Para configurar la Raspberry Pi, primero conectamos la Raspberry Pi a un monitor, teclado y ratón.
+
+Luego, encendemos la Raspberry Pi y esperar a que se inicie el sistema operativo. 
+
+Después, abrimos una terminal y ejecutar el siguiente comando para actualizar el sistema operativo:
+```bash
+sudo apt update && sudo apt upgrade -y
+```
+
+Clonamos el repositorio en el caso de que no se haya realizado aún. Puedes ver las distintas formas de clonar el repositorio en la sección referente al [GitHub](../../github.md#repository).
+
+Navegamos al directorio del repositorio clonado, en el caso de haberlo clonado en la carpeta de Documentos, el comando sería:
+```bash
+cd ~/Documents/klevor
+```
+
+Cambiamos el directorio actual a `devices/raspberry_pi_5` para acceder al código específico de la Raspberry Pi 5:
+```bash
+cd devices/raspberry_pi_5
+```
+
+Configuramos el entorno virtual de Python. Para ello, ejecuta el siguiente comando:
+
+- Si el sistema operativo es Windows:
+    ```cmd
+    python -m venv .venv
+    .\.venv\Scripts\activate
+    ```
+- Si el sistema operativo es Linux o macOS:
+    ```bash
+    python3 -m venv .venv
+    source .venv/bin/activate
+    ```
+
+Instalamos las dependencias necesarias para el proyecto ejecutando el siguiente comando:
+```bash
+pip install -r requirements.txt
+```
+
+En el caso de no tener configurado la Raspberry Pi Pico 2 W, se recomienda seguir su respectiva [guía de configuración](../../programming/guides/raspberry-pi-pico-2w.md#configuration) para poder utilizarla como controlador del robot. Al igual que, en el caso de no haber generado el modelo para la detección de obstáculos, se recomienda seguir la [guía de configuración del modelo](../../programming/guides/object-detection.md#object-detection) para poder utilizarlo con la Raspberry Pi 5.
+
+### Configurar el Startup Service {:#startup-service}
+
+Para que el robot se inicie automáticamente al encender la Raspberry Pi, es necesario configurar un servicio de inicio. 
+
+Para ello, nos aseguramos primero de que el script de Shell `run.sh` sea ejecutable, para lo cual ejecutamos el siguiente comando:
+```bash
+chmod +x run.sh
+```
+
+> [!NOTE]
+> Necesitamos estar en el directorio `devices/raspberry_pi_5` para que el comando anterior funcione correctamente.
+
+Posteriormente, creamos un archivo de servicio en el directorio `/etc/systemd/system/` con el nombre `klevor.service` con el siguiente comando:
+```bash
+sudo nano /etc/systemd/system/klevor.service
+```
+
+En el editor de texto, pegamos el siguiente contenido:
+
+```ini
+[Unit]
+Description=Klevor Startup Service
+After=multi-user.target
+
+[Service]
+User=pi
+ExecStart=/home/pi/Documents/klevor/devices/raspberry_pi_5/run.sh
+WorkingDirectory=/home/pi/Documents/klevor/devices/raspberry_pi_5
+StandardOutput=inherit
+StandardError=inherit
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+```
+
+> [!NOTE]
+> Reemplazamos `user` por el nombre de usuario de la Raspberry Pi, que por defecto es `pi`.
+> Así mismo, reemplazamos `/home/pi/Documents/klevor/devices/raspberry_pi_5/run.sh` con la ruta completa al script `run.sh` que se encuentra en el directorio del repositorio clonado. De igual forma, ajustamos la ruta del `WorkingDirectory` al directorio donde se encuentra el script `run.sh`.
+
+Guardamos los cambios y salimos del editor de texto (en nano, presionamos `Ctrl + X`, luego `Y` para confirmar los cambios y finalmente `Enter`).
+
+Luego, recargamos los servicios del sistema con el siguiente comando:
+```bash
+sudo systemctl daemon-reload
+```
+
+Finalmente, habilitamos el servicio para que se inicie automáticamente al arrancar la Raspberry Pi con el siguiente comando:
+```bash
+sudo systemctl enable klevor.service
+```
+
+> [!NOTE]
+> Si en algún momento necesitas detener el servicio, puedes hacerlo con el siguiente comando:
+> ```bash
+> sudo systemctl stop klevor.service
+> ```
+
+Reiniciamos la Raspberry Pi para que los cambios surtan efecto. A partir de ahora, el robot se iniciará automáticamente al encender la Raspberry Pi.
+
+> [!IMPORTANT]
+> Por la lógica del código, el robot no se moverá hasta que sea pulsado el botón o switch de encendido, como se indica en el diagrama de conexiones del robot. Esto es para evitar que el robot se mueva accidentalmente al encender la Raspberry Pi. Puedes ver el diagrama de conexiones en la sección de [Electrónica](../../electronic/diagrams/wiring.md#wiring-diagrams).
+
+> [!IMPORTANT]
+> En el caso de que creas que el robot no se haya iniciado correctamente, puedes revisar el estado del servicio con el siguiente comando:
+> ```bash
+> sudo systemctl status klevor.service
+> ```
+> 
+> Así mismo, puedes ejecutar el código directamente sin necesidad de configurar el servicio de inicio, para lo cual, simplemente ejecuta el siguiente comando:
+> ```bash
+> run.sh
+> ```
+> 
+> Esto iniciará el robot y podrás ver los mensajes de depuración en la terminal. Si todo funciona correctamente, deberías ver mensajes indicando que el robot está listo para recibir comandos.
+> Si deseas detener el robot, puedes presionar `Ctrl + C` en la terminal donde se está ejecutando el script `run.sh`. 
 
 # Referencias Bibliográficas
 
 1. *Raspberry Pi OS*. (2025). Raspberry Pi. <a id="raspberry-pi-os" href="https://www.raspberrypi.com/software/">https://www.raspberrypi.com/software/</a>
 
 2. *Raspberry Pi Connect*. (2025). Raspberry Pi. <a id="raspberry-pi-connect" href="https://www.raspberrypi.com/documentation/remote-access/raspberry-pi-connect.html">https://www.raspberrypi.com/documentation/remote-access/raspberry-pi-connect.html</a>
-
+   
 3. *Camera*. (2025). Raspberry Pi. <a id="camera-docs" href="https://www.raspberrypi.com/documentation/computers/camera.html">https://www.raspberrypi.com/documentation/computers/camera.html</a>
 
 4. *AI Kit and AI HAT+ software*. (2025). Raspberry Pi. <a id="getting-started-raspberry-pi" href="https://www.raspberrypi.com/documentation/computers/ai.html#getting-started">https://www.raspberrypi.com/documentation/computers/ai.html#getting-started</a>
