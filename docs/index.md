@@ -34,7 +34,9 @@ class="picture--team">
 1. **[Nosotros](about.md)**
 2. **Electrónica**
     1. Componentes
-        1. Actuales
+        1. [Previos](electronic/components/previous.md#previous-components-list)
+            1. [HiLetgo Time-of-Flight Sensor VL53L0X](electronic/components/previous.md#sensor-tof-hiletgo)
+        2. [Actuales](electronic/components/current.md#current-components-list)
             1. [Raspberry Pi 5](electronic/components/current.md#raspberry-pi-5)
             2. [Raspberry Pi Camera Module 3 Wide](electronic/components/current.md#raspberry-pi-camera-module-3-wide)
             3. [Raspberry Pi AI HAT+ (26 TOPS)](electronic/components/current.md#raspberry-pi-ai-hat-26-tops)
@@ -46,8 +48,11 @@ class="picture--team">
             9. [URGENEX 7.4V Battery](electronic/components/current.md#urgenex-7-4v-battery)
             10. [INJORA 7KG 2065 Micro Servo](electronic/components/current.md#injora-7kg-2065-micro-servo)
             11. [9-Axis IMU Gyroscope GY-BNO085](electronic/components/current.md#gyroscope-gy-bno085)
-        2. Previos
-            1. [HiLetgo Time-of-Flight Sensor VL53L0X](electronic/components/previous.md#sensor-tof-hiletgo)
+        3. [Futuros](electronic/components/future.md#future-components-list)
+            1. [Motor 540](electronic/components/future.md#motor-540)
+            2. [ESC para Motores 540/550 2-3s 60 A](electronic/components/future.md#esc-for-540-550-motors-2-3s-60-a)
+            3. [UGREEN Nexode Power Bank 12000mAh 100W PD PPS](electronic/components/future.md#ugreen-nexode-power-bank-12000mah-100w-pd-pps)
+            4. [USB-C QC PD3.0 Trigger 5V/9V/12V/15V/20V 5A](electronic/components/future.md#usb-c-qc-pd3-0-trigger-5v-9v-12v-15v-20v-5a) 
     2. Diagramas
         1. [Diagramas de Conexiones](electronic/diagrams/wiring.md#wiring-diagrams)
             1. [Versión 1](electronic/diagrams/wiring.md#version1)

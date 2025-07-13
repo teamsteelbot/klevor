@@ -1,4 +1,4 @@
-# Lista de Componentes {:#components-list}
+# Lista de Componentes Actuales {:#current-components-list}
 
 A continuación, está la descripción de todos los componentes principales de Klevor.
 

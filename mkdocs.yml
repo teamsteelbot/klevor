@@ -44,8 +44,9 @@ nav:
   - Nosotros: about.md
   - Electrónica:
     - Componentes:
-      - Actuales: electronic/components/current.md
       - Previos: electronic/components/previous.md
+      - Actuales: electronic/components/current.md
+      - Futuros: electronic/components/future.md
     - Diagramas:
       - Diagramas de Conexiones: electronic/diagrams/wiring.md
   - Mecánica:
