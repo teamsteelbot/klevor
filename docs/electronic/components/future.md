@@ -5,7 +5,7 @@ A continuación, está la descripción de todos los componentes que se planean u
 ## Motor 540 {:#motor-540}
 
 <div class="center">
-    <img src="../../assets/images/components/motor-540.png" alt="Motor" class="component-image" width="300">
+    <img src="../../assets/images/components/motor-540.png" alt="Motor 540" class="component-image">
     <i>Motor 540</i>
 </div>
 
@@ -24,17 +24,17 @@ Especificaciones mecánicas:
 | Velocidad sin carga | >12000rpm |
 | Corriente sin carga | >0.5A     |
 
-La razón principal por la cual pensamos que cambiar de motor sería una buena opción, es debido a que nos permite reducir un poco el peso de los componentes utilizados en Klevor, y así utilizar piezas más robustas en el sistema de transmisión del mismo.
+La razón principal por la cual pensamos que cambiar de motor sería una buena opción, es debido a que al cambiarnos al power bank que se menciona más adelante, tendríamos cierta disponibilidad de peso para este motor, y, además, no requeriríamos de la caja reductora diseñada para el motor [INJORA 180](current.md#injora-180-motor-48t), ya que el nuevo motor 540 es capaz de entregar la potencia necesaria para mover Klevor, lo que nos permitiría tener una mayor velocidad y eficiencia en el movimiento de Klevor.
 
 ## ESC para Motores 540/550 2-3S 60 A {:#esc-for-540-550-motors-2-3s-60-a}
 
 <div class="center">
-    <img src="../../assets/images/components/esc-motor-540.png" alt="ESC" 
-class="component-image" width="300">
-    <i>ESC</i>
+    <img src="../../assets/images/components/esc-motor-540.png" alt="ESC para motores 540/550" 
+class="component-image">
+    <i>ESC para motores 540/550</i>
 </div>
 
-Además del nuevo motor que se planea incorporar en Klevor, éste necesita de un ESC que sea compatible con motores del mismo tipo (540), así que, además de reemplazar el motor, también se debe de reemplazar el ESC, además de esto, también tiene múltiple ventajas, como una configuración del modo de uso, simplemente cambiando de posición a los cables [[2](#esc-motor-540-product-info)].
+Además del nuevo motor que se planea incorporar en Klevor, este necesita de un ESC que sea compatible con motores del mismo tipo (540), así que, además de reemplazar el motor, también se debe de reemplazar el ESC, sustituyendo así el [ESC Mini MB100](current.md#injora-mb100-20a-mini-esc). También, este ESC tiene múltiples ventajas, como una configuración del modo de uso, simplemente cambiando de posición a los cables [[2](#esc-motor-540-product-info)].
 
 Especificaciones físicas:
 
@@ -48,12 +48,12 @@ Especificaciones físicas:
 ## UGREEN Nexode Power Bank 12000mAh 100W PD PPS {:#ugreen-nexode-power-bank-12000mah-100w-pd-pps}
 
 <div class="center">
-    <img src="../../assets/images/components/ugreen-power-bank-12000-mah.png" alt="UGREEN Power Bank" 
+    <img src="../../assets/images/components/ugreen-power-bank-12000-mah.png" alt="Power Bank UGREEN Nexode 12000mAh" 
 class="component-image">
-    <i>UGREEN Power Bank</i>
+    <i>Power Bank UGREEN Nexode 12000mAh</i>
 </div>
 
-El Power Bank UGREEN de 12000mAh ofrece una gran ventaja en comparación al Shargeek Storm 2, siendo este su reducido peso, si bien es cierto que el UGREEN Nexode tiene una funcionalidad menor, sigue cumpliendo con todos los requisitos de un Power Bank común para poder usarse con una RPi 5.
+El power bank de UGREEN de 12000 mAh ofrece una gran ventaja en comparación al [Shargeek Storm 2](current.md#shargeek-storm-2), siendo este su reducido peso, si bien es cierto que el UGREEN Nexode tiene una funcionalidad y una capacidad de mAh menor, sigue cumpliendo con todos los requisitos de un power bank común para poder usarse con una Raspberry Pi 5: la compatibilidad con PD (Power Delivery) y PPS (Programmable Power Supply), para así poder negociar el voltaje y la corriente que se le entrega a la Raspberry Pi 5, además de que, al ser un power bank de 100 W, es capaz de entregar los 5V @ 5A que necesita la Raspberry Pi 5 para funcionar correctamente [[3](#ugreen-power-bank-product-info)].
 
 Especificaciones físicas:
 
@@ -72,7 +72,7 @@ class="component-image">
     <i>Power Delivery Trigger</i>
 </div>
 
-Anteriormente, notamos que la RPi 5, no consumía los 5V @ 5A que debería, lo que resultaba en un comportamiento un tanto errático cuando tenía conectado varios periféricos, lo que significaba que necesitaba de alguna manera forzar la entrega de la corriente por PD (Power Delivery), por lo que, este componente soluciona el problema, al forzar la alimentación de la RPi 5 por Power Delivery y que el Power Bank le entregue los 5V @ 5A que debería, algo que es bastante crucial para que la RPi 5 utilice todos los componentes como debería.
+Anteriormente, notamos que la Raspberry Pi 5, no consumía los 5V @ 5A que debería, lo que resultaba en un comportamiento un tanto errático cuando tenía conectado varios periféricos y significaba que necesitaba de alguna manera forzar la entrega de la corriente por PD (Power Delivery), por lo que, este componente soluciona el problema, al forzar la alimentación de la Raspberry Pi 5 por Power Delivery y que el power bank le entregue los 5V @ 5A que debería, algo que es bastante crucial para que la Raspberry Pi 5 utilice todos los componentes como debería.
 
 Especificaciones físicas:
 
