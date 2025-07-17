@@ -7,7 +7,7 @@
     <i>Logo de PyTorch</i>
 </div>
 
-PyTorch es una librería de software de código abierto diseñada en el Aprendizaje Automático (Machine Learning), y, en particular para el Aprendizaje Profundo (Deep Learning). PyTorch se ha convertido en uno de los frameworks más populares para el desarrollo de las IA [[1](#pytorch-docs)].
+PyTorch es una librería de software de código abierto diseñada originalmente por Adam Paszke, Sam Gross, Soumith Chintala y Gregory Chanan en septiembre de 2016, principalmente para que ayude en el desarrollo del Aprendizaje Automático (Machine Learning), y, en particular para el Aprendizaje Profundo (Deep Learning). PyTorch se ha convertido en uno de los frameworks más populares para el desarrollo de las IA [[1](#pytorch-docs)].
 
 Al igual que muchas de las librerías ya mencionadas, PyTorch es bastante útil cuando se trata de desarrollar un programa que involucre Visión por Computadoras, o el Aprendizaje por Refuerzo. Ya que, facilitan el desarrollo de modelos de Inteligencia Artificial.
 
@@ -35,6 +35,8 @@ La tarea central de YOLO. Identifica la ubicación de objetos en una imagen/vide
     <i>Logo de OpenCV</i>
 </div>
 
+Esta librería es desarrollada por Intel Corporation, y luego ésta fue mantenida por Willow Garage, y luego Itseez (quien luego fue adquirida por Intel), el proyecto OpenCV fue iniciado en 1999 por Intel como una iniciativa para avanzar en las tareas que son utilizan muchos recursos del procesador. 
+
 Open Source Computer Vision Library (OpenCV) es una de las librerías de software más populares y potentes del mundo para la visión por computadora y el aprendizaje automático (Machine Learning). Fue desarrollada inicialmente por Intel y ahora es mantenida por una comunidad global activa. En su esencia, OpenCV es una colección masiva de algoritmos y funciones que te permiten procesar imágenes y videos, extraer información de ellos y hacer que las computadoras "vean" y "entiendan" el mundo visual de una manera similar a como lo hacen los humanos.
 
 Su propósito principal es proporcionar una infraestructura común para aplicaciones de visión por computadora y acelerar el uso de la percepción automática en productos comerciales, investigación y desarrollo [[3](#opencv-docs)].
@@ -46,6 +48,10 @@ Su propósito principal es proporcionar una infraestructura común para aplicaci
     <i>Logo de NumPy</i>
 </div>
 
+Desarrollada por Travis Oliphant, la librería NumPy contiene dos paquetes, el primero fue lanzado como Numeric en 1995, luego Numarray fue lanzado, la cual podía realizar operaciones más rápido que Numeric en arrays grandes, pero tardaba más que Numericen realizar las mismas operaciones pero con arrays pequeños. 
+
+Así que, para evitar tener que usar una librería u otra, Travis Oliphant, combinó a Numeric y a Numarray en lo que hoy es NumPy.
+
 La librería NumPy o Numerical Python es una librería la cual contiene muchísimas funciones utilizadas ampliamente en el ecosistema de Python, gracias a esta librería, otras más populares y más flexibles como TensorFlow y PyTorch pudieron ser construidas. Esta librería se basa en la computación numérica y científica en Python.
 
 El propósito general es permitir operaciones numéricas rápidas y eficientes en grandes cantidades de datos [[4](#numpy-docs)]. Estos cálculos tan extensos, se utilizan para el procesamiento de imágenes de Klevor, aunque también tiene usos como el análisis de datos.
@@ -56,6 +62,8 @@ El propósito general es permitir operaciones numéricas rápidas y eficientes e
     <img src="../assets/images/logo/raspberry-pi.png" alt="Picamera 2" class="logo--3rd-party">
     <i>Logo de Raspberry Pi</i>
 </div>
+
+La librería Picamera fue lanzada inicialmente alrededor de septiembre de 2013. Fue desarrollada por Dave Jones, un desarrollador externo, y no directamente por la Fundación Raspberry Pi en sus inicios. Sin embargo, mientras Raspberry Pi se enfocaba más en APIs de Linux, la libreria `picamera` se volvió incompatible y no podía recibir mantenimiento en versiones futuras de Raspberry Pi OS.
 
 La librería PiCamera 2 es la sucesora de la `picamera` original, desarrollada por Raspberry Pi Foundation [[5](#the-picamera2-library)]. Esta librería permite la conexión entre la RPi Camera Module 3 y el Modelo de Detección de Obstáculos. Entre sus múltiples funciones se encuentran:
 
@@ -71,7 +79,13 @@ Además de, obviamente, permitir la toma de imágenes y videos
     <i>Logo de Hailo Platform</i>
 </div>
 
-Hailo Platform es un ecosistema tanto de hardware y software desarrollado por la empresa Hailo, este ecosistema está diseñado para llevar un modelo de Deep Learning desde su entrenamiento hasta su aplicación en tiempo real en periféricos [[6](#hailo-ai-software-suite)].
+Hailo Technologies fue fundada en Tel Aviv, Israel, por Orr Danon, Avi Baum, Hadar Zeitlin y Rami Feig, en febrero de 2017.
+
+El propósito fundamental de Hailo Technologies es reimaginar la arquitectura tradicional de los procesadores para llevar el rendimiento de la IA de clase de centro de datos a los dispositivos de borde. En el momento de su fundación, las tecnologías disruptivas de IA estaban limitadas en gran medida a los centros de datos debido a su alto costo, los requisitos de gran potencia computacional y hardware extenso, y el consumo significativo de energía.
+
+Hailo se propuso resolver estos desafíos desarrollando procesadores de IA especializados que pudieran realizar tareas sofisticadas de aprendizaje profundo, como la detección y segmentación de objetos, en tiempo real, con un consumo mínimo de energía, tamaño y costo.
+
+Hailo Platform es un ecosistema tanto de hardware y software desarrollado por la empresa Hailo Technologies, este ecosistema está diseñado para llevar un modelo de Deep Learning desde su entrenamiento hasta su aplicación en tiempo real en periféricos [[6](#hailo-ai-software-suite)].
 
 Además de esto, la Hailo Platform también incluye múltiples librerías, el objetivo principal de estas librerías (como HailoRT o PyHailoRT) es la de acelerar el proceso de desarrollo de extremo a extremo, tanto en la compilación y optimización hasta su uso en tiempo real.
 
