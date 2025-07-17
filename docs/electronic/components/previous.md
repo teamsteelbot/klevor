@@ -1,6 +1,6 @@
-# Lista de Componentes {:#components-list}
+# Lista de Componentes {:#previous-components-list}
 
-## HiLetgo Time-of-Flight Sensor VL53L0X {:#sensor-tof-hiletgo}
+## HiLetgo Time-of-Flight Sensor VL53L0X: Empleado en el Prototipo 1 {:#sensor-tof-hiletgo}
 
 <div class="center">
     <img src="../../assets/images/components/vl53l0x.png" alt="Sensor VL53L0X" 

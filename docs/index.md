@@ -1,4 +1,4 @@
-# Klevor
+# Klevor {:#klevor}
 
 <div class="center">
     <img src="assets/images/logo/teamsteelbot.png" alt="Logo del Equipo" 
@@ -8,10 +8,17 @@ class="logo--team">
 
 Bienvenidos a la documentación de Klevor, un robot autónomo diseñado para participar en el Desafío Abierto y el Desafío Cerrado de la competencia de robótica de la World Robot Olympiad 2025, en la categoría Futuros Ingenieros. Esta documentación contiene toda la información necesaria para entender su funcionamiento, los dispositivos utilizados, el código implementado, los componentes y más. Esperamos que la misma sea útil tanto para los jueces como para cualquier persona interesada en aprender sobre este proyecto.
 
-<div class="center">
-    <img src="assets/images/logo/wro.webp" alt="Logo de la World Robot Olympiad" 
-class="logo--3rd-party">
-    <i>Logo de la World Robot Olympiad</i>
+<div class="image-horizontal-container">
+    <div class="center">
+        <img src="assets/images/logo/wro.webp" alt="Logo de la World Robot Olympiad" 
+    class="logo--education">
+        <i>Logo de la World Robot Olympiad</i>
+    </div>
+    <div class="center">
+        <img src="assets/images/logo/mincyt.png" alt="Logo del MINCYT" 
+    class="logo--education">
+        <i>Logo del MINCYT</i>
+    </div>
 </div>
 
 A continuación se presenta un índice con los enlaces a las diferentes secciones de la documentación. Cada sección contiene información detallada sobre los aspectos técnicos y prácticos del robot, incluyendo la mecánica, el código, los dispositivos utilizados, los componentes, los esquemas y diagramas, las fotos del equipo y los vídeos de Klevor en acción. Además, se incluyen recursos externos para ampliar la información y facilitar la comprensión de los conceptos presentados.
@@ -22,12 +29,14 @@ class="picture--team">
     <i>Team Steel Bot en la competencia regional del Salto Ángel</i>
 </div>
 
-## Índice
+## Índice {#index}
 
 1. **[Nosotros](about.md)**
 2. **Electrónica**
     1. Componentes
-        1. Actuales
+        1. [Previos](electronic/components/previous.md#previous-components-list)
+            1. [HiLetgo Time-of-Flight Sensor VL53L0X](electronic/components/previous.md#sensor-tof-hiletgo)
+        2. [Actuales](electronic/components/current.md#current-components-list)
             1. [Raspberry Pi 5](electronic/components/current.md#raspberry-pi-5)
             2. [Raspberry Pi Camera Module 3 Wide](electronic/components/current.md#raspberry-pi-camera-module-3-wide)
             3. [Raspberry Pi AI HAT+ (26 TOPS)](electronic/components/current.md#raspberry-pi-ai-hat-26-tops)
@@ -39,19 +48,23 @@ class="picture--team">
             9. [URGENEX 7.4V Battery](electronic/components/current.md#urgenex-7-4v-battery)
             10. [INJORA 7KG 2065 Micro Servo](electronic/components/current.md#injora-7kg-2065-micro-servo)
             11. [9-Axis IMU Gyroscope GY-BNO085](electronic/components/current.md#gyroscope-gy-bno085)
-        2. Previos
-            1. [HiLetgo Time-of-Flight Sensor VL53L0X](electronic/components/previous.md#sensor-tof-hiletgo)
+        3. [Futuros](electronic/components/future.md#future-components-list)
+            1. [Motor 540](electronic/components/future.md#motor-540)
+            2. [ESC para Motores 540/550 2-3s 60 A](electronic/components/future.md#esc-for-540-550-motors-2-3s-60-a)
+            3. [UGREEN Nexode Power Bank 12000mAh 100W PD PPS](electronic/components/future.md#ugreen-nexode-power-bank-12000mah-100w-pd-pps)
+            4. [USB-C QC PD3.0 Trigger 5V/9V/12V/15V/20V 5A](electronic/components/future.md#usb-c-qc-pd3-0-trigger-5v-9v-12v-15v-20v-5a) 
     2. Diagramas
         1. [Diagramas de Conexiones](electronic/diagrams/wiring.md#wiring-diagrams)
             1. [Versión 1](electronic/diagrams/wiring.md#version1)
             2. [Versión 2](electronic/diagrams/wiring.md#version2)
+            3. [Versión 3](electronic/diagrams/wiring.md#version3)
 3. **Mecánica**
-   1. Piezas
+    1. Piezas
         1. [Piezas 3D Comunes](mechanical/parts/common.md#common-3d-parts)
         2. [Piezas del Prototipo 1](mechanical/parts/prototype1.md#prototype1)
         3. [Piezas del Prototipo 2](mechanical/parts/prototype2.md#prototype2)
         4. [Piezas del Prototipo 3](mechanical/parts/prototype3.md#prototype3)
-   2. Prototipos
+    2. Prototipos
         1. [Prototipo 1](mechanical/prototypes/prototype1.md#prototype1)
             1. [Primera Capa](mechanical/prototypes/prototype1.md#first-layer)
             2. [Segunda Capa](mechanical/prototypes/prototype1.md#second-layer)
@@ -79,6 +92,7 @@ class="picture--team">
         1. [Diagramas de Flujo](programming/diagrams/flowcharts.md#flowcharts)
             1. [Desafío sin Obstáculos](programming/diagrams/flowcharts.md#without-obstacles-challenge)
                 1. [Versión 1](programming/diagrams/flowcharts.md#without-obstacles-challenge-version1)
+                2. [Versión 2](programming/diagrams/flowcharts.md#without-obstacles-challenge-version2)
             2. [Desafío con Obstáculos](programming/diagrams/flowcharts.md#obstacles-challenge)
                 1. [Versión 1](programming/diagrams/flowcharts.md#obstacles-challenge-version1)
     4. [Glosario de Términos](programming/glossary.md#glossary)
@@ -100,11 +114,14 @@ class="picture--team">
             1. [Instalación](programming/guides/circuit-python.md#installation)
         3. [Guía de MicroPython](programming/guides/micro-python.md#micro-python)
             1. [Instalación](programming/guides/micro-python.md#installation)
-        4. [Guía de Raspberry Pi](programming/guides/raspberry-pi.md#raspberry-pi)
-            1. [Instalación de Raspberry Pi OS](programming/guides/raspberry-pi.md#raspberry-pi-os-installation)
-            2. [Instalación de la Cámara](programming/guides/raspberry-pi.md#camera-installation)
-            3. [Instalación de Raspberry Pi AI HAT+](programming/guides/raspberry-pi.md#raspberry-pi-ai-hat-plus-installation)
-        5. [Guía de Detección de Objetos](programming/guides/object-detection.md#object-detection)
+        4. [Guía de Raspberry Pi 5](programming/guides/raspberry-pi-5.md#raspberry-pi-5)
+            1. [Instalación de Raspberry Pi OS](programming/guides/raspberry-pi-5.md#raspberry-pi-os-installation)
+            2. [Instalación de la Cámara](programming/guides/raspberry-pi-5.md#camera-installation)
+            3. [Instalación de Raspberry Pi AI HAT+](programming/guides/raspberry-pi-5.md#raspberry-pi-ai-hat-plus-installation)
+            4. [Configuración de la Raspberry Pi](programming/guides/raspberry-pi-5.md#raspberry-pi-configuration)
+        5. [Guía de Raspberry Pi Pico 2 W](programming/guides/raspberry-pi-pico-2w.md#raspberry-pi-pico-2w)
+            1. [Configuración](programming/guides/raspberry-pi-pico-2w.md#configuration)
+        6. [Guía de Detección de Objetos](programming/guides/object-detection.md#object-detection)
             1. [Creación del Modelo](programming/guides/object-detection.md#model-creation)
             2. [Entrenamiento del Modelo](programming/guides/object-detection.md#model-training)
             3. [Conversión del Modelo](programming/guides/object-detection.md#model-conversion)
@@ -136,25 +153,50 @@ class="picture--team">
 6. **[Vídeos](videos.md)**
     1. [Desafío sin Obstáculos](videos.md#without-obstacles-challenge)
         1. [Parte 1](videos.md#without-obstacles-challenge-part1)
-7. **[Patrocinadores](sponsors.md)**
-8. **[Contacto](contact.md)**
+7. **[Software](software.md#software)**
+    1. [Programación](software.md#programming)
+        1. [Label Studio](software.md#label-studio)
+        2. [Google Colab](software.md#google-colab)
+        3. [Visual Studio Code](software.md#visual-studio-code)
+        4. [PyCharm](software.md#pycharm)
+        5. [Thonny](software.md#thonny)
+    2. [Diseño](software.md#design)
+        1. [Canva](software.md#canva)
+        2. [Mermaid](software.md#mermaid)
+        3. [Draw.io](software.md#draw-io)
+        4. [Fusion 360](software.md#fusion-360)
+    3. [Planificación](software.md#planning)
+        1. [Jira](software.md#jira)
+8. [Gadgets](gadgets.md)
+    1. [Multímetro Digital con Puerto USB-C 4-30 V 0-12 A](gadgets.md#usb-c-tester)
+9. **[Patrocinadores](sponsors.md)**
+    1. [Viajes Giorgio](sponsors.md#viajes-giorgio)
+    2. [Nathaly's Star](sponsors.md#nathalys-star)
+    3. [Steel C.A.](sponsors.md#steel-ca)
+10. **[Contacto](contact.md)**
 
-## Patrocinantes
+## Patrocinadores {#sponsors}
 
 <div class="center">
-    <img src="assets/images/sponsors/viajes-giorgio.png" alt="Logo de Viajes Giorgio" 
+    <a href="sponsors.html#viajes-giorgio">
+        <img src="assets/images/sponsors/viajes-giorgio.png" alt="Logo de Viajes Giorgio" 
 class="logo--sponsor">
+    </a>
     <i>Logo de Viajes Giorgio</i>
 </div>
 
 <div class="center">
-    <img src="assets/images/sponsors/nathalys-star.png" alt="Logo de Nathaly's Star" 
+    <a href="sponsors.html#nathalys-star">
+        <img src="assets/images/sponsors/nathalys-star.png" alt="Logo de Nathaly's Star" 
 class="logo--sponsor">
+    </a>
     <i>Logo de Nathaly's Star</i>
 </div>
 
 <div class="center">
-    <img src="assets/images/sponsors/steel-ca.jpg" alt="Logo de Steel C.A." 
+    <a href="sponsors.html#steel-ca">
+        <img src="assets/images/sponsors/steel-ca.jpg" alt="Logo de Steel C.A." 
 class="logo--sponsor">
+    </a>
     <i>Logo de Steel C.A.</i>
 </div>

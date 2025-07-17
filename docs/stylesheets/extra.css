@@ -26,6 +26,11 @@
     width: 350px;
 }
 
+.gadget-image {
+    max-width: 100%;
+    width: 400px;
+}
+
 .wiring-diagram-image {
     max-width: 100%;
     width: 850px;
@@ -60,6 +65,14 @@
     flex-direction: row;
 }
 
+.image-horizontal-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--gap);
+    flex-direction: row;
+}
+
 .object-detection-image {
     max-width: 100%;
     width: 750px;
@@ -83,6 +96,11 @@
 .logo--team {
     max-width: 100%;
     width: 300px;
+}
+
+.logo--education {
+    max-width: 100%;
+    width: 200px;
 }
 
 .picture--team {

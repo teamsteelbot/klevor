@@ -44,8 +44,9 @@ nav:
   - Nosotros: about.md
   - Electrónica:
     - Componentes:
-      - Actuales: electronic/components/current.md
       - Previos: electronic/components/previous.md
+      - Actuales: electronic/components/current.md
+      - Futuros: electronic/components/future.md
     - Diagramas:
       - Diagramas de Conexiones: electronic/diagrams/wiring.md
   - Mecánica:
@@ -68,7 +69,8 @@ nav:
         - Guía de MkDocs: programming/guides/mkdocs.md
         - Guía de CircuitPython: programming/guides/circuit-python.md
         - Guía de MicroPython: programming/guides/micro-python.md
-        - Guía de Raspberry Pi: programming/guides/raspberry-pi.md
+        - Guía de Raspberry Pi 5: programming/guides/raspberry-pi-5.md
+        - Guía de Raspberry Pi Pico 2W: programming/guides/raspberry-pi-pico-2w.md
         - Guía de Detección de Objetos: programming/guides/object-detection.md
     - Referencia del Código:
         - Raspberry Pi 5:
@@ -93,7 +95,9 @@ nav:
             - Code: programming/code/raspberry-pi-pico-2w/code.md
   - GitHub: github.md
   - Videos: videos.md
-  - Sponsors: sponsors.md
+  - Software: software.md
+  - Gadgets: gadgets.md
+  - Patrocinadores: sponsors.md
   - Contacto: contact.md
 extra_css:
   - stylesheets/extra.css
@@ -105,12 +109,25 @@ extra:
     - icon: fontawesome/brands/instagram
       link: https://instagram.com/teamsteelbotsa
       name: Equipo Steel Bot en Instagram
-copyright: Copyright &copy; 2025 Team Steel Bot
+    - icon: fontawesome/brands/telegram
+      link: https://t.me/ralvarezdev
+      name: Telegram del Capitan del Equipo Steel Bot
+    - icon: fontawesome/solid/paper-plane
+      link: mailto:<ralvarezdev@protonmail.com>
+      name: Enviar un correo al Capitán del Equipo Steel Bot
+copyright:
+  Copyright &copy; 2025 Team Steel Bot. All rights reserved.
+  Special thanks for Viajes Giorgio, Nathaly's Star and Steel C.A. for 
+  sponsoring our team.
 markdown_extensions:
   - attr_list
   - admonition
   - pymdownx.details
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - nl2br
 plugins:
   - search
