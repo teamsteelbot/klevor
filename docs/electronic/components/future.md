@@ -78,10 +78,10 @@ Especificaciones físicas:
 
 | **Medida** | **Valor** |
 |------------|-----------|
-| Largo      | 115 mm    |
-| Alto       | 46 mm     |
-| Ancho      | 45.5 mm   |
-| Peso       | 309 g     |
+| Largo      | 48.3 mm   |
+| Alto       | 10.2 mm   |
+| Ancho      | 20.3 mm   |
+| Peso       | 17.86 g   |
 
 # Referencias Bibliográficas
 
