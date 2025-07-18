@@ -1,9 +1,9 @@
-# Librerías {:#libraries}
+# Python {:#python}
 
 ## PyTorch {:#pytorch}
 
 <div class="center">
-    <img src="../assets/images/logo/pytorch.png" alt="PyTorch" class="logo--3rd-party">
+    <img src="../../assets/images/logo/pytorch.png" alt="PyTorch" class="logo--3rd-party">
     <i>Logo de PyTorch</i>
 </div>
 
@@ -14,7 +14,7 @@ Al igual que muchas de las librerías ya mencionadas, PyTorch es bastante útil 
 ## Ultralytics YOLO {:#ultralytics-yolo}
 
 <div class="center">
-    <img src="../assets/images/logo/ultralytics.png" alt="Ultralytics" class="logo--3rd-party">
+    <img src="../../assets/images/logo/ultralytics.png" alt="Ultralytics" class="logo--3rd-party">
     <i>Logo de Ultralytics</i>
 </div>
 
@@ -31,7 +31,7 @@ La tarea central de YOLO. Identifica la ubicación de objetos en una imagen/vide
 ## OpenCV {:#opencv}
 
 <div class="center">
-    <img src="../assets/images/logo/opencv.png" alt="OpenCV" class="logo--3rd-party">
+    <img src="../../assets/images/logo/opencv.png" alt="OpenCV" class="logo--3rd-party">
     <i>Logo de OpenCV</i>
 </div>
 
@@ -44,7 +44,7 @@ Su propósito principal es proporcionar una infraestructura común para aplicaci
 ## NumPy {:#numpy}
 
 <div class="center">
-    <img src="../assets/images/logo/numpy.png" alt="Numpy" class="logo--3rd-party">
+    <img src="../../assets/images/logo/numpy.png" alt="Numpy" class="logo--3rd-party">
     <i>Logo de NumPy</i>
 </div>
 
@@ -59,7 +59,7 @@ El propósito general es permitir operaciones numéricas rápidas y eficientes e
 ## PiCamera 2 {:#picamera-2}
 
 <div class="center">
-    <img src="../assets/images/logo/raspberry-pi.png" alt="Picamera 2" class="logo--3rd-party">
+    <img src="../../assets/images/logo/raspberry-pi.png" alt="Picamera 2" class="logo--3rd-party">
     <i>Logo de Raspberry Pi</i>
 </div>
 
@@ -75,7 +75,7 @@ Además de, obviamente, permitir la toma de imágenes y videos.
 ## Hailo Platform {:#hailo-platform}
 
 <div class="center">
-    <img src="../assets/images/logo/hailo.png" alt="Hailo Platform" class="logo--3rd-party">
+    <img src="../../assets/images/logo/hailo.png" alt="Hailo Platform" class="logo--3rd-party">
     <i>Logo de Hailo Platform</i>
 </div>
 
@@ -88,6 +88,8 @@ Hailo se propuso resolver estos desafíos desarrollando procesadores de IA espec
 Hailo Platform es un ecosistema tanto de hardware y software desarrollado por la empresa Hailo Technologies, este ecosistema está diseñado para llevar un modelo de Deep Learning desde su entrenamiento hasta su aplicación en tiempo real en periféricos [[6](#hailo-ai-software-suite)].
 
 Además de esto, la Hailo Platform también incluye múltiples librerías, el objetivo principal de estas librerías (como HailoRT o PyHailoRT) es la de acelerar el proceso de desarrollo de extremo a extremo, tanto en la compilación y optimización hasta su uso en tiempo real.
+
+## MkDocs {:#mkdocs}
 
 # Referencias Bibliográficas
 
