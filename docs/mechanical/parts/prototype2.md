@@ -1,15 +1,19 @@
 # Prototipo 2 {:#prototype2}
 
-![alt text](../../../models/2d-designs/prototype2/bottom-layer-prototype2.png)
+## Base de la Capa Inferior {#bottom-layer-mounting}
 
-**Capa inferior:** Hicimos cambios respecto al prototipo 1, hicimos más orificios para no sobrepasar el peso reglamentario.
+<div class="center">
+	<img src="../../assets/images/github/models/plans/prototype2/bottom-layer-mounting.png" alt="Base de la Capa Inferior" class="mechanical-image">
+	<i>Base de la Capa Inferior</i>
+</div>
 
+Hicimos cambios con respecto al prototipo 1; realizamos más orificios para no sobrepasar el peso reglamentario.
 
-![alt text](../../../models/2d-designs/prototype2/top-floor-prototype2.png)
+## Base de la Capa Superior {#top-layer-mounting}
 
-**Capa superior:** En esta hubo demasiados cambios debidos a la adición de nuevos componentes como la Raspberry PI 5 o el RPlidar.
+<div class="center">
+	<img src="../../assets/images/github/models/plans/prototype2/top-layer-mounting.png" alt="Base de la Capa Superior" class="mechanical-image">
+	<i>Base de la Capa Superior</i>
+</div>
 
-
-![alt text](../../../models/2d-designs/prototype2/camera-mounting-prototype2.png)
-
-**Soporte para cámara:** Luego de varias pruebas logramos determinar el ángulo ideal para la cámara, por eso unimos ambas piezas que anteriormente eran graduables.
+En esta hubo demasiados cambios debidos a la adición de nuevos componentes como la [Raspberry Pi 5](../../electronic/components/current.md#raspberry-pi-5) y el [RPLiDAR C1](../../electronic/components/current.md#raspberry-pi-5).

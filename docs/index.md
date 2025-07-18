@@ -60,7 +60,9 @@ class="picture--team">
             3. [Versión 3](electronic/diagrams/wiring.md#version3)
 3. **Mecánica**
     1. Piezas
-        1. [Piezas 3D Comunes](mechanical/parts/common.md#common-3d-parts)
+        1. [Piezas Comunes]
+            1. [Previas](mechanical/parts/common/previous.md#common-parts)
+            2. [Actuales](mechanical/parts/common/current.md#common-parts)
         2. [Piezas del Prototipo 1](mechanical/parts/prototype1.md#prototype1)
         3. [Piezas del Prototipo 2](mechanical/parts/prototype2.md#prototype2)
         4. [Piezas del Prototipo 3](mechanical/parts/prototype3.md#prototype3)

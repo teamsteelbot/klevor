@@ -51,7 +51,9 @@ nav:
       - Diagramas de Conexiones: electronic/diagrams/wiring.md
   - Mecánica:
     - Piezas:
-      - Piezas 3D Comunes: mechanical/parts/common.md
+      - Piezas Comunes:
+        - Actuales: mechanical/parts/common/current.md
+        - Previas: mechanical/parts/common/previous.md
       - Piezas del Prototipo 1: mechanical/parts/prototype1.md
       - Piezas del Prototipo 2: mechanical/parts/prototype2.md
       - Piezas del Prototipo 3: mechanical/parts/prototype3.md

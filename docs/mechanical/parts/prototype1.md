@@ -1,42 +1,64 @@
 # Prototipo 1 {:#prototype1}
 
-# Primer nivel
+## Base de la Capa Inferior {#bottom-layer-mounting}
 
-![alt text](../../../models/2d-designs/prototype1/bottom-layer-prototype1.png)
+<div class="center">
+	<img src="../../assets/images/github/models/plans/prototype1/bottom-layer-mounting.png" alt="Base de la Capa Inferior" class="mechanical-image">
+	<i>Base de la Capa Inferior</i>
+</div>
 
-**Capa inferior:** La "base" de Klevor, hecha para ensamblar toda su parte mecánica.
+La base de Klevor, hecha para ensamblar toda su parte mecánica.
 
-![alt text](../../../models/2d-designs/prototype1/thin-2nd-floor-mounting-prototype1-plan.png)
+## Soporte Superior de la Caja del Diferencial (Delgado) {#differential-gearbox-upper-mounting--thin}
 
-**Soporte (delgado):** Este soporte se atornilla a la caja del diferencial trasera para sostener el segundo nivel
+<div class="center">
+	<img src="../../assets/images/github/models/plans/prototype1/differential-box-upper-mounting--thin.png" alt="Soporte Superior de la Caja del Diferencial (Delgado)" class="mechanical-image">
+	<i>Soporte Superior de la Caja del Diferencial (Delgado)</i>
+</div>
 
-![alt text](../../../models/2d-designs/prototype1/width-2nd-floor-mounting-prototype1.png)
+Este soporte se atornilla a la caja del diferencial trasera para sostener el segundo nivel
 
-**Soporte (grueso):** Se conecta a la caja del diferencial frontal, el orificio central es más grande debido a que también se sostiene del agarre superior de las ruedas delanteras.
+## Soporte Superior de la Caja del Diferencial (Grueso) {#differential-gearbox-upper-mounting--wide}
 
-# Segundo Nivel 
+<div class="center">
+	<img src="../../assets/images/github/models/plans/prototype1/differential-box-upper-mounting--wide.png" alt="Soporte Superior de la Caja del Diferencial (Grueso)" class="mechanical-image">
+	<i>Soporte Superior de la Caja del Diferencial (Grueso)</i>
+</div>
 
-![alt text](../../../models/2d-designs/prototype1/2nd-floor-prototype1-plan.png)
+Se conecta a la caja del diferencial frontal, el orificio central es más grande debido a que también se sostiene del agarre superior de las ruedas delanteras.
 
+## Base de la Capa Intermedia {#middle-layer-mounting}
 
+<div class="center">
+	<img src="../../assets/images/github/models/plans/prototype1/middle-layer-mounting.png" alt="Base de la Capa Intermedia" class="mechanical-image">
+	<i>Base de la Capa Intermedia</i>
+</div>
 
-**Segunda capa:** Diseñada para colocar los sensores ToF y un powerbank que usaremos de manera provisional.
+Diseñada para colocar los [sensores ToF](../../electronic/components/previous.md#sensor-tof-hiletgo) y un power bank que usaremos de manera provisional.
 
-![alt text](../../../models/2d-designs/prototype1/tof-sensor-mounting-plan.png)
+## Soporte para Sensor ToF {#tof-sensor-mounting}
 
-**Soporte para sensor ToF:** El sensor ToF se atornilla de forma horizontal en esta base. La base se ensambla directamente a la capa.
+<div class="center">
+	<img src="../../assets/images/github/models/plans/prototype1/tof-sensor-mounting.png" alt="Soporte para Sensor ToF" class="mechanical-image">
+	<i>Soporte para Sensor ToF</i>
+</div>
 
-![alt text](../../../models/2d-designs/prototype1/3rd-floor-mounting-plan.png)
+El [sensor ToF](../../electronic/components/previous.md#sensor-tof-hiletgo) se atornilla de forma horizontal en esta base. La base se ensambla directamente a la capa.
 
-**Soporte de la capa superior:** Sostienen la capa superior. Diseñados para ser ensamblados con tornillos y tuercas, esto le da más resistencia.
+## Pilares de la Base de la Capa Superior {#top-layer-mounting-pillars}
 
-# Tercer Nivel
+<div class="center">
+	<img src="../../assets/images/github/models/plans/prototype1/top-layer-mounting-pillars.png" alt="Pilares de la Base de la Capa Superior" class="mechanical-image">
+	<i>Pilares de la Base de la Capa Superior</i>
+</div>
 
-![alt text](../../../models/2d-designs/prototype1/3rd-floor-prototype1.png)
+Sostienen la capa superior. Diseñados para ser ensamblados con tornillos y tuercas, esto le da más resistencia.
 
+## Base de la Capa Superior {#top-layer-mounting}
 
-**Capa superior:** Hecha para colocar el microcontrolador y cámara.
+<div class="center">
+	<img src="../../assets/images/github/models/plans/prototype1/top-layer-mounting.png" alt="Base de la Capa Superior" class="mechanical-image">
+	<i>Base de la Capa Superior</i>
+</div>
 
-![alt text](../../../models/2d-designs/prototype1/camera-mounting-prototype1.png)
-
-**Soporte para cámara:** Fue diseñada para estar alta y que no fuese obstruida, además, está seccionada en dos partes, la superior (donde va la cámara) y la inferior (pilares) fue diseñada para que su ángulo de visión sea modificable. Esto solo mientras se hacen pruebas.SSSSSS
+Hecha para colocar el microcontrolador y cámara.
