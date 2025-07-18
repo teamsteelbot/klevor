@@ -35,9 +35,9 @@ La tarea central de YOLO. Identifica la ubicación de objetos en una imagen/vide
     <i>Logo de OpenCV</i>
 </div>
 
-Esta librería es desarrollada por Intel Corporation, y luego ésta fue mantenida por Willow Garage, y luego Itseez (quien luego fue adquirida por Intel), el proyecto OpenCV fue iniciado en 1999 por Intel como una iniciativa para avanzar en las tareas que son utilizan muchos recursos del procesador. 
+Esta librería es desarrollada por Intel Corporation, posteriormente fue mantenida por Willow Garage, y después Itseez (y luego fue adquirida por Intel). El proyecto OpenCV fue iniciado en 1999 por Intel como una iniciativa para avanzar en las tareas que utilizan muchos recursos del procesador. 
 
-Open Source Computer Vision Library (OpenCV) es una de las librerías de software más populares y potentes del mundo para la visión por computadora y el aprendizaje automático (Machine Learning). Fue desarrollada inicialmente por Intel y ahora es mantenida por una comunidad global activa. En su esencia, OpenCV es una colección masiva de algoritmos y funciones que te permiten procesar imágenes y videos, extraer información de ellos y hacer que las computadoras "vean" y "entiendan" el mundo visual de una manera similar a como lo hacen los humanos.
+Open Source Computer Vision Library (OpenCV) es una de las librerías de software más populares y potentes del mundo para la visión por computadora y el aprendizaje automático (Machine Learning). Fue desarrollada inicialmente por Intel y ahora es mantenida por una comunidad global activa. En su esencia, OpenCV es una colección masiva de algoritmos y funciones que te permiten procesar imágenes y videos, extraer información de ellos y hacer que las computadoras **vean** y **entiendan** el mundo visual de una manera similar a como lo hacen los humanos.
 
 Su propósito principal es proporcionar una infraestructura común para aplicaciones de visión por computadora y acelerar el uso de la percepción automática en productos comerciales, investigación y desarrollo [[3](#opencv-docs)].
 
@@ -48,7 +48,7 @@ Su propósito principal es proporcionar una infraestructura común para aplicaci
     <i>Logo de NumPy</i>
 </div>
 
-Desarrollada por Travis Oliphant, la librería NumPy contiene dos paquetes, el primero fue lanzado como Numeric en 1995, luego Numarray fue lanzado, la cual podía realizar operaciones más rápido que Numeric en arrays grandes, pero tardaba más que Numericen realizar las mismas operaciones pero con arrays pequeños. 
+Desarrollada por Travis Oliphant, la librería NumPy contiene dos paquetes, el primero fue lanzado como Numeric en 1995, y luego Numarray, la cual podía realizar operaciones más rápido que Numeric en arrays grandes, pero tardaba más que Numeric en realizar las mismas operaciones pero con arrays pequeños. 
 
 Así que, para evitar tener que usar una librería u otra, Travis Oliphant, combinó a Numeric y a Numarray en lo que hoy es NumPy.
 
@@ -63,14 +63,14 @@ El propósito general es permitir operaciones numéricas rápidas y eficientes e
     <i>Logo de Raspberry Pi</i>
 </div>
 
-La librería Picamera fue lanzada inicialmente alrededor de septiembre de 2013. Fue desarrollada por Dave Jones, un desarrollador externo, y no directamente por la Fundación Raspberry Pi en sus inicios. Sin embargo, mientras Raspberry Pi se enfocaba más en APIs de Linux, la libreria `picamera` se volvió incompatible y no podía recibir mantenimiento en versiones futuras de Raspberry Pi OS.
+La librería Picamera fue lanzada inicialmente alrededor de septiembre de 2013. Fue desarrollada por Dave Jones, un desarrollador externo, y no directamente por la Fundación Raspberry Pi en sus inicios. Sin embargo, mientras Raspberry Pi se enfocaba más en API de Linux, la libreria `picamera` se volvió incompatible y no podía recibir mantenimiento en versiones futuras de Raspberry Pi OS.
 
-La librería PiCamera 2 es la sucesora de la `picamera` original, desarrollada por Raspberry Pi Foundation [[5](#the-picamera2-library)]. Esta librería permite la conexión entre la RPi Camera Module 3 y el Modelo de Detección de Obstáculos. Entre sus múltiples funciones se encuentran:
+La librería PiCamera 2 es la sucesora de la `picamera` original, desarrollada por Raspberry Pi Foundation [[5](#the-picamera2-library)]. Esta librería permite la conexión entre la Raspberry Pi Camera Module 3 y el Modelo de Detección de Obstáculos. Entre sus múltiples funciones se encuentran:
 
 - Obtener streams de video para procesamiento en tiempo real (por ejemplo, con OpenCV o NumPy).
 - Controlar diversos parámetros de la cámara (exposición, ganancia, balance de blancos, modos de enfoque, etc.).
 
-Además de, obviamente, permitir la toma de imágenes y videos
+Además de, obviamente, permitir la toma de imágenes y videos.
 
 ## Hailo Platform {:#hailo-platform}
 

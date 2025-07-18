@@ -8,10 +8,12 @@ Muchos robots autónomos, si no es que todos, necesitan de un lenguaje de progra
     <img src= "../assets/images/logo/python.png" alt="Python" class="logo--3rd-party">
     <i>Logo de Python</i>
 </div>
-Python fue creado por **Guido van Rossum**. Es un programador holandés que comenzó a trabajar en Python a finales de la década de 1980. La primera versión pública de Python (versión 0.9.0) fue lanzada en febrero de 1991.
+
+Python fue creado por **Guido van Rossum**, un programador holandés que comenzó a trabajar en Python a finales de la década de 1980. La primera versión pública de Python (versión 0.9.0) fue lanzada en febrero de 1991.
+
 Además de esto, Guido mantuvo la autoridad final sobre el desarrollo de Python hasta que se retiró de ese rol en 2018.
 
-Guido concibió Python con varios propósitos clave en mente, influenciado por su experiencia con otros lenguajes como ABC y Modula-3, principalmente, se enfocaba en crear un lenguaje que fuese tan fácil de entender como el pseudocódigo, para que fuese más accesible para principiates y además fuese más fácil de mantener para los equipos. Además de esto, Guido diseñó Python de manera que, éste fuese un lenguaje bastante versátil, que no estuviese restringido a una sóla rama, sino que pueda ser utilizado en una gran variedad, como:
+Guido concibió Python con varios propósitos clave en mente, influenciado por su experiencia con otros lenguajes como **ABC** y **Modula-3**, principalmente, se enfocaba en crear un lenguaje que fuese tan fácil de entender como el pseudocódigo, para que fuese más accesible para principiantes y además fuese más fácil de mantener para los equipos. Además de esto, Guido diseñó Python de manera que, este fuese un lenguaje bastante versátil, que no estuviese restringido a una sóla rama, sino que pueda ser utilizado en una gran variedad, como:
 
 - Scripting y automatización de tareas.
 
@@ -36,7 +38,7 @@ La ventaja principal de Python es la versatilidad, pues no necesitamos administr
     <i>Logo de MicroPython</i>
 </div>
 
-MicroPython fue creado por **Damien George**, un ingeniero de software australiano, Damien comenzó a trabajar en MicroPython en 2013. La primera versión pública fue lanzada en 2014.
+MicroPython fue creado por **Damien George**, un ingeniero de software australiano. Damien comenzó a trabajar en MicroPython en 2013. La primera versión pública fue lanzada en 2014.
 
 MicroPython es una implementación de Python en microcontroladores, a pesar de estar escrito en el lenguaje de programación C, este replica todas las funciones de Python en microcontroladores como la ESP32 y ESP8266.
 
@@ -54,11 +56,11 @@ class="logo--3rd-party">
 
 CircuitPython es una bifurcación de MicroPython, y fue desarrollado principalmente por **Adafruit Industries**, una empresa líder en hardware de código abierto y educación electrónica. Si bien no hay un único creador individual como en Python o MicroPython, **Limor Fried (Ladyada)**, la fundadora de Adafruit, y su equipo han sido los principales impulsores y desarrolladores de CircuitPython.
 
-CircuitPython fue lanzado por primera vez en 2017. Nació de la necesidad de tener una versión de Python para microcontroladores que estuviera aún más orientada a la educación y la facilidad de uso para principiantes,CircuitPython fue diseñado con un enfoque muy específico en la educación, la experimentación rápida y la facilidad de uso para personas que se inician en la programación de microcontroladores y la electrónica.
+CircuitPython fue lanzado en 2017. Nació de la necesidad de tener una versión de Python para microcontroladores que estuviera aún más orientada a la educación y la facilidad de uso para principiantes, CircuitPython fue diseñado con un enfoque muy específico en la educación, la experimentación rápida y la facilidad de uso para personas que se inician en la programación de microcontroladores y la electrónica.
 
 Dado que el código reside en una unidad de disco accesible por USB, es muy fácil editar y actualizar el código sin necesidad de herramientas de desarrollo complejas, a diferencia de MicroPython, que es más genérico, CircuitPython se enfoca en proporcionar soporte directo y robusto para una amplia gama de sensores, actuadores y componentes externos, especialmente los vendidos por Adafruit y sus socios. Esto se logra a través de una extensa colección de librerías y controladores pre-escritos.
 
-Al igual que MicroPython, CircuitPython es una implementación de Python en microcontroladores, pero está optimizada para ser utilizada en dispositivos con recursos limitados, como la Raspberry Pi Pico 2 WH[[3](#circuit-python-docs)].
+Al igual que MicroPython, CircuitPython es una implementación de Python en microcontroladores, pero está optimizada para ser utilizada en dispositivos con recursos limitados, como la Raspberry Pi Pico 2 WH [[3](#circuit-python-docs)].
 
 # Referencias Bibliográficas
 
