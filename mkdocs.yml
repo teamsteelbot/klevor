@@ -58,9 +58,10 @@ nav:
             - Piezas del Prototipo 2: mechanical/parts/prototype2.md
             - Piezas del Prototipo 3: mechanical/parts/prototype3.md
         - Prototipos:
-             - Prototipo 1: mechanical/prototypes/prototype1.md
-             - Prototipo 2: mechanical/prototypes/prototype2.md
-             - Prototipo 3: mechanical/prototypes/prototype3.md
+            - Prototipo 1: mechanical/prototypes/prototype1.md
+            - Prototipo 2: mechanical/prototypes/prototype2.md
+            - Prototipo 3: mechanical/prototypes/prototype3.md
+            - Prototipo 4: mechanical/prototypes/prototype4.md
     - Programación:
         - Lenguajes: programming/languages.md
         - Librerías:

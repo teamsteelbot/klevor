@@ -92,3 +92,5 @@ La parte superior cambió drásticamente en cuanto a diseño, los cambios que hi
 - **Soporte Raspberry Pi Camera 3**: Luego de probar qué ángulo de colocación era el mejor para la cámara decidimos hacer un soporte completamente fijo. Aunque pensamos cambiarlo más adelante.
 
 Decidimos eliminar también la tercera capa que tenía el primer prototipo, ya que pudimos resumir todos los componentes en una única superficie.
+
+## Lista de Materiales {:#materials-list}

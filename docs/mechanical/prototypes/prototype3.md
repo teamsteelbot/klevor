@@ -55,3 +55,5 @@ Adicionalmente, aprovechamos la estructura y ubicación del
 [RPLidar C1](../../electronic/components/current.md#rplidar-c1) para usarlo de soporte sin interferir en su función, al este estar colocado al revés, nos permite colocar en la parte superior la [Raspberry Pi Pico 2 WH](../../electronic/components/current.md#raspberry-pi-pico-2-wh), y en la parte posterior de este la [Raspberry Camera Module 3 Wide](../../electronic/components/current.md#raspberry-pi-camera-module-3-wide).
 
 Esto ayudó enormemente a solucionar nuestro problema con el peso, ya que esta modificación nos ahorró el soporte impreso de todos los componentes antes mencionados. En total, pudimos pasar de tener una capa de 42 g a una de tan solo 18 g, lo que se traduce en un Klevor que cumple con el peso reglamentario, alcanzando un peso total de 1470 g aproximadamente.
+
+## Lista de Materiales {:#materials-list}
