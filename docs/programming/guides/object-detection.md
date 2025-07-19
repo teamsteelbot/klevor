@@ -15,8 +15,8 @@ Después de haber descargado el repositorio, debemos dirigirnos a la carpeta `de
 cd devices/raspberry-pi-5/src
 ```
 
-> [!WARNING]
-> Para que dicho comando funcione correctamente, la ruta debe ser relativa a la carpeta donde se encuentra el repositorio clonado. En caso de no estar en la carpeta raíz del repositorio, se debe modificar la ruta acorde a la ubicación del mismo.
+!!! warning
+	Para que dicho comando funcione correctamente, la ruta debe ser relativa a la carpeta donde se encuentra el repositorio clonado. En caso de no estar en la carpeta raíz del repositorio, se debe modificar la ruta acorde a la ubicación del mismo.
 
 Posteriormente, nos movemos a la carpeta `yolo/scripts`:
 ```bash
@@ -55,8 +55,8 @@ Luego, ejecutamos el script `yolo/scripts/resize.py` para redimensionar las imá
 
 Posteriormente, se realizó la anotación de las imágenes, donde se etiquetaron los prismas con sus respectivos colores. Para ello, se utilizó la herramienta [Label Studio](https://labelstud.io/), una herramienta de etiquetado de datos de código abierto que permite crear conjuntos de datos personalizados para el entrenamiento de modelos de aprendizaje automático.
 
-> [!WARNING]
-> Si el número de imágenes por anotar es muy grande, notaremos que la herramienta Label Studio arrojará un error `The number of files exceeded settings.DATA_UPLOAD_MAX_NUMBER_FILES`. Para solucionarlo, si Label Studio fue instalado como un paquete de Python, se puede modificar el archivo `settings.py` que se encuentra en la carpeta `label_studio/core/settings.py`, donde se debe cambiar el valor de `DATA_UPLOAD_MAX_NUMBER_FILES` a un número mayor al número de imágenes por anotar o `None` si se desea un número ilimitado. En caso de no encontrar este archivo, se puede buscar en la carpeta `site-packages/label_studio/core/settings.py` dentro del entorno virtual de Python donde fue instalado Label Studio.
+!!! warning
+	Si el número de imágenes por anotar es muy grande, notaremos que la herramienta Label Studio arrojará un error `The number of files exceeded settings.DATA_UPLOAD_MAX_NUMBER_FILES`. Para solucionarlo, si Label Studio fue instalado como un paquete de Python, se puede modificar el archivo `settings.py` que se encuentra en la carpeta `label_studio/core/settings.py`, donde se debe cambiar el valor de `DATA_UPLOAD_MAX_NUMBER_FILES` a un número mayor al número de imágenes por anotar o `None` si se desea un número ilimitado. En caso de no encontrar este archivo, se puede buscar en la carpeta `site-packages/label_studio/core/settings.py` dentro del entorno virtual de Python donde fue instalado Label Studio.
 
 <div class="center">
    <img src="../../assets/images/object-detection/label-studio.png" alt="Anotación de imágenes con Label Studio" class="object-detection-image">
@@ -73,8 +73,8 @@ Después de haber anotado las imágenes con la plataforma Label Studio, se expor
 
 Luego, se ejecutó el script `yolo/scripts/split.py` para dividir el conjunto de datos en un conjunto de entrenamiento `yolo/dataset/g/organized/train`, un conjunto de validación `yolo/dataset/g/organized/val` y un conjunto de testing `yolo/dataset/g/organized/test`, con una distribución del 70%, 20% y 10%, respectivamente. Este script utiliza la biblioteca `os` para crear las carpetas necesarias y mover las imágenes a las carpetas correspondientes. Además, este script eliminará las imágenes de la carpeta `yolo/dataset/g/augmented`, mas no modificará o eliminará las carpetas `yolo/dataset/g/labeled/to_process` y `yolo/dataset/g/labeled/processed`.
 
-> [!INFO]
-> Se puede observar, que en cada una de las rutas, se encuentra la carpeta `to_process`, la cual es una carpeta temporal, que se utiliza para guardar las imágenes que se están procesando. Una vez que se han procesado las imágenes, los archivos dentro de las mismas se mueven a una carpeta `processed` correspondiente, la cual se encuentra en la misma ruta. De esta forma, se evita que las imágenes procesadas se mezclen con las imágenes por procesar, así como permite a futuro seguir entrenando el mismo modelo, sin necesidad de volver a procesar las mismas imágenes. Así mismo, se puede observar que tanto para `augmented` y `organized`, no existe la carpeta `to_process`, ya que, después de ser procesadas estas imágenes, son eliminadas debido al gran número de estas al momento de realizar el `data augmentation`.
+!!! info
+	Se puede observar, que en cada una de las rutas, se encuentra la carpeta `to_process`, la cual es una carpeta temporal, que se utiliza para guardar las imágenes que se están procesando. Una vez que se han procesado las imágenes, los archivos dentro de las mismas se mueven a una carpeta `processed` correspondiente, la cual se encuentra en la misma ruta. De esta forma, se evita que las imágenes procesadas se mezclen con las imágenes por procesar, así como permite a futuro seguir entrenando el mismo modelo, sin necesidad de volver a procesar las mismas imágenes. Así mismo, se puede observar que tanto para `augmented` y `organized`, no existe la carpeta `to_process`, ya que, después de ser procesadas estas imágenes, son eliminadas debido al gran número de estas al momento de realizar el `data augmentation`.
 
 ## Entrenamiento del Modelo {:#model-training}
 
@@ -85,8 +85,8 @@ Luego, se ejecutó el script `yolo/scripts/split.py` para dividir el conjunto de
 
 Primeramente, dependiendo del modelo y la forma en la que se vaya a entrenar el mismo, se debe modificar un archivo `.yaml`, los cuales se encuentran dentro de la carpeta `yolo/data`, donde se debe modificar la ruta de las imágenes y las etiquetas a las rutas correspondientes. En este caso, se debe modificar el archivo `g.yaml` para el modelo de 1 clase, cuya carpeta padre variará entre `colab` y `local` dependiendo del entorno.
 
-> [!NOTE]
-> Al momento de clonar este repositorio, se suministran archivos plantilla para los `.yaml`, los cuales terminan en `.yaml.example`. A los cuales posterior a su modificación, se les debe cambiar la extensión a `.yaml`.
+!!! note
+	Al momento de clonar este repositorio, se suministran archivos plantilla para los `.yaml`, los cuales terminan en `.yaml.example`. A los cuales posterior a su modificación, se les debe cambiar la extensión a `.yaml`.
 
 Existen dos maneras de entrenar el modelo dependiendo del equipo disponible en el momento:
 
@@ -102,8 +102,8 @@ Existen dos maneras de entrenar el modelo dependiendo del equipo disponible en e
 4. **ONNX**: Ejecutamos el script `yolo/scripts/export.py`, y pasamos como formato del modelo `onnx`, el cual es un formato abierto empleado para representar modelos de Machine Learning de forma interoperable entre distintos frameworks, herramientas, entre otros [[2](#onnx)].
 5. **Limpieza**: Finalmente, ejecutamos el script `yolo/scripts/after_training.py` para eliminar la carpeta `yolo/dataset/g/organized/val`, ya que esta no serán necesaria para los próximos pasos. Además, moverá el contenido de la carpeta `yolo/dataset/g/organized/train/images` al subdirectorio en `hailo/suite/train`, para posteriormente ser eliminada la primera. Así mismo, para que el modelo pueda ser convertido a un formato compatible con el Hailo 8, moverá los pesos de formato `ONNX` con mejor resultado correspondiente al modelo.
 
-> [!TIP]
-> En el caso de emplear Google Colab y que se desconecte la sesión del entorno de ejecución durante el entrenamiento del modelo, se puede retomar el mismo, al modificar la ruta del modelo o el nombre del modelo a emplear en la función `train_model` del Notebook, por la ruta donde se guardó los mejores pesos del entrenamiento, en nuestro caso: `g_to_train/yolo/v11/runs/m/weights/best.pt`.
+!!! tip
+	En el caso de emplear Google Colab y que se desconecte la sesión del entorno de ejecución durante el entrenamiento del modelo, se puede retomar el mismo, al modificar la ruta del modelo o el nombre del modelo a emplear en la función `train_model` del Notebook, por la ruta donde se guardó los mejores pesos del entrenamiento, en nuestro caso: `g_to_train/yolo/v11/runs/m/weights/best.pt`.
 
 <div class="center">
    <img src="../../assets/images/components/nvidia-l4.png" 
@@ -111,8 +111,8 @@ alt="Vista frontal de la GPU Tesla L4 de NVIDIA" class="component-image">
     <i>Vista frontal de la GPU Tesla L4 de NVIDIA</i>
 </div>
 
-> [!IMPORTANT]
-> Durante esta sección se menciona la versión 11 de YOLO, pero, de la misma forma que se menciona el dataset **G** a fines didácticos, se puede utilizar cualquier versión de YOLO, así como cualquier dataset, ya que el proceso es el mismo. Sin embargo, se recomienda utilizar la versión 11 de YOLO, debido a que es la más reciente y cuenta con mejoras significativas en comparación con versiones anteriores.
+!!! important
+	Durante esta sección se menciona la versión 11 de YOLO, pero, de la misma forma que se menciona el dataset **G** a fines didácticos, se puede utilizar cualquier versión de YOLO, así como cualquier dataset, ya que el proceso es el mismo. Sin embargo, se recomienda utilizar la versión 11 de YOLO, debido a que es la más reciente y cuenta con mejoras significativas en comparación con versiones anteriores.
 
 ## Conversión del Modelo {:#model-conversion}
 
@@ -137,11 +137,11 @@ Primeramente, visitamos la página oficial de Hailo, en el cual debemos crearnos
 - Paquete de Python (whl) de HailoRT, para la arquitectura donde está siendo ejecutado el Docker (en nuestro caso, x86_64), y la versión de Python del contenedor (de no ser modificado, debe ser la versión 3.10). Versión recomendada: 4.20.0.
 - Hailo Dataflow Compiler, para la arquitectura donde está siendo ejecutado el Docker (en nuestro caso, `x86_64`). Versión recomendada: 3.30.0.
 
-> [!IMPORTANT]
-> En el caso de emplear una GPU NVIDIA para la optimización del formato `.har`, también debemos instalar el [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html)
+!!! important
+	En el caso de emplear una GPU NVIDIA para la optimización del formato `.har`, también debemos instalar el [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html)
 
-> [!IMPORTANT]
-> En el caso de no conseguir uno de los paquetes, en el portal para descargar software de Hailo, se tienen dos formas para buscar los paquetes: `Latest releases` (o últimas versiones), y `Archive` (o archivados); el primero de ellos es el predeterminado. De no conseguir el respectivo paquete en `Latest releases`, este probablemente esté en `Archive`.
+!!! important
+	En el caso de no conseguir uno de los paquetes, en el portal para descargar software de Hailo, se tienen dos formas para buscar los paquetes: `Latest releases` (o últimas versiones), y `Archive` (o archivados); el primero de ellos es el predeterminado. De no conseguir el respectivo paquete en `Latest releases`, este probablemente esté en `Archive`.
 
 Posteriormente, cambiamos de nuevo el directorio actual:
 
@@ -175,8 +175,8 @@ Posteriormente, inicializamos el contenedor Docker:
     docker run -it --name compile_onnx_file --ipc=host -v {path}:/home/hailo/shared hailo_compiler:v0
     ```
 
-> [!NOTE]
-> Sustituimos `path` por la ruta absoluta de la carpeta `hailo/suite`.
+!!! note
+	Sustituimos `path` por la ruta absoluta de la carpeta `hailo/suite`.
 
 Dentro del contenedor, nos movemos al directorio `/home/hailo/shared/libs`:
 ```bash
@@ -216,19 +216,19 @@ Instalamos todas las dependencias requeridas:
 pip install -e .
 ```
 
-> [!WARNING]
-> En el caso de obtener un error similar a:
-> ```bash
-> ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.
-> tensorflow 2.12.0 requires numpy<1.24,>=1.22, but you have numpy 2.2.6 
-> which is incompatible.
-> hailo-dataflow-compiler 3.30.0 requires numpy==1.23.3, but you have numpy 2.
-> 2.6 which is incompatible.
-> ```
-> Debemos modificar el archivo `setup.py` que se encuentra dentro del repositorio, y en la línea 44, dentro de la función `main`, sustituimos `"numpy"` por `"numpy==1.23.3"`, así como en la línea 46, sustituimos `"scipy"` por`"scipy==1.9.3"`. Reintentamos el comando: 
-> ```bash
-> pip install -e .
-> ```
+!!! warning
+	En el caso de obtener un error similar a:
+	```bash
+	ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.
+	tensorflow 2.12.0 requires numpy<1.24,>=1.22, but you have numpy 2.2.6 
+	which is incompatible.
+	hailo-dataflow-compiler 3.30.0 requires numpy==1.23.3, but you have numpy 2.
+	2.6 which is incompatible.
+	```
+	Debemos modificar el archivo `setup.py` que se encuentra dentro del repositorio, y en la línea 44, dentro de la función `main`, sustituimos `"numpy"` por `"numpy==1.23.3"`, así como en la línea 46, sustituimos `"scipy"` por`"scipy==1.9.3"`. Reintentamos el comando: 
+	```bash
+	pip install -e .
+	```
 
 Evaluamos si los paquetes se han instalado correctamente con el siguiente comando: 
 ```bash
@@ -309,8 +309,8 @@ En este momento, ya podemos probar tanto que todo esté funcionando correctament
     python basic_pipelines/detection.py --input {imagen} --labels-json ../labels/g.json --hef-path ../../v11/runs/g/weights/compiled.hef
     ```
 
-> [!NOTE]
-> Sustituimos `imagen` por la ruta de la imagen a probar.
+!!! note
+	Sustituimos `imagen` por la ruta de la imagen a probar.
 
 Esto abrirá una ventana con la cámara, donde se mostrarán los cuadros delimitadores y las etiquetas de los objetos detectados. Si todo está funcionando correctamente, deberíamos ver los objetos detectados en tiempo real.
 

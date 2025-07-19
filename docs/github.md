@@ -22,8 +22,8 @@ class="logo--3rd-party">
     <i>Logo de Git</i>
 </div>
 
-> [!NOTE]
-> Para poder clonar el repositorio, es necesario tener instalado Git en tu computadora. Puedes descargarlo desde [aquí](https://git-scm.com/downloads).
+!!! note
+	Para poder clonar el repositorio, es necesario tener instalado Git en tu computadora. Puedes descargarlo desde [aquí](https://git-scm.com/downloads).
 
 ## Estructura del Repositorio {:#repository-structure}
 

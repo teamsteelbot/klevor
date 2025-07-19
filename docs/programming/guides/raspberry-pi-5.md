@@ -25,8 +25,8 @@ Raspberry Pi OS es el sistema operativo oficial para las Raspberry Pi, basado en
     <i>Raspberry Pi Imager</i>
 </div>
 
-> [!IMPORTANT]
-> Por experiencia propia, recomendamos la configuración de la aplicación oficial de Raspberry Pi para conexión remota, Raspberry Pi Connect, que permite acceder a la Raspberry Pi desde cualquier lugar y sin necesidad de estar conectado a la misma red wifi [[2](#raspberry-pi-connect)]. En nuestro caso, en reiteradas ocasiones nos permitió de forma remota, a través del modo Remote Shell, eliminar procesos que han producido un crash o han limitado la repuesta de la Raspberry Pi.
+!!! important
+	Por experiencia propia, recomendamos la configuración de la aplicación oficial de Raspberry Pi para conexión remota, Raspberry Pi Connect, que permite acceder a la Raspberry Pi desde cualquier lugar y sin necesidad de estar conectado a la misma red wifi [[2](#raspberry-pi-connect)]. En nuestro caso, en reiteradas ocasiones nos permitió de forma remota, a través del modo Remote Shell, eliminar procesos que han producido un crash o han limitado la repuesta de la Raspberry Pi.
 
 ## Instalación de la Cámara {:#camera-installation}
 
@@ -45,8 +45,8 @@ Para instalar la cámara en la Raspberry Pi, se debe seguir los siguientes pasos
    ```
 3. Si la cámara funciona correctamente, se mostrará una vista previa de la cámara en la pantalla por unos segundos.
 
-> [!IMPORTANT]
-> En caso de estar interesado en adquirir algún tipo de Raspberry Pi Camera, se debe comprar un cable aparte dependiendo del proveedor, ya que normalmente estas vienen con el cable para la Raspberry Pi 4, el cual no es el mismo.
+!!! important
+	En caso de estar interesado en adquirir algún tipo de Raspberry Pi Camera, se debe comprar un cable aparte dependiendo del proveedor, ya que normalmente estas vienen con el cable para la Raspberry Pi 4, el cual no es el mismo.
 
 ## Instalación de Raspberry Pi AI HAT+ {:#raspberry-pi-ai-hat-plus-installation}
 
@@ -182,8 +182,8 @@ Para ello, nos aseguramos primero de que el script de Shell `run.sh` sea ejecuta
 chmod +x run.sh
 ```
 
-> [!NOTE]
-> Necesitamos estar en el directorio `devices/raspberry_pi_5` para que el comando anterior funcione correctamente.
+!!! note
+	Necesitamos estar en el directorio `devices/raspberry_pi_5` para que el comando anterior funcione correctamente.
 
 Posteriormente, creamos un archivo de servicio en el directorio `/etc/systemd/system/` con el nombre `klevor.service` con el siguiente comando:
 ```bash
@@ -209,9 +209,9 @@ Restart=on-failure
 WantedBy=multi-user.target
 ```
 
-> [!NOTE]
-> Reemplazamos `user` por el nombre de usuario de la Raspberry Pi, que por defecto es `pi`.
-> Así mismo, reemplazamos `/home/pi/Documents/klevor/devices/raspberry_pi_5/run.sh` con la ruta completa al script `run.sh` que se encuentra en el directorio del repositorio clonado. De igual forma, ajustamos la ruta del `WorkingDirectory` al directorio donde se encuentra el script `run.sh`.
+!!! note
+	Reemplazamos `user` por el nombre de usuario de la Raspberry Pi, que por defecto es `pi`.
+	Así mismo, reemplazamos `/home/pi/Documents/klevor/devices/raspberry_pi_5/run.sh` con la ruta completa al script `run.sh` que se encuentra en el directorio del repositorio clonado. De igual forma, ajustamos la ruta del `WorkingDirectory` al directorio donde se encuentra el script `run.sh`.
 
 Guardamos los cambios y salimos del editor de texto (en nano, presionamos `Ctrl + X`, luego `Y` para confirmar los cambios y finalmente `Enter`).
 
@@ -225,19 +225,19 @@ Finalmente, habilitamos el servicio para que se inicie automáticamente al arran
 sudo systemctl enable klevor.service
 ```
 
-> [!NOTE]
-> Si en algún momento necesitas detener el servicio, puedes hacerlo con el siguiente comando:
-> ```bash
-> sudo systemctl stop klevor.service
-> ```
+!!! note
+	Si en algún momento necesitas detener el servicio, puedes hacerlo con el siguiente comando:
+	```bash
+	sudo systemctl stop klevor.service
+	```
 
 Reiniciamos la Raspberry Pi para que los cambios surtan efecto. A partir de ahora, el robot se iniciará automáticamente al encender la Raspberry Pi.
 
-> [!IMPORTANT]
-> Por la lógica del código, el robot no se moverá hasta que sea pulsado el botón o switch de encendido, como se indica en el diagrama de conexiones del robot. Esto es para evitar que el robot se mueva accidentalmente al encender la Raspberry Pi. Puedes ver el diagrama de conexiones en la sección de [Electrónica](../../electronic/diagrams/wiring.md#wiring-diagrams).
+!!! important
+	Por la lógica del código, el robot no se moverá hasta que sea pulsado el botón o switch de encendido, como se indica en el diagrama de conexiones del robot. Esto es para evitar que el robot se mueva accidentalmente al encender la Raspberry Pi. Puedes ver el diagrama de conexiones en la sección de [Electrónica](../../electronic/diagrams/wiring.md#wiring-diagrams).
 
-> [!IMPORTANT]
-> En el caso de que creas que el robot no se haya iniciado correctamente, puedes revisar el estado del servicio con el siguiente comando:
+!!! important
+	En el caso de que creas que el robot no se haya iniciado correctamente, puedes revisar el estado del servicio con el siguiente comando:
 > ```bash
 > sudo systemctl status klevor.service
 > ```
