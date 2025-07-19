@@ -1,13 +1,20 @@
-# IDEs
+# JetBrains IDEs
 .idea
+/**/*/.idea
+
+# VS Code
 .vscode
+/**/*/.vscode
 
 # Virtual environment
-/.venv
-/**/*/.venv/**/*
+.venv
+.env
+/**/*/.venv
+/**/*/.env
 
 # Python
-/**/*/__pycache__/**/*
+__pycache__
+/**/*/__pycache__
 
 # Circuit Python settings.toml
 /**/*/settings.toml
@@ -42,3 +49,4 @@
 
 # MkDocs
 /site
+/**/*/site
