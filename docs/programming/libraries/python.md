@@ -3,7 +3,7 @@
 ## PyTorch {:#pytorch}
 
 <div class="center">
-    <img src="../../assets/images/logo/pytorch.png" alt="PyTorch" class="logo--3rd-party">
+    <img src="../../assets/images/logo/pytorch.png" alt="PyTorch" class="logo--3rd-party" width="300">
     <i>Logo de PyTorch</i>
 </div>
 
@@ -14,7 +14,7 @@ Al igual que muchas de las librerías ya mencionadas, PyTorch es bastante útil 
 ## Ultralytics YOLO {:#ultralytics-yolo}
 
 <div class="center">
-    <img src="../../assets/images/logo/ultralytics.png" alt="Ultralytics" class="logo--3rd-party">
+    <img src="../../assets/images/logo/ultralytics.png" alt="Ultralytics" class="logo--3rd-party" width="300">
     <i>Logo de Ultralytics</i>
 </div>
 
@@ -31,7 +31,7 @@ La tarea central de YOLO. Identifica la ubicación de objetos en una imagen/vide
 ## OpenCV {:#opencv}
 
 <div class="center">
-    <img src="../../assets/images/logo/opencv.png" alt="OpenCV" class="logo--3rd-party">
+    <img src="../../assets/images/logo/opencv.png" alt="OpenCV" class="logo--3rd-party" width="300">
     <i>Logo de OpenCV</i>
 </div>
 
@@ -44,7 +44,7 @@ Su propósito principal es proporcionar una infraestructura común para aplicaci
 ## NumPy {:#numpy}
 
 <div class="center">
-    <img src="../../assets/images/logo/numpy.png" alt="Numpy" class="logo--3rd-party">
+    <img src="../../assets/images/logo/numpy.png" alt="Numpy" class="logo--3rd-party" width="300">
     <i>Logo de NumPy</i>
 </div>
 
@@ -59,7 +59,7 @@ El propósito general es permitir operaciones numéricas rápidas y eficientes e
 ## PiCamera 2 {:#picamera-2}
 
 <div class="center">
-    <img src="../../assets/images/logo/raspberry-pi.png" alt="Picamera 2" class="logo--3rd-party">
+    <img src="../../assets/images/logo/raspberry-pi.png" alt="Picamera 2" class="logo--3rd-party" width="300">
     <i>Logo de Raspberry Pi</i>
 </div>
 
@@ -75,7 +75,7 @@ Además de, obviamente, permitir la toma de imágenes y videos.
 ## Hailo Platform {:#hailo-platform}
 
 <div class="center">
-    <img src="../../assets/images/logo/hailo.png" alt="Hailo Platform" class="logo--3rd-party">
+    <img src="../../assets/images/logo/hailo.png" alt="Hailo Platform" class="logo--3rd-party" width="300">
     <i>Logo de Hailo Platform</i>
 </div>
 
@@ -91,6 +91,15 @@ Además de esto, la Hailo Platform también incluye múltiples librerías, el ob
 
 ## MkDocs {:#mkdocs}
 
+<div class="center">
+    <img src="../../assets/images/logo/mkdocs.png" alt="MkDocs" class="logo--3rd-party" width="300">
+    <i>Logo de MkDocs</i>
+</div>
+
+MkDocs fue lanzado en su versión 0.2 el 21 de enero de 2014, Tom Christie siendo el principal desarrollador de la misma librería, sin embargo, al ser un proyecto open-source (de código abierto), MkDocs ha recibido aporte de parte de comunidades y usuarios en vista de mejorar y optimizar su código fuente [[7](#mkdocs-documentation)].
+
+MkDocs tiene como objetivo principal ser un generador de sitios rápido, sencillo, y atractivo en su apartado visual, diseñado específicamente para ayudar en la documentación de proyectos. Gracias a MkDocs, podemos generar este sitio por el cual están viendo la documentación de Klevor, decidimos utilizar MkDocs principalmente para organizar de manera más eficiente todos los ítems de esta documentación, de manera que, se les haga más fácil a las personas revisar un ítem en específico de Klevor.
+
 # Referencias Bibliográficas
 
 1. *PyTorch Documentation*. (2025). PyTorch Contributors. <a id="pytorch-docs" href="https://docs.pytorch.org/docs/stable/index.html">https://docs.pytorch.org/docs/stable/index.html</a>
@@ -104,3 +113,5 @@ Además de esto, la Hailo Platform también incluye múltiples librerías, el ob
 5. *The PiCamera 2 Library*. (2025). Raspberry Pi Ltd. <a id="the-picamera2-library" href="https://datasheets.raspberrypi.com/camera/picamera2-manual.pdf">https://datasheets.raspberrypi.com/camera/picamera2-manual.pdf</a>
 
 6. *Hailo AI Software Suite*. (2025). Hailo Technologies Ltd. <a id="hailo-ai-software-suite" href="https://hailo.ai/products/hailo-software/hailo-ai-software-suite/#sw-overview">https://hailo.ai/products/hailo-software/hailo-ai-software-suite/#sw-overview</a>
+
+7. *MkDocs*. (2025). Tom Christie. <a id="mkdocs-documentation" href="https://www.mkdocs.org/">https://www.mkdocs.org/</a>
