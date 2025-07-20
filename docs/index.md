@@ -97,6 +97,7 @@ class="picture--team">
             5. [PiCamera2](programming/libraries/python.md#picamera-2)
             6. [Hailo Platform](programming/libraries/python.md#hailo-platform)
             7. [MkDocs](programming/libraries/python.md#mkdocs)
+            8. [WeasyPrint](programming/libraries/python.md#weasyprint)
         2. [CircuitPython](programming/libraries/circuit-python.md#circuit-python)
 			1. [Adafruit Motor](programming/libraries/circuit-python.md#adafruit-motor)
 			2. [Adafruit BNO08X](programming/libraries/circuit-python.md#adafruit-bno08x)

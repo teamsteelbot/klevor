@@ -92,13 +92,19 @@ Además de esto, la Hailo Platform también incluye múltiples librerías, el ob
 ## MkDocs {:#mkdocs}
 
 <div class="center">
-    <img src="../../assets/images/logo/mkdocs.png" alt="MkDocs" class="logo--3rd-party">
+    <img src="../../assets/images/logo/mkdocs.png" alt="Logo de MkDocs" class="logo--3rd-party">
     <i>Logo de MkDocs</i>
 </div>
 
 MkDocs fue lanzado en su versión 0.2 el 21 de enero de 2014, Tom Christie siendo el principal desarrollador de la misma librería, sin embargo, al ser un proyecto open-source (de código abierto), MkDocs ha recibido aporte de parte de comunidades y usuarios en vista de mejorar y optimizar su código fuente [[7](#mkdocs-documentation)].
 
 MkDocs tiene como objetivo principal ser un generador de sitios rápido, sencillo, y atractivo en su apartado visual, diseñado específicamente para ayudar en la documentación de proyectos. Gracias a MkDocs, podemos generar este sitio por el cual están viendo la documentación de Klevor, decidimos utilizar MkDocs principalmente para organizar de manera más eficiente todos los ítems de esta documentación, de manera que, se les haga más fácil a las personas revisar un ítem en específico de Klevor.
+
+## WeasyPrint {:#weasyprint}
+
+WeasyPrint fue creado por Simon Sapin, y el proyecto ha sido desarrollado y mantenido por el equipo de Kozea. Actualmente, el soporte profesional, la gestión comunitaria y el mantenimiento están a cargo de CourtBouillon, una organización que también ofrece servicios de consultoría y patrocinio para mejorar y expandir WeasyPrint. WeasyPrint es una librería de Python que permite generar documentos PDF a partir de archivos HTML y CSS. Fue lanzada por primera vez en 2011, y desde entonces ha evolucionado para convertirse en una herramienta robusta y versátil para la creación de documentos PDF de alta calidad [[8](#weasyprint-documentation)].
+
+En Klevor, utilizamos WeasyPrint para generar documentos PDF a partir de la documentación escrita en Markdown. Esto nos permite crear una versión imprimible y fácilmente compartible de la documentación, lo que es especialmente útil para aquellos que prefieren leer en formato físico o necesitan compartir la documentación con personas que no tienen acceso a Internet.
 
 # Referencias Bibliográficas
 
@@ -115,3 +121,5 @@ MkDocs tiene como objetivo principal ser un generador de sitios rápido, sencill
 6. *Hailo AI Software Suite*. (2025). Hailo Technologies Ltd. <a id="hailo-ai-software-suite" href="https://hailo.ai/products/hailo-software/hailo-ai-software-suite/#sw-overview">https://hailo.ai/products/hailo-software/hailo-ai-software-suite/#sw-overview</a>
 
 7. *MkDocs*. (2025). Tom Christie. <a id="mkdocs-documentation" href="https://www.mkdocs.org/">https://www.mkdocs.org/</a>
+
+8. *WeasyPrint*. (2025). WeasyPrint Developers. <a id="weasyprint-documentation" href="https://weasyprint.org/">https://weasyprint.org/</a>
