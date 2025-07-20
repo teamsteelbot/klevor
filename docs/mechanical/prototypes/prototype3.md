@@ -57,3 +57,27 @@ Adicionalmente, aprovechamos la estructura y ubicación del
 Esto ayudó enormemente a solucionar nuestro problema con el peso, ya que esta modificación nos ahorró el soporte impreso de todos los componentes antes mencionados. En total, pudimos pasar de tener una capa de 42 g a una de tan solo 18 g, lo que se traduce en un Klevor que cumple con el peso reglamentario, alcanzando un peso total de 1470 g aproximadamente.
 
 ## Lista de Materiales {:#materials-list}
+
+| Componente                                             | Unidad | Costo por Unidad ($)| Total ($) |
+|--------------------------------------------------------|--------|---------------------|-----------|
+| Raspberry Pi 5                                         | 1      | 120.00              | 120.00    |
+| Raspberry Pi AI HAT+                                   | 1      | 139.95              | 139.95    |
+| Micro SD 512GB                                         | 1      | 29.99               | 29.99     |
+| RPLiDAR C1                                             | 1      | 75.90               | 75.90     |
+| Raspberry Pi Camera Module 3                           | 1      | 35.00               | 35.00     |
+| Case para la Raspberry Pi Camera Module 3              | 1      | 5.99                | 5.99      |
+| Cable para la cámara de la Raspberry Pi 5 de 50cm      | 1      | 9.79                | 9.79      |
+| URGENEX 3000mAh Battery                                | 1      | 26.99               | 26.99     |
+| Giroscopio BNO085                                      | 1      | 18.59               | 18.59     |
+| INJORA 7Kg 2065 Servo                                  | 1      | 17.98               | 17.98     |
+| INJORA MB100 20A Brushed Mini ESC                      | 1      | 32.99               | 32.99     |
+| INJORA 180 48T Motor PRO                               | 1      | 13.99               | 13.99     |
+| Raspberry Pi Pico 2WH                                  | 1      | 14.99               | 14.99     |
+| Raspberry Pi Pico 2WH Breakout Board                   | 1      | 14.94               | 14.94     |
+| Shargeek Storm 2                                       | 1      | 146.69              | 146.69    |
+| Aluminium Alloy Front & Rear Steering Knuckle Hub Base | 1      | 18.38               | 18.38     |
+| RC Car Metal Differential Kit 1/18                     | 1      | 23.28               | 23.28     |
+| 10PCS Toy Car Wheels 35mm                              | 1      | 7.99                | 7.99      |
+| Metal Upgrade Drive Shaft Driving Gear                 | 1      | 26.99               | 26.99     |
+
+**Total para los Componentes: $780.42**
