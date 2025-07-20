@@ -72,6 +72,7 @@ nav:
         - Glosario de Términos: programming/glossary.md
         - Guías:
             - Guía de MkDocs: programming/guides/mkdocs.md
+            - Guía de WeasyPrint: programming/guides/weasyprint.md
             - Guía de CircuitPython: programming/guides/circuit-python.md
             - Guía de MicroPython: programming/guides/micro-python.md
             - Guía de Raspberry Pi 5: programming/guides/raspberry-pi-5.md
