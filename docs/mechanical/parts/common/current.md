@@ -16,7 +16,7 @@ En este modelo 3D podemos ver cómo está diseñado este sistema. Pasaremos a mo
 	<i>Base del sistema reductor de RPM</i>
 </div>
 
- Es el cuerpo en el que se ensamblan todos los componentes de este sistema.
+Es el cuerpo en el que se ensamblan todos los componentes de este sistema.
 
 ### Piñones {:#rpm-reduction-system-gears}
 
@@ -77,15 +77,14 @@ Los bujes sostienen a los ejes y a su vez permiten el giro de los engranajes.
 ### Separador en forma de cruceta {:#cross-shaped-separator}
 
 <div class="center">
-	<img src="../../../assets/images/github/models/plans/common/current/servo-4-pointed-crosshead.png" alt="Separador en forma de cruceta" class="mechanical
--image">
+	<img src="../../../assets/images/github/models/plans/common/current/servo-4-pointed-crosshead.png" alt="Separador en forma de cruceta" class="mechanical-image">
 	<i>Separador en forma de cruceta</i>
 </div>
 
 Se conecta con el buje que está detrás del piñón de 36 dientes. Este encaja con el buje y con uno de los ejes.
 
 ## Sistema Motriz {:#drivetrain-system}
- 
+
 ### Diferenciales {:#differentials}
 
 <div class="center">
@@ -102,13 +101,12 @@ Todo nuestro sistema motriz se basa en 2 diferenciales que hacen que las cuatro 
 	<i>Caja de diferencial</i>
 </div>
 
-Acá es dónde se guarda el diferencial y salen los componentes que permiten el giro de la rueda. 
+Acá es dónde se guarda el diferencial y salen los componentes que permiten el giro de la rueda.
 
 ### Eje transmisor {:#transmission-shaft}
 
 <div class="center">
-	<img src="../../../assets/images/github/models/plans/common/current/main-transmission-shaft.png" alt="Eje transmisor" class="mechanical
--image">
+	<img src="../../../assets/images/github/models/plans/common/current/main-transmission-shaft.png" alt="Eje transmisor" class="mechanical-image">
 	<i>Eje transmisor</i>
 </div>
 
@@ -130,7 +128,7 @@ La usamos en el diferencial, está diseñado para encajar con el semieje, hacien
 	<i>Nudillos traseros</i>
 </div>
 
- s la pieza que sostiene directamente la rueda, encaja con las copas transmisoras.
+s la pieza que sostiene directamente la rueda, encaja con las copas transmisoras.
 
 ### Nudillos delanteros {:#front-knuckles}
 

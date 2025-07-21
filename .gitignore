@@ -50,3 +50,6 @@ __pycache__
 # MkDocs
 /site
 /**/*/site
+
+# PDF
+/**/*/teamsteelbot.pdf

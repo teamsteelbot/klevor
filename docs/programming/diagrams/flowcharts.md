@@ -5,8 +5,7 @@
 ### Versión 1: Empleada en el Prototipo 1, 2 y 3 {:#without-obstacles-challenge-version1}
 
 <div class="center">
-    <img src="../../assets/images/github/schemes/flowcharts/without-obstacles-challenge/version1-flowchart.png"
-alt="Versión 1 del diagrama de Flujo del Desafío sin Obstáculos" class="flowchart-image">
+    <img src="../../assets/images/github/schemes/flowcharts/without-obstacles-challenge/version1-flowchart.png" alt="Versión 1 del diagrama de Flujo del Desafío sin Obstáculos" class="flowchart-image">
     <i>Versión 1 del diagrama de Flujo del Desafío sin Obstáculos</i>
 </div>
 
@@ -19,8 +18,7 @@ Como se puede apreciar, Klevor siempre intenta cumplir una serie de pasos:
 ### Versión 2: Empleada en el Prototipo 3 y 4 {:#without-obstacles-challenge-version2}
 
 <div class="center">
-    <img src="../../assets/images/github/schemes/flowcharts/without-obstacles-challenge/version2-flowchart.png" 
-alt="Versión 2 del diagrama de Flujo del Desafío sin Obstáculos" class="flowchart-image">
+    <img src="../../assets/images/github/schemes/flowcharts/without-obstacles-challenge/version2-flowchart.png" alt="Versión 2 del diagrama de Flujo del Desafío sin Obstáculos" class="flowchart-image">
     <i>Versión 2 del diagrama de Flujo del Desafío sin Obstáculos</i>
 </div>
 

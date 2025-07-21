@@ -33,8 +33,7 @@ Primeramente, debemos comprender distintos conceptos relacionados con la detecci
 Para la visión por computadora, las imágenes se expresan como funciones continuas en un plano de coordenadas 2D representadas como f(x, y). Cuando se digitalizan, las imágenes pasan por dos procesos primarios llamados muestreo y cuantización, que, en resumen, convierten la función de imagen continua en una estructura de cuadrícula discreta de elementos que representan píxeles [[2](#object-detection-ibm)].
 
 <div class="center">
-   <img src="../assets/images/app/object-detection.png" 
-alt="Imagen con distintas anotaciones de manzanas" class="app-image">
+   <img src="../assets/images/app/object-detection.png" alt="Imagen con distintas anotaciones de manzanas" class="app--image">
    <i>Imagen con distintas anotaciones de manzanas</i>
 </div>
 
