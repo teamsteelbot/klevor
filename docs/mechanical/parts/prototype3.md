@@ -1,6 +1,6 @@
 # Prototipo 3 {:#prototype3}
 
-## Base de la Capa Inferior {#bottom-layer-mounting}
+## Base de la Capa Inferior {:#bottom-layer-mounting}
 
 <div class="center">
 	<img src="../../assets/images/github/models/plans/prototype3/bottom-layer-mounting.png" alt="Base de la Capa Inferior" class="mechanical-image">
@@ -9,7 +9,7 @@
 
 Se hicieron cambios drásticos, principalmente modificando el grosor de la capa y añadiendo nuevos huecos, toda la base está hecha a medida de los componentes que estamos usando.
 
-## Soporte Superior de la Caja del Diferencial (Delgado) {#differential-gearbox-upper-mounting--thin}
+## Soporte Superior de la Caja del Diferencial (Delgado) {:#differential-gearbox-upper-mounting--thin}
 
 <div class="center">
 	<img src="../../assets/images/github/models/plans/prototype3/differential-box-upper-mounting--thin.png" alt="Soporte Superior de la Caja del Diferencial (Delgado)" class="mechanical-image">
@@ -18,7 +18,7 @@ Se hicieron cambios drásticos, principalmente modificando el grosor de la capa 
 
 Realizado para sostener con total firmeza la capa superior, se ensambla en la caja del diferencial trasera.
 
-## Soporte Superior de la Caja del Diferencial (Grueso) {#differential-gearbox-upper-mounting--wide}
+## Soporte Superior de la Caja del Diferencial (Grueso) {:#differential-gearbox-upper-mounting--wide}
 
 <div class="center">
 	<img src="../../assets/images/github/models/plans/prototype3/differential-box-upper-mounting--wide.png" alt="Soporte Superior de la Caja del Diferencial (Grueso)" class="mechanical-image">
@@ -27,7 +27,7 @@ Realizado para sostener con total firmeza la capa superior, se ensambla en la ca
 
 El espacio central es más ancho porque se ensambla en la caja del diferencial frontal con el soporte superior de los nudillos. Encima de esta, se ubica nuestro [RPLiDAR C1](../../electronic/components/current.md#rplidar-c1).
 
-## Base de la Capa Superior {#top-layer-mounting}
+## Base de la Capa Superior {:#top-layer-mounting}
 
 <div class="center">
 	<img src="../../assets/images/github/models/plans/prototype3/top-layer-mounting.png" alt="Base de la Capa Superior" class="mechanical-image">

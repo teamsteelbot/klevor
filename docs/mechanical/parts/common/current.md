@@ -1,6 +1,6 @@
 # Piezas Comunes {:#common-parts}
 
-## Sistema reductor de RPM {#rpm-reduction-system}
+## Sistema reductor de RPM {:#rpm-reduction-system}
 
 <div class="center">
 	<img src="../../../assets/images/github/models/views/common/current/rpm-reduction-system.png" alt="Sistema reductor de RPM" class="mechanical-image">
@@ -9,7 +9,7 @@
 
 En este modelo 3D podemos ver cómo está diseñado este sistema. Pasaremos a mostrar y explicar las piezas que lo conforman.
 
-### Base del sistema {#rpm-reduction-system-base}
+### Base del sistema {:#rpm-reduction-system-base}
 
 <div class="center">
 	<img src="../../../assets/images/github/models/plans/common/current/rpm-reduction-system-mounting.png" alt="Base del sistema reductor de RPM" class="mechanical-image">
@@ -18,7 +18,7 @@ En este modelo 3D podemos ver cómo está diseñado este sistema. Pasaremos a mo
 
  Es el cuerpo en el que se ensamblan todos los componentes de este sistema.
 
-### Piñones {#rpm-reduction-system-gears}
+### Piñones {:#rpm-reduction-system-gears}
 
 <div class="center mechanical-images-container">
 	<div class="center">
@@ -45,7 +45,7 @@ En este modelo 3D podemos ver cómo está diseñado este sistema. Pasaremos a mo
 
 Esta es la parte más importante de nuestro sistema, son los que hacen que el motor pierda velocidad, pero que a su vez, gane fuerza. Estos engranajes son sobrantes de kits, pero quisimos adecuarlos a nuestro sistema para que no fuesen desperdiciadas.
 
-### Eje principal {#rpm-reduction-system-main-shaft}
+### Eje principal {:#rpm-reduction-system-main-shaft}
 
 <div class="center">
 	<img src="../../../assets/images/github/models/plans/common/current/rpm-reduction-system-shaft.png" alt="Eje del sistema reductor de RPM" class="mechanical-image">
@@ -54,7 +54,7 @@ Esta es la parte más importante de nuestro sistema, son los que hacen que el mo
 
 Usamos dos de estos ejes, funcionan sujetando los piñones a una altura fija. Esta pieza también es reutilizada.
 
-### Separadores {#rpm-reduction-system-separators}
+### Separadores {:#rpm-reduction-system-separators}
 
 <div class="center">
 	<img src="../../../assets/images/github/models/plans/common/current/lego-3-5-separator.png" alt="Separadores del sistema reductor de RPM" class="mechanical-image">
@@ -63,7 +63,7 @@ Usamos dos de estos ejes, funcionan sujetando los piñones a una altura fija. Es
 
 Se encargan de mantener los engranajes en un mismo sitio para que estos coincidan en sus giros. Esta también es una pieza reutilizada. Usamos tres unidades
 
-### Bujes {#rpm-reduction-system-bushings}
+### Bujes {:#rpm-reduction-system-bushings}
 
 <div class="center">
 	<img src="../../../assets/images/github/models/plans/common/current/transmission-mount-bushing.png" alt="Bujes del sistema reductor de RPM" class="mechanical-image">
@@ -72,9 +72,9 @@ Se encargan de mantener los engranajes en un mismo sitio para que estos coincida
 
 Los bujes sostienen a los ejes y a su vez permiten el giro de los engranajes.
 
-## Servo {#servo}
+## Servo {:#servo}
 
-### Separador en forma de cruceta {#cross-shaped-separator}
+### Separador en forma de cruceta {:#cross-shaped-separator}
 
 <div class="center">
 	<img src="../../../assets/images/github/models/plans/common/current/servo-4-pointed-crosshead.png" alt="Separador en forma de cruceta" class="mechanical
@@ -84,9 +84,9 @@ Los bujes sostienen a los ejes y a su vez permiten el giro de los engranajes.
 
 Se conecta con el buje que está detrás del piñón de 36 dientes. Este encaja con el buje y con uno de los ejes.
 
-## Sistema Motriz {#drivetrain-system}
+## Sistema Motriz {:#drivetrain-system}
  
-### Diferenciales {#differentials}
+### Diferenciales {:#differentials}
 
 <div class="center">
 	<img src="../../../assets/images/github/models/plans/common/current/differential.png" alt="Diferenciales" class="mechanical-image">
@@ -95,7 +95,7 @@ Se conecta con el buje que está detrás del piñón de 36 dientes. Este encaja 
 
 Todo nuestro sistema motriz se basa en 2 diferenciales que hacen que las cuatro ruedas tengan tracción.
 
-### Caja de diferencial {#gearbox}
+### Caja de diferencial {:#gearbox}
 
 <div class="center">
 	<img src="../../../assets/images/github/models/plans/common/current/gearbox.png" alt="Caja de diferencial" class="mechanical-image">
@@ -104,7 +104,7 @@ Todo nuestro sistema motriz se basa en 2 diferenciales que hacen que las cuatro 
 
 Acá es dónde se guarda el diferencial y salen los componentes que permiten el giro de la rueda. 
 
-### Eje transmisor {#transmission-shaft}
+### Eje transmisor {:#transmission-shaft}
 
 <div class="center">
 	<img src="../../../assets/images/github/models/plans/common/current/main-transmission-shaft.png" alt="Eje transmisor" class="mechanical
@@ -114,7 +114,7 @@ Acá es dónde se guarda el diferencial y salen los componentes que permiten el 
 
 Se encarga de conectar ambos diferenciales, para que las cuatro ruedas se muevan por igual.
 
-### Copas transmisoras {#transmission-cups}
+### Copas transmisoras {:#transmission-cups}
 
 <div class="center">
 	<img src="../../../assets/images/github/models/plans/common/current/transmission-cup.png" alt="Copas transmisoras" class="mechanical-image">
@@ -123,7 +123,7 @@ Se encarga de conectar ambos diferenciales, para que las cuatro ruedas se muevan
 
 La usamos en el diferencial, está diseñado para encajar con el semieje, haciendo que tras ruedas tengan movimiento.
 
-### Nudillos traseros {#rear-knuckles}
+### Nudillos traseros {:#rear-knuckles}
 
 <div class="center">
 	<img src="../../../assets/images/github/models/plans/common/current/back-knuckle.png" alt="Nudillos traseros" class="mechanical-image">
@@ -132,7 +132,7 @@ La usamos en el diferencial, está diseñado para encajar con el semieje, hacien
 
  s la pieza que sostiene directamente la rueda, encaja con las copas transmisoras.
 
-### Nudillos delanteros {#front-knuckles}
+### Nudillos delanteros {:#front-knuckles}
 
 <div class="center">
 	<img src="../../../assets/images/github/models/plans/common/current/front-knuckle.png" alt="Nudillos delanteros" class="mechanical-image">
@@ -141,7 +141,7 @@ La usamos en el diferencial, está diseñado para encajar con el semieje, hacien
 
 También se encarga de conectarse con la rueda y con una copa transmisora, pero a diferencia del nudillo trasero este es un poco más alargado, para encajar con las barras del sistema Ackermann.
 
-### Ruedas {#wheels}
+### Ruedas {:#wheels}
 
 <div class="center">
 	<img src="../../../assets/images/github/models/plans/common/current/wheels.png" alt="Ruedas" class="mechanical-image">

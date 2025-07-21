@@ -29,7 +29,7 @@ class="picture--team">
     <i>Team Steel Bot en la competencia regional del Salto Ángel</i>
 </div>
 
-## Índice {#index}
+## Índice {:#index}
 
 1. **[Nosotros](about.md)**
 2. **Electrónica**
@@ -188,7 +188,7 @@ class="picture--team">
     3. [Steel C.A.](sponsors.md#steel-ca)
 10. **[Contacto](contact.md)**
 
-## Patrocinadores {#sponsors}
+## Patrocinadores {:#sponsors}
 
 <div class="center">
     <a href="sponsors.html#viajes-giorgio">

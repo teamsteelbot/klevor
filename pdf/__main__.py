@@ -34,16 +34,23 @@ if __name__ == '__main__':
             # Parse the HTML with BeautifulSoup
             soup = BeautifulSoup(md_html_body, 'html.parser')
 
-            # Extract the images
+            # Iterate over all <img> tags to convert relative paths
             images = soup.find_all('img')
-
             for img in images:
                 img_src = img.get('src')
                 if img_src and not img_src.startswith(('http://', 'https://')):
                     # Convert relative image paths
                     img_src = os.path.normpath(os.path.join(md_file_directory_path, img_src))
-                    print(f'Converting image path: {img_src}')
                     img['src'] = img_src
+
+            # Iterate over all <h1> to <h6> tags to remove the ID
+            headers = soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
+            for header in headers:
+                # Remove the {:#id} part from the header text
+                header_text = header.get_text()
+                if '{:#' in header_text:
+                    header_text = header_text.split('{:#')[0].strip()
+                    header.string = header_text
 
             html_body += str(soup)
             html_body += BREAK_PAGE_HTML

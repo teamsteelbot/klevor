@@ -1,6 +1,6 @@
-# Circuit Python {#circuit-python}
+# Circuit Python {:#circuit-python}
 
-## Adafruit Motor {#adafruit-motor}
+## Adafruit Motor {:#adafruit-motor}
 
 <div class="center">
 	<img src="../../assets/images/logo/adafruit.png" alt="Logo de Adafruit" class="logo--3rd-party">
@@ -11,7 +11,7 @@ La librería `adafruit_motor` tiene sus orígenes aproximadamente en 2017, hay v
 
 Esta librería cumple el mismo propósito en Klevor, siendo utilizada por la [Raspberry Pi Pico 2WH](../../electronic/components/current.md#raspberry-pi-pico-2-wh) quien se comunica con el [ESC](../../electronic/components/current.md#injora-mb100-20a-mini-esc) para controlar el [motor](../../electronic/components/current.md#injora-180-motor-48t) y el [servomotor](../../electronic/components/current.md#injora-7kg-2065-micro-servo) y así poder manejar a Klevor.
 
-## Adafruit BNO08X {#adafruit-bno08x}
+## Adafruit BNO08X {:#adafruit-bno08x}
 
 La librería `adafruit_bno08x` también es desarrollada y mantenida por Adafruit Industries, su versión más antigua fue lanzada el 22 de spetiembre de 2020 (version 1.0.0), esta librería es mantenida por Adafruit Industries, siendo la persona encargada y a quien se le atribuye el trabajo de esta librería a Bryan Siepert [[2](#adafruit-bno08x-documentation)].
 
