@@ -22,6 +22,7 @@ class MarkdownFile:
 	path: str
 	parent_dir: Optional[str] = None
 
+
 @dataclasses.dataclass
 class DocumentationSection:
 	"""
@@ -31,7 +32,8 @@ class DocumentationSection:
 	parent_dir: Optional['DocumentationSection'] = None
 	depth: int = 0
 
-def extract_md_paths(nav, documentation_section=None) -> list[MarkdownFile]:
+
+def extract_md_paths(nav, documentation_section = None) -> list[MarkdownFile]:
 	"""
 	Extracts all Markdown file paths from the navigation structure.
 
@@ -51,7 +53,11 @@ def extract_md_paths(nav, documentation_section=None) -> list[MarkdownFile]:
 
 		if isinstance(value, list):
 			# Initialize a DocumentationSection object for the subdirectory
-			sub_dir = DocumentationSection(name=key, parent_dir=documentation_section, depth=documentation_section.depth + 1)
+			sub_dir = DocumentationSection(
+				name=key,
+				parent_dir=documentation_section,
+				depth=documentation_section.depth + 1,
+				)
 
 			# Recursively extract paths from the subdirectory
 			nested_files = extract_md_paths(value, sub_dir)
@@ -76,9 +82,14 @@ def extract_md_paths(nav, documentation_section=None) -> list[MarkdownFile]:
 				continue
 
 			# Initialize a MarkdownFile object for the Markdown file
-			md_file = MarkdownFile(name=key, path=value, parent_dir=documentation_section)
+			md_file = MarkdownFile(
+				name=key,
+				path=value,
+				parent_dir=documentation_section,
+				)
 			files.append(md_file)
 	return files
+
 
 def extract_md_paths_from_yaml(yaml_file):
 	"""
@@ -95,6 +106,7 @@ def extract_md_paths_from_yaml(yaml_file):
 
 	# Extract Markdown file paths from the navigation structure
 	return extract_md_paths(config.get('nav', []))
+
 
 if __name__ == '__main__':
 	# Extract Markdown file paths from the MkDocs configuration file

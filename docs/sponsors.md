@@ -27,7 +27,7 @@ class="logo--sponsor">
 Nathaly's Star es una boutique de moda que se especializa en ofrecer ropa y accesorios de alta calidad, con un enfoque en las últimas tendencias y estilos. Su compromiso es proporcionar a sus clientes una experiencia de compra única, con productos que destacan por su elegancia y originalidad.
 
 - Instagram: [@boutiquenathalysstar](https://www.instagram.com/boutiquenathalysstar/)
-- Ubicación (Maracaibo): [Local L-67, entre la entrada La Chinita y Sinamaica, Nivel Lago, Centro Sambil Maracaibo, Maracaibo, Venezuela](https://maps.app.goo.gl/rBUmZLRyckYVG9r38) 
+- Ubicación (Maracaibo): [Local L-67, entre la entrada La Chinita y Sinamaica, Nivel Lago, Centro Sambil Maracaibo, Maracaibo, Venezuela](https://maps.app.goo.gl/rBUmZLRyckYVG9r38)
 - Ubicación (Ciudad Ojeda): [Centro Comercial Camino Real, Calle Vargas con Calle Bermudez, Ciudad Ojeda, Venezuela](https://maps.app.goo.gl/X45idmxjfygE8ngX6)
 
 ## Steel C.A. {:#steel-ca}

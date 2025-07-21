@@ -35,7 +35,7 @@ La tarea central de YOLO. Identifica la ubicación de objetos en una imagen/vide
     <i>Logo de OpenCV</i>
 </div>
 
-Esta librería es desarrollada por Intel Corporation, posteriormente fue mantenida por Willow Garage, y después Itseez (y luego fue adquirida por Intel). El proyecto OpenCV fue iniciado en 1999 por Intel como una iniciativa para avanzar en las tareas que utilizan muchos recursos del procesador. 
+Esta librería es desarrollada por Intel Corporation, posteriormente fue mantenida por Willow Garage, y después Itseez (y luego fue adquirida por Intel). El proyecto OpenCV fue iniciado en 1999 por Intel como una iniciativa para avanzar en las tareas que utilizan muchos recursos del procesador.
 
 Open Source Computer Vision Library (OpenCV) es una de las librerías de software más populares y potentes del mundo para la visión por computadora y el aprendizaje automático (Machine Learning). Fue desarrollada inicialmente por Intel y ahora es mantenida por una comunidad global activa. En su esencia, OpenCV es una colección masiva de algoritmos y funciones que te permiten procesar imágenes y videos, extraer información de ellos y hacer que las computadoras **vean** y **entiendan** el mundo visual de una manera similar a como lo hacen los humanos.
 
@@ -48,7 +48,7 @@ Su propósito principal es proporcionar una infraestructura común para aplicaci
     <i>Logo de NumPy</i>
 </div>
 
-Desarrollada por Travis Oliphant, la librería NumPy contiene dos paquetes, el primero fue lanzado como Numeric en 1995, y luego Numarray, la cual podía realizar operaciones más rápido que Numeric en arrays grandes, pero tardaba más que Numeric en realizar las mismas operaciones pero con arrays pequeños. 
+Desarrollada por Travis Oliphant, la librería NumPy contiene dos paquetes, el primero fue lanzado como Numeric en 1995, y luego Numarray, la cual podía realizar operaciones más rápido que Numeric en arrays grandes, pero tardaba más que Numeric en realizar las mismas operaciones pero con arrays pequeños.
 
 Así que, para evitar tener que usar una librería u otra, Travis Oliphant, combinó a Numeric y a Numarray en lo que hoy es NumPy.
 

@@ -85,10 +85,18 @@ Especificaciones físicas:
 
 # Referencias Bibliográficas
 
-1. *Motor 540 y disipador de calor de aluminio con ventilador de refrigeración de 5 V para Wltoys 1/18 RC Cars A949-B A959-B A969-B A979-B K929-B*. (2025). Amazon. <a id="motor-540-product-info" href="https://www.amazon.com/dp/B0995W966Z">https://www.amazon.com/dp/B0995W966Z</a>
+1. *Motor 540 y disipador de calor de aluminio con ventilador de refrigeración
+   de 5 V para Wltoys 1/18 RC Cars A949-B A959-B A969-B A979-B
+   K929-B*. (2025). Amazon. <a id="motor-540-product-info" href="https://www.amazon.com/dp/B0995W966Z">https://www.amazon.com/dp/B0995W966Z</a>
 
-2. *60A cepillado 2-3s ESC T-Plug ESC controlador electrónico de velocidad impermeable para 1/10 RC Car RC barco RC para uso con motores 540/550*. (2025). Amazon. <a id="esc-motor-540-product-info" href="https://www.amazon.com/gp/product/B0F9Y6CMC8">https://www.amazon.com/gp/product/B0F9Y6CMC8</a>
+2. *60A cepillado 2-3s ESC T-Plug ESC controlador electrónico de velocidad
+   impermeable para 1/10 RC Car RC barco RC para uso con motores
+   540/550*. (2025). Amazon. <a id="esc-motor-540-product-info" href="https://www.amazon.com/gp/product/B0F9Y6CMC8">https://www.amazon.com/gp/product/B0F9Y6CMC8</a>
 
-3. *UGREEN Nexode Power Bank 12000mAh 100W PD PPS Cargador portátil de carga rápida con 1USB-C 1USB-A y pantalla inteligente para MacBook Air/iPad/iPhone 16/Galaxy S24/Steam Deck/Googl*. (2025). Amazon. <a id="ugreen-power-bank-product-info" href="https://www.amazon.com/gp/product/B0CXJ1F1M7">https://www.amazon.com/gp/product/B0CXJ1F1M7</a>
+3. *UGREEN Nexode Power Bank 12000mAh 100W PD PPS Cargador portátil de carga
+   rápida con 1USB-C 1USB-A y pantalla inteligente para MacBook Air/iPad/iPhone
+   16/Galaxy S24/Steam
+   Deck/Googl*. (2025). Amazon. <a id="ugreen-power-bank-product-info" href="https://www.amazon.com/gp/product/B0CXJ1F1M7">https://www.amazon.com/gp/product/B0CXJ1F1M7</a>
 
-4. *USB-C QC PD3.0 Trigger Board Module Type-C Female Interface*. (2025). Amazon. <a id="pd-trigger-product-info" href="https://www.amazon.com/gp/product/B0DRJWBG7G">https://www.amazon.com/gp/product/B0DRJWBG7G</a>
+4. *USB-C QC PD3.0 Trigger Board Module Type-C Female
+   Interface*. (2025). Amazon. <a id="pd-trigger-product-info" href="https://www.amazon.com/gp/product/B0DRJWBG7G">https://www.amazon.com/gp/product/B0DRJWBG7G</a>

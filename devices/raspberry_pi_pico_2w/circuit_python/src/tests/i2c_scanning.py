@@ -10,21 +10,21 @@ i2c = I2C(GP1, GP0)
 # Try to lock the I2C bus. This ensures no other process uses it while scanning.
 print("Starting I2C scan...")
 while not i2c.try_lock():
-    pass  # Active wait until the bus is available
+	pass  # Active wait until the bus is available
 
 try:
-    # Perform the I2C bus scan
-    found_devices = i2c.scan()
+	# Perform the I2C bus scan
+	found_devices = i2c.scan()
 
-    if not found_devices:
-        print("No I2C devices found on the bus. Check your connections.")
+	if not found_devices:
+		print("No I2C devices found on the bus. Check your connections.")
 
-    else:
-        print("I2C devices found at the following addresses (hexadecimal):")
-        for address in found_devices:
-            print(
-                f"  - 0x{address:x}"
-            )  # Print the address in hexadecimal format
+	else:
+		print("I2C devices found at the following addresses (hexadecimal):")
+		for address in found_devices:
+			print(
+				f"  - 0x{address:x}",
+				)  # Print the address in hexadecimal format
 
 finally:
-    i2c.unlock()
+	i2c.unlock()

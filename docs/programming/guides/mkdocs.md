@@ -15,6 +15,7 @@ Para instalar MkDocs, es necesario tener `Python` y `pip` instalados en tu siste
 Puedes crear un entorno virtual de Python, instalar MkDocs y las dependencias del proyecto ejecutando el siguiente comando en la terminal:
 
 - Si el sistema operativo es Windows:
+
 ```cmd
 python -m venv .venv
 ./.venv/Scripts/activate
@@ -22,6 +23,7 @@ pip install -r requirements.txt
 ```
 
 - Si el sistema operativo es Linux o macOS:
+
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
@@ -51,7 +53,6 @@ mkdocs serve
 Aunque si deseas simplificar el proceso, puedes ejecutar directamente el archivo `serve.bat` en Windows o `serve.sh` en Linux o macOS, que se encargará de activar el entorno virtual y servir la documentación automáticamente.
 
 ## Despliegue {:#deployment}
-
 
 Para desplegar la documentación en GitHub Pages, puedes utilizar el siguiente comando:
 

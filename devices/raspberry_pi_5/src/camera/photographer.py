@@ -15,202 +15,202 @@ from ..utils.decorators import ignore_sigint
 
 
 class Photographer(PhotographerABC, LoggerConsumerProtocol):
-    """
-    Class to handle image processing for the camera.
-    """
+	"""
+	Class to handle image processing for the camera.
+	"""
 
-    # Logger configuration
-    LOGGER_TAG = "Photographer"
+	# Logger configuration
+	LOGGER_TAG = "Photographer"
 
-    # Wait timeout
-    WAIT_TIMEOUT = 0.1
+	# Wait timeout
+	WAIT_TIMEOUT = 0.1
 
-    # Wait timeout for the start event
-    START_WAIT_TIMEOUT = 0.1
+	# Wait timeout for the start event
+	START_WAIT_TIMEOUT = 0.1
 
-    def __init__(
-        self,
-        debug: bool,
-        camera: CameraABC,
-        images_queue: Queue,
-        capture_image_event: EventCls,
-        start_event: EventCls,
-        stop_event: EventCls,
-        writer_messages_queue: Queue,
-        preprocess_fn: Callable[[Image], np.ndarray],
-        server_messages_queue: Optional[Queue] = None
-    ):
-        """
-        Initialize the Photographer class.
+	def __init__(
+			self,
+			debug: bool,
+			camera: CameraABC,
+			images_queue: Queue,
+			capture_image_event: EventCls,
+			start_event: EventCls,
+			stop_event: EventCls,
+			writer_messages_queue: Queue,
+			preprocess_fn: Callable[[Image], np.ndarray],
+			server_messages_queue: Optional[Queue] = None,
+			):
+		"""
+		Initialize the Photographer class.
 
-        Args:
-            debug (bool): Flag to indicate if the photographer is in debug mode.
-            camera (CameraABC): Camera instance for capturing images.
-            images_queue (Queue): Queue to hold input images for processing.
-            capture_image_event (EventCls): Event to signal when an image should be captured.
-            start_event (EventCls): Event to signal when the photographer should start.
-            stop_event (EventCls): Event to signal when the photographer should stop processing images.
-            writer_messages_queue (Queue): Queue to hold log messages.
-            preprocess_fn: Callable[[Image], np.ndarray]: Function to preprocess images before inference.
-            server_messages_queue (Optional[Queue]): Queue to broadcast messages through the websockets server, if any.
-        """
-        # Initialize the debug flag
-        self.__debug = debug
+		Args:
+			debug (bool): Flag to indicate if the photographer is in debug mode.
+			camera (CameraABC): Camera instance for capturing images.
+			images_queue (Queue): Queue to hold input images for processing.
+			capture_image_event (EventCls): Event to signal when an image should be captured.
+			start_event (EventCls): Event to signal when the photographer should start.
+			stop_event (EventCls): Event to signal when the photographer should stop processing images.
+			writer_messages_queue (Queue): Queue to hold log messages.
+			preprocess_fn: Callable[[Image], np.ndarray]: Function to preprocess images before inference.
+			server_messages_queue (Optional[Queue]): Queue to broadcast messages through the websockets server, if any.
+		"""
+		# Initialize the debug flag
+		self.__debug = debug
 
-        # Initialize the queues and events
-        self.__images_queue = images_queue
-        self.__capture_image_event = capture_image_event
-        self.__start_event = start_event
-        self.__started_event = Event()
-        self.__deleted_event = Event()
-        self.__stop_event = stop_event
+		# Initialize the queues and events
+		self.__images_queue = images_queue
+		self.__capture_image_event = capture_image_event
+		self.__start_event = start_event
+		self.__started_event = Event()
+		self.__deleted_event = Event()
+		self.__stop_event = stop_event
 
-        # Check the type of camera
-        is_instance(camera, CameraABC)
-        self.__camera: CameraABC = camera
+		# Check the type of camera
+		is_instance(camera, CameraABC)
+		self.__camera: CameraABC = camera
 
-        # Initialize the reentrant lock
-        self.__rlock = RLock()
+		# Initialize the reentrant lock
+		self.__rlock = RLock()
 
-        # Initialize the logger
-        self.__logger = Logger(
-            writer_messages_queue,
-            tag=self.LOGGER_TAG,
-            debug=self.__debug
-            )
+		# Initialize the logger
+		self.__logger = Logger(
+			writer_messages_queue,
+			tag=self.LOGGER_TAG,
+			debug=self.__debug,
+			)
 
-        # Check the type of preprocess function
-        is_instance(preprocess_fn, Callable)
-        self.__preprocess_fn = preprocess_fn
+		# Check the type of preprocess function
+		is_instance(preprocess_fn, Callable)
+		self.__preprocess_fn = preprocess_fn
 
-        # Initialize the dispatcher for broadcasting messages
-        self.__dispatcher = Dispatcher(
-            server_messages_queue,
-            writer_messages_queue
-        ) if server_messages_queue else None
+		# Initialize the dispatcher for broadcasting messages
+		self.__dispatcher = Dispatcher(
+			server_messages_queue,
+			writer_messages_queue,
+			) if server_messages_queue else None
 
-        # Initialize the image counter
-        self.__imager_counter = 0
+		# Initialize the image counter
+		self.__imager_counter = 0
 
-    @final
-    @property
-    def logger(self) -> Logger:
-        return self.__logger
+	@final
+	@property
+	def logger(self) -> Logger:
+		return self.__logger
 
-    @final
-    def _start(self) -> None:
-        with self.__rlock:
-            # Check if the stop event is set
-            if self.__stop_event.is_set():
-                raise RuntimeError(
-                    "Stop event is set. Photographer will not run."
-                )
+	@final
+	def _start(self) -> None:
+		with self.__rlock:
+			# Check if the stop event is set
+			if self.__stop_event.is_set():
+				raise RuntimeError(
+					"Stop event is set. Photographer will not run.",
+					)
 
-            # Check if the photographer is already running
-            if self.__started_event.is_set():
-                raise RuntimeError(
-                    "Photographer is already running. Cannot start again."
-                )
+			# Check if the photographer is already running
+			if self.__started_event.is_set():
+				raise RuntimeError(
+					"Photographer is already running. Cannot start again.",
+					)
 
-            # Set the started event
-            self.__started_event.set()
+			# Set the started event
+			self.__started_event.set()
 
-        # Log
-        self.__logger.info("Initialized.")
+		# Log
+		self.__logger.info("Initialized.")
 
-    @final
-    def _stop(self) -> None:
-        with self.__rlock:
-            # Clear the started event
-            self.__started_event.clear()
+	@final
+	def _stop(self) -> None:
+		with self.__rlock:
+			# Clear the started event
+			self.__started_event.clear()
 
-            # Clear the deleted event
-            self.__deleted_event.clear()
+			# Clear the deleted event
+			self.__deleted_event.clear()
 
-            # Clear the capture image event
-            self.__capture_image_event.clear()
+			# Clear the capture image event
+			self.__capture_image_event.clear()
 
-            # Reset the image counter
-            self.__imager_counter = 0
+			# Reset the image counter
+			self.__imager_counter = 0
 
-        # Log
-        self.__logger.info("Stopped.")
+		# Log
+		self.__logger.info("Stopped.")
 
-    @final
-    def _capture_image(self) -> None:
-        # Wait for the capture image event
-        capture_image = self.__capture_image_event.wait(
-            timeout=self.WAIT_TIMEOUT
-        )
-        if not capture_image:
-            return None
+	@final
+	def _capture_image(self) -> None:
+		# Wait for the capture image event
+		capture_image = self.__capture_image_event.wait(
+			timeout=self.WAIT_TIMEOUT,
+			)
+		if not capture_image:
+			return None
 
-        # Capture image stream from camera
-        image_stream = self.__camera.capture_image_stream()
+		# Capture image stream from camera
+		image_stream = self.__camera.capture_image_stream()
 
-        # Convert the image stream to a PIL Image
-        image = self.__camera.convert_image_stream_to_pil(image_stream)
+		# Convert the image stream to a PIL Image
+		image = self.__camera.convert_image_stream_to_pil(image_stream)
 
-        # Preprocess the image
-        preprocessed_image = self.__preprocess_fn(image)
+		# Preprocess the image
+		preprocessed_image = self.__preprocess_fn(image)
 
-        # Put image in input image processing queue
-        self.__images_queue.put(preprocessed_image)
+		# Put image in input image processing queue
+		self.__images_queue.put(preprocessed_image)
 
-        # Increment the image counter
-        self.__imager_counter += 1
+		# Increment the image counter
+		self.__imager_counter += 1
 
-        # Log
-        self.__logger.debug(
-            f"Image {self.__imager_counter} added to images queue."
-            )
+		# Log
+		self.__logger.debug(
+			f"Image {self.__imager_counter} added to images queue.",
+			)
 
-        # Clear the capture image event
-        self.__capture_image_event.clear()
+		# Clear the capture image event
+		self.__capture_image_event.clear()
 
-        # If the dispatcher is available, broadcast the original image
-        self.__dispatcher.broadcast_original_image(
-            image
-        ) if self.__dispatcher else None
+		# If the dispatcher is available, broadcast the original image
+		self.__dispatcher.broadcast_original_image(
+			image,
+			) if self.__dispatcher else None
 
-    @final
-    @ignore_sigint
-    @log_on_error()
-    def run(self):
-        # Start the photographer
-        self._start()
+	@final
+	@ignore_sigint
+	@log_on_error()
+	def run(self):
+		# Start the photographer
+		self._start()
 
-        # Wait for the start event
-        self.__logger.info("Waiting for the start event...")
-        while not self.__stop_event.is_set() and not self.__deleted_event.is_set():
-            if self.__start_event.wait(timeout=self.START_WAIT_TIMEOUT):
-                break
-        if self.__stop_event.is_set() or self.__deleted_event.is_set():
-            # Stop the photographer if the stop or deleted event is set
-            self._stop()
-            return
-        self.__logger.info("Started.")
+		# Wait for the start event
+		self.__logger.info("Waiting for the start event...")
+		while not self.__stop_event.is_set() and not self.__deleted_event.is_set():
+			if self.__start_event.wait(timeout=self.START_WAIT_TIMEOUT):
+				break
+		if self.__stop_event.is_set() or self.__deleted_event.is_set():
+			# Stop the photographer if the stop or deleted event is set
+			self._stop()
+			return
+		self.__logger.info("Started.")
 
-        try:
-            # Capture images until the photographer is stopped
-            while not self.__stop_event.is_set() and not self.__deleted_event.is_set():
-                self._capture_image()
+		try:
+			# Capture images until the photographer is stopped
+			while not self.__stop_event.is_set() and not self.__deleted_event.is_set():
+				self._capture_image()
 
-            # Stop the photographer
-            self._stop()
+			# Stop the photographer
+			self._stop()
 
-        except Exception as e:
-            # Stop the photographer in case of an exception
-            self._stop()
-            raise e
+		except Exception as e:
+			# Stop the photographer in case of an exception
+			self._stop()
+			raise e
 
-    def __del__(self):
-        """
-        Destructor to clean up resources when the photographer is no longer needed.
-        """
-        self.__deleted_event.set()
+	def __del__(self):
+		"""
+		Destructor to clean up resources when the photographer is no longer needed.
+		"""
+		self.__deleted_event.set()
 
-        # Log
-        self.__logger.info(
-            "Instance is being deleted. Resources will be cleaned up."
-        )
+		# Log
+		self.__logger.info(
+			"Instance is being deleted. Resources will be cleaned up.",
+			)

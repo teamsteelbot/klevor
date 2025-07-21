@@ -8,9 +8,10 @@ class="logo--3rd-party">
     <i>Logo de GitHub</i>
 </div>
 
-Para empezar, debemos descargamos nuestro repositorio de GitHub, donde se encuentra el código del modelo de detección de objetos, así como los scripts necesarios para su entrenamiento y conversión a un formato compatible con el Hailo 8. Para ello, recomendamos dirigirse a la siguiente sección de la documentación [```GitHub```](../../github.md#repository), donde se explican las distintas formas de descargar el repositorio, ya sea mediante la descarga del archivo comprimido o mediante la clonación del repositorio con Git. 
+Para empezar, debemos descargamos nuestro repositorio de GitHub, donde se encuentra el código del modelo de detección de objetos, así como los scripts necesarios para su entrenamiento y conversión a un formato compatible con el Hailo 8. Para ello, recomendamos dirigirse a la siguiente sección de la documentación [```GitHub```](../../github.md#repository), donde se explican las distintas formas de descargar el repositorio, ya sea mediante la descarga del archivo comprimido o mediante la clonación del repositorio con Git.
 
 Después de haber descargado el repositorio, debemos dirigirnos a la carpeta `devices/raspberry-pi-5/src`, donde se encuentra todo el código empleado por la Raspberry Pi 5, puede realizarse con el siguiente comando:
+
 ```bash
 cd devices/raspberry-pi-5/src
 ```
@@ -19,6 +20,7 @@ cd devices/raspberry-pi-5/src
 	Para que dicho comando funcione correctamente, la ruta debe ser relativa a la carpeta donde se encuentra el repositorio clonado. En caso de no estar en la carpeta raíz del repositorio, se debe modificar la ruta acorde a la ubicación del mismo.
 
 Posteriormente, nos movemos a la carpeta `yolo/scripts`:
+
 ```bash
 cd yolo/scripts
 ```
@@ -91,13 +93,13 @@ Primeramente, dependiendo del modelo y la forma en la que se vaya a entrenar el 
 Existen dos maneras de entrenar el modelo dependiendo del equipo disponible en el momento:
 
 1. **Entrenamiento de forma local**: Para ello, se debe contar con una GPU dedicada para el entrenamiento.
-    1. En este caso, debemos ejecutar el script `yolo/scripts/train.py` para entrenar el modelo YOLOv11. Este script utiliza la librería [Ultralytics](../libraries/python.md#ultralytics-yolo) para realizar el entrenamiento del modelo y guardar los pesos en la carpeta `yolo/v11/runs/g`.
+	1. En este caso, debemos ejecutar el script `yolo/scripts/train.py` para entrenar el modelo YOLOv11. Este script utiliza la librería [Ultralytics](../libraries/python.md#ultralytics-yolo) para realizar el entrenamiento del modelo y guardar los pesos en la carpeta `yolo/v11/runs/g`.
 2. **Entrenamiento de forma remota**: Para ello, se puede utilizar [Google Colab](https://colab.research.google.com/), donde se puede utilizar una GPU de forma gratuita o de paga, dependiendo del tiempo requerido para el entrenamiento y la velocidad en la que se quiere completar dicho entrenamiento.
-    1. En este caso, debemos ejecutar primero el script `yolo/scripts/zip_to_train.py`, el cual se encargará de crear un archivo comprimido con el conjunto de datos, el cual se guardará en la carpeta `yolo/v11/zip`.
-    2. Luego, subimos el archivo a Google Drive, le cambiamos la visibilidad a`Anyone with the link can view` y copiamos el ID del archivo comprimido, el cual se encuentra en la URL del mismo. Este enlace lo pegamos en la sección correspondiente del Jupyter Notebook `yolo/v11/notebooks/colab/g_train.ipynb` para poder descargar el archivo comprimido en Google Colab.
-    3. Seleccionamos el entorno de ejecución acorde a nuestra disponibilidad. Puedes utilizar de forma gratuita una GPU Tesla T4 de NVIDIA por alrededor de 5 h diarias, o comprar 100 créditos (que cuestan $10 al momento de redactar esta guía) de la plataforma para poder usarlo por más tiempo y/o utilizar mejores GPU. En nuestro caso, empleamos una GPU Tesla L4 de NVIDIA, la cual consumió alrededor de 6 créditos por entrenar un modelo completo.
-    4. Ejecutamos las secciones del Jupyter Notebook `yolo/v11/notebooks/colab/g_train.ipynb`, omitiendo la sección antes mencionada relacionada con la descompresión del archivo comprimido. Este Jupyter Notebook utiliza la librería [Ultralytics](../libraries/python.md#ultralytics-yolo) para realizar el entrenamiento del modelo y guarda los pesos en la carpeta `yolo/v11/runs/g`.
-    5. Una vez finalizado el entrenamiento, se puede descargar el archivo comprimido con los pesos del modelo desde Google Drive y descomprimirlo en la carpeta `yolo/v11/runs/g` de forma local.
+	1. En este caso, debemos ejecutar primero el script `yolo/scripts/zip_to_train.py`, el cual se encargará de crear un archivo comprimido con el conjunto de datos, el cual se guardará en la carpeta `yolo/v11/zip`.
+	2. Luego, subimos el archivo a Google Drive, le cambiamos la visibilidad a `Anyone with the link can view` y copiamos el ID del archivo comprimido, el cual se encuentra en la URL del mismo. Este enlace lo pegamos en la sección correspondiente del Jupyter Notebook `yolo/v11/notebooks/colab/g_train.ipynb` para poder descargar el archivo comprimido en Google Colab.
+	3. Seleccionamos el entorno de ejecución acorde a nuestra disponibilidad. Puedes utilizar de forma gratuita una GPU Tesla T4 de NVIDIA por alrededor de 5 h diarias, o comprar 100 créditos (que cuestan $10 al momento de redactar esta guía) de la plataforma para poder usarlo por más tiempo y/o utilizar mejores GPU. En nuestro caso, empleamos una GPU Tesla L4 de NVIDIA, la cual consumió alrededor de 6 créditos por entrenar un modelo completo.
+	4. Ejecutamos las secciones del Jupyter Notebook `yolo/v11/notebooks/colab/g_train.ipynb`, omitiendo la sección antes mencionada relacionada con la descompresión del archivo comprimido. Este Jupyter Notebook utiliza la librería [Ultralytics](../libraries/python.md#ultralytics-yolo) para realizar el entrenamiento del modelo y guarda los pesos en la carpeta `yolo/v11/runs/g`.
+	5. Una vez finalizado el entrenamiento, se puede descargar el archivo comprimido con los pesos del modelo desde Google Drive y descomprimirlo en la carpeta `yolo/v11/runs/g` de forma local.
 3. **Inferencia**: Ejecutamos el script `yolo/scripts/test.py` para realizar la inferencia del modelo entrenado y evaluar el rendimiento del modelo con imágenes que no ha visualizado con anterioridad. Este script genera imágenes con las inferencias realizadas por el modelo, donde se muestran los cuadros delimitadores y las etiquetas de los objetos detectados.
 4. **ONNX**: Ejecutamos el script `yolo/scripts/export.py`, y pasamos como formato del modelo `onnx`, el cual es un formato abierto empleado para representar modelos de Machine Learning de forma interoperable entre distintos frameworks, herramientas, entre otros [[2](#onnx)].
 5. **Limpieza**: Finalmente, ejecutamos el script `yolo/scripts/after_training.py` para eliminar la carpeta `yolo/dataset/g/organized/val`, ya que esta no serán necesaria para los próximos pasos. Además, moverá el contenido de la carpeta `yolo/dataset/g/organized/train/images` al subdirectorio en `hailo/suite/train`, para posteriormente ser eliminada la primera. Así mismo, para que el modelo pueda ser convertido a un formato compatible con el Hailo 8, moverá los pesos de formato `ONNX` con mejor resultado correspondiente al modelo.
@@ -125,6 +127,7 @@ class="logo--3rd-party">
 </div>
 
 Al momento de la instalación de la AI HAT+, ejecutamos el comando `hailortcli fw-control identify`, donde pudimos notar la siguiente línea:
+
 ```
 Firmware Version: 4.20.0 (release,app,extended context switch buffer)
 ```
@@ -157,6 +160,7 @@ Posteriormente, cambiamos de nuevo el directorio actual:
 En ambos casos, debe existir un archivo `Dockerfile`, indiferentemente de la carpeta en la que nos encontramos.
 
 Para crear la imagen de Docker, ejecutamos el siguiente comando:
+
 ```bash
 docker build -t hailo_compiler:v0 .
 ```
@@ -179,17 +183,20 @@ Posteriormente, inicializamos el contenedor Docker:
 	Sustituimos `path` por la ruta absoluta de la carpeta `hailo/suite`.
 
 Dentro del contenedor, nos movemos al directorio `/home/hailo/shared/libs`:
+
 ```bash
 cd /home/hailo/shared/libs
 ```
 
 En el mismo terminal, creamos un entorno virtual para Python:
+
 ```bash
 python -m venv .venv
 source .venv/bin/activate
 ```
 
 Ahora instalamos los paquetes anteriormente descargados, que actualmente se encuentran en la carpeta `hailo/suite/libs`. Para la versión que descargamos, ejecutamos el siguiente comando:
+
 ```bash
 dpkg -i hailort_4.20.0_amd64.deb
 pip install  hailort-4.20.0-cp310-cp310-linux_x86_64.whl
@@ -197,21 +204,25 @@ pip install hailo_dataflow_compiler-3.30.0-py3-none-linux_x86_64.whl
 ```
 
 Realizamos un clone del siguiente repositorio de GitHub que contiene todo lo necesario para la conversión del modelo de formato `ONNX` a `HEF`:
+
 ```bash
 git clone https://github.com/hailo-ai/hailo_model_zoo.git
 ```
 
 Sin embargo, en nuestro caso, como requerimos de la versión v2.14, el comando sería el siguiente:
+
 ```bash
 git clone -b v2.14 https://github.com/hailo-ai/hailo_model_zoo.git
 ```
 
 Ahora nos movemos del directorio actual al correspondiente del repositorio `hailo-model-zoo`:
+
 ```bash
 cd hailo_model_zoo
 ```
 
-Instalamos todas las dependencias requeridas: 
+Instalamos todas las dependencias requeridas:
+
 ```bash
 pip install -e .
 ```
@@ -219,28 +230,29 @@ pip install -e .
 !!! warning
 	En el caso de obtener un error similar a:
 	```bash
-	ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.
-	tensorflow 2.12.0 requires numpy<1.24,>=1.22, but you have numpy 2.2.6 
-	which is incompatible.
-	hailo-dataflow-compiler 3.30.0 requires numpy==1.23.3, but you have numpy 2.
-	2.6 which is incompatible.
+	ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts. 
+	tensorflow 2.12.0 requires numpy<1.24,>=1.22, but you have numpy 2.2.6 which is incompatible. 
+	hailo-dataflow-compiler 3.30.0 requires numpy==1.23.3, but you have numpy 2.2.6 which is incompatible.
 	```
-	Debemos modificar el archivo `setup.py` que se encuentra dentro del repositorio, y en la línea 44, dentro de la función `main`, sustituimos `"numpy"` por `"numpy==1.23.3"`, así como en la línea 46, sustituimos `"scipy"` por`"scipy==1.9.3"`. Reintentamos el comando: 
+	Debemos modificar el archivo `setup.py` que se encuentra dentro del repositorio, y en la línea 44, dentro de la función `main`, sustituimos `"numpy"` por `"numpy==1.23.3"`, así como en la línea 46, sustituimos `"scipy"` por `"scipy==1.9.3"`. Reintentamos el comando:
 	```bash
 	pip install -e .
 	```
 
-Evaluamos si los paquetes se han instalado correctamente con el siguiente comando: 
+Evaluamos si los paquetes se han instalado correctamente con el siguiente comando:
+
 ```bash
 hailomz --version
 ```
 
-Ahora modificamos el archivo de configuración del modelo, en el campo`classes`, estableciendo el número de clases con el que se ha entrenado el mismo (para el modelo **G** sería 1):
+Ahora modificamos el archivo de configuración del modelo, en el campo `classes`, estableciendo el número de clases con el que se ha entrenado el mismo (para el modelo **G** sería 1):
+
 ```bash
 sudo nano hailo_model_zoo/cfg/postprocess_config/yolov11n_nms_config.json
 ```
 
 Establecemos la variable de entorno `USER` como Hailo:
+
 ```bash
 export USER=hailo
 ```
@@ -270,29 +282,33 @@ Esperamos a que se complete el anterior paso, y ya tendríamos nuestro modelo pe
 Para mover todos los archivos generados en el directorio `hailo/suite/libs/hailo_model_zoo` a la carpeta con los pesos del modelo correspondiente, ejecutamos el script `yolo/scripts/after_hailo_compilation.py`.
 
 Por último, para salir del contenedor Docker, ejecutamos el siguiente comando:
+
 ```bash
 exit
 ```
 
 ## Prueba del Modelo {:#model-testing}
 
-Después de haber completado todos los pasos anteriores, nos movemos a la
-carpeta `hailo/suite/libs`, y clonamos el siguiente repositorio:
+Después de haber completado todos los pasos anteriores, nos movemos a la carpeta `hailo/suite/libs`, y clonamos el siguiente repositorio:
+
 ```bash
 git clone https://github.com/hailo-ai/hailo-rpi5-examples.git
 ```
 
 Nos cambiamos de nuevo de carpeta, ahora a `hailo-rpi5-examples`, con el siguiente comando:
+
 ```bash
 cd hailo-rpi5-examples
 ```
 
 Ejecutamos el siguiente comando para instalar todas las dependencias necesarias:
+
 ```bash
 ./install.sh
 ```
 
 Ahora, cada vez que abramos un nuevo terminal, ejecutamos el siguiente comando:
+
 ```bash
 source setup_env.sh
 ```

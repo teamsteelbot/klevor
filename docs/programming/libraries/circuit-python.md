@@ -19,7 +19,7 @@ El propósito de esta librería es la de recibir los datos del sensor BNO08X y p
 
 En el caso de Klevor, utilizamos esta librería en conjunto con el [giroscopio](../../electronic/components/current.md#gyroscope-gy-bno085) para que, cuando Klevor esté en medio de un cruce, poder determinar con exactitud cuando ha girado 90° y así, saber que ya terminó de cruzar y que debe de avanzar recto.
 
-# Referencias Biliográficas 
+# Referencias Biliográficas
 
 1. Shawcroft, S. (2025). *Adafruit motor Library*. <a id="adafruit-motor-documentation" href="https://docs.circuitpython.org/projects/motor/en/latest/">https://docs.circuitpython.org/projects/motor/en/latest/</a>
 

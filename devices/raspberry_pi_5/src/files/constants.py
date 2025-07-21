@@ -30,4 +30,5 @@ WEIGHTS = 'weights'
 
 # Directories to ignore always
 IGNORE_DIRS = (
-    '.git', '__pycache__', '.idea', '.vscode', '.venv', 'venv', 'env')
+	'.git', '__pycache__', '.idea', '.vscode', '.venv', 'venv', 'env',
+	)

@@ -4,211 +4,211 @@ from ..utils import is_instance
 
 
 class Measure:
-    """
-    Class that represents a single measurement from the RPLidar.
-    """
+	"""
+	Class that represents a single measurement from the RPLidar.
+	"""
 
-    # Measure attributes separator
-    ATTRIBUTES_SEPARATOR = ","
+	# Measure attributes separator
+	ATTRIBUTES_SEPARATOR = ","
 
-    # Measures separator
-    MEASURES_SEPARATOR = ";"
+	# Measures separator
+	MEASURES_SEPARATOR = ";"
 
-    def __init__(self, angle: float, distance: float, quality: int):
-        """
-        Initialize the Measure instance.
-        """
-        self.angle = angle
-        self.distance = distance
-        self.quality = quality
+	def __init__(self, angle: float, distance: float, quality: int):
+		"""
+		Initialize the Measure instance.
+		"""
+		self.angle = angle
+		self.distance = distance
+		self.quality = quality
 
-    def __str__(self):
-        """
-        String representation of the Measure object.
-        """
-        # return self.ATTRIBUTES_SEPARATOR.join([str(self.angle), str(self.distance), str(self.quality)])
-        return self.ATTRIBUTES_SEPARATOR.join(
-            [str(self.angle), str(self.distance)]
-        )
+	def __str__(self):
+		"""
+		String representation of the Measure object.
+		"""
+		# return self.ATTRIBUTES_SEPARATOR.join([str(self.angle), str(self.distance), str(self.quality)])
+		return self.ATTRIBUTES_SEPARATOR.join(
+			[str(self.angle), str(self.distance)],
+			)
 
-    def __repr__(self):
-        """
-        String representation of the Measure object for debugging.
-        """
-        return f"Measure(angle={self.angle}, distance={self.distance}, quality={self.quality})"
+	def __repr__(self):
+		"""
+		String representation of the Measure object for debugging.
+		"""
+		return f"Measure(angle={self.angle}, distance={self.distance}, quality={self.quality})"
 
-    @property
-    def angle(self) -> float:
-        """
-        Get the angle of the measure.
-        
-        Returns:
-            float: Angle of the measure.
-        """
-        return self.__angle
+	@property
+	def angle(self) -> float:
+		"""
+		Get the angle of the measure.
 
-    @angle.setter
-    def angle(self, value: float) -> None:
-        """
-        Set the angle of the measure.
-        
-        Args:
-            value (float): Angle to set.
-        """
-        is_instance(value, float)
+		Returns:
+			float: Angle of the measure.
+		"""
+		return self.__angle
 
-        if not (0 <= value):
-            raise ValueError(
-                f"Angle must be a non-negative float, received: {value}"
-            )
-        self.__angle = 0.0 if value >= 360.0 else value
+	@angle.setter
+	def angle(self, value: float) -> None:
+		"""
+		Set the angle of the measure.
 
-    @property
-    def distance(self) -> float:
-        """
-        Get the distance of the measure.
-        
-        Returns:
-            float: Distance of the measure.
-        """
-        return self.__distance
+		Args:
+			value (float): Angle to set.
+		"""
+		is_instance(value, float)
 
-    @distance.setter
-    def distance(self, value: float) -> None:
-        """
-        Set the distance of the measure.
-        
-        Args:
-            value (float): Distance to set.
-        """
-        is_instance(value, float)
+		if not (0 <= value):
+			raise ValueError(
+				f"Angle must be a non-negative float, received: {value}",
+				)
+		self.__angle = 0.0 if value >= 360.0 else value
 
-        if value < 0:
-            raise ValueError(
-                "Distance must be a non-negative float, received: {}".format(
-                    value
-                )
-            )
+	@property
+	def distance(self) -> float:
+		"""
+		Get the distance of the measure.
 
-        self.__distance = value
+		Returns:
+			float: Distance of the measure.
+		"""
+		return self.__distance
 
-    @property
-    def quality(self) -> int:
-        """
-        Get the quality of the measure.
-        
-        Returns:
-            int: Quality of the measure.
-        """
-        return self.__quality
+	@distance.setter
+	def distance(self, value: float) -> None:
+		"""
+		Set the distance of the measure.
 
-    @quality.setter
-    def quality(self, value: int) -> None:
-        """
-        Set the quality of the measure.
-        
-        Args:
-            value (int): Quality to set.
-        """
-        is_instance(value, int)
+		Args:
+			value (float): Distance to set.
+		"""
+		is_instance(value, float)
 
-        if value < 0:
-            raise ValueError(
-                f"Quality must be a non-negative integer, received: {value}"
-            )
-        self.__quality = value
+		if value < 0:
+			raise ValueError(
+				"Distance must be a non-negative float, received: {}".format(
+					value,
+					),
+				)
 
-    @classmethod
-    def from_string(cls, measure_str: str) -> Optional['Measure']:
-        """
-        Create a Measure object from a string representation.
+		self.__distance = value
 
-        Args:
-            measure_str (str): String representation of the measure.
+	@property
+	def quality(self) -> int:
+		"""
+		Get the quality of the measure.
 
-        Returns:
-            Measure: Measure object created from the string.
-        """
-        try:
-            # Check the type of measure_str
-            is_instance(measure_str, str)
+		Returns:
+			int: Quality of the measure.
+		"""
+		return self.__quality
 
-            # Split the string by the attributes separator
-            parts = measure_str.split(cls.ATTRIBUTES_SEPARATOR)
+	@quality.setter
+	def quality(self, value: int) -> None:
+		"""
+		Set the quality of the measure.
 
-            if len(parts) < 2:
-                raise ValueError(f"Invalid measure string: {measure_str}")
+		Args:
+			value (int): Quality to set.
+		"""
+		is_instance(value, int)
 
-            # Convert parts to appropriate types
-            angle = float(parts[0])
-            distance = float(parts[1])
+		if value < 0:
+			raise ValueError(
+				f"Quality must be a non-negative integer, received: {value}",
+				)
+		self.__quality = value
 
-            # Quality is optional, default to 0 if not provided
-            quality = int(parts[2]) if len(parts) > 2 else 0
+	@classmethod
+	def from_string(cls, measure_str: str) -> Optional['Measure']:
+		"""
+		Create a Measure object from a string representation.
 
-        except ValueError as e:
-            return None
+		Args:
+			measure_str (str): String representation of the measure.
 
-        return cls(angle, distance, quality)
+		Returns:
+			Measure: Measure object created from the string.
+		"""
+		try:
+			# Check the type of measure_str
+			is_instance(measure_str, str)
 
-    @classmethod
-    def measures_to_string(cls, measures: List) -> str:
-        """
-        Convert a list of Measure objects to a string representation.
-        
-        Args:
-            measures (List): List of Measure objects.
-        
-        Returns:
-            str: String representation of the measures.
-        """
-        # Check the type of measures
-        is_instance(measures, List)
+			# Split the string by the attributes separator
+			parts = measure_str.split(cls.ATTRIBUTES_SEPARATOR)
 
-        # Convert each measure to string and join them with spaces
-        return cls.MEASURES_SEPARATOR.join(str(measure) for measure in measures)
+			if len(parts) < 2:
+				raise ValueError(f"Invalid measure string: {measure_str}")
 
-    @classmethod
-    def from_string_to_measures(cls, measures_str: str) -> List:
-        """
-        Convert a string representation of measures back to a list of Measure objects.
+			# Convert parts to appropriate types
+			angle = float(parts[0])
+			distance = float(parts[1])
 
-        Args:
-            measures_str (str): String representation of measures.
+			# Quality is optional, default to 0 if not provided
+			quality = int(parts[2]) if len(parts) > 2 else 0
 
-        Returns:
-            List: List of Measure objects.
-        """
-        # Check the type of measures_str
-        is_instance(measures_str, str)
+		except ValueError as e:
+			return None
 
-        # Split the string by the measures separator and convert each part to Measure
-        return [cls.from_string(measure_str) for measure_str in
-                measures_str.split(cls.MEASURES_SEPARATOR) if measure_str]
+		return cls(angle, distance, quality)
 
-    @classmethod
-    def get_properties_from_string(cls, measure_str: str) -> tuple:
-        """
-        Get the properties of a Measure object from its string representation.
+	@classmethod
+	def measures_to_string(cls, measures: List) -> str:
+		"""
+		Convert a list of Measure objects to a string representation.
 
-        Args:
-            measure_str (str): String representation of the measure.
+		Args:
+			measures (List): List of Measure objects.
 
-        Returns:
-            tuple: A tuple containing the angle, distance, and quality of the measure.
-        """
-        # Check the type of measure_str
-        is_instance(measure_str, str)
+		Returns:
+			str: String representation of the measures.
+		"""
+		# Check the type of measures
+		is_instance(measures, List)
 
-        # Split the string by the attributes separator
-        parts = measure_str.split(cls.ATTRIBUTES_SEPARATOR)
+		# Convert each measure to string and join them with spaces
+		return cls.MEASURES_SEPARATOR.join(str(measure) for measure in measures)
 
-        if len(parts) < 2:
-            raise ValueError("Invalid measure string: {}".format(measure_str))
+	@classmethod
+	def from_string_to_measures(cls, measures_str: str) -> List:
+		"""
+		Convert a string representation of measures back to a list of Measure objects.
 
-        return (
-            float(parts[0]),
-            float(parts[1]),
-            int(parts[2]) if len(parts) > 2 else 0
-            # Quality, default to 0 if not provided
-        )
+		Args:
+			measures_str (str): String representation of measures.
+
+		Returns:
+			List: List of Measure objects.
+		"""
+		# Check the type of measures_str
+		is_instance(measures_str, str)
+
+		# Split the string by the measures separator and convert each part to Measure
+		return [cls.from_string(measure_str) for measure_str in
+		        measures_str.split(cls.MEASURES_SEPARATOR) if measure_str]
+
+	@classmethod
+	def get_properties_from_string(cls, measure_str: str) -> tuple:
+		"""
+		Get the properties of a Measure object from its string representation.
+
+		Args:
+			measure_str (str): String representation of the measure.
+
+		Returns:
+			tuple: A tuple containing the angle, distance, and quality of the measure.
+		"""
+		# Check the type of measure_str
+		is_instance(measure_str, str)
+
+		# Split the string by the attributes separator
+		parts = measure_str.split(cls.ATTRIBUTES_SEPARATOR)
+
+		if len(parts) < 2:
+			raise ValueError("Invalid measure string: {}".format(measure_str))
+
+		return (
+			float(parts[0]),
+			float(parts[1]),
+			int(parts[2]) if len(parts) > 2 else 0,
+			# Quality, default to 0 if not provided
+			)

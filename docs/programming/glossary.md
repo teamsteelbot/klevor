@@ -110,9 +110,7 @@ Docker emplea archivos, denominados *Dockerfile*, los cuales usan DSL (Domain Sp
 
 ### Docker Image {:#docker-image}
 
-Es un archivo compuesto de múltiples capas, empleado para ejecutar un 
-contenedor Docker [[5](#what-is-docker)]. Es un paquete de software ejecutable 
-que contiene todo lo necesario para correr la aplicación. Esta imagen informa cómo un contenedor debe inicializarse, determinando qué software debe ejecutarse y de qué forma.
+Es un archivo compuesto de múltiples capas, empleado para ejecutar un contenedor Docker [[5](#what-is-docker)]. Es un paquete de software ejecutable que contiene todo lo necesario para correr la aplicación. Esta imagen informa cómo un contenedor debe inicializarse, determinando qué software debe ejecutarse y de qué forma.
 
 ### Docker Container {:#docker-container}
 
@@ -120,24 +118,18 @@ Un contenedor Docker es una instancia *runtime* de una imagen Docker [[5](#what-
 
 ## Multiprocesamiento {:#multiprocessing}
 
-El multiprocesamiento es la técnica que permite la utilización de dos o más 
-unidades centrales de procesamiento (CPU) en un único sistema informático para ejecutar múltiples procesos de forma simultánea [[6](#what-is-multiprocessing)]. Esta técnica es especialmente útil en sistemas que requieren un alto rendimiento y eficiencia, ya que permite distribuir la carga de trabajo entre varias CPU, mejorando así el tiempo de respuesta y la capacidad de procesamiento.
+El multiprocesamiento es la técnica que permite la utilización de dos o más unidades centrales de procesamiento (CPU) en un único sistema informático para ejecutar múltiples procesos de forma simultánea [[6](#what-is-multiprocessing)]. Esta técnica es especialmente útil en sistemas que requieren un alto rendimiento y eficiencia, ya que permite distribuir la carga de trabajo entre varias CPU, mejorando así el tiempo de respuesta y la capacidad de procesamiento.
 
 # Referencias Bibliográficas
 
 1. *What is machine learning?*. (22 de septiembre de 2021). IBM. <a id="machine-learning-ibm" href="https://www.ibm.com/think/topics/machine-learning">https://www.ibm.com/think/topics/machine-learning</a>
 
-2. Murel, J., Kavlakoglu, E. *What is object detection?*. (3 de enero de 
-    2024). IBM. <a id="object-detection-ibm" href="https://www.ibm.com/topics/object-detection">https://www.ibm.com/topics/object-detection</a>
+2. Murel, J., Kavlakoglu, E. *What is object detection?*. (3 de enero de 2024). IBM. <a id="object-detection-ibm" href="https://www.ibm.com/topics/object-detection">https://www.ibm.com/topics/object-detection</a>
 
-3. *Models*. (2025). Ultralytics. <a id="models-ultralytics" 
-    href="https://docs.ultralytics.com/models/">https://docs.ultralytics.com/models/</a>
- 
-4. Schneider, J., Smalley, I. *What is neural processing unit (NPU)?*. (27 
-    de septiembre de 2024). IBM. <a id="npu-ibm" href="https://www.ibm.com/topics/neural-processing-unit">https://www.ibm.com/topics/neural-processing-unit</a>
+3. *Models*. (2025). Ultralytics. <a id="models-ultralytics" href="https://docs.ultralytics.com/models/">https://docs.ultralytics.com/models/</a>
 
-5. *What is Docker?*. (22 de abril de 2025). Geeks for Geeks. <a 
-    id="what-is-docker" href="https://www.geeksforgeeks.org/introduction-to-docker/">https://www.geeksforgeeks.org/introduction-to-docker/</a>
+4. Schneider, J., Smalley, I. *What is neural processing unit (NPU)?*. (27 de septiembre de 2024). IBM. <a id="npu-ibm" href="https://www.ibm.com/topics/neural-processing-unit">https://www.ibm.com/topics/neural-processing-unit</a>
 
-6. Yasar, K. (23 de junio de 2023). *What is multiprocessing?*. TechTarget. 
-   <a id="what-is-multiprocessing" href="https://www.techtarget.com/searchdatacenter/definition/multiprocessing">https://www.techtarget.com/searchdatacenter/definition/multiprocessing</a>
+5. *What is Docker?*. (22 de abril de 2025). Geeks for Geeks. <a id="what-is-docker" href="https://www.geeksforgeeks.org/introduction-to-docker/">https://www.geeksforgeeks.org/introduction-to-docker/</a>
+
+6. Yasar, K. (23 de junio de 2023). *What is multiprocessing?*. TechTarget. <a id="what-is-multiprocessing" href="https://www.techtarget.com/searchdatacenter/definition/multiprocessing">https://www.techtarget.com/searchdatacenter/definition/multiprocessing</a>

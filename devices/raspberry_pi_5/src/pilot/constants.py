@@ -26,9 +26,9 @@ SERVO_SMALL_TURN_ANGLE = 20
 TURNS = 12
 
 # Distance constants
-FRONT_START_TURN_DISTANCE_THRESHOLD = 600.0 # 500.0
+FRONT_START_TURN_DISTANCE_THRESHOLD = 600.0  # 500.0
 FRONT_STOP_TURN_DISTANCE_THRESHOLD = 1500.0
-SIDE_DISTANCE_DIFFERENCE_PERCENTAGE = 0.15 # 0.2
+SIDE_DISTANCE_DIFFERENCE_PERCENTAGE = 0.15  # 0.2
 SIDE_DISTANCE_THRESHOLD = 1500.0
 STOP_DISTANCE_THRESHOLD = 1500.0
 SAFETY_FRONT_DISTANCE_START_THRESHOLD = 200.0
@@ -39,20 +39,20 @@ ANGLE_WIDTH = 5
 
 # Map directions to angles
 DIRECTION_TO_ANGLE = {
-    CardinalDirection.NORTH: 0,
-    CardinalDirection.NORTH_NORTHEAST: 22.5,
-    CardinalDirection.NORTHEAST: 45,
-    CardinalDirection.EAST_NORTHEAST: 67.5,
-    CardinalDirection.EAST: 90,
-    CardinalDirection.EAST_SOUTHEAST: 112.5,
-    CardinalDirection.SOUTHEAST: 135,
-    CardinalDirection.SOUTH_SOUTHEAST: 157.5,
-    CardinalDirection.SOUTH: 180,
-    CardinalDirection.SOUTH_SOUTHWEST: 202.5,
-    CardinalDirection.SOUTHWEST: 225,
-    CardinalDirection.WEST_SOUTHWEST: 247.5,
-    CardinalDirection.WEST: 270,
-    CardinalDirection.WEST_NORTHWEST: 292.5,
-    CardinalDirection.NORTHWEST: 315,
-    CardinalDirection.NORTH_NORTHWEST: 337.5,
-}
+	CardinalDirection.NORTH: 0,
+	CardinalDirection.NORTH_NORTHEAST: 22.5,
+	CardinalDirection.NORTHEAST: 45,
+	CardinalDirection.EAST_NORTHEAST: 67.5,
+	CardinalDirection.EAST: 90,
+	CardinalDirection.EAST_SOUTHEAST: 112.5,
+	CardinalDirection.SOUTHEAST: 135,
+	CardinalDirection.SOUTH_SOUTHEAST: 157.5,
+	CardinalDirection.SOUTH: 180,
+	CardinalDirection.SOUTH_SOUTHWEST: 202.5,
+	CardinalDirection.SOUTHWEST: 225,
+	CardinalDirection.WEST_SOUTHWEST: 247.5,
+	CardinalDirection.WEST: 270,
+	CardinalDirection.WEST_NORTHWEST: 292.5,
+	CardinalDirection.NORTHWEST: 315,
+	CardinalDirection.NORTH_NORTHWEST: 337.5,
+	}

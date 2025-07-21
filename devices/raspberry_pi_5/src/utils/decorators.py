@@ -3,21 +3,21 @@ from signal import SIGINT, SIG_IGN, signal
 
 
 def ignore_sigint(func):
-    """
-    Decorator to ignore keyboard interrupts (SIGINT) in a function.
+	"""
+	Decorator to ignore keyboard interrupts (SIGINT) in a function.
 
-    Args:
-        func (function): The function to decorate.
+	Args:
+		func (function): The function to decorate.
 
-    Returns:
-        function: The decorated function.
-    """
+	Returns:
+		function: The decorated function.
+	"""
 
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        # Ignore the SIGINT signal to prevent the process from being interrupted by Ctrl+C
-        signal(SIGINT, SIG_IGN)
+	@wraps(func)
+	def wrapper(*args, **kwargs):
+		# Ignore the SIGINT signal to prevent the process from being interrupted by Ctrl+C
+		signal(SIGINT, SIG_IGN)
 
-        return func(*args, **kwargs)
+		return func(*args, **kwargs)
 
-    return wrapper
+	return wrapper

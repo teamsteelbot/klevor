@@ -12,11 +12,14 @@ class="component-image">
 
 Equipada con un procesador ARM Cortex-A76 de 64 bits a 2.4 GHz [[1](#raspberry-pi-5-datasheet)]. La Raspberry Pi 5 es nuestro controlador principal de elección, decidimos usar a la Raspberry Pi 5 debido a múltiples factores, entre ellos:
 
-- **Compatibilidad**: Existen muchos componentes de Klevor (como la Camera Module 3 Wide) que a su vez pertenecen al ecosistema Raspberry, lo que hace que implementarlos a la Raspberry Pi 5 no requiera tanto esfuerzo.
+- **Compatibilidad
+  **: Existen muchos componentes de Klevor (como la Camera Module 3 Wide) que a su vez pertenecen al ecosistema Raspberry, lo que hace que implementarlos a la Raspberry Pi 5 no requiera tanto esfuerzo.
 
-- **Potencia**: La Raspberry Pi 5 es uno de los computadores portátiles más potentes actualmente, gracias a esto, funciones demandantes como lo es el procesamiento de imágenes en tiempo real, son fácilmente realizables por una Raspberry Pi 5.
+- **Potencia
+  **: La Raspberry Pi 5 es uno de los computadores portátiles más potentes actualmente, gracias a esto, funciones demandantes como lo es el procesamiento de imágenes en tiempo real, son fácilmente realizables por una Raspberry Pi 5.
 
-- **Portabilidad**: La Raspberry Pi 5 destaca entre los controladores, ya que no es una computadora bastante pesada, apenas llegando a los 60 g, hace que incorporarlo a Klevor sea una opción prácticamente segura [[1](#raspberry-pi-5-datasheet)].
+- **Portabilidad
+  **: La Raspberry Pi 5 destaca entre los controladores, ya que no es una computadora bastante pesada, apenas llegando a los 60 g, hace que incorporarlo a Klevor sea una opción prácticamente segura [[1](#raspberry-pi-5-datasheet)].
 
 | **Medida** | **Valor** |
 |------------|-----------|
@@ -173,7 +176,9 @@ El INJORA MB100 20A mini ESC es un controlador de velocidad electrónico [[11](#
 
 Gracias a este dispositivo, podemos asegurar una conexión segura y efectiva entre el motor y la Pico 2, sin necesitar componentes más grandes (como un puente H L298N) para cumplir la misma función. Además que, este mini controlador de velocidad es capaz de soportar el alto amperaje (este puede superar hasta picos de 100A) que pueda consumir el motor INJORA 180.
 
-Además de todo esto, es una parte del código bastante fácil de configurar gracias a librerías como `adafruit_motor` que permite configurar al motor principal como un servo de rotación continua gracias al módulo `servo`.
+Además de todo esto, es una parte del código bastante fácil de configurar gracias a librerías como
+`adafruit_motor` que permite configurar al motor principal como un servo de rotación continua gracias al módulo
+`servo`.
 
 A su vez, gracias a que incorpora un BEC (Battery Eliminator Circuit) podemos alimentar al [INJORA 7Kg 2065 Micro Servo](#injora-7kg-2065-micro-servo), sin necesidad de proporcionar una tercera batería o una alimentación secundaria de la misma batería.
 
@@ -224,7 +229,8 @@ El INJORA 7 kg 2065 Micro Servo es el servomotor encargado de controlar la direc
 
 No solo estos aspectos definieron la elección, el INJORA 7 kg 2065 ofrece también una gran precisión a pesar de su reducido tamaño, algo esencialmente vital en esta competencia.
 
-Gracias a la librería antes mencionada, la `adafruit_motor` con el módulo `servo`, nos permiten configurar el servo a nuestra elección, convirtiendo el uso de funciones para controlar el servo previamente establecido mucho más fácil de leer sin arriesgar el rendimiento del programa.
+Gracias a la librería antes mencionada, la `adafruit_motor` con el módulo
+`servo`, nos permiten configurar el servo a nuestra elección, convirtiendo el uso de funciones para controlar el servo previamente establecido mucho más fácil de leer sin arriesgar el rendimiento del programa.
 
 | **Medida** | **Valor** |
 |------------|-----------|
@@ -245,7 +251,11 @@ El GY-BNO085 es un sensor de orientación inercial (IMU) de 9 Grados de Libertad
 
 Además de todo esto, el poder utilizar un giroscopio le permite a Klevor contar las vueltas que ha dado tanto en el Desafío sin Obstáculos como el Desafío Cerrado de la forma más segura, ya que, a pesar de algún problema mecánico que impida que el robot sea capaz de ir completamente derecho, el giroscopio le puede hacer saber que tanto se está desvíando, siendo este uno de los componentes indispensables para poder completar este desafío.
 
-La forma en la que lo implementamos es bastante sencilla, el giroscopio siempre está actualizando los datos de manera asíncrona cada 50 milisegundos, y Klevor maneja dos variables, `yaw_deg` (la diferencia en grados en su orientación desde que inició en la pista hasta dónde está ubicado ahora mismo), y `relative_yaw` la cual utiliza el mismo `yaw_deg` para asignarse un valor, pero, en vez de reiniciarse cada vez que pasa de los -180 grados o 180 grados, simplemente le resta o suma (dependiendo del caso) 360 grados a `relative_yaw`, luego dividimos este número entre 90, y redondeamos hacia abajo (es decir, 10.57 pasa a ser simplemente 10), y si la división es igual a -12 o 12, sabemos que ya está casi en su zona de estacionamiento y Klevor simplemente avanza un poquito y se detiene (en el caso del Desafío sin Obstáculos).
+La forma en la que lo implementamos es bastante sencilla, el giroscopio siempre está actualizando los datos de manera asíncrona cada 50 milisegundos, y Klevor maneja dos variables,
+`yaw_deg` (la diferencia en grados en su orientación desde que inició en la pista hasta dónde está ubicado ahora mismo), y
+`relative_yaw` la cual utiliza el mismo
+`yaw_deg` para asignarse un valor, pero, en vez de reiniciarse cada vez que pasa de los -180 grados o 180 grados, simplemente le resta o suma (dependiendo del caso) 360 grados a
+`relative_yaw`, luego dividimos este número entre 90, y redondeamos hacia abajo (es decir, 10.57 pasa a ser simplemente 10), y si la división es igual a -12 o 12, sabemos que ya está casi en su zona de estacionamiento y Klevor simplemente avanza un poquito y se detiene (en el caso del Desafío sin Obstáculos).
 
 | **Medida** | **Valor** |
 |------------|-----------|
@@ -256,28 +266,48 @@ La forma en la que lo implementamos es bastante sencilla, el giroscopio siempre 
 
 # Referencias Bibliográficas
 
-1. *Raspberry Pi 5 Datasheet*. (2025). Raspberry Pi Ltd. <a id="raspberry-pi-5-datasheet" href="https://datasheets.raspberrypi.com/rpi5/raspberry-pi-5-product-brief.pdf">https://datasheets.raspberrypi.com/rpi5/raspberry-pi-5-product-brief.pdf</a>
+1. *Raspberry Pi 5
+   Datasheet*. (2025). Raspberry Pi Ltd. <a id="raspberry-pi-5-datasheet" href="https://datasheets.raspberrypi.com/rpi5/raspberry-pi-5-product-brief.pdf">https://datasheets.raspberrypi.com/rpi5/raspberry-pi-5-product-brief.pdf</a>
 
-2. *Raspberry Pi camera module 3 (standard | wide | NOIR)*. (2025). GeekFactory. <a id="raspberry-pi-camera-module-3-geek-factory" href="https://www.geekfactory.mx/producto/raspberry-pi-camera-module-3/">https://www.geekfactory.mx/producto/raspberry-pi-camera-module-3/</a>
+2. *Raspberry Pi camera module 3 (standard | wide |
+   NOIR)*. (2025). GeekFactory. <a id="raspberry-pi-camera-module-3-geek-factory" href="https://www.geekfactory.mx/producto/raspberry-pi-camera-module-3/">https://www.geekfactory.mx/producto/raspberry-pi-camera-module-3/</a>
 
-3. *Raspberry Pi Camera Documentation*. (2025). Raspberry Pi Ltd. <a id="raspberry-pi-camera-documentation" href="https://www.raspberrypi.com/documentation/accessories/camera.html">https://www.raspberrypi.com/documentation/accessories/camera.html</a>
+3. *Raspberry Pi Camera
+   Documentation*. (2025). Raspberry Pi Ltd. <a id="raspberry-pi-camera-documentation" href="https://www.raspberrypi.com/documentation/accessories/camera.html">https://www.raspberrypi.com/documentation/accessories/camera.html</a>
 
-4. *Raspberry Pi AI HAT+ Documentation*. (2025). Raspberry Pi Ltd. <a id="raspberry-pi-ai-hat-documentation" href="https://www.raspberrypi.com/documentation/accessories/ai-hat-plus.html">https://www.raspberrypi.com/documentation/accessories/ai-hat-plus.html</a>
+4. *Raspberry Pi AI HAT+
+   Documentation*. (2025). Raspberry Pi Ltd. <a id="raspberry-pi-ai-hat-documentation" href="https://www.raspberrypi.com/documentation/accessories/ai-hat-plus.html">https://www.raspberrypi.com/documentation/accessories/ai-hat-plus.html</a>
 
-5. *Raspberry Pi Pico 2 WH Datasheet*. (2025). Raspberry Pi Ltd. <a id="raspberry-pi-pico-2-wh-datasheet" href="https://datasheets.raspberrypi.com/pico/pico-2-product-brief.pdf">https://datasheets.raspberrypi.com/pico/pico-2-product-brief.pdf</a>
+5. *Raspberry Pi Pico 2 WH
+   Datasheet*. (2025). Raspberry Pi Ltd. <a id="raspberry-pi-pico-2-wh-datasheet" href="https://datasheets.raspberrypi.com/pico/pico-2-product-brief.pdf">https://datasheets.raspberrypi.com/pico/pico-2-product-brief.pdf</a>
 
-6. *Escáner Láser DTOF 360° SLAMTEC RPLIDAR C1*. (2025). RobotShop. <a id="rplidar-c1-robot-shop" href="https://www.robotshop.com/es/products/escaner-laser-dtof-360-slamtec-rplidar-c1?qd=3ec3808f4c3dd74dab521269d23d2fb2">https://www.robotshop.com/es/products/escaner-laser-dtof-360-slamtec-rplidar-c1?qd=3ec3808f4c3dd74dab521269d23d2fb2</a>
+6. *Escáner Láser DTOF 360° SLAMTEC RPLIDAR
+   C1*. (2025). RobotShop. <a id="rplidar-c1-robot-shop" href="https://www.robotshop.com/es/products/escaner-laser-dtof-360-slamtec-rplidar-c1?qd=3ec3808f4c3dd74dab521269d23d2fb2">https://www.robotshop.com/es/products/escaner-laser-dtof-360-slamtec-rplidar-c1?qd=3ec3808f4c3dd74dab521269d23d2fb2</a>
 
-7. *RPLidar C1 360 ToF LiDAR Datasheet*. (2025). RobotShop. <a id="rplidar-c1-datasheet" href="https://cdn.robotshop.com/media/R/Rpk/RB-Rpk-35/pdf/rp-lidar-360-tof-lidar-datasheet.pdf">https://cdn.robotshop.com/media/R/Rpk/RB-Rpk-35/pdf/rp-lidar-360-tof-lidar-datasheet.pdf</a>
+7. *RPLidar C1 360 ToF LiDAR
+   Datasheet*. (2025). RobotShop. <a id="rplidar-c1-datasheet" href="https://cdn.robotshop.com/media/R/Rpk/RB-Rpk-35/pdf/rp-lidar-360-tof-lidar-datasheet.pdf">https://cdn.robotshop.com/media/R/Rpk/RB-Rpk-35/pdf/rp-lidar-360-tof-lidar-datasheet.pdf</a>
 
-8. *Shargeek Storm 2, banco de energía para portátil de 100 W, cargador portátil de 25600 mAh, primer banco de energía transparente del mundo con pantalla IPS, Samsung Galaxy, MacBook y más*. (2025). Amazon. <a id="shargeek-storm-2-amazon" href="https://www.amazon.es/Shargeek-port%C3%A1til-cargador-transparente-pantalla/dp/B09NY8GN76">https://www.amazon.es/Shargeek-port%C3%A1til-cargador-transparente-pantalla/dp/B09NY8GN76</a>
+8. *Shargeek Storm 2, banco de energía para portátil de 100 W, cargador portátil
+   de 25600 mAh, primer banco de energía transparente del mundo con pantalla
+   IPS, Samsung Galaxy, MacBook y
+   más*. (2025). Amazon. <a id="shargeek-storm-2-amazon" href="https://www.amazon.es/Shargeek-port%C3%A1til-cargador-transparente-pantalla/dp/B09NY8GN76">https://www.amazon.es/Shargeek-port%C3%A1til-cargador-transparente-pantalla/dp/B09NY8GN76</a>
 
-9. *Shargeek Storm 2, 100W Portable Power Bank*. (2025). Sharge Technology (Shenzhen) Co., Ltd. <a id="shargeek-storm-2-100w-power-bank" href="https://docs.google.com/gview?embedded=true&url=manuals.plus/m/74637553dc00ed21580afe764bb86b7b118410fa97478a675e0edc76f8214d87_optim.pdf">https://docs.google.com/gview?embedded=true&url=manuals.plus/m/74637553dc00ed21580afe764bb86b7b118410fa97478a675e0edc76f8214d87_optim.pdf</a>
+9. *Shargeek Storm 2, 100W Portable Power
+   Bank*. (2025). Sharge Technology (Shenzhen) Co., Ltd. <a id="shargeek-storm-2-100w-power-bank" href="https://docs.google.com/gview?embedded=true&url=manuals.plus/m/74637553dc00ed21580afe764bb86b7b118410fa97478a675e0edc76f8214d87_optim.pdf">https://docs.google.com/gview?embedded=true&url=manuals.plus/m/74637553dc00ed21580afe764bb86b7b118410fa97478a675e0edc76f8214d87_optim.pdf</a>
 
-10. *INJORA Motor Cepillado 180 48T con Piñón de Acero Inoxidable, Conector JST-PH2.0 para Upgrade 1/18 RC Crawler Redcat Ascent-18*. (2025). Amazon. <a id="injora-180-48t-amazon" href="https://www.amazon.es/INJORA-Cepillado-Inoxidable-JST-PH2-0-Ascent-18/dp/B0D97YNMLG?ref_=ast_sto_dp">https://www.amazon.es/INJORA-Cepillado-Inoxidable-JST-PH2-0-Ascent-18/dp/B0D97YNMLG?ref_=ast_sto_dp</a>
+10. *INJORA Motor Cepillado 180 48T con Piñón de Acero Inoxidable, Conector
+    JST-PH2.0 para Upgrade 1/18 RC Crawler Redcat
+    Ascent-18*. (2025). Amazon. <a id="injora-180-48t-amazon" href="https://www.amazon.es/INJORA-Cepillado-Inoxidable-JST-PH2-0-Ascent-18/dp/B0D97YNMLG?ref_=ast_sto_dp">https://www.amazon.es/INJORA-Cepillado-Inoxidable-JST-PH2-0-Ascent-18/dp/B0D97YNMLG?ref_=ast_sto_dp</a>
 
-11. *INJORA MB100-R80 20A Brushed Mini ESC con Motor 180 de 48T para Actualización TRX4M 1/18 RC Crawler*. (2025). Amazon. <a id="injora-mb100-r80-amazon" href="https://www.amazon.es/INJORA-MB100-Brushed-Actualizaci%C3%B3n-Crawler/dp/B0CXT74XV6?ref_=ast_sto_dp">https://www.amazon.es/INJORA-MB100-Brushed-Actualizaci%C3%B3n-Crawler/dp/B0CXT74XV6?ref_=ast_sto_dp</a>
+11. *INJORA MB100-R80 20A Brushed Mini ESC con Motor 180 de 48T para
+    Actualización TRX4M 1/18 RC
+    Crawler*. (2025). Amazon. <a id="injora-mb100-r80-amazon" href="https://www.amazon.es/INJORA-MB100-Brushed-Actualizaci%C3%B3n-Crawler/dp/B0CXT74XV6?ref_=ast_sto_dp">https://www.amazon.es/INJORA-MB100-Brushed-Actualizaci%C3%B3n-Crawler/dp/B0CXT74XV6?ref_=ast_sto_dp</a>
 
-12. *URGENEX 3000mAh 7.4 V Li-ion Battery with Dean-Style T Plug 2S Rechargeable RC Battery Fit for WLtoys 4WD High Speed RC Cars and Most 1/10, 1/12, 1/16 Scale RC Cars Trucks with 7.4V Battery Charger*. (2025). Amazon. <a id="urgenex-3000-mah-amazon" href="https://www.amazon.com/URGENEX-Bater%C3%ADa-enchufe-recargable-velocidad/dp/B0CYNVSN7W?ref_=ast_sto_dp">https://www.amazon.com/URGENEX-Bater%C3%ADa-enchufe-recargable-velocidad/dp/B0CYNVSN7W?ref_=ast_sto_dp</a>
+12. *URGENEX 3000mAh 7.4 V Li-ion Battery with Dean-Style T Plug 2S Rechargeable
+    RC Battery Fit for WLtoys 4WD High Speed RC Cars and Most 1/10, 1/12, 1/16
+    Scale RC Cars Trucks with 7.4V Battery
+    Charger*. (2025). Amazon. <a id="urgenex-3000-mah-amazon" href="https://www.amazon.com/URGENEX-Bater%C3%ADa-enchufe-recargable-velocidad/dp/B0CYNVSN7W?ref_=ast_sto_dp">https://www.amazon.com/URGENEX-Bater%C3%ADa-enchufe-recargable-velocidad/dp/B0CYNVSN7W?ref_=ast_sto_dp</a>
 
-13. *INJORA 7 kg 2065 Digital Servo Waterproof High Voltage Sub-Micro Shift Servo for TRX4 TRX6 SCX10 III 1/10 RC Crawler Car,1PCS*. (2025). Amazon. <a id="injora-7kg-2065-amazon" href="https://www.amazon.com/digital-impermeable-voltaje-Sub-Micro-Crawler/dp/B0BLBMVYCW?ref_=ast_sto_dp">https://www.amazon.com/digital-impermeable-voltaje-Sub-Micro-Crawler/dp/B0BLBMVYCW?ref_=ast_sto_dp</a>
+13. *INJORA 7 kg 2065 Digital Servo Waterproof High Voltage Sub-Micro Shift
+    Servo for TRX4 TRX6 SCX10 III 1/10 RC Crawler
+    Car,1PCS*. (2025). Amazon. <a id="injora-7kg-2065-amazon" href="https://www.amazon.com/digital-impermeable-voltaje-Sub-Micro-Crawler/dp/B0BLBMVYCW?ref_=ast_sto_dp">https://www.amazon.com/digital-impermeable-voltaje-Sub-Micro-Crawler/dp/B0BLBMVYCW?ref_=ast_sto_dp</a>

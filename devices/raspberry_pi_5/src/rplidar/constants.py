@@ -17,5 +17,3 @@ APPS_DIR = os.path.join(os.path.dirname(__file__), "apps")
 
 # Get the absolute path of the ultra_simple executable
 ULTRA_SIMPLE_PATH = os.path.join(APPS_DIR, "ultra_simple")
-
-

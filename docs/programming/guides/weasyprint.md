@@ -4,9 +4,9 @@ Para la presente documentación, decidimos también permitir la visualización d
 
 ## Instalación de WeasyPrint {:#installation}
 
-Esta guía para instalar WeasyPrint está basada en la documentación oficial de WeasyPrint, la cual puedes encontrar en su sitio web: [WeasyPrint](https://doc.courtbouillon.org/weasyprint). 
+Esta guía para instalar WeasyPrint está basada en la documentación oficial de WeasyPrint, la cual puedes encontrar en su sitio web: [WeasyPrint](https://doc.courtbouillon.org/weasyprint).
 
-!!! important 
+!!! important
 	Cabe destacar que, para el momento que lees esta guía, el enfoque de la misma es para el sistema operativo de Windows, sin embargo, WeasyPrint también es compatible con otros sistemas operativos como Linux y macOS.
 
 Primero, debemos asegurarnos de tener instalado Python en nuestro sistema. Puedes descargar la última versión de Python desde su sitio oficial: [Python](https://www.python.org/downloads/).
@@ -21,10 +21,10 @@ pacman -S mingw-w64-ucrt-x86_64-python-gobject
 pacman -S mingw-w64-x86_64-pango
 ```
 
-!!! note 
+!!! note
 	El primer comando instala GTK 3, que es necesario para la renderización de gráficos, el segundo comando instala las bindings de Python para GObject, que son necesarias para interactuar con GTK, y el tercer comando instala Pango, que es una biblioteca para el manejo de texto y tipografía.
 
-Después de instalar las dependencias, puedes instalar WeasyPrint con el ejecutable oficial en [WeasyPrint Releases](https://github.com/Kozea/WeasyPrint/releases). 
+Después de instalar las dependencias, puedes instalar WeasyPrint con el ejecutable oficial en [WeasyPrint Releases](https://github.com/Kozea/WeasyPrint/releases).
 
 Si instalaste las dependencias del entorno virtual de Python a través del `requirements.txt`, ya estás listo para usar WeasyPrint. En el caso contrario, activa tu entorno virtual de Python y ejecuta el siguiente comando para instalar WeasyPrint:
 

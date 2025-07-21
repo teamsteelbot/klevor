@@ -66,11 +66,11 @@ Para la instalación, empleamos las dos guías de la documentación oficial de R
     ```bash
     sudo rpi-eeprom-update
     ```
-    1. Si dicho comando imprime una fecha anterior al 6 de diciembre de 2023, entonces debemos actualizar el firmware de la Raspberry Pi 5. Para ello, ejecutamos el siguiente comando:
-        ```bash
-        sudo raspi-config
-        ```
-    2. En el menú de configuración, seleccionamos la opción `Advanced Options` y luego `Bootloader Version`. Elegimos la opción `Latest` y salimos del menú de configuración.
+	1. Si dicho comando imprime una fecha anterior al 6 de diciembre de 2023, entonces debemos actualizar el firmware de la Raspberry Pi 5. Para ello, ejecutamos el siguiente comando:
+	    ```bash
+		sudo raspi-config
+		```
+	2. En el menú de configuración, seleccionamos la opción `Advanced Options` y luego `Bootloader Version`. Elegimos la opción `Latest` y salimos del menú de configuración.
 3. Ejecutamos el siguiente comando para actualizar el firmware:
     ```bash
     sudo rpi-eeprom-update -a
@@ -88,23 +88,23 @@ Para la instalación, empleamos las dos guías de la documentación oficial de R
     ```bash
     sudo raspi-config
     ```
-    1. En el menú de configuración, seleccionamos la opción
-       `Advanced Options` y luego `PCIe Speed`. Elegimos la opción
-       `Yes` para habilitar el modo PCIe Gen 3.0.
-    2. Reiniciamos la Raspberry Pi 5.
-11. Instalamos las dependencias requeridas para usar el NPU. Ejecutamos el siguiente comando desde una ventana de terminal: 
+	1. En el menú de configuración, seleccionamos la opción
+	   `Advanced Options` y luego `PCIe Speed`. Elegimos la opción
+	   `Yes` para habilitar el modo PCIe Gen 3.0.
+	2. Reiniciamos la Raspberry Pi 5.
+11. Instalamos las dependencias requeridas para usar el NPU. Ejecutamos el siguiente comando desde una ventana de terminal:
     ```bash
     sudo apt install hailo-all
     ```
-    Cabe destacar que, debido a que la última actualización (4.21.0) es muy reciente, recomendamos instalar la versión anterior que es con la que hemos podido trabajar y comprobar su correcto funcionamiento, para lo cual, en vez del anterior comando, sería: 
+    Cabe destacar que, debido a que la última actualización (4.21.0) es muy reciente, recomendamos instalar la versión anterior que es con la que hemos podido trabajar y comprobar su correcto funcionamiento, para lo cual, en vez del anterior comando, sería:
     ```bash
     sudo apt install hailo-all=4.20.0
     ```
     Esto instalará las siguientes dependencias:
-    - Controlador de dispositivo del kernel Hailo y firmware
-    - Software de middleware HailoRT
-    - Bibliotecas de post-procesamiento central Tappas de Hailo
-    - Etapas de software de demostración de post-procesamiento rpicam-apps Hailo
+	- Controlador de dispositivo del kernel Hailo y firmware
+	- Software de middleware HailoRT
+	- Bibliotecas de post-procesamiento central Tappas de Hailo
+	- Etapas de software de demostración de post-procesamiento rpicam-apps Hailo
 12. Finalmente, reiniciamos la Raspberry Pi de nuevo para que estos ajustes tengan efecto.
 13. Para verificar que el NPU está correctamente instalado y funcionando, ejecutamos el siguiente comando:
     ```bash
@@ -123,7 +123,7 @@ Para la instalación, empleamos las dos guías de la documentación oficial de R
     Part Number: <N/A>
     Product Name: <N/A>
     ```
-    
+
 ## Configuración de la Raspberry Pi {:#raspberry-pi-configuration}
 
 <div class="center">
@@ -134,9 +134,10 @@ class="component-image">
 
 Para configurar la Raspberry Pi, primero conectamos la Raspberry Pi a un monitor, teclado y ratón.
 
-Luego, encendemos la Raspberry Pi y esperar a que se inicie el sistema operativo. 
+Luego, encendemos la Raspberry Pi y esperar a que se inicie el sistema operativo.
 
 Después, abrimos una terminal y ejecutar el siguiente comando para actualizar el sistema operativo:
+
 ```bash
 sudo apt update && sudo apt upgrade -y
 ```
@@ -144,11 +145,13 @@ sudo apt update && sudo apt upgrade -y
 Clonamos el repositorio en el caso de que no se haya realizado aún. Puedes ver las distintas formas de clonar el repositorio en la sección referente al [GitHub](../../github.md#repository).
 
 Navegamos al directorio del repositorio clonado, en el caso de haberlo clonado en la carpeta de Documentos, el comando sería:
+
 ```bash
 cd ~/Documents/klevor
 ```
 
 Cambiamos el directorio actual a `devices/raspberry_pi_5` para acceder al código específico de la Raspberry Pi 5:
+
 ```bash
 cd devices/raspberry_pi_5
 ```
@@ -167,6 +170,7 @@ Configuramos el entorno virtual de Python. Para ello, ejecuta el siguiente coman
     ```
 
 Instalamos las dependencias necesarias para el proyecto ejecutando el siguiente comando:
+
 ```bash
 pip install -r requirements.txt
 ```
@@ -175,9 +179,10 @@ En el caso de no tener configurado la Raspberry Pi Pico 2 W, se recomienda segui
 
 ### Configurar el Startup Service {:#startup-service}
 
-Para que el robot se inicie automáticamente al encender la Raspberry Pi, es necesario configurar un servicio de inicio. 
+Para que el robot se inicie automáticamente al encender la Raspberry Pi, es necesario configurar un servicio de inicio.
 
 Para ello, nos aseguramos primero de que el script de Shell `run.sh` sea ejecutable, para lo cual ejecutamos el siguiente comando:
+
 ```bash
 chmod +x run.sh
 ```
@@ -186,6 +191,7 @@ chmod +x run.sh
 	Necesitamos estar en el directorio `devices/raspberry_pi_5` para que el comando anterior funcione correctamente.
 
 Posteriormente, creamos un archivo de servicio en el directorio `/etc/systemd/system/` con el nombre `klevor.service` con el siguiente comando:
+
 ```bash
 sudo nano /etc/systemd/system/klevor.service
 ```
@@ -210,17 +216,18 @@ WantedBy=multi-user.target
 ```
 
 !!! note
-	Reemplazamos `user` por el nombre de usuario de la Raspberry Pi, que por defecto es `pi`.
-	Así mismo, reemplazamos `/home/pi/Documents/klevor/devices/raspberry_pi_5/run.sh` con la ruta completa al script `run.sh` que se encuentra en el directorio del repositorio clonado. De igual forma, ajustamos la ruta del `WorkingDirectory` al directorio donde se encuentra el script `run.sh`.
+	Reemplazamos `user` por el nombre de usuario de la Raspberry Pi, que por defecto es `pi`. Así mismo, reemplazamos `/home/pi/Documents/klevor/devices/raspberry_pi_5/run.sh` con la ruta completa al script `run.sh` que se encuentra en el directorio del repositorio clonado. De igual forma, ajustamos la ruta del `WorkingDirectory` al directorio donde se encuentra el script `run.sh`.
 
 Guardamos los cambios y salimos del editor de texto (en nano, presionamos `Ctrl + X`, luego `Y` para confirmar los cambios y finalmente `Enter`).
 
 Luego, recargamos los servicios del sistema con el siguiente comando:
+
 ```bash
 sudo systemctl daemon-reload
 ```
 
 Finalmente, habilitamos el servicio para que se inicie automáticamente al arrancar la Raspberry Pi con el siguiente comando:
+
 ```bash
 sudo systemctl enable klevor.service
 ```
@@ -238,24 +245,26 @@ Reiniciamos la Raspberry Pi para que los cambios surtan efecto. A partir de ahor
 
 !!! important
 	En el caso de que creas que el robot no se haya iniciado correctamente, puedes revisar el estado del servicio con el siguiente comando:
-> ```bash
-> sudo systemctl status klevor.service
-> ```
-> 
-> Así mismo, puedes ejecutar el código directamente sin necesidad de configurar el servicio de inicio, para lo cual, simplemente ejecuta el siguiente comando:
-> ```bash
-> run.sh
-> ```
-> 
-> Esto iniciará el robot y podrás ver los mensajes de depuración en la terminal. Si todo funciona correctamente, deberías ver mensajes indicando que el robot está listo para recibir comandos.
-> Si deseas detener el robot, puedes presionar `Ctrl + C` en la terminal donde se está ejecutando el script `run.sh`. 
+
+	```bash
+	sudo systemctl status klevor.service
+	```
+
+	Así mismo, puedes ejecutar el código directamente sin necesidad de configurar el servicio de inicio, para lo cual, simplemente ejecuta el siguiente comando:
+	```bash
+	run.sh
+	```
+	
+	Esto iniciará el robot y podrás ver los mensajes de depuración en la terminal. Si todo funciona correctamente, deberías ver mensajes indicando que el robot está listo para recibir comandos.
+
+	Si deseas detener el robot, puedes presionar `Ctrl + C` en la terminal donde se está ejecutando el script `run.sh`.
 
 # Referencias Bibliográficas
 
 1. *Raspberry Pi OS*. (2025). Raspberry Pi. <a id="raspberry-pi-os" href="https://www.raspberrypi.com/software/">https://www.raspberrypi.com/software/</a>
 
 2. *Raspberry Pi Connect*. (2025). Raspberry Pi. <a id="raspberry-pi-connect" href="https://www.raspberrypi.com/documentation/remote-access/raspberry-pi-connect.html">https://www.raspberrypi.com/documentation/remote-access/raspberry-pi-connect.html</a>
-   
+
 3. *Camera*. (2025). Raspberry Pi. <a id="camera-docs" href="https://www.raspberrypi.com/documentation/computers/camera.html">https://www.raspberrypi.com/documentation/computers/camera.html</a>
 
 4. *AI Kit and AI HAT+ software*. (2025). Raspberry Pi. <a id="getting-started-raspberry-pi" href="https://www.raspberrypi.com/documentation/computers/ai.html#getting-started">https://www.raspberrypi.com/documentation/computers/ai.html#getting-started</a>

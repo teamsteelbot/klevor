@@ -9,7 +9,7 @@ led.direction = Direction.OUTPUT
 
 # Blink the LED indefinitely
 while True:
-    led.value = True
-    sleep(1)
-    led.value = False
-    sleep(1)
+	led.value = True
+	sleep(1)
+	led.value = False
+	sleep(1)

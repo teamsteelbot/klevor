@@ -23,4 +23,5 @@ Al inicio, queríamos utilizar varios de estos sensores para poder cubrir los pu
 
 # Referencias Bibliográficas
 
-1. *VL53L0X*. (2025). STMicroElectronics. <a id="sensor-tof" href="https://www.st.com/en/imaging-and-photonics-solutions/vl53l0x.html">https://www.st.com/en/imaging-and-photonics-solutions/vl53l0x.html</a>
+1.
+*VL53L0X*. (2025). STMicroElectronics. <a id="sensor-tof" href="https://www.st.com/en/imaging-and-photonics-solutions/vl53l0x.html">https://www.st.com/en/imaging-and-photonics-solutions/vl53l0x.html</a>

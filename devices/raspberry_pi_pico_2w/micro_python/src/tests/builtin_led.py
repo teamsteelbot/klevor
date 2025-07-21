@@ -7,9 +7,9 @@ from machine import Pin
 led = Pin("LED", Pin.OUT)
 
 while True:
-    led.on()
-    print("LED is on")
-    time.sleep(1)
-    led.off()
-    print("LED is off")
-    time.sleep(1)
+	led.on()
+	print("LED is on")
+	time.sleep(1)
+	led.off()
+	print("LED is off")
+	time.sleep(1)

@@ -1,7 +1,9 @@
 import os
 
 # Root directory of the project
-ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
+ROOT_DIR = os.path.abspath(
+	os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'),
+	)
 
 # MkDocs configuration file
 MKDOCS_CONFIG_FILE = os.path.join(ROOT_DIR, 'mkdocs.yml')
@@ -14,6 +16,9 @@ PDF_DIR = os.path.join(ROOT_DIR, 'pdf')
 
 # PDF output file
 PDF_OUTPUT_FILE = os.path.join(DOCS_DIR, 'downloads', 'teamsteelbot.pdf')
+
+# PDF DPI
+PDF_DPI = 300
 
 # WeasyPrint stylesheet file
 STYLESHEET_FILE = os.path.join(PDF_DIR, 'styles.css')
@@ -30,11 +35,11 @@ FIRST_PAGE_HTML = f"""
 
 # Omitted MkDocs pages and directories
 OMITTED_DIRECTORIES = [
-	'programming/code'
-]
+	'programming/code',
+	]
 OMITTED_PAGES = [
 	'sponsors.md',
-]
+	]
 
 # Break page HTML
 BREAK_PAGE_HTML = '\n<div class="page-break"></div>\n'

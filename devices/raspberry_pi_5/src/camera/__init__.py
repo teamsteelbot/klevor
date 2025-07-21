@@ -16,182 +16,182 @@ from ..log.protocols import LoggerConsumerProtocol
 
 
 class Camera(CameraABC, LoggerConsumerProtocol):
-    """
-    Class implementation that wraps the functionality required for the Raspberry Pi Camera.
-    """
+	"""
+	Class implementation that wraps the functionality required for the Raspberry Pi Camera.
+	"""
 
-    # Logger configuration
-    LOGGER_TAG = "Camera"
+	# Logger configuration
+	LOGGER_TAG = "Camera"
 
-    def __init__(
-        self,
-        writer_messages_queue: Queue,
-        width: int = WIDTH,
-        height: int = HEIGHT,
-        rotation: int = 0,
-        video_config: Optional[Dict] = None
-    ):
-        """
-        Initialize the camera with the specified width, height, and video configuration.
+	def __init__(
+			self,
+			writer_messages_queue: Queue,
+			width: int = WIDTH,
+			height: int = HEIGHT,
+			rotation: int = 0,
+			video_config: Optional[Dict] = None,
+			):
+		"""
+		Initialize the camera with the specified width, height, and video configuration.
 
-        Args:
-            writer_messages_queue (Queue): Queue to hold log messages.
-            width (int): Width of the camera image.
-            height (int): Height of the camera image.
-            video_config(Optional[Dict]): Configuration for video recording.
-            rotation (int): Rotation angle for the camera.
-        """
-        # Initialize the logger
-        self.__logger = Logger(writer_messages_queue, self.LOGGER_TAG)
+		Args:
+			writer_messages_queue (Queue): Queue to hold log messages.
+			width (int): Width of the camera image.
+			height (int): Height of the camera image.
+			video_config(Optional[Dict]): Configuration for video recording.
+			rotation (int): Rotation angle for the camera.
+		"""
+		# Initialize the logger
+		self.__logger = Logger(writer_messages_queue, self.LOGGER_TAG)
 
-        # Initialize the reentrant lock
-        self.__rlock = RLock()
+		# Initialize the reentrant lock
+		self.__rlock = RLock()
 
-        # Configure the camera and video settings
-        self.__picam2 = Picamera2()
-        self.__picam2.set_controls(
-            {"AwbMode": "auto"}
-        )  # Set Auto White Balance (AWB)
-        self.__config = self.__picam2.create_still_configuration(
-            main={"size": (width, height)}
-        )
-        self.__picam2.configure(self.__config)
+		# Configure the camera and video settings
+		self.__picam2 = Picamera2()
+		self.__picam2.set_controls(
+			{"AwbMode": "auto"},
+			)  # Set Auto White Balance (AWB)
+		self.__config = self.__picam2.create_still_configuration(
+			main={"size": (width, height)},
+			)
+		self.__picam2.configure(self.__config)
 
-        # Configure rotation if specified
-        if rotation:
-            self.__picam2.set_controls({"Rotation": rotation})
+		# Configure rotation if specified
+		if rotation:
+			self.__picam2.set_controls({"Rotation": rotation})
 
-        # Set the video configuration if provided and the started preview flag
-        self.__video_config = video_config
-        self.__started_preview = False
+		# Set the video configuration if provided and the started preview flag
+		self.__video_config = video_config
+		self.__started_preview = False
 
-    @final
-    def logger(self) -> Logger:
-        return self.__logger
+	@final
+	def logger(self) -> Logger:
+		return self.__logger
 
-    @final
-    def _start_preview(self) -> None:
-        with self.__rlock:
-            # Check if the preview is already started
-            if self.__started_preview:
-                return
+	@final
+	def _start_preview(self) -> None:
+		with self.__rlock:
+			# Check if the preview is already started
+			if self.__started_preview:
+				return
 
-            self.__picam2.start_preview()
-            self.__started_preview = True
+			self.__picam2.start_preview()
+			self.__started_preview = True
 
-        # Log
-        self.__logger.info("Camera preview started.")
+		# Log
+		self.__logger.info("Camera preview started.")
 
-    @final
-    def _stop_preview(self) -> None:
-        with self.__rlock:
-            # Check if the preview is running
-            if not self.__started_preview:
-                return
+	@final
+	def _stop_preview(self) -> None:
+		with self.__rlock:
+			# Check if the preview is running
+			if not self.__started_preview:
+				return
 
-            self.__picam2.stop_preview()
-            self.__started_preview = False
+			self.__picam2.stop_preview()
+			self.__started_preview = False
 
-        # Log
-        self.__logger.info("Camera preview stopped.")
+		# Log
+		self.__logger.info("Camera preview stopped.")
 
-    @final
-    def record_video(
-        self,
-        width: int = WIDTH,
-        height: int = HEIGHT,
-        duration: int = 10,
-        file_path: str = 'video.h264',
-        encoder=H264Encoder()
-    ) -> None:
-        with self.__rlock:
-            # Stop the camera preview if it is running
-            self._stop_preview()
+	@final
+	def record_video(
+			self,
+			width: int = WIDTH,
+			height: int = HEIGHT,
+			duration: int = 10,
+			file_path: str = 'video.h264',
+			encoder = H264Encoder(),
+			) -> None:
+		with self.__rlock:
+			# Stop the camera preview if it is running
+			self._stop_preview()
 
-            # Configure the camera for video recording
-            if not self.__video_config:
-                self.__video_config = self.__picam2.create_video_configuration(
-                    main={"size": (width, height)},
-                    display="preview"
-                )
-            self.__picam2.configure(self.__video_config)
+			# Configure the camera for video recording
+			if not self.__video_config:
+				self.__video_config = self.__picam2.create_video_configuration(
+					main={"size": (width, height)},
+					display="preview",
+					)
+			self.__picam2.configure(self.__video_config)
 
-            # Get the  output
-            output = FileOutput(file_path)
+			# Get the  output
+			output = FileOutput(file_path)
 
-            # Start the recording
-            self.__picam2.start_recording(encoder, output)
+			# Start the recording
+			self.__picam2.start_recording(encoder, output)
 
-            # Sleep for the duration of the recording
-            sleep(duration)
+			# Sleep for the duration of the recording
+			sleep(duration)
 
-            # Stop the recording
-            self.__picam2.stop_recording()
+			# Stop the recording
+			self.__picam2.stop_recording()
 
-        # Log
-        self.__logger.info(
-            f"Video of {duration} seconds recording saved to {file_path}."
-        )
+		# Log
+		self.__logger.info(
+			f"Video of {duration} seconds recording saved to {file_path}.",
+			)
 
-    @final
-    def capture_image(
-        self,
-        adjust_duration: float = ADJUST_DURATION
-    ) -> Image:
-        with self.__rlock:
-            # Start the camera preview
-            self._start_preview()
+	@final
+	def capture_image(
+			self,
+			adjust_duration: float = ADJUST_DURATION,
+			) -> Image:
+		with self.__rlock:
+			# Start the camera preview
+			self._start_preview()
 
-            # Allow time for the camera to adjust
-            sleep(adjust_duration)
+			# Allow time for the camera to adjust
+			sleep(adjust_duration)
 
-            # Capture the image
-            image = self.__picam2.capture()
+			# Capture the image
+			image = self.__picam2.capture()
 
-            # Stop the camera preview if required
-            self._stop_preview()
+			# Stop the camera preview if required
+			self._stop_preview()
 
-        # Log
-        self.__logger.info("Captured image.")
+		# Log
+		self.__logger.info("Captured image.")
 
-        return image
+		return image
 
-    @final
-    def capture_image_stream(
-        self,
-        image_format: str = IMAGE_FORMAT,
-        adjust_duration: float = ADJUST_DURATION
-    ) -> io.BytesIO:
-        with self.__rlock:
-            # Start the camera preview
-            self._start_preview()
+	@final
+	def capture_image_stream(
+			self,
+			image_format: str = IMAGE_FORMAT,
+			adjust_duration: float = ADJUST_DURATION,
+			) -> io.BytesIO:
+		with self.__rlock:
+			# Start the camera preview
+			self._start_preview()
 
-            # Allow time for the camera to adjust
-            sleep(adjust_duration)
+			# Allow time for the camera to adjust
+			sleep(adjust_duration)
 
-            # Capture the image stream
-            image_stream = io.BytesIO()
-            self.__picam2.capture(image_stream, format=image_format)
+			# Capture the image stream
+			image_stream = io.BytesIO()
+			self.__picam2.capture(image_stream, format=image_format)
 
-            # Stop the camera preview
-            self._stop_preview()
+			# Stop the camera preview
+			self._stop_preview()
 
-        # Log
-        self.__logger.info("Captured image stream.")
+		# Log
+		self.__logger.info("Captured image stream.")
 
-        return image_stream
+		return image_stream
 
-    def __del__(self):
-        """
-        Destructor to clean up resources when the camera is no longer needed.
-        """
-        # Stop the camera preview
-        self._stop_preview()
+	def __del__(self):
+		"""
+		Destructor to clean up resources when the camera is no longer needed.
+		"""
+		# Stop the camera preview
+		self._stop_preview()
 
-        # Stop the camera
-        self.__picam2.close()
+		# Stop the camera
+		self.__picam2.close()
 
-        # Log
-        self.__logger.info(
-            "Camera instance is being deleted. Resources will be cleaned up."
-        )
+		# Log
+		self.__logger.info(
+			"Camera instance is being deleted. Resources will be cleaned up.",
+			)
