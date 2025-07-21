@@ -12,6 +12,9 @@ DOCS_DIR = os.path.join(ROOT_DIR, 'docs')
 # PDF directory
 PDF_DIR = os.path.join(ROOT_DIR, 'pdf')
 
+# PDF output file
+PDF_OUTPUT_FILE = os.path.join(DOCS_DIR, 'downloads', 'teamsteelbot.pdf')
+
 # WeasyPrint stylesheet file
 STYLESHEET_FILE = os.path.join(PDF_DIR, 'styles.css')
 

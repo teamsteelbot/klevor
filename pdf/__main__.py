@@ -9,7 +9,7 @@ from .constants import (
 	STYLESHEET_FILE,
 	MKDOCS_CONFIG_FILE,
 	FIRST_PAGE_HTML,
-	BREAK_PAGE_HTML,
+	BREAK_PAGE_HTML, PDF_OUTPUT_FILE,
 	)
 from .yml import extract_md_paths_from_yaml
 
@@ -55,9 +55,8 @@ if __name__ == '__main__':
             html_body += str(soup)
             html_body += BREAK_PAGE_HTML
 
-    output_pdf = os.path.join(DOCS_DIR, 'html.pdf')
     try:
-        print(f'Saving PDF to {output_pdf}...')
+        print(f'Saving PDF to {PDF_OUTPUT_FILE}...')
         html =  f"""
 			<html>
 				<body>
@@ -65,7 +64,10 @@ if __name__ == '__main__':
 				</body>
 			</html>
 		"""
-        HTML(string=html, base_url=DOCS_DIR).write_pdf(output_pdf, stylesheets=[CSS(STYLESHEET_FILE)])
-        print(f'PDF saved to {output_pdf}')
+        HTML(string=html, base_url=DOCS_DIR).write_pdf(
+	        PDF_OUTPUT_FILE,
+	        stylesheets=[CSS(STYLESHEET_FILE)]
+	    )
+        print(f'PDF saved to {PDF_OUTPUT_FILE}')
     except Exception as e:
         print(f'Error saving PDF: {e}')

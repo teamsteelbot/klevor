@@ -3,6 +3,9 @@
 echo "Activating virtual environment..."
 source ./.venv/bin/activate
 
+echo "Update the PDF..."
+python -m pdf
+
 echo "Deploying MkDocs site to origin and dev remotes..."
 mkdocs gh-deploy --remote-name origin
 mkdocs gh-deploy --remote-name dev

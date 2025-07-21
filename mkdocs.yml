@@ -109,6 +109,9 @@ extra_css:
     - stylesheets/extra.css
 extra:
     social:
+        - icon: material/download
+          link: /downloads/html.pdf
+          name: Download PDF
         - icon: fontawesome/brands/github
           link: https://github.com/teamsteelbot/klevor
           name: Equipo Steel Bot en GitHub
