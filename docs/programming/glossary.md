@@ -8,7 +8,7 @@ class="logo--3rd-party">
    <i>Logo de PyTorch</i>
 </div>
 
-El Machine Learning (ML) es una rama de la inteligencia artificial enfocada en imitar la manera en que los humanos piensan en una computadora, para realizar tareas de forma autónoma, y para mejorar el rendimiento y precisión a medida que se expone a un mayor conjunto de datos [1](#machine-learning-ibm).
+El Machine Learning (ML) es una rama de la inteligencia artificial enfocada en imitar la manera en que los humanos piensan en una computadora, para realizar tareas de forma autónoma, y para mejorar el rendimiento y precisión a medida que se expone a un mayor conjunto de datos [[1](#machine-learning-ibm)].
 
 Normalmente, se divide en 3 partes el sistema de aprendizaje de un algoritmo de Machine Learning:
 

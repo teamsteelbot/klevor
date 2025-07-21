@@ -16,7 +16,7 @@ PDF_DIR = os.path.join(ROOT_DIR, 'pdf')
 STYLESHEET_FILE = os.path.join(PDF_DIR, 'styles.css')
 
 # Team logo file
-TEAM_LOGO_FILE = os.path.join(ROOT_DIR, 'assets', 'images', 'logo', 'teamsteelbot.png')
+TEAM_LOGO_FILE = os.path.join('assets', 'images', 'logo', 'teamsteelbot.png')
 
 # First page HTML
 FIRST_PAGE_HTML = f"""
