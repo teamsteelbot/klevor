@@ -22,7 +22,9 @@ Bienvenidos a la documentación de Klevor, un robot autónomo diseñado para par
 </div>
 
 !!! important 
-	Si deseas visualizar esta documentación de una forma más tradicional, puedes descargarla en formato PDF desde el siguiente enlace: [Descargar PDF](downloads/teamsteelbot.pdf).
+	Si deseas visualizar esta documentación de una forma más tradicional, puedes descargarla en formato PDF:
+	- [Descargar la Versión para Imprimir](downloads/teamsteelbot--printing.pdf).
+	- [Descargar la Versión Digital](downloads/teamsteelbot--digital.pdf).
 
 A continuación se presenta un índice con los enlaces a las diferentes secciones de la documentación. Cada sección contiene información detallada sobre los aspectos técnicos y prácticos del robot, incluyendo la mecánica, el código, los dispositivos utilizados, los componentes, los esquemas y diagramas, las fotos del equipo y los vídeos de Klevor en acción. Además, se incluyen recursos externos para ampliar la información y facilitar la comprensión de los conceptos presentados.
 

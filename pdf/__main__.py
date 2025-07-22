@@ -9,7 +9,7 @@ from .constants import (
 	STYLESHEET_FILE,
 	MKDOCS_CONFIG_FILE,
 	FIRST_PAGE_HTML,
-	BREAK_PAGE_HTML, PDF_OUTPUT_FILE,
+	BREAK_PAGE_HTML, PDF_OUTPUT_FILE, PDF_DPI,
 	)
 from .yml import extract_md_paths_from_yaml
 

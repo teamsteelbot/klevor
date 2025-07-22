@@ -110,8 +110,11 @@ extra_css:
 extra:
     social:
         - icon: material/download
-          link: /downloads/html.pdf
-          name: Download PDF
+          link: /downloads/teamsteelbot--digital.pdf
+          name: Descargar PDF en su versión digital
+        - icon: fontawesome/solid/print
+          link: /downloads/teamsteelbot--printing.pdf
+          name: Descargar PDF en su versión impresa
         - icon: fontawesome/brands/github
           link: https://github.com/teamsteelbot/klevor
           name: Equipo Steel Bot en GitHub
