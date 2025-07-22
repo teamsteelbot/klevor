@@ -123,27 +123,28 @@ Esta parte superior también la diseñamos e imprimimos, principalmente recortan
 
 ## Lista de Materiales {:#materials-list}
 
-| Componente                                             | Unidad | Costo por Unidad ($) | Total ($) |
-|--------------------------------------------------------|--------|----------------------|-----------|
-| Raspberry Pi 5                                         | 1      | 120.00               | 120.00    |
-| Micro SD 512GB                                         | 1      | 29.99                | 29.99     |
-| Raspberry Pi Camera Module 3                           | 1      | 35.00                | 35.00     |
-| Case para la Raspberry Pi Camera Module 3              | 1      | 5.99                 | 5.99      |
-| Cable para la cámara de la Raspberry Pi 5 de 50cm      | 1      | 9.79                 | 9.79      |
-| URGENEX 3000mAh Battery                                | 1      | 26.99                | 26.99     |
-| Giroscopio BNO085                                      | 1      | 18.59                | 18.59     |
-| Step-Down LM2596                                       | 1      | 3.15                 | 3.15      |
-| INJORA 7Kg 2065 Servo                                  | 1      | 17.98                | 17.98     |
-| INJORA MB100 20A Brushed Mini ESC                      | 1      | 32.99                | 32.99     |
-| INJORA 180 48T Motor PRO                               | 1      | 13.99                | 13.99     |
-| Protoboard                                             | 1      | 4.00                 | 4.00      |
-| Raspberry Pi Pico 2WH                                  | 1      | 14.99                | 14.99     |
-| Raspberry Pi Pico 2WH Breakout Board                   | 1      | 14.94                | 14.94     |
-| 4pcs ToF Laser Range Finder for Arduino                | 2      | 12.99                | 25.98     |
-| Harvic Power Bank PB-607                               | 1      | 17.50                | 17.50     |
-| Aluminium Alloy Front & Rear Steering Knuckle Hub Base | 1      | 18.38                | 18.38     |
-| RC Car Metal Differential Kit 1/18                     | 1      | 23.28                | 23.28     |
-| 10PCS Toy Car Wheels 35mm                              | 1      | 7.99                 | 7.99      |
-| Metal Upgrade Drive Shaft Driving Gear                 | 1      | 26.99                | 26.99     |
+| Componente                                                                                     | Unidad | Costo por Unidad ($) | Total ($)          |
+|------------------------------------------------------------------------------------------------|--------|----------------------|--------------------|
+| [Raspberry Pi 5](https://www.canakit.com/raspberry-pi-5-16gb.html)                             | 1      | 120.00               | 120.00             |
+| [Micro SD 512GB](https://www.amazon.com/dp/B0C1Q79X3P)                                         | 1      | 54.99                | 54.99              |
+| [Raspberry Pi Camera Module 3 Wide](https://www.canakit.com/raspberry-pi-camera-module-3.html) | 1      | 37.95                | 37.95              |
+| [Raspberry Pi Pico 2WH](https://www.amazon.com/dp/B0F4W9J5CC)                                  | 1      | 14.99                | 14.99              |
+| [Raspberry Pi Pico 2WH Breakout Board](https://www.amazon.com/dp/B0BFB53Y2N)                   | 1      | 11.95                | 11.95              |
+| [Case para la Raspberry Pi Camera Module 3](https://www.amazon.com/dp/B09TNG4V55)              | 1      | 5.99                 | 5.99               |
+| [Cable para la cámara de la Raspberry Pi 5 de 50cm](https://www.amazon.com/dp/B0D3YWTNF8)      | 1      | 9.79                 | 9.79               |
+| [URGENEX 3000mAh Battery](https://www.amazon.com/dp/B0CYNVSN7W)                                | 1      | 26.99                | 26.99              |
+| [Giroscopio BNO085](https://www.amazon.com/dp/B0CDGZMLPP)                                      | 1      | 18.59                | 18.59              |
+| [Step-Down LM2596](https://www.amazon.com/dp/B0D7ZWVSFW)                                       | 1      | 4.99                 | 4.99               |
+| [INJORA 7Kg 2065 Servo](https://www.amazon.com/dp/B0BLBMVYCW)                                  | 1      | 17.98                | 17.98              |
+| [INJORA MB100 20A Brushed Mini ESC](https://www.amazon.com/dp/B0CXT74XV6)                      | 1      | 32.99                | 32.99              |
+| [INJORA 180 48T Motor PRO](https://www.amazon.com/es/dp/B0BZ7D63YW/)                           | 1      | 13.98                | 13.98              |
+| [Half-Size Breadboard](https://www.amazon.com/dp/B01EV640I6)                                   | 1      | 5.98                 | 5.98               |
+| [4pcs ToF Laser Range Finder for Arduino](https://www.amazon.com/dp/B0C6WZFZSX)                | 2      | 12.99                | 25.98              |
+| [Harvic Power Bank PB-607](https://nebulixcolombia.com/products/power-bank-harvic)             | 1      | 17.50 [[1](#note1)]  | 17.50 [[1](#note1)]|
+| [Aluminium Alloy Front & Rear Steering Knuckle Hub Base](https://www.amazon.com/dp/B09XW246FQ) | 1      | 17.99                | 17.99              |
+| [RC Car Metal Differential Kit 1/18](https://www.amazon.com/dp/B08GHC4D5M)                     | 1      | 21.98                | 21.98              |
+| [10PCS Toy Car Wheels 35mm](https://www.amazon.com/dp/B0DQ96VJGL)                              | 1      | 7.99                 | 7.99               |
+| [20 rodamientos de bolas MR128-2RS](https://www.amazon.com/dp/B09P1QV29K)                      | 1      | 9.29                 | 9.29               |
+**Total para los Componentes: $477.89**
 
-**Total para los Componentes: $468.51**
+1. El producto está listado con un valor de $70.000,00 COP lo cual es equivalente a alrededor de 17,50 dólares estadounidense a fecha del 21 de julio de 2025. <a id="note1" ></a>
