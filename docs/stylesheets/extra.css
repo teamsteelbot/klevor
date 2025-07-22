@@ -3,8 +3,7 @@
     --color-primary-foreground--dark: #212529;
     --color-primary-background--light: #f8f9fa;
     --color-primary-background--dark: #f8f9fa;
-    --border-radius: 4px;
-    --margin: 1.2rem;
+    --center-vmargin: 1.2rem;
     --gap: 1rem;
 }
 
@@ -18,7 +17,7 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    margin: var(--margin) 0;
+    margin: var(--center-vmargin) 0;
 }
 
 .component-image {

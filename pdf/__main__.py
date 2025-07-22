@@ -6,10 +6,15 @@ from bs4 import BeautifulSoup
 
 from .constants import (
 	DOCS_DIR,
-	STYLESHEET_FILE,
+	COMMON_STYLESHEET_FILE,
+	DIGITAL_STYLESHEET_FILE,
+	PRINTING_STYLESHEET_FILE,
 	MKDOCS_CONFIG_FILE,
 	FIRST_PAGE_HTML,
-	BREAK_PAGE_HTML, PDF_OUTPUT_FILE, PDF_DPI,
+	BREAK_PAGE_HTML,
+	PRINTING_PDF_OUTPUT_FILE,
+	DIGITAL_PDF_OUTPUT_FILE,
+	PDF_DPI, PDF_OUTPUT_FILES,
 	)
 from .yml import extract_md_paths_from_yaml
 
@@ -63,7 +68,6 @@ if __name__ == '__main__':
 				html_body += BREAK_PAGE_HTML
 
 	try:
-		print(f'Saving PDF to {PDF_OUTPUT_FILE}...')
 		html = f"""
 			<html>
 				<body>
@@ -71,12 +75,19 @@ if __name__ == '__main__':
 				</body>
 			</html>
 		"""
-		HTML(string=html, base_url=DOCS_DIR).write_pdf(
-			PDF_OUTPUT_FILE,
-			stylesheets=[CSS(STYLESHEET_FILE)],
-			optimize_images=True,
-			dpi=PDF_DPI,
-			)
-		print(f'PDF saved to {PDF_OUTPUT_FILE}')
+		for path, stylesheet in PDF_OUTPUT_FILES:
+			print (f'Saving PDF to {path}...')
+			if not os.path.exists(os.path.dirname(path)):
+				os.makedirs(os.path.dirname(path))
+			HTML(string=html, base_url=DOCS_DIR).write_pdf(
+				path,
+				stylesheets=[
+					CSS(COMMON_STYLESHEET_FILE),
+					CSS(stylesheet)
+				],
+				optimize_images=True,
+				dpi=PDF_DPI,
+				)
+			print(f'PDF saved to {path}')
 	except Exception as e:
 		print(f'Error saving PDF: {e}')

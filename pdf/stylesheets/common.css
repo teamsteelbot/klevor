@@ -6,34 +6,40 @@
     --font-size--h1: 18pt;
     --font-size--h2: 16pt;
     --font-size--h3: 14pt;
-    --font-line-height--sans-serif: 1.15;
-    --font-line-height--monospace: 1.2;
-    --font-color: #212529;
+    --font-line-height--sans-serif: 2;
+    --font-line-height--monospace: 1.5;
 
-    --color-background: #212529;
-    --color-primary-background--light: #f8f9fa;
-    --color-primary-background--dark: #f8f9fa;
-    --border-radius: 4pt;
-    --margin: 1.2rem;
-    --gap: 1rem;
+    --tab: 4em;
+
+    --center-vmargin: 1.2em;
+    --gap: 1em;
 }
 
 @page {
     size: A4;
     margin: 2cm;
-    background: #fff;
+    background: var(--page-background-color);
+}
+
+@page:first {
+    background: var(--page-bacckground-color--first-page);
 }
 
 body {
     font-family: var(--font-family--sans-serif), sans-serif;
     font-size: var(--font-size--sans-serif);
     line-height: var(--font-line-height--sans-serif);
-    color: var(--font-color);
-    background: #f8f9fa;
+    color: var(--font-color--body);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+    break-after: avoid;
 }
 
 h1 {
     font-size: var(--font-size--h1);
+    color: var(--font-color--h1);
 }
 
 h1:not(:first-child) {
@@ -42,6 +48,7 @@ h1:not(:first-child) {
 
 h2 {
     font-size: var(--font-size--h2);
+    color: var(--font-color--h2);
 }
 
 h2:not(:first-child) {
@@ -50,10 +57,15 @@ h2:not(:first-child) {
 
 h3 {
     font-size: var(--font-size--h3);
+    color: var(--font-color--h3);
 }
 
 h3:not(:first-child) {
     margin-top: 0.5em;
+}
+
+p {
+    text-indent: var(--tab);
 }
 
 table {
@@ -73,18 +85,17 @@ code, pre {
     padding: 0.2em 0.4em;
 }
 
-.first-page {
+.special-page {
     display: grid;
     place-items: center;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
 }
 
-.first-page-logo {
+.special-page-logo {
     width: 300pt;
-}
-
-body > .first-page,
-.first-page {
-    background: var(--color-background);
 }
 
 .center {
@@ -92,7 +103,7 @@ body > .first-page,
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    margin: var(--margin) 0;
+    margin: var(--center-vmargin) 0;
 }
 
 .page-break {
