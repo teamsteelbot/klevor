@@ -7,27 +7,27 @@ En esta sección detallaremos los componentes y su funcionalidad dentro de cada 
 En esta primera capa toda la parte motriz de nuestro robot.
 
 <div class="vehicle-views-container">
-    <div class="center">
+    <div class="hcenter">
         <img src="../../assets/images/github/v-photos/prototype1/prototype1-layer1-front-view.png"
 alt="Primera capa, vista delantera" class="vehicle-view-image">
         <i>Primera capa, vista delantera</i>
     </div>
-    <div class="center">
+    <div class="hcenter">
         <img src="../../assets/images/github/v-photos/prototype1/prototype1-layer1-back-view.png" 
 alt="Primera capa, vista trasera" class="vehicle-view-image">
         <i>Primera capa, vista trasera</i>
     </div>  
-    <div class="center">
+    <div class="hcenter">
         <img src="../../assets/images/github/v-photos/prototype1/prototype1-layer1-left-view.png"
 alt="Primera capa, vista izquierda" class="vehicle-view-image">
         <i>Primera capa, vista izquierda</i>
     </div>
-    <div class="center">
+    <div class="hcenter">
         <img src="../../assets/images/github/v-photos/prototype1/prototype1-layer1-right-view.png"
 alt="Primera capa, vista derecha" class="vehicle-view-image">
         <i>Primera capa, vista derecha</i>
     </div>
-    <div class="center">
+    <div class="hcenter">
         <img src="../../assets/images/github/v-photos/prototype1/prototype1-layer1-top-view.png" 
 alt="Primera capa, vista superior" class="vehicle-view-image">
         <i>Primera capa, vista superior</i>
@@ -47,28 +47,28 @@ Esta capa fue 100% diseñada e impresa por nosotros. Al tener múltiples piezas 
 ## Segunda Capa {:#second-layer}
 
 <div class="vehicle-views-container">
-    <div class="center">
+    <div class="hcenter">
         <img src="../../assets/images/github/v-photos/prototype1/prototype1
 -layer2-front-view.png" 
 alt="Segunda capa, vista delantera" class="vehicle-view-image">
         <i>Segunda capa, vista delantera</i>
     </div>
-    <div class="center">
+    <div class="hcenter">
         <img src="../../assets/images/github/v-photos/prototype1/prototype1-layer2-back-view.png" 
 alt="Segunda capa, vista trasera" class="vehicle-view-image">
         <i>Segunda capa, vista trasera</i>
     </div>
-    <div class="center">
+    <div class="hcenter">
         <img src="../../assets/images/github/v-photos/prototype1/prototype1-layer2-left-view.png" 
 alt="Segunda capa, vista izquierda" class="vehicle-view-image">
         <i>Segunda capa, vista izquierda</i>
     </div>
-    <div class="center">
+    <div class="hcenter">
         <img src="../../assets/images/github/v-photos/prototype1/prototype1-layer2-right-view.png"
 alt="Segunda capa, vista derecha" class="vehicle-view-image">
         <i>Segunda capa, vista derecha</i>
     </div>
-    <div class="center">
+    <div class="hcenter">
         <img src="../../assets/images/github/v-photos/prototype1/prototype1-layer2-top-view.png" 
 alt="Segunda capa, vista superior" class="vehicle-view-image">
         <i>Segunda capa, vista superior</i>
@@ -88,27 +88,27 @@ Nuestra segunda capa también fue diseñada en 3D para que el power bank pudiera
 ## Tercera Capa {:#third-layer}
 
 <div class="vehicle-views-container">
-    <div class="center">
+    <div class="hcenter">
         <img src="../../assets/images/github/v-photos/prototype1/prototype1-layer3-front-view.png" 
 alt="Tercera capa, vista delantera" class="vehicle-view-image">
         <i>Tercera capa, vista delantera</i>
     </div>
-    <div class="center">
+    <div class="hcenter">
         <img src="../../assets/images/github/v-photos/prototype1/prototype1-layer3-back-view.png"
 alt="Tercera capa, vista trasera" class="vehicle-view-image">
         <i>Tercera capa, vista trasera</i>
     </div>
-    <div class="center">
+    <div class="hcenter">
         <img src="../../assets/images/github/v-photos/prototype1/prototype1-layer3-left-view.png"
 alt="Tercera capa, vista izquierda" class="vehicle-view-image">
         <i>Tercera capa, vista izquierda</i>
     </div>
-    <div class="center">
+    <div class="hcenter">
         <img src="../../assets/images/github/v-photos/prototype1/prototype1-layer3-right-view.png"
 alt="Tercera capa, vista derecha" class="vehicle-view-image">
         <i>Tercera capa, vista derecha</i>
     </div>
-    <div class="center">
+    <div class="hcenter">
         <img src="../../assets/images/github/v-photos/prototype1/prototype1-layer3-top-view.png"
 alt="Tercera capa, vista superior" class="vehicle-view-image">
         <i>Tercera capa, vista superior</i>

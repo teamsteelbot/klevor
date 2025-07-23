@@ -2,7 +2,7 @@
 
 ## Configuración {:#configuration}
 
-<div class="center">
+<div class="hcenter">
     <img src="../../assets/images/components/raspberry-pi-pico-2-w.png" alt="Raspberry Pi Pico 2W" 
 class="component-image">
     <i>Raspberry Pi Pico 2W</i>

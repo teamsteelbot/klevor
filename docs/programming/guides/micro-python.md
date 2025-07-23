@@ -2,7 +2,7 @@
 
 ## Instalación de MicroPython {:#installation}
 
-<div class="center">
+<div class="hcenter">
     <img src="../../assets/images/logo/micro-python.png" 
 alt="Logo de MicroPython" class="logo--3rd-party">
     <i>Logo de MicroPython</i>

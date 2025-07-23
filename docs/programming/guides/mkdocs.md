@@ -1,6 +1,6 @@
 # MkDocs {:#mkdocs}
 
-<div class="center">
+<div class="hcenter">
     <img src="../../assets/images/logo/mkdocs.png" 
 alt="Logo de MkDocs" class="logo--3rd-party">
     <i>Logo de MkDocs</i>

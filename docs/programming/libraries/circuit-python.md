@@ -2,7 +2,7 @@
 
 ## Adafruit Motor {:#adafruit-motor}
 
-<div class="center">
+<div class="hcenter">
 	<img src="../../assets/images/logo/adafruit.png" alt="Logo de Adafruit" class="logo--3rd-party">
 	<i>Logo de Adafruit</i>
 </div>

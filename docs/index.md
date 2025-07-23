@@ -1,6 +1,6 @@
 # Klevor {:#klevor}
 
-<div class="center">
+<div class="hcenter">
     <img src="assets/images/logo/teamsteelbot.png" alt="Logo del Equipo" 
 class="logo--team">
     <i>Logo del Equipo</i>
@@ -9,12 +9,12 @@ class="logo--team">
 Bienvenidos a la documentación de Klevor, un robot autónomo diseñado para participar en el Desafío Abierto y el Desafío Cerrado de la competencia de robótica de la World Robot Olympiad 2025, en la categoría Futuros Ingenieros. Esta documentación contiene toda la información necesaria para entender su funcionamiento, los dispositivos utilizados, el código implementado, los componentes y más. Esperamos que la misma sea útil tanto para los jueces como para cualquier persona interesada en aprender sobre este proyecto.
 
 <div class="image-horizontal-container">
-    <div class="center">
+    <div class="hcenter">
         <img src="assets/images/logo/wro.webp" alt="Logo de la World Robot Olympiad" 
     class="logo--education">
         <i>Logo de la World Robot Olympiad</i>
     </div>
-    <div class="center">
+    <div class="hcenter">
         <img src="assets/images/logo/mincyt.png" alt="Logo del MINCYT" 
     class="logo--education">
         <i>Logo del MINCYT</i>
@@ -22,13 +22,11 @@ Bienvenidos a la documentación de Klevor, un robot autónomo diseñado para par
 </div>
 
 !!! important 
-	Si deseas visualizar esta documentación de una forma más tradicional, puedes descargarla en formato PDF:
-	- [Descargar la Versión para Imprimir](downloads/teamsteelbot--printing.pdf).
-	- [Descargar la Versión Digital](downloads/teamsteelbot--digital.pdf).
+	Si deseas visualizar esta documentación de una forma más tradicional, puedes descargarla en formato PDF: [Descargar](downloads/teamsteelbot.pdf).
 
 A continuación se presenta un índice con los enlaces a las diferentes secciones de la documentación. Cada sección contiene información detallada sobre los aspectos técnicos y prácticos del robot, incluyendo la mecánica, el código, los dispositivos utilizados, los componentes, los esquemas y diagramas, las fotos del equipo y los vídeos de Klevor en acción. Además, se incluyen recursos externos para ampliar la información y facilitar la comprensión de los conceptos presentados.
 
-<div class="center">
+<div class="hcenter">
     <img src="assets/images/github/t-photos/salto-angel-regional-competition-photo.jpg" alt="Team Steel Bot en la competencia regional del Salto Ángel" 
 class="picture--team">
     <i>Team Steel Bot en la competencia regional del Salto Ángel</i>
@@ -195,7 +193,7 @@ class="picture--team">
 
 ## Patrocinadores {:#sponsors}
 
-<div class="center">
+<div class="hcenter">
     <a href="sponsors.html#viajes-giorgio">
         <img src="assets/images/sponsors/viajes-giorgio.png" alt="Logo de Viajes Giorgio" 
 class="logo--sponsor">
@@ -203,7 +201,7 @@ class="logo--sponsor">
     <i>Logo de Viajes Giorgio</i>
 </div>
 
-<div class="center">
+<div class="hcenter">
     <a href="sponsors.html#nathalys-star">
         <img src="assets/images/sponsors/nathalys-star.png" alt="Logo de Nathaly's Star" 
 class="logo--sponsor">
@@ -211,7 +209,7 @@ class="logo--sponsor">
     <i>Logo de Nathaly's Star</i>
 </div>
 
-<div class="center">
+<div class="hcenter">
     <a href="sponsors.html#steel-ca">
         <img src="assets/images/sponsors/steel-ca.jpg" alt="Logo de Steel C.A." 
 class="logo--sponsor">

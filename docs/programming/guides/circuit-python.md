@@ -2,7 +2,7 @@
 
 ## Instalación de CircuitPython {:#installation}
 
-<div class="center">
+<div class="hcenter">
     <img src="../../assets/images/logo/circuit-python.png" 
 alt="Logo de CircuitPython" class="logo--3rd-party">
     <i>Logo de CircuitPython</i>

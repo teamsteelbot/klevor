@@ -4,7 +4,7 @@
 
 ### Versión 1 {:#camera-mounting-v1}
 
-<div class="center">
+<div class="hcenter">
 	<img src="../../../assets/images/github/models/plans/common/previous/raspberry-pi-camera-module-3-mounting-v1.png" alt="Versión 1 del Soporte para la Raspberry Pi Camera Module 3" class="mechanical-image">
 	<i>Versión 1 del Soporte para la Raspberry Pi Camera Module 3</i>
 </div>
@@ -13,7 +13,7 @@ Fue diseñada para estar alta y que no fuese obstruida, además, está seccionad
 
 ### Versión 2 {:#camera-mounting-v2}
 
-<div class="center">
+<div class="hcenter">
 	<img src="../../../assets/images/github/models/plans/common/previous/raspberry-pi-camera-module-3-mounting-v2.png" alt="Versión 2 del Soporte para la Raspberry Pi Camera Module 3" class="mechanical-image">
 	<i>Versión 2 del Soporte para la Raspberry Pi Camera Module 3</i>
 </div>

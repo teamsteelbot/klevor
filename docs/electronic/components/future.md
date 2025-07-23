@@ -4,7 +4,7 @@ A continuación, está la descripción de todos los componentes que se planean u
 
 ## Motor 540 {:#motor-540}
 
-<div class="center">
+<div class="hcenter">
     <img src="../../assets/images/components/motor-540.png" alt="Motor 540" class="component-image">
     <i>Motor 540</i>
 </div>
@@ -28,7 +28,7 @@ La razón principal por la cual pensamos que cambiar de motor sería una buena o
 
 ## ESC para Motores 540/550 2-3S 60 A {:#esc-for-540-550-motors-2-3s-60-a}
 
-<div class="center">
+<div class="hcenter">
     <img src="../../assets/images/components/esc-motor-540.png" alt="ESC para motores 540/550" 
 class="component-image">
     <i>ESC para motores 540/550</i>
@@ -47,7 +47,7 @@ Especificaciones físicas:
 
 ## UGREEN Nexode Power Bank 12000mAh 100W PD PPS {:#ugreen-nexode-power-bank-12000mah-100w-pd-pps}
 
-<div class="center">
+<div class="hcenter">
     <img src="../../assets/images/components/ugreen-power-bank-12000-mah.png" alt="Power Bank UGREEN Nexode 12000mAh" 
 class="component-image">
     <i>Power Bank UGREEN Nexode 12000mAh</i>
@@ -66,7 +66,7 @@ Especificaciones físicas:
 
 ## USB-C QC PD3.0 Trigger 5V/9V/12V/15V/20V 5A {:#usb-c-qc-pd3-0-trigger-5v-9v-12v-15v-20v-5a}
 
-<div class="center">
+<div class="hcenter">
     <img src="../../assets/images/components/pd-trigger-usb-c-to-usb-c.png" alt="PD Trigger" 
 class="component-image">
     <i>Power Delivery Trigger</i>

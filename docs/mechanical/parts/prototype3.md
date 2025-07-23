@@ -2,7 +2,7 @@
 
 ## Base de la Capa Inferior {:#bottom-layer-mounting}
 
-<div class="center">
+<div class="hcenter">
 	<img src="../../assets/images/github/models/plans/prototype3/bottom-layer-mounting.png" alt="Base de la Capa Inferior" class="mechanical-image">
 	<i>Base de la Capa Inferior</i>
 </div>
@@ -11,7 +11,7 @@ Se hicieron cambios drásticos, principalmente modificando el grosor de la capa 
 
 ## Soporte Superior de la Caja del Diferencial (Delgado) {:#differential-gearbox-upper-mounting--thin}
 
-<div class="center">
+<div class="hcenter">
 	<img src="../../assets/images/github/models/plans/prototype3/differential-box-upper-mounting--thin.png" alt="Soporte Superior de la Caja del Diferencial (Delgado)" class="mechanical-image">
 	<i>Soporte Superior de la Caja del Diferencial (Delgado)</i>
 </div>
@@ -20,7 +20,7 @@ Realizado para sostener con total firmeza la capa superior, se ensambla en la ca
 
 ## Soporte Superior de la Caja del Diferencial (Grueso) {:#differential-gearbox-upper-mounting--wide}
 
-<div class="center">
+<div class="hcenter">
 	<img src="../../assets/images/github/models/plans/prototype3/differential-box-upper-mounting--wide.png" alt="Soporte Superior de la Caja del Diferencial (Grueso)" class="mechanical-image">
 	<i>Soporte Superior de la Caja del Diferencial (Grueso)</i>
 </div>
@@ -29,7 +29,7 @@ El espacio central es más ancho porque se ensambla en la caja del diferencial f
 
 ## Base de la Capa Superior {:#top-layer-mounting}
 
-<div class="center">
+<div class="hcenter">
 	<img src="../../assets/images/github/models/plans/prototype3/top-layer-mounting.png" alt="Base de la Capa Superior" class="mechanical-image">
 	<i>Base de la Capa Superior</i>
 </div>

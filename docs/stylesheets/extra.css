@@ -12,7 +12,7 @@
     --md-primary-bg-color: var(--color-primary-background--light);
 }
 
-.center {
+.hcenter {
     display: flex;
     flex-direction: column;
     justify-content: center;

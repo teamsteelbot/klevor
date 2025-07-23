@@ -3,32 +3,32 @@
 Este es un segundo prototipo de Klevor, donde se le hicieron correcciones esenciales y se agregaron nuevos componentes que explicaremos detalladamente.
 
 <div class="vehicle-views-container">
-    <div class="center">
+    <div class="hcenter">
         <img src="../../assets/images/github/v-photos/prototype2/prototype2-front-view.png"
 alt="Vista delantera" class="vehicle-view-image">
         <i>Vista delantera</i>
     </div>
-    <div class="center"> 
+    <div class="hcenter"> 
         <img src="../../assets/images/github/v-photos/prototype2/prototype2-back-view.png" 
 alt="Vista Trasera" class="vehicle-view-image">
         <i>Vista trasera</i>
     </div>
-    <div class="center">
+    <div class="hcenter">
         <img src="../../assets/images/github/v-photos/prototype2/prototype2-right-view.png" 
 alt="Vista derecha" class="vehicle-view-image">
         <i>Vista derecha</i>
     </div>
-    <div class="center">
+    <div class="hcenter">
         <img src="../../assets/images/github/v-photos/prototype2/prototype2-left-view.png" 
 alt="Vista izquierda" class="vehicle-view-image">
         <i>Vista izquierda</i>
     </div>
-    <div class="center">
+    <div class="hcenter">
         <img src="../../assets/images/github/v-photos/prototype2/prototype2-top-view.png"
 alt="Vista superior" class="vehicle-view-image">
         <i>Vista superior</i>
     </div>
-    <div class="center">
+    <div class="hcenter">
         <img src="../../assets/images/github/v-photos/prototype2/prototype2-bottom-view.png"
 alt="Vista inferior" class="vehicle-view-image">
         <i>Vista inferior</i>
@@ -44,7 +44,7 @@ Una parte fundamental para nuestro robot es su sistema de cruce. Es basado en un
 Las ruedas para funcionar están conectadas a un muñón de dirección, luego a un
 "palier" o "semieje" que pasa por dentro del muñón y se junta con la rueda para que esta gire, el palier gira mientras está junto al diferencial.
 
-<div class="center">
+<div class="hcenter">
     <img src="../../assets/images/mechanical/ackermann-steering-system.png" 
 alt="Sistema Ackermann" class="mechanical-image">
 </div>

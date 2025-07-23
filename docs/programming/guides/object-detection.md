@@ -2,7 +2,7 @@
 
 ## Creación del Modelo {:#model-creation}
 
-<div class="center">
+<div class="hcenter">
     <img src="../../assets/images/logo/github.png" alt="Logo de GitHub" 
 class="logo--3rd-party">
     <i>Logo de GitHub</i>
@@ -45,11 +45,11 @@ Para la creación del conjunto de datos, tomamos imágenes de los prismas que se
 Luego, ejecutamos el script `yolo/scripts/resize.py` para redimensionar las imágenes a un tamaño de 640 × 640 píxeles, que es el tamaño de entrada del modelo YOLOv11. Este script utiliza la biblioteca OpenCV para redimensionar las imágenes y guardarlas en la carpeta `yolo/dataset/general/resized/to_process`.
 
 <div class="center image-comparison-container">
-    <div class="center">
+    <div class="hcenter">
        <img src="../../assets/images/object-detection/original-image.jpg" alt="Imagen sin redimensionar del conjunto de datos" class="object-detection-image">
        <i>Imagen sin redimensionar del conjunto de datos</i>
     </div>
-    <div class="center">
+    <div class="hcenter">
        <img src="../../assets/images/object-detection/resized-image.jpg" alt="Imagen redimensionada del conjunto de datos" class="object-detection-image">
        <i>Imagen redimensionada del conjunto de datos</i>
     </div>
@@ -60,7 +60,7 @@ Posteriormente, se realizó la anotación de las imágenes, donde se etiquetaron
 !!! warning
 	Si el número de imágenes por anotar es muy grande, notaremos que la herramienta Label Studio arrojará un error `The number of files exceeded settings.DATA_UPLOAD_MAX_NUMBER_FILES`. Para solucionarlo, si Label Studio fue instalado como un paquete de Python, se puede modificar el archivo `settings.py` que se encuentra en la carpeta `label_studio/core/settings.py`, donde se debe cambiar el valor de `DATA_UPLOAD_MAX_NUMBER_FILES` a un número mayor al número de imágenes por anotar o `None` si se desea un número ilimitado. En caso de no encontrar este archivo, se puede buscar en la carpeta `site-packages/label_studio/core/settings.py` dentro del entorno virtual de Python donde fue instalado Label Studio.
 
-<div class="center">
+<div class="hcenter">
    <img src="../../assets/images/object-detection/label-studio.png" alt="Anotación de imágenes con Label Studio" class="object-detection-image">
    <i>Anotación de imágenes con Label Studio</i>
 </div>
@@ -80,7 +80,7 @@ Luego, se ejecutó el script `yolo/scripts/split.py` para dividir el conjunto de
 
 ## Entrenamiento del Modelo {:#model-training}
 
-<div class="center">
+<div class="hcenter">
    <img src="../../assets/images/object-detection/inferences.png" alt="Imagen con distintas inferencias realizadas (modelo GMR)" class="object-detection-image">
    <i>Imagen con distintas inferencias realizadas (modelo GMR)</i>
 </div>
@@ -107,7 +107,7 @@ Existen dos maneras de entrenar el modelo dependiendo del equipo disponible en e
 !!! tip
 	En el caso de emplear Google Colab y que se desconecte la sesión del entorno de ejecución durante el entrenamiento del modelo, se puede retomar el mismo, al modificar la ruta del modelo o el nombre del modelo a emplear en la función `train_model` del Notebook, por la ruta donde se guardó los mejores pesos del entrenamiento, en nuestro caso: `g_to_train/yolo/v11/runs/m/weights/best.pt`.
 
-<div class="center">
+<div class="hcenter">
    <img src="../../assets/images/components/nvidia-l4.png" 
 alt="Vista frontal de la GPU Tesla L4 de NVIDIA" class="component-image">
     <i>Vista frontal de la GPU Tesla L4 de NVIDIA</i>
@@ -120,7 +120,7 @@ alt="Vista frontal de la GPU Tesla L4 de NVIDIA" class="component-image">
 
 Para la conversión del modelo a un formato compatible con el Hailo 8, requerimos de Docker (mas no es imprescindible), para crear un contenedor con todos los paquetes necesarios para su correcto funcionamiento.
 
-<div class="center">
+<div class="hcenter">
     <img src="../../assets/images/logo/docker.png" alt="Logo de Docker" 
 class="logo--3rd-party">
     <i>Logo de Docker</i>

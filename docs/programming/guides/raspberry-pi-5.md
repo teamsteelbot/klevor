@@ -2,7 +2,7 @@
 
 ## Instalación de Raspberry Pi OS {:#raspberry-pi-os-installation}
 
-<div class="center">
+<div class="hcenter">
     <img src="../../assets/images/logo/raspberry-pi.png" alt="Logo de Raspberry Pi" 
 class="logo--3rd-party">
     <i>Logo de Raspberry Pi</i>
@@ -20,7 +20,7 @@ Raspberry Pi OS es el sistema operativo oficial para las Raspberry Pi, basado en
    sudo apt upgrade
    ```
 
-<div class="center">
+<div class="hcenter">
     <img src="../../assets/images/app/raspberry-pi-imager.png" alt="Raspberry Pi Imager" class="app--image">
     <i>Raspberry Pi Imager</i>
 </div>
@@ -30,7 +30,7 @@ Raspberry Pi OS es el sistema operativo oficial para las Raspberry Pi, basado en
 
 ## Instalación de la Cámara {:#camera-installation}
 
-<div class="center">
+<div class="hcenter">
     <img src="../../assets/images/components/raspberry-pi-camera-module-3.png" alt="Raspberry 
 Pi Camera Module 3" class="component-image">
     <i>Raspberry Pi Camera Module 3</i>
@@ -50,7 +50,7 @@ Para instalar la cámara en la Raspberry Pi, se debe seguir los siguientes pasos
 
 ## Instalación de Raspberry Pi AI HAT+ {:#raspberry-pi-ai-hat-plus-installation}
 
-<div class="center">
+<div class="hcenter">
    <img src="../../assets/images/components/raspberry-pi-ai-hat-plus.png" 
 alt="Raspberry Pi AI HAT+ 26 TOPS" class="component-image">
    <i>Raspberry Pi AI HAT+ 26 TOPS</i>
@@ -126,7 +126,7 @@ Para la instalación, empleamos las dos guías de la documentación oficial de R
 
 ## Configuración de la Raspberry Pi {:#raspberry-pi-configuration}
 
-<div class="center">
+<div class="hcenter">
     <img src="../../assets/images/components/raspberry-pi-5.png" alt="Raspberry Pi 5"
 class="component-image">
     <i>Raspberry Pi 5</i>

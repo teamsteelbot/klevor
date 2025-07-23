@@ -2,7 +2,7 @@
 
 ## Base de la Capa Inferior {:#bottom-layer-mounting}
 
-<div class="center">
+<div class="hcenter">
 	<img src="../../assets/images/github/models/plans/prototype2/bottom-layer-mounting.png" alt="Base de la Capa Inferior" class="mechanical-image">
 	<i>Base de la Capa Inferior</i>
 </div>
@@ -11,7 +11,7 @@ Hicimos cambios con respecto al prototipo 1; realizamos más orificios para no s
 
 ## Base de la Capa Superior {:#top-layer-mounting}
 
-<div class="center">
+<div class="hcenter">
 	<img src="../../assets/images/github/models/plans/prototype2/top-layer-mounting.png" alt="Base de la Capa Superior" class="mechanical-image">
 	<i>Base de la Capa Superior</i>
 </div>

@@ -4,7 +4,7 @@ A continuación, está la descripción de todos los componentes principales de K
 
 ## Raspberry Pi 5 (16GB RAM) {:#raspberry-pi-5}
 
-<div class="center">
+<div class="hcenter">
     <img src="../../assets/images/components/raspberry-pi-5.png" alt="Raspberry Pi 5" 
 class="component-image">
     <i>Raspberry Pi 5</i>
@@ -30,7 +30,7 @@ Equipada con un procesador ARM Cortex-A76 de 64 bits a 2.4 GHz [[1](#raspberry-p
 
 ## Raspberry Pi Camera Module 3 Wide {:#raspberry-pi-camera-module-3-wide}
 
-<div class="center">
+<div class="hcenter">
     <img src="../../assets/images/components/raspberry-pi-camera-module-3.png" alt="Raspberry 
 Pi Camera Module 3" class="component-image">
     <i>Raspberry Pi Camera Module 3</i>
@@ -47,7 +47,7 @@ La Raspberry Pi Camera Module 3 Wide es nuestra elección de preferencia, como l
 
 ## Raspberry Pi AI HAT+ (26 TOPS) {:#raspberry-pi-ai-hat-26-tops}
 
-<div class="center">
+<div class="hcenter">
     <img src="../../assets/images/components/raspberry-pi-ai-hat-plus.png" alt="Raspberry 
 Pi AI HAT+ 26 TOPS" class="component-image">
     <i>Raspberry Pi AI HAT+ 26 TOPS</i>
@@ -66,7 +66,7 @@ El Raspberry Pi AI HAT+ tiene dos versiones, una de 13 Trillones de Operaciones 
 
 ## Raspberry Pi Pico 2 WH {:#raspberry-pi-pico-2-wh}
 
-<div class="center">
+<div class="hcenter">
   <img src="../../assets/images/components/raspberry-pi-pico-2-w.png" alt="Raspberry Pi 
 Pico 2 W" class="component-image">
   <i>Raspberry Pi Pico 2 W</i>
@@ -87,7 +87,7 @@ La versión con el módulo de WiFi integrado ofrece una gran ventaja a la hora d
 
 ## RPLiDAR C1 {:#rplidar-c1}
 
-<div class="center">
+<div class="hcenter">
     <img src="../../assets/images/components/rplidar-c1.png" alt="RPLiDAR C1" class="component-image">
     <i>RPLiDAR C1</i>
 </div>
@@ -114,7 +114,7 @@ Especificaciones técnicas:
 
 ## Shargeek Storm 2 {:#shargeek-storm-2}
 
-<div class="center">
+<div class="hcenter">
     <img src="../../assets/images/components/shargeek-storm-2.png" alt="Shargeek Storm 2" 
 class="component-image">
     <i>Shargeek Storm 2</i>
@@ -140,7 +140,7 @@ Sin embargo, debido a su gran peso, es un componente un tanto difícil de poder 
 
 ## INJORA 180 Motor 48T {:#injora-180-motor-48t}
 
-<div class="center">
+<div class="hcenter">
     <img src="../../assets/images/components/injora-180-motor-48t.png" alt="INJORA 180 Motor 
 48T" class="component-image">
     <i>INJORA 180 Motor 48T</i>
@@ -166,7 +166,7 @@ Especificaciones mecánicas:
 
 ## INJORA MB100 20A mini ESC {:#injora-mb100-20a-mini-esc}
 
-<div class="center">
+<div class="hcenter">
     <img src="../../assets/images/components/injora-mb100-mini-esc-20a.png" alt="INJORA MB100 20A Mini ESC" 
 class="component-image">
     <i>INJORA MB100 20A Mini ESC</i>
@@ -198,7 +198,7 @@ Especificaciones mecánicas:
 
 ## URGENEX 7.4 V Battery {:#urgenex-7-4v-battery}
 
-<div class="center">
+<div class="hcenter">
     <img src="../../assets/images/components/urgenex-7-4v-3000mah.png" alt="URGENEX 7.4V 
 Battery" class="component-image">
     <i>URGENEX 7.4 V Battery</i>
@@ -219,7 +219,7 @@ Además de esto, esta batería ofrece una alta capacidad comparada con el resto 
 
 ## INJORA 7 kg 2065 Micro Servo {:#injora-7kg-2065-micro-servo}
 
-<div class="center">
+<div class="hcenter">
     <img src="../../assets/images/components/injora-7kg-2065-micro-servo.png" alt="INJORA 
 Micro Servo" class="component-image">
     <i>INJORA 7 kg 2065 Micro Servo</i>
@@ -241,7 +241,7 @@ Gracias a la librería antes mencionada, la `adafruit_motor` con el módulo
 
 ## 9-Axis IMU Gyroscope GY-BNO085 {:#gyroscope-gy-bno085}
 
-<div class="center">
+<div class="hcenter">
     <img src="../../assets/images/components/bno08x.png"
   alt="BNO085" class="component-image">
     <i>BNO085</i>

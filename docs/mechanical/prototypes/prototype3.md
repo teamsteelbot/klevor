@@ -3,32 +3,32 @@
 A continuación, explicaremos minuciosamente el cómo y el porqué hicimos un tercer prototipo de Klevor, detallando los componentes agregados y los que fueron removidos.
 
 <div class="vehicle-views-container">
-    <div class="center">
+    <div class="hcenter">
         <img src="../../assets/images/github/v-photos/prototype3/prototype3-front-view.png" 
 alt="Vista delantera" class="vehicle-view-image">
         <i>Vista delantera</i>
     </div>
-    <div class="center">
+    <div class="hcenter">
         <img src="../../assets/images/github/v-photos/prototype3/prototype3-back-view.png" 
 alt="Vista Trasera" class="vehicle-view-image">
         <i>Vista trasera</i>
     </div>
-    <div class="center">
+    <div class="hcenter">
         <img src="../../assets/images/github/v-photos/prototype3/prototype3-right-view.png" 
 alt="Vista derecha" class="vehicle-view-image">
         <i>Vista derecha</i>
     </div>
-    <div class="center">
+    <div class="hcenter">
         <img src="../../assets/images/github/v-photos/prototype3/prototype3-left-view.png" 
 alt="Vista izquierda" class="vehicle-view-image">
         <i>Vista izquierda</i>
     </div>
-    <div class="center">
+    <div class="hcenter">
         <img src="../../assets/images/github/v-photos/prototype3/prototype3-top-view.png"
 alt="Vista superior" class="vehicle-view-image">
         <i>Vista superior</i>
     </div>
-    <div class="center">
+    <div class="hcenter">
         <img src="../../assets/images/github/v-photos/prototype3/prototype3-bottom-view.png" 
 alt="Vista inferior" class="vehicle-view-image">
         <i>Vista inferior</i>

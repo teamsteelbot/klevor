@@ -2,7 +2,7 @@
 
 ## Base de la Capa Inferior {:#bottom-layer-mounting}
 
-<div class="center">
+<div class="hcenter">
 	<img src="../../assets/images/github/models/plans/prototype1/bottom-layer-mounting.png" alt="Base de la Capa Inferior" class="mechanical-image">
 	<i>Base de la Capa Inferior</i>
 </div>
@@ -11,7 +11,7 @@ La base de Klevor, hecha para ensamblar toda su parte mecánica.
 
 ## Soporte Superior de la Caja del Diferencial (Delgado) {:#differential-gearbox-upper-mounting--thin}
 
-<div class="center">
+<div class="hcenter">
 	<img src="../../assets/images/github/models/plans/prototype1/differential-box-upper-mounting--thin.png" alt="Soporte Superior de la Caja del Diferencial (Delgado)" class="mechanical-image">
 	<i>Soporte Superior de la Caja del Diferencial (Delgado)</i>
 </div>
@@ -20,7 +20,7 @@ Este soporte se atornilla a la caja del diferencial trasera para sostener el seg
 
 ## Soporte Superior de la Caja del Diferencial (Grueso) {:#differential-gearbox-upper-mounting--wide}
 
-<div class="center">
+<div class="hcenter">
 	<img src="../../assets/images/github/models/plans/prototype1/differential-box-upper-mounting--wide.png" alt="Soporte Superior de la Caja del Diferencial (Grueso)" class="mechanical-image">
 	<i>Soporte Superior de la Caja del Diferencial (Grueso)</i>
 </div>
@@ -29,7 +29,7 @@ Se conecta a la caja del diferencial frontal, el orificio central es más grande
 
 ## Base de la Capa Intermedia {:#middle-layer-mounting}
 
-<div class="center">
+<div class="hcenter">
 	<img src="../../assets/images/github/models/plans/prototype1/middle-layer-mounting.png" alt="Base de la Capa Intermedia" class="mechanical-image">
 	<i>Base de la Capa Intermedia</i>
 </div>
@@ -38,7 +38,7 @@ Diseñada para colocar los [sensores ToF](../../electronic/components/previous.m
 
 ## Soporte para Sensor ToF {:#tof-sensor-mounting}
 
-<div class="center">
+<div class="hcenter">
 	<img src="../../assets/images/github/models/plans/prototype1/tof-sensor-mounting.png" alt="Soporte para Sensor ToF" class="mechanical-image">
 	<i>Soporte para Sensor ToF</i>
 </div>
@@ -47,7 +47,7 @@ El [sensor ToF](../../electronic/components/previous.md#sensor-tof-hiletgo) se a
 
 ## Pilares de la Base de la Capa Superior {:#top-layer-mounting-pillars}
 
-<div class="center">
+<div class="hcenter">
 	<img src="../../assets/images/github/models/plans/prototype1/top-layer-mounting-pillars.png" alt="Pilares de la Base de la Capa Superior" class="mechanical-image">
 	<i>Pilares de la Base de la Capa Superior</i>
 </div>
@@ -56,7 +56,7 @@ Sostienen la capa superior. Diseñados para ser ensamblados con tornillos y tuer
 
 ## Base de la Capa Superior {:#top-layer-mounting}
 
-<div class="center">
+<div class="hcenter">
 	<img src="../../assets/images/github/models/plans/prototype1/top-layer-mounting.png" alt="Base de la Capa Superior" class="mechanical-image">
 	<i>Base de la Capa Superior</i>
 </div>

@@ -4,7 +4,7 @@ A pesar de todo el esfuerzo de cada uno los integrantes del equipo, nosotros pen
 
 ## Viajes Giorgio {:#viajes-giorgio}
 
-<div class="center">
+<div class="hcenter">
     <img src="assets/images/sponsors/viajes-giorgio.png" alt="Logo de Viajes Giorgio" 
 class="logo--sponsor">
     <i>Logo de Viajes Giorgio</i>
@@ -18,7 +18,7 @@ Viajes Giorgio es una agencia de viajes que se especializa en ofrecer vuelos nac
 
 ## Nathaly's Star {:#nathalys-star}
 
-<div class="center">
+<div class="hcenter">
     <img src="assets/images/sponsors/nathalys-star.png" alt="Logo de Nathaly's Star" 
 class="logo--sponsor">
     <i>Logo de Nathaly's Star</i>
@@ -32,7 +32,7 @@ Nathaly's Star es una boutique de moda que se especializa en ofrecer ropa y acce
 
 ## Steel C.A. {:#steel-ca}
 
-<div class="center">
+<div class="hcenter">
     <img src="assets/images/sponsors/steel-ca.jpg" alt="Logo de Steel C.A." 
 class="logo--sponsor">
     <i>Logo de Steel C.A.</i>

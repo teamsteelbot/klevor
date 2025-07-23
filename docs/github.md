@@ -2,7 +2,7 @@
 
 ## Repositorio {:#repository}
 
-<div class="center">
+<div class="hcenter">
     <img src="assets/images/logo/github.png" alt="Logo de GitHub" 
 class="logo--3rd-party">
     <i>Logo de GitHub</i>
@@ -16,7 +16,7 @@ También, puedes descargarlo directamente desde la terminal utilizando el siguie
 git clone https://github.com/teamsteelbot/klevor.git
 ```
 
-<div class="center">
+<div class="hcenter">
     <img src="assets/images/logo/git.png" alt="Logo de Git" 
 class="logo--3rd-party">
     <i>Logo de Git</i>

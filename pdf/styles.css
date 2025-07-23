@@ -1,29 +1,75 @@
 :root {
     --font-family--sans-serif: 'Fira Sans';
     --font-family--monospace: 'Fira Code';
+    --font-color--h1: #868e96;
+    --font-color--h2: #495057;
+    --font-color--h3: #343a40;
+    --font-color--body: #212529;
+    --font-size--h1: 24pt;
+    --font-size--h2: 18pt;
+    --font-size--h3: 14pt;
     --font-size--sans-serif: 12pt;
     --font-size--monospace: 10pt;
-    --font-size--h1: 18pt;
-    --font-size--h2: 16pt;
-    --font-size--h3: 14pt;
-    --font-line-height--sans-serif: 2;
+    --font-line-height--sans-serif: 1.15;
     --font-line-height--monospace: 1.5;
+
+    --body-background-color: transparent;
+    --page-background-color: #fff;
+    --page-background-color--first-page: #fac319;
+    --page-background-color--section-page: #212529;
 
     --tab: 4em;
 
+    --page-margin: 2cm;
     --center-vmargin: 1.2em;
     --gap: 1em;
 }
 
 @page {
     size: A4;
-    margin: 2cm;
+    margin: var(--page-margin);
     background: var(--page-background-color);
+
+    @bottom-center {
+        content: counter(page) "/" counter(pages);
+    }
 }
 
 @page:first {
-    background: var(--page-bacckground-color--first-page);
+    background: var(--page-background-color--first-page) url("../assets/images/logo/teamsteelbot.png") no-repeat center center;
+
+    @bottom-center {
+        content: none;
+    }
 }
+
+@page section {
+    background-color: var(--page-background-color--section-page);
+
+    @bottom-center {
+        content: none;
+    }
+}
+
+.center {
+    display: grid;
+    justify-content: center;
+    align-items: center;
+}
+
+.hcenter {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: var(--center-vmargin) 0;
+}
+
+.teamsteelbot-logo {
+    width: 300pt;
+}
+
+/* General styles */
 
 body {
     font-family: var(--font-family--sans-serif), sans-serif;
@@ -85,30 +131,15 @@ code, pre {
     padding: 0.2em 0.4em;
 }
 
-.special-page {
-    display: grid;
-    place-items: center;
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    padding: 0;
-}
-
-.special-page-logo {
-    width: 300pt;
-}
-
-.center {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    margin: var(--center-vmargin) 0;
-}
-
 .page-break {
-  page-break-before: always;
+    page-break-before: always;
 }
+
+.page-break-inside {
+    page-break-inside: avoid;
+}
+
+/* Images */
 
 .component-image {
     max-width: 100%;

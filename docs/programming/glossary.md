@@ -2,7 +2,7 @@
 
 ## Machine Learning {:#machine-learning}
 
-<div class="center">
+<div class="hcenter">
    <img src="../assets/images/logo/pytorch.png" alt="Logo de PyTorch" 
 class="logo--3rd-party">
    <i>Logo de PyTorch</i>
@@ -32,7 +32,7 @@ Primeramente, debemos comprender distintos conceptos relacionados con la detecci
 
 Para la visión por computadora, las imágenes se expresan como funciones continuas en un plano de coordenadas 2D representadas como f(x, y). Cuando se digitalizan, las imágenes pasan por dos procesos primarios llamados muestreo y cuantización, que, en resumen, convierten la función de imagen continua en una estructura de cuadrícula discreta de elementos que representan píxeles [[2](#object-detection-ibm)].
 
-<div class="center">
+<div class="hcenter">
    <img src="../assets/images/app/object-detection.png" alt="Imagen con distintas anotaciones de manzanas" class="app--image">
    <i>Imagen con distintas anotaciones de manzanas</i>
 </div>
@@ -56,7 +56,7 @@ La evaluación de métricas es un paso crucial en el proceso de detección de ob
 
 ## You Only Look Once (YOLO) {:#yolo}
 
-<div class="center">
+<div class="hcenter">
    <img src="../assets/images/logo/ultralytics.png" 
 alt="Logo de Ultralytics" class="logo--3rd-party">
    <i>Logo de Ultralytics</i>
@@ -70,7 +70,7 @@ Para Klevor, la detección de objetos se basa en el modelo YOLOv11; la última v
 
 Una unidad de procesamiento neuronal (NPU) es un microprocesador especializado diseñado para imitar la función de procesamiento del cerebro humano. Están optimizados para tareas y aplicaciones de inteligencia artificial (IA), redes neuronales, aprendizaje profundo y aprendizaje automático [[4](#npu-ibm)].
 
-<div class="center">
+<div class="hcenter">
    <img src="../assets/images/components/raspberry-pi-ai-hat-plus.png" 
 alt="Raspberry Pi AI HAT+ 26 TOPS" class="component-image">
    <i>Raspberry Pi AI HAT+ 26 TOPS</i>
@@ -94,7 +94,7 @@ Entre las características clave de las NPU se encuentran:
 
 ## Docker {:#docker}
 
-<div class="center">
+<div class="hcenter">
     <img src="../assets/images/logo/docker.png" alt="Logo de Docker" 
 class="logo--3rd-party">
     <i>Logo de Docker</i>

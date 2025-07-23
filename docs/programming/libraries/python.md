@@ -2,7 +2,7 @@
 
 ## PyTorch {:#pytorch}
 
-<div class="center">
+<div class="hcenter">
     <img src="../../assets/images/logo/pytorch.png" alt="PyTorch" class="logo--3rd-party">
     <i>Logo de PyTorch</i>
 </div>
@@ -13,7 +13,7 @@ Al igual que muchas de las librerías ya mencionadas, PyTorch es bastante útil 
 
 ## Ultralytics YOLO {:#ultralytics-yolo}
 
-<div class="center">
+<div class="hcenter">
     <img src="../../assets/images/logo/ultralytics.png" alt="Ultralytics" class="logo--3rd-party" >
     <i>Logo de Ultralytics</i>
 </div>
@@ -30,7 +30,7 @@ La tarea central de YOLO. Identifica la ubicación de objetos en una imagen/vide
 
 ## OpenCV {:#opencv}
 
-<div class="center">
+<div class="hcenter">
     <img src="../../assets/images/logo/opencv.png" alt="OpenCV" class="logo--3rd-party">
     <i>Logo de OpenCV</i>
 </div>
@@ -43,7 +43,7 @@ Su propósito principal es proporcionar una infraestructura común para aplicaci
 
 ## NumPy {:#numpy}
 
-<div class="center">
+<div class="hcenter">
     <img src="../../assets/images/logo/numpy.png" alt="Numpy" class="logo--3rd-party">
     <i>Logo de NumPy</i>
 </div>
@@ -58,7 +58,7 @@ El propósito general es permitir operaciones numéricas rápidas y eficientes e
 
 ## PiCamera 2 {:#picamera-2}
 
-<div class="center">
+<div class="hcenter">
     <img src="../../assets/images/logo/raspberry-pi.png" alt="Picamera 2" class="logo--3rd-party">
     <i>Logo de Raspberry Pi</i>
 </div>
@@ -74,7 +74,7 @@ Además de, obviamente, permitir la toma de imágenes y videos.
 
 ## Hailo Platform {:#hailo-platform}
 
-<div class="center">
+<div class="hcenter">
     <img src="../../assets/images/logo/hailo.png" alt="Hailo Platform" class="logo--3rd-party">
     <i>Logo de Hailo Platform</i>
 </div>
@@ -91,7 +91,7 @@ Además de esto, la Hailo Platform también incluye múltiples librerías, el ob
 
 ## MkDocs {:#mkdocs}
 
-<div class="center">
+<div class="hcenter">
     <img src="../../assets/images/logo/mkdocs.png" alt="Logo de MkDocs" class="logo--3rd-party">
     <i>Logo de MkDocs</i>
 </div>

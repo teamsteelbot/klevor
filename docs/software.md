@@ -6,7 +6,7 @@ Aquí se encuentran todos los programas que utilizamos como Team Steel Bot para 
 
 ### Label Studio {:#label-studio}
 
-<div class="center">
+<div class="hcenter">
     <img src="assets/images/logo/label-studio.png" alt="Logo de Label Studio" 
 class="logo--3rd-party">
     <i>Logo de Label Studio</i>
@@ -18,7 +18,7 @@ En el caso de Klevor, este programa se utilizó para [remarcar](programming/guid
 
 ### Google Colab {:#google-colab}
 
-<div class="center">
+<div class="hcenter">
     <img src="assets/images/logo/google-colab.png" alt="Logo de Google Colab" 
 class="logo--3rd-party">
     <i>Logo de Google Colab</i>
@@ -30,7 +30,7 @@ En el caso de Klevor, utilizamos esta plataforma para poder [entrenar el modelo 
 
 ### Visual Studio Code {:#visual-studio-code}
 
-<div class="center">
+<div class="hcenter">
     <img src="assets/images/logo/visual-studio-code.png" alt="Logo de Visual Studio Code" class="logo--3rd-party">
     <i>Logo de Visual Studio Code</i>
 </div>
@@ -41,7 +41,7 @@ En el caso de Klevor, nosotros utilizamos Visual Studio Code principalmente en l
 
 ### PyCharm {:#pycharm}
 
-<div class="center">
+<div class="hcenter">
     <img src="assets/images/logo/pycharm.png" alt="Logo de PyCharm" 
 class="logo--3rd-party">
     <i>Logo de PyCharm</i>
@@ -53,7 +53,7 @@ En nuestro caso, empleamos PyCharm para verificar y depurar con más profundida 
 
 ### Thonny {:#thonny}
 
-<div class="center">
+<div class="hcenter">
     <img src="assets/images/logo/thonny.png" alt="Logo de Thonny" 
 class="logo--3rd-party">
     <i>Logo de Thonny</i>
@@ -65,7 +65,7 @@ class="logo--3rd-party">
 
 ### Canva {:#canva}
 
-<div class="center">
+<div class="hcenter">
     <img src="assets/images/logo/canva.png" alt="Logo de Canva" 
 class="logo--3rd-party">
     <i>Logo de Canva</i>
@@ -75,7 +75,7 @@ class="logo--3rd-party">
 
 ### Mermaid {:#mermaid}
 
-<div class="center">
+<div class="hcenter">
     <img src="assets/images/logo/mermaid.png" alt="Logo de Mermaid" 
 class="logo--3rd-party">
     <i>Logo de Mermaid</i>
@@ -85,7 +85,7 @@ Después de no lograr los resultados esperados con Canva, decidimos optar por [M
 
 ### Draw.io {:#draw-io}
 
-<div class="center">
+<div class="hcenter">
     <img src="assets/images/logo/draw.io.png" alt="Logo de Draw.io" 
 class="logo--3rd-party">
     <i>Logo de Draw.io</i>
@@ -95,7 +95,7 @@ class="logo--3rd-party">
 
 ### Fusion 360 {:#fusion-360}
 
-<div class="center">
+<div class="hcenter">
     <img src="assets/images/logo/fusion-360.png" alt="Logo de Fusion 360" 
 class="logo--3rd-party">
     <i>Logo de Fusion 360</i>
@@ -109,7 +109,7 @@ Elegimos este programa porque es una solución "todo en uno" que combina el dise
 
 ### Jira {:#jira}
 
-<div class="center">
+<div class="hcenter">
     <img src="assets/images/logo/jira.png" alt="Logo de Jira" 
 class="logo--3rd-party">
     <i>Logo de Jira</i>

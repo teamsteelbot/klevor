@@ -4,7 +4,7 @@ Muchos robots autónomos, si no es que todos, necesitan de un lenguaje de progra
 
 ## Python {:#python}
 
-<div class="center">
+<div class="hcenter">
     <img src= "../assets/images/logo/python.png" alt="Python" class="logo--3rd-party">
     <i>Logo de Python</i>
 </div>
@@ -33,7 +33,7 @@ La ventaja principal de Python es la versatilidad, pues no necesitamos administr
 
 ## MicroPython {:#micro-python}
 
-<div class="center">
+<div class="hcenter">
     <img src= "../assets/images/logo/micro-python.png" alt="MicroPython" class="logo--3rd-party">
     <i>Logo de MicroPython</i>
 </div>
@@ -48,7 +48,7 @@ En el caso de Klevor, utilizamos MicroPython en la Raspberry Pi Pico 2 WH, para 
 
 ## CircuitPython {:#circuit-python}
 
-<div class="center">
+<div class="hcenter">
     <img src="../assets/images/logo/circuit-python.png" alt="CircuitPython" 
 class="logo--3rd-party">
     <i>Logo de CircuitPython</i>
