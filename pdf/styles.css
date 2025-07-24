@@ -1,11 +1,9 @@
 :root {
     --font-family--sans-serif: 'Fira Sans';
     --font-family--monospace: 'Fira Code';
-    --font-color--h1: #868e96;
     --font-color--h2: #495057;
     --font-color--h3: #343a40;
     --font-color--body: #212529;
-    --font-size--h1: 24pt;
     --font-size--h2: 18pt;
     --font-size--h3: 14pt;
     --font-size--sans-serif: 12pt;
@@ -35,22 +33,6 @@
     }
 }
 
-@page:first {
-    background: var(--page-background-color--first-page) url("../assets/images/logo/teamsteelbot.png") no-repeat center center;
-
-    @bottom-center {
-        content: none;
-    }
-}
-
-@page section {
-    background-color: var(--page-background-color--section-page);
-
-    @bottom-center {
-        content: none;
-    }
-}
-
 .center {
     display: grid;
     justify-content: center;
@@ -71,6 +53,13 @@
 
 /* General styles */
 
+/*
+html, body {
+    height: calc(29.7cm - 2 * var(--page-margin));
+    width: calc(21cm - 2 * var(--page-margin));
+}
+*/
+
 body {
     font-family: var(--font-family--sans-serif), sans-serif;
     font-size: var(--font-size--sans-serif);
@@ -78,18 +67,9 @@ body {
     color: var(--font-color--body);
 }
 
-h1, h2, h3, h4, h5, h6 {
+h2, h3, h4, h5, h6 {
     page-break-after: avoid;
     break-after: avoid;
-}
-
-h1 {
-    font-size: var(--font-size--h1);
-    color: var(--font-color--h1);
-}
-
-h1:not(:first-child) {
-    margin-top: 1.5em;
 }
 
 h2 {

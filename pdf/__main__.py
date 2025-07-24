@@ -1,30 +1,40 @@
 import os
 
 from markdown import markdown
-from weasyprint import HTML, CSS
 from bs4 import BeautifulSoup
 
 from .constants import (
 	DOCS_DIR,
-	MKDOCS_CONFIG_FILE,
-	BREAK_PAGE_HTML,
-	PDF_OUTPUT_FILE, STYLESHEET_FILE, PDF_DPI,
 	)
-from .yml import extract_md_paths_from_yaml
+from .yml import YAML
+from .styles import Styles
+from .svg import SVG
+from . import PDF
 
 if __name__ == '__main__':
-	# Get the MarkDown files
-	md_files = extract_md_paths_from_yaml(MKDOCS_CONFIG_FILE)
+	# Initialize the PDF
+	pdf = PDF()
 
-	# Add first page with title
-	html_body = "<div></div>"
-	html_body += BREAK_PAGE_HTML
+	# Add the title page
+	first_page_styles = Styles.page_background(
+		Styles.PAGE_BACKGROUND_COLOR_FIRST_PAGE,
+		f'url("{SVG.FIRST_PAGE_SVG}")',
+		)
+	pdf.add_title_page(custom_styles=first_page_styles)
 
 	# Iterate over the files and directories in the docs directory
+	depth_counter = []
+
+	# Get the MarkDown files
+	md_files = YAML.extract_md_paths_from_mkdocs()
+
 	for idx, md_file in enumerate(md_files):
+		# Get the Markdown file path and directory
 		md_file_directory_path = os.path.dirname(md_file.path)
 		md_file_path = os.path.join(DOCS_DIR, md_file.path)
+
 		with open(md_file_path, 'r', encoding='utf-8') as f:
+			# Read the content of the Markdown file
 			content = f.read()
 
 			# Convert Markdown to HTML
@@ -47,7 +57,7 @@ if __name__ == '__main__':
 						)
 					img['src'] = img_src
 
-			# Iterate over all <h1> to <h6> tags to remove the ID
+			# Iterate over all <h1> to <h6> tags to remove the ID from the header text
 			headers = soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
 			for header in headers:
 				# Remove the {:#id} part from the header text
@@ -56,30 +66,39 @@ if __name__ == '__main__':
 					header_text = header_text.split('{:#')[0].strip()
 					header.string = header_text
 
-			html_body += str(soup)
-			if idx < len(md_files) - 1:
-				# Add a page break after each file except the last one
-				html_body += BREAK_PAGE_HTML
+			# Get the <h1> tag for the title
+			title_tag = soup.find('h1')
+			if not title_tag:
+				raise RuntimeError(f'Markdown file {md_file.path} does not contain an <h1> tag for the title.')
+			title_tag_text = title_tag.get_text()
+
+			# Remove the <h1> tag from the soup
+			title_tag.decompose()
+
+			# Get the depth and number of the current Markdown file
+			number = [md_file.number]
+			parent_dir = md_file.parent_dir
+			while parent_dir is not None:
+				number.insert(0, parent_dir.number)
+				parent_dir = parent_dir.parent_dir
+			full_number = '. '.join(map(str, number))
+
+			# Add the title page
+			background_svg = SVG.background_text(
+				text=f"{full_number} {title_tag_text}",
+				fill=Styles.FONT_COLOR_H1,
+				font_size=Styles.FONT_SIZE_H1,
+			)
+			section_page_styles = Styles.page_background(
+				Styles.PAGE_BACKGROUND_COLOR_FIRST_PAGE,
+				background_svg,
+				)
+			pdf.add_title_page(custom_styles=section_page_styles)
+
+			# Add a page break after each file except the last one
+			pdf.add_html_content(str(soup), break_page=(idx < len(md_files) - 1))
 
 	try:
-		html = f"""
-			<html>
-				<body>
-					{html_body}
-				</body>
-			</html>
-		"""
-		print (f'Saving PDF to {PDF_OUTPUT_FILE}...')
-		if not os.path.exists(os.path.dirname(PDF_OUTPUT_FILE)):
-			os.makedirs(os.path.dirname(PDF_OUTPUT_FILE))
-		HTML(string=html, base_url=DOCS_DIR).write_pdf(
-			PDF_OUTPUT_FILE,
-			stylesheets=[
-				CSS(STYLESHEET_FILE),
-			],
-			optimize_images=True,
-			dpi=PDF_DPI,
-		)
-		print(f'PDF saved to {PDF_OUTPUT_FILE}')
+		pdf.save()
 	except Exception as e:
 		print(f'Error saving PDF: {e}')
