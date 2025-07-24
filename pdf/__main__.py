@@ -9,21 +9,21 @@ from .constants import (
 from .yml import YAML
 from .styles import Styles
 from .svg import SVG
-from . import PDF
+from . import PDF, HTML
 
 if __name__ == '__main__':
 	# Initialize the PDF
 	pdf = PDF()
 
 	# Add the title page
+	first_page_selector = 'first'
+	first_page_html = HTML.empty_div_with_page_selector(first_page_selector)
 	first_page_styles = Styles.page_background(
 		Styles.PAGE_BACKGROUND_COLOR_FIRST_PAGE,
 		f'url("{SVG.FIRST_PAGE_SVG}")',
+		page_selector=first_page_selector,
 		)
-	pdf.add_title_page(custom_styles=first_page_styles)
-
-	# Iterate over the files and directories in the docs directory
-	depth_counter = []
+	pdf.add_title_page(first_page_html, custom_styles=first_page_styles)
 
 	# Get the MarkDown files
 	md_files = YAML.extract_md_paths_from_mkdocs()
@@ -84,19 +84,22 @@ if __name__ == '__main__':
 			full_number = '. '.join(map(str, number))
 
 			# Add the title page
+			page_selector = f'section-{idx + 1}'
+			section_html = HTML.empty_div_with_page_selector(page_selector)
 			background_svg = SVG.background_text(
 				text=f"{full_number} {title_tag_text}",
 				fill=Styles.FONT_COLOR_H1,
 				font_size=Styles.FONT_SIZE_H1,
 			)
 			section_page_styles = Styles.page_background(
-				Styles.PAGE_BACKGROUND_COLOR_FIRST_PAGE,
+				Styles.PAGE_BACKGROUND_COLOR_SECTION_PAGE,
 				background_svg,
+				page_selector=page_selector,
 				)
-			pdf.add_title_page(custom_styles=section_page_styles)
+			pdf.add_title_page(section_html, custom_styles=section_page_styles)
 
 			# Add a page break after each file except the last one
-			pdf.add_html_content(str(soup), break_page=(idx < len(md_files) - 1))
+			pdf.add_html_content(str(soup), break_page=False)
 
 	try:
 		pdf.save()

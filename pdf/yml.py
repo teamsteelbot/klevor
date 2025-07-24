@@ -79,7 +79,7 @@ class YAML:
 				sub_dir = DocumentationSection(
 					name=key,
 					parent_dir=documentation_section,
-					depth=documentation_section.depth + 1,
+					depth=documentation_section.depth + 1 if documentation_section else 0,
 					number=idx + 1,
 					)
 

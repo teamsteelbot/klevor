@@ -7,6 +7,8 @@ class Styles:
 	# Custom styles
 	FONT_SIZE_H1 = '36pt'
 	FONT_COLOR_H1 = '#fff'
+	FONT_FAMILY_SANS_SERIF = 'Fira Sans'
+	FONT_FAMILY_MONOSPACE = 'Fira Code'
 	PAGE_BACKGROUND_COLOR_FIRST_PAGE = '#fac319'
 	PAGE_BACKGROUND_COLOR_SECTION_PAGE = '#212529'
 
@@ -14,7 +16,7 @@ class Styles:
 	def page_background(
 			background_color: str,
 			background_image: str,
-			page_idx: int = 0,
+			page_selector: str = 'first',
 	        background_repeat: str  ='no-repeat',
 			background_position: str = 'center center',
 	        content: str = 'none') -> str:
@@ -24,7 +26,7 @@ class Styles:
 	    Args:
 			background_color (str): The background color for the page.
 			background_image (str): The background image for the page, formatted as a CSS URL.
-	        page_idx (int): The page number to apply the CSS to (0-based index).
+			page_selector (str): The CSS selector for the page.
 	        background_repeat (str): The repeat style for the background image.
 	        background_position (str): The position of the background image.
 	        content (str): The content to display at the bottom center of the page.
@@ -32,7 +34,7 @@ class Styles:
 	        str: The complete CSS string for the specified page.
 	    """
 		return f"""
-	    @page :nth({page_idx + 1}) {{
+	    @page {page_selector} {{
 	        background: {background_color} {background_image} {background_repeat} {background_position};
 	
 	        @bottom-center {{

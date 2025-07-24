@@ -34,9 +34,10 @@ class PDF:
 
 	def add_title_page(
 			self,
-			html_content: str = '',
+			html_content: str,
 			custom_styles: str = '',
-			break_page: bool = True):
+			break_page: bool = True
+			):
 		"""
 		Adds a title page to the PDF document.
 
@@ -99,10 +100,11 @@ class PDF:
 				""",
 			base_url=base_url
 		).write_pdf(
-			output_file=output_file,
+			output_file,
 			stylesheets=[
 				CSS(stylesheet),
-				],
+				CSS(string='\n'.join(self.__custom_styles)),
+			],
 			optimize_images=optimize_images,
 			dpi=dpi,
 			)

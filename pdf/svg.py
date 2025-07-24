@@ -1,6 +1,6 @@
-import os
+import urllib.parse
 
-from .constants import ASSETS_DIR
+from .styles import Styles
 
 class SVG:
 	"""
@@ -8,13 +8,14 @@ class SVG:
 	"""
 
 	# SVG for the first page of the PDF
-	FIRST_PAGE_SVG = os.path.join(ASSETS_DIR, 'images', 'logo', 'teamsteelbot.png')
+	FIRST_PAGE_SVG = "assets/images/logo/teamsteelbot.png" # It's hardcoded because CSS uses '/'
 
 	@staticmethod
 	def background_text(
 			text: str,
 			fill: str,
 			font_size: int | str,
+			font_family: str = Styles.FONT_FAMILY_SANS_SERIF,
 			dominant_baseline: str = "middle",
 			text_anchor: str = "middle",
 			) -> str:
@@ -25,14 +26,16 @@ class SVG:
 			text (str): The text to display in the background.
 			fill (str): The fill color for the text.
 			font_size (int | str): The font size for the text.
-			dominant_baseline (str): The dominant baseline for the text. Defaults to "middle".
-			text_anchor (str): The text anchor for the text. Defaults to "middle".
+			font_family (str): The font family for the text.
+			dominant_baseline (str): The dominant baseline for the text.
+			text_anchor (str): The text anchor for the text.
 		Returns:
 			str: A CSS URL string containing the SVG data.
 		"""
 		svg = (
-			"<svg xmlns='http://www.w3.org/2000/svg' width='100%' height='100%' viewBox='0 0 100 100'>"
+			"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>"
 			f"<text x='50%' y='50%' dominant-baseline='{dominant_baseline}' text-anchor='{text_anchor}' "
-			f"font-size='{font_size}' fill='{fill}'>{text}</text></svg>"
+			f"font-size='{font_size}' font-family='{font_family}' fill='{fill}'>{text}</text></svg>"
 		)
-		return f"url('data:image/svg+xml;utf8,{svg}')"
+		encoded_svg = urllib.parse.quote(svg)
+		return f'url("data:image/svg+xml;utf8,{encoded_svg}")'
