@@ -9,15 +9,19 @@ from .constants import (
 from .yml import YAML
 from .styles import Styles
 from .svg import SVG
-from . import PDF, HTML
+from . import PDF
 
 if __name__ == '__main__':
 	# Initialize the PDF
 	pdf = PDF()
 
-	# Add the title page
+	# Initialize the styles
+	styles = Styles()
+
+	# Add the first page with the team logo
+	team_logo = pdf.team_logo()
 	first_page_selector = 'first'
-	first_page_html = HTML.empty_div_with_page_selector(first_page_selector)
+	first_page_html = HTML.div_with_page_selector(first_page_selector, team_logo)
 	first_page_styles = Styles.page_background(
 		Styles.PAGE_BACKGROUND_COLOR_FIRST_PAGE,
 		f'url("{SVG.FIRST_PAGE_SVG}")',
@@ -97,6 +101,19 @@ if __name__ == '__main__':
 				page_selector=page_selector,
 				)
 			pdf.add_title_page(section_html, custom_styles=section_page_styles)
+
+			"""
+			# Create a new parent tag
+			parent = soup.new_tag('div', attrs={'class': 'wrapper'})
+			
+			# Move all children of soup into the parent
+			for child in list(soup.contents):
+			    parent.append(child.extract())
+			
+			# Replace soup's contents with the parent
+			soup.clear()
+			soup.append(parent)
+			"""
 
 			# Add a page break after each file except the last one
 			pdf.add_html_content(str(soup), break_page=False)
