@@ -121,6 +121,17 @@ class Measure:
 		other_converted = other.to_unit(self.unit)
 		return Measure(self.value - other_converted.value, self.unit)
 
+	def __rmul__(self, factor: float) -> 'Measure':
+		"""
+		Multiplies the measure by a factor.
+
+		Args:
+			factor (float): The factor to multiply the measure by.
+		Returns:
+			Measure: A new Measure instance with the multiplied value.
+		"""
+		return Measure(self.value * factor, self.unit)
+
 	def to_unit(self, target_unit: str) -> 'Measure':
 		"""
 		Converts the measure to a specified unit.

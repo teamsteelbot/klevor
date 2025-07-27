@@ -12,12 +12,12 @@ class Styles:
 
 	# Custom styles
 	ROOT_CLASS = ':root'
-	FONT_SIZE_H1 = '--font-size-h1'
-	FONT_COLOR_H1 = '--font-color-h1'
-	FONT_FAMILY_SANS_SERIF = '--font-family-sans-serif'
-	FONT_FAMILY_MONOSPACE = '--font-family-monospace'
-	PAGE_BACKGROUND_COLOR_FIRST_PAGE = '--page-background-color-first-page'
-	PAGE_BACKGROUND_COLOR_SECTION_PAGE = '--page-background-color-section-page'
+	FONT_SIZE_H1 = '--font-size--h1'
+	FONT_COLOR_H1 = '--font-color--h1'
+	FONT_FAMILY_SANS_SERIF = '--font-family--sans-serif'
+	FONT_FAMILY_MONOSPACE = '--font-family--monospace'
+	PAGE_BACKGROUND_COLOR_FIRST_PAGE = '--page-background-color--first-page'
+	PAGE_BACKGROUND_COLOR_SECTION_PAGE = '--page-background-color--section-page'
 	PAGE_FORMAT = '--page-format'
 	PAGE_MARGIN = '--page-margin'
 
@@ -35,6 +35,23 @@ class Styles:
 
 	# WeasyPrint stylesheet files
 	STYLESHEET_FILE = os.path.join(PDF_DIR, 'styles.css')
+
+	@staticmethod
+	def parse_style_as_dict(style: str) -> dict:
+		"""
+		Parses a style string and returns a dictionary of styles.
+
+		Args:
+			style (str): The style string to parse.
+
+		Returns:
+			dict: A dictionary containing the parsed styles.
+		"""
+		if not style:
+			return {}
+		raw_styles = style.split(';')
+		raw_styles = [s.strip() for s in raw_styles if s.strip()]
+		return {k.strip(): v.strip() for k, v in (s.split(':', 1) for s in raw_styles if ':' in s)}
 
 	def __init__(self, stylesheet_file: str = STYLESHEET_FILE):
 		"""
@@ -56,22 +73,15 @@ class Styles:
 			raw_classes = [c.strip() for c in raw_classes if c.strip()]
 			self.__classes = {}
 			for cls in raw_classes:
-				if cls:
-					# Split the class name and its styles
-					name, styles = cls.split('{', 1)
-					name = name.strip()
-					raw_styles = styles.split('}')[0].split(';')
-					raw_styles = [s.strip() for s in raw_styles if s.strip()]
+				if not cls:
+					continue
 
-					# Parse the styles into a dictionary
-					styles_dict = {}
-					for style in raw_styles:
-						key, value = style.split(':', 1)
-						if key and value:
-							styles_dict[key.strip()] = value.strip()
+				# Split the class name and its styles
+				name, styles = cls.split('{', 1)
+				name = name.strip()
 
-					# Store the class name and its styles
-					self.__classes[name] = styles_dict
+				# Store the class name and its styles
+				self.__classes[name] = Styles.parse_style_as_dict(styles)
 
 		# Check if the required selectors are present
 		for selector in [

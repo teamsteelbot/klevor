@@ -8,7 +8,6 @@ from .constants import (
 	)
 from .yml import YAML
 from .styles import Styles
-from .svg import SVG
 from . import PDF
 
 if __name__ == '__main__':

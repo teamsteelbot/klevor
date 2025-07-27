@@ -30,7 +30,7 @@ class PDF:
 	TEAM_SVG = "assets/images/logo/teamsteelbot.png"
 
 	# Team logo image height
-	TEAM_LOGO_HEIGHT = Measure(30, Measure.MM_UNIT)
+	TEAM_LOGO_HEIGHT = Measure(60, Measure.MM_UNIT)
 
 	def __init__(self, styles_inst: Styles):
 		"""
@@ -117,7 +117,11 @@ class PDF:
 		"""
 		h1_tag = self.__soup.new_tag(
 			'h1',
-			style=f'font-size: {self.__styles.FONT_SIZE_H1}; color: {self.__styles.FONT_COLOR_H1};'
+			style=join_styles({
+				'font-size': self.__styles.font_size_h1,
+				'height': self.__styles.font_size_h1,
+				'color': self.__styles.font_color_h1
+				})
 			)
 		h1_tag.string = text
 		return h1_tag
@@ -134,11 +138,13 @@ class PDF:
 		Returns:
 			Tag: A BeautifulSoup Tag object representing the centered div.
 		"""
-		# Check if the tag has a height
+		# Extract the style attribute from the tag
 		tag_style = tag.get('style')
 		if tag_style is None:
 			raise ValueError("Tag does not have a style attribute with height defined.")
 
+		# Extract the height from the tag's style
+		tag_style = Styles.parse_style_as_dict(tag_style)
 		tag_height = tag_style.get('height')
 		if tag_height is None:
 			raise ValueError("Tag does not have a height defined in its style.")
@@ -148,7 +154,7 @@ class PDF:
 
 		# Calculate the margin top to center the tag
 		margin_top = (
-			self.__styles.page_height - self.__styles.page_margin - tag_height
+			self.__styles.page_height - 2 * self.__styles.page_margin - tag_height
 		).value / 2
 
 		# Create a div with the horizontally centered class
