@@ -27,6 +27,9 @@ class Styles:
 	# Page format sizes
 	PAGE_FORMAT_A4_HEIGHT = Measure(297, Measure.MM_UNIT)
 
+	# First page selector
+	FIRST_PAGE_SELECTOR = 'first'
+
 	# Horizontally centering class
 	HCENTER_CLASS = 'hcenter'
 
@@ -135,7 +138,7 @@ class Styles:
 		)
 
 	@staticmethod
-	def page_background(
+	def page(
 			page_selector: str,
 			background_color: str = 'transparent',
 			background_image: str = 'none',
@@ -189,18 +192,18 @@ class Styles:
 	    }}
 	    """
 
-	def first_page_background(
+	def first_page(
 			self,
 			):
 		"""
 		Generates the CSS for the first page background.
 		"""
-		return self.page_background(
-			page_selector='first',
+		return self.page(
+			page_selector=self.FIRST_PAGE_SELECTOR,
 			background_color=self.__page_background_color_first_page,
 			)
 
-	def section_page_background(
+	def section_page(
 			self,
 			page_selector: str,
 			top_right_content: str,
@@ -212,9 +215,26 @@ class Styles:
 			page_selector (str): The CSS selector for the section page.
 			top_right_content (str): Content for the top-right corner of the section page.
 		"""
-		return self.page_background(
+		return self.page(
 			page_selector=page_selector,
 			background_color=self.__page_background_color_section_page,
+			top_right_content=top_right_content,
+			)
+
+	def section_body(
+			self,
+			page_selector: str,
+	        top_right_content: str
+	    ) -> str:
+		"""
+		Generates the CSS for a section body.
+
+		Args:
+			page_selector (str): The CSS selector for the section body.
+			top_right_content (str): Content for the top-right corner of the section body.
+		"""
+		return self.page(
+			page_selector=page_selector,
 			top_right_content=top_right_content,
 			)
 

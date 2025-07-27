@@ -48,6 +48,7 @@ class PDF:
 		self.__html_body_tag = self.__soup.new_tag('body')
 		self.__styles_files = []
 		self.__runtime_styles = []
+		self.__section_counter = 0
 
 		# Append BeautifulSoup tags
 		self.__soup.append(self.__html_tag)
@@ -56,20 +57,19 @@ class PDF:
 	def div_with_page_selector(
 			self,
 			page_selector: str,
-			content: str = ''
+			tag: Tag
 		) -> Tag:
 		"""
 		Generates a div with a specific page selector for WeasyPrint.
 
 		Args:
 			page_selector (str): The CSS selector for the page.
-			content (str): Optional content to include within the div.
+			tag (Tag): The BeautifulSoup Tag to include in the div.
 		Returns:
 			Tag: A BeautifulSoup Tag object representing the div with the page selector.
 		"""
 		div_tag = self.__soup.new_tag('div', style=f'page: {page_selector};')
-		if content:
-			div_tag.string = content
+		div_tag.append(tag)
 		return div_tag
 
 	def break_page(self) -> Tag:
@@ -106,6 +106,22 @@ class PDF:
 			alt='Team SteelBot Logo'
 			)
 
+	def title(self, text: str) -> Tag:
+		"""
+		Generates a title tag for the PDF document.
+
+		Args:
+			text (str): The title text to display in the PDF document.
+		Returns:
+			Tag: A BeautifulSoup Tag object representing the title.
+		"""
+		h1_tag = self.__soup.new_tag(
+			'h1',
+			style=f'font-size: {self.__styles.FONT_SIZE_H1}; color: {self.__styles.FONT_COLOR_H1};'
+			)
+		h1_tag.string = text
+		return h1_tag
+
 	def center_tag(
 			self,
 			tag: Tag,
@@ -132,13 +148,16 @@ class PDF:
 
 		# Calculate the margin top to center the tag
 		margin_top = (
-			self.__styles.page_height.value - self.__styles.page_margin - tag_height
-		) / 2
+			self.__styles.page_height - self.__styles.page_margin - tag_height
+		).value / 2
 
 		# Create a div with the horizontally centered class
 		hcenter_div = self.__soup.new_tag('div', **{
 			'class': self.__styles.HCENTER_CLASS,
+			'style': f'margin-top: {margin_top}{tag_height.unit};'
 			})
+		hcenter_div.append(tag)
+		return hcenter_div
 
 	def add_tag(self, tag: Tag, runtime_styles: str = '', break_page: bool = True):
 		"""
@@ -154,6 +173,71 @@ class PDF:
 			self.__runtime_styles.append(runtime_styles)
 		if break_page:
 			self.__html_body_tag.append(self.break_page())
+
+	def add_first_page(
+			self,
+			tag: Tag
+		):
+		"""
+		Adds the first page of the PDF document with a custom HTML content.
+
+		Args:
+			tag (Tag): The BeautifulSoup Tag to add to the first page.
+		"""
+		center_tag = self.center_tag(tag)
+		first_page_tag = self.div_with_page_selector(
+			self.__styles.FIRST_PAGE_SELECTOR,
+			center_tag
+		)
+		custom_styles = self.__styles.first_page()
+		self.add_tag(first_page_tag, custom_styles)
+
+	def add_section_page(
+			self,
+			tag: Tag,
+			top_right_content: str = '',
+			break_page: bool = True
+		):
+		"""
+		Adds a section page to the PDF document with a custom HTML content.
+
+		Args:
+			tag (Tag): The BeautifulSoup Tag to add to the section page.
+			top_right_content (str): Custom CSS styles to apply.
+			break_page (bool): Whether to insert a page break after the content.
+		"""
+		self.__section_counter += 1
+		page_selector = f'section-{self.__section_counter}'
+		center_tag = self.center_tag(tag)
+		section_tag = self.div_with_page_selector(page_selector, center_tag)
+		custom_styles = self.__styles.section_page(
+			page_selector=page_selector,
+			top_right_content=top_right_content,
+			)
+		self.add_tag(section_tag, custom_styles, break_page)
+
+	def add_section_body(
+			self,
+			tag: Tag,
+			top_right_content: str = '',
+			break_page: bool = True
+		):
+		"""
+		Adds a section body to the PDF document with a custom HTML content.
+
+		Args:
+			tag (Tag): The BeautifulSoup Tag to add to the section body.
+			top_right_content (str): Custom CSS styles to apply.
+			break_page (bool): Whether to insert a break after the content.
+		"""
+		page_selector = f'section-{self.__section_counter}-body'
+		section_body_tag = self.div_with_page_selector(page_selector, tag)
+		custom_styles = self.__styles.section_body(
+			page_selector=page_selector,
+			top_right_content=top_right_content,
+			)
+		self.add_tag(section_body_tag, custom_styles, break_page)
+
 
 	def save(
 			self,

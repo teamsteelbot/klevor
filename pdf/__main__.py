@@ -12,22 +12,15 @@ from .svg import SVG
 from . import PDF
 
 if __name__ == '__main__':
-	# Initialize the PDF
-	pdf = PDF()
-
 	# Initialize the styles
 	styles = Styles()
 
+	# Initialize the PDF
+	pdf = PDF(styles)
+
 	# Add the first page with the team logo
-	team_logo = pdf.team_logo()
-	first_page_selector = 'first'
-	first_page_html = HTML.div_with_page_selector(first_page_selector, team_logo)
-	first_page_styles = Styles.page_background(
-		Styles.PAGE_BACKGROUND_COLOR_FIRST_PAGE,
-		f'url("{SVG.FIRST_PAGE_SVG}")',
-		page_selector=first_page_selector,
-		)
-	pdf.add_title_page(first_page_html, custom_styles=first_page_styles)
+	team_logo_tag = pdf.team_logo()
+	pdf.add_first_page(team_logo_tag)
 
 	# Get the MarkDown files
 	md_files = YAML.extract_md_paths_from_mkdocs()
@@ -88,35 +81,18 @@ if __name__ == '__main__':
 			full_number = '. '.join(map(str, number))
 
 			# Add the title page
-			page_selector = f'section-{idx + 1}'
-			section_html = HTML.empty_div_with_page_selector(page_selector)
-			background_svg = SVG.background_text(
-				text=f"{full_number} {title_tag_text}",
-				fill=Styles.FONT_COLOR_H1,
-				font_size=Styles.FONT_SIZE_H1,
-			)
-			section_page_styles = Styles.page_background(
-				Styles.PAGE_BACKGROUND_COLOR_SECTION_PAGE,
-				background_svg,
-				page_selector=page_selector,
-				)
-			pdf.add_title_page(section_html, custom_styles=section_page_styles)
+			title_tag = pdf.title(title_tag_text)
+			pdf.add_section_page(title_tag, full_number)
 
-			"""
 			# Create a new parent tag
-			parent = soup.new_tag('div', attrs={'class': 'wrapper'})
+			section_body_tag = soup.new_tag('div')
 			
 			# Move all children of soup into the parent
 			for child in list(soup.contents):
-			    parent.append(child.extract())
+				section_body_tag.append(child.extract())
 			
-			# Replace soup's contents with the parent
-			soup.clear()
-			soup.append(parent)
-			"""
-
-			# Add a page break after each file except the last one
-			pdf.add_html_content(str(soup), break_page=False)
+			# Add the section body to the PDF
+			pdf.add_section_body(section_body_tag, full_number)
 
 	try:
 		pdf.save()
