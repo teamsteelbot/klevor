@@ -34,9 +34,77 @@ alt="Primera capa, vista superior" class="vehicle-view-image">
     </div>
 </div>
 
-A continuación, explicaremos a detalle cómo funciona este sistema motriz. Para lograrlo, nos basamos en el sistema mecánico de un automóvil; cuyo funcionamiento depende de un diferencial (una pieza formada por varios engranajes cubiertos por una carcasa) para el movimiento de dos ruedas, al usar cuatro ruedas, usamos dos diferenciales (uno para las delanteras, otro para las traseras) conectados mediante un eje transmisor para el movimiento uniforme de todas estas. Estos diferenciales se mueven en conjunto mediante un engranaje que está conectado al eje transmisor. El eje transmisor únicamente tiene la función de conectar ambos diferenciales entre sí por medio de una ranura en estos, y tiene la adición de un engranaje en la parte donde va nuestro motor ([INJORA 48T](../../electronic/components/current.md#injora-180-motor-48t)). Dicho motor originalmente lo conectamos al engranaje del eje transmisor, pero no funcionó, ya que este no cuenta con la suficiente fuerza para mover el sistema. Esto nos condujo a crear un sistema de reducción de RPM, para así, añadir más torque al motor. Esta modificación consta de un engranaje en la boquilla del motor, que a su vez está acoplado a 3 piñones más junto al engranaje principal del eje transmisor de los diferenciales, lo que finalmente le permitió a Klevor moverse.
+A continuación, explicaremos a detalle cómo funciona este sistema motriz. Para lograrlo, nos basamos en el sistema mecánico de un automóvil; cuyo funcionamiento depende de un diferencial (una pieza formada por varios engranajes cubiertos por una carcasa) para el movimiento de dos ruedas, al usar cuatro ruedas, usamos dos diferenciales (uno para las delanteras, otro para las traseras) conectados mediante un eje transmisor para el movimiento uniforme de todas estas. Estos diferenciales se mueven en conjunto mediante un engranaje que está conectado al eje transmisor. El eje transmisor únicamente tiene la función de conectar ambos diferenciales entre sí por medio de una ranura en estos, y tiene la adición de un engranaje en la parte donde va nuestro motor ([INJORA 48T](../../electronic/components/current.md#injora-180-motor-48t)). Dicho motor originalmente lo conectamos al engranaje del eje transmisor, pero no funcionó, ya que este no cuenta con la suficiente fuerza para mover el sistema. Esto nos condujo a crear un sistema de reducción de RPM.
 
-Otra parte fundamental para nuestro robot es su sistema de cruce, que consta de un servomotor ([INJORA 7 kg 2065](../../electronic/components/current.md#injora-7kg-2065-micro-servo)) conectado a nuestro sistema "Ackermann" que funciona conectando ambas ruedas delanteras a una dirección o "sistema de trapecio". El servomotor mueve unas barras que a su vez están conectados a unos muñones de dirección que están en las ruedas, permitiendo así que, uno de los muñones de dirección anteriormente mencionados, sea empujado hacia un lado por el movimiento del servomotor y a su vez, tire de la otra rueda hacia el lado opuesto. Debido a los ángulos del trapecio, esto provoca que la rueda interior gire más que la exterior.
+## ¿Cómo funciona nuestro sistema reductor de RPM?
+
+(FOTO DEL SISTEMA)
+
+ Este sistema permite que el motor, originalmente muy rápido pero con poco torque, pueda aplicar una mayor fuerza al moverse, algo importante para los desafíos, que requieren tracción y superación de obstáculos.
+
+ (FOTOS DE LOS 5 PIÑONES)
+
+ Este sistema cuenta con el ya antes mencionado, Motor INJORA 48T, con una velocidad de 20000 RPM con un piñón de 20 dientes instalado en su boquilla. Además de los piñones cuyos diseños 2D están adjuntos, que constan de 36, 8, 24, 17 y 40 dientes; todos provenientes de kits de LEGO.
+
+ El sistema funciona en varias etapas, en las que cada conjunto de piñones va reduciendo la velocidad de rotación y aumentando el torque.
+
+El motor acciona un piñón de 36 dientes, engranado con el piñón de 20 dientes que está en la boquilla del motor.
+
+El piñón de 36 dientes está montado sobre un eje que también hace girar un piñón de 8 dientes.
+
+Este piñón de 8 dientes engrana con un piñón de 24 dientes, al cual también está fijado un piñón de 17 dientes.
+
+El piñón de 17 dientes impulsa un piñón de 40 dientes, que está siendo atravesado por el eje principal que lleva el movimiento a los diferenciales del robot.
+
+A continuación, explicaremos algunas reglas importantes que hay que tener en cuenta:
+
+**Cuando un piñón más pequeño (impulsor) mueve uno más grande (impulsado), la velocidad disminuye y el torque aumenta.**
+
+**Cuando uno más grande mueve a uno más pequeño, la velocidad aumenta y el torque disminuye.**
+
+**La relación de transmisión o relación de reducción se calcula con la siguiente fórmula:**
+
+![alt text](../../../v-photos/gear-ratio-formula.png)
+
+Teniendo esto en cuenta, desglosaremos paso a paso cómo esto se aplica en nuestro sistema.
+
+El piñón de 20 dientes está directamente en la boquilla del motor.
+
+Este impulsa un piñón de 36 dientes.
+
+**Relación = 36/20 = 1.8**
+
+Esto significa que el motor debe dar 1.8 vueltas para que el piñón de 36 dientes dé 1 vuelta. Por lo tanto, la velocidad se reduce y el torque se incrementa en 1.8.
+
+Luego el piñón de 36 está fijado en el mismo eje con un piñón de 8 dientes.
+
+Este piñón de 8 engrana con uno de 24 dientes
+
+**Relación = 24/8 = 3**
+
+El piñón de 8 debe girar 3 veces para que el de 24 dé una vuelta. Esto significa que triplica el torque cuando esto ocurre.
+
+Ahora, el piñón de 24 está unido al piñón de 17 dientes, este piñón de 17 impulsa al último piñón de 40 dientes (eje final).
+
+**Relación = 40/17 = 2.35**
+
+El piñón de 17 dientes necesita dar 2.35 vueltas para que el de 40 dé una sola. Se reduce aún más la velocidad y se aumenta el torque.
+
+Como todo esto está conectado en serie (uno tras otro), las relaciones se multiplican entre sí para obtener la relación de reducción total:
+
+**Relación total = 1.8 x 3 x 2.35 = 12.69**
+
+Esto significa que por cada 12.69 vueltas del motor, el último piñón da tan solo una vuelta, aumentando el torque así mismo.
+
+Luego de esta reducción, el motor tiene una salida de 1576 RPM.
+
+
+
+
+
+
+
+La otra parte fundamental para nuestro robot es su sistema de cruce, que consta de un servomotor ([INJORA 7 kg 2065](../../electronic/components/current.md#injora-7kg-2065-micro-servo)) conectado a nuestro sistema "Ackermann" que funciona conectando ambas ruedas delanteras a una dirección o "sistema de trapecio". El servomotor mueve unas barras que a su vez están conectados a unos muñones de dirección que están en las ruedas, permitiendo así que, uno de los muñones de dirección anteriormente mencionados, sea empujado hacia un lado por el movimiento del servomotor y a su vez, tire de la otra rueda hacia el lado opuesto. Debido a los ángulos del trapecio, esto provoca que la rueda interior gire más que la exterior.
 
 Algunos componentes que también están en esta capa son el giroscopio ([BNO08X](../../electronic/components/current.md#gyroscope-gy-bno085)) y una batería de 7.4 V y 3000 mAh ([URGENEX 7.4 V](../../electronic/components/current.md#urgenex-7-4v-battery)), y los ya mencionados INJORA 48T (motor) y el servomotor INJORA 7 kg 2065.
 

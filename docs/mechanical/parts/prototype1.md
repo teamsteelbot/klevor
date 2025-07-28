@@ -7,7 +7,7 @@
 	<i>Base de la Capa Inferior</i>
 </div>
 
-La base de Klevor, hecha para ensamblar toda su parte mecánica.
+La base de Klevor, el robot, está diseñada especialmente para ensamblar y soportar toda su parte mecánica. Esta estructura principal da un soporte firme, permitiendo un ensamblaje a medida de cada componente.
 
 ## Soporte Superior de la Caja del Diferencial (Delgado) {:#differential-gearbox-upper-mounting--thin}
 
@@ -34,7 +34,7 @@ Se conecta a la caja del diferencial frontal, el orificio central es más grande
 	<i>Base de la Capa Intermedia</i>
 </div>
 
-Diseñada para colocar los [sensores ToF](../../electronic/components/previous.md#sensor-tof-hiletgo) y un power bank que usaremos de manera provisional.
+Esta pieza está diseñada específicamente para alojar los [sensores ToF](../../electronic/components/previous.md#sensor-tof-hiletgo), asegurando su correcta posición y funcionamiento, además cuenta con un espacio para colocar un power bank, que utilizaremos de manera provisional para dar energía al robot. Su diseño facilita el ensamblaje ordenado y seguro de estos componentes.
 
 ## Soporte para Sensor ToF {:#tof-sensor-mounting}
 
@@ -43,7 +43,7 @@ Diseñada para colocar los [sensores ToF](../../electronic/components/previous.m
 	<i>Soporte para Sensor ToF</i>
 </div>
 
-El [sensor ToF](../../electronic/components/previous.md#sensor-tof-hiletgo) se atornilla de forma horizontal en esta base. La base se ensambla directamente a la capa.
+Este soporte para el [sensor ToF](../../electronic/components/previous.md#sensor-tof-hiletgo) está diseñado de manera meticulosa, con un ángulo específico que permite su buen funcionamiento. El sensor se atornilla en esta base. La base se ensambla directamente a los orificios correspondientes en la capa.
 
 ## Pilares de la Base de la Capa Superior {:#top-layer-mounting-pillars}
 
@@ -52,7 +52,7 @@ El [sensor ToF](../../electronic/components/previous.md#sensor-tof-hiletgo) se a
 	<i>Pilares de la Base de la Capa Superior</i>
 </div>
 
-Sostienen la capa superior. Diseñados para ser ensamblados con tornillos y tuercas, esto le da más resistencia.
+Esta pieza ha sido diseñada con el fin de sostener la capa superior y hechos para ser ensamblados con tornillos y tuercas, esto para brindarle más resistencia, ya que los componentes de la capa superior no son para nada livianos.
 
 ## Base de la Capa Superior {:#top-layer-mounting}
 
@@ -61,4 +61,4 @@ Sostienen la capa superior. Diseñados para ser ensamblados con tornillos y tuer
 	<i>Base de la Capa Superior</i>
 </div>
 
-Hecha para colocar el microcontrolador y cámara.
+Diseñada específicamente para colocar el microcontrolador y el soporte de nuestra cámara, manteniendo orificios para que los componentes puedan disipar el calor de manera correcta.

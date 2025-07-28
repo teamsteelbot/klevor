@@ -7,7 +7,7 @@
 	<i>Base de la Capa Inferior</i>
 </div>
 
-Hicimos cambios con respecto al prototipo 1; realizamos más orificios para no sobrepasar el peso reglamentario.
+Realizamos varios cambios en comparación con el prototipo 1; entre ellos, añadimos más orificios estratégicamente distribuidos para reducir el peso total del robot y asegurarnos de no sobrepasar el límite reglamentario establecido.
 
 ## Base de la Capa Superior {:#top-layer-mounting}
 
@@ -16,4 +16,4 @@ Hicimos cambios con respecto al prototipo 1; realizamos más orificios para no s
 	<i>Base de la Capa Superior</i>
 </div>
 
-En esta hubo demasiados cambios debidos a la adición de nuevos componentes como la [Raspberry Pi 5](../../electronic/components/current.md#raspberry-pi-5) y el [RPLiDAR C1](../../electronic/components/current.md#raspberry-pi-5).
+En esta versión se realizaron numerosos cambios significativos, principalmente debido a la incorporación de nuevos componentes tecnológicos, como la [Raspberry Pi 5](../../electronic/components/current.md#raspberry-pi-5) y el [RPLiDAR C1](../../electronic/components/current.md#raspberry-pi-5). Estas adiciones nos obligaron a hacer ajustes en el diseño y la estructura para acomodar correctamente estos componentes, garantizando su integración y el óptimo funcionamiento de Klevor.

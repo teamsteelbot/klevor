@@ -65,7 +65,69 @@ En este diagrama se ve un ejemplo más claro de cómo funciona este sistema. Des
 
 Esto ilustra más la geometría de la dirección que permite que las ruedas delanteras giren en ángulos diferentes y a su vez en la misma dirección, consiguiendo así un giro eficiente.
 
-Nuestro motor ([INJORA 48T](../../electronic/components/current.md#injora-180-motor-48t)) es el que se encarga de mover gran parte del sistema motriz, pero presentó una falla al no tener el suficiente torque para mover el robot. Por esto tomamos la decisión de hacer un sistema reductor de RPM, consta de un piñón que está en la boquilla del motor y que se conecta a 2 piñones más junto al engranaje principal del eje transmisor, reduciendo así la velocidad del motor, pero añadiendo más fuerza al mismo.
+Nuestro motor ([INJORA 48T](../../electronic/components/current.md#injora-180-motor-48t)) es el que se encarga de mover gran parte del sistema motriz, pero presentó una falla al no tener el suficiente torque para mover el robot. Por esto tomamos la decisión de hacer un sistema reductor de RPM.
+
+## ¿Cómo funciona nuestro sistema reductor de RPM?
+
+(FOTO DEL SISTEMA)
+
+ Este sistema permite que el motor, originalmente muy rápido pero con poco torque, pueda aplicar una mayor fuerza al moverse, algo importante para los desafíos, que requieren tracción y superación de obstáculos.
+
+ (FOTOS DE LOS 5 PIÑONES)
+
+ Este sistema cuenta con el ya antes mencionado, Motor INJORA 48T, con una velocidad de 20000 RPM con un piñón de 20 dientes instalado en su boquilla. Además de los piñones cuyos diseños 2D están adjuntos, que constan de 36, 8, 24, 17 y 40 dientes; todos provenientes de kits de LEGO.
+
+ El sistema funciona en varias etapas, en las que cada conjunto de piñones va reduciendo la velocidad de rotación y aumentando el torque.
+
+El motor acciona un piñón de 36 dientes, engranado con el piñón de 20 dientes que está en la boquilla del motor.
+
+El piñón de 36 dientes está montado sobre un eje que también hace girar un piñón de 8 dientes.
+
+Este piñón de 8 dientes engrana con un piñón de 24 dientes, al cual también está fijado un piñón de 17 dientes.
+
+El piñón de 17 dientes impulsa un piñón de 40 dientes, que está siendo atravesado por el eje principal que lleva el movimiento a los diferenciales del robot.
+
+A continuación, explicaremos algunas reglas importantes que hay que tener en cuenta:
+
+**Cuando un piñón más pequeño (impulsor) mueve uno más grande (impulsado), la velocidad disminuye y el torque aumenta.**
+
+**Cuando uno más grande mueve a uno más pequeño, la velocidad aumenta y el torque disminuye.**
+
+**La relación de transmisión o relación de reducción se calcula con la siguiente fórmula:**
+
+![alt text](../../../v-photos/gear-ratio-formula.png)
+
+Teniendo esto en cuenta, desglosaremos paso a paso cómo esto se aplica en nuestro sistema.
+
+El piñón de 20 dientes está directamente en la boquilla del motor.
+
+Este impulsa un piñón de 36 dientes.
+
+**Relación = 36/20 = 1.8**
+
+Esto significa que el motor debe dar 1.8 vueltas para que el piñón de 36 dientes dé 1 vuelta. Por lo tanto, la velocidad se reduce y el torque se incrementa en 1.8.
+
+Luego el piñón de 36 está fijado en el mismo eje con un piñón de 8 dientes.
+
+Este piñón de 8 engrana con uno de 24 dientes
+
+**Relación = 24/8 = 3**
+
+El piñón de 8 debe girar 3 veces para que el de 24 dé una vuelta. Esto significa que triplica el torque cuando esto ocurre.
+
+Ahora, el piñón de 24 está unido al piñón de 17 dientes, este piñón de 17 impulsa al último piñón de 40 dientes (eje final).
+
+**Relación = 40/17 = 2.35**
+
+El piñón de 17 dientes necesita dar 2.35 vueltas para que el de 40 dé una sola. Se reduce aún más la velocidad y se aumenta el torque.
+
+Como todo esto está conectado en serie (uno tras otro), las relaciones se multiplican entre sí para obtener la relación de reducción total:
+
+**Relación total = 1.8 x 3 x 2.35 = 12.69**
+
+Esto significa que por cada 12.69 vueltas del motor, el último piñón da tan solo una vuelta, aumentando el torque así mismo.
+
+Luego de esta reducción, el motor tiene una salida de 1576 RPM.
 
 Seguiremos explicando esta primera capa de nuestro robot. De componentes tiene un giroscopio ([BNO08X](../../electronic/components/current.md#gyroscope-gy-bno085)) que ayuda al robot a orientarse y así contar el número de vueltas que da, tiene una batería ([URGENEX 7.4 V](../../electronic/components/current.md#urgenex-7-4v-battery)) que alimenta al [INJORA MB100 20 A mini ESC](../../electronic/components/current.md#injora-mb100-20a-mini-esc) que es un regulador de velocidad y a su vez también alimenta el motor INJORA 48T y el servomotor INJORA 7 kg 2065.
 
