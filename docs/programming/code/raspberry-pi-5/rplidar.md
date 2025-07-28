@@ -1,3 +1,0 @@
-# RPLiDAR Module
-
-::: devices.raspberry_pi_5.src.rplidar

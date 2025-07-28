@@ -3,14 +3,14 @@ repo_url: https://github.com/teamsteelbot/klevor/
 repo_name: Klevor
 edit_uri: edit/main/docs/
 site_description: Klevor es la documentación oficial del equipo Steel Bot 
-    para la competencia de la World Robot Olympiad (WRO).
-site_author: Equipo Steel Bot
+    para la competencia de la World Robot Olympiad (WRO) de 2025.
+site_author: Team Steel Bot
+site_dir: site
 use_directory_urls: false
 theme:
     name: material
     logo: assets/images/logo/teamsteelbot.png
     favicon: assets/images/favicon/favicon.ico
-    language: es
     features:
         - header.autohide
         - navigation.footer
@@ -23,37 +23,38 @@ theme:
         # Palette toggle for automatic mode
         - media: "(prefers-color-scheme)"
           toggle:
-              icon:  material/brightness-auto
-              name: Switch to light mode
+              icon: material/brightness-auto
+              name: Cambiar al modo claro
 
         # Palette toggle for light mode
         - media: "(prefers-color-scheme: light)"
           scheme: default
           toggle:
               icon: material/brightness-7
-              name: Switch to dark mode
+              name: Cambiar al modo oscuro
 
         # Palette toggle for dark mode
         - media: "(prefers-color-scheme: dark)"
           scheme: slate
           toggle:
               icon: material/brightness-4
-              name: Switch to light mode
+              name: Cambiar al modo claro
 nav:
     - Inicio: index.md
-    - Nosotros: about.md
+    - Sobre Nosotros: about.md
+    - GitHub: github.md
     - Electrónica:
         - Componentes:
-            - Previos: electronic/components/previous.md
-            - Actuales: electronic/components/current.md
-            - Futuros: electronic/components/future.md
+            - Componentes Previos: electronic/components/previous.md
+            - Componentes Actuales: electronic/components/current.md
+            - Componentes Futuros: electronic/components/future.md
         - Diagramas:
             - Diagramas de Conexiones: electronic/diagrams/wiring.md
     - Mecánica:
         - Piezas:
             - Piezas Comunes:
-                - Actuales: mechanical/parts/common/current.md
-                - Previas: mechanical/parts/common/previous.md
+                - Piezas Comunes Previas: mechanical/parts/common/previous.md
+                - Piezas Comunes Actuales: mechanical/parts/common/current.md
             - Piezas del Prototipo 1: mechanical/parts/prototype1.md
             - Piezas del Prototipo 2: mechanical/parts/prototype2.md
             - Piezas del Prototipo 3: mechanical/parts/prototype3.md
@@ -65,8 +66,8 @@ nav:
     - Programación:
         - Lenguajes: programming/languages.md
         - Librerías:
-            - Python: programming/libraries/python.md
-            - CircuitPython: programming/libraries/circuit-python.md
+            - Librerías de Python: programming/libraries/python.md
+            - Librerías de CircuitPython: programming/libraries/circuit-python.md
         - Diagramas:
             - Diagramas de Flujo: programming/diagrams/flowcharts.md
         - Glosario de Términos: programming/glossary.md
@@ -75,31 +76,30 @@ nav:
             - Guía de WeasyPrint: programming/guides/weasyprint.md
             - Guía de CircuitPython: programming/guides/circuit-python.md
             - Guía de MicroPython: programming/guides/micro-python.md
-            - Guía de Raspberry Pi 5: programming/guides/raspberry-pi-5.md
-            - Guía de Raspberry Pi Pico 2W: programming/guides/raspberry-pi-pico-2w.md
+            - Guía de la Raspberry Pi 5: programming/guides/raspberry-pi-5.md
+            - Guía de la Raspberry Pi Pico 2W: programming/guides/raspberry-pi-pico-2w.md
             - Guía de Detección de Objetos: programming/guides/object-detection.md
         - Referencia del Código:
             - Raspberry Pi 5:
-                - Args: programming/code/raspberry-pi-5/args.md
-                - Camera: programming/code/raspberry-pi-5/camera.md
-                - Common: programming/code/raspberry-pi-5/common.md
-                - Files: programming/code/raspberry-pi-5/files.md
-                - Hailo: programming/code/raspberry-pi-5/hailo.md
-                - Log: programming/code/raspberry-pi-5/log.md
-                - Model: programming/code/raspberry-pi-5/model.md
-                - OpenCV: programming/code/raspberry-pi-5/opencv.md
-                - Pilot: programming/code/raspberry-pi-5/pilot.md
-                - Plot: programming/code/raspberry-pi-5/plot.md
-                - RPLiDAR: programming/code/raspberry-pi-5/rplidar.md
-                - Serial Communication: programming/code/raspberry-pi-5/serial-communication.md
-                - Server: programming/code/raspberry-pi-5/server.md
-                - Spawner: programming/code/raspberry-pi-5/spawner.md
-                - Utils: programming/code/raspberry-pi-5/utils.md
-                - YOLO: programming/code/raspberry-pi-5/yolo.md
+                - Módulo Args: programming/code/raspberry-pi-5/args.md
+                - Módulo Camera: programming/code/raspberry-pi-5/camera.md
+                - Módulo Common: programming/code/raspberry-pi-5/common.md
+                - Módulo Files: programming/code/raspberry-pi-5/files.md
+                - Módulo Hailo: programming/code/raspberry-pi-5/hailo.md
+                - Módulo Log: programming/code/raspberry-pi-5/log.md
+                - Módulo Model: programming/code/raspberry-pi-5/model.md
+                - Módulo OpenCV: programming/code/raspberry-pi-5/opencv.md
+                - Módulo Pilot: programming/code/raspberry-pi-5/pilot.md
+                - Módulo Plot: programming/code/raspberry-pi-5/plot.md
+                - Módulo RPLiDAR: programming/code/raspberry-pi-5/rplidar.md
+                - Módulo Serial Communication: programming/code/raspberry-pi-5/serial-communication.md
+                - Módulo Server: programming/code/raspberry-pi-5/server.md
+                - Módulo Spawner: programming/code/raspberry-pi-5/spawner.md
+                - Módulo Utils: programming/code/raspberry-pi-5/utils.md
+                - Módulo YOLO: programming/code/raspberry-pi-5/yolo.md
         - Raspberry Pi Pico 2W:
-            - Lib: programming/code/raspberry-pi-pico-2w/lib.md
-            - Code: programming/code/raspberry-pi-pico-2w/code.md
-    - GitHub: github.md
+            - Módulo Lib: programming/code/raspberry-pi-pico-2w/lib.md
+            - Código Principal: programming/code/raspberry-pi-pico-2w/code.md
     - Videos: videos.md
     - Software: software.md
     - Gadgets: gadgets.md
@@ -108,26 +108,33 @@ nav:
 extra_css:
     - stylesheets/extra.css
 extra:
+    alternate:
+        - name: English
+          link: /en/
+          lang: en
+        - name: Español
+          link: /es/
+          lang: es
     social:
         - icon: fontawesome/solid/print
           link: /downloads/teamsteelbot.pdf
-          name: Descargar PDF en su versión impresa
+          name: Descargar PDF
         - icon: fontawesome/brands/github
-          link: https://github.com/teamsteelbot/klevor
-          name: Equipo Steel Bot en GitHub
+          link: https://github.com/teamsteelbot
+          name: Team Steel Bot en GitHub
         - icon: fontawesome/brands/instagram
           link: https://instagram.com/teamsteelbotsa
-          name: Equipo Steel Bot en Instagram
+          name: Team Steel Bot en Instagram
         - icon: fontawesome/brands/telegram
           link: https://t.me/ralvarezdev
-          name: Telegram del Capitan del Equipo Steel Bot
+          name: Capitán del Team Steel Bot en Telegram
         - icon: fontawesome/solid/paper-plane
           link: mailto:<inquiries@ralvarez.dev>
-          name: Enviar un correo al Capitán del Equipo Steel Bot
+          name: Contáctanos por Email
 copyright:
-    Copyright &copy; 2025 Team Steel Bot. All rights reserved.
-    Special thanks for Viajes Giorgio, Nathaly's Star and Steel C.A. for 
-    sponsoring our team.
+    Copyright &copy; 2025 Team Steel Bot. Todos los derechos reservados.
+    Muchas gracias a Viajes Giorgio, Nathaly's Star y Steel C.A. por
+    patrocinar a nuestro equipo.
 markdown_extensions:
     - attr_list
     - admonition
@@ -148,3 +155,104 @@ plugins:
                     show_root_toc_entry: true
                     show_root_full_path: false
                     show_submodules: true
+    - i18n:
+        docs_structure: suffix
+        languages:
+            - locale: en
+              name: English
+              build: true
+              site_description: Klevor is the official documentation of the Team Steel Bot for the
+                  World Robot Olympiad (WRO) competition in 2025.
+              theme:
+                  palette:
+                      - media: "(prefers-color-scheme)"
+                        toggle:
+                            name: Switch to light mode
+
+                      - media: "(prefers-color-scheme: light)"
+                        toggle:
+                            name: Switch to dark mode
+
+                      - media: "(prefers-color-scheme: dark)"
+                        toggle:
+                            name: Switch to light mode
+              extra:
+                  social:
+                    - icon: fontawesome/solid/print
+                      name: Download PDF
+                    - icon: fontawesome/brands/github
+                      name: Team Steel Bot on GitHub
+                    - icon: fontawesome/brands/instagram
+                      name: Team Steel Bot on Instagram
+                    - icon: fontawesome/brands/telegram
+                      name: Team Steel Bot Captain on Telegram
+                    - icon: fontawesome/solid/paper-plane
+                      name: Contact Us via Email
+              copyright:
+                  Copyright &copy; 2025 Team Steel Bot. All rights reserved.
+                  Special thanks to Viajes Giorgio, Nathaly's Star and Steel C.A. for
+                  sponsoring our team.
+              nav_translations:
+                  Inicio: Home
+                  Sobre Nosotros: About Us
+                  Electrónica: Electronics
+                  Componentes: Components
+                  Componentes Previos: Previous Components
+                  Componentes Actuales: Current Components
+                  Componentes Futuros: Future Components
+                  Diagramas: Diagrams
+                  Diagramas de Conexiones: Wiring Diagrams
+                  Mecánica: Mechanics
+                  Piezas: Parts
+                  Piezas Comunes: Common Parts
+                  Piezas Comunes Previas: Previous Common Parts
+                  Piezas Comunes Actuales: Current Common Parts
+                  Piezas del Prototipo 1: Prototype 1 Parts
+                  Piezas del Prototipo 2: Prototype 2 Parts
+                  Piezas del Prototipo 3: Prototype 3 Parts
+                  Prototipos: Prototypes
+                  Prototipo 1: Prototype 1
+                  Prototipo 2: Prototype 2
+                  Prototipo 3: Prototype 3
+                  Prototipo 4: Prototype 4
+                  Programación: Programming
+                  Lenguajes: Languages
+                  Librerías: Libraries
+                  Librerías de Python: Python Libraries
+                  Librerías de CircuitPython: CircuitPython Libraries
+                  Diagramas de Flujo: Flowcharts
+                  Glosario de Términos: Glossary of Terms
+                  Guías: Guides
+                  Guía de MkDocs: MkDocs Guide
+                  Guía de WeasyPrint: WeasyPrint Guide
+                  Guía de CircuitPython: CircuitPython Guide
+                  Guía de MicroPython: MicroPython Guide
+                  Guía de Raspberry Pi 5: Raspberry Pi 5 Guide
+                  Guía de Raspberry Pi Pico 2W: Raspberry Pi Pico 2W Guide
+                  Guía de Detección de Objetos: Object Detection Guide
+                  Referencia del Código: Code Reference
+                  Módulo Args: Args Module
+                  Módulo Camera: Camera Module
+                  Módulo Common: Common Module
+                  Módulo Files: Files Module
+                  Módulo Hailo: Hailo Module
+                  Módulo Log: Log Module
+                  Módulo Model: Model Module
+                  Módulo OpenCV: OpenCV Module
+                  Módulo Pilot: Pilot Module
+                  Módulo Plot: Plot Module
+                  Módulo RPLiDAR: RPLiDAR Module
+                  Módulo Serial Communication: Serial Communication Module
+                  Módulo Server: Server Module
+                  Módulo Spawner: Spawner Module
+                  Módulo Utils: Utils Module
+                  Módulo YOLO: YOLO Module
+                  Módulo Lib: Lib Module
+                  Código Principal: Main Code
+                  Patrocinadores: Sponsors
+                  Contacto: Contact
+            - locale: es
+              name: Español
+              build: true
+              default: true
+

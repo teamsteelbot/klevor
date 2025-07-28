@@ -1,0 +1,3 @@
+# Hailo Module {:#hailo-module}
+
+::: devices.raspberry_pi_5.src.hailo
