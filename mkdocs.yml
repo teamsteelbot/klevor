@@ -97,9 +97,9 @@ nav:
                 - Módulo Spawner: programming/code/raspberry-pi-5/spawner.md
                 - Módulo Utils: programming/code/raspberry-pi-5/utils.md
                 - Módulo YOLO: programming/code/raspberry-pi-5/yolo.md
-        - Raspberry Pi Pico 2W:
-            - Módulo Lib: programming/code/raspberry-pi-pico-2w/lib.md
-            - Código Principal: programming/code/raspberry-pi-pico-2w/code.md
+            - Raspberry Pi Pico 2W:
+                - Módulo Lib: programming/code/raspberry-pi-pico-2w/lib.md
+                - Código Principal: programming/code/raspberry-pi-pico-2w/code.md
     - Videos: videos.md
     - Software: software.md
     - Gadgets: gadgets.md

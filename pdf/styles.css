@@ -1,11 +1,12 @@
 :root {
     --font-family--sans-serif: 'Fira Sans';
     --font-family--monospace: 'Fira Code';
-    --font-color--h1: #fff;
+    --font-color--h1--section: #fff;
     --font-color--h2: #495057;
     --font-color--h3: #343a40;
     --font-color--body: #212529;
-    --font-size--h1: 36pt;
+    --font-size--h1--section: 64pt;
+    --font-size--h1--subsection: 24pt;
     --font-size--h2: 18pt;
     --font-size--h3: 14pt;
     --font-size--text--sans-serif: 12pt;
