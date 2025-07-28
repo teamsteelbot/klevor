@@ -4,6 +4,6 @@ Como equipo, estamos abiertos a cualquier sugerencia en cada uno de los aspectos
 
 - **Instagram del Equipo**: [@teamsteelbot](https://www.instagram.com/teamsteelbotsa/)
 - **Telegram del Capitán del Equipo**: [@ralvarezdev](https://t.me/ralvarezdev)
-- **Correo del Capitán del Equipo**: ralvarezdev@protonmail.com
+- **Correo del Capitán del Equipo**: [inquiries@ralvarez.dev](mailto:inquiries@ralvarez.dev)
 
 Recuerda que puedes acceder al repositorio a través del siguiente enlace: [GitHub](https://github.com/teamsteelbot/klevor). Si presentas algún error con respecto al código, te invitamos a que lo reportes en nuestro repositorio de GitHub, en la sección de [Issues](https://github.com/teamsteelbot/klevor/issues).
