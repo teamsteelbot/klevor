@@ -49,7 +49,7 @@ Redujimos significativamente el tamaño de esta capa, ajustándola a los compone
 
 ## Segunda Capa {:#second-layer}
 
-Se puede apreciar con claridad el drástico cambio que tuvo la parte superior de Klevor, donde reemplazamos la capa anterior por un soporte nuevo, hecho específicamente para que se acople la Shargeek Storm 2, sobre esta misma base, y encima de este power bank, se colocó estratégicamente la [Raspberry Pi 5](../../electronic/components/current.es.md#raspberry-pi-5).
+Se puede apreciar con claridad el drástico cambio que tuvo la parte superior de Klevor, donde reemplazamos la capa anterior por un soporte nuevo, hecho específicamente para que se acople la [Shargeek Storm 2](../../electronic/components/current.es.md#shargeek-storm-2), sobre esta misma base, y encima de este power bank, se colocó estratégicamente la [Raspberry Pi 5](../../electronic/components/current.es.md#raspberry-pi-5).
 
 Adicionalmente, aprovechamos la estructura y ubicación del
 [RPLidar C1](../../electronic/components/current.es.md#rplidar-c1) para usarlo de soporte sin interferir en su función, al este estar colocado al revés, nos permite colocar en la parte superior la [Raspberry Pi Pico 2 WH](../../electronic/components/current.es.md#raspberry-pi-pico-2-wh), y en la parte posterior de este la [Raspberry Camera Module 3 Wide](../../electronic/components/current.es.md#raspberry-pi-camera-module-3-wide).

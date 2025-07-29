@@ -68,7 +68,7 @@ A continuación, explicaremos a detalle cómo funciona este sistema motriz. Para
 	</div>
 </div>
 
- Este sistema cuenta con el ya antes mencionado, Motor INJORA 48T, con una velocidad de 20000 RPM con un piñón de 20 dientes instalado en su boquilla. Además de los piñones cuyos diseños 2D están adjuntos, que constan de 36, 8, 24, 17 y 40 dientes; todos provenientes de kits de LEGO.
+ Este sistema cuenta con el ya antes mencionado, motor [INJORA 48T](../../electronic/components/current.es.md#injora-180-motor-48t), con una velocidad de 20000 RPM con un piñón de 20 dientes instalado en su boquilla. Además de los piñones cuyos diseños 2D están adjuntos, que constan de 36, 8, 24, 17 y 40 dientes; todos provenientes de kits de LEGO.
 
  El sistema funciona en varias etapas, en las que cada conjunto de piñones va reduciendo la velocidad de rotación y aumentando el torque.
 
@@ -84,11 +84,11 @@ El piñón de 17 dientes impulsa un piñón de 40 dientes, que está siendo atra
 
 A continuación, explicaremos algunas reglas importantes que hay que tener en cuenta:
 
-**Cuando un piñón más pequeño (impulsor) mueve uno más grande (impulsado), la velocidad disminuye y el torque aumenta.**
+- Cuando un piñón más pequeño (impulsor) mueve uno más grande (impulsado), **la velocidad disminuye y el torque aumenta.**
 
-**Cuando uno más grande mueve a uno más pequeño, la velocidad aumenta y el torque disminuye.**
+- Cuando uno más grande mueve a uno más pequeño, **la velocidad aumenta y el torque disminuye.**
 
-**La relación de transmisión o relación de reducción se calcula con la siguiente fórmula:**
+La relación de transmisión o relación de reducción se calcula con la siguiente fórmula:
 
 <div class="hcenter">
 	<img src="/assets/images/mechanical/gear-ratio-formula.png" alt="Fórmula de relación de transmisión" class="mechanical-image">
@@ -125,11 +125,11 @@ Como todo esto está conectado en serie (uno tras otro), las relaciones se multi
 
 Esto significa que por cada 12.69 vueltas del motor, el último piñón da tan solo una vuelta, aumentando el torque así mismo.
 
-Luego de esta reducción, el motor tiene una salida de 1576 RPM.
+Luego de esta reducción, el motor tiene una salida de 1576 RPM. Sin embargo, cabe destacar que también se reduce la velocidad de las ruedas, porque también hay reducciones por el engranaje del eje transmisor y por los diferenciales.
 
 La otra parte fundamental para nuestro robot es su sistema de cruce, que consta de un servomotor ([INJORA 7 kg 2065](../../electronic/components/current.es.md#injora-7kg-2065-micro-servo)) conectado a nuestro sistema "Ackermann" que funciona conectando ambas ruedas delanteras a una dirección o "sistema de trapecio". El servomotor mueve unas barras que a su vez están conectados a unos muñones de dirección que están en las ruedas, permitiendo así que, uno de los muñones de dirección anteriormente mencionados, sea empujado hacia un lado por el movimiento del servomotor y a su vez, tire de la otra rueda hacia el lado opuesto. Debido a los ángulos del trapecio, esto provoca que la rueda interior gire más que la exterior.
 
-Algunos componentes que también están en esta capa son el giroscopio ([BNO08X](../../electronic/components/current.es.md#gyroscope-gy-bno085)) y una batería de 7.4 V y 3000 mAh ([URGENEX 7.4 V](../../electronic/components/current.es.md#urgenex-7-4v-battery)), y los ya mencionados INJORA 48T (motor) y el servomotor INJORA 7 kg 2065.
+Algunos componentes que también están en esta capa son el giroscopio ([BNO08X](../../electronic/components/current.es.md#gyroscope-gy-bno085)) y una batería de 7.4 V y 3000 mAh ([URGENEX 7.4 V](../../electronic/components/current.es.md#urgenex-7-4v-battery)), y los ya mencionados, motor [INJORA 48T](../../electronic/components/current.es.md#injora-180-motor-48t) y el servomotor [INJORA 7 kg 2065](../../electronic/components/current.es.md#injora-7kg-2065-micro-servo).
 
 ### ¿Por qué diseñamos de esta manera la primera capa de nuestro robot? {:#why-first-layer}
 
@@ -174,7 +174,7 @@ A futuro queremos colocar un [RPLidar C1](../../electronic/components/current.es
 
 La parte de la alimentación cuenta con un power bank por el cual los componentes de la capa superior reciben electricidad.
 
-Nuestra segunda capa también fue diseñada en 3D para que el power bank pudiera tener un espacio hecho a su medida en el medio, por otro lado, los sensores ToF tienen un soporte también diseñado e impreso por nosotros. ¡Están justo a su medida!
+Nuestra segunda capa también fue diseñada en 3D para que el power bank pudiera tener un espacio hecho a su medida en el medio, por otro lado, los [sensores ToF](../../electronic/components/previous.es.md#sensor-tof-hiletgo) tienen un soporte también diseñado e impreso por nosotros. ¡Están justo a su medida!
 
 ## Tercera Capa {:#third-layer}
 
@@ -208,7 +208,7 @@ alt="Tercera capa, vista superior" class="vehicle-view-image">
 
 La tercera capa de Klevor cuenta con todas las partes que contienen su programación y control, tales son la [Raspberry Pi 5](../../electronic/components/current.es.md#raspberry-pi-5) y la [Raspberry Pi Pico 2 WH](../../electronic/components/current.es.md#raspberry-pi-pico-2-wh), la Raspberry Pi 5 está conectada por USB-C a la PowerBank que se encuentra en la segunda capa; esta se encargará de darle directrices a nuestra [Raspberry Camera Module 3 Wide](../../electronic/components/current.es.md#raspberry-pi-camera-module-3-wide), que funciona más eficientemente gracias a una AI Hat+ que funciona detectando las formas y colores de los obstáculos en pista. Se encuentra en la parte posterior del robot en un soporte que también fue diseñado e impreso por nosotros.
 
-Nuestra antes mencionada Raspberry Pi Pico 2 se encarga de darle órdenes a los sensores ToF ubicados en la segunda capa, además de también estar comunicada con nuestro giroscopio; el motor INJORA 48T y el servomotor INJORA 7 kg 2065, todos ubicados en la primera capa. Esta es alimentada mediante la batería de 7.4 V y 3000 mAh (ubicada también en la primera capa). La Raspberry Pi Pico 2 soporta hasta 5.5 V, es decir, no soporta estos 7.4 voltios, razón por la que pusimos un "StepDown", un componente que se encarga de reducir el voltaje, evitando que nuestra Raspberry Pi Pico 2 sufra consecuencias por el sobre voltaje. Tanto nuestra Raspberry Pi 5 y nuestra Raspberry Pi Pico 2 están conectados entre sí por un cable de tipo USB-C.
+Nuestra antes mencionada [Raspberry Pi Pico 2 WH](../../electronic/components/current.es.md#raspberry-pi-pico-2-wh) se encarga de darle órdenes a los [sensores ToF](../../electronic/components/previous.es.md#sensor-tof-hiletgo) ubicados en la segunda capa, además de también estar comunicada con nuestro [giroscopio](../../electronic/components/current.es.md#gyroscope-gy-bno085); el [INJORA 48T](../../electronic/components/current.es.md#injora-180-motor-48t) y el servomotor [INJORA 7 kg 2065](../../electronic/components/current.es.md#injora-7kg-2065-micro-servo), todos ubicados en la primera capa. Esta es alimentada mediante la batería de 7.4 V y 3000 mAh (ubicada también en la primera capa). La [Raspberry Pi Pico 2 WH](../../electronic/components/current.es.md#raspberry-pi-pico-2-wh) soporta hasta 5.5 V, es decir, no soporta estos 7.4 voltios, razón por la que pusimos un "StepDown", un componente que se encarga de reducir el voltaje, evitando que nuestra [Raspberry Pi Pico 2 WH](../../electronic/components/current.es.md#raspberry-pi-pico-2-wh) sufra consecuencias por el sobre voltaje. Tanto nuestra [Raspberry Pi 5](../../electronic/components/current.es.md#raspberry-pi-5) y nuestra [Raspberry Pi Pico 2 WH](../../electronic/components/current.es.md#raspberry-pi-pico-2-wh) están conectados entre sí por un cable de tipo USB-C.
 
 Esta parte superior también la diseñamos e imprimimos, principalmente recortando espacios por el peso y haciendo un soporte para nuestra cámara que mediante 2 tornillos permite que la cámara gire su ángulo de inclinación, esto lo hicimos para probar en que inclinación quedaba mejor esta cámara y así no tener errores más adelante.
 
