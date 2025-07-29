@@ -9,8 +9,8 @@ class Measure:
 	MM_UNIT = 'mm'
 	PT_UNIT = 'pt'
 
-	@staticmethod
-	def is_valid_unit(unit: str) -> bool:
+	@classmethod
+	def is_valid_unit(cls, unit: str) -> bool:
 		"""
 		Checks if the provided unit is a valid measurement unit.
 
@@ -20,7 +20,7 @@ class Measure:
 		Returns:
 			bool: True if the unit is valid, False otherwise.
 		"""
-		return unit in {Measure.INCH_UNIT, Measure.CM_UNIT, Measure.MM_UNIT, Measure.PT_UNIT}
+		return unit in {cls.INCH_UNIT, cls.CM_UNIT, cls.MM_UNIT, cls.PT_UNIT}
 
 	@staticmethod
 	def parse_style_measure(
@@ -39,8 +39,8 @@ class Measure:
 		unit = style[-2:]  # Get the last two characters as the unit
 		return Measure(value, unit)
 
-	@staticmethod
-	def convert(value: float, from_unit: str, to_unit: str) -> float:
+	@classmethod
+	def convert(cls, value: float, from_unit: str, to_unit: str) -> float:
 		"""
 		Converts a value from one unit to another.
 
@@ -52,41 +52,41 @@ class Measure:
 		Returns:
 			float: The converted value in the target unit.
 		"""
-		if not Measure.is_valid_unit(from_unit) or not Measure.is_valid_unit(to_unit):
-			raise ValueError(f"Invalid units: {from_unit}, {to_unit}. Valid units are: {Measure.INCH_UNIT}, {Measure.CM_UNIT}, {Measure.MM_UNIT}, {Measure.PT_UNIT}.")
+		if not cls.is_valid_unit(from_unit) or not cls.is_valid_unit(to_unit):
+			raise ValueError(f"Invalid units: {from_unit}, {to_unit}. Valid units are: {cls.INCH_UNIT}, {cls.CM_UNIT}, {cls.MM_UNIT}, {cls.PT_UNIT}.")
 
 		# Check if the conversion is necessary
 		if from_unit == to_unit:
 			return value
 
 		# Conversion factors for each unit
-		if from_unit == Measure.INCH_UNIT:
-			if to_unit == Measure.CM_UNIT:
+		if from_unit == cls.INCH_UNIT:
+			if to_unit == cls.CM_UNIT:
 				return value * 2.54
-			if to_unit == Measure.MM_UNIT:
+			if to_unit == cls.MM_UNIT:
 				return value * 25.4
-			if to_unit == Measure.PT_UNIT:
+			if to_unit == cls.PT_UNIT:
 				return value * 72.0
-		elif from_unit == Measure.CM_UNIT:
-			if to_unit == Measure.INCH_UNIT:
+		elif from_unit == cls.CM_UNIT:
+			if to_unit == cls.INCH_UNIT:
 				return value / 2.54
-			if to_unit == Measure.MM_UNIT:
+			if to_unit == cls.MM_UNIT:
 				return value * 10.0
-			if to_unit == Measure.PT_UNIT:
+			if to_unit == cls.PT_UNIT:
 				return value * 72.0 / 2.54
-		elif from_unit == Measure.MM_UNIT:
-			if to_unit == Measure.INCH_UNIT:
+		elif from_unit == cls.MM_UNIT:
+			if to_unit == cls.INCH_UNIT:
 				return value / 25.4
-			if to_unit == Measure.CM_UNIT:
+			if to_unit == cls.CM_UNIT:
 				return value / 10.0
-			if to_unit == Measure.PT_UNIT:
+			if to_unit == cls.PT_UNIT:
 				return value * 72.0 / 25.4
-		elif from_unit == Measure.PT_UNIT:
-			if to_unit == Measure.INCH_UNIT:
+		elif from_unit == cls.PT_UNIT:
+			if to_unit == cls.INCH_UNIT:
 				return value / 72.0
-			if to_unit == Measure.CM_UNIT:
+			if to_unit == cls.CM_UNIT:
 				return value * 2.54 / 72.0
-			if to_unit == Measure.MM_UNIT:
+			if to_unit == cls.MM_UNIT:
 				return value * 25.4 / 72.0
 
 		raise ValueError(f"Conversion from {from_unit} to {to_unit} is not supported.")
@@ -101,8 +101,8 @@ class Measure:
 			unit (str): The unit of the measure.
 		"""
 		# Check if the unit is valid
-		if not Measure.is_valid_unit(unit):
-			raise ValueError(f"Invalid unit: {unit}. Valid units are: {Measure.INCH_UNIT}, {Measure.CM_UNIT}, {Measure.MM_UNIT}, {Measure.PT_UNIT}.")
+		if not self.is_valid_unit(unit):
+			raise ValueError(f"Invalid unit: {unit}. Valid units are: {self.INCH_UNIT}, {self.CM_UNIT}, {self.MM_UNIT}, {self.PT_UNIT}.")
 
 		self.value = value
 		self.unit = unit
@@ -132,6 +132,19 @@ class Measure:
 		"""
 		return Measure(self.value * factor, self.unit)
 
+	def __truediv__(self, divisor: float) -> 'Measure':
+		"""
+		Divides the measure by a divisor.
+
+		Args:
+			divisor (float): The divisor to divide the measure by.
+		Returns:
+			Measure: A new Measure instance with the divided value.
+		"""
+		if divisor == 0:
+			raise ValueError("Division by zero is not allowed.")
+		return Measure(self.value / divisor, self.unit)
+
 	def to_unit(self, target_unit: str) -> 'Measure':
 		"""
 		Converts the measure to a specified unit.
@@ -142,8 +155,8 @@ class Measure:
 		Returns:
 			Measure: A new Measure instance with the converted value and target unit.
 		"""
-		if not Measure.is_valid_unit(target_unit):
-			raise ValueError(f"Invalid target unit: {target_unit}. Valid units are: {Measure.INCH_UNIT}, {Measure.CM_UNIT}, {Measure.MM_UNIT}, {Measure.PT_UNIT}.")
+		if not self.is_valid_unit(target_unit):
+			raise ValueError(f"Invalid target unit: {target_unit}. Valid units are: {self.INCH_UNIT}, {self.CM_UNIT}, {self.MM_UNIT}, {self.PT_UNIT}.")
 
 		converted_value = Measure.convert(self.value, self.unit, target_unit)
 		return Measure(converted_value, target_unit)

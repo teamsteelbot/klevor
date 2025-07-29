@@ -1,4 +1,6 @@
 import os
+from uuid import uuid4
+from typing import Callable
 
 from bs4 import BeautifulSoup, Tag
 from weasyprint import HTML, CSS
@@ -32,15 +34,35 @@ class PDF:
 	# Team logo image height
 	TEAM_LOGO_HEIGHT = Measure(60, Measure.MM_UNIT)
 
-	def __init__(self, styles_inst: Styles):
+	@staticmethod
+	def normalize_images_src(soup, normpath_fn: Callable[[str], str]):
+		"""
+		Normalizes the src attributes of <img> tags in the BeautifulSoup object.
+
+		Args:
+			soup (BeautifulSoup): The BeautifulSoup object containing HTML content.
+			normpath_fn (Callable[[str], str]): A function to normalize the image paths.
+		"""
+		# Iterate over all <img> tags to convert relative paths
+		images = soup.find_all('img')
+		for img in images:
+			img_src = img.get('src')
+			if img_src and not img_src.startswith(('http://', 'https://')):
+				# Convert relative image paths
+				img_src = normpath_fn(img_src)
+				img['src'] = img_src
+
+	def __init__(self, styles_inst: Styles, base_url: str = PDF_BASE_URL):
 		"""
 		Initializes the PDF class with the given styles.
 
 		Args:
 			styles_inst (Styles): An instance of the Styles class containing CSS styles.
+			base_url (str): The base URL for the HTML content.
 		"""
-		# Store the styles instance
+		# Store the styles instance and base URL
 		self.__styles = styles_inst
+		self.__base_url = base_url
 
 		# Initialize any necessary attributes or configurations here
 		self.__soup = BeautifulSoup('', 'html.parser')
@@ -53,6 +75,42 @@ class PDF:
 		# Append BeautifulSoup tags
 		self.__soup.append(self.__html_tag)
 		self.__html_tag.append(self.__html_body_tag)
+
+		# Initialize a map for runtime ID
+		self.__runtime_ids = {}
+
+	def normalize_headers_id(self, soup: BeautifulSoup, relative_file_path: str):
+		"""
+		Normalizes the ID attributes of header tags in the BeautifulSoup object.
+
+		Args:
+			soup (BeautifulSoup): The BeautifulSoup object containing HTML content.
+			relative_file_path (str): The path to the Markdown file being processed relative to the base URL.
+		"""
+		# Iterate over all <h1> to <h6> tags to remove the ID from the header text
+		headers = soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
+		for header in headers:
+			header_text = header.get_text()
+			for prefix in ['{:#', '{#']:
+				if prefix not in header_text:
+					continue
+
+				# Remove the ID from the header text
+				header_split = header_text.split(prefix)
+				header_text = header_split[0]
+				header_id = header_split[1]
+				header.string = header_text.strip()
+
+				# Normalize the header ID and check if it's on the runtime IDs map
+				header_id = header_id.strip('}').strip()
+				header_relative_path_id = f'{relative_file_path}#{header_id}'
+				if header_relative_path_id not in self.__runtime_ids:
+					# If the ID is not in the map, generate a new ID
+					new_id = uuid4()
+					self.__runtime_ids[header_relative_path_id] = new_id
+
+				# Set the ID attribute of the header tag
+				header.id = self.__runtime_ids[header_relative_path_id]
 
 	def div_with_page_selector(
 			self,
@@ -106,21 +164,25 @@ class PDF:
 			alt='Team SteelBot Logo'
 			)
 
-	def title(self, text: str) -> Tag:
+	def section_title(self, text: str) -> Tag:
 		"""
-		Generates a title tag for the PDF document.
+		Generates a title tag for a section in the PDF document.
 
 		Args:
-			text (str): The title text to display in the PDF document.
+			text (str): The title text for the section.
 		Returns:
 			Tag: A BeautifulSoup Tag object representing the title.
 		"""
 		h1_tag = self.__soup.new_tag(
 			'h1',
 			style=join_styles({
-				'font-size': self.__styles.font_size_h1,
-				'height': self.__styles.font_size_h1,
-				'color': self.__styles.font_color_h1
+				'font-family': self.__styles.font_family_monospace,
+				'font-size': self.__styles.font_size_h1_section,
+				'height': self.__styles.font_size_h1_section,
+				'line-height': 1,
+				'color': self.__styles.font_color_h1_section,
+				'justify-content': 'center',
+				'text-transform': 'uppercase',
 				})
 			)
 		h1_tag.string = text
@@ -129,39 +191,51 @@ class PDF:
 	def center_tag(
 			self,
 			tag: Tag,
-			) -> Tag:
+			center_vertically: bool = True,
+			center_horizontally: bool = True,
+		) -> Tag:
 		"""
 		Centers a BeautifulSoup Tag within a div.
 
 		Args:
 			tag (Tag): The BeautifulSoup Tag to center.
+			center_vertically (bool): Whether to center the tag vertically.
+			center_horizontally (bool): Whether to center the tag horizontally.
 		Returns:
 			Tag: A BeautifulSoup Tag object representing the centered div.
 		"""
-		# Extract the style attribute from the tag
-		tag_style = tag.get('style')
-		if tag_style is None:
-			raise ValueError("Tag does not have a style attribute with height defined.")
+		# Initialize center styles map
+		center_styles = {}
 
-		# Extract the height from the tag's style
-		tag_style = Styles.parse_style_as_dict(tag_style)
-		tag_height = tag_style.get('height')
-		if tag_height is None:
-			raise ValueError("Tag does not have a height defined in its style.")
+		if center_vertically:
+			# Extract the style attribute from the tag
+			tag_style = tag.get('style')
+			if tag_style is None:
+				raise ValueError("Tag does not have a style attribute with height defined.")
 
-		# Parse as a Measure object
-		tag_height = Measure.parse_style_measure(tag_height)
+			# Extract the height from the tag's style
+			tag_style = Styles.parse_style_as_dict(tag_style)
+			tag_height = tag_style.get('height')
+			if tag_height is None:
+				raise ValueError("Tag does not have a height defined in its style.")
 
-		# Calculate the margin top to center the tag
-		margin_top = (
-			self.__styles.page_height - 2 * self.__styles.page_margin - tag_height
-		).value / 2
+			# Parse as a Measure object
+			tag_height = Measure.parse_style_measure(tag_height)
+
+			# Calculate the margin top to center the tag
+			margin_top = (
+				self.__styles.page_height / 2 - self.__styles.page_margin - tag_height / 2
+			) / 2
+
+			# Add the margin top to the center styles
+			center_styles['style'] = f'margin-top: {str(margin_top)}'
+
+		if center_horizontally:
+			# Add horizontal centering class
+			center_styles['class'] = self.__styles.HCENTER_CLASS
 
 		# Create a div with the horizontally centered class
-		hcenter_div = self.__soup.new_tag('div', **{
-			'class': self.__styles.HCENTER_CLASS,
-			'style': f'margin-top: {margin_top}{tag_height.unit};'
-			})
+		hcenter_div = self.__soup.new_tag('div', **center_styles)
 		hcenter_div.append(tag)
 		return hcenter_div
 
@@ -196,13 +270,12 @@ class PDF:
 			center_tag
 		)
 		custom_styles = self.__styles.first_page()
-		self.add_tag(first_page_tag, custom_styles)
+		self.add_tag(first_page_tag, custom_styles, False)
 
 	def add_section_page(
 			self,
 			tag: Tag,
 			top_right_content: str = '',
-			break_page: bool = True
 		):
 		"""
 		Adds a section page to the PDF document with a custom HTML content.
@@ -210,7 +283,6 @@ class PDF:
 		Args:
 			tag (Tag): The BeautifulSoup Tag to add to the section page.
 			top_right_content (str): Custom CSS styles to apply.
-			break_page (bool): Whether to insert a page break after the content.
 		"""
 		self.__section_counter += 1
 		page_selector = f'section-{self.__section_counter}'
@@ -220,13 +292,12 @@ class PDF:
 			page_selector=page_selector,
 			top_right_content=top_right_content,
 			)
-		self.add_tag(section_tag, custom_styles, break_page)
+		self.add_tag(section_tag, custom_styles, False)
 
 	def add_section_body(
 			self,
 			tag: Tag,
 			top_right_content: str = '',
-			break_page: bool = True
 		):
 		"""
 		Adds a section body to the PDF document with a custom HTML content.
@@ -234,7 +305,6 @@ class PDF:
 		Args:
 			tag (Tag): The BeautifulSoup Tag to add to the section body.
 			top_right_content (str): Custom CSS styles to apply.
-			break_page (bool): Whether to insert a break after the content.
 		"""
 		page_selector = f'section-{self.__section_counter}-body'
 		section_body_tag = self.div_with_page_selector(page_selector, tag)
@@ -242,12 +312,11 @@ class PDF:
 			page_selector=page_selector,
 			top_right_content=top_right_content,
 			)
-		self.add_tag(section_body_tag, custom_styles, break_page)
+		self.add_tag(section_body_tag, custom_styles, False)
 
 
 	def save(
 			self,
-			base_url: str = PDF_BASE_URL,
 			output_file: str = PDF_OUTPUT_FILE,
 			optimize_images: bool = True,
 			dpi: int = PDF_DPI
@@ -256,7 +325,6 @@ class PDF:
 		Saves the PDF document to the specified output file.
 
 		Args:
-			base_url (str): The base URL for the HTML content.
 			output_file (str): The path to the output PDF file.
 			optimize_images (bool): Whether to optimize images in the PDF.
 			dpi (int): The DPI for the PDF output.
@@ -270,7 +338,7 @@ class PDF:
 		print(f'Saving PDF to {output_file}...')
 		HTML(
 			string=str(self.__html_tag),
-			base_url=base_url
+			base_url=self.__base_url
 		).write_pdf(
 			output_file,
 			stylesheets=[

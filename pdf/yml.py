@@ -22,6 +22,29 @@ class MarkdownFile:
 	parent_dir: Optional['DocumentationSection'] = None
 	number: int = 0
 
+	def is_top_level(self):
+		return self.parent_dir is None
+
+	def is_first_from_section(self):
+		"""
+		Check if this Markdown file is the first file in its section.
+
+		Returns:
+			bool: True if this is the first file in its section, False otherwise.
+		"""
+		return self.is_top_level() or (self.number == 1 and self.parent_dir.is_first_from_section())
+
+	def get_section_name(self) -> str:
+		"""
+		Get the name of the section, including its parent directories.
+
+		Returns:
+			str: The full name of the section.
+		"""
+		if self.parent_dir is None:
+			return self.name
+		return self.parent_dir.get_section_name()
+
 @dataclasses.dataclass
 class DocumentationSection:
 	"""
@@ -31,6 +54,26 @@ class DocumentationSection:
 	parent_dir: Optional['DocumentationSection'] = None
 	depth: int = 0
 	number: int = 0
+
+	def is_first_from_section(self):
+		"""
+		Check if this section is the first section in its parent directory.
+
+		Returns:
+			bool: True if this is the first section in its parent directory, False otherwise.
+		"""
+		return self.depth == 1 or (self.number == 1 and self.parent_dir.is_first_from_section())
+
+	def get_section_name(self) -> str:
+		"""
+		Get the name of the section, including its parent directories.
+
+		Returns:
+			str: The full name of the section.
+		"""
+		if self.parent_dir is None:
+			return self.name
+		return self.parent_dir.get_section_name()
 
 class YAML:
 	"""
@@ -106,6 +149,8 @@ class YAML:
 					continue
 
 				# Initialize a MarkdownFile object for the Markdown file
+				if idx == 0 and documentation_section is None:
+					key = 'Índice'
 				md_file = MarkdownFile(
 					name=key,
 					path=value,
@@ -130,7 +175,6 @@ class YAML:
 
 		# Extract Markdown file paths from the navigation structure
 		return YAML.extract_md_paths_from_mkdocs_nav(config.get('nav', []))
-
 
 
 if __name__ == '__main__':

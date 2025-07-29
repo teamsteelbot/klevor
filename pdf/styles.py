@@ -12,8 +12,8 @@ class Styles:
 
 	# Custom styles
 	ROOT_CLASS = ':root'
-	FONT_SIZE_H1 = '--font-size--h1'
-	FONT_COLOR_H1 = '--font-color--h1'
+	FONT_SIZE_H1_SECTION = '--font-size--h1--section'
+	FONT_COLOR_H1_SECTION = '--font-color--h1--section'
 	FONT_FAMILY_SANS_SERIF = '--font-family--sans-serif'
 	FONT_FAMILY_MONOSPACE = '--font-family--monospace'
 	PAGE_BACKGROUND_COLOR_FIRST_PAGE = '--page-background-color--first-page'
@@ -81,7 +81,7 @@ class Styles:
 				name = name.strip()
 
 				# Store the class name and its styles
-				self.__classes[name] = Styles.parse_style_as_dict(styles)
+				self.__classes[name] = self.parse_style_as_dict(styles)
 
 		# Check if the required selectors are present
 		for selector in [
@@ -100,8 +100,8 @@ class Styles:
 
 		# Check if the required styles are present in the root class styles
 		for style in [
-			self.FONT_SIZE_H1,
-			self.FONT_COLOR_H1,
+			self.FONT_SIZE_H1_SECTION,
+			self.FONT_COLOR_H1_SECTION,
 			self.FONT_FAMILY_SANS_SERIF,
 			self.FONT_FAMILY_MONOSPACE,
 			self.PAGE_BACKGROUND_COLOR_FIRST_PAGE,
@@ -115,8 +115,12 @@ class Styles:
 					)
 
 		# Initialize the styles
-		self.__font_size_h1 = self.__root_class_styles.get(self.FONT_SIZE_H1)
-		self.__font_color_h1 = self.__root_class_styles.get(self.FONT_COLOR_H1)
+		self.__font_size_h1_section = self.__root_class_styles.get(
+			self.FONT_SIZE_H1_SECTION
+			)
+		self.__font_color_h1_section = self.__root_class_styles.get(
+			self.FONT_COLOR_H1_SECTION
+			)
 		self.__font_family_sans_serif = self.__root_class_styles.get(
 			self.FONT_FAMILY_SANS_SERIF,
 			)
@@ -155,8 +159,8 @@ class Styles:
 			background_repeat: str = 'no-repeat',
 			background_position: str = 'center center',
 			background_size: str = 'auto',
-			top_right_content: str = 'none',
-			bottom_center_content: str = 'none',
+			top_right_content: str = '',
+			bottom_center_content: str = '',
 			) -> str:
 		"""
 	    Generates CSS for a specific page of a PDF document with a specified background.
@@ -193,7 +197,7 @@ class Styles:
 	        {join_styles(attr)}
 	        
 	        @top-right {{
-	            content: {f'"{top_right_content}"' if top_right_content != 'none' else 'none'}
+	            content: {f'"{top_right_content}"' if top_right_content else 'none'};
 	        }}
 	        	
 	        @bottom-center {{
@@ -229,6 +233,9 @@ class Styles:
 			page_selector=page_selector,
 			background_color=self.__page_background_color_section_page,
 			top_right_content=top_right_content,
+			bottom_center_content='none',
+			#top_right_background_color=self.__page_background_color_section_page,
+			#top_right_color=self.__font_color_h1_section,
 			)
 
 	def section_body(
@@ -246,6 +253,8 @@ class Styles:
 		return self.page(
 			page_selector=page_selector,
 			top_right_content=top_right_content,
+			#top_right_background_color=self.__page_background_color_section_page,
+			#top_right_color=self.__font_color_h1_section,
 			)
 
 	@property
@@ -256,18 +265,18 @@ class Styles:
 		return self.__stylesheet_file
 
 	@property
-	def font_size_h1(self) -> str:
+	def font_size_h1_section(self) -> str:
 		"""
-		Returns the font size for H1 headers.
+		Returns the font size for H1 headers in sections.
 		"""
-		return self.__font_size_h1
+		return self.__font_size_h1_section
 
 	@property
-	def font_color_h1(self) -> str:
+	def font_color_h1_section(self) -> str:
 		"""
-		Returns the font color for H1 headers.
+		Returns the font color for H1 headers in sections.
 		"""
-		return self.__font_color_h1
+		return self.__font_color_h1_section
 
 	@property
 	def font_family_sans_serif(self) -> str:

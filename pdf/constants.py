@@ -23,4 +23,8 @@ OMITTED_DIRECTORIES = [
 	]
 OMITTED_PAGES = [
 	'sponsors.md',
+	'videos.md'
 	]
+
+# Main index MarkDown file
+MAIN_INDEX_DB = 'index.md'
