@@ -10,6 +10,12 @@ Bienvenidos al repositorio de Klevor, el robot del Team Steel Bot, que compite e
 
 Actualmente, toda la documentación oficial se encuentra [aquí](https://klevor.ralvarez.dev), en GitHub Pages, donde podrás acceder a toda la documentación presente en este repositorio en un formato web fácil y rápido. Esta documentación está organizada en varias secciones, cada una de las cuales contiene información específica sobre el robot y su desarrollo.
 
+<p align="center">
+	<img src="assets/images/qr/page-url--dark.svg" alt="Código QR de la URL de la página web" width="200">
+	<br>
+	<i>Código QR de la URL de la página web</i>
+</p>
+
 ![Peview de la documentación en GitHub Pages](assets/videos/documentation-preview.gif)
 
 > [!IMPORTANT]
