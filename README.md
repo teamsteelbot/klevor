@@ -16,7 +16,11 @@ Actualmente, toda la documentación oficial se encuentra [aquí](https://klevor.
 	<i>Código QR de la URL de la página web</i>
 </p>
 
-![Peview de la documentación en GitHub Pages](assets/videos/documentation-preview.gif)
+<p align="center">
+	<img src="assets/videos/documentation-preview.gif" alt="Peview de la documentación en GitHub Pages" width="500">
+	<br>
+	<i>Peview de la documentación en GitHub Pages</i>
+</p>
 
 > [!IMPORTANT]
 > Si te gusta leer la documentación en un formato más tradicional, puedes descargarla en formato PDF ubicando el botón de imprimir, el cual es el primer ícono (de izquierda a derecha) en el pie de página de la documentación en GitHub Pages, que te permitirá descargar un archivo PDF con toda la documentación del robot Klevor.
