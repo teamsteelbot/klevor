@@ -13,7 +13,7 @@ Esta librería cumple el mismo propósito en Klevor, siendo utilizada por la [Ra
 
 ## Adafruit BNO08X {:#adafruit-bno08x}
 
-La librería `adafruit_bno08x` también es desarrollada y mantenida por Adafruit Industries, su versión más antigua fue lanzada el 22 de spetiembre de 2020 (version 1.0.0), esta librería es mantenida por Adafruit Industries, siendo la persona encargada y a quien se le atribuye el trabajo de esta librería a Bryan Siepert [[2](#adafruit-bno08x-documentation)].
+La librería `adafruit_bno08x` también es desarrollada y mantenida por Adafruit Industries, su versión más antigua fue lanzada el 22 de septiembre de 2020 (version 1.0.0), esta librería es mantenida por Adafruit Industries, siendo la persona encargada y a quien se le atribuye el trabajo de esta librería a Bryan Siepert [[2](#adafruit-bno08x-documentation)].
 
 El propósito de esta librería es la de recibir los datos del sensor BNO08X y poder simplificar la forma en la que los usuarios manejan los datos, como por ejemplo, simplificar los cálculos de los cuaterniones (algo así como un vector 3D), para poder manejar su posición relativa.
 

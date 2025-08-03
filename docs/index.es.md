@@ -56,7 +56,10 @@ class="picture--team">
 		3. [Prototipo 3](mechanical/prototypes/prototype3.es.md)
 		4. [Prototipo 4](mechanical/prototypes/prototype4.es.md)
 4. **Programación**
-	1. [Lenguajes de Programación](programming/languages.es.md)
+	1. Lenguajes de Programación
+        1. [Lenguajes de Programación Previos](programming/languages/previous.es.md)
+        2. [Lenguajes de Programación Actuales](programming/languages/current.es.md)
+        3. [Lenguajes de Programación Futuros](programming/languages/future.es.md)
 	2. Librerías
 		1. [Librerías de Python](programming/libraries/python.es.md)
 		2. [Librerías de CircuitPython](programming/libraries/circuit-python.es.md)

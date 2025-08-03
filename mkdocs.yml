@@ -64,7 +64,10 @@ nav:
             - Prototipo 3: mechanical/prototypes/prototype3.md
             - Prototipo 4: mechanical/prototypes/prototype4.md
     - Programación:
-        - Lenguajes: programming/languages.md
+        - Lenguajes de Programación:
+            - Lenguaje de Programación Previos: programming/languages/previous.md
+            - Lenguaje de Programación Actuales: programming/languages/current.md
+            - Lenguaje de Programación Futuros: programming/languages/future.md
         - Librerías:
             - Librerías de Python: programming/libraries/python.md
             - Librerías de CircuitPython: programming/libraries/circuit-python.md
@@ -216,7 +219,10 @@ plugins:
                   Prototipo 3: Prototype 3
                   Prototipo 4: Prototype 4
                   Programación: Programming
-                  Lenguajes: Languages
+                  Lenguajes de Programación: Programming Languages
+                  Lenguaje de Programación Previos: Previous Programming Language
+                  Lenguaje de Programación Actuales: Current Programming Language
+                  Lenguaje de Programación Futuros: Future Programming Language
                   Librerías: Libraries
                   Librerías de Python: Python Libraries
                   Librerías de CircuitPython: CircuitPython Libraries
