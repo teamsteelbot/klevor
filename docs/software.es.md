@@ -35,7 +35,7 @@ En el caso de Klevor, utilizamos esta plataforma para poder [entrenar el modelo 
     <i>Logo de Visual Studio Code</i>
 </div>
 
-[Visual Studio Code](https://code.visualstudio.com/) es un programa de desarrollo de software con terminal integrado, soporte nativo de Git, soporte a casi todos los lenguajes de programación, un sin número de extensiones y totalmente personalizable.
+[Visual Studio Code](https://code.visualstudio.com/) es un programa de desarrollo de software con terminal integrado, soporte nativo de Git, soporte a casi todos los lenguajes de programación, un sinnúmero de extensiones y totalmente personalizable.
 
 En el caso de Klevor, nosotros utilizamos Visual Studio Code principalmente en la Raspberry Pi 5, como en los computadores del equipo menos potentes, ya que este programa es más ligero que otros programas de desarrollo, como PyCharm, y permite trabajar con múltiples lenguajes de programación, lo que lo hace ideal para el desarrollo de Klevor.
 
@@ -49,7 +49,7 @@ class="logo--3rd-party">
 
 [PyCharm](https://www.jetbrains.com/pycharm/) es otro programa de desarrollo de software; sin embargo, este presenta muchas más funcionalidades que Visual Studio Code, con el detalle que este programa necesita de una licencia, mientras que una Visual Studio Code no necesita de una licencia. Esto es debido a que PyCharm es un programa de desarrollo integrado (IDE) para Python, lo que significa que está diseñado específicamente para trabajar con este lenguaje de programación, mientras que Visual Studio Code es un editor de código fuente más general, por lo tanto, PyCharm ofrece características más avanzadas y específicas para Python, como la depuración avanzada, la refactorización de código, la integración con bases de datos, entre otras.
 
-En nuestro caso, empleamos PyCharm para verificar y depurar con más profundida el código de Klevor, ya que este programa cuenta con herramientas avanzadas de depuración y análisis de código, lo que nos permitió identificar y corregir errores en el código de manera más eficiente.
+En nuestro caso, empleamos PyCharm para verificar y depurar con más profundidad el código de Klevor, ya que este programa cuenta con herramientas avanzadas de depuración y análisis de código, lo que nos permitió identificar y corregir errores en el código de manera más eficiente.
 
 ### Thonny {:#thonny}
 
