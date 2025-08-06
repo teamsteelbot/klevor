@@ -30,7 +30,7 @@ Below is an index with all the links to access all of the different sections of 
 <div class="hcenter">
     <img src="/assets/images/github/t-photos/salto-angel-regional-competition-photo.jpg" alt="Team Steel Bot en la competencia regional del Salto Ángel" 
 class="picture--team">
-    <i>Team Steel Bot at the Salto Ángel's regional competition</i>
+    <i>Team Steel Bot at Salto Ángel's regional competition</i>
 </div>
 
 ## Index {:#index}
@@ -39,7 +39,7 @@ class="picture--team">
 2. **Electronics**
 	1. Components
 		1. [Previous Components](electronic/components/previous.en.md)
-		2. [Actual Compenents](electronic/components/current.en.md)
+		2. [Actual Components](electronic/components/current.en.md)
 		3. [Future Components](electronic/components/future.en.md)
 	2. Diagrams
 		1. [Connection Diagrams](electronic/diagrams/wiring.en.md)
@@ -67,7 +67,7 @@ class="picture--team">
 	5. Guides
 		1. [MkDocs' Guide](programming/guides/mkdocs.en.md)
 		2. [CircuitPython's Guide](programming/guides/circuit-python.en.md)
-		3. [MicroPytohn's Guide](programming/guides/micro-python.en.md)
+		3. [MicroPython's Guide](programming/guides/micro-python.en.md)
 		4. [Raspberry Pi 5's  Guide](programming/guides/raspberry-pi-5.en.md)
 		5. [Raspberry Pi Pico 2W's Guide](programming/guides/raspberry-pi-pico-2w.en.md)
 		6. [Object Detection's Guide](programming/guides/object-detection.en.md)

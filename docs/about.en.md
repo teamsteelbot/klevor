@@ -6,8 +6,7 @@ class="logo--team">
     <i>Team's Logo</i>
 </div>
 
-This is Team Steel Bot's repository, or well, the documentation, a participating team in the World Robot Olympiad 2025, in the Future Engineers category. Representing the Salto Angel School, in Maracaibo, Estado Zulia, Venezuela
-Este es el repositorio, o en su defecto la documentación, del Team Steel Bot, equipo compitiendo en la World Robot Olympiad 2025, en la categoría Futuros Ingenieros. Representando al Colegio Salto Ángel en Maracaibo, Estado Zulia, Venezuela.
+This is Team Steel Bot's repository, or well, the documentation, a participating team in the World Robot Olympiad 2025, in the Future Engineers category. Representing the Salto Angel School, in Maracaibo, Estado Zulia, Venezuela.
 
 <div class="hcenter">
     <img src="/assets/images/logo/wro.webp" alt="Logo de la World Robot Olympiad" 
@@ -18,8 +17,8 @@ class="logo--3rd-party">
 Currently, this team is conformed by 3 members:
 
 - **Ramón Álvarez**, 19 years old. [ralvarezdev](https://github.com/ralvarezdev). The team's captain and in charge of the robot's code. Currently, he is in his 9th trimester in Computer Engineering at Universidad Rafael Urdaneta (URU).
-- **Sebastián Álvarez**, 15 years old. [salvarezdev](https://github.com/salvarezdev). Currently in charge of robot's code, the documentation and the robot's logic. Currently, he is in his 4th year of high school at Salto Angel School.
-- **Otto Piñero**, 16 años. [Ottorafaelpg](https://github.com/Ottorafaelpg). Currently in charge of the robot's design and manufacturing, he is also in his 4th year of high school at Salto Angel School.
+- **Sebastián Álvarez**, 15 years old. [salvarezdev](https://github.com/salvarezdev). Currently in charge of robot's code, the documentation and the robot's logic. Currently, he is in his 4th year of high school at Colegio Salto Ángel.
+- **Otto Piñero**, 16 years old. [Ottorafaelpg](https://github.com/Ottorafaelpg). Currently in charge of the robot's design and manufacturing, he is also in his 4th year of high school at Colegio Salto Ángel.
 
 <div class="hcenter">
     <img src="/assets/images/github/t-photos/official-photo.png" alt="Foto del Equipo" 
@@ -37,6 +36,6 @@ Piñero.</i>
     <div class="hcenter">
         <img src="/assets/images/logo/colegio-salto-angel.png" alt="Logo del Colegio Salto Ángel" 
     class="logo--education">
-        <i>Salto Angel School's Logo</i>
+        <i>Colegio Salto Ángel's Logo</i>
     </div>
 </div>

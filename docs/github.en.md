@@ -8,7 +8,7 @@ class="logo--3rd-party">
     <i>GitHub's Logo</i>
 </div>
 
-This project can be found in GitHub, where you can find the source code, the documentation, 3D models, diagrams and flowcharts from Klevor, our robot. This repository is organized within multiple folders and files, every one of them containing specific information about our robot and its development. You can access the repository through the following link: [https://github.com/teamsteelbot/klevor](https://github.com/teamsteelbot/klevor)
+This project can be found in GitHub, where you can find the source code, documentation, 3D models, diagrams and flowcharts from our robot, Klevor. This repository is organized within multiple folders and files, every one of them containing specific information about our robot and its development. You can access the repository through the following link: [https://github.com/teamsteelbot/klevor](https://github.com/teamsteelbot/klevor)
 
 Also, you can download it directly through the terminal using the following command:
 

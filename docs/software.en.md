@@ -102,7 +102,7 @@ class="logo--3rd-party">
 
 [Fusion 360](https://www.autodesk.com/products/fusion-360/overview) is a 3D design program, made by Autodesk, with this program, we were able to design the pieces we needed and export them to `.stl` format, with which we were able to 3D print them. It is also a very versatile program for draftsmen, engineers, manufacturers and the creation of equipment, since it has a lot of functions, like rendering, design, component weighing, PCB designing, simulations, free-form modeling, etc.
 
-We decided to use this program because it's pretty much an "all-in-one" solution which combines computer-assisted design, manufacturing, engineering and the PCB design, which is a pretty comfortable solution.
+We decided to use this program because it's pretty much an "all-in-one" solution which combines computer-assisted design, manufacturing, engineering and the PCB design, which turns it into a pretty comfortable solution.
 
 ## Planning {:#planning}
 
