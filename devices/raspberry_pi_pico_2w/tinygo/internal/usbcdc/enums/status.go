@@ -6,8 +6,8 @@ import (
 )
 
 type (
-	// Status represent the enum status messages sent and received to the Raspberry Pi 5
-	Status int
+	// Status represents the enum status messages sent and received to the Raspberry Pi 5
+	Status uint8
 )
 
 const (

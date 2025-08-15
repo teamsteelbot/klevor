@@ -6,8 +6,8 @@ import (
 )
 
 type (
-	// IncomingCategory represent the enum categories of incoming messages from the Raspberry Pi 5
-	IncomingCategory int
+	// IncomingCategory represents the enum categories of incoming messages from the Raspberry Pi 5
+	IncomingCategory uint8
 )
 
 const (

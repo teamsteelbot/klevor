@@ -6,6 +6,7 @@ import torch
 from ultralytics import YOLO
 
 from ..files import Files
+from ..constants import SIZE
 
 
 class Yolo:
@@ -70,6 +71,26 @@ class Yolo:
 			str: Path to the exported ONNX model file.
 		"""
 		return model.export(format="onnx")
+
+	@staticmethod
+	def export_onnx_for_hailo_8l(model: YOLO) -> str:
+		"""
+		Export the model to ONNX format for Hailo-8L.
+
+		Args:
+			model (YOLO): Loaded YOLO model.
+		Returns:
+			str: Path to the exported ONNX model file.
+		"""
+		return model.export(
+			format="onnx",
+			imgsz = SIZE,  # Keep consistent with training
+			dynamic = False,  # CRITICAL: Must be False for Hailo
+			simplify = True,  # Simplify the graph
+			opset = 11,  # Compatible opset version
+			half = False,  # Keep full precision for now
+			int8 = False  # We'll let Hailo handle quantization
+		)
 
 	@staticmethod
 	def export_tflite(model: YOLO, quantized: bool = True) -> str:

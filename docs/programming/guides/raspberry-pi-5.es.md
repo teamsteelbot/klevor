@@ -175,7 +175,7 @@ Instalamos las dependencias necesarias para el proyecto ejecutando el siguiente 
 pip install -r requirements.txt
 ```
 
-En el caso de no tener configurado la Raspberry Pi Pico 2 W, se recomienda seguir su respectiva [guía de configuración](../../programming/guides/raspberry-pi-pico-2w.es.md#configuration) para poder utilizarla como controlador del robot. Al igual que, en el caso de no haber generado el modelo para la detección de obstáculos, se recomienda seguir la [guía de configuración del modelo](../../programming/guides/object-detection.es.md) para poder utilizarlo con la Raspberry Pi 5.
+En el caso de no tener configurado la Raspberry Pi Pico 2 W, se recomienda seguir su respectiva [guía de configuración](raspberry-pi-pico-2w.es.md#configuration) para poder utilizarla como controlador del robot. Al igual que, en el caso de no haber generado el modelo para la detección de obstáculos, se recomienda seguir la [guía de configuración del modelo](object-detection.es.md) para poder utilizarlo con la Raspberry Pi 5.
 
 ### Configurar el Startup Service {:#startup-service}
 

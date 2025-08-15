@@ -10,7 +10,7 @@ class="component-image">
 
 Para poder configurar la Raspberry Pi Pico 2 W y poder utilizarla sin problemas, recomendamos seguir una serie de pasos:
 
-1. Instala la última versión de [CircuitPython](../guides/circuit-python.es.md).
+1. Instala la última versión de [CircuitPython](circuit-python.es.md).
 2. Copiar tanto `code.py` como el contenido de las carpetas `config` y `lib` mediante una conexión por USB:
 	1. Para ello, conecta la Raspberry Pi Pico 2 W a tu computadora mediante un cable USB.
 	2. Copia el archivo `code.py` y la carpeta `lib` en la raíz de la unidad de almacenamiento de la Raspberry Pi Pico 2 W.

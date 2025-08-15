@@ -6,8 +6,8 @@ import (
 )
 
 type (
-	// Challenge represent the enum challenge messages sent and received from the Raspberry Pi Pico
-	Challenge int
+	// Challenge represents the enum challenge messages sent and received from the Raspberry Pi Pico
+	Challenge uint8
 )
 
 const (
@@ -53,4 +53,20 @@ func ChallengeFromString(s string) (Challenge, error) {
 		}
 	}
 	return ChallengeNil, fmt.Errorf(ErrInvalidChallengeName, s)
+}
+
+// ChallengeFromBoolean returns the Challenge enum based on the given boolean
+//
+// Parameters:
+//
+// isWithObstacles: A boolean indicating if the challenge is with obstacles
+//
+// Returns:
+//
+// The Challenge enum value
+func ChallengeFromBoolean(isWithObstacles bool) Challenge {
+	if isWithObstacles {
+		return ChallengeWithObstacles
+	}
+	return ChallengeWithoutObstacles
 }
