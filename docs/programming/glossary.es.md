@@ -68,7 +68,7 @@ Para Klevor, la detección de objetos se basa en el modelo YOLOv11; la última v
 
 ## Neural Processing Unit (NPU) {:#npu}
 
-Una unidad de procesamiento neuronal (NPU) es un microprocesador especializado diseñado para imitar la función de procesamiento del cerebro humano. Están optimizados para tareas y aplicaciones de inteligencia artificial (IA), redes neuronales, aprendizaje profundo y aprendizaje automático [[4](#npu-ibm)].
+Una unidad de procesamiento neuronal (NPU) es un microprocesador especializado y diseñado para imitar la función de procesamiento del cerebro humano. Están optimizados para tareas y aplicaciones de inteligencia artificial (IA), redes neuronales, aprendizaje profundo y aprendizaje automático [[4](#npu-ibm)].
 
 <div class="hcenter">
    <img src="/assets/images/components/raspberry-pi-ai-hat-plus.png" 

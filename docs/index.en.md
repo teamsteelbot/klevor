@@ -39,15 +39,15 @@ class="picture--team">
 2. **Electronics**
 	1. Components
 		1. [Previous Components](electronic/components/previous.en.md)
-		2. [Actual Components](electronic/components/current.en.md)
+		2. [Current Components](electronic/components/current.en.md)
 		3. [Future Components](electronic/components/future.en.md)
 	2. Diagrams
 		1. [Connection Diagrams](electronic/diagrams/wiring.en.md)
 3. **Mechanics**
 	1. Parts
-		1. Shared Parts
-			1. [Previous Shared Parts](mechanical/parts/common/previous.en.md)
-			2. [Present Shared Parts](mechanical/parts/common/current.en.md)
+		1. Common Parts
+			1. [Previous Common Parts](mechanical/parts/common/previous.en.md)
+			2. [Present Common Parts](mechanical/parts/common/current.en.md)
 		2. [Prototype 1's Parts](mechanical/parts/prototype1.en.md)
 		3. [Prototype 2's Parts](mechanical/parts/prototype2.en.md)
 		4. [Prototype 3's Parts](mechanical/parts/prototype3.en.md)
