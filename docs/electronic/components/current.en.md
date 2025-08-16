@@ -5,7 +5,7 @@ Here is all of Klevor's components and their respective description.
 ## Raspberry Pi 5 (16GB RAM) {:#raspberry-pi-5}
 
 <div class="hcenter">
-    <img src="/assets/images/components/raspberry-pi-5.png" alt="Raspberry Pi 5" 
+    <img src="../../assets/images/components/raspberry-pi-5.png" alt="Raspberry Pi 5" 
 class="component-image">
     <i>Raspberry Pi 5</i>
 </div>
@@ -28,7 +28,7 @@ Built with an 64-bit ARM Cortex-A76 processor, clocked at 2.4Ghz [[1](#raspberry
 ## Raspberry Pi Camera Module 3 Wide {:#raspberry-pi-camera-module-3-wide}
 
 <div class="hcenter">
-    <img src="/assets/images/components/raspberry-pi-camera-module-3.png" alt="Raspberry 
+    <img src="../../assets/images/components/raspberry-pi-camera-module-3.png" alt="Raspberry 
 Pi Camera Module 3" class="component-image">
     <i>Raspberry Pi Camera Module 3</i>
 </div>
@@ -46,7 +46,7 @@ The Raspberry Pi Camera Module 3 Wide is our preferred camera, as the rest of th
 ## Raspberry Pi AI HAT+ (26 TOPS) {:#raspberry-pi-ai-hat-26-tops}
 
 <div class="hcenter">
-    <img src="/assets/images/components/raspberry-pi-ai-hat-plus.png" alt="Raspberry 
+    <img src="../..../../assets/images/components/raspberry-pi-ai-hat-plus.png" alt="Raspberry 
 Pi AI HAT+ 26 TOPS" class="component-image">
     <i>Raspberry Pi AI HAT+ 26 TOPS</i>
 </div>
@@ -65,7 +65,7 @@ The Raspberry Pi AI HAT+ has two versiones, a 13 Trillion Operations per Seconds
 ## Raspberry Pi Pico 2 WH {:#raspberry-pi-pico-2-wh}
 
 <div class="hcenter">
-  <img src="/assets/images/components/raspberry-pi-pico-2-w.png" alt="Raspberry Pi 
+  <img src="../../assets/images/components/raspberry-pi-pico-2-w.png" alt="Raspberry Pi 
 Pico 2 W" class="component-image">
   <i>Raspberry Pi Pico 2 W</i>
 </div>
@@ -86,7 +86,7 @@ We also decided to settle on the model with an integrated WiFi module, because, 
 ## RPLiDAR C1 {:#rplidar-c1}
 
 <div class="hcenter">
-    <img src="/assets/images/components/rplidar-c1.png" alt="RPLiDAR C1" class="component-image">
+    <img src="../../assets/images/components/rplidar-c1.png" alt="RPLiDAR C1" class="component-image">
     <i>RPLiDAR C1</i>
 </div>
 
@@ -113,7 +113,7 @@ Technical specifications:
 ## Shargeek Storm 2 {:#shargeek-storm-2}
 
 <div class="hcenter">
-    <img src="/assets/images/components/shargeek-storm-2.png" alt="Shargeek Storm 2" 
+    <img src="../../assets/images/components/shargeek-storm-2.png" alt="Shargeek Storm 2" 
 class="component-image">
     <i>Shargeek Storm 2</i>
 </div>
@@ -140,7 +140,7 @@ However, the Shargeek Storm 2's weight is considerable enough to the point where
 ## INJORA 180 Motor 48T {:#injora-180-motor-48t}
 
 <div class="hcenter">
-    <img src="/assets/images/components/injora-180-motor-48t.png" alt="INJORA 180 Motor 
+    <img src="../../assets/images/components/injora-180-motor-48t.png" alt="INJORA 180 Motor 
 48T" class="component-image">
     <i>INJORA 180 Motor 48T</i>
 </div>
@@ -166,7 +166,7 @@ Mechanical specifications:
 ## INJORA MB100 20A mini ESC {:#injora-mb100-20a-mini-esc}
 
 <div class="hcenter">
-    <img src="/assets/images/components/injora-mb100-mini-esc-20a.png" alt="INJORA MB100 20A Mini ESC" 
+    <img src="../../assets/images/components/injora-mb100-mini-esc-20a.png" alt="INJORA MB100 20A Mini ESC" 
 class="component-image">
     <i>INJORA MB100 20A Mini ESC</i>
 </div>
@@ -196,7 +196,7 @@ Mechanical specifications:
 ## URGENEX 7.4 V Battery {:#urgenex-7-4v-battery}
 
 <div class="hcenter">
-    <img src="/assets/images/components/urgenex-7-4v-3000mah.png" alt="URGENEX 7.4V 
+    <img src="../../assets/images/components/urgenex-7-4v-3000mah.png" alt="URGENEX 7.4V 
 Battery" class="component-image">
     <i>URGENEX 7.4 V Battery</i>
 </div>
@@ -217,7 +217,7 @@ Another factor to take into consideration is the high capacity this battery offe
 ## INJORA 7 kg 2065 Micro Servo {:#injora-7kg-2065-micro-servo}
 
 <div class="hcenter">
-    <img src="/assets/images/components/injora-7kg-2065-micro-servo.png" alt="INJORA 
+    <img src="../../assets/images/components/injora-7kg-2065-micro-servo.png" alt="INJORA 
 Micro Servo" class="component-image">
     <i>INJORA 7 kg 2065 Micro Servo</i>
 </div>
@@ -238,7 +238,7 @@ Thanks to the aforementioned library,  the `adafruit_motor` with its `servo` mod
 ## 9-Axis IMU Gyroscope GY-BNO085 {:#gyroscope-gy-bno085}
 
 <div class="hcenter">
-    <img src="/assets/images/components/bno08x.png"
+    <img src="../../assets/images/components/bno08x.png"
   alt="BNO085" class="component-image">
     <i>BNO085</i>
 </div>

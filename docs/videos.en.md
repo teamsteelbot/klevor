@@ -1,7 +1,7 @@
-# Videos {:#videos}
+# Videos
 
-## Open Challenge {:#without-obstacles-challenge}
+## Open Challenge
 
-### Part I {:#without-obstacles-challenge-part1}
+### Part I
 
-[![View in YouTube](https://img.youtube.com/vi/G6BuVhfz97A/0.jpg)](https://www.youtube.com/watch?v=G6BuVhfz97A)
+[![Watch on YouTube](https://img.youtube.com/vi/G6BuVhfz97A/0.jpg)](https://www.youtube.com/watch?v=G6BuVhfz97A)

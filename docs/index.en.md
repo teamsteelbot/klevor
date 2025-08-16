@@ -1,39 +1,35 @@
-# Home {:#home}
+# Home
 
 <div class="hcenter">
-    <img src="/assets/images/logo/teamsteelbot.png" alt="Logo del Equipo" 
+    <img src="./assets/images/logo/teamsteelbot.png" alt="Team's Logo" 
 class="logo--team">
     <i>Team's Logo</i>
 </div>
 
-Welcome to Klevor's documentation, an autonomous robot designed to participate on the World Robot Olympiad 2025, in the Future Engineers category. This documentatios aims to offer all of the necessary info to understand how Klevor works, the different devices involved, the source code and more. We hope that it is as useful as possible for both the judges and anyone that is interested in the project.
+Welcome to Klevor's documentation, an autonomous robot designed to participate on the World Robot Olympiad 2025, in the Future Engineers category. This documentation aims to offer all the necessary info to understand how Klevor works, the different devices involved, the source code and more. We hope that it is as useful as possible for both the judges and anyone that is interested in the project.
 
 <div class="image-horizontal-container">
     <div class="hcenter">
-        <img src="/assets/images/logo/wro.webp" alt="Logo de la World Robot Olympiad" 
+        <img src="./assets/images/logo/wro.webp" alt="World Robot Olympiad's Logo" 
     class="logo--education">
         <i>World Robot Olympiad's Logo</i>
     </div>
     <div class="hcenter">
-        <img src="/assets/images/logo/mincyt.png" alt="Logo del MINCYT" 
+        <img src="./assets/images/logo/mincyt.png" alt="MINCYT's Logo" 
     class="logo--education">
         <i>MINCYT's Logo</i>
     </div>
 </div>
 
-!!! important 
-	If you want to visualize this documentation on a more traditional way, you can download it on a PDF format: [Download](downloads/teamsteelbot.pdf).
-
-
-Below is an index with all the links to access all of the different sections of this documentaion. Each section has detailed information about the robot's technical aspects, including the mechanics, source code, the different devices, the components, the schemes and diagrams, the team's photos and videos of Klevor in action. Also, we included additional resources to amplify the information to facilitate the comprehension for all of the concepts involved.
+Below is an index with all the links to access all the different sections of this documentation. Each section has detailed information about the robot's technical aspects, including the mechanics, source code, the different devices, the components, the schemes and diagrams, the team's photos and videos of Klevor in action. Also, we included additional resources to amplify the information to facilitate the comprehension for all the concepts involved.
 
 <div class="hcenter">
-    <img src="/assets/images/github/t-photos/salto-angel-regional-competition-photo.jpg" alt="Team Steel Bot en la competencia regional del Salto Ángel" 
+    <img src="./assets/images/github/t-photos/salto-angel-regional-competition-photo.jpg" alt="Team Steel Bot at Salto Ángel's regional competition" 
 class="picture--team">
     <i>Team Steel Bot at Salto Ángel's regional competition</i>
 </div>
 
-## Index {:#index}
+## Index
 
 1. **[About us](about.en.md)**
 2. **Electronics**
@@ -56,8 +52,11 @@ class="picture--team">
 		2. [Prototype 2](mechanical/prototypes/prototype2.en.md)
 		3. [Prototype 3](mechanical/prototypes/prototype3.en.md)
 		4. [Prototype 4](mechanical/prototypes/prototype4.en.md)
-4. **Programming**
-	1. [Programming Languages](programming/languages.en.md)
+4. **Programación**
+	1. Programming Languages
+		1. [Previous Programming Languages](programming/languages/previous.en.md)
+		2. [Current Programming Languages](programming/languages/current.en.md)
+		3. [Future Programming Languages](programming/languages/future.en.md)
 	2. Libraries
 		1. [Python Libraries](programming/libraries/python.en.md)
 		2. [CircuitPython Libraries](programming/libraries/circuit-python.en.md)
@@ -95,15 +94,15 @@ class="picture--team">
 5. **[GitHub](github.en.md)**
 6. **[Videos](videos.en.md)**
 7. **[Software](software.en.md)**
-8. [Gadgets](gadgets.en.md)
+8. **[Gadgets](gadgets.en.md)**
 9. **[Sponsors](sponsors.en.md)**
 10. **[Contact Us](contact.en.md)**
 
-## Sponsors {:#sponsors}
+## Sponsors
 
 <div class="hcenter">
     <a href="sponsors.html#viajes-giorgio">
-        <img src="/assets/images/sponsors/viajes-giorgio.png" alt="Logo de Viajes Giorgio" 
+        <img src="./assets/images/sponsors/viajes-giorgio.png" alt="Viajes Giorgio's Logo" 
 class="logo--sponsor">
     </a>
     <i>Viajes Giorgio's Logo</i>
@@ -111,7 +110,7 @@ class="logo--sponsor">
 
 <div class="hcenter">
     <a href="sponsors.html#nathalys-star">
-        <img src="/assets/images/sponsors/nathalys-star.png" alt="Logo de Nathaly's Star" 
+        <img src="./assets/images/sponsors/nathalys-star.png" alt="Nathaly's Star's Logo" 
 class="logo--sponsor">
     </a>
     <i>Nathaly's Star's Logo</i>
@@ -119,7 +118,7 @@ class="logo--sponsor">
 
 <div class="hcenter">
     <a href="sponsors.html#steel-ca">
-        <img src="/assets/images/sponsors/steel-ca.jpg" alt="Logo de Steel C.A." 
+        <img src="./assets/images/sponsors/steel-ca.jpg" alt="Steel C.A.'s Logo" 
 class="logo--sponsor">
     </a>
     <i>Steel C.A.'s Logo</i>

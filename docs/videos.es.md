@@ -1,7 +1,7 @@
-# Videos {:#videos}
+# Videos
 
-## Desafío sin Obstáculos {:#without-obstacles-challenge}
+## Desafío sin Obstáculos
 
-### Parte I {:#without-obstacles-challenge-part1}
+### Parte I
 
 [![Ver en YouTube](https://img.youtube.com/vi/G6BuVhfz97A/0.jpg)](https://www.youtube.com/watch?v=G6BuVhfz97A)

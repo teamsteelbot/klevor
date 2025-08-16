@@ -76,7 +76,6 @@ nav:
         - Glosario de Términos: programming/glossary.md
         - Guías:
             - Guía de MkDocs: programming/guides/mkdocs.md
-            - Guía de WeasyPrint: programming/guides/weasyprint.md
             - Guía de CircuitPython: programming/guides/circuit-python.md
             - Guía de MicroPython: programming/guides/micro-python.md
             - Guía de la Raspberry Pi 5: programming/guides/raspberry-pi-5.md
@@ -178,8 +177,6 @@ plugins:
                             name: Switch to light mode
               extra:
                   social:
-                    - icon: fontawesome/solid/print
-                      name: Download PDF
                     - icon: fontawesome/brands/github
                       name: Team Steel Bot on GitHub
                     - icon: fontawesome/brands/instagram
@@ -227,7 +224,6 @@ plugins:
                   Glosario de Términos: Glossary of Terms
                   Guías: Guides
                   Guía de MkDocs: MkDocs Guide
-                  Guía de WeasyPrint: WeasyPrint Guide
                   Guía de CircuitPython: CircuitPython Guide
                   Guía de MicroPython: MicroPython Guide
                   Guía de Raspberry Pi 5: Raspberry Pi 5 Guide

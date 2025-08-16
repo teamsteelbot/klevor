@@ -1,9 +1,9 @@
 # Klevor 
 
 <p align="center">
-    <img src="assets/images/logo/teamsteelbot.png" alt="Team Logo" width="400">
+    <img src="assets/images/logo/teamsteelbot.png" alt="Team's Logo" width="400">
     <br>
-    <i>Team Logo</i>
+    <i>Team's Logo</i>
 </p>
 
 Welcome to the Klevor repository, the robot of Team Steel Bot, competing in the World Robot Olympiad 2025 in the Future Engineers category. Here you will find all the information about the robot, including its code, 3D models, schematics, and documentation.

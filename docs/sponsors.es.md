@@ -1,11 +1,11 @@
-# Patrocinadores {:#sponsors}
+# Patrocinadores
 
 A pesar de todo el esfuerzo de cada uno los integrantes del equipo, nosotros pensamos que nada de lo que hemos logrado sería posible de no ser por la ayuda de cada uno de nuestros patrocinadores:
 
-## Viajes Giorgio {:#viajes-giorgio}
+## Viajes Giorgio
 
 <div class="hcenter">
-    <img src="/assets/images/sponsors/viajes-giorgio.png" alt="Logo de Viajes Giorgio" 
+    <img src="./assets/images/sponsors/viajes-giorgio.png" alt="Logo de Viajes Giorgio" 
 class="logo--sponsor">
     <i>Logo de Viajes Giorgio</i>
 </div>
@@ -14,12 +14,12 @@ Viajes Giorgio es una agencia de viajes que se especializa en ofrecer vuelos nac
 
 - Instagram: [@viajesgiorgiooficial](https://www.instagram.com/viajesgiorgiooficial/)
 - WhatsApp: [+593 99 429 2979](https://wa.me/593994292979)
-- Ubicación: [Centro Corporativo Zyra, Av. 6 de Diciembre y Av. Portugal, Quito, Ecuador](https://maps.app.goo.gl/Vw3a9mdFkt4FSpa28)
+- Ubicación: [Centro Corporativo Zyra, Av. 6 de diciembre y Av. Portugal, Quito, Ecuador](https://maps.app.goo.gl/Vw3a9mdFkt4FSpa28)
 
-## Nathaly's Star {:#nathalys-star}
+## Nathaly's Star
 
 <div class="hcenter">
-    <img src="/assets/images/sponsors/nathalys-star.png" alt="Logo de Nathaly's Star" 
+    <img src="./assets/images/sponsors/nathalys-star.png" alt="Logo de Nathaly's Star" 
 class="logo--sponsor">
     <i>Logo de Nathaly's Star</i>
 </div>
@@ -28,12 +28,12 @@ Nathaly's Star es una boutique de moda que se especializa en ofrecer ropa y acce
 
 - Instagram: [@boutiquenathalysstar](https://www.instagram.com/boutiquenathalysstar/)
 - Ubicación (Maracaibo): [Local L-67, entre la entrada La Chinita y Sinamaica, Nivel Lago, Centro Sambil Maracaibo, Maracaibo, Venezuela](https://maps.app.goo.gl/rBUmZLRyckYVG9r38)
-- Ubicación (Ciudad Ojeda): [Centro Comercial Camino Real, Calle Vargas con Calle Bermudez, Ciudad Ojeda, Venezuela](https://maps.app.goo.gl/X45idmxjfygE8ngX6)
+- Ubicación (Ciudad Ojeda): [Centro Comercial Camino Real, Calle Vargas con Calle Bermúdez, Ciudad Ojeda, Venezuela](https://maps.app.goo.gl/X45idmxjfygE8ngX6)
 
-## Steel C.A. {:#steel-ca}
+## Steel C.A.
 
 <div class="hcenter">
-    <img src="/assets/images/sponsors/steel-ca.jpg" alt="Logo de Steel C.A." 
+    <img src="./assets/images/sponsors/steel-ca.jpg" alt="Logo de Steel C.A." 
 class="logo--sponsor">
     <i>Logo de Steel C.A.</i>
 </div>

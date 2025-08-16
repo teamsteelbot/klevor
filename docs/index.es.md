@@ -1,7 +1,7 @@
-# Inicio {:#home}
+# Inicio
 
 <div class="hcenter">
-    <img src="/assets/images/logo/teamsteelbot.png" alt="Logo del Equipo" 
+    <img src="./assets/images/logo/teamsteelbot.png" alt="Logo del Equipo" 
 class="logo--team">
     <i>Logo del Equipo</i>
 </div>
@@ -10,29 +10,26 @@ Bienvenidos a la documentación de Klevor, un robot autónomo diseñado para par
 
 <div class="image-horizontal-container">
     <div class="hcenter">
-        <img src="/assets/images/logo/wro.webp" alt="Logo de la World Robot Olympiad" 
+        <img src="./assets/images/logo/wro.webp" alt="Logo de la World Robot Olympiad" 
     class="logo--education">
         <i>Logo de la World Robot Olympiad</i>
     </div>
     <div class="hcenter">
-        <img src="/assets/images/logo/mincyt.png" alt="Logo del MINCYT" 
+        <img src="./assets/images/logo/mincyt.png" alt="Logo del MINCYT" 
     class="logo--education">
         <i>Logo del MINCYT</i>
     </div>
 </div>
 
-!!! importante 
-	Si deseas visualizar esta documentación de una forma más tradicional, puedes descargarla en formato PDF: [Descargar](downloads/teamsteelbot.pdf).
-
 A continuación se presenta un índice con los enlaces a las diferentes secciones de la documentación. Cada sección contiene información detallada sobre los aspectos técnicos y prácticos del robot, incluyendo la mecánica, el código, los dispositivos utilizados, los componentes, los esquemas y diagramas, las fotos del equipo y los vídeos de Klevor en acción. Además, se incluyen recursos externos para ampliar la información y facilitar la comprensión de los conceptos presentados.
 
 <div class="hcenter">
-    <img src="/assets/images/github/t-photos/salto-angel-regional-competition-photo.jpg" alt="Team Steel Bot en la competencia regional del Salto Ángel" 
+    <img src="./assets/images/github/t-photos/salto-angel-regional-competition-photo.jpg" alt="Team Steel Bot en la competencia regional del Salto Ángel" 
 class="picture--team">
     <i>Team Steel Bot en la competencia regional del Salto Ángel</i>
 </div>
 
-## Índice {:#index}
+## Índice
 
 1. **[Sobre Nosotros](about.es.md)**
 2. **Electrónica**
@@ -97,15 +94,15 @@ class="picture--team">
 5. **[GitHub](github.es.md)**
 6. **[Vídeos](videos.es.md)**
 7. **[Software](software.es.md)**
-8. [Gadgets](gadgets.es.md)
+8. **[Gadgets](gadgets.es.md)**
 9. **[Patrocinadores](sponsors.es.md)**
 10. **[Contacto](contact.es.md)**
 
-## Patrocinadores {:#sponsors}
+## Patrocinadores
 
 <div class="hcenter">
     <a href="sponsors.html#viajes-giorgio">
-        <img src="/assets/images/sponsors/viajes-giorgio.png" alt="Logo de Viajes Giorgio" 
+        <img src="./assets/images/sponsors/viajes-giorgio.png" alt="Logo de Viajes Giorgio" 
 class="logo--sponsor">
     </a>
     <i>Logo de Viajes Giorgio</i>
@@ -113,7 +110,7 @@ class="logo--sponsor">
 
 <div class="hcenter">
     <a href="sponsors.html#nathalys-star">
-        <img src="/assets/images/sponsors/nathalys-star.png" alt="Logo de Nathaly's Star" 
+        <img src="./assets/images/sponsors/nathalys-star.png" alt="Logo de Nathaly's Star" 
 class="logo--sponsor">
     </a>
     <i>Logo de Nathaly's Star</i>
@@ -121,7 +118,7 @@ class="logo--sponsor">
 
 <div class="hcenter">
     <a href="sponsors.html#steel-ca">
-        <img src="/assets/images/sponsors/steel-ca.jpg" alt="Logo de Steel C.A." 
+        <img src="./assets/images/sponsors/steel-ca.jpg" alt="Logo de Steel C.A." 
 class="logo--sponsor">
     </a>
     <i>Logo de Steel C.A.</i>
