@@ -1,8 +1,8 @@
-# Videos
+# Vídeos
 
 ## Desafío sin Obstáculos
 
 ### Parte I
 
-[![Watch on YouTube](https://img.youtube.com/vi/G6BuVhfz97A/0.jpg)](https://www.youtube.com/watch?v=G6BuVhfz97A)
+[![Ver en YouTube](https://img.youtube.com/vi/G6BuVhfz97A/0.jpg)](https://www.youtube.com/watch?v=G6BuVhfz97A)
 
