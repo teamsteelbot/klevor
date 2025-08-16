@@ -1,6 +1,8 @@
-package debug
+package enabler
 
 import (
+	"machine"
+
 	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/pulldown"
 )
 
@@ -30,6 +32,15 @@ func NewDefaultHandler(
 	return &DefaultHandler{
 		pullDownHandler,
 	}, nil
+}
+
+// NewDefaultHandlerFromPin creates a new default debug handler with a pull-down handler created from the given pin.
+func NewDefaultHandlerFromPin(pin machine.Pin) *DefaultHandler {
+	pullDownHandler := pulldown.NewDefaultHandler(pin)
+
+	return &DefaultHandler{
+		pullDownHandler,
+	}
 }
 
 // IsEnabled checks if the debug mode is enabled.

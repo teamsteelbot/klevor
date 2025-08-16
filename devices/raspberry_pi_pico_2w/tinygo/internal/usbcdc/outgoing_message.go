@@ -55,6 +55,66 @@ func NewOutgoingMessageFromUint8Content(
 	}
 }
 
+// NewOutgoingMessageFromUint16Content creates a new instance of OutgoingMessage with uint16 content
+//
+// Parameters:
+//
+// category: The category of the message
+// content: The uint16 content of the message
+//
+// Returns:
+//
+// An instance of OutgoingMessage
+func NewOutgoingMessageFromUint16Content(
+	category enums.OutgoingCategory,
+	content uint16,
+) *OutgoingMessage {
+	return &OutgoingMessage{
+		Category: category,
+		Content:  fmt.Sprintf("%d", content),
+	}
+}
+
+// NewOutgoingMessageFromFloat64Content creates a new instance of OutgoingMessage with float64 content
+//
+// Parameters:
+//
+// category: The category of the message
+// content: The float64 content of the message
+//
+// Returns:
+//
+// An instance of OutgoingMessage
+func NewOutgoingMessageFromFloat64Content(
+	category enums.OutgoingCategory,
+	content float64,
+) *OutgoingMessage {
+	return &OutgoingMessage{
+		Category: category,
+		Content:  fmt.Sprintf("%f", content),
+	}
+}
+
+// NewOutgoingMessageFromIntContent creates a new instance of OutgoingMessage with int content
+//
+// Parameters:
+//
+// category: The category of the message
+// content: The int content of the message
+//
+// Returns:
+//
+// An instance of OutgoingMessage
+func NewOutgoingMessageFromIntContent(
+	category enums.OutgoingCategory,
+	content int,
+) *OutgoingMessage {
+	return &OutgoingMessage{
+		Category: category,
+		Content:  fmt.Sprintf("%d", content),
+	}
+}
+
 // String returns a string representation of the OutgoingMessage
 //
 // Returns:
@@ -62,7 +122,7 @@ func NewOutgoingMessageFromUint8Content(
 // A string that represents the OutgoingMessage
 func (msg *OutgoingMessage) String() string {
 	return fmt.Sprintf(
-		"%02d%d%s%d",
+		"%d%d%s%d",
 		msg.Category,
 		HeaderSeparatorChar,
 		msg.Content,
@@ -126,13 +186,17 @@ func NewOutgoingMessageFromString(message string) (*OutgoingMessage, error) {
 	return NewOutgoingMessage(category, parts[1]), nil
 }
 
-/*
-def format_to_send_with_error_message(self) -> str:
-"""
-Format the message to send with an error message.
-
-Returns:
-str: The formatted message string.
-"""
-return f"{self.__category}{HEADER_SEPARATOR_CHAR}{self.__content}"
-*/
+// FormatToSendAsAnErrorMessage formats the message to send as an error message.
+//
+// Returns:
+//
+// The formatted error message string.
+func (msg *OutgoingMessage) FormatToSendAsAnErrorMessage() string {
+	// Format the message as an error message
+	return fmt.Sprintf(
+		"%d%s%s",
+		msg.Category,
+		HeaderSeparatorString,
+		msg.Content,
+	)
+}

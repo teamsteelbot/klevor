@@ -16,19 +16,16 @@ const (
 	EndChar uint8 = '\x04'
 
 	// BufferSize is the size of the buffer for USB-CDC communication
-	BufferSize uint8 = 8
+	BufferSize uint8 = 16
+
+	// ChunkSize is the default size of data chunks
+	ChunkSize = 64
 
 	// OutgoingMessageExpectedParts is the expected number of parts in an outgoing message
 	OutgoingMessageExpectedParts = 2
 
 	// IncomingMessageExpectedParts is the expected number of parts in an incoming message
 	IncomingMessageExpectedParts = 2
-
-	// ToggleLEDOnReceive is the default setting for toggling the LED on receive
-	ToggleLEDOnReceive = false
-
-	// ChunkSize is the default size of data chunks
-	ChunkSize = 64
 
 	// ConfirmationMessageTimeout is the timeout duration for confirmation messages
 	ConfirmationMessageTimeout = time.Second * 5
@@ -72,6 +69,12 @@ var (
 	OutgoingChallengeWithObstaclesMessage = NewOutgoingMessageFromUint8Content(
 		usbcdcenums.OutgoingCategoryChallenge,
 		uint8(challengeenums.ChallengeWithObstacles),
+	)
+
+	// OutgoingChallengeWithObstaclesAndParkingMessage is the outgoing challenge message with obstacles and parking
+	OutgoingChallengeWithObstaclesAndParkingMessage = NewOutgoingMessageFromUint8Content(
+		usbcdcenums.OutgoingCategoryChallenge,
+		uint8(challengeenums.ChallengeWithObstaclesAndParking),
 	)
 
 	// OutgoingChallengeWithoutObstaclesMessage is the outgoing challenge message without obstacles
