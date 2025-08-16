@@ -119,9 +119,6 @@ extra:
           link: /es/
           lang: es
     social:
-        - icon: fontawesome/solid/print
-          link: /downloads/teamsteelbot.pdf
-          name: Descargar PDF
         - icon: fontawesome/brands/github
           link: https://github.com/teamsteelbot
           name: Team Steel Bot en GitHub

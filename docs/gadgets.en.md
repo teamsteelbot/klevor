@@ -3,7 +3,7 @@
 ## Digital Multimeter with USB-C Port 4-30 V 0-12 A {:#usb-c-tester} 
 
 <div class="hcenter">
-    <img src="/assets/images/gadgets/usb-c-tester.png" alt="Multímetro Digital con Puerto USB-C 4-30 V 0-12 A" class="gadget-image">
+    <img src="./assets/images/gadgets/usb-c-tester.png" alt="Multímetro Digital con Puerto USB-C 4-30 V 0-12 A" class="gadget-image">
     <i> Digital Multimeter with USB-C Port 4-30 V 0-12 A</i>
 </div>
 
