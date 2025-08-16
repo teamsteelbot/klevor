@@ -1,7 +1,46 @@
 package escmotor
 
+import (
+	"machine"
+
+	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/debug"
+	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/movement"
+	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc"
+)
+
 const (
-	DefaultIsPolarityInverted        = false
-	DefaultMinPulse           uint16 = 1000
-	DefaultMaxPulse           uint16 = 2000
+	// StopSpeed is the speed to stop the ESC motor
+	StopSpeed = 0
+
+	// DefaultIsPolarityInverted indicates whether the ESC motor's polarity is inverted
+	DefaultIsPolarityInverted = false
+
+	// DefaultPWMFrequency is the frequency for the PWM signal in Hertz
+	DefaultPWMFrequency = 50
+
+	// DefaultMinPulseWidth is the default minimum pulse width in microseconds
+	DefaultMinPulseWidth uint16 = 1000
+
+	// DefaultMaxPulseWidth is the default maximum pulse width in microseconds
+	DefaultMaxPulseWidth uint16 = 2000
+)
+
+var (
+	// DefaultOptions is the default options for the ESC motor handler
+	DefaultOptions = NewOptions(
+		DefaultIsPolarityInverted,
+		DefaultPWMFrequency,
+		DefaultMinPulseWidth,
+		DefaultMaxPulseWidth,
+	)
+
+	// ESCMotorHandler is the default handler for ESC motors
+	ESCMotorHandler, _ = NewDefaultHandler(
+		machine.PWM0,
+		machine.GPIO0,
+		usbcdc.USBCDCHandler,
+		debug.Handler,
+		movement.Handler,
+		DefaultOptions,
+	)
 )

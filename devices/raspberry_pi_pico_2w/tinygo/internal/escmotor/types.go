@@ -2,8 +2,11 @@ package escmotor
 
 import (
 	"fmt"
+	"time"
+
 	"machine"
 
+	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal"
 	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/debug"
 	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/movement"
 	pulldownenabler "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/pulldown/enabler"
@@ -13,26 +16,29 @@ import (
 )
 
 type (
-	// DefaultESCMotor is the default implementation to handle ESC (Electronic Speed Controller) motor operations.
-	DefaultESCMotor struct {
+	// DefaultHandler is the default implementation to handle ESC (Electronic Speed Controller) motor operations.
+	DefaultHandler struct {
 		usbCDCHandler      usbcdc.Handler
 		debugHandler       pulldownenabler.Handler
 		movementHandler    pulldownenabler.Handler
 		pwm                machine.PWM
 		pin                machine.Pin
 		isPolarityInverted bool
-		minPulse           uint16
-		halfPulse          uint16
-		maxPulse           uint16
-		rangePulse         uint16
+		frequency          uint16
+		minPulseWidth      uint16
+		halfPulseWidth     uint16
+		maxPulseWidth      uint16
+		rangePulseWidth    uint16
 		servo              tinygoservo.Servo
+		speed              int16
 	}
 
-	// Options are the different optional parameters for the DefaultESCMotor constructor
+	// Options are the different optional parameters for the DefaultHandler constructor
 	Options struct {
 		IsPolarityInverted bool
-		MinPulse           uint16
-		MaxPulse           uint16
+		Frequency          uint16
+		MinPulseWidth      uint16
+		MaxPulseWidth      uint16
 	}
 )
 
@@ -41,25 +47,28 @@ type (
 // Parameters:
 //
 // isPolarityInverted: Whether the motor polarity is inverted
-// minPulse: Minimum pulse width for the ESC motor
-// maxPulse: Maximum pulse width for the ESC motor
+// frequency: Frequency for the PWM signal
+// minPulseWidth: Minimum pulse width for the ESC motor
+// maxPulseWidth: Maximum pulse width for the ESC motor
 //
 // Returns:
 //
 // An instance of Options
 func NewOptions(
 	isPolarityInverted bool,
-	minPulse uint16,
-	maxPulse uint16,
+	frequency uint16,
+	minPulseWidth uint16,
+	maxPulseWidth uint16,
 ) *Options {
 	return &Options{
-		IsPolarityInverted: isPolarityInverted,
-		MinPulse:           minPulse,
-		MaxPulse:           maxPulse,
+		isPolarityInverted,
+		frequency,
+		minPulseWidth,
+		maxPulseWidth,
 	}
 }
 
-// NewDefaultESCMotor creates a new instance of DefaultESCMotor
+// NewDefaultHandler creates a new instance of DefaultHandler
 //
 // Parameters:
 //
@@ -72,14 +81,14 @@ func NewOptions(
 //
 // Returns:
 //
-// An instance of DefaultESCMotor and an error if any occurred during initialization
-func NewDefaultESCMotor(
+// An instance of DefaultHandler and an error if any occurred during initialization
+func NewDefaultHandler(
 	pwm machine.PWM,
 	pin machine.Pin,
 	usbCDCHandler usbcdc.Handler,
 	debugHandler, movementHandler pulldownenabler.Handler,
 	options *Options,
-) (*DefaultESCMotor, error) {
+) (*DefaultHandler, error) {
 	// Check if the USB CDC handler is nil
 	if usbCDCHandler == nil {
 		return nil, usbcdc.ErrNilHandler
@@ -95,44 +104,51 @@ func NewDefaultESCMotor(
 		return nil, movement.ErrNilHandler
 	}
 
+	// Check if options are nil
+	if options == nil {
+		return nil, ErrNilOptions
+	}
+
+	// Configure the timer/PWM.
+	if err := pwm.Configure(
+		machine.PWMConfig{
+			Period: time.Second / time.Duration(options.Frequency),
+		},
+	); err != nil {
+		return nil, fmt.Errorf(internal.ErrFailedToConfigurePWM, err)
+	}
+
 	// Create a new instance of the servo
 	servo, err := tinygoservo.New(pwm, pin)
 	if err != nil {
 		return nil, err
 	}
 
-	// Check if options is nil
-	if options == nil {
-		options = &Options{
-			IsPolarityInverted: DefaultIsPolarityInverted,
-			MinPulse:           DefaultMinPulse,
-			MaxPulse:           DefaultMaxPulse,
-		}
-	}
-
 	// Calculate the half pulse and range pulse
-	halfPulse := (options.MaxPulse + options.MinPulse) / 2
-	rangePulse := options.MaxPulse - options.MinPulse
+	halfPulseWidth := (options.MaxPulseWidth + options.MinPulseWidth) / 2
+	rangePulseWidth := options.MaxPulseWidth - options.MinPulseWidth
 
 	// Initialize the ESC motor with the provided parameters
-	escMotor := &DefaultESCMotor{
+	handler := &DefaultHandler{
 		usbCDCHandler,
 		debugHandler,
 		movementHandler,
 		pwm,
 		pin,
 		options.IsPolarityInverted,
-		options.MinPulse,
-		halfPulse,
-		options.MaxPulse,
-		rangePulse,
+		options.Frequency,
+		options.MinPulseWidth,
+		halfPulseWidth,
+		options.MaxPulseWidth,
+		rangePulseWidth,
 		servo,
+		StopSpeed, // Initial speed is set to 0
 	}
 
 	// Stop the motor initially
-	_ = escMotor.Stop()
+	_ = handler.Stop()
 
-	return escMotor, nil
+	return handler, nil
 }
 
 // SetSpeed sets the ESC motor speed.
@@ -140,7 +156,7 @@ func NewDefaultESCMotor(
 // Parameters:
 //
 // speed: Speed value between -half of the maximum pulse (full backward) and half of the maximum pulse (full forward).
-func (e *DefaultESCMotor) SetSpeed(speed uint16, isForward bool) error {
+func (e *DefaultHandler) SetSpeed(speed uint16, isForward bool) error {
 	// Check if the is polarity inverted
 	if e.isPolarityInverted {
 		isForward = !isForward
@@ -149,23 +165,27 @@ func (e *DefaultESCMotor) SetSpeed(speed uint16, isForward bool) error {
 	// Calculate the microseconds based on the speed and direction
 	var microseconds uint16
 	if isForward {
-		microseconds = e.halfPulse + speed
+		microseconds = e.halfPulseWidth + speed
+		e.speed = int16(speed)
 	} else {
-		microseconds = e.halfPulse - speed
+		microseconds = e.halfPulseWidth - speed
+		e.speed = -int16(speed)
 	}
 
 	// Ensure the microseconds is within the valid range
-	if microseconds < e.minPulse {
+	if microseconds < e.minPulseWidth {
 		return fmt.Errorf(
 			ErrSpeedBelowMinPulseWidth,
-			e.minPulse,
-			-e.rangePulse/2,
+			e.minPulseWidth,
+			-e.rangePulseWidth/2,
+			microseconds,
 		)
-	} else if microseconds > e.maxPulse {
+	} else if microseconds > e.maxPulseWidth {
 		return fmt.Errorf(
 			ErrSpeedAboveMaxPulseWidth,
-			e.maxPulse,
-			e.rangePulse/2,
+			e.maxPulseWidth,
+			e.rangePulseWidth/2,
+			microseconds,
 		)
 	}
 
@@ -173,7 +193,7 @@ func (e *DefaultESCMotor) SetSpeed(speed uint16, isForward bool) error {
 	if e.movementHandler.IsEnabled() {
 		e.servo.SetMicroseconds(int16(microseconds))
 	} else {
-		microseconds = e.halfPulse
+		microseconds = e.halfPulseWidth
 	}
 
 	// Send the debug message if the debug handler is enabled
@@ -191,16 +211,25 @@ func (e *DefaultESCMotor) SetSpeed(speed uint16, isForward bool) error {
 	return nil
 }
 
+// GetSpeed returns the current speed of the ESC motor.
+//
+// Returns:
+//
+// The current speed of the ESC motor as an int16 value.
+func (e *DefaultHandler) GetSpeed() int16 {
+	return e.speed
+}
+
 // Stop sets the ESC motor speed to 0 (stop).
 //
 // Returns:
 //
 // An error if the speed could not be set to 0, otherwise nil.
-func (e *DefaultESCMotor) Stop() error {
-	return e.SetSpeed(0, true)
+func (e *DefaultHandler) Stop() error {
+	return e.SetSpeed(StopSpeed, true)
 }
 
-// GoForward sets the ESC motor speed forward.
+// SetSpeedForward sets the ESC motor speed forward.
 //
 // Parameters:
 //
@@ -209,11 +238,11 @@ func (e *DefaultESCMotor) Stop() error {
 // Returns:
 //
 // An error if the speed could not be set, otherwise nil.
-func (e *DefaultESCMotor) GoForward(speed uint16) error {
+func (e *DefaultHandler) SetSpeedForward(speed uint16) error {
 	return e.SetSpeed(speed, true)
 }
 
-// GoBackward sets the ESC motor speed backward.
+// SetSpeedBackward sets the ESC motor speed backward.
 //
 // Parameters:
 //
@@ -222,6 +251,6 @@ func (e *DefaultESCMotor) GoForward(speed uint16) error {
 // Returns:
 //
 // An error if the speed could not be set, otherwise nil.
-func (e *DefaultESCMotor) GoBackward(speed uint16) error {
+func (e *DefaultHandler) SetSpeedBackward(speed uint16) error {
 	return e.SetSpeed(speed, false)
 }

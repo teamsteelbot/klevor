@@ -4,7 +4,9 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/challenge"
 	challengeenums "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/challenge/enums"
+	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/led"
 	usbcdcenums "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc/enums"
 )
 
@@ -81,5 +83,11 @@ var (
 	OutgoingChallengeWithoutObstaclesMessage = NewOutgoingMessageFromUint8Content(
 		usbcdcenums.OutgoingCategoryChallenge,
 		uint8(challengeenums.ChallengeWithoutObstacles),
+	)
+
+	// USBCDCHandler is the USB CDC handler for the Raspberry Pi Pico 2W
+	USBCDCHandler, _ = NewDefaultHandler(
+		challenge.ChallengeHandler,
+		led.OnBoardLEDHandler,
 	)
 )

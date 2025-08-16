@@ -3,6 +3,8 @@ package usbcdc
 import (
 	"strings"
 	"time"
+
+	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc/enums"
 )
 
 type (
@@ -10,7 +12,10 @@ type (
 	Handler interface {
 		ReceiveMessages() (*[]IncomingMessage, error)
 		SendMessage(message *OutgoingMessage) error
-		SendBufferMessage(category string, content *strings.Builder) error
+		SendBufferMessage(
+			category enums.OutgoingCategory,
+			content *strings.Builder,
+		) error
 		SendConfirmationMessage() error
 		WaitForConfirmationMessage(
 			messageToConfirm *OutgoingMessage,
@@ -18,8 +23,8 @@ type (
 		) error
 		SendInitializationMessage() error
 		SendChallengeMessage() error
-		SendBNO08xYawDegreesMessage(yawDegrees float64) error
-		SendBNO08xYawTurnsMessage(turns int) error
+		SendBNO08XYawDegreesMessage(yawDegrees float64) error
+		SendBNO08XYawTurnsMessage(turns int) error
 		SendErrorMessage(err error) error
 		Start() error
 		Stop()

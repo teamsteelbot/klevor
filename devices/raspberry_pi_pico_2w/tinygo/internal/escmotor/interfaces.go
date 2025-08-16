@@ -1,12 +1,12 @@
 package escmotor
 
 type (
-	// ESCMotor is the interface to handle ESC (Electronic Speed Controller) motor operations
-	ESCMotor interface {
-		GetSpeed() int
+	// Handler is the interface to handle ESC (Electronic Speed Controller) motor operations
+	Handler interface {
+		GetSpeed() int16
 		SetSpeed(speed uint16, isForward bool) error
 		Stop() error
-		GoForward(speed uint16) error
-		GoBackward(speed uint16) error
+		SetSpeedForward(speed uint16) error
+		SetSpeedBackward(speed uint16) error
 	}
 )
