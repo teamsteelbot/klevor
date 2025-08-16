@@ -14,13 +14,15 @@ const (
 	ChallengeNil Challenge = iota
 	ChallengeWithoutObstacles
 	ChallengeWithObstacles
+	ChallengeWithObstaclesAndParking
 )
 
 var (
 	// ChallengeNames maps a given Challenge to its string name
 	ChallengeNames = map[Challenge]string{
-		ChallengeWithObstacles:    "with_obstacles",
-		ChallengeWithoutObstacles: "without_obstacles",
+		ChallengeWithObstacles:           "with_obstacles",
+		ChallengeWithoutObstacles:        "without_obstacles",
+		ChallengeWithObstaclesAndParking: "with_obstacles_and_parking",
 	}
 )
 
@@ -53,20 +55,4 @@ func ChallengeFromString(s string) (Challenge, error) {
 		}
 	}
 	return ChallengeNil, fmt.Errorf(ErrInvalidChallengeName, s)
-}
-
-// ChallengeFromBoolean returns the Challenge enum based on the given boolean
-//
-// Parameters:
-//
-// isWithObstacles: A boolean indicating if the challenge is with obstacles
-//
-// Returns:
-//
-// The Challenge enum value
-func ChallengeFromBoolean(isWithObstacles bool) Challenge {
-	if isWithObstacles {
-		return ChallengeWithObstacles
-	}
-	return ChallengeWithoutObstacles
 }

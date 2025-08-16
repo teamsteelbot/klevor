@@ -91,20 +91,20 @@ func (msg *IncomingMessage) IsEqual(other *IncomingMessage) bool {
 //
 // Parameters:
 //
-// msgStr: The string representation of the message
+// message: The string representation of the message
 //
 // Returns:
 //
 // An instance of IncomingMessage, or an error if the string is invalid
-func NewIncomingMessageFromString(msgStr string) (*IncomingMessage, error) {
+func NewIncomingMessageFromString(message string) (*IncomingMessage, error) {
 	// Remove the end character if present
-	if len(msgStr) > 0 && msgStr[len(msgStr)-1] == EndChar {
-		msgStr = msgStr[:len(msgStr)-1]
+	if len(message) > 0 && message[len(message)-1] == EndChar {
+		message = message[:len(message)-1]
 	}
 
 	// Split the string into category and content
 	parts := strings.SplitN(
-		strings.TrimSpace(msgStr),
+		strings.TrimSpace(message),
 		HeaderSeparatorString,
 		IncomingMessageExpectedParts,
 	)

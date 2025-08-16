@@ -18,48 +18,6 @@ class SerialCommunication:
 	"""
 	A class to handle serial communication over USB CDC in CircuitPython.
 	"""
-	# Default configuration
-	TOGGLE_LED_ON_RECEIVE = False
-	DATA_PORT_ENABLED = True
-	CONSOLE_PORT_ENABLED = True
-	CHUNK_SIZE = 64
-
-	# Status outgoing messages
-	START_MESSAGE = OutgoingMessage(
-		OutgoingCategory.STATUS,
-		Status.START,
-		)
-	OUTGOING_OK_MESSAGE = OutgoingMessage(
-		OutgoingCategory.STATUS,
-		Status.OK,
-		)
-
-	# Status incoming messages
-	STOP_MESSAGE = IncomingMessage(
-		IncomingCategory.STATUS,
-		Status.STOP,
-		)
-	INCOMING_OK_MESSAGE = IncomingMessage(
-		IncomingCategory.STATUS,
-		Status.OK,
-		)
-	HEARTBEAT_MESSAGE = IncomingMessage(
-		OutgoingCategory.STATUS,
-		Status.HEARTBEAT,
-		)
-
-	# Challenge messages
-	CHALLENGE_WITH_OBSTACLES = OutgoingMessage(
-		OutgoingCategory.CHALLENGE,
-		Challenge.WITH_OBSTACLES,
-		)
-	CHALLENGE_WITHOUT_OBSTACLES = OutgoingMessage(
-		OutgoingCategory.CHALLENGE,
-		Challenge.WITHOUT_OBSTACLES,
-		)
-
-	# Confirmation timeout
-	CONFIRMATION_TIMEOUT = 5.0
 
 	def __init__(
 			self,
