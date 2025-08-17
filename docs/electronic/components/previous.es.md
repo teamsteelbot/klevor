@@ -1,12 +1,23 @@
-# Componentes Previos {:#previous-components}
+# Componentes Previos
 
-## HiLetgo Time-of-Flight Sensor VL53L0X: Empleado en el Prototipo 1 {:#sensor-tof-hiletgo}
+## HiLetgo Time-of-Flight Sensor VL53L0X: Empleado en el Prototipo 1
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="../../assets/images/components/vl53l0x.png" alt="Sensor VL53L0X" 
+width="350">
+	<br>
+	<i>Sensor VL53L0X</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
     <img src="/assets/images/components/vl53l0x.png" alt="Sensor VL53L0X" 
 class="component-image">
     <i>Sensor VL53L0X</i>
 </div>
+mkdocs-only-end -->
 
 El sensor VL53L0X en sí mismo es un pequeño sensor de distancia muy popular que utiliza la tecnología Time-of-Flight (ToF) para medir la distancia a un objeto. El sensor VL53L0X emite un pulso de luz láser infrarroja invisible y mide el tiempo que tarda en regresar al sensor.
 
@@ -21,7 +32,6 @@ Al inicio, queríamos utilizar varios de estos sensores para poder cubrir los pu
 | Ancho      | 10.7 mm   |
 | Peso       | 0.8 g     |
 
-# Referencias Bibliográficas
+# Referencias
 
-1.
-*VL53L0X*. (2025). STMicroElectronics. <a id="sensor-tof" href="https://www.st.com/en/imaging-and-photonics-solutions/vl53l0x.html">https://www.st.com/en/imaging-and-photonics-solutions/vl53l0x.html</a>
+1. *VL53L0X*. (2025). STMicroElectronics. <a id="sensor-tof" href="https://www.st.com/en/imaging-and-photonics-solutions/vl53l0x.html">https://www.st.com/en/imaging-and-photonics-solutions/vl53l0x.html</a>

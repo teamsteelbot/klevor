@@ -112,27 +112,6 @@ mkdocs-only-end -->
 		4. [Guía de la Raspberry Pi 5](programming/guides/raspberry-pi-5.es.md)
 		5. [Guía de la Raspberry Pi Pico 2 W](programming/guides/raspberry-pi-pico-2w.es.md)
 		6. [Guía de Detección de Objetos](programming/guides/object-detection.es.md)
-	6. Referencia del Código
-		1. Raspberry Pi 5
-			1. [Módulo Args](programming/code/raspberry-pi-5/args.es.md)
-			2. [Módulo Camera](programming/code/raspberry-pi-5/camera.es.md)
-			3. [Módulo Common](programming/code/raspberry-pi-5/common.es.md)
-			4. [Módulo Files](programming/code/raspberry-pi-5/files.es.md)
-			5. [Módulo Hailo](programming/code/raspberry-pi-5/hailo.es.md)
-			6. [Módulo Log](programming/code/raspberry-pi-5/log.es.md)
-			7. [Módulo Model](programming/code/raspberry-pi-5/model.es.md)
-			8. [Módulo OpenCV](programming/code/raspberry-pi-5/opencv.es.md)
-			9. [Módulo Pilot](programming/code/raspberry-pi-5/pilot.es.md)
-			10. [Módulo Plot](programming/code/raspberry-pi-5/plot.es.md)
-			11. [Módulo RPLiDAR](programming/code/raspberry-pi-5/rplidar.es.md)
-			12. [Módulo Serial Communication](programming/code/raspberry-pi-5/serial-communication.es.md)
-			13. [Módulo Server](programming/code/raspberry-pi-5/server.es.md)
-			14. [Módulo Spawner](programming/code/raspberry-pi-5/spawner.es.md)
-			15. [Módulo Utils](programming/code/raspberry-pi-5/utils.es.md)
-			16. [Módulo YOLO](programming/code/raspberry-pi-5/yolo.es.md)
-		2. Raspberry Pi Pico 2W
-			1. [Módulo Lib](programming/code/raspberry-pi-pico-2w/lib.es.md)
-			2. [Código Principal](programming/code/raspberry-pi-pico-2w/code.es.md)
 5. **[GitHub](github.es.md)**
 6. **[Vídeos](videos.es.md)**
 7. **[Software](software.es.md)**

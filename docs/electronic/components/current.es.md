@@ -1,14 +1,25 @@
-# Componentes Actuales {:#current-components}
+# Componentes Actuales
 
 A continuación, está la descripción de todos los componentes principales de Klevor.
 
-## Raspberry Pi 5 (16GB RAM) {:#raspberry-pi-5}
+## Raspberry Pi 5 (16GB RAM)
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="../../assets/images/components/raspberry-pi-5.png" alt="Raspberry Pi 5" 
+width="350">
+	<br>
+	<i>Raspberry Pi 5</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
     <img src="/assets/images/components/raspberry-pi-5.png" alt="Raspberry Pi 5" 
 class="component-image">
     <i>Raspberry Pi 5</i>
 </div>
+mkdocs-only-end -->
 
 Equipada con un procesador ARM Cortex-A76 de 64 bits a 2.4 GHz [[1](#raspberry-pi-5-datasheet)]. La Raspberry Pi 5 es nuestro controlador principal de elección, decidimos usar a la Raspberry Pi 5 debido a múltiples factores, entre ellos:
 
@@ -25,13 +36,24 @@ Equipada con un procesador ARM Cortex-A76 de 64 bits a 2.4 GHz [[1](#raspberry-p
 | Ancho      | 56 mm     |
 | Peso       | 46 g      |
 
-## Raspberry Pi Camera Module 3 Wide {:#raspberry-pi-camera-module-3-wide}
+## Raspberry Pi Camera Module 3 Wide
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="../../assets/images/components/raspberry-pi-camera-module-3.png" alt="Raspberry Pi Camera Module 3" 
+width="350">
+	<br>
+	<i>Raspberry Pi Camera Module 3</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
-    <img src="/assets/images/components/raspberry-pi-camera-module-3.png" alt="Raspberry 
-Pi Camera Module 3" class="component-image">
+    <img src="/assets/images/components/raspberry-pi-camera-module-3.png" alt="Raspberry Pi Camera Module 3" 
+class="component-image">
     <i>Raspberry Pi Camera Module 3</i>
 </div>
+mkdocs-only-end -->
 
 La Raspberry Pi Camera Module 3 Wide es nuestra elección de preferencia, como los demás componentes Raspberry, esta se destaca por ser bastante ligera y portátil, ya que, pues es una cámara bastante pequeña, midiendo apenas 25 mm × 24 mm × 12.4 mm y pesando 4 gramos, sin perder absolutamente ni una pizca de eficiencia, porque puede grabar a 1536 x 864p120, ahora bien, decidimos utilizar la versión Wide por su campo de visión horizontal de 102 grados [[2](#raspberry-pi-camera-module-3-geek-factory)] | [[3](#raspberry-pi-camera-documentation)], porque nos permite tener un rango de visión óptimo para poder detectar todos los obstáculos de la pista.
 
@@ -42,13 +64,24 @@ La Raspberry Pi Camera Module 3 Wide es nuestra elección de preferencia, como l
 | Ancho      | 12.4 mm   |
 | Peso       | 4 g       |
 
-## Raspberry Pi AI HAT+ (26 TOPS) {:#raspberry-pi-ai-hat-26-tops}
+## Raspberry Pi AI HAT+ (26 TOPS)
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="../../assets/images/components/raspberry-pi-ai-hat-plus.png" alt="Raspberry Pi AI HAT+ 26 TOPS" 
+width="350">
+	<br>
+	<i>Raspberry Pi AI HAT+ 26 TOPS</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
-    <img src="/assets/images/components/raspberry-pi-ai-hat-plus.png" alt="Raspberry 
-Pi AI HAT+ 26 TOPS" class="component-image">
+    <img src="/assets/images/components/raspberry-pi-ai-hat-plus.png" alt="Raspberry Pi AI HAT+ 26 TOPS" 
+class="component-image">
     <i>Raspberry Pi AI HAT+ 26 TOPS</i>
 </div>
+mkdocs-only-end -->
 
 Si bien la Raspberry Pi 5 es capaz de procesar imágenes en tiempo real, tuvimos en cuenta que necesitaba un poco más de poder, por lo cual decidimos incorporar la AI HAT+ a la Raspberry Pi 5 para poder alcanzar el nivel de procesamiento necesario.
 
@@ -61,13 +94,24 @@ El Raspberry Pi AI HAT+ tiene dos versiones, una de 13 Trillones de Operaciones 
 | Ancho      | 56 mm     |
 | Peso       | 9.07 g    |
 
-## Raspberry Pi Pico 2 WH {:#raspberry-pi-pico-2-wh}
+## Raspberry Pi Pico 2 WH
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="../../assets/images/components/raspberry-pi-pico-2-w.png" alt="Raspberry Pi Pico 2 W" 
+width="350">
+	<br>
+	<i>Raspberry Pi Pico 2 W</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
-  <img src="/assets/images/components/raspberry-pi-pico-2-w.png" alt="Raspberry Pi 
-Pico 2 W" class="component-image">
-  <i>Raspberry Pi Pico 2 W</i>
+    <img src="/assets/images/components/raspberry-pi-pico-2-w.png" alt="Raspberry Pi Pico 2 W" 
+class="component-image">
+    <i>Raspberry Pi Pico 2 W</i>
 </div>
+mkdocs-only-end -->
 
 Construido sobre el chip RP2350 [[5](#raspberry-pi-pico-2-wh-datasheet)], la Raspberry Pi Pico 2 W es el microcontrolador de Klevor, además de ser un microcontrolador ligero y pequeño, este chip permite una fácil integración con el resto de los componentes Raspberry, debido a que establecer una comunicación serial con una Raspberry Pi 5 es mucho más fácil de hacer con una Raspberry Pi Pico que con algún otro microcontrolador de distinto fabricante.
 
@@ -82,12 +126,24 @@ La versión con el módulo de WiFi integrado ofrece una gran ventaja a la hora d
 | Ancho      | 21 mm     |
 | Peso       | 6 g       |
 
-## RPLiDAR C1 {:#rplidar-c1}
+## RPLiDAR C1
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="../../assets/images/components/rplidar-c1.png" alt="RPLiDAR C1" 
+width="350">
+	<br>
+	<i>RPLiDAR C1</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
-    <img src="/assets/images/components/rplidar-c1.png" alt="RPLiDAR C1" class="component-image">
+    <img src="/assets/images/components/rplidar-c1.png" alt="RPLiDAR C1" 
+class="component-image">
     <i>RPLiDAR C1</i>
 </div>
+mkdocs-only-end -->
 
 El RPLiDAR C1 es un escáner de rango láser de 360 grados, el cual puede detectar superficies que están hasta 12 metros de distancia, su punto ciego es de tan solo 5 centímetros alrededor del mismo [[6](#rplidar-c1-robot-shop)] | [[7](#rplidar-c1-datasheet)], todos estos factores hacen que el RPLiDAR C1 sea una gran opción para poder guíar a Klevor por la pista.
 
@@ -109,13 +165,24 @@ Especificaciones técnicas:
 | Resolución angular     | 0,72°                                                                              |
 | Ángulo de inclinación  | 0°-1,5°                                                                            |
 
-## Shargeek Storm 2 {:#shargeek-storm-2}
+## Shargeek Storm 2
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="../../assets/images/components/shargeek-storm-2.png" alt="Shargeek Storm 2" 
+width="350">
+	<br>
+	<i>Shargeek Storm 2</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
     <img src="/assets/images/components/shargeek-storm-2.png" alt="Shargeek Storm 2" 
 class="component-image">
     <i>Shargeek Storm 2</i>
 </div>
+mkdocs-only-end -->
 
 El Shargeek Storm 2 es un Power Bank, con múltiples características interesantes [[8](#shargeek-storm-2-amazon)] | [[9](#shargeek-storm-2-100w-power-bank)] como:
 
@@ -135,13 +202,24 @@ Sin embargo, debido a su gran peso, es un componente un tanto difícil de poder 
 | Ancho      | 45.9 mm   |
 | Peso       | 579 g     |
 
-## INJORA 180 Motor 48T {:#injora-180-motor-48t}
+## INJORA 180 Motor 48T
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="../../assets/images/components/injora-180-motor-48t.png" alt="INJORA 180 Motor 48T" 
+width="350">
+	<br>
+	<i>INJORA 180 Motor 48T</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
-    <img src="/assets/images/components/injora-180-motor-48t.png" alt="INJORA 180 Motor 
-48T" class="component-image">
+    <img src="/assets/images/components/injora-180-motor-48t.png" alt="INJORA 180 Motor 48T" 
+class="component-image">
     <i>INJORA 180 Motor 48T</i>
 </div>
+mkdocs-only-end -->
 
 El INJORA 180 Motor 48T es un motor diseñado para carros controlados por radio, ya que estos carros suelen tener un peso y medidas similares a las de Klevor, decidimos que este motor sería una buena incorporación. Debido a su tamaño compacto, bajo voltaje (necesitando apenas 7.4 V, llegamos a considerar motores de 12 V hasta, incluso de 24 V para Klevor), y bajo peso [[10](#injora-180-48t-amazon)].
 
@@ -161,13 +239,24 @@ Especificaciones mecánicas:
 | Velocidad sin carga | 20500rpm  |
 | Corriente sin carga | 0.48A     |
 
-## INJORA MB100 20A mini ESC {:#injora-mb100-20a-mini-esc}
+## INJORA MB100 20A mini ESC
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="../../assets/images/components/injora-mb100-mini-esc-20a.png" alt="INJORA MB100 20A Mini ESC" 
+width="350">
+	<br>
+	<i>INJORA MB100 20A Mini ESC</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
     <img src="/assets/images/components/injora-mb100-mini-esc-20a.png" alt="INJORA MB100 20A Mini ESC" 
 class="component-image">
     <i>INJORA MB100 20A Mini ESC</i>
 </div>
+mkdocs-only-end -->
 
 El INJORA MB100 20A mini ESC es un controlador de velocidad electrónico [[11](#injora-mb100-r80-amazon)], normalmente (en carros RC) este se usa en conjunto con algún motor de la marca INJORA, este permite la conexión entre el INJORA 180 Motor 48T y la Raspberry Pi Pico 2.
 
@@ -177,7 +266,7 @@ Además de todo esto, es una parte del código bastante fácil de configurar gra
 `adafruit_motor` que permite configurar al motor principal como un servo de rotación continua gracias al módulo
 `servo`.
 
-A su vez, gracias a que incorpora un BEC (Battery Eliminator Circuit) podemos alimentar al [INJORA 7Kg 2065 Micro Servo](#injora-7kg-2065-micro-servo), sin necesidad de proporcionar una tercera batería o una alimentación secundaria de la misma batería.
+A su vez, gracias a que incorpora un BEC (Battery Eliminator Circuit) podemos alimentar al [INJORA 7Kg 2065 Micro Servo](#injora-7-kg-2065-micro-servo), sin necesidad de proporcionar una tercera batería o una alimentación secundaria de la misma batería.
 
 | **Medida** | **Valor** |
 |------------|-----------|
@@ -193,17 +282,28 @@ Especificaciones mecánicas:
 | Tipo de motor compatible: | Motor Escobillado (030/050/130/**180**/370) |
 | Salida BEC                | 6V/3A (Modo Lineal)                         |
 
-## URGENEX 7.4 V Battery {:#urgenex-7-4v-battery}
+## Batería URGENEX 7.4 V
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="../../assets/images/components/urgenex-7-4v-3000mah.png" alt="Batería URGENEX 7.4 V" 
+width="350">
+	<br>
+	<i>Batería URGENEX 7.4 V</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
-    <img src="/assets/images/components/urgenex-7-4v-3000mah.png" alt="URGENEX 7.4V 
-Battery" class="component-image">
-    <i>URGENEX 7.4 V Battery</i>
+    <img src="/assets/images/components/urgenex-7-4v-3000mah.png" alt="Batería URGENEX 7.4 V" 
+class="component-image">
+    <i>Batería URGENEX 7.4 V</i>
 </div>
+mkdocs-only-end -->
 
-La URGENEX 7.4 V Battery es nuestra segunda batería la cual cumple la única función de alimentar al INJORA 180 Motor 48T, además de esto es una batería recargable lo que lo convierte en una opción sólida para poder alimentar el motor principal.
+La Batería URGENEX 7.4 V es nuestra segunda batería la cual cumple la única función de alimentar al INJORA 180 Motor 48T, además de esto es una batería recargable lo que lo convierte en una opción sólida para poder alimentar el motor principal.
 
-Si bien cualquier batería de 7.4 V funcionaría perfectamente para poder utilizar al INJORA 180 Motor 48T, decidimos utilizar a la URGENEX 7.4v Battery por su alta calidad, ya que, el motor INJORA 180, en casos extremos puede llegar a consumir 100A, lo que podría causarle problemas a la Shargeek Storm 2, por lo cual decidimos irnos por la ruta más segura y alimentar al motor con su batería propia.
+Si bien cualquier batería de 7.4 V funcionaría perfectamente para poder utilizar al INJORA 180 Motor 48T, decidimos utilizar la batería URGENEX 7.4v por su alta calidad, ya que, el motor INJORA 180, en casos extremos puede llegar a consumir 100 A, lo que podría causarle problemas a la Shargeek Storm 2, por lo cual decidimos irnos por la ruta más segura y alimentar al motor con su batería propia.
 
 Además de esto, esta batería ofrece una alta capacidad comparada con el resto del mercado, pues que esta alcanza los 3000 mAh [[12](#urgenex-3000-mah-amazon)].
 
@@ -214,13 +314,24 @@ Además de esto, esta batería ofrece una alta capacidad comparada con el resto 
 | Ancho      | 19 mm     |
 | Peso       | 103 g     |
 
-## INJORA 7 kg 2065 Micro Servo {:#injora-7kg-2065-micro-servo}
+## INJORA 7 kg 2065 Micro Servo
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="../../assets/images/components/injora-7kg-2065-micro-servo.png" alt="INJORA 7 kg 2065 Micro Servo" 
+width="350">
+	<br>
+	<i>INJORA 7 kg 2065 Micro Servo</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
-    <img src="/assets/images/components/injora-7kg-2065-micro-servo.png" alt="INJORA 
-Micro Servo" class="component-image">
+    <img src="/assets/images/components/injora-7kg-2065-micro-servo.png" alt="INJORA 7 kg 2065 Micro Servo" 
+class="component-image">
     <i>INJORA 7 kg 2065 Micro Servo</i>
 </div>
+mkdocs-only-end -->
 
 El INJORA 7 kg 2065 Micro Servo es el servomotor encargado de controlar la dirección de Klevor, decidimos utilizar este modelo debido a su reducido tamaño y peso, además de una precisión más que suficiente para poder manejar a Klevor. [[13](#injora-7kg-2065-amazon)].
 
@@ -236,13 +347,24 @@ Gracias a la librería antes mencionada, la `adafruit_motor` con el módulo
 | Ancho      | 13 mm     |
 | Peso       | 20 g      |
 
-## 9-Axis IMU Gyroscope GY-BNO085 {:#gyroscope-gy-bno085}
+## 9-Axis IMU Gyroscope GY-BNO085
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="../../assets/images/components/bno08x.png" alt="BNO085" 
+width="350">
+	<br>
+	<i>BNO085</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
-    <img src="/assets/images/components/bno08x.png"
-  alt="BNO085" class="component-image">
+    <img src="/assets/images/components/bno08x.png" alt="BNO085" 
+class="component-image">
     <i>BNO085</i>
 </div>
+mkdocs-only-end -->
 
 El GY-BNO085 es un sensor de orientación inercial (IMU) de 9 Grados de Libertad (9DOF), ampliamente utilizado en aplicaciones que requieren un seguimiento de movimiento preciso. En el caso de Klevor, optamos por utilizar este sensor para poder lograr una mayor autonomía del robot en los cruces, ya que este sensor le permite alinearse casi perfectamente y poder ajustarse.
 
@@ -261,7 +383,7 @@ La forma en la que lo implementamos es bastante sencilla, el giroscopio siempre 
 | Ancho      | 1.8 mm    |
 | Peso       | 3 g       |
 
-# Referencias Bibliográficas
+# Referencias
 
 1. *Raspberry Pi 5
    Datasheet*. (2025). Raspberry Pi Ltd. <a id="raspberry-pi-5-datasheet" href="https://datasheets.raspberrypi.com/rpi5/raspberry-pi-5-product-brief.pdf">https://datasheets.raspberrypi.com/rpi5/raspberry-pi-5-product-brief.pdf</a>

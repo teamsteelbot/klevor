@@ -112,27 +112,6 @@ mkdocs-only-end -->
 		4. [Raspberry Pi 5's  Guide](programming/guides/raspberry-pi-5.en.md)
 		5. [Raspberry Pi Pico 2W's Guide](programming/guides/raspberry-pi-pico-2w.en.md)
 		6. [Object Detection's Guide](programming/guides/object-detection.en.md)
-	6. Source Code References
-		1. Raspberry Pi 5
-			1. [Args Module](programming/code/raspberry-pi-5/args.en.md)
-			2. [Camera Module](programming/code/raspberry-pi-5/camera.en.md)
-			3. [Common Module](programming/code/raspberry-pi-5/common.en.md)
-			4. [Files Module](programming/code/raspberry-pi-5/files.en.md)
-			5. [Hailo Module](programming/code/raspberry-pi-5/hailo.en.md)
-			6. [Log Module](programming/code/raspberry-pi-5/log.en.md)
-			7. [Model Module](programming/code/raspberry-pi-5/model.en.md)
-			8. [OpenCV Module](programming/code/raspberry-pi-5/opencv.en.md)
-			9. [Pilot Module](programming/code/raspberry-pi-5/pilot.en.md)
-			10. [Plot Module](programming/code/raspberry-pi-5/plot.en.md)
-			11. [RPLiDAR Module](programming/code/raspberry-pi-5/rplidar.en.md)
-			12. [Serial Communication Module](programming/code/raspberry-pi-5/serial-communication.en.md)
-			13. [Server Module](programming/code/raspberry-pi-5/server.en.md)
-			14. [Spawner Module](programming/code/raspberry-pi-5/spawner.en.md)
-			15. [Utils Module](programming/code/raspberry-pi-5/utils.en.md)
-			16. [YOLO Module](programming/code/raspberry-pi-5/yolo.en.md)
-		2. Raspberry Pi Pico 2W
-			1. [Lib Module](programming/code/raspberry-pi-pico-2w/lib.en.md)
-			2. [Source Code](programming/code/raspberry-pi-pico-2w/code.en.md)
 5. **[GitHub](github.en.md)**
 6. **[Videos](videos.en.md)**
 7. **[Software](software.en.md)**
