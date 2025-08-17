@@ -24,7 +24,7 @@ Bienvenidos a la documentación de Klevor, un robot autónomo diseñado para par
 A continuación se presenta un índice con los enlaces a las diferentes secciones de la documentación. Cada sección contiene información detallada sobre los aspectos técnicos y prácticos del robot, incluyendo la mecánica, el código, los dispositivos utilizados, los componentes, los esquemas y diagramas, las fotos del equipo y los vídeos de Klevor en acción. Además, se incluyen recursos externos para ampliar la información y facilitar la comprensión de los conceptos presentados.
 
 <div class="hcenter">
-    <img src="./assets/images/github/t-photos/salto-angel-regional-competition-photo.jpg" alt="Team Steel Bot en la competencia regional del Salto Ángel" 
+    <img src="./assets/images/github/t-photos/salto-angel-regional-competition-photo.png" alt="Team Steel Bot en la competencia regional del Salto Ángel" 
 class="picture--team">
     <i>Team Steel Bot en la competencia regional del Salto Ángel</i>
 </div>

@@ -56,7 +56,7 @@ Nathaly's Star es una boutique de moda que se especializa en ofrecer ropa y acce
 
 <!-- github-only-start -->
 <p align="center">
-	<img src="./assets/images/sponsors/nathalys-star.png" alt="Logo de Steel C.A." 
+	<img src="./assets/images/sponsors/steel-ca.png" alt="Logo de Steel C.A." 
 width="500">
 	<br>
 	<i>Logo de Steel C.A.</i>

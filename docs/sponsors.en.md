@@ -56,7 +56,7 @@ Nathaly's Star is a fashion boutique specialized in high-quality clothes and acc
 
 <!-- github-only-start -->
 <p align="center">
-	<img src="./assets/images/sponsors/nathalys-star.png" alt="Steel C.A.'s Logo" 
+	<img src="./assets/images/sponsors/steel-ca.png" alt="Steel C.A.'s Logo" 
 width="500">
 	<br>
 	<i>Steel C.A.'s Logo</i>

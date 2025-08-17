@@ -24,7 +24,7 @@ Welcome to Klevor's documentation, an autonomous robot designed to participate o
 Below is an index with all the links to access all the different sections of this documentation. Each section has detailed information about the robot's technical aspects, including the mechanics, source code, the different devices, the components, the schemes and diagrams, the team's photos and videos of Klevor in action. Also, we included additional resources to amplify the information to facilitate the comprehension for all the concepts involved.
 
 <div class="hcenter">
-    <img src="./assets/images/github/t-photos/salto-angel-regional-competition-photo.jpg" alt="Team Steel Bot at Salto Ángel's regional competition" 
+    <img src="./assets/images/github/t-photos/salto-angel-regional-competition-photo.png" alt="Team Steel Bot at Salto Ángel's regional competition" 
 class="picture--team">
     <i>Team Steel Bot at Salto Ángel's regional competition</i>
 </div>
