@@ -1,33 +1,75 @@
 # Inicio
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="./assets/images/logo/teamsteelbot.png" alt="Logo del Equipo Steel Bot" 
+width="300">
+	<br>
+	<i>Logo del Equipo Steel Bot</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
-    <img src="./assets/images/logo/teamsteelbot.png" alt="Logo del Equipo" 
+    <img src="/assets/images/logo/teamsteelbot.png" alt="Logo del Equipo Steel Bot" 
 class="logo--team">
-    <i>Logo del Equipo</i>
+    <i>Logo del Equipo Steel Bot</i>
 </div>
+mkdocs-only-end -->
 
 Bienvenidos a la documentación de Klevor, un robot autónomo diseñado para participar en la competencia de robótica de la World Robot Olympiad 2025, en la categoría Futuros Ingenieros. Esta documentación contiene toda la información necesaria para entender su funcionamiento, los dispositivos utilizados, el código implementado, los componentes y más. Esperamos que la misma sea útil tanto para los jueces como para cualquier persona interesada en aprender sobre este proyecto.
 
+<!-- github-only-start -->
+<div>
+	<p align="center">
+		<img src="./assets/images/logo/wro.webp" alt="Logo de la World Robot Olympiad"
+	width="200">
+		<br>
+		<i>Logo de la World Robot Olympiad</i>
+	</p>
+	<br>	
+	<p align="center">
+		<img src="./assets/images/logo/mincyt.png" alt="Logo del MINCYT"
+width="200">
+		<br>
+		<i>Logo del MINCYT</i>
+	</p>
+</div>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="image-horizontal-container">
     <div class="hcenter">
-        <img src="./assets/images/logo/wro.webp" alt="Logo de la World Robot Olympiad" 
+        <img src="/assets/images/logo/wro.webp" alt="Logo de la World Robot Olympiad" 
     class="logo--education">
         <i>Logo de la World Robot Olympiad</i>
     </div>
     <div class="hcenter">
-        <img src="./assets/images/logo/mincyt.png" alt="Logo del MINCYT" 
+        <img src="/assets/images/logo/mincyt.png" alt="Logo del MINCYT" 
     class="logo--education">
         <i>Logo del MINCYT</i>
     </div>
 </div>
+mkdocs-only-end -->
 
 A continuación se presenta un índice con los enlaces a las diferentes secciones de la documentación. Cada sección contiene información detallada sobre los aspectos técnicos y prácticos del robot, incluyendo la mecánica, el código, los dispositivos utilizados, los componentes, los esquemas y diagramas, las fotos del equipo y los vídeos de Klevor en acción. Además, se incluyen recursos externos para ampliar la información y facilitar la comprensión de los conceptos presentados.
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="./assets/images/github/t-photos/salto-angel-regional-competition-photo.png" alt="Equipo Steel Bot en la competencia regional del Salto Ángel"
+width="500">
+	<br>
+	<i>Equipo Steel Bot en la competencia regional del Salto Ángel</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
-    <img src="./assets/images/github/t-photos/salto-angel-regional-competition-photo.png" alt="Team Steel Bot en la competencia regional del Salto Ángel" 
+    <img src="/assets/images/github/t-photos/salto-angel-regional-competition-photo.png" alt="Equipo Steel Bot en la competencia regional del Salto Ángel" 
 class="picture--team">
-    <i>Team Steel Bot en la competencia regional del Salto Ángel</i>
+    <i>Equipo Steel Bot en la competencia regional del Salto Ángel</i>
 </div>
+mkdocs-only-end -->
 
 ## Índice
 
@@ -100,9 +142,36 @@ class="picture--team">
 
 ## Patrocinadores
 
+
+<!-- github-only-start -->
+<p align="center">
+	<a href="sponsors.en.md#viajes-giorgio">
+		<img src="./assets/images/sponsors/viajes-giorgio.png" alt="Logo de Viajes Giorgio"
+width="500">
+		<br>
+		<i>Logo de Viajes Giorgio</i>
+	</a>
+	<br>
+	<a href="sponsors.en.md#nathalys-star">
+		<img src="./assets/images/sponsors/nathalys-star.png" alt="Logo de Nathaly's Star"
+width="500">
+		<br>
+		<i>Logo de Nathaly's Star</i>
+	</a>
+	<br>
+	<a href="sponsors.en.md#steel-ca">
+		<img src="./assets/images/sponsors/steel-ca.png" alt="Logo de Steel C.A."
+width="500">
+		<br>
+		<i>Logo de Steel C.A.</i>
+	</a>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
     <a href="sponsors.html#viajes-giorgio">
-        <img src="./assets/images/sponsors/viajes-giorgio.png" alt="Logo de Viajes Giorgio" 
+        <img src="/assets/images/sponsors/viajes-giorgio.png" alt="Logo de Viajes Giorgio" 
 class="logo--sponsor">
     </a>
     <i>Logo de Viajes Giorgio</i>
@@ -110,7 +179,7 @@ class="logo--sponsor">
 
 <div class="hcenter">
     <a href="sponsors.html#nathalys-star">
-        <img src="./assets/images/sponsors/nathalys-star.png" alt="Logo de Nathaly's Star" 
+        <img src="/assets/images/sponsors/nathalys-star.png" alt="Logo de Nathaly's Star" 
 class="logo--sponsor">
     </a>
     <i>Logo de Nathaly's Star</i>
@@ -118,8 +187,9 @@ class="logo--sponsor">
 
 <div class="hcenter">
     <a href="sponsors.html#steel-ca">
-        <img src="./assets/images/sponsors/steel-ca.jpg" alt="Logo de Steel C.A." 
+        <img src="/assets/images/sponsors/steel-ca.png" alt="Logo de Steel C.A." 
 class="logo--sponsor">
     </a>
     <i>Logo de Steel C.A.</i>
 </div>
+mkdocs-only-end -->
