@@ -81,27 +81,27 @@ nav:
             - Guía de la Raspberry Pi 5: programming/guides/raspberry-pi-5.md
             - Guía de la Raspberry Pi Pico 2W: programming/guides/raspberry-pi-pico-2w.md
             - Guía de Detección de Objetos: programming/guides/object-detection.md
-        - Referencia del Código:
-            - Raspberry Pi 5:
-                - Módulo Args: programming/code/raspberry-pi-5/args.md
-                - Módulo Camera: programming/code/raspberry-pi-5/camera.md
-                - Módulo Common: programming/code/raspberry-pi-5/common.md
-                - Módulo Files: programming/code/raspberry-pi-5/files.md
-                - Módulo Hailo: programming/code/raspberry-pi-5/hailo.md
-                - Módulo Log: programming/code/raspberry-pi-5/log.md
-                - Módulo Model: programming/code/raspberry-pi-5/model.md
-                - Módulo OpenCV: programming/code/raspberry-pi-5/opencv.md
-                - Módulo Pilot: programming/code/raspberry-pi-5/pilot.md
-                - Módulo Plot: programming/code/raspberry-pi-5/plot.md
-                - Módulo RPLiDAR: programming/code/raspberry-pi-5/rplidar.md
-                - Módulo Serial Communication: programming/code/raspberry-pi-5/serial-communication.md
-                - Módulo Server: programming/code/raspberry-pi-5/server.md
-                - Módulo Spawner: programming/code/raspberry-pi-5/spawner.md
-                - Módulo Utils: programming/code/raspberry-pi-5/utils.md
-                - Módulo YOLO: programming/code/raspberry-pi-5/yolo.md
-            - Raspberry Pi Pico 2W:
-                - Módulo Lib: programming/code/raspberry-pi-pico-2w/lib.md
-                - Código Principal: programming/code/raspberry-pi-pico-2w/code.md
+        #- Referencia del Código:
+        #    - Raspberry Pi 5:
+        #        - Módulo Args: programming/code/raspberry-pi-5/args.md
+        #        - Módulo Camera: programming/code/raspberry-pi-5/camera.md
+        #        - Módulo Common: programming/code/raspberry-pi-5/common.md
+        #        - Módulo Files: programming/code/raspberry-pi-5/files.md
+        #        - Módulo Hailo: programming/code/raspberry-pi-5/hailo.md
+        #        - Módulo Log: programming/code/raspberry-pi-5/log.md
+        #        - Módulo Model: programming/code/raspberry-pi-5/model.md
+        #        - Módulo OpenCV: programming/code/raspberry-pi-5/opencv.md
+        #        - Módulo Pilot: programming/code/raspberry-pi-5/pilot.md
+        #        - Módulo Plot: programming/code/raspberry-pi-5/plot.md
+        #        - Módulo RPLiDAR: programming/code/raspberry-pi-5/rplidar.md
+        #        - Módulo Serial Communication: programming/code/raspberry-pi-5/serial-communication.md
+        #        - Módulo Server: programming/code/raspberry-pi-5/server.md
+        #        - Módulo Spawner: programming/code/raspberry-pi-5/spawner.md
+        #        - Módulo Utils: programming/code/raspberry-pi-5/utils.md
+        #        - Módulo YOLO: programming/code/raspberry-pi-5/yolo.md
+        #    - Raspberry Pi Pico 2W:
+        #        - Módulo Lib: programming/code/raspberry-pi-pico-2w/lib.md
+        #        - Código Principal: programming/code/raspberry-pi-pico-2w/code.md
     - Videos: videos.md
     - Software: software.md
     - Gadgets: gadgets.md

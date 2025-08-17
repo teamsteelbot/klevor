@@ -6,11 +6,22 @@ Aquí se encuentran todos los programas que utilizamos como Team Steel Bot para 
 
 ### Label Studio 
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="./assets/images/logo/label-studio.png" alt="Logo de Label Studio" 
+width="200">
+	<br>
+	<i>Logo de Label Studio</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
-    <img src="./assets/images/logo/label-studio.png" alt="Logo de Label Studio" 
+    <img src="/assets/images/logo/label-studio.png" alt="Logo de Label Studio" 
 class="logo--3rd-party">
     <i>Logo de Label Studio</i>
 </div>
+mkdocs-only-end -->
 
 [Label Studio](https://labelstud.io/) es un programa open-source (de código abierto) el cual nos permite preparar las fotos para poder entrenar una Inteligencia Artificial para la detección de objetos. Este programa no se limita a esta funcionalidad, ya que además permite asignar etiquetas a una gran variedad de tipos, como texto, audio, imágenes, vídeos, series de tiempo, multi-dominio, entre otros.
 
@@ -18,11 +29,22 @@ En el caso de Klevor, este programa se utilizó para [remarcar](programming/guid
 
 ### Google Colab
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="./assets/images/logo/google-colab.png" alt="Logo de Google Colab" 
+width="200">
+	<br>
+	<i>Logo de Google Colab</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
-    <img src="./assets/images/logo/google-colab.png" alt="Logo de Google Colab" 
+    <img src="/assets/images/logo/google-colab.png" alt="Logo de Google Colab" 
 class="logo--3rd-party">
     <i>Logo de Google Colab</i>
 </div>
+mkdocs-only-end -->
 
 Como se mencionó anteriormente, un modelo de Inteligencia Artificial debe ser entrenado, ya sea de manera local o en la nube, pues Google Colab cumple exactamente está función. [Google Colab](https://colab.research.google.com/) es un servicio que te permite ejecutar código en Python en tu propio navegador web, además de brindar acceso gratuito a GPU y TPU que puedan ser utilizadas en línea, así como también la posibilidad de utilizar Google Drive para almacenar los archivos generados por el entrenamiento del modelo.
 
@@ -30,10 +52,22 @@ En el caso de Klevor, utilizamos esta plataforma para poder [entrenar el modelo 
 
 ### Visual Studio Code
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="./assets/images/logo/visual-studio-code.png" alt="Logo de Visual Studio Code" 
+width="200">
+	<br>
+	<i>Logo de Visual Studio Code</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
-    <img src="./assets/images/logo/visual-studio-code.png" alt="Logo de Visual Studio Code" class="logo--3rd-party">
+    <img src="/assets/images/logo/visual-studio-code.png" alt="Logo de Visual Studio Code" 
+class="logo--3rd-party">
     <i>Logo de Visual Studio Code</i>
 </div>
+mkdocs-only-end -->
 
 [Visual Studio Code](https://code.visualstudio.com/) es un programa de desarrollo de software con terminal integrado, soporte nativo de Git, soporte a casi todos los lenguajes de programación, un sinnúmero de extensiones y totalmente personalizable.
 
@@ -41,11 +75,22 @@ En el caso de Klevor, nosotros utilizamos Visual Studio Code principalmente en l
 
 ### PyCharm
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="./assets/images/logo/pycharm.png" alt="Logo de PyCharm" 
+width="200">
+	<br>
+	<i>Logo de PyCharm</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
-    <img src="./assets/images/logo/pycharm.png" alt="Logo de PyCharm" 
+    <img src="/assets/images/logo/pycharm.png" alt="Logo de PyCharm" 
 class="logo--3rd-party">
     <i>Logo de PyCharm</i>
 </div>
+mkdocs-only-end -->
 
 [PyCharm](https://www.jetbrains.com/pycharm/) es otro programa de desarrollo de software; sin embargo, este presenta muchas más funcionalidades que Visual Studio Code, con el detalle que este programa necesita de una licencia, mientras que una Visual Studio Code no necesita de una licencia. Esto es debido a que PyCharm es un programa de desarrollo integrado (IDE) para Python, lo que significa que está diseñado específicamente para trabajar con este lenguaje de programación, mientras que Visual Studio Code es un editor de código fuente más general, por lo tanto, PyCharm ofrece características más avanzadas y específicas para Python, como la depuración avanzada, la refactorización de código, la integración con bases de datos, entre otras.
 
@@ -53,11 +98,22 @@ En nuestro caso, empleamos PyCharm para verificar y depurar con más profundidad
 
 ### Thonny
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="./assets/images/logo/thonny.png" alt="Logo de Thonny" 
+width="200">
+	<br>
+	<i>Logo de Thonny</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
-    <img src="./assets/images/logo/thonny.png" alt="Logo de Thonny" 
+    <img src="/assets/images/logo/thonny.png" alt="Logo de Thonny" 
 class="logo--3rd-party">
     <i>Logo de Thonny</i>
 </div>
+mkdocs-only-end -->
 
 [Thonny](https://thonny.org/) es otro programa de desarrollo integrado, utilizado principalmente para poder ejecutar código directamente en la Raspberry Pi Pico 2 W, tanto para probar, como para utilizarlo en los Desafíos. Cabe destacar que, a diferencia de las anteriores soluciones, Thonny es un IDE diseñado específicamente para principiantes en Python, lo que lo hace más fácil de usar y entender para aquellos que están empezando a aprender el lenguaje. Además, Thonny tiene una interfaz más simple y menos abrumadora que PyCharm o Visual Studio Code, así como integra funcionalidades específicas para trabajar con microcontroladores, en nuestro caso, la Raspberry Pi Pico 2 W.
 
@@ -65,41 +121,85 @@ class="logo--3rd-party">
 
 ### Canva
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="./assets/images/logo/canva.png" alt="Logo de Canva" 
+width="200">
+	<br>
+	<i>Logo de Canva</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
-    <img src="./assets/images/logo/canva.png" alt="Logo de Canva" 
+    <img src="/assets/images/logo/canva.png" alt="Logo de Canva" 
 class="logo--3rd-party">
     <i>Logo de Canva</i>
 </div>
+mkdocs-only-end -->
 
 [Canva](https://www.canva.com/) es una plataforma de diseño en línea, la cual te permite diseñar cualquier cosa en 2D, decidimos utilizar Canva principalmente para la elaboración de los diagramas de conexiones y diagramas de flujo, como una solución rápida y efectiva para la documentación, sin embargo, notamos que nuestros diagramas eran muy complejos y tomaban mucho tiempo de hacer, por lo que cambiamos a otras soluciones en línea.
 
 ### Mermaid
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="./assets/images/logo/mermaid.png" alt="Logo de Mermaid" 
+width="200">
+	<br>
+	<i>Logo de Mermaid</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
-    <img src="./assets/images/logo/mermaid.png" alt="Logo de Mermaid" 
+    <img src="/assets/images/logo/mermaid.png" alt="Logo de Mermaid" 
 class="logo--3rd-party">
     <i>Logo de Mermaid</i>
 </div>
+mkdocs-only-end -->
 
 Después de no lograr los resultados esperados con Canva, decidimos optar por [Mermaid](https://www.mermaidchart.com/), el cual es un programa open-source (de código abierto) que se especializa principalmente en la creación de diagramas con texto, con un sistema parecido a Markdown, con el objetivo de elaborar los diagramas de flujo.
 
 ### Draw.io
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="./assets/images/logo/drawio.png" alt="Logo de Draw.io" 
+width="200">
+	<br>
+	<i>Logo de Draw.io</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
-    <img src="./assets/images/logo/draw.io.png" alt="Logo de Draw.io" 
+    <img src="/assets/images/logo/drawio.png" alt="Logo de Draw.io" 
 class="logo--3rd-party">
     <i>Logo de Draw.io</i>
 </div>
+mkdocs-only-end -->
 
 [Draw.io](https://www.drawio.com/) es una página web que permite la creación de diagramas en línea, con la posibilidad de que varios usuarios lo puedan modificar al mismo tiempo, con una interfaz muy similar a la de Microsoft Visio, pero con la ventaja de que es completamente gratuita y open-source (de código abierto). Decidimos utilizar Draw.io para la creación de los diagramas de conexiones y esquemas eléctricos, ya que nos permitió crear diagramas más complejos y detallados, además de ser más fácil de usar que Canva.
 
 ### Fusion 360
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="./assets/images/logo/fusion-360.png" alt="Logo de Fusion 360" 
+width="200">
+	<br>
+	<i>Logo de Fusion 360</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
-    <img src="./assets/images/logo/fusion-360.png" alt="Logo de Fusion 360" 
+    <img src="/assets/images/logo/fusion-360.png" alt="Logo de Fusion 360" 
 class="logo--3rd-party">
     <i>Logo de Fusion 360</i>
 </div>
+mkdocs-only-end -->
 
 [Fusion 360](https://www.autodesk.com/products/fusion-360/overview) es un programa de diseño 3D de Autodesk, con el cual pudimos diseñar las piezas en 3D y exportarlas al formato `.stl` para imprimir con mucha facilidad. Es muy versátil para dibujantes, ingenieros, fabricantes y para la creación de equipos, ya que tiene funciones de renderizado, diseño, pesaje de componentes, diseño de PCB, simulaciones, modelado de forma libre, etc.
 
@@ -109,11 +209,22 @@ Elegimos este programa porque es una solución "todo en uno" que combina el dise
 
 ### Jira
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="./assets/images/logo/jira.png" alt="Logo de Jira" 
+width="200">
+	<br>
+	<i>Logo de Jira</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
-    <img src="./assets/images/logo/jira.png" alt="Logo de Jira" 
+    <img src="/assets/images/logo/jira.png" alt="Logo de Jira" 
 class="logo--3rd-party">
     <i>Logo de Jira</i>
 </div>
+mkdocs-only-end -->
 
 [Jira](https://www.atlassian.com/software/jira) es una página web cuyo objetivo es la de organizar las tareas de un equipo de trabajo y asignarles una prioridad, básicamente es una página de organización de trabajo.
 
