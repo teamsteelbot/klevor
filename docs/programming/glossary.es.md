@@ -4,7 +4,7 @@
 
 <!-- github-only-start -->
 <p align="center">
-	<img src="../../assets/images/logo/pytorch.png" alt="Logo de PyTorch" 
+	<img src="../assets/images/logo/pytorch.png" alt="Logo de PyTorch" 
 width="200">
 	<br>
 	<i>Logo de PyTorch</i>
@@ -80,7 +80,7 @@ La evaluación de métricas es un paso crucial en el proceso de detección de ob
 
 <!-- github-only-start -->
 <p align="center">
-	<img src="../../assets/images/logo/ultralytics.png" alt="Logo de Ultralytics" 
+	<img src="../assets/images/logo/ultralytics.png" alt="Logo de Ultralytics" 
 width="200">
 	<br>
 	<i>Logo de Ultralytics</i>
@@ -105,7 +105,7 @@ Una unidad de procesamiento neuronal (NPU) es un microprocesador especializado y
 
 <!-- github-only-start -->
 <p align="center">
-	<img src="../../assets/images/components/raspberry-pi-ai-hat-plus.png" alt="Raspberry Pi AI HAT+ 26 TOPS" 
+	<img src="../assets/images/components/raspberry-pi-ai-hat-plus.png" alt="Raspberry Pi AI HAT+ 26 TOPS" 
 width="350">
 	<br>
 	<i>Raspberry Pi AI HAT+ 26 TOPS</i>
@@ -140,7 +140,7 @@ Entre las características clave de las NPU se encuentran:
 
 <!-- github-only-start -->
 <p align="center">
-	<img src="../../assets/images/logo/docker.png" alt="Logo de Docker" 
+	<img src="../assets/images/logo/docker.png" alt="Logo de Docker" 
 width="200">
 	<br>
 	<i>Logo de Docker</i>

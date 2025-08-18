@@ -117,7 +117,7 @@ Después de haber anotado las imágenes con la plataforma Label Studio, se expor
 
 Luego, se ejecutó el script `yolo/scripts/split.py` para dividir el conjunto de datos en un conjunto de entrenamiento `yolo/dataset/g/organized/train`, un conjunto de validación `yolo/dataset/g/organized/val` y un conjunto de testing `yolo/dataset/g/organized/test`, con una distribución del 70%, 20% y 10%, respectivamente. Este script utiliza la biblioteca `os` para crear las carpetas necesarias y mover las imágenes a las carpetas correspondientes. Además, este script eliminará las imágenes de la carpeta `yolo/dataset/g/augmented`, mas no modificará o eliminará las carpetas `yolo/dataset/g/labeled/to_process` y `yolo/dataset/g/labeled/processed`.
 
-> [!INFO]
+> [!NOTE]
 > Se puede observar, que en cada una de las rutas, se encuentra la carpeta `to_process`, la cual es una carpeta temporal, que se utiliza para guardar las imágenes que se están procesando. Una vez que se han procesado las imágenes, los archivos dentro de las mismas se mueven a una carpeta `processed` correspondiente, la cual se encuentra en la misma ruta. De esta forma, se evita que las imágenes procesadas se mezclen con las imágenes por procesar, así como permite a futuro seguir entrenando el mismo modelo, sin necesidad de volver a procesar las mismas imágenes. Así mismo, se puede observar que tanto para `augmented` y `organized`, no existe la carpeta `to_process`, ya que, después de ser procesadas estas imágenes, son eliminadas debido al gran número de estas al momento de realizar el `data augmentation`.
 
 ## Entrenamiento del Modelo

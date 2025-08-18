@@ -4,7 +4,7 @@
 
 <!-- github-only-start -->
 <p align="center">
-	<img src="../../assets/images/logo/pytorch.png" alt="PyTorch's Logo" 
+	<img src="../assets/images/logo/pytorch.png" alt="PyTorch's Logo" 
 width="200">
 	<br>
 	<i>PyTorch's Logo</i>
