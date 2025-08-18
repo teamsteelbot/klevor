@@ -1,3 +1,3 @@
-# Python Libraries {:#python-libraries}
+# Python Libraries
 
 *In Development*

@@ -1,3 +1,3 @@
-# Raspberry Pi Pico 2W Guide {:#raspberry-pi-pico-2w-guide}
+# Raspberry Pi Pico 2 W Guide
 
 *In Development*

@@ -1,13 +1,25 @@
-# Diagramas de Flujo {:#flowcharts}
+# Diagramas de Flujo
 
-## Desafío sin Obstáculos {:#without-obstacles-challenge}
+## Desafío sin Obstáculos
 
-### Versión 1: Empleada en el Prototipo 1, 2 y 3 {:#without-obstacles-challenge-version1}
+### Versión 1: Empleada en el Prototipo 1, 2 y 3
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="../../assets/images/github/schemes/flowcharts/without-obstacles-challenge/version1-flowchart.es.png" alt="Versión 1 del diagrama de Flujo del Desafío sin Obstáculos" 
+width="1000">
+	<br>
+	<i>Versión 1 del diagrama de Flujo del Desafío sin Obstáculos</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
-    <img src="/assets/images/github/schemes/flowcharts/without-obstacles-challenge/version1-flowchart.png" alt="Versión 1 del diagrama de Flujo del Desafío sin Obstáculos" class="flowchart-image">
+    <img src="/assets/images/github/schemes/flowcharts/without-obstacles-challenge/version1-flowchart.png" alt="Versión 1 del diagrama de Flujo del Desafío sin Obstáculos" 
+class="flowchart-image">
     <i>Versión 1 del diagrama de Flujo del Desafío sin Obstáculos</i>
 </div>
+mkdocs-only-end -->
 
 Como se puede apreciar, Klevor siempre intenta cumplir una serie de pasos:
 
@@ -15,19 +27,42 @@ Como se puede apreciar, Klevor siempre intenta cumplir una serie de pasos:
 - Mientras está girando, empieza a leer los datos del giroscopio, cuando detecte que su orientación ha cambiado al menos 90° con respecto a como inició a girar, empieza a avanzar hacia adelante, sumándole 1 a su contador de giros, en caso contrario, es decir, que no ha girado 90°, simplemente sigue girando.
 - Tras completar los 12 giros, Klevor simplemente avanza hasta que detecte que la distancia al frente sea de alrededor de 1.25 m, tras esto simplemente para.
 
-### Versión 2: Empleada en el Prototipo 3 y 4 {:#without-obstacles-challenge-version2}
+### Versión 2: Empleada en el Prototipo 3 y 4
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="../../assets/images/github/schemes/flowcharts/without-obstacles-challenge/version2-flowchart.es.png" alt="Versión 2 del diagrama de Flujo del Desafío sin Obstáculos" 
+width="1000">
+	<br>
+	<i>Versión 2 del diagrama de Flujo del Desafío sin Obstáculos</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
-    <img src="/assets/images/github/schemes/flowcharts/without-obstacles-challenge/version2-flowchart.png" alt="Versión 2 del diagrama de Flujo del Desafío sin Obstáculos" class="flowchart-image">
+    <img src="/assets/images/github/schemes/flowcharts/without-obstacles-challenge/version2-flowchart.png" alt="Versión 2 del diagrama de Flujo del Desafío sin Obstáculos" 
+class="flowchart-image">
     <i>Versión 2 del diagrama de Flujo del Desafío sin Obstáculos</i>
 </div>
+mkdocs-only-end -->
 
-## Desafío con Obstáculos {:#obstacles-challenge}
+## Desafío con Obstáculos
 
-### Versión 1: Empleada en el Prototipo 1, 2 y 3 {:#obstacles-challenge-version1}
+### Versión 1: Empleada en el Prototipo 1, 2 y 3
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="../../assets/images/github/schemes/flowcharts/obstacles-challenge/version1-flowchart.es.png" alt="Versión 1 del diagrama de Flujo del Desafío con Obstáculos" 
+width="1000">
+	<br>
+	<i>Versión 1 del diagrama de Flujo del Desafío con Obstáculos</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
-    <img src="/assets/images/github/schemes/flowcharts/obstacles-challenge/version1-flowchart.png"
-alt="Versión 1 del diagrama de Flujo del Desafío con Obstáculos" class="flowchart-image">
+    <img src="/assets/images/github/schemes/flowcharts/obstacles-challenge/version1-flowchart.png" alt="Versión 1 del diagrama de Flujo del Desafío con Obstáculos" 
+class="flowchart-image">
     <i>Versión 1 del diagrama de Flujo del Desafío con Obstáculos</i>
 </div>
+mkdocs-only-end -->

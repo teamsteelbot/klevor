@@ -1,13 +1,25 @@
-# Lenguajes de Programación Actuales {:#current-programming-languages}
+# Lenguajes de Programación Actuales
 
 Muchos robots autónomos, si no es que todos, necesitan de un lenguaje de programación para poder llevar a cabo tareas complejas. En el caso de Klevor, utilizamos un lenguaje principal: Python, y una implementación para la Raspberry Pi Pico 2 WH: CircuitPython.
 
-## Python {:#python}
+## Python
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="../../assets/images/logo/python.png" alt="Logo de Python" 
+width="200">
+	<br>
+	<i>Logo de Python</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
-    <img src= "/assets/images/logo/python.png" alt="Python" class="logo--3rd-party">
+    <img src="/assets/images/logo/python.png" alt="Logo de Python" 
+class="logo--3rd-party">
     <i>Logo de Python</i>
 </div>
+mkdocs-only-end -->
 
 Python fue creado por **Guido van Rossum**, un programador holandés que comenzó a trabajar en Python a finales de la década de 1980. La primera versión pública de Python (versión 0.9.0) fue lanzada en febrero de 1991.
 
@@ -31,13 +43,24 @@ Cabe destacar que, a pesar de su sencillez, Python es un lenguaje potente y vers
 
 La ventaja principal de Python es la versatilidad, pues no necesitamos administrar cada tarea en un lenguaje de programación distinto, sino que podemos utilizar Python para todo, desde la detección de obstáculos hasta el control de los motores, lo que simplifica el proceso de desarrollo y reduce la complejidad del código.
 
-## CircuitPython {:#circuit-python}
+## CircuitPython
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="../../assets/images/logo/circuit-python.png" alt="Logo de CircuitPython" 
+width="200">
+	<br>
+	<i>Logo de CircuitPython</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
-    <img src="/assets/images/logo/circuit-python.png" alt="CircuitPython" 
+    <img src="/assets/images/logo/circuit-python.png" alt="Logo de CircuitPython" 
 class="logo--3rd-party">
     <i>Logo de CircuitPython</i>
 </div>
+mkdocs-only-end -->
 
 CircuitPython es una bifurcación de MicroPython, y fue desarrollado principalmente por **Adafruit Industries**, una empresa líder en hardware de código abierto y educación electrónica. Si bien no hay un único creador individual como en Python o MicroPython, **Limor Fried (Ladyada)**, la fundadora de Adafruit, y su equipo han sido los principales impulsores y desarrolladores de CircuitPython.
 
@@ -47,7 +70,7 @@ Dado que el código reside en una unidad de disco accesible por USB, es muy fác
 
 Al igual que MicroPython, CircuitPython es una implementación de Python en microcontroladores, pero está optimizada para ser utilizada en dispositivos con recursos limitados, como la Raspberry Pi Pico 2 WH [[2](#circuit-python-docs)].
 
-# Referencias Bibliográficas
+# Referencias
 
 1. *El tutorial de Python*. (2025). Python Software Foundation. <a id="python-docs" href="https://docs.python.org/es/3/tutorial/">https://docs.python.org/es/3/tutorial/</a>
 

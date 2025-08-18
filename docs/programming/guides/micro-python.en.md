@@ -1,3 +1,3 @@
-# MicroPython Guide {:#micro-python-guide}
+# MicroPython Guide
 
 *In Development*

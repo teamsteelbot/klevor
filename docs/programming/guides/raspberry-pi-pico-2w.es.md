@@ -1,12 +1,23 @@
-# Guía de la Raspberry Pi Pico 2W {:#raspberry-pi-pico-2w-guide}
+# Guía de la Raspberry Pi Pico 2 W
 
-## Configuración {:#configuration}
+## Configuración
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="../../assets/images/components/raspberry-pi-pico-2-w.png" alt="Raspberry Pi Pico 2 W" 
+width="350">
+	<br>
+	<i>Raspberry Pi Pico 2 W</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
-    <img src="/assets/images/components/raspberry-pi-pico-2-w.png" alt="Raspberry Pi Pico 2W" 
+    <img src="/assets/images/components/raspberry-pi-pico-2-w.png" alt="Raspberry Pi Pico 2 W" 
 class="component-image">
-    <i>Raspberry Pi Pico 2W</i>
+    <i>Raspberry Pi Pico 2 W</i>
 </div>
+mkdocs-only-end -->
 
 Para poder configurar la Raspberry Pi Pico 2 W y poder utilizarla sin problemas, recomendamos seguir una serie de pasos:
 

@@ -110,7 +110,7 @@ mkdocs-only-end -->
 		2. [CircuitPython's Guide](programming/guides/circuit-python.en.md)
 		3. [MicroPython's Guide](programming/guides/micro-python.en.md)
 		4. [Raspberry Pi 5's  Guide](programming/guides/raspberry-pi-5.en.md)
-		5. [Raspberry Pi Pico 2W's Guide](programming/guides/raspberry-pi-pico-2w.en.md)
+		5. [Raspberry Pi Pico 2 W's Guide](programming/guides/raspberry-pi-pico-2w.en.md)
 		6. [Object Detection's Guide](programming/guides/object-detection.en.md)
 5. **[GitHub](github.en.md)**
 6. **[Videos](videos.en.md)**

@@ -1,3 +1,3 @@
-# CircuitPython Guide {:#circuit-python-guide}
+# CircuitPython Guide
 
 *In Development*

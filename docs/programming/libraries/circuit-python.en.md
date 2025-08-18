@@ -1,3 +1,3 @@
-# CircuitPython Libraries {:#circuit-python-libraries}
+# CircuitPython Libraries
 
 *In Development*

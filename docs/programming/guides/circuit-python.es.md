@@ -1,12 +1,23 @@
-# Guía de CircuitPython {:#circuit-python-guide}
+# Guía de CircuitPython
 
-## Instalación de CircuitPython {:#installation}
+## Instalación de CircuitPython
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="../../assets/images/logo/circuit-python.png" alt="Logo de CircuitPython" 
+width="200">
+	<br>
+	<i>Logo de CircuitPython</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
-    <img src="/assets/images/logo/circuit-python.png" 
-alt="Logo de CircuitPython" class="logo--3rd-party">
+    <img src="/assets/images/logo/circuit-python.png" alt="Logo de CircuitPython" 
+class="logo--3rd-party">
     <i>Logo de CircuitPython</i>
 </div>
+mkdocs-only-end -->
 
 El proceso para instalar CircuitPython es prácticamente el mismo método que se usa para poder instalar MicroPython, en resumidas cuentas lo que hay que hacer es:
 
@@ -17,6 +28,6 @@ El proceso para instalar CircuitPython es prácticamente el mismo método que se
 
 Después del reinicio, tu Raspberry Pi Pico debería aparecer ahora como una nueva unidad de disco llamada "CIRCUITPY" además de tener unos archivos como `code.py` [[1](#circuit-python-docs)]. Esto significa que la instalación fue exitosa y CircuitPython está listo para usar.
 
-# Referencias Bibliográficas
+# Referencias
 
 1. *CircuitPython*. (2025). CircuitPython. <a id="circuit-python-docs" href="https://docs.circuitpython.org/en/latest/README.html">https://docs.circuitpython.org/en/latest/README.html</a>

@@ -79,7 +79,7 @@ nav:
             - Guía de CircuitPython: programming/guides/circuit-python.md
             - Guía de MicroPython: programming/guides/micro-python.md
             - Guía de la Raspberry Pi 5: programming/guides/raspberry-pi-5.md
-            - Guía de la Raspberry Pi Pico 2W: programming/guides/raspberry-pi-pico-2w.md
+            - Guía de la Raspberry Pi Pico 2 W: programming/guides/raspberry-pi-pico-2w.md
             - Guía de Detección de Objetos: programming/guides/object-detection.md
     - Videos: videos.md
     - Software: software.md
@@ -201,7 +201,7 @@ plugins:
                   Guía de CircuitPython: CircuitPython Guide
                   Guía de MicroPython: MicroPython Guide
                   Guía de Raspberry Pi 5: Raspberry Pi 5 Guide
-                  Guía de Raspberry Pi Pico 2W: Raspberry Pi Pico 2W Guide
+                  Guía de Raspberry Pi Pico 2 W: Raspberry Pi Pico 2 W Guide
                   Guía de Detección de Objetos: Object Detection Guide
                   Código Principal: Main Code
                   Patrocinadores: Sponsors

@@ -1,3 +1,3 @@
-# Object Detection Guide {:#object-detection-guide }
+# Object Detection Guide
 
 *In Development*

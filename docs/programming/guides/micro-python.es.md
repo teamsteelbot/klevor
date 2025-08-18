@@ -1,12 +1,23 @@
-# Guía de MicroPython {:#micro-python-guide}
+# Guía de MicroPython
 
-## Instalación de MicroPython {:#installation}
+## Instalación de MicroPython
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="../../assets/images/logo/micro-python.png" alt="Logo de MicroPython" 
+width="200">
+	<br>
+	<i>Logo de MicroPython</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
-    <img src="/assets/images/logo/micro-python.png" 
-alt="Logo de MicroPython" class="logo--3rd-party">
+    <img src="/assets/images/logo/micro-python.png" alt="Logo de MicroPython" 
+class="logo--3rd-party">
     <i>Logo de MicroPython</i>
 </div>
+mkdocs-only-end -->
 
 Por defecto, la Raspberry Pi Pico 2 WH viene con MicroPython preinstalado. Sin embargo, si deseas instalar una versión diferente o actualizarla, puedes seguir estos pasos [[1](#micro-python-docs)] | [[2](#raspberry-pi-micro-python-docs)]:
 
@@ -15,7 +26,7 @@ Por defecto, la Raspberry Pi Pico 2 WH viene con MicroPython preinstalado. Sin e
 3. Copiar el archivo `.uf2` descargado en la unidad de almacenamiento de la Raspberry Pi Pico. Automáticamente, la Raspberry Pi Pico se reiniciará.
 4. Desconectar la Raspberry Pi Pico y volver a conectarla sin presionar el botón BOOTSEL.
 
-# Referencias Bibliográficas
+# Referencias
 
 1. *MicroPython*. (2025). MicroPython. <a id="micro-python-docs" href="https://micropython.org/">https://micropython.org/</a>
 

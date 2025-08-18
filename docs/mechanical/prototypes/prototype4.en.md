@@ -1,3 +1,3 @@
-# Prototype 4 {:#prototype4}
+# Prototype 4
 
 *In Development*

@@ -1,3 +1,3 @@
-# Previous Common Parts {:#previous-common-parts}
+# Previous Common Parts
 
 *In Development*

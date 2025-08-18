@@ -1,3 +1,3 @@
-# MkDocs Guide {:#mkdocs-guide}
+# MkDocs Guide
 
 *In Development*

@@ -1,1 +1,1 @@
-# Lenguajes de Programación Futuros {:#future-programming-languages}
+# Lenguajes de Programación Futuros

@@ -1,14 +1,25 @@
-# Guía de Detección de Objetos {:#object-detection-guide}
+# Guía de Detección de Objetos
 
-## Creación del Modelo {:#model-creation}
+## Creación del Modelo
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="../../assets/images/logo/github.png" alt="Logo de GitHub" 
+width="200">
+	<br>
+	<i>Logo de GitHub</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
     <img src="/assets/images/logo/github.png" alt="Logo de GitHub" 
 class="logo--3rd-party">
     <i>Logo de GitHub</i>
 </div>
+mkdocs-only-end -->
 
-Para empezar, debemos descargamos nuestro repositorio de GitHub, donde se encuentra el código del modelo de detección de objetos, así como los scripts necesarios para su entrenamiento y conversión a un formato compatible con el Hailo 8. Para ello, recomendamos dirigirse a la siguiente sección de la documentación [```GitHub```](../../github.es.md#repository), donde se explican las distintas formas de descargar el repositorio, ya sea mediante la descarga del archivo comprimido o mediante la clonación del repositorio con Git.
+Para empezar, debemos descargamos nuestro repositorio de GitHub, donde se encuentra el código del modelo de detección de objetos, así como los scripts necesarios para su entrenamiento y conversión a un formato compatible con el Hailo 8. Para ello, recomendamos dirigirse a la siguiente sección de la documentación [```GitHub```](../../github.es.md#repositorio), donde se explican las distintas formas de descargar el repositorio, ya sea mediante la descarga del archivo comprimido o mediante la clonación del repositorio con Git.
 
 Después de haber descargado el repositorio, debemos dirigirnos a la carpeta `devices/raspberry-pi-5/src`, donde se encuentra todo el código empleado por la Raspberry Pi 5, puede realizarse con el siguiente comando:
 
@@ -16,8 +27,8 @@ Después de haber descargado el repositorio, debemos dirigirnos a la carpeta `de
 cd devices/raspberry-pi-5/src
 ```
 
-!!! warning
-	Para que dicho comando funcione correctamente, la ruta debe ser relativa a la carpeta donde se encuentra el repositorio clonado. En caso de no estar en la carpeta raíz del repositorio, se debe modificar la ruta acorde a la ubicación del mismo.
+> [!WARNING]
+> Para que dicho comando funcione correctamente, la ruta debe ser relativa a la carpeta donde se encuentra el repositorio clonado. En caso de no estar en la carpeta raíz del repositorio, se debe modificar la ruta acorde a la ubicación del mismo.
 
 Posteriormente, nos movemos a la carpeta `yolo/scripts`:
 
@@ -44,6 +55,25 @@ Para la creación del conjunto de datos, tomamos imágenes de los prismas que se
 
 Luego, ejecutamos el script `yolo/scripts/resize.py` para redimensionar las imágenes a un tamaño de 640 × 640 píxeles, que es el tamaño de entrada del modelo YOLOv11. Este script utiliza la biblioteca OpenCV para redimensionar las imágenes y guardarlas en la carpeta `yolo/dataset/general/resized/to_process`.
 
+<!-- github-only-start -->
+<div>
+	<p align="center">
+		<img src="../../assets/images/object-detection/original-image.jpg" alt="Imagen sin redimensionar del conjunto de datos" 
+	width="750">
+		<br>
+		<i>Imagen sin redimensionar del conjunto de datos</i>
+	</p>
+	<br>
+	<p align="center">
+		<img src="../../assets/images/object-detection/resized-image.jpg" alt="Imagen redimensionada del conjunto de datos"
+width="750">
+		<br>
+		<i>Imagen redimensionada del conjunto de datos</i>
+	</p>
+</div>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="center image-comparison-container">
     <div class="hcenter">
        <img src="/assets/images/object-detection/original-image.jpg" alt="Imagen sin redimensionar del conjunto de datos" class="object-detection-image">
@@ -54,16 +84,28 @@ Luego, ejecutamos el script `yolo/scripts/resize.py` para redimensionar las imá
        <i>Imagen redimensionada del conjunto de datos</i>
     </div>
 </div>
+mkdocs-only-end -->
 
 Posteriormente, se realizó la anotación de las imágenes, donde se etiquetaron los prismas con sus respectivos colores. Para ello, se utilizó la herramienta [Label Studio](https://labelstud.io/), una herramienta de etiquetado de datos de código abierto que permite crear conjuntos de datos personalizados para el entrenamiento de modelos de aprendizaje automático.
 
-!!! warning
-	Si el número de imágenes por anotar es muy grande, notaremos que la herramienta Label Studio arrojará un error `The number of files exceeded settings.DATA_UPLOAD_MAX_NUMBER_FILES`. Para solucionarlo, si Label Studio fue instalado como un paquete de Python, se puede modificar el archivo `settings.py` que se encuentra en la carpeta `label_studio/core/settings.py`, donde se debe cambiar el valor de `DATA_UPLOAD_MAX_NUMBER_FILES` a un número mayor al número de imágenes por anotar o `None` si se desea un número ilimitado. En caso de no encontrar este archivo, se puede buscar en la carpeta `site-packages/label_studio/core/settings.py` dentro del entorno virtual de Python donde fue instalado Label Studio.
+> [!WARNING]
+> Si el número de imágenes por anotar es muy grande, notaremos que la herramienta Label Studio arrojará un error `The number of files exceeded settings.DATA_UPLOAD_MAX_NUMBER_FILES`. Para solucionarlo, si Label Studio fue instalado como un paquete de Python, se puede modificar el archivo `settings.py` que se encuentra en la carpeta `label_studio/core/settings.py`, donde se debe cambiar el valor de `DATA_UPLOAD_MAX_NUMBER_FILES` a un número mayor al número de imágenes por anotar o `None` si se desea un número ilimitado. En caso de no encontrar este archivo, se puede buscar en la carpeta `site-packages/label_studio/core/settings.py` dentro del entorno virtual de Python donde fue instalado Label Studio.
 
+<!-- github-only-start -->
+<p align="center">
+   <img src="../../assets/images/object-detection/label-studio.png" alt="Anotación de imágenes con Label Studio"
+width="750">
+   <br>
+   <i>Anotación de imágenes con Label Studio</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
    <img src="/assets/images/object-detection/label-studio.png" alt="Anotación de imágenes con Label Studio" class="object-detection-image">
    <i>Anotación de imágenes con Label Studio</i>
 </div>
+mkdocs-only-end -->
 
 Durante el proceso, manejamos conjunto de datos de 1 (**G**, **M**, **R**), 2 (**GR**), 3 (**GMR**), 4 (**BGOR**) clases, las cuales fuimos variando a lo largo del desarrollo del proyecto, donde **M** proviene de `magenta rectangular prism`, **G** de `green rectangular prism`, **R** de `red rectangular prism`, **B** de `blue line` y **O** de `orange line`. Primeramente, desarrollamos un modelo de 4 clases, sin embargo, no logró un buen rendimiento para todas las clases, ya que incluía, además del prisma rojo y verde, la línea naranja y la línea azul, que finalmente, debido a nuestros componentes, se podían inferir mediante el RPLIDAR C1. Posteriormente, se decidió omitir las clases relacionadas con las líneas de la pista, las cuales no eran necesarias para la detección de los prismas. Luego, se optó por un modelo de 2 clases, el cual fue capaz de detectar los prismas rojo y verde. Seguidamente, se optó por un conjunto de datos de 3 clases, ya que añadimos una clase adicional, el prisma magenta, para poder realizar la detección del estacionamiento. Después, se optó por dos modelos, uno con dos clases (**GR**), para poder detectar los obstáculos de la pista, y otro de una sola clase (**M**) para la detección del estacionamiento después de haber recorrido toda la pista. Finalmente, debido a ciertas complicaciones por la optimización de los modelos para el NPU Hailo 8, se optó por tres modelos de 1 clase (**G**, **M**, **R**), donde cada uno de estos modelos fue capaz de detectar los prismas de un color específico, acorde a lo requerido en la pista.
 
@@ -75,20 +117,31 @@ Después de haber anotado las imágenes con la plataforma Label Studio, se expor
 
 Luego, se ejecutó el script `yolo/scripts/split.py` para dividir el conjunto de datos en un conjunto de entrenamiento `yolo/dataset/g/organized/train`, un conjunto de validación `yolo/dataset/g/organized/val` y un conjunto de testing `yolo/dataset/g/organized/test`, con una distribución del 70%, 20% y 10%, respectivamente. Este script utiliza la biblioteca `os` para crear las carpetas necesarias y mover las imágenes a las carpetas correspondientes. Además, este script eliminará las imágenes de la carpeta `yolo/dataset/g/augmented`, mas no modificará o eliminará las carpetas `yolo/dataset/g/labeled/to_process` y `yolo/dataset/g/labeled/processed`.
 
-!!! info
-	Se puede observar, que en cada una de las rutas, se encuentra la carpeta `to_process`, la cual es una carpeta temporal, que se utiliza para guardar las imágenes que se están procesando. Una vez que se han procesado las imágenes, los archivos dentro de las mismas se mueven a una carpeta `processed` correspondiente, la cual se encuentra en la misma ruta. De esta forma, se evita que las imágenes procesadas se mezclen con las imágenes por procesar, así como permite a futuro seguir entrenando el mismo modelo, sin necesidad de volver a procesar las mismas imágenes. Así mismo, se puede observar que tanto para `augmented` y `organized`, no existe la carpeta `to_process`, ya que, después de ser procesadas estas imágenes, son eliminadas debido al gran número de estas al momento de realizar el `data augmentation`.
+> [!INFO]
+> Se puede observar, que en cada una de las rutas, se encuentra la carpeta `to_process`, la cual es una carpeta temporal, que se utiliza para guardar las imágenes que se están procesando. Una vez que se han procesado las imágenes, los archivos dentro de las mismas se mueven a una carpeta `processed` correspondiente, la cual se encuentra en la misma ruta. De esta forma, se evita que las imágenes procesadas se mezclen con las imágenes por procesar, así como permite a futuro seguir entrenando el mismo modelo, sin necesidad de volver a procesar las mismas imágenes. Así mismo, se puede observar que tanto para `augmented` y `organized`, no existe la carpeta `to_process`, ya que, después de ser procesadas estas imágenes, son eliminadas debido al gran número de estas al momento de realizar el `data augmentation`.
 
-## Entrenamiento del Modelo {:#model-training}
+## Entrenamiento del Modelo
 
+<!-- github-only-start -->
+<p align="center">
+   <img src="../../assets/images/object-detection/inferences.png" alt="Imagen con distintas inferencias realizadas (modelo GMR)"
+width="750">
+   <br>
+   <i>Imagen con distintas inferencias realizadas (modelo GMR)</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
    <img src="/assets/images/object-detection/inferences.png" alt="Imagen con distintas inferencias realizadas (modelo GMR)" class="object-detection-image">
    <i>Imagen con distintas inferencias realizadas (modelo GMR)</i>
 </div>
+mkdocs-only-end -->
 
 Primeramente, dependiendo del modelo y la forma en la que se vaya a entrenar el mismo, se debe modificar un archivo `.yaml`, los cuales se encuentran dentro de la carpeta `yolo/data`, donde se debe modificar la ruta de las imágenes y las etiquetas a las rutas correspondientes. En este caso, se debe modificar el archivo `g.yaml` para el modelo de 1 clase, cuya carpeta padre variará entre `colab` y `local` dependiendo del entorno.
 
-!!! note
-	Al momento de clonar este repositorio, se suministran archivos plantilla para los `.yaml`, los cuales terminan en `.yaml.example`. A los cuales posterior a su modificación, se les debe cambiar la extensión a `.yaml`.
+> [!NOTE]
+> Al momento de clonar este repositorio, se suministran archivos plantilla para los `.yaml`, los cuales terminan en `.yaml.example`. A los cuales posterior a su modificación, se les debe cambiar la extensión a `.yaml`.
 
 Existen dos maneras de entrenar el modelo dependiendo del equipo disponible en el momento:
 
@@ -104,27 +157,50 @@ Existen dos maneras de entrenar el modelo dependiendo del equipo disponible en e
 4. **ONNX**: Ejecutamos el script `yolo/scripts/export.py`, y pasamos como formato del modelo `onnx`, el cual es un formato abierto empleado para representar modelos de Machine Learning de forma interoperable entre distintos frameworks, herramientas, entre otros [[2](#onnx)].
 5. **Limpieza**: Finalmente, ejecutamos el script `yolo/scripts/after_training.py` para eliminar la carpeta `yolo/dataset/g/organized/val`, ya que esta no serán necesaria para los próximos pasos. Además, moverá el contenido de la carpeta `yolo/dataset/g/organized/train/images` al subdirectorio en `hailo/suite/train`, para posteriormente ser eliminada la primera. Así mismo, para que el modelo pueda ser convertido a un formato compatible con el Hailo 8, moverá los pesos de formato `ONNX` con mejor resultado correspondiente al modelo.
 
-!!! tip
-	En el caso de emplear Google Colab y que se desconecte la sesión del entorno de ejecución durante el entrenamiento del modelo, se puede retomar el mismo, al modificar la ruta del modelo o el nombre del modelo a emplear en la función `train_model` del Notebook, por la ruta donde se guardó los mejores pesos del entrenamiento, en nuestro caso: `g_to_train/yolo/v11/runs/m/weights/best.pt`.
+> [!TIP]
+> En el caso de emplear Google Colab y que se desconecte la sesión del entorno de ejecución durante el entrenamiento del modelo, se puede retomar el mismo, al modificar la ruta del modelo o el nombre del modelo a emplear en la función `train_model` del Notebook, por la ruta donde se guardó los mejores pesos del entrenamiento, en nuestro caso: `g_to_train/yolo/v11/runs/m/weights/best.pt`.
 
+<!-- github-only-start -->
+<p align="center">
+   <img src="../../assets/images/components/nvidia-l4.png"
+alt="Vista frontal de la GPU Tesla L4 de NVIDIA"
+width="350">
+   <br>
+   <i>Vista frontal de la GPU Tesla L4 de NVIDIA</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
    <img src="/assets/images/components/nvidia-l4.png" 
 alt="Vista frontal de la GPU Tesla L4 de NVIDIA" class="component-image">
     <i>Vista frontal de la GPU Tesla L4 de NVIDIA</i>
 </div>
+mkdocs-only-end -->
 
-!!! important
-	Durante esta sección se menciona la versión 11 de YOLO, pero, de la misma forma que se menciona el dataset **G** a fines didácticos, se puede utilizar cualquier versión de YOLO, así como cualquier dataset, ya que el proceso es el mismo. Sin embargo, se recomienda utilizar la versión 11 de YOLO, debido a que es la más reciente y cuenta con mejoras significativas en comparación con versiones anteriores.
+> [!IMPORTANT]
+> Durante esta sección se menciona la versión 11 de YOLO, pero, de la misma forma que se menciona el dataset **G** a fines didácticos, se puede utilizar cualquier versión de YOLO, así como cualquier dataset, ya que el proceso es el mismo. Sin embargo, se recomienda utilizar la versión 11 de YOLO, debido a que es la más reciente y cuenta con mejoras significativas en comparación con versiones anteriores.
 
 ## Conversión del Modelo {:#model-conversion}
 
 Para la conversión del modelo a un formato compatible con el Hailo 8, requerimos de Docker (mas no es imprescindible), para crear un contenedor con todos los paquetes necesarios para su correcto funcionamiento.
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="../../assets/images/logo/docker.png" alt="Logo de Docker" 
+width="200">
+	<br>
+	<i>Logo de Docker</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
     <img src="/assets/images/logo/docker.png" alt="Logo de Docker" 
 class="logo--3rd-party">
     <i>Logo de Docker</i>
 </div>
+mkdocs-only-end -->
 
 Al momento de la instalación de la AI HAT+, ejecutamos el comando `hailortcli fw-control identify`, donde pudimos notar la siguiente línea:
 
@@ -140,11 +216,11 @@ Primeramente, visitamos la página oficial de Hailo, en el cual debemos crearnos
 - Paquete de Python (whl) de HailoRT, para la arquitectura donde está siendo ejecutado el Docker (en nuestro caso, x86_64), y la versión de Python del contenedor (de no ser modificado, debe ser la versión 3.10). Versión recomendada: 4.20.0.
 - Hailo Dataflow Compiler, para la arquitectura donde está siendo ejecutado el Docker (en nuestro caso, `x86_64`). Versión recomendada: 3.30.0.
 
-!!! important
-	En el caso de emplear una GPU NVIDIA para la optimización del formato `.har`, también debemos instalar el [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html)
+> [!IMPORTANT]
+> En el caso de emplear una GPU NVIDIA para la optimización del formato `.har`, también debemos instalar el [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html)
 
-!!! important
-	En el caso de no conseguir uno de los paquetes, en el portal para descargar software de Hailo, se tienen dos formas para buscar los paquetes: `Latest releases` (o últimas versiones), y `Archive` (o archivados); el primero de ellos es el predeterminado. De no conseguir el respectivo paquete en `Latest releases`, este probablemente esté en `Archive`.
+> [!IMPORTANT]
+> En el caso de no conseguir uno de los paquetes, en el portal para descargar software de Hailo, se tienen dos formas para buscar los paquetes: `Latest releases` (o últimas versiones), y `Archive` (o archivados); el primero de ellos es el predeterminado. De no conseguir el respectivo paquete en `Latest releases`, este probablemente esté en `Archive`.
 
 Posteriormente, cambiamos de nuevo el directorio actual:
 
@@ -179,8 +255,8 @@ Posteriormente, inicializamos el contenedor Docker:
     docker run -it --name compile_onnx_file --ipc=host -v {path}:/home/hailo/shared hailo_compiler:v0
     ```
 
-!!! note
-	Sustituimos `path` por la ruta absoluta de la carpeta `hailo/suite`.
+> [!NOTE]
+> Sustituimos `path` por la ruta absoluta de la carpeta `hailo/suite`.
 
 Dentro del contenedor, nos movemos al directorio `/home/hailo/shared/libs`:
 
@@ -227,17 +303,17 @@ Instalamos todas las dependencias requeridas:
 pip install -e .
 ```
 
-!!! warning
-	En el caso de obtener un error similar a:
-	```bash
-	ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts. 
-	tensorflow 2.12.0 requires numpy<1.24,>=1.22, but you have numpy 2.2.6 which is incompatible. 
-	hailo-dataflow-compiler 3.30.0 requires numpy==1.23.3, but you have numpy 2.2.6 which is incompatible.
-	```
-	Debemos modificar el archivo `setup.py` que se encuentra dentro del repositorio, y en la línea 44, dentro de la función `main`, sustituimos `"numpy"` por `"numpy==1.23.3"`, así como en la línea 46, sustituimos `"scipy"` por `"scipy==1.9.3"`. Reintentamos el comando:
-	```bash
-	pip install -e .
-	```
+> [!WARNING]
+> En el caso de obtener un error similar a:
+> ```bash
+> ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts. 
+> tensorflow 2.12.0 requires numpy<1.24,>=1.22, but you have numpy 2.2.6 which is incompatible. 
+> hailo-dataflow-compiler 3.30.0 requires numpy==1.23.3, but you have numpy 2.2.6 which is incompatible.
+> ```
+> Debemos modificar el archivo `setup.py` que se encuentra dentro del repositorio, y en la línea 44, dentro de la función `main`, sustituimos `"numpy"` por `"numpy==1.23.3"`, así como en la línea 46, sustituimos `"scipy"` por `"scipy==1.9.3"`. Reintentamos el comando:
+> ```bash
+> pip install -e .
+> ```
 
 Evaluamos si los paquetes se han instalado correctamente con el siguiente comando:
 
@@ -287,7 +363,7 @@ Por último, para salir del contenedor Docker, ejecutamos el siguiente comando:
 exit
 ```
 
-## Prueba del Modelo {:#model-testing}
+## Prueba del Modelo
 
 Después de haber completado todos los pasos anteriores, nos movemos a la carpeta `hailo/suite/libs`, y clonamos el siguiente repositorio:
 
@@ -325,12 +401,12 @@ En este momento, ya podemos probar tanto que todo esté funcionando correctament
     python basic_pipelines/detection.py --input {imagen} --labels-json ../labels/g.json --hef-path ../../v11/runs/g/weights/compiled.hef
     ```
 
-!!! note
-	Sustituimos `imagen` por la ruta de la imagen a probar.
+> [!NOTE]
+> Sustituimos `imagen` por la ruta de la imagen a probar.
 
 Esto abrirá una ventana con la cámara, donde se mostrarán los cuadros delimitadores y las etiquetas de los objetos detectados. Si todo está funcionando correctamente, deberíamos ver los objetos detectados en tiempo real.
 
-# Referencias Bibliográficas
+# Referencias
 
 1. d'Oleron, L. (23 de abril de 2025). *Custom dataset with Hailo AI Hat, Yolo, Raspberry PI 5, and Docker*. Medium. <a id="custom-dataset-medium" href="https://pub.towardsai.net/custom-dataset-with-hailo-ai-hat-yolo-raspberry-pi-5-and-docker-0d88ef5eb70f">https://pub.towardsai.net/custom-dataset-with-hailo-ai-hat-yolo-raspberry-pi-5-and-docker-0d88ef5eb70f</a>
 
