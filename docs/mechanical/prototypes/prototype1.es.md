@@ -478,6 +478,7 @@ Esta parte superior también la diseñamos e imprimimos, principalmente recortan
 | [RC Car Metal Differential Kit 1/18](https://www.amazon.com/dp/B08GHC4D5M)                     | 1      | 21.98                | 21.98               |
 | [10PCS Toy Car Wheels 35mm](https://www.amazon.com/dp/B0DQ96VJGL)                              | 1      | 7.99                 | 7.99                |
 | [20 rodamientos de bolas MR128-2RS](https://www.amazon.com/dp/B09P1QV29K)                      | 1      | 9.29                 | 9.29                |
+
 **Total para los Componentes: $477.89**
 
 1. El producto está listado con un valor de $70.000,00 COP lo cual es equivalente alrededor de 17,50 dólares estadounidenses a fecha del 21 de julio de 2025. <a id="note1" ></a>
