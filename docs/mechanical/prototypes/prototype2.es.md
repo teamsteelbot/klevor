@@ -1,7 +1,69 @@
-# Prototipo 2 {:#prototype2}
+# Prototipo 2
 
 Este es un segundo prototipo de Klevor, donde se le hicieron correcciones esenciales y se agregaron nuevos componentes que explicaremos detalladamente.
 
+<!-- github-only-start -->
+<table>
+	<tbody>
+		<tr>
+			<td>
+				<p align="center">
+					<img src="../../assets/images/github/v-photos/prototype2/prototype2-front-view.png"
+alt="Vista delantera del prototipo 2" width="600">
+					<br>
+					<i>Vista delantera del prototipo 2</i>
+				</p>
+			</td>
+			<td>
+				<p align="center">
+					<img src="../../assets/images/github/v-photos/prototype2/prototype2-back-view.png"
+alt="Vista trasera del prototipo 2" width="600">
+					<br>
+					<i>Vista trasera del prototipo 2</i>
+				</p>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<p align="center">
+					<img src="../../assets/images/github/v-photos/prototype2/prototype2-right-view.png"
+alt="Vista derecha del prototipo 2" width="600">
+					<br>
+					<i>Vista derecha del prototipo 2</i>
+				</p>
+			</td>
+			<td>
+				<p align="center">
+					<img src="../../assets/images/github/v-photos/prototype2/prototype2-left-view.png"
+alt="Vista izquierda del prototipo 2" width="600">
+					<br>
+					<i>Vista izquierda del prototipo 2</i>
+				</p>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<p align="center">
+					<img src="../../assets/images/github/v-photos/prototype2/prototype2-top-view.png"
+alt="Vista superior del prototipo 2" width="600">
+					<br>
+					<i>Vista superior del prototipo 2</i>
+				</p>
+			</td>
+			<td>
+				<p align="center">
+					<img src="../../assets/images/github/v-photos/prototype2/prototype2-bottom-view.png"
+alt="Vista inferior del prototipo 2" width="600">
+					<br>
+					<i>Vista inferior del prototipo 2</i>
+				</p>
+			</td>
+		</tr>
+	</tbody>
+</table>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="vehicle-views-container">
     <div class="hcenter">
         <img src="/assets/images/github/v-photos/prototype2/prototype2-front-view.png"
@@ -34,21 +96,33 @@ alt="Vista inferior" class="vehicle-view-image">
         <i>Vista inferior</i>
     </div>
 </div>
+mkdocs-only-end -->
 
-## Primera Capa {:#first-layer}
+## Primera Capa
 
 En esta primera capa, al igual que en nuestro primer prototipo, tenemos nuestro sistema motriz, al cual no se le hicieron modificaciones. Este funciona como el sistema mecánico de un automóvil, un mecanismo 4x4 de dos diferenciales (sistema de engranajes cubiertos por una carcasa) conectados entre sí por un eje transmisor. Nosotros conectamos nuestro motor ([INJORA 48T](../../electronic/components/current.es.md#injora-180-motor-48t)) a un piñón que tiene el eje transmisor, esto hace que los diferenciales giren en un mismo sentido y que por consecuencia, Klevor se mueva.
 
-Una parte fundamental para nuestro robot es su sistema de cruce. Es basado en un mecanismo Ackermann, que consiste en que las dos ruedas están conectadas por una dirección o "sistema de trapecio", esto lo que hace es que, mediante una fuerza que haga el cruce (en este caso nuestro servomotor [INJORA 7 kg 2065](../../electronic/components/current.es.md#injora-7kg-2065-micro-servo))la dirección se mueva y eso hace girar ambas ruedas al mismo lado, debido a la geometría y forma de trapecio que tiene la dirección, las ruedas no giran con el mismo ángulo, sino que, la rueda interna respecto al cruce gira más que la rueda externa.
+Una parte fundamental para nuestro robot es su sistema de cruce. Es basado en un mecanismo Ackermann, que consiste en que las dos ruedas están conectadas por una dirección o "sistema de trapecio", esto lo que hace es que, mediante una fuerza que haga el cruce (en este caso nuestro servomotor [INJORA 7 kg 2065](../../electronic/components/current.es.md#injora-7-kg-2065-micro-servo))la dirección se mueva y eso hace girar ambas ruedas al mismo lado, debido a la geometría y forma de trapecio que tiene la dirección, las ruedas no giran con el mismo ángulo, sino que, la rueda interna respecto al cruce gira más que la rueda externa.
 
-Las ruedas para funcionar están conectadas a un muñón de dirección, luego a un
-"palier" o "semieje" que pasa por dentro del muñón y se junta con la rueda para que esta gire, el palier gira mientras está junto al diferencial.
+Las ruedas para funcionar están conectadas a un muñón de dirección, luego a un "palier" o "semieje" que pasa por dentro del muñón y se junta con la rueda para que esta gire, el palier gira mientras está junto al diferencial.
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="../../assets/images/mechanical/ackermann-steering-system.png"
+alt="Sistema Ackermann"
+width="600">
+	<br>
+	<i>Sistema Ackermann</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
     <img src="/assets/images/mechanical/ackermann-steering-system.png" 
 alt="Sistema Ackermann" class="mechanical-image">
 	<i>Sistema Ackermann</i>
 </div>
+mkdocs-only-end -->
 
 En este diagrama se ve un ejemplo más claro de cómo funciona este sistema. Describiremos a continuación el significado de cada término:
 
@@ -66,23 +140,23 @@ En este diagrama se ve un ejemplo más claro de cómo funciona este sistema. Des
 
 Esto ilustra más la geometría de la dirección que permite que las ruedas delanteras giren en ángulos diferentes y a su vez en la misma dirección, consiguiendo así un giro eficiente.
 
-De componentes tiene un giroscopio ([BNO08X](../../electronic/components/current.es.md#gyroscope-gy-bno085)) que ayuda al robot a orientarse y así contar el número de vueltas que da, tiene una batería ([URGENEX 7.4 V](../../electronic/components/current.es.md#urgenex-7-4v-battery)) que alimenta al [INJORA MB100 20 A mini ESC](../../electronic/components/current.es.md#injora-mb100-20a-mini-esc) que es un regulador de velocidad y a su vez también alimenta el motor [INJORA 48T](../../electronic/components/current.es.md#injora-180-motor-48t) y el servomotor [INJORA 7 kg 2065](../../electronic/components/current.es.md#injora-7kg-2065-micro-servo).
+De componentes tiene un giroscopio ([BNO08X](../../electronic/components/current.es.md#9-axis-imu-gyroscope-gy-bno085)) que ayuda al robot a orientarse y así contar el número de vueltas que da, tiene una batería ([URGENEX 7.4 V](../../electronic/components/current.es.md#batería-urgenex-74-v)) que alimenta al [INJORA MB100 20 A mini ESC](../../electronic/components/current.es.md#injora-mb100-20a-mini-esc) que es un regulador de velocidad y a su vez también alimenta el motor [INJORA 48T](../../electronic/components/current.es.md#injora-180-motor-48t) y el servomotor [INJORA 7 kg 2065](../../electronic/components/current.es.md#injora-7-kg-2065-micro-servo).
 
-### ¿Por qué diseñamos así nuestro chasis? {:#why-design-chassis}
+### ¿Por qué diseñamos así nuestro chasis?
 
 Este chasis es una modificación de la primera capa del primer prototipo de Klevor. Decidimos modificarla por el peso, reduciendo el espacio por componentes que ya no están, esta primera capa también está diseñada con esa forma debido a las piezas de kits que no son modificables, como lo son los diferenciales, los muñones de dirección y el eje transmisor. Así hicimos un espacio a medida para cada componente. Esta también es la razón por la que diseñamos toda la parte de conexión de las ruedas (Ruedas, Semiejes y cajas de diferenciales).
 
-## Segunda Capa {:#second-layer}
+## Segunda Capa
 
 Esta es la capa donde más cambios se hicieron, anteriormente aquí teníamos los sensores ToF (Time of Flight), pero fueron reemplazados por el [RPLidar C1](../../electronic/components/current.es.md#rplidar-c1) un sensor que mediante un láser infrarrojo nos permite detectar distancias de hasta 12 metros en los 360 grados, cosa que corrige el mal funcionamiento de los anteriores sensores, que daban lecturas erróneas y tenían un rango de detección muchísimo más corto. Decidimos colocarlo al revés para que evitar que tenga lecturas erróneas debido a que su láser pasaría por encima de la pared de la pista.
 
-En esta parte superior también está el microcontrolador ([Raspberry Pi Pico 2 WH](../../electronic/components/current.es.md#raspberry-pi-pico-2-wh)) y el microprocesador ([Raspberry Pi 5](../../electronic/components/current.es.md#raspberry-pi-5)), además de la alimentación de los mismos, que es un power bank marca Harvic de 10000 mAh y 22.5 W, este se conecta a la [Raspberry Pi 5](../../electronic/components/current.es.md#raspberry-pi-5) y a su vez, envía parte del voltaje al RPLIDAR; la Raspberry Pi Pico 2 WH y la [Raspberry Camera Module 3 Wide](../../electronic/components/current.es.md#raspberry-pi-camera-module-3-wide), que es la cámara que nos ayudará a detectar los colores de los bloques en el desafío cerrado.
+En esta parte superior también está el microcontrolador ([Raspberry Pi Pico 2 WH](../../electronic/components/current.es.md#raspberry-pi-pico-2-wh)) y el microprocesador ([Raspberry Pi 5](../../electronic/components/current.es.md#raspberry-pi-5)), además de la alimentación de los mismos, que es un power bank marca Harvic de 10000 mAh y 22.5 W, este se conecta a la [Raspberry Pi 5](../../electronic/components/current.es.md#raspberry-pi-5-16gb-ram) y a su vez, envía parte del voltaje al RPLIDAR; la Raspberry Pi Pico 2 WH y la [Raspberry Camera Module 3 Wide](../../electronic/components/current.es.md#raspberry-pi-camera-module-3-wide), que es la cámara que nos ayudará a detectar los colores de los bloques en el desafío cerrado.
 
-### ¿Por qué diseñamos así la parte superior? {:#why-design-top}
+### ¿Por qué diseñamos así la parte superior?
 
 La parte superior cambió drásticamente en cuanto a diseño, los cambios que hicimos fueron:
 
-- **Crear un espacio en la parte frontal**: Esto lo hicimos para colocar el RPLIDAR con el mayor ángulo de visión posible.
+- **Crear un espacio en la parte frontal**: Esto lo hicimos para colocar el RPLiDAR con el mayor ángulo de visión posible.
 
 - **Recortar bordes**: Para reducir peso y espacio innecesario.
 
@@ -92,7 +166,7 @@ La parte superior cambió drásticamente en cuanto a diseño, los cambios que hi
 
 Decidimos eliminar también la tercera capa que tenía el primer prototipo, ya que pudimos resumir todos los componentes en una única superficie.
 
-## Lista de Materiales {:#materials-list}
+## Lista de Materiales
 
 | Componente                                                                                     | Unidad | Costo por Unidad ($) | Total ($)           |
 |------------------------------------------------------------------------------------------------|--------|----------------------|---------------------|

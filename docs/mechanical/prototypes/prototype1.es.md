@@ -211,10 +211,21 @@ A continuación, explicaremos algunas reglas importantes que hay que tener en cu
 
 La relación de transmisión o relación de reducción se calcula con la siguiente fórmula:
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="../../assets/images/mechanical/gear-ratio-formula.png" alt="Fórmula de relación de transmisión" 
+	width="600">
+	<br>
+	<i>Fórmula de relación de transmisión</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
 	<img src="/assets/images/mechanical/gear-ratio-formula.png" alt="Fórmula de relación de transmisión" class="mechanical-image">
 	<i>Fórmula de relación de transmisión</i>
 </div>
+mkdocs-only-end -->
 
 Teniendo esto en cuenta, desglosaremos paso a paso cómo esto se aplica en nuestro sistema.
 

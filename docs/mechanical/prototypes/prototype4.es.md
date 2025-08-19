@@ -1,6 +1,6 @@
-# Prototipo 4 {:#prototype4}
+# Prototipo 4 
 
-## Lista de Materiales {:#materials-list}
+## Lista de Materiales
 
 | Componente                                                                                                           | Unidad | Costo por Unidad ($) | Total ($) |
 |----------------------------------------------------------------------------------------------------------------------|--------|----------------------|-----------|
