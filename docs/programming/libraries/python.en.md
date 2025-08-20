@@ -1,6 +1,6 @@
 # Python Libraries
 
-## PyTorch {:#pytorch}
+## PyTorch
 
 <div class="hcenter">
     <img src="/assets/images/logo/pytorch.png" alt="PyTorch" class="logo--3rd-party">
@@ -11,7 +11,7 @@ PyTorch is an open-source software library designed originally by Adam Paszke, S
 
 Like some of the libraries we are about to mention, PyTorch is particularly useful when it comes to developing programs that need Computer Vision, or Reinforcement Learning. It facilitates the development of AI models.
 
-## Ultralytics YOLO {:#ultralytics-yolo}
+## Ultralytics YOLO
 
 <div class="hcenter">
     <img src="/assets/images/logo/ultralytics.png" alt="Ultralytics" class="logo--3rd-party" >
@@ -29,7 +29,7 @@ Its the main interface to interact with the models. It allows to load pre-traine
 YOLO's main task. It identifies the location of objects within an image/video through bounding boxes and assigns a class to each object. These models are available for different sizes (Nano `n`, Small `s`, Medium `m`, Large `l`, XLarge `x`)
 to scale according to the speed and precision that is needed. This library has a lot of different uses, however, we used Ultralytics YOLO mainly for the Object Detection, to be able to detect and identify the different obstacles [[2](#ultralytics-yolo-docs)].
 
-## OpenCV {:#opencv}
+## OpenCV
 
 <div class="hcenter">
     <img src="/assets/images/logo/opencv.png" alt="OpenCV" class="logo--3rd-party">
@@ -43,7 +43,7 @@ Open Source Computer Vision Library (OpenCV) is one of the world's most popular 
 
 Its main purpose is to provide a common infrastructure for applications that need computer vision and to speed up the automatic perception for commercial products, research and development [[3](#opencv-docs)].
 
-## NumPy {:#numpy}
+## NumPy
 
 <div class="hcenter">
     <img src="/assets/images/logo/numpy.png" alt="Numpy" class="logo--3rd-party">
@@ -58,7 +58,7 @@ NumPy or Numerical Python is a library that contains a lot of functions used in 
 
 The main purpose is to allow quick and efficient operations in large data sets [[4](#numpy-docs)]. These large and long calculations are used for Klevor's object detection, however, NumPy has a lot of different purposes, such as data analysis.
 
-## PiCamera 2 {:#picamera-2}
+## PiCamera 2
 
 <div class="hcenter">
     <img src="/assets/images/logo/raspberry-pi.png" alt="Picamera 2" class="logo--3rd-party">
@@ -74,7 +74,7 @@ Because of this issue, the PiCamera 2 was created, PiCamera2 is the original `pi
 
 Aside from, obviously, allowing the user to take photos and videos with ease.
 
-## Hailo Platform {:#hailo-platform}
+## Hailo Platform
 
 <div class="hcenter">
     <img src="/assets/images/logo/hailo.png" alt="Hailo Platform" class="logo--3rd-party">
@@ -91,7 +91,7 @@ Hailo Platform is both a hardware and software ecosystem, developed by Hailo Tec
 
 On top of this, Hailo Platform also included multiple libraries  (like HailoRT or PyHailoRT), their main objective is to speed up the developing process from end to end, both in the compilation and optimization in real-time.
 
-## MkDocs {:#mkdocs}
+## MkDocs
 
 <div class="hcenter">
     <img src="/assets/images/logo/mkdocs.png" alt="Logo de MkDocs" class="logo--3rd-party">
@@ -102,7 +102,7 @@ MkDocs was released on version 0.2 on January 21st, 2014, with Tom Christie as i
 
 MkDocs' main objective is to be a quick, simple and visually attractive sites generator, designed specifically to help in various projects' documentation. Thanks to MkDocs, we were able to generate this site where you can see Klevor's documentation, we decided to use MkDocs mainly to organize more efficiently all of this documentation's items, in a way that, we can make it easier for the user to search an specific item.
 
-## WeasyPrint {:#weasyprint}
+## WeasyPrint
 
 WeasyPrint was created by Simon Sapin, and the project has been developed and maintaiend by Kozea Group. As of right now,the professional support, community management and maintenance by CourtBouillon, an organization that offers consulting services and sponsorship to upgrade and expand WeasyPrint. WeasyPrint is a Python library that allows to generate PDF documents with just HTML and CSS files. It was launched for the first time in 2011, and since then, it has evolved into a robust and versatile tool to create high-quality PDF documents [[8](#weasyprint-documentation)].
 

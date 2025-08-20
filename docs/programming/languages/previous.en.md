@@ -1,6 +1,6 @@
 # Previous Programming Languages
 
-## MicroPython {:#micro-python}
+## MicroPython
 
 <div class="hcenter">
     <img src= "/assets/images/logo/micro-python.png" alt="MicroPython" class="logo--3rd-party">

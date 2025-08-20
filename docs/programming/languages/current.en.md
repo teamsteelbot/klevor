@@ -3,7 +3,7 @@
 A lot of autonomous robots, if not all, need a programming language to be able to process complex tasks. In Klevor, we used one main language: Python, and a Python implementation for the Raspberry Pi Pico 2 WH: CircuitPython
 Muchos robots autónomos, si no es que todos, necesitan de un lenguaje de programación para poder llevar a cabo tareas complejas. En el caso de Klevor, utilizamos un lenguaje principal: Python, y una implementación para la Raspberry Pi Pico 2 WH: CircuitPython.
 
-## Python {:#python}
+## Python
 
 <div class="hcenter">
     <img src= "/assets/images/logo/python.png" alt="Python" class="logo--3rd-party">
@@ -33,7 +33,7 @@ Cabe destacar que, a pesar de su sencillez, Python es un lenguaje potente y vers
 
 Python's main advantage is, again, its versatility, since we don't need to run every task in a different programming language for each of them, since we can just use Python from everything, like object detection and controlling the motors, which simplifies the developping and reduces the code's complexity.
 
-## CircuitPython {:#circuit-python}
+## CircuitPython
 
 <div class="hcenter">
     <img src="/assets/images/logo/circuit-python.png" alt="CircuitPython" 

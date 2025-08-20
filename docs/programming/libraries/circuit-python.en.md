@@ -1,6 +1,6 @@
 # CircuitPython Libraries
 
-## Adafruit Motor {:#adafruit-motor}
+## Adafruit Motor
 
 <div class="hcenter">
     <img src="/assets/images/logo/adafruit.png" alt="Adafruit" class="logo--3rd-party">
@@ -11,7 +11,7 @@ The `adafruit_motor` library's first release dates back to 2017, however, it is 
 
 This library serves the same purpose in Klevor, it is used by the [Raspberry Pi Pico 2WH](../../electronic/components/current.es.md#raspberry-pi-pico-2-wh) which then communicates with the [ESC](../../electronic/components/current.es.md#injora-mb100-20a-mini-esc) to control the [motor](../../electronic/components/current.es.md#injora-180-motor-48t) and [servomotor](../../electronic/components/current.es.md#injora-7kg-2065-micro-servo) to be able to drive Klevor.
 
-## Adafruit BNO08X {:#adafruit-bno08x}
+## Adafruit BNO08X
 
 The `adafruit_bno08x` is also developed and maintained by Adafruit Industries, its oldest version was launched in September 22nd, 2020 (version 1.0.0), this library is also being maintained by Adafruit Industries, the person in charge of this library, and, who the work is attributed to, is Bryan Siepert [[2](#adafruit-bno08x-documentation)].
 

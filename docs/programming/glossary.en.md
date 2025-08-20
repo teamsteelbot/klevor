@@ -155,19 +155,19 @@ Docker is an open-source platform, that allows you to package an application and
 
 If you are using Windows, you can install Docker Desktop from Microsoft Store.
 
-### Dockerfile {:#dockerfile}
+### Dockerfile
 
 Docker uses files, these files are denominated as *Dockerfile*, these use DSL (Domain Specific Language) to describe all the necessary instructions to quickly create a Docker image [[5](#what-is-docker)].
 
-### Docker Image {:#docker-image}
+### Docker Image
 
 This is a files composed of multiple layers, used to execute a Docker container [[5](#what-is-docker)]. It is an executable software package that contains everything needed to run the application. This image informs how a container should be initialized, determimining which software needs to be executed and how it needs to.
 
-### Docker Container {:#docker-container}
+### Docker Container
 
 A Docker container is a runtime instance of a Docker image [[5](#what-is-docker)]. It contains the kit require for a certain application, and it can be run in isolation.
 
-## Multiprocessing {:#multiprocessing}
+## Multiprocessing
 
 The multiprocessing is a technique that allows the usage of two or more Central Processing Units (CPU) in a single computer system to execute multiple processes simultaneously [[6](#what-is-multiprocessing)]. This technique is specially useful for systems that require a high performance and efficiency on their tasks, because, this technique allows to divide workload into multiple CPUs, upgrading the responde time and the processing capacity.
 
