@@ -137,3 +137,50 @@ Key aspects of a NPU include:
 - **Parallel processing**: NPUs are designed to perform multiple calculations in parallel, which allows them to compute multiple tasks simultaneously. This is specially useful for deep learning processes, where large amounts of computation on matrices and tensors are required.
 
 - **Low arithmetic precision**: NPUs often support- 8-bit (or lower) operations to reduce the computational complexity and increase the energetic efficiency
+
+- **Bandwidth Memory**: Many NPUs feature on-chip bandwidth memory to effectively execute processing AI tasks that require large data sets.
+
+- **Hardware Acceleration**: Advances in the NPU's design have led to the incorporation of certain hardware acceleration techniques, like the systolic array architecture or enhanced tensor processing to optimize the performance for AI workloads
+
+## Docker {:#docker}
+
+<div class="hcenter">
+    <img src="/assets/images/logo/docker.png" alt="Logo de Docker" 
+class="logo--3rd-party">
+    <i>Docker's Logo</i>
+</div>
+
+Docker is an open-source platform, that allows you to package an application and all its dependencies into a container
+[[5](#what-is-docker)]. These containers are lightweight, making them portable. Also, these containers are completely isolated from the infrastructure on which they are running, and therefore the container image can be run as a container in any operative system that Docker is installed [[5](#what-is-docker)].
+
+If you are using Windows, you can install Docker Desktop from Microsoft Store.
+
+### Dockerfile {:#dockerfile}
+
+Docker uses files, these files are denominated as *Dockerfile*, these use DSL (Domain Specific Language) to describe all the necessary instructions to quickly create a Docker image [[5](#what-is-docker)].
+
+### Docker Image {:#docker-image}
+
+This is a files composed of multiple layers, used to execute a Docker container [[5](#what-is-docker)]. It is an executable software package that contains everything needed to run the application. This image informs how a container should be initialized, determimining which software needs to be executed and how it needs to.
+
+### Docker Container {:#docker-container}
+
+A Docker container is a runtime instance of a Docker image [[5](#what-is-docker)]. It contains the kit require for a certain application, and it can be run in isolation.
+
+## Multiprocessing {:#multiprocessing}
+
+The multiprocessing is a technique that allows the usage of two or more Central Processing Units (CPU) in a single computer system to execute multiple processes simultaneously [[6](#what-is-multiprocessing)]. This technique is specially useful for systems that require a high performance and efficiency on their tasks, because, this technique allows to divide workload into multiple CPUs, upgrading the responde time and the processing capacity.
+
+# References
+
+1. *What is machine learning?*. (22 de septiembre de 2021). IBM. <a id="machine-learning-ibm" href="https://www.ibm.com/think/topics/machine-learning">https://www.ibm.com/think/topics/machine-learning</a>
+
+2. Murel, J., Kavlakoglu, E. *What is object detection?*. (3 de enero de 2024). IBM. <a id="object-detection-ibm" href="https://www.ibm.com/topics/object-detection">https://www.ibm.com/topics/object-detection</a>
+
+3. *Models*. (2025). Ultralytics. <a id="models-ultralytics" href="https://docs.ultralytics.com/models/">https://docs.ultralytics.com/models/</a>
+
+4. Schneider, J., Smalley, I. *What is neural processing unit (NPU)?*. (27 de septiembre de 2024). IBM. <a id="npu-ibm" href="https://www.ibm.com/topics/neural-processing-unit">https://www.ibm.com/topics/neural-processing-unit</a>
+
+5. *What is Docker?*. (22 de abril de 2025). Geeks for Geeks. <a id="what-is-docker" href="https://www.geeksforgeeks.org/introduction-to-docker/">https://www.geeksforgeeks.org/introduction-to-docker/</a>
+
+6. Yasar, K. (23 de junio de 2023). *What is multiprocessing?*. TechTarget. <a id="what-is-multiprocessing" href="https://www.techtarget.com/searchdatacenter/definition/multiprocessing">https://www.techtarget.com/searchdatacenter/definition/multiprocessing</a>
