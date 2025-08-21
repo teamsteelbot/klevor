@@ -357,5 +357,3 @@ Este sistema de transmisión 4x4 está compuesto por dos diferenciales metálico
 Desde cada diferencial se conectan los semiejes, elementos diseñados para transmitir el giro hacia las ruedas. Los semiejes se acoplan a la copa transmisora que está en el nudillo, que actúa como soporte de la rueda. Este nudillo no solo sostiene la rueda, sino que también permite su giro libre para la tracción y facilita el movimiento.
 
 Gracias a esta configuración, el sistema puede mover todo el conjunto utilizando un solo motor, ya que la transmisión y la distribución adecuada del torque a través de los diferenciales y semiejes aseguran que las ruedas reciban la potencia necesaria.
-
-
