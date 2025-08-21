@@ -58,6 +58,7 @@ nav:
             - Piezas del Prototipo 1: mechanical/parts/prototype1.md
             - Piezas del Prototipo 2: mechanical/parts/prototype2.md
             - Piezas del Prototipo 3: mechanical/parts/prototype3.md
+            - Piezas del Prototipo 4: mechanical/parts/prototype4.md
         - Prototipos:
             - Prototipo 1: mechanical/prototypes/prototype1.md
             - Prototipo 2: mechanical/prototypes/prototype2.md
@@ -69,15 +70,17 @@ nav:
             - Lenguaje de Programación Actuales: programming/languages/current.md
             - Lenguaje de Programación Futuros: programming/languages/future.md
         - Librerías:
+            - Legado:
+                - Librerías de CircuitPython: programming/libraries/legacy/circuit-python.md
             - Librerías de Python: programming/libraries/python.md
-            - Librerías de CircuitPython: programming/libraries/circuit-python.md
         - Diagramas:
             - Diagramas de Flujo: programming/diagrams/flowcharts.md
         - Glosario de Términos: programming/glossary.md
         - Guías:
             - Legado:
-                - Guía de CircuitPython: programming/guides/circuit-python.md
-                - Guía de MicroPython: programming/guides/micro-python.md
+                - Guía de CircuitPython: programming/guides/legacy/circuit-python.md
+                - Guía de MicroPython: programming/guides/legacy/micro-python.md
+                - Guía de la Raspberry Pi Pico 2 W: programming/guides/legacy/raspberry-pi-pico-2w.md
             - Guía de MkDocs: programming/guides/mkdocs.md
             - Guía de TinyGo: programming/guides/tinygo.md
             - Guía de la Raspberry Pi 5: programming/guides/raspberry-pi-5.md
@@ -183,6 +186,7 @@ plugins:
                   Piezas del Prototipo 1: Prototype 1 Parts
                   Piezas del Prototipo 2: Prototype 2 Parts
                   Piezas del Prototipo 3: Prototype 3 Parts
+                  Piezas del Prototipo 4: Prototype 4 Parts
                   Prototipos: Prototypes
                   Prototipo 1: Prototype 1
                   Prototipo 2: Prototype 2

@@ -4,7 +4,7 @@
 
 <!-- github-only-start -->
 <p align="center">
-	<img src="../../assets/images/logo/adafruit.png" alt="Logo de Adafruit" 
+	<img src="../../../assets/images/logo/adafruit.png" alt="Logo de Adafruit" 
 width="200">
 	<br>
 	<i>Logo de Adafruit</i>
@@ -21,7 +21,7 @@ mkdocs-only-end -->
 
 La librería `adafruit_motor` tiene sus orígenes aproximadamente en 2017, hay versiones provenientes de Adafruit Industries previos a 2017 que cumplen con el mismo propósito que `adafruit_motor`, sin embargo, estas librerías se conocen por otros nombres, y son incompatibles con CircuitPython, esta librería le es atribuida a Scott Shawcroft como desarrollador principal, teniendo como propósito principal, la de facilitar el uso de motores y servomotores por microcontroladores por CircuitPython [[1](#adafruit-motor-documentation)].
 
-Esta librería cumple el mismo propósito en Klevor, siendo utilizada por la [Raspberry Pi Pico 2WH](../../electronic/components/current.es.md#raspberry-pi-pico-2-wh) quien se comunica con el [ESC](../../electronic/components/current.es.md#injora-mb100-20a-mini-esc) para controlar el [motor](../../electronic/components/current.es.md#injora-180-motor-48t) y el [servomotor](../../electronic/components/current.es.md#injora-7-kg-2065-micro-servo) y así poder manejar a Klevor.
+Esta librería cumple el mismo propósito en Klevor, siendo utilizada por la [Raspberry Pi Pico 2WH](../../../electronic/components/current.es.md#raspberry-pi-pico-2-wh) quien se comunica con el [ESC](../../../electronic/components/current.es.md#injora-mb100-20a-mini-esc) para controlar el [motor](../../../electronic/components/current.es.md#injora-180-motor-48t) y el [servomotor](../../../electronic/components/current.es.md#injora-7-kg-2065-micro-servo) y así poder manejar a Klevor.
 
 ## Adafruit BNO08X
 
@@ -29,7 +29,7 @@ La librería `adafruit_bno08x` también es desarrollada y mantenida por Adafruit
 
 El propósito de esta librería es la de recibir los datos del sensor BNO08X y poder simplificar la forma en la que los usuarios manejan los datos, como por ejemplo, simplificar los cálculos de los cuaterniones (algo así como un vector 3D), para poder manejar su posición relativa.
 
-En el caso de Klevor, utilizamos esta librería en conjunto con el [giroscopio](../../electronic/components/current.es.md#9-axis-imu-gyroscope-gy-bno085) para que, cuando Klevor esté en medio de un cruce, poder determinar con exactitud cuando ha girado 90° y así, saber que ya terminó de cruzar y que debe de avanzar recto.
+En el caso de Klevor, utilizamos esta librería en conjunto con el [giroscopio](../../../electronic/components/current.es.md#9-axis-imu-gyroscope-gy-bno085) para que, cuando Klevor esté en medio de un cruce, poder determinar con exactitud cuando ha girado 90° y así, saber que ya terminó de cruzar y que debe de avanzar recto.
 
 # Referencias
 

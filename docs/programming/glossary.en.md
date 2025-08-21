@@ -140,15 +140,26 @@ Key aspects of a NPU include:
 
 - **Bandwidth Memory**: Many NPUs feature on-chip bandwidth memory to effectively execute processing AI tasks that require large data sets.
 
-- **Hardware Acceleration**: Advances in the NPU's design have led to the incorporation of certain hardware acceleration techniques, like the systolic array architecture or enhanced tensor processing to optimize the performance for AI workloads
+- **Hardware Acceleration**: Advances in the NPU design have led to the incorporation of certain hardware acceleration techniques, like the systolic array architecture or enhanced tensor processing to optimize the performance for AI workloads
 
 ## Docker {:#docker}
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="../assets/images/logo/docker.png" alt="Docker's Logo" 
+width="200">
+	<br>
+	<i>Docker's Logo</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
-    <img src="/assets/images/logo/docker.png" alt="Logo de Docker" 
+    <img src="/assets/images/logo/docker.png" alt="Docker's Logo" 
 class="logo--3rd-party">
     <i>Docker's Logo</i>
 </div>
+mkdocs-only-end -->
 
 Docker is an open-source platform, that allows you to package an application and all its dependencies into a container
 [[5](#what-is-docker)]. These containers are lightweight, making them portable. Also, these containers are completely isolated from the infrastructure on which they are running, and therefore the container image can be run as a container in any operative system that Docker is installed [[5](#what-is-docker)].
@@ -161,7 +172,7 @@ Docker uses files, these files are denominated as *Dockerfile*, these use DSL (D
 
 ### Docker Image
 
-This is a files composed of multiple layers, used to execute a Docker container [[5](#what-is-docker)]. It is an executable software package that contains everything needed to run the application. This image informs how a container should be initialized, determimining which software needs to be executed and how it needs to.
+This is a files composed of multiple layers, used to execute a Docker container [[5](#what-is-docker)]. It is an executable software package that contains everything needed to run the application. This image informs how a container should be initialized, determining which software needs to be executed and how it needs to.
 
 ### Docker Container
 

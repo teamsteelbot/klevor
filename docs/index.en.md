@@ -89,6 +89,7 @@ mkdocs-only-end -->
 		2. [Prototype 1's Parts](mechanical/parts/prototype1.en.md)
 		3. [Prototype 2's Parts](mechanical/parts/prototype2.en.md)
 		4. [Prototype 3's Parts](mechanical/parts/prototype3.en.md)
+       	5. [Prototype 4's Parts](mechanical/parts/prototype4.en.md)
 	2. Prototypes
 		1. [Prototype 1](mechanical/prototypes/prototype1.en.md)
 		2. [Prototype 2](mechanical/prototypes/prototype2.en.md)
@@ -101,14 +102,17 @@ mkdocs-only-end -->
 		3. [Future Programming Languages](programming/languages/future.en.md)
 	2. Libraries
 		1. [Python Libraries](programming/libraries/python.en.md)
-		2. [CircuitPython Libraries](programming/libraries/circuit-python.en.md)
+		2. [CircuitPython Libraries](programming/libraries/legacy/circuit-python.en.md)
 	3. Diagrams
 		1. [Flowchart](programming/diagrams/flowcharts.en.md)
 	4. [Glossary](programming/glossary.en.md)
 	5. Guides
-		1. [MkDocs' Guide](programming/guides/mkdocs.en.md)
-		2. [CircuitPython's Guide](programming/guides/circuit-python.en.md)
-		3. [MicroPython's Guide](programming/guides/micro-python.en.md)
+   		1. Legacy
+			1. [CircuitPython's Guide](programming/guides/legacy/circuit-python.en.md)
+            2. [MicroPython's Guide](programming/guides/legacy/micro-python.en.md)
+            3. [Raspberry Pi Pico 2 W's Guide](programming/guides/legacy/raspberry-pi-pico-2w.en.md)
+		2. [MkDocs' Guide](programming/guides/mkdocs.en.md)
+    	3. [TinyGo's Guide](programming/guides/tinygo.en.md)
 		4. [Raspberry Pi 5's  Guide](programming/guides/raspberry-pi-5.en.md)
 		5. [Raspberry Pi Pico 2 W's Guide](programming/guides/raspberry-pi-pico-2w.en.md)
 		6. [Object Detection's Guide](programming/guides/object-detection.en.md)

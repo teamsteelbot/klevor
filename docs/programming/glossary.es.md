@@ -155,7 +155,6 @@ class="logo--3rd-party">
 </div>
 mkdocs-only-end -->
 
-
 Docker es una plataforma open-source (o de código abierto), con el cual se puede empaquetar una aplicación así como todas las dependencias que esta requiere, en una unidad denominada *contenedor* [[5](#what-is-docker)]. Estas son ligeras en peso, lo cual permite su portabilidad. Así mismo, los contenedores están aislados de la infraestructura donde está siendo ejecutados, y por ende la imagen del contenedor puede ser ejecutada como un contenedor en cualquier sistema operativo donde esté instalado Docker [[5](#what-is-docker)].
 
 Si su sistema operativo es Windows, Docker Desktop se puede instalar con facilidad desde la Microsoft Store.

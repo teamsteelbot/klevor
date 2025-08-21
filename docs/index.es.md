@@ -89,6 +89,7 @@ mkdocs-only-end -->
 		2. [Piezas del Prototipo 1](mechanical/parts/prototype1.es.md)
 		3. [Piezas del Prototipo 2](mechanical/parts/prototype2.es.md)
 		4. [Piezas del Prototipo 3](mechanical/parts/prototype3.es.md)
+       	5. [Piezas del Prototipo 4](mechanical/parts/prototype4.es.md)
 	2. Prototipos
 		1. [Prototipo 1](mechanical/prototypes/prototype1.es.md)
 		2. [Prototipo 2](mechanical/prototypes/prototype2.es.md)
@@ -100,15 +101,19 @@ mkdocs-only-end -->
         2. [Lenguajes de Programación Actuales](programming/languages/current.es.md)
         3. [Lenguajes de Programación Futuros](programming/languages/future.es.md)
 	2. Librerías
-		1. [Librerías de Python](programming/libraries/python.es.md)
-		2. [Librerías de CircuitPython](programming/libraries/circuit-python.es.md)
+   		1. Legado:
+           1. [Librerías de CircuitPython](programming/libraries/legacy/circuit-python.es.md)
+		2. [Librerías de Python](programming/libraries/python.es.md)
 	3. Diagramas
 		1. [Diagramas de Flujo](programming/diagrams/flowcharts.es.md)
 	4. [Glosario de Términos](programming/glossary.es.md)
 	5. Guías
-		1. [Guía de MkDocs](programming/guides/mkdocs.es.md)
-		2. [Guía de CircuitPython](programming/guides/circuit-python.es.md)
-		3. [Guía de MicroPython](programming/guides/micro-python.es.md)
+   		1. Legado 
+            1. [Guía de MicroPython](programming/guides/legacy/micro-python.es.md)
+            2. [Guía de CircuitPython](programming/guides/legacy/circuit-python.es.md)
+            3. [Guía de la Raspberry Pi Pico 2 W](programming/guides/legacy/raspberry-pi-pico-2w.es.md)
+		2. [Guía de MkDocs](programming/guides/mkdocs.es.md)
+       	3. [Guía de TinyGo](programming/guides/tinygo.es.md)
 		4. [Guía de la Raspberry Pi 5](programming/guides/raspberry-pi-5.es.md)
 		5. [Guía de la Raspberry Pi Pico 2 W](programming/guides/raspberry-pi-pico-2w.es.md)
 		6. [Guía de Detección de Objetos](programming/guides/object-detection.es.md)
