@@ -4,7 +4,7 @@ En esta sección detallaremos los componentes y su funcionalidad dentro de cada 
 
 ## Primera Capa
 
-En esta primera capa toda la parte motriz de nuestro robot.
+En esta primera capa está toda la parte motriz de nuestro robot.
 
 <!-- github-only-start -->
 <table>
@@ -239,17 +239,17 @@ Esto significa que el motor debe dar 1.8 vueltas para que el piñón de 36 dient
 
 Luego el piñón de 36 está fijado en el mismo eje con un piñón de 8 dientes.
 
-Este piñón de 8 engrana con uno de 24 dientes
+Este piñón de 8 dientes engrana con uno de 24 dientes.
 
 **Relación = 24/8 = 3**
 
-El piñón de 8 debe girar 3 veces para que el de 24 dé una vuelta. Esto significa que triplica el torque cuando esto ocurre.
+El piñón de 8 dientes debe girar 3 veces para que el de 24 dientes dé una vuelta. Esto significa que triplica el torque cuando esto ocurre.
 
 Ahora, el piñón de 24 está unido al piñón de 17 dientes, este piñón de 17 impulsa al último piñón de 40 dientes (eje final).
 
 **Relación = 40/17 = 2.35**
 
-El piñón de 17 dientes necesita dar 2.35 vueltas para que el de 40 dé una sola. Se reduce aún más la velocidad y se aumenta el torque.
+El piñón de 17 dientes necesita dar 2.35 vueltas para que el de 40 dientes dé una sola. Se reduce aún más la velocidad y se aumenta el torque.
 
 Como todo esto está conectado en serie (uno tras otro), las relaciones se multiplican entre sí para obtener la relación de reducción total:
 
@@ -258,8 +258,6 @@ Como todo esto está conectado en serie (uno tras otro), las relaciones se multi
 Esto significa que por cada 12.69 vueltas del motor, el último piñón da tan solo una vuelta, aumentando el torque así mismo.
 
 Luego de esta reducción, el motor tiene una salida de 1576 RPM. Sin embargo, cabe destacar que también se reduce la velocidad de las ruedas, porque también hay reducciones por el engranaje del eje transmisor y por los diferenciales.
-
-La otra parte fundamental para nuestro robot es su sistema de cruce, que consta de un servomotor ([INJORA 7 kg 2065](../../electronic/components/current.es.md#injora-7-kg-2065-micro-servo)) conectado a nuestro sistema "Ackermann" que funciona conectando ambas ruedas delanteras a una dirección o "sistema de trapecio". El servomotor mueve unas barras que a su vez están conectados a unos muñones de dirección que están en las ruedas, permitiendo así que, uno de los muñones de dirección anteriormente mencionados, sea empujado hacia un lado por el movimiento del servomotor y a su vez, tire de la otra rueda hacia el lado opuesto. Debido a los ángulos del trapecio, esto provoca que la rueda interior gire más que la exterior.
 
 Algunos componentes que también están en esta capa son el giroscopio ([BNO08X](../../electronic/components/current.es.md#9-axis-imu-gyroscope-gy-bno085)) y una batería de 7.4 V y 3000 mAh ([URGENEX 7.4 V](../../electronic/components/current.es.md#batería-urgenex-74-v)), y los ya mencionados, motor [INJORA 48T](../../electronic/components/current.es.md#injora-180-motor-48t) y el servomotor [INJORA 7 kg 2065](../../electronic/components/current.es.md#injora-7-kg-2065-micro-servo).
 
@@ -357,7 +355,7 @@ Esta segunda capa está dedicada a la alimentación y los [sensores ToF](../../e
 
 Klevor consta de ocho sensores colocados estratégicamente para medir la proximidad en diferentes ángulos mientras se mueve, como se puede ver en las fotos del robot, los sensores están fijados en unos soportes que diseñamos en 3D y luego imprimimos. Tiene dos de estos en cada lateral, tres al frente (uno colocado horizontalmente y otros dos a los lados que están puestos a 15 grados respecto al sensor central) y uno ubicado en el centro de la parte trasera de Klevor. Todos estos se conectan a una protoboard en la parte superior de Klevor.
 
-A futuro queremos colocar un [RPLidar C1](../../electronic/components/current.es.md#rplidar-c1), un componente que mejorará el funcionamiento del robot, tanto en su tiempo de respuesta como en su ángulo de visión.
+A futuro queremos colocar un [RPLidar C1](../../electronic/components/current.es.md#rplidar-c1), un scanner de 360 grados un componente que mejorará el funcionamiento del robot, tanto en su tiempo de respuesta como en su ángulo de visión.
 
 La parte de la alimentación cuenta con un power bank por el cual los componentes de la capa superior reciben electricidad.
 
@@ -481,4 +479,4 @@ Esta parte superior también la diseñamos e imprimimos, principalmente recortan
 
 **Total para los Componentes: $477.89**
 
-1. El producto está listado con un valor de $70.000,00 COP lo cual es equivalente alrededor de 17,50 dólares estadounidenses a fecha del 21 de julio de 2025. <a id="note1" ></a>
+1. El producto está listado con un valor de $70.000,00 COP lo cual es equivalente a alrededor de 17,50 dólares estadounidenses. <a id="note1" ></a>
