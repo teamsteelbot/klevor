@@ -142,7 +142,7 @@ func NewDefaultHandler(
 	}
 
 	// Center the servo on initialization
-	_ = handler.Center()
+	_ = handler.SetAngleToCenter()
 
 	return handler, nil
 }
@@ -197,7 +197,7 @@ func (s *DefaultHandler) SetAngle(angle uint16) error {
 	}
 
 	// Send a debug message if debug mode is enabled
-	if s.debugHandler.IsShorted() && s.usbCDCHandler != nil {
+	if s.debugHandler.IsEnabled() && s.usbCDCHandler != nil {
 		err := s.usbCDCHandler.SendMessage(
 			internalusbcdc.NewOutgoingMessageFromUint8Content(
 				internalusbcdcenums.OutgoingCategoryDebug,

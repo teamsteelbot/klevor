@@ -1,6 +1,8 @@
 package cyw43439
 
 import (
+	"fmt"
+
 	soypatcyw43439 "github.com/soypat/cyw43439"
 )
 
@@ -16,6 +18,6 @@ var (
 func init() {
 	err := Device.Init(WifiConfig)
 	if err != nil {
-		panic(err)
+		panic(fmt.Errorf("failed to initialize cyw43439 device: %w", err))
 	}
 }

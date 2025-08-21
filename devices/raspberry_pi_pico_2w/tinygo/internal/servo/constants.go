@@ -1,6 +1,8 @@
 package servo
 
 import (
+	"fmt"
+
 	"machine"
 
 	internaldebug "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/debug"
@@ -41,12 +43,20 @@ var (
 	)
 
 	// ServoHandler is the default servo handler using the Raspberry Pi Pico 2W's PWM1 and GPIO2.
-	ServoHandler, _ = NewDefaultHandler(
-		machine.PWM1,
-		machine.GPIO2,
+	ServoHandler Handler
+)
+
+func init() {
+	servoHandler, err := NewDefaultHandler(
+		machine.PWM2,
+		machine.GPIO5,
 		internalusbcdc.USBCDCHandler,
 		internaldebug.Handler,
 		internalmovement.Handler,
 		DefaultOptions,
 	)
-)
+	if err != nil {
+		panic(fmt.Errorf("failed to initialize servo handler: %w", err))
+	}
+	ServoHandler = servoHandler
+}

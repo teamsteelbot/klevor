@@ -1,6 +1,7 @@
 package usbcdc
 
 import (
+	"fmt"
 	"time"
 
 	internalchallenge "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/challenge"
@@ -73,8 +74,16 @@ var (
 	)
 
 	// USBCDCHandler is the USB CDC handler for the Raspberry Pi Pico 2W
-	USBCDCHandler, _ = NewDefaultHandler(
+	USBCDCHandler Handler
+)
+
+func init() {
+	usbCDCHandler, err := NewDefaultHandler(
 		internalchallenge.ChallengeHandler,
 		internalledonboard.OnBoardHandler,
 	)
-)
+	if err != nil {
+		panic(fmt.Errorf("failed to initialize usb cdc: %w", err))
+	}
+	USBCDCHandler = usbCDCHandler
+}

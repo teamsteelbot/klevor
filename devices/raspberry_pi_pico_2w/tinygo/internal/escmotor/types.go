@@ -193,7 +193,7 @@ func (e *DefaultHandler) SetSpeed(speed uint16, isForward bool) error {
 	}
 
 	// Send the debug message if the debug handler is enabled
-	if e.debugHandler.IsEnabled() {
+	if e.debugHandler.IsEnabled() && e.usbCDCHandler != nil {
 		err := e.usbCDCHandler.SendMessage(
 			internalusbcdc.NewOutgoingMessageFromUint8Content(
 				internalusbcdcenums.OutgoingCategoryDebug,

@@ -1,6 +1,7 @@
 package _switch
 
 import (
+	"fmt"
 	"time"
 
 	"machine"
@@ -16,13 +17,19 @@ var (
 	PullUpHandler internalpullup.Handler = internalpullup.NewDefaultHandler(machine.GPIO21)
 
 	// SwitchHandler is the default switch handler that uses the pull-up handler.
-	SwitchHandler, _ = NewDefaultHandler(
-		PullUpHandler,
-		DefaultInterval,
-	)
+	SwitchHandler Handler
 )
 
 func init() {
+	switchHandler, err := NewDefaultHandler(
+		PullUpHandler,
+		DefaultInterval,
+	)
+	if err != nil {
+		panic(fmt.Errorf("failed to initialize switch: %w", err))
+	}
+	SwitchHandler = switchHandler
+
 	// Call the setup function to initialize the pull-up
 	SwitchHandler.Setup()
 }

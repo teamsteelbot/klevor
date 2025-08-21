@@ -20,8 +20,8 @@ func main() {
 
 		// Print movement and debug flag
 		fmt.Printf(
-			spacer,
 			"\n%s\nMovement flag: %t\nDebug flag: %t\n%s\n",
+			spacer,
 			internalmovement.Handler.IsEnabled(),
 			internaldebug.Handler.IsEnabled(),
 			spacer,
@@ -33,9 +33,8 @@ func main() {
 		// Start testing the motor forward
 		var speed uint16
 		for speed = 0; speed <= 250; speed += 1 {
-			if err := internalescmotor.ESCMotorHandler.SetSpeed(
+			if err := internalescmotor.ESCMotorHandler.SetSpeedForward(
 				speed,
-				true,
 			); err != nil {
 				fmt.Println(err)
 			}
@@ -49,14 +48,18 @@ func main() {
 		time.Sleep(2 * time.Second)
 
 		// Start testing the motor backward
-		for speed = 250; speed > 0; speed -= 1 {
-			if err := internalescmotor.ESCMotorHandler.SetSpeed(
+		for speed = 0; speed <= 250; speed += 1 {
+			if err := internalescmotor.ESCMotorHandler.SetSpeedBackward(
 				speed,
-				false,
 			); err != nil {
 				fmt.Println(err)
 			}
 			time.Sleep(10 * time.Millisecond)
+		}
+
+		// Stop the motor
+		if err := internalescmotor.ESCMotorHandler.Stop(); err != nil {
+			fmt.Println(err)
 		}
 
 		// Turn off the LED

@@ -1,6 +1,8 @@
 package escmotor
 
 import (
+	"fmt"
+
 	"machine"
 
 	internaldebug "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/debug"
@@ -35,7 +37,11 @@ var (
 	)
 
 	// ESCMotorHandler is the default handler for ESC motors
-	ESCMotorHandler, _ = NewDefaultHandler(
+	ESCMotorHandler Handler
+)
+
+func init() {
+	escMotorHandler, err := NewDefaultHandler(
 		machine.PWM0,
 		machine.GPIO1,
 		internalusbcdc.USBCDCHandler,
@@ -43,4 +49,8 @@ var (
 		internalmovement.Handler,
 		DefaultOptions,
 	)
-)
+	if err != nil {
+		panic(fmt.Errorf("failed to initialize esc motor handler: %w", err))
+	}
+	ESCMotorHandler = escMotorHandler
+}
