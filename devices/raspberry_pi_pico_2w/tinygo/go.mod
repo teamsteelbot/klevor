@@ -3,8 +3,8 @@ module github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo
 go 1.25
 
 require (
-	github.com/ralvarezdev/go-adafruit-bno08x v0.3.0
-	tinygo.org/x/drivers v0.32.0
+	github.com/ralvarezdev/go-adafruit-bno08x v0.3.4
+	tinygo.org/x/drivers v0.33.0
 )
 
 require (

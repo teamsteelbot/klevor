@@ -1,6 +1,10 @@
 github.com/ralvarezdev/go-adafruit-bno08x v0.1.0/go.mod h1:cwSOaeBo0L2FkoSCwJAfWX/HWlaFbDa3DMYKtTv1RqM=
 github.com/ralvarezdev/go-adafruit-bno08x v0.2.0/go.mod h1:cwSOaeBo0L2FkoSCwJAfWX/HWlaFbDa3DMYKtTv1RqM=
 github.com/ralvarezdev/go-adafruit-bno08x v0.3.0/go.mod h1:cwSOaeBo0L2FkoSCwJAfWX/HWlaFbDa3DMYKtTv1RqM=
+github.com/ralvarezdev/go-adafruit-bno08x v0.3.1/go.mod h1:cwSOaeBo0L2FkoSCwJAfWX/HWlaFbDa3DMYKtTv1RqM=
+github.com/ralvarezdev/go-adafruit-bno08x v0.3.2/go.mod h1:cwSOaeBo0L2FkoSCwJAfWX/HWlaFbDa3DMYKtTv1RqM=
+github.com/ralvarezdev/go-adafruit-bno08x v0.3.3/go.mod h1:cwSOaeBo0L2FkoSCwJAfWX/HWlaFbDa3DMYKtTv1RqM=
+github.com/ralvarezdev/go-adafruit-bno08x v0.3.4/go.mod h1:cwSOaeBo0L2FkoSCwJAfWX/HWlaFbDa3DMYKtTv1RqM=
 github.com/soypat/cyw43439 v0.0.0-20250505012923-830110c8f4af h1:ZfFq94aH/BCSWWKd9RPUgdHOdgGKCnfl2VdvU9UksTA=
 github.com/soypat/cyw43439 v0.0.0-20250505012923-830110c8f4af/go.mod h1:MUaGO5m6X7xrkHrPDmnaxCEcuCCFN/0ZFh9oie+exbU=
 github.com/soypat/seqs v0.0.0-20250124201400-0d65bc7c1710 h1:Y9fBuiR/urFY/m76+SAZTxk2xAOS2n85f+H1CugajeA=
@@ -11,3 +15,4 @@ golang.org/x/exp v0.0.0-20241204233417-43b7b7cde48d h1:0olWaB5pg3+oychR51GUVCEsG
 golang.org/x/exp v0.0.0-20241204233417-43b7b7cde48d/go.mod h1:qj5a5QZpwLU2NLQudwIN5koi3beDhSAlJwa67PuM98c=
 tinygo.org/x/drivers v0.32.0 h1:qz7MRR1ZBIUhWC6kc4XuVNPr2+mUT8m7QJwA+Jji4IU=
 tinygo.org/x/drivers v0.32.0/go.mod h1:ZdErNrApSABdVXjA1RejD67R8SNRI6RKVfYgQDZtKtk=
+tinygo.org/x/drivers v0.33.0/go.mod h1:ZdErNrApSABdVXjA1RejD67R8SNRI6RKVfYgQDZtKtk=
