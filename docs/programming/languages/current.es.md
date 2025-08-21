@@ -43,35 +43,44 @@ Cabe destacar que, a pesar de su sencillez, Python es un lenguaje potente y vers
 
 La ventaja principal de Python es la versatilidad, pues no necesitamos administrar cada tarea en un lenguaje de programación distinto, sino que podemos utilizar Python para todo, desde la detección de obstáculos hasta el control de los motores, lo que simplifica el proceso de desarrollo y reduce la complejidad del código.
 
-## CircuitPython
+## Go {:#go}
 
 <!-- github-only-start -->
 <p align="center">
-	<img src="../../assets/images/logo/circuit-python.png" alt="Logo de CircuitPython" 
+	<img src="../../assets/images/logo/go.png" alt="Logo de Go" 
 width="200">
 	<br>
-	<i>Logo de CircuitPython</i>
+	<i>Logo de Go</i>
 </p>
 <!-- github-only-end -->
 
 <!-- mkdocs-only-start
 <div class="hcenter">
-    <img src="/assets/images/logo/circuit-python.png" alt="Logo de CircuitPython" 
+    <img src="/assets/images/logo/go.png" alt="Logo de Go" 
 class="logo--3rd-party">
-    <i>Logo de CircuitPython</i>
+    <i>Logo de Go</i>
 </div>
 mkdocs-only-end -->
 
-CircuitPython es una bifurcación de MicroPython, y fue desarrollado principalmente por **Adafruit Industries**, una empresa líder en hardware de código abierto y educación electrónica. Si bien no hay un único creador individual como en Python o MicroPython, **Limor Fried (Ladyada)**, la fundadora de Adafruit, y su equipo han sido los principales impulsores y desarrolladores de CircuitPython.
+## TinyGo {:#tinygo}
 
-CircuitPython fue lanzado en 2017. Nació de la necesidad de tener una versión de Python para microcontroladores que estuviera aún más orientada a la educación y la facilidad de uso para principiantes, CircuitPython fue diseñado con un enfoque muy específico en la educación, la experimentación rápida y la facilidad de uso para personas que se inician en la programación de microcontroladores y la electrónica.
+<!-- github-only-start -->
+<p align="center">
+	<img src="../../assets/images/logo/tinygo.png" alt="Logo de TinyGo" 
+width="200">
+	<br>
+	<i>Logo de TinyGo</i>
+</p>
+<!-- github-only-end -->
 
-Dado que el código reside en una unidad de disco accesible por USB, es muy fácil editar y actualizar el código sin necesidad de herramientas de desarrollo complejas, a diferencia de MicroPython, que es más genérico, CircuitPython se enfoca en proporcionar soporte directo y robusto para una amplia gama de sensores, actuadores y componentes externos, especialmente los vendidos por Adafruit y sus socios. Esto se logra a través de una extensa colección de librerías y controladores pre-escritos.
-
-Al igual que MicroPython, CircuitPython es una implementación de Python en microcontroladores, pero está optimizada para ser utilizada en dispositivos con recursos limitados, como la Raspberry Pi Pico 2 WH [[2](#circuit-python-docs)].
+<!-- mkdocs-only-start
+<div class="hcenter">
+    <img src="/assets/images/logo/tinygo.png" alt="Logo de TinyGo" 
+class="logo--3rd-party">
+    <i>Logo de TinyGo</i>
+</div>
+mkdocs-only-end -->
 
 # Referencias
 
 1. *El tutorial de Python*. (2025). Python Software Foundation. <a id="python-docs" href="https://docs.python.org/es/3/tutorial/">https://docs.python.org/es/3/tutorial/</a>
-
-2. *CircuitPython*. (2025). CircuitPython. <a id="circuit-python-docs" href="https://docs.circuitpython.org/en/latest/README.html">https://docs.circuitpython.org/en/latest/README.html</a>
