@@ -5,7 +5,7 @@ import (
 )
 
 var (
-	ErrNilHandler                  = errors.New("challenge handler cannot be nil")
-	ErrNilObstaclesPullDownHandler = errors.New("obstacles pull-down handler cannot be nil")
-	ErrNilParkingPullDownHandler   = errors.New("parking pull-down handler cannot be nil")
+	ErrNilHandler                = errors.New("challenge handler cannot be nil")
+	ErrNilObstaclesPullUpHandler = errors.New("obstacles pull-up handler cannot be nil")
+	ErrNilParkingPullUpHandler   = errors.New("parking pull-up handler cannot be nil")
 )

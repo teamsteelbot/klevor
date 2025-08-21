@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc/enums"
+	internalusbcdcenums "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc/enums"
 )
 
 type (
 	// OutgoingMessage is the struct to handle the messages sent to the Raspberry Pi 5
 	OutgoingMessage struct {
-		Category enums.OutgoingCategory
+		Category internalusbcdcenums.OutgoingCategory
 		Content  string
 	}
 )
@@ -26,7 +26,7 @@ type (
 //
 // An instance of OutgoingMessage
 func NewOutgoingMessage(
-	category enums.OutgoingCategory,
+	category internalusbcdcenums.OutgoingCategory,
 	content string,
 ) *OutgoingMessage {
 	return &OutgoingMessage{
@@ -46,7 +46,7 @@ func NewOutgoingMessage(
 //
 // An instance of OutgoingMessage
 func NewOutgoingMessageFromUint8Content(
-	category enums.OutgoingCategory,
+	category internalusbcdcenums.OutgoingCategory,
 	content uint8,
 ) *OutgoingMessage {
 	return &OutgoingMessage{
@@ -66,7 +66,7 @@ func NewOutgoingMessageFromUint8Content(
 //
 // An instance of OutgoingMessage
 func NewOutgoingMessageFromUint16Content(
-	category enums.OutgoingCategory,
+	category internalusbcdcenums.OutgoingCategory,
 	content uint16,
 ) *OutgoingMessage {
 	return &OutgoingMessage{
@@ -86,7 +86,7 @@ func NewOutgoingMessageFromUint16Content(
 //
 // An instance of OutgoingMessage
 func NewOutgoingMessageFromFloat64Content(
-	category enums.OutgoingCategory,
+	category internalusbcdcenums.OutgoingCategory,
 	content float64,
 ) *OutgoingMessage {
 	return &OutgoingMessage{
@@ -106,7 +106,7 @@ func NewOutgoingMessageFromFloat64Content(
 //
 // An instance of OutgoingMessage
 func NewOutgoingMessageFromIntContent(
-	category enums.OutgoingCategory,
+	category internalusbcdcenums.OutgoingCategory,
 	content int,
 ) *OutgoingMessage {
 	return &OutgoingMessage{
@@ -121,13 +121,11 @@ func NewOutgoingMessageFromIntContent(
 //
 // A string that represents the OutgoingMessage
 func (msg *OutgoingMessage) String() string {
-	return fmt.Sprintf(
-		"%d%d%s%d",
-		msg.Category,
-		HeaderSeparatorChar,
-		msg.Content,
-		EndChar,
-	)
+	var sb strings.Builder
+	sb.WriteByte(byte(msg.Category))
+	sb.WriteString(msg.Content)
+	sb.WriteByte(EndChar)
+	return sb.String()
 }
 
 // IsEqual compares the given instance of OutgoingMessage with the current one
@@ -162,28 +160,14 @@ func NewOutgoingMessageFromString(message string) (*OutgoingMessage, error) {
 		message = message[:len(message)-1]
 	}
 
-	// Split the string into category and content
-	parts := strings.SplitN(
-		strings.TrimSpace(message),
-		HeaderSeparatorString,
-		OutgoingMessageExpectedParts,
-	)
-	if len(parts) != OutgoingMessageExpectedParts {
-		return nil, fmt.Errorf(
-			ErrOutgoingMessageMissingParts,
-			len(parts),
-			OutgoingMessageExpectedParts,
-		)
-	}
-
 	// Convert the category string to a Category enum value
-	category, err := enums.OutgoingCategoryFromString(parts[0])
+	category, err := internalusbcdcenums.OutgoingCategoryFromUint8(message[0])
 	if err != nil {
 		return nil, err
 	}
 
 	// Create and return the OutgoingMessage object
-	return NewOutgoingMessage(category, parts[1]), nil
+	return NewOutgoingMessage(category, message[1:]), nil
 }
 
 // FormatToSendAsAnErrorMessage formats the message to send as an error message.
@@ -194,9 +178,8 @@ func NewOutgoingMessageFromString(message string) (*OutgoingMessage, error) {
 func (msg *OutgoingMessage) FormatToSendAsAnErrorMessage() string {
 	// Format the message as an error message
 	return fmt.Sprintf(
-		"%d%s%s",
+		"%d%s",
 		msg.Category,
-		HeaderSeparatorString,
 		msg.Content,
 	)
 }

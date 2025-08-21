@@ -56,3 +56,22 @@ func IncomingCategoryFromString(s string) (IncomingCategory, error) {
 	}
 	return IncomingCategoryNil, fmt.Errorf(ErrInvalidIncomingCategoryName, s)
 }
+
+// IncomingCategoryFromUint8 returns the IncomingCategory enum based on a given uint8 value
+//
+// Parameters:
+//
+// value: The uint8 value to search on IncomingCategoryNames
+//
+// Returns:
+//
+// The IncomingCategory enum value, or an error if the key wasn't found for the given value
+func IncomingCategoryFromUint8(value uint8) (IncomingCategory, error) {
+	if value < uint8(IncomingCategoryNil) || value > uint8(IncomingCategoryServoAngle) {
+		return IncomingCategoryNil, fmt.Errorf(
+			ErrInvalidIncomingCategory,
+			value,
+		)
+	}
+	return IncomingCategory(value), nil
+}

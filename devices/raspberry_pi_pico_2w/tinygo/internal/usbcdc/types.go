@@ -7,17 +7,17 @@ import (
 
 	"machine"
 
-	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/challenge"
-	challengeenums "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/challenge/enums"
-	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/led"
-	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc/enums"
+	internalchallenge "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/challenge"
+	internalchallengeenums "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/challenge/enums"
+	internalled "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/led"
+	internalusbcdcenums "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc/enums"
 )
 
 type (
 	// DefaultHandler is the default implementation of the Handler interface.
 	DefaultHandler struct {
-		challengeHandler challenge.Handler
-		ledHandler       led.Handler
+		challengeHandler internalchallenge.Handler
+		ledHandler       internalled.Handler
 	}
 )
 
@@ -32,17 +32,17 @@ type (
 //
 // An instance of DefaultHandler, or an error if any of the handlers is nil
 func NewDefaultHandler(
-	challengeHandler challenge.Handler,
-	ledHandler led.Handler,
+	challengeHandler internalchallenge.Handler,
+	ledHandler internalled.Handler,
 ) (*DefaultHandler, error) {
 	// Check if the challengeHandler is nil
 	if challengeHandler == nil {
-		return nil, challenge.ErrNilHandler
+		return nil, internalchallenge.ErrNilHandler
 	}
 
 	// Check if the ledHandler is nil
 	if ledHandler == nil {
-		return nil, led.ErrNilHandler
+		return nil, internalled.ErrNilHandler
 	}
 
 	return &DefaultHandler{
@@ -58,7 +58,7 @@ func NewDefaultHandler(
 // A pointer to a list of received messages or an error if it fails to receive messages
 func (d *DefaultHandler) ReceiveMessages() (*[]IncomingMessage, error) {
 	// If no messages are received, turn off the LED
-	if machine.Serial.Buffered == 0 {
+	if machine.Serial.Buffered() == 0 {
 		if d.ledHandler.IsOn() {
 			d.ledHandler.SetOff()
 		}
@@ -73,7 +73,7 @@ func (d *DefaultHandler) ReceiveMessages() (*[]IncomingMessage, error) {
 	// Initialize a slice to hold the messages and a buffer to hold the incoming data
 	messages := &[]IncomingMessage{}
 	buffer := make([]byte, 0, BufferSize)
-	for machine.Serial.Buffered > 0 {
+	for machine.Serial.Buffered() > 0 {
 		// Read a byte from the serial port
 		c, err := machine.Serial.ReadByte()
 		if err != nil {
@@ -132,15 +132,15 @@ func (d *DefaultHandler) SendMessage(message *OutgoingMessage) error {
 //
 // An error if there is an error in sending the message
 func (d *DefaultHandler) SendBufferMessage(
-	category enums.OutgoingCategory,
+	category internalusbcdcenums.OutgoingCategory,
 	message *strings.Builder,
 ) error {
 	// Send the category header
-	if category == enums.OutgoingCategoryNil {
+	if category == internalusbcdcenums.OutgoingCategoryNil {
 		return fmt.Errorf(ErrNilOutgoingCategory, category)
 	}
-	machine.Serial.Write(
-		[]byte(fmt.Sprintf("%s%s", category, HeaderSeparatorString)),
+	machine.Serial.WriteByte(
+		byte(category),
 	)
 
 	// Send the message in chunks
@@ -160,7 +160,7 @@ func (d *DefaultHandler) SendBufferMessage(
 	}
 
 	// Send the end character to indicate the end of the message
-	if _, err := machine.Serial.WriteByte(EndChar); err != nil {
+	if err := machine.Serial.WriteByte(EndChar); err != nil {
 		return fmt.Errorf(ErrFailedToSendEndCharacter, err)
 	}
 	return nil
@@ -234,11 +234,11 @@ func (d *DefaultHandler) SendChallengeMessage() error {
 
 	// Send the challenge message based on the challenge type
 	var challengeMessage *OutgoingMessage
-	if challengeType == challengeenums.ChallengeWithObstaclesAndParking {
+	if challengeType == internalchallengeenums.ChallengeWithObstaclesAndParking {
 		challengeMessage = OutgoingChallengeWithObstaclesAndParkingMessage
-	} else if challengeType == challengeenums.ChallengeWithObstacles {
+	} else if challengeType == internalchallengeenums.ChallengeWithObstacles {
 		challengeMessage = OutgoingChallengeWithObstaclesMessage
-	} else if challengeType == challengeenums.ChallengeWithoutObstacles {
+	} else if challengeType == internalchallengeenums.ChallengeWithoutObstacles {
 		challengeMessage = OutgoingChallengeWithoutObstaclesMessage
 	} else {
 		return fmt.Errorf(ErrUnknownChallengeType, challengeType)
@@ -263,7 +263,7 @@ func (d *DefaultHandler) SendChallengeMessage() error {
 func (d *DefaultHandler) SendBNO08XYawDegreesMessage(yawDegrees float64) error {
 	// Create the BNO08x yaw degrees message
 	bno08xMessage := NewOutgoingMessageFromFloat64Content(
-		enums.OutgoingCategoryBNO08XYawDegrees,
+		internalusbcdcenums.OutgoingCategoryBNO08XYawDegrees,
 		yawDegrees,
 	)
 
@@ -283,7 +283,7 @@ func (d *DefaultHandler) SendBNO08XYawDegreesMessage(yawDegrees float64) error {
 func (d *DefaultHandler) SendBNO08XYawTurnsMessage(turns int) error {
 	// Create the BNO08x yaw turns message
 	bno08xMessage := NewOutgoingMessageFromIntContent(
-		enums.OutgoingCategoryBNO08XYawTurns,
+		internalusbcdcenums.OutgoingCategoryBNO08XYawTurns,
 		turns,
 	)
 
@@ -308,7 +308,7 @@ func (d *DefaultHandler) SendErrorMessage(err error) error {
 
 	// Create the error message
 	errorMessage := NewOutgoingMessage(
-		enums.OutgoingCategoryError,
+		internalusbcdcenums.OutgoingCategoryError,
 		err.Error(),
 	)
 

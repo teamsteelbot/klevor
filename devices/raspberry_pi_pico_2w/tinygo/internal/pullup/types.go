@@ -1,11 +1,11 @@
-package pulldown
+package pullup
 
 import (
 	"machine"
 )
 
 type (
-	// DefaultHandler is the default implementation to handle pull-down resistor.
+	// DefaultHandler is the default implementation to handle pull-up resistor.
 	DefaultHandler struct {
 		inputPin machine.Pin
 	}
@@ -20,15 +20,15 @@ type (
 // Returns:
 //
 // An instance of DefaultHandler.
-func NewDefaultHandler(inputPin int) *DefaultHandler {
+func NewDefaultHandler(inputPin machine.Pin) *DefaultHandler {
 	return &DefaultHandler{
-		machine.Pin(inputPin),
+		inputPin,
 	}
 }
 
 // Setup initializes the input pin for the DefaultHandler
 func (d *DefaultHandler) Setup() {
-	d.inputPin.Configure(machine.PinConfig{Mode: machine.PinInputPulldown})
+	d.inputPin.Configure(machine.PinConfig{Mode: machine.PinInputPullup})
 }
 
 // IsHigh checks if the input pin is high.
@@ -55,8 +55,7 @@ func (d *DefaultHandler) IsLow() bool {
 //
 // True if the input pin is open, otherwise false.
 func (d *DefaultHandler) IsOpen() bool {
-	// In a pull-down configuration, an open pin will read low.
-	return d.IsLow()
+	return d.IsHigh()
 }
 
 // IsShorted checks if the input pin is shorted (connected to ground).
@@ -65,6 +64,5 @@ func (d *DefaultHandler) IsOpen() bool {
 //
 // True if the input pin is shorted, otherwise false.
 func (d *DefaultHandler) IsShorted() bool {
-	// In a pull-down configuration, a shorted pin will read high.
-	return d.IsHigh()
+	return d.IsLow()
 }

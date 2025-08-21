@@ -7,26 +7,6 @@ from busio import I2C
 
 from .serial_communication import SerialCommunication
 
-
-class BNO08XError(Exception):
-	"""
-	Custom exception class for BNO08X errors.
-	"""
-
-	def __init__(self, message):
-		"""
-		Initializes the BNO08XError with a custom message.
-		"""
-		super().__init__(message)
-		self.message = message
-
-	def __str__(self):
-		"""
-		Returns a string representation of the BNO08XError.
-		"""
-		return f"BNO08X Error: {self.message}"
-
-
 class BNO08XHandler:
 	"""
 	A class to handle BNO08X sensor operations.
@@ -58,7 +38,7 @@ class BNO08XHandler:
 		self.__bno = BNO08X_I2C(i2c, address=address)
 		self.__bno.enable_feature(BNO_REPORT_GYROSCOPE)
 		self.__bno.enable_feature(BNO_REPORT_ROTATION_VECTOR)
-
+-
 		# Check the type of serial communication
 		self.__serial_communication = serial_communication
 
@@ -80,69 +60,6 @@ class BNO08XHandler:
 
 		# Set has been calibrated flag
 		self.__calibrated = False
-
-	async def calibrate(self):
-		"""
-		Calibrates the BNO08X sensor by taking initial readings to set the initial orientation.
-
-		Raises:
-			BNO08XError: If the sensor is already calibrated.
-		"""
-		# Check if already calibrated
-		# if self.__calibrated:
-		#     raise BNO08XError("BNO08X sensor is already calibrated.")
-
-		# Set the calibrated flag to True
-		self.__calibrated = True
-
-		# Gathering multiple samples to fix errors
-		for _ in range(self.INITIAL_SAMPLES):
-			await self.__read_quaternion()
-			await sleep(self.DELAY)
-
-		# Saving the orientation, this makes the turns variables much smoother to handle
-		self.__initial_roll_deg, self.__initial_pitch_deg, self.__initial_yaw_deg = BNO08XHandler.quaternion_to_euler_degrees(
-			*self.__quaternion,
-			)
-
-	@staticmethod
-	def quaternion_to_euler_degrees(x: float, y: float, z: float, w: float):
-		"""
-		This function receives the 4 components of the quaternion and calculates the orientation
-		"""
-		# Roll
-		sinr_cosp = 2 * (w * x + y * z)
-		cosr_cosp = 1 - 2 * (x * x + y * y)
-		roll_rad = atan2(sinr_cosp, cosr_cosp)
-
-		# Pitch
-		sinp = 2 * (w * y - z * x)
-
-		# Clamp the value to avoid domain errors for asin (should be between -1 and 1)
-		if sinp > 1:
-			pitch_rad = pi / 2
-		elif sinp < -1:
-			pitch_rad = -pi / 2
-		else:
-			pitch_rad = asin(sinp)
-
-		# Yaw
-		siny_cosp = 2 * (w * z + x * y)
-		cosy_cosp = 1 - 2 * (y * y + z * z)
-		yaw_rad = atan2(siny_cosp, cosy_cosp)
-
-		return degrees(roll_rad), degrees(pitch_rad), degrees(yaw_rad)
-
-	@staticmethod
-	def gyro_to_degrees(x_rad: float, y_rad: float, z_rad: float):
-		"""
-		Converts gyroscope readings from radians to degrees.
-		"""
-		return (
-			degrees(x_rad),
-			degrees(y_rad),
-			degrees(z_rad),
-			)
 
 	@property
 	def quaternion(self):
@@ -334,3 +251,4 @@ class BNO08XHandler:
 		Returns the number of 90-degree turns made since the last reset.
 		"""
 		return self.__accumulated_90_deg_turns
+

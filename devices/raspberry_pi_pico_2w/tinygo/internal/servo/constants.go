@@ -3,9 +3,9 @@ package servo
 import (
 	"machine"
 
-	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/debug"
-	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/movement"
-	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc"
+	internaldebug "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/debug"
+	internalmovement "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/movement"
+	internalusbcdc "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc"
 )
 
 const (
@@ -44,9 +44,9 @@ var (
 	ServoHandler, _ = NewDefaultHandler(
 		machine.PWM1,
 		machine.GPIO2,
-		usbcdc.USBCDCHandler,
-		debug.Handler,
-		movement.Handler,
+		internalusbcdc.USBCDCHandler,
+		internaldebug.Handler,
+		internalmovement.Handler,
 		DefaultOptions,
 	)
 )

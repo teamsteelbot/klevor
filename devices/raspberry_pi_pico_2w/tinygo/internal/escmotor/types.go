@@ -7,22 +7,20 @@ import (
 	"machine"
 
 	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal"
-	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/debug"
-	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/movement"
-	pulldownenabler "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/pulldown/enabler"
-	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc"
-	usbcdcenums "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc/enums"
+	internaldebug "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/debug"
+	internalmovement "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/movement"
+	internalpullupenabler "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/pullup/enabler"
+	internalusbcdc "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc"
+	internalusbcdcenums "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc/enums"
 	tinygoservo "tinygo.org/x/drivers/servo"
 )
 
 type (
 	// DefaultHandler is the default implementation to handle ESC (Electronic Speed Controller) motor operations.
 	DefaultHandler struct {
-		usbCDCHandler      usbcdc.Handler
-		debugHandler       pulldownenabler.Handler
-		movementHandler    pulldownenabler.Handler
-		pwm                machine.PWM
-		pin                machine.Pin
+		usbCDCHandler      internalusbcdc.Handler
+		debugHandler       internalpullupenabler.Handler
+		movementHandler    internalpullupenabler.Handler
 		isPolarityInverted bool
 		frequency          uint16
 		minPulseWidth      uint16
@@ -75,33 +73,33 @@ func NewOptions(
 // pwm: The PWM interface to control the ESC motor
 // pin: The pin connected to the ESC motor
 // usbCDCHandler: The USB CDC handler to send messages
-// debugHandler: The debug pull-down handler to check if the debug mode is enabled
-// movementHandler: The movement pull-down handler to check if the movement is enabled
+// debugHandler: The debug pull-up handler to check if the debug mode is enabled
+// movementHandler: The movement pull-up handler to check if the movement is enabled
 // options: Optional parameters for the ESC motor configuration
 //
 // Returns:
 //
 // An instance of DefaultHandler and an error if any occurred during initialization
 func NewDefaultHandler(
-	pwm machine.PWM,
+	pwm tinygoservo.PWM,
 	pin machine.Pin,
-	usbCDCHandler usbcdc.Handler,
-	debugHandler, movementHandler pulldownenabler.Handler,
+	usbCDCHandler internalusbcdc.Handler,
+	debugHandler, movementHandler internalpullupenabler.Handler,
 	options *Options,
 ) (*DefaultHandler, error) {
 	// Check if the USB CDC handler is nil
 	if usbCDCHandler == nil {
-		return nil, usbcdc.ErrNilHandler
+		return nil, internalusbcdc.ErrNilHandler
 	}
 
-	// Check if the debug pull-down handler is nil
+	// Check if the debug pull-up handler is nil
 	if debugHandler == nil {
-		return nil, debug.ErrNilHandler
+		return nil, internaldebug.ErrNilHandler
 	}
 
-	// Check if the movement pull-down handler is nil
+	// Check if the movement pull-up handler is nil
 	if movementHandler == nil {
-		return nil, movement.ErrNilHandler
+		return nil, internalmovement.ErrNilHandler
 	}
 
 	// Check if options are nil
@@ -109,10 +107,10 @@ func NewDefaultHandler(
 		return nil, ErrNilOptions
 	}
 
-	// Configure the timer/PWM.
+	// Configure the PWM
 	if err := pwm.Configure(
 		machine.PWMConfig{
-			Period: time.Second / time.Duration(options.Frequency),
+			Period: uint64(time.Second / time.Duration(options.Frequency)),
 		},
 	); err != nil {
 		return nil, fmt.Errorf(internal.ErrFailedToConfigurePWM, err)
@@ -133,8 +131,6 @@ func NewDefaultHandler(
 		usbCDCHandler,
 		debugHandler,
 		movementHandler,
-		pwm,
-		pin,
 		options.IsPolarityInverted,
 		options.Frequency,
 		options.MinPulseWidth,
@@ -199,9 +195,9 @@ func (e *DefaultHandler) SetSpeed(speed uint16, isForward bool) error {
 	// Send the debug message if the debug handler is enabled
 	if e.debugHandler.IsEnabled() {
 		err := e.usbCDCHandler.SendMessage(
-			usbcdc.NewOutgoingMessageFromUint8Content(
-				usbcdcenums.OutgoingCategoryDebug,
-				uint8(usbcdcenums.DebugReceivedMotorSpeed),
+			internalusbcdc.NewOutgoingMessageFromUint8Content(
+				internalusbcdcenums.OutgoingCategoryDebug,
+				uint8(internalusbcdcenums.DebugReceivedMotorSpeed),
 			),
 		)
 		if err != nil {

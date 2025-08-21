@@ -4,7 +4,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc/enums"
+	internalusbcdcenums "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc/enums"
 )
 
 type (
@@ -13,7 +13,7 @@ type (
 		ReceiveMessages() (*[]IncomingMessage, error)
 		SendMessage(message *OutgoingMessage) error
 		SendBufferMessage(
-			category enums.OutgoingCategory,
+			category internalusbcdcenums.OutgoingCategory,
 			content *strings.Builder,
 		) error
 		SendConfirmationMessage() error

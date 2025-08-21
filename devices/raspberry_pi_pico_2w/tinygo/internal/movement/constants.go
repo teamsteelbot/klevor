@@ -3,10 +3,15 @@ package movement
 import (
 	"machine"
 
-	pulldownenabler "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/pulldown/enabler"
+	internalpullupenabler "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/pullup/enabler"
 )
 
 var (
 	// Handler is the handler for the pull-down for the movement mode.
-	Handler = pulldownenabler.NewDefaultHandlerFromPin(machine.GPIO14)
+	Handler = internalpullupenabler.NewDefaultHandlerFromPin(machine.GPIO14)
 )
+
+func init() {
+	// Call the setup function to initialize the pull-up enabler
+	Handler.Setup()
+}

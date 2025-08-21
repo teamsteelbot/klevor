@@ -1,15 +1,15 @@
 package challenge
 
 import (
-	challengeenums "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/challenge/enums"
-	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/pulldown"
+	internalchallengeenums "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/challenge/enums"
+	internalpullup "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/pullup"
 )
 
 type (
 	// DefaultHandler is the default implementation of the Handler interface.
 	DefaultHandler struct {
-		obstaclesPullDownHandler pulldown.Handler
-		parkingPullDownHandler   pulldown.Handler
+		obstaclesPullUpHandler internalpullup.Handler
+		parkingPullUpHandler   internalpullup.Handler
 	}
 )
 
@@ -17,25 +17,25 @@ type (
 //
 // Parameters:
 //
-// pullDownHandler: The pull-down handler to use
+// pullUpHandler: The pull-up handler to use
 //
 // Returns:
 //
-// An instance of DefaultHandler, or an error if the pull-down handler is nil
+// An instance of DefaultHandler, or an error if the pull-up handler is nil
 func NewDefaultHandler(
-	obstaclesPullDownHandler pulldown.Handler,
-	parkingPullDownHandler pulldown.Handler,
+	obstaclesPullUpHandler internalpullup.Handler,
+	parkingPullUpHandler internalpullup.Handler,
 ) (*DefaultHandler, error) {
-	if obstaclesPullDownHandler == nil {
-		return nil, ErrNilObstaclesPullDownHandler
+	if obstaclesPullUpHandler == nil {
+		return nil, ErrNilObstaclesPullUpHandler
 	}
-	if parkingPullDownHandler == nil {
-		return nil, ErrNilParkingPullDownHandler
+	if parkingPullUpHandler == nil {
+		return nil, ErrNilParkingPullUpHandler
 	}
 
 	return &DefaultHandler{
-		obstaclesPullDownHandler,
-		parkingPullDownHandler,
+		obstaclesPullUpHandler,
+		parkingPullUpHandler,
 	}, nil
 }
 
@@ -43,41 +43,41 @@ func NewDefaultHandler(
 //
 // Returns:
 //
-// True if the pull-down for obstacles is shorted and the pull-down for parking is open, false otherwise.
+// True if the pull-up for obstacles is shorted and the pull-up for parking is open, false otherwise.
 func (d *DefaultHandler) IsWithObstacles() bool {
-	return d.obstaclesPullDownHandler.IsShorted() && d.parkingPullDownHandler.IsOpen()
+	return d.obstaclesPullUpHandler.IsShorted() && d.parkingPullUpHandler.IsOpen()
 }
 
 // IsWithObstaclesAndParking checks if the challenge is with obstacles and parking.
 //
 // Returns:
 //
-// True if both pull-downs for obstacles and parking are shorted, false otherwise.
+// True if both pull-ups for obstacles and parking are shorted, false otherwise.
 func (d *DefaultHandler) IsWithObstaclesAndParking() bool {
-	return d.obstaclesPullDownHandler.IsShorted() && d.parkingPullDownHandler.IsShorted()
+	return d.obstaclesPullUpHandler.IsShorted() && d.parkingPullUpHandler.IsShorted()
 }
 
 // IsWithoutObstacles checks if the challenge is without obstacles.
 //
 // Returns:
 //
-// True if the pull-down for obstacles is open, false otherwise.
+// True if the pull-up for obstacles is open, false otherwise.
 func (d *DefaultHandler) IsWithoutObstacles() bool {
-	return d.obstaclesPullDownHandler.IsOpen()
+	return d.obstaclesPullUpHandler.IsOpen()
 }
 
-// GetChallenge returns the current challenge based on the pull-down states.
+// GetChallenge returns the current challenge based on the pull-up states.
 //
 // Returns:
 //
 // The current challenge as an enum value.
-func (d *DefaultHandler) GetChallenge() challengeenums.Challenge {
+func (d *DefaultHandler) GetChallenge() internalchallengeenums.Challenge {
 	if d.IsWithObstaclesAndParking() {
-		return challengeenums.ChallengeWithObstaclesAndParking
+		return internalchallengeenums.ChallengeWithObstaclesAndParking
 	} else if d.IsWithObstacles() {
-		return challengeenums.ChallengeWithObstacles
+		return internalchallengeenums.ChallengeWithObstacles
 	} else if d.IsWithoutObstacles() {
-		return challengeenums.ChallengeWithoutObstacles
+		return internalchallengeenums.ChallengeWithoutObstacles
 	}
-	return challengeenums.ChallengeNil
+	return internalchallengeenums.ChallengeNil
 }

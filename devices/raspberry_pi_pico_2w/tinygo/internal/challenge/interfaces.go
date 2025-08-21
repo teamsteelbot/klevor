@@ -1,7 +1,7 @@
 package challenge
 
 import (
-	challengeenums "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/challenge/enums"
+	internalchallengeenums "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/challenge/enums"
 )
 
 type (
@@ -10,6 +10,6 @@ type (
 		IsWithObstacles() bool
 		IsWithoutObstacles() bool
 		IsWithObstaclesAndParking() bool
-		GetChallenge() challengeenums.Challenge
+		GetChallenge() internalchallengeenums.Challenge
 	}
 )

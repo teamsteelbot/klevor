@@ -62,3 +62,22 @@ func OutgoingCategoryFromString(s string) (OutgoingCategory, error) {
 	}
 	return OutgoingCategoryNil, fmt.Errorf(ErrInvalidOutgoingCategoryName, s)
 }
+
+// OutgoingCategoryFromUint8 returns the OutgoingCategory enum based on a given uint8 value
+//
+// Parameters:
+//
+// value: The uint8 value to search on OutgoingCategoryNames
+//
+// Returns:
+//
+// The OutgoingCategory enum value, or an error if the key wasn't found for the given value
+func OutgoingCategoryFromUint8(value uint8) (OutgoingCategory, error) {
+	if value >= uint8(len(OutgoingCategoryNames)) {
+		return OutgoingCategoryNil, fmt.Errorf(
+			ErrInvalidOutgoingCategory,
+			value,
+		)
+	}
+	return OutgoingCategory(value), nil
+}

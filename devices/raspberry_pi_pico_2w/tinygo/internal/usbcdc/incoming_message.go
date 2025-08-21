@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc/enums"
+	internalusbcdcenums "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc/enums"
 )
 
 type (
 	// IncomingMessage is the struct to handle the messages received to the Raspberry Pi 5
 	IncomingMessage struct {
-		Category enums.IncomingCategory
+		Category internalusbcdcenums.IncomingCategory
 		Content  string
 	}
 )
@@ -26,7 +26,7 @@ type (
 //
 // An instance of IncomingMessage
 func NewIncomingMessage(
-	category enums.IncomingCategory,
+	category internalusbcdcenums.IncomingCategory,
 	content string,
 ) *IncomingMessage {
 	return &IncomingMessage{
@@ -46,7 +46,7 @@ func NewIncomingMessage(
 //
 // An instance of IncomingMessage
 func NewIncomingMessageFromUint8Content(
-	category enums.IncomingCategory,
+	category internalusbcdcenums.IncomingCategory,
 	content uint8,
 ) *IncomingMessage {
 	return &IncomingMessage{
@@ -61,13 +61,11 @@ func NewIncomingMessageFromUint8Content(
 //
 // A string that represents the IncomingMessage
 func (msg *IncomingMessage) String() string {
-	return fmt.Sprintf(
-		"%02d%d%s%d",
-		msg.Category,
-		HeaderSeparatorChar,
-		msg.Content,
-		EndChar,
-	)
+	var sb strings.Builder
+	sb.WriteByte(byte(msg.Category))
+	sb.WriteString(msg.Content)
+	sb.WriteByte(EndChar)
+	return sb.String()
 }
 
 // IsEqual compares the given instance of IncomingMessage with the current one
@@ -102,28 +100,14 @@ func NewIncomingMessageFromString(message string) (*IncomingMessage, error) {
 		message = message[:len(message)-1]
 	}
 
-	// Split the string into category and content
-	parts := strings.SplitN(
-		strings.TrimSpace(message),
-		HeaderSeparatorString,
-		IncomingMessageExpectedParts,
-	)
-	if len(parts) != IncomingMessageExpectedParts {
-		return nil, fmt.Errorf(
-			ErrIncomingMessageMissingParts,
-			len(parts),
-			IncomingMessageExpectedParts,
-		)
-	}
-
 	// Convert the category string to a Category enum value
-	category, err := enums.IncomingCategoryFromString(parts[0])
+	category, err := internalusbcdcenums.IncomingCategoryFromUint8(message[0])
 	if err != nil {
 		return nil, err
 	}
 
 	// Create and return the IncomingMessage object
-	return NewIncomingMessage(category, parts[1]), nil
+	return NewIncomingMessage(category, message[1:]), nil
 }
 
 /*

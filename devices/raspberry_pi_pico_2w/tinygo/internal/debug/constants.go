@@ -3,10 +3,15 @@ package debug
 import (
 	"machine"
 
-	pulldownenabler "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/pulldown/enabler"
+	internalpullupenabler "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/pullup/enabler"
 )
 
 var (
-	// Handler is the handler for the pull-down for the debug mode.
-	Handler = pulldownenabler.NewDefaultHandlerFromPin(machine.GPIO10)
+	// Handler is the handler for the pull-up for the debug mode.
+	Handler = internalpullupenabler.NewDefaultHandlerFromPin(machine.GPIO10)
 )
+
+func init() {
+	// Call the setup function to initialize the pull-up enabler
+	Handler.Setup()
+}

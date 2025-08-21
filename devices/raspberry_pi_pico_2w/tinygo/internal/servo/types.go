@@ -6,22 +6,20 @@ import (
 
 	"machine"
 
-	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/debug"
-	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/movement"
-	pulldownenabler "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/pulldown/enabler"
-	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc"
-	usbcdcenums "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc/enums"
+	internaldebug "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/debug"
+	internalmovement "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/movement"
+	internalpullupenabler "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/pullup/enabler"
+	internalusbcdc "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc"
+	internalusbcdcenums "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc/enums"
 	tinygoservo "tinygo.org/x/drivers/servo"
 )
 
 type (
 	// DefaultHandler is the default implementation of the Servo interface
 	DefaultHandler struct {
-		usbCDCHandler       usbcdc.Handler
-		debugHandler        pulldownenabler.Handler
-		movementHandler     pulldownenabler.Handler
-		pwm                 machine.PWM
-		pin                 machine.Pin
+		usbCDCHandler       internalusbcdc.Handler
+		debugHandler        internalpullupenabler.Handler
+		movementHandler     internalpullupenabler.Handler
 		isDirectionInverted bool
 		frequency           uint16
 		minPulseWidth       uint16
@@ -82,26 +80,26 @@ func NewOptions(
 //
 // An instance of DefaultHandler and an error if any occurred during initialization
 func NewDefaultHandler(
-	pwm machine.PWM,
+	pwm tinygoservo.PWM,
 	pin machine.Pin,
-	usbCDCHandler usbcdc.Handler,
+	usbCDCHandler internalusbcdc.Handler,
 	debugHandler,
-	movementHandler pulldownenabler.Handler,
+	movementHandler internalpullupenabler.Handler,
 	options *Options,
 ) (*DefaultHandler, error) {
 	// Check if the USB CDC handler is nil
 	if usbCDCHandler == nil {
-		return nil, usbcdc.ErrNilHandler
+		return nil, internalusbcdc.ErrNilHandler
 	}
 
 	// Check if the debug pull-down handler is nil
 	if debugHandler == nil {
-		return nil, debug.ErrNilHandler
+		return nil, internaldebug.ErrNilHandler
 	}
 
 	// Check if the movement pull-down handler is nil
 	if movementHandler == nil {
-		return nil, movement.ErrNilHandler
+		return nil, internalmovement.ErrNilHandler
 	}
 
 	// Check if the options are nil
@@ -109,10 +107,10 @@ func NewDefaultHandler(
 		return nil, ErrNilOptions
 	}
 
-	// Configure the PWM pin
+	// Configure the PWM
 	if err := pwm.Configure(
 		machine.PWMConfig{
-			Period: time.Second / time.Duration(options.Frequency),
+			Period: uint64(time.Second / time.Duration(options.Frequency)),
 		},
 	); err != nil {
 		return nil, err
@@ -133,8 +131,6 @@ func NewDefaultHandler(
 		usbCDCHandler,
 		debugHandler,
 		movementHandler,
-		pwm,
-		pin,
 		options.IsDirectionInverted,
 		options.Frequency,
 		options.MinPulseWidth,
@@ -203,9 +199,9 @@ func (s *DefaultHandler) SetAngle(angle uint16) error {
 	// Send a debug message if debug mode is enabled
 	if s.debugHandler.IsShorted() && s.usbCDCHandler != nil {
 		err := s.usbCDCHandler.SendMessage(
-			usbcdc.NewOutgoingMessageFromUint8Content(
-				usbcdcenums.OutgoingCategoryDebug,
-				uint8(usbcdcenums.DebugReceivedServoAngle),
+			internalusbcdc.NewOutgoingMessageFromUint8Content(
+				internalusbcdcenums.OutgoingCategoryDebug,
+				uint8(internalusbcdcenums.DebugReceivedServoAngle),
 			),
 		)
 		if err != nil {

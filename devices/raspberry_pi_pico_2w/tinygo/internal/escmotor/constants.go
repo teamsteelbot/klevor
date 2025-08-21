@@ -3,9 +3,9 @@ package escmotor
 import (
 	"machine"
 
-	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/debug"
-	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/movement"
-	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc"
+	internaldebug "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/debug"
+	internalmovement "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/movement"
+	internalusbcdc "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc"
 )
 
 const (
@@ -37,10 +37,10 @@ var (
 	// ESCMotorHandler is the default handler for ESC motors
 	ESCMotorHandler, _ = NewDefaultHandler(
 		machine.PWM0,
-		machine.GPIO0,
-		usbcdc.USBCDCHandler,
-		debug.Handler,
-		movement.Handler,
+		machine.GPIO1,
+		internalusbcdc.USBCDCHandler,
+		internaldebug.Handler,
+		internalmovement.Handler,
 		DefaultOptions,
 	)
 )

@@ -1,7 +1,7 @@
-package pulldown
+package pullup
 
 type (
-	// Handler is the interface to handle pull-down resistor operations
+	// Handler is the interface to handle pull-up resistor operations
 	Handler interface {
 		Setup()
 		IsHigh() bool

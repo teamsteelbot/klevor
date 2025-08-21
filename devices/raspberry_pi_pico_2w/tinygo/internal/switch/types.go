@@ -3,13 +3,13 @@ package _switch
 import (
 	"time"
 
-	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/pulldown"
+	internalpullup "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/pullup"
 )
 
 type (
 	// DefaultHandler is the default implementation of the Handler interface for managing the switch state.
 	DefaultHandler struct {
-		pulldown.Handler
+		internalpullup.Handler
 		interval time.Duration
 	}
 )
@@ -18,22 +18,22 @@ type (
 //
 // Parameters:
 //
-// pullDownHandler: The pull-down handler to use
+// pullUpHandler: The pull-up handler to use
 // interval: The interval to wait for the switch to be pressed
 //
 // Returns:
 //
-// An instance of DefaultHandler, or an error if the pull-down handler is nil
+// An instance of DefaultHandler, or an error if the pull-up handler is nil
 func NewDefaultHandler(
-	pullDownHandler pulldown.Handler,
+	pullUpHandler internalpullup.Handler,
 	interval time.Duration,
 ) (*DefaultHandler, error) {
-	if pullDownHandler == nil {
-		return nil, pulldown.ErrNilPullDownHandler
+	if pullUpHandler == nil {
+		return nil, internalpullup.ErrNilPullUpHandler
 	}
 
 	return &DefaultHandler{
-		pullDownHandler,
+		pullUpHandler,
 		interval,
 	}, nil
 }

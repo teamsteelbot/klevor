@@ -1,12 +1,15 @@
-package led
+package pin
 
 import (
-	"machine"
 	"time"
+
+	"machine"
+
+	internalled "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/led"
 )
 
 type (
-	// DefaultHandler is the default implementation to manage the onboard LED of the Raspberry Pi Pico 2W or any other LED.
+	// DefaultHandler is the default implementation to manage a LED connected to the Raspberry Pi Pico 2W.
 	DefaultHandler struct {
 		ledPin machine.Pin
 	}
@@ -16,7 +19,7 @@ type (
 //
 // Parameters:
 //
-// ledPin: The GPIO number where the LED is connected. Default is 25.
+// ledPin: The GPIO number where the LED is connected.
 //
 // Returns:
 //
@@ -25,15 +28,6 @@ func NewDefaultHandler(ledPin int) *DefaultHandler {
 	return &DefaultHandler{
 		machine.Pin(ledPin),
 	}
-}
-
-// NewDefaultHandleForOnboardLED creates a new instance of DefaultHandler for the onboard LED.
-//
-// Returns:
-//
-// An instance of DefaultHandler configured for the onboard LED.
-func NewDefaultHandleForOnboardLED() *DefaultHandler {
-	return NewDefaultHandler(machine.LED)
 }
 
 // Setup initializes the LED pin as an output pin and sets it to the off state.
@@ -95,12 +89,12 @@ func (h *DefaultHandler) Blink(times int, delay time.Duration) error {
 		return nil // No blinking needed
 	}
 	if times < 0 {
-		return ErrNegativeBlinkCount
+		return internalled.ErrNegativeBlinkCount
 	}
 
 	// Validate the delay duration
 	if delay < 0 {
-		return ErrNegativeDelayDuration
+		return internalled.ErrNegativeDelayDuration
 	}
 
 	for _ = range times {
