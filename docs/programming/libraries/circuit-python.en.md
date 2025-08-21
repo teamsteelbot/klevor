@@ -7,7 +7,7 @@
     <i>Adafruit's Logo</i>
 </div>
 
-The `adafruit_motor` library's first release dates back to 2017, however, it is worth noting that, there are previous libraries from Adafruit Industries that serve the same purpose as `adafruit_motor`, but, these libraries are known by other names and, are incompatible with CircuitPython, this library's development is often atributed to Scott Shawcroft as it's main developer, as expected, this library's main purpose is to ease using motors and servomotors with microcontrollers in CircuitPython [[1](#adafruit-motor-documentation)].
+The `adafruit_motor` library's first release dates back to 2017, however, it is worth noting that, there are previous libraries from Adafruit Industries that serve the same purpose as `adafruit_motor`, but, these libraries are known by other names and, are incompatible with CircuitPython, this library's development is often attributed to Scott Shawcroft as it's main developer, as expected, this library's main purpose is to ease using motors and servomotors with microcontrollers in CircuitPython [[1](#adafruit-motor-documentation)].
 
 This library serves the same purpose in Klevor, it is used by the [Raspberry Pi Pico 2WH](../../electronic/components/current.es.md#raspberry-pi-pico-2-wh) which then communicates with the [ESC](../../electronic/components/current.es.md#injora-mb100-20a-mini-esc) to control the [motor](../../electronic/components/current.es.md#injora-180-motor-48t) and [servomotor](../../electronic/components/current.es.md#injora-7kg-2065-micro-servo) to be able to drive Klevor.
 

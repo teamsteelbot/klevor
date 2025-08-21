@@ -75,9 +75,11 @@ nav:
             - Diagramas de Flujo: programming/diagrams/flowcharts.md
         - Glosario de Términos: programming/glossary.md
         - Guías:
+            - Legado:
+                - Guía de CircuitPython: programming/guides/circuit-python.md
+                - Guía de MicroPython: programming/guides/micro-python.md
             - Guía de MkDocs: programming/guides/mkdocs.md
-            - Guía de CircuitPython: programming/guides/circuit-python.md
-            - Guía de MicroPython: programming/guides/micro-python.md
+            - Guía de TinyGo: programming/guides/tinygo.md
             - Guía de la Raspberry Pi 5: programming/guides/raspberry-pi-5.md
             - Guía de la Raspberry Pi Pico 2 W: programming/guides/raspberry-pi-pico-2w.md
             - Guía de Detección de Objetos: programming/guides/object-detection.md
@@ -197,7 +199,9 @@ plugins:
                   Diagramas de Flujo: Flowcharts
                   Glosario de Términos: Glossary of Terms
                   Guías: Guides
+                  Legado: Legacy
                   Guía de MkDocs: MkDocs Guide
+                  Guía de TinyGo: TinyGo Guide
                   Guía de CircuitPython: CircuitPython Guide
                   Guía de MicroPython: MicroPython Guide
                   Guía de Raspberry Pi 5: Raspberry Pi 5 Guide

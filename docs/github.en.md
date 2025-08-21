@@ -27,6 +27,13 @@ Also, you can download it directly through the terminal using the following comm
 git clone https://github.com/teamsteelbot/klevor.git
 ```
 
+> [!IMPORTANT]
+> To clone the submodules too, you can use the following command:
+>
+> ```bash
+> git clone --recurse-submodules https://github.com/teamsteelbot/klevor.git
+> ```
+
 <!-- github-only-start -->
 <p align="center">
 	<img src="./assets/images/logo/git.png" alt="Git's Logo" 

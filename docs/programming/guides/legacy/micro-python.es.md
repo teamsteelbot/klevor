@@ -4,7 +4,7 @@
 
 <!-- github-only-start -->
 <p align="center">
-	<img src="../../assets/images/logo/micro-python.png" alt="Logo de MicroPython" 
+	<img src="../../../assets/images/logo/micro-python.png" alt="Logo de MicroPython" 
 width="200">
 	<br>
 	<i>Logo de MicroPython</i>

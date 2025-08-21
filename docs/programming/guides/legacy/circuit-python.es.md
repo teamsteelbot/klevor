@@ -4,7 +4,7 @@
 
 <!-- github-only-start -->
 <p align="center">
-	<img src="../../assets/images/logo/circuit-python.png" alt="Logo de CircuitPython" 
+	<img src="../../../assets/images/logo/circuit-python.png" alt="Logo de CircuitPython" 
 width="200">
 	<br>
 	<i>Logo de CircuitPython</i>

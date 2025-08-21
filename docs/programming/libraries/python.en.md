@@ -102,12 +102,6 @@ MkDocs was released on version 0.2 on January 21st, 2014, with Tom Christie as i
 
 MkDocs' main objective is to be a quick, simple and visually attractive sites generator, designed specifically to help in various projects' documentation. Thanks to MkDocs, we were able to generate this site where you can see Klevor's documentation, we decided to use MkDocs mainly to organize more efficiently all of this documentation's items, in a way that, we can make it easier for the user to search an specific item.
 
-## WeasyPrint
-
-WeasyPrint was created by Simon Sapin, and the project has been developed and maintaiend by Kozea Group. As of right now,the professional support, community management and maintenance by CourtBouillon, an organization that offers consulting services and sponsorship to upgrade and expand WeasyPrint. WeasyPrint is a Python library that allows to generate PDF documents with just HTML and CSS files. It was launched for the first time in 2011, and since then, it has evolved into a robust and versatile tool to create high-quality PDF documents [[8](#weasyprint-documentation)].
-
-As team Steelbot, we use WeasyPrint to generate PDF documents from the documentation written in Markdown. This allows us to create a printable and easily shareable version from the documentation, which is specially useful for those who prefer to read in physical formats or to share the documentation without Internet connection.
-
 # References
 
 1. *PyTorch Documentation*. (2025). PyTorch Contributors. <a id="pytorch-docs" href="https://docs.pytorch.org/docs/stable/index.html">https://docs.pytorch.org/docs/stable/index.html</a>
@@ -123,5 +117,3 @@ As team Steelbot, we use WeasyPrint to generate PDF documents from the documenta
 6. *Hailo AI Software Suite*. (2025). Hailo Technologies Ltd. <a id="hailo-ai-software-suite" href="https://hailo.ai/products/hailo-software/hailo-ai-software-suite/#sw-overview">https://hailo.ai/products/hailo-software/hailo-ai-software-suite/#sw-overview</a>
 
 7. *MkDocs*. (2025). Tom Christie. <a id="mkdocs-documentation" href="https://www.mkdocs.org/">https://www.mkdocs.org/</a>
-
-8. *WeasyPrint*. (2025). WeasyPrint Developers. <a id="weasyprint-documentation" href="https://weasyprint.org/">https://weasyprint.org/</a>
