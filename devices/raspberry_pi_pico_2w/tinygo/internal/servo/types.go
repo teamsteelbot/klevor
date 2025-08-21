@@ -267,7 +267,7 @@ func (s *DefaultHandler) SetAngleRelativeToCenter(relativeAngle int16) error {
 //
 // An error if the angle is not within the right limit
 func (s *DefaultHandler) SetAngleToRight(angle uint16) error {
-	return s.SetAngleRelativeToCenter(int16(angle))
+	return s.SetAngleRelativeToCenter(-int16(angle))
 }
 
 // SetAngleToLeft sets the servo motor to the left by a specified angle
@@ -280,5 +280,36 @@ func (s *DefaultHandler) SetAngleToRight(angle uint16) error {
 //
 // An error if the angle is not within the left limit
 func (s *DefaultHandler) SetAngleToLeft(angle uint16) error {
-	return s.SetAngleRelativeToCenter(-int16(angle))
+	return s.SetAngleRelativeToCenter(int16(angle))
+}
+
+// SetDirectionToCenter sets the direction to center
+func (s *DefaultHandler) SetDirectionToCenter() error {
+	return s.SetAngleToCenter()
+}
+
+// SetDirectionToRight sets the direction to right
+//
+// Parameters:
+//
+// angle: The angle value to move the servo to the left, must be between 0 and the left limit
+//
+// Returns:
+//
+// An error if the angle is not within the left limit
+func (s *DefaultHandler) SetDirectionToRight(angle uint16) error {
+	return s.SetAngleToLeft(angle)
+}
+
+// SetDirectionToLeft sets the direction to left
+//
+// Parameters:
+//
+// angle: The angle value to move the servo to the right, must be between 0 and the right limit
+//
+// Returns:
+//
+// An error if the angle is not within the right limit
+func (s *DefaultHandler) SetDirectionToLeft(angle uint16) error {
+	return s.SetAngleToRight(angle)
 }

@@ -10,5 +10,8 @@ type (
 		SetAngleToCenter() error
 		SetAngleToRight(angle uint16) error
 		SetAngleToLeft(angle uint16) error
+		SetDirectionToCenter() error
+		SetDirectionToRight(angle uint16) error
+		SetDirectionToLeft(angle uint16) error
 	}
 )
