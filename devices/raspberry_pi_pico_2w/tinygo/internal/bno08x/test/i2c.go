@@ -33,6 +33,12 @@ type (
 		debugger   Debugger
 		address    uint16 // I2C address of the device
 	}
+
+	// I2COptions struct for configuring the BNO08X over I2C.
+	I2COptions struct {
+		Options  *Options
+		Address0 *machine.Pin
+	}
 )
 
 // probeDevice tries a zero-length write then a 1-byte read to confirm presence.
@@ -46,6 +52,24 @@ func probeDevice(bus *machine.I2C, addr uint16) error {
 		return fmt.Errorf("probe failed at 0x%X: %w", addr, err)
 	}
 	return nil
+}
+
+// NewI2COptions creates a new I2COptions instance with default values.
+//
+// Parameters:
+//
+// debugger: The debugger to use for logging and debugging information (optional).
+// resetPin: The pin used to reset the BNO08X sensor (optional).
+// address0Pin: The pin used to set the I2C address (optional).
+func NewI2COptions(
+	debugger Debugger,
+	resetPin *machine.Pin,
+	address0Pin *machine.Pin,
+) *I2COptions {
+	return &I2COptions{
+		Options:  NewOptions(debugger, resetPin),
+		Address0: address0Pin,
+	}
 }
 
 // NewI2C creates a new I2C instance for the BNO08X sensor.
@@ -70,7 +94,7 @@ func NewI2C(
 	sclPin machine.Pin,
 	address uint16,
 	dataBuffer DataBuffer,
-	options *Options,
+	options *I2COptions,
 ) (*I2C, error) {
 	// Check if the I2C bus is nil
 	if i2cBus == nil {
@@ -90,6 +114,21 @@ func NewI2C(
 
 	// Allow sensor boot time (adjust if you have an external reset just issued)
 	time.Sleep(I2CSetupDelay)
+
+	// Check if the address is the default or the alternative
+	if address != I2CDefaultAddress && address != I2CAlternativeAddress {
+		return nil, ErrInvalidI2CAddress
+	}
+
+	// Set the Address0 pin based on the desired address
+	if options != nil && options.Address0 != nil {
+		options.Address0.Configure(machine.PinConfig{Mode: machine.PinOutput})
+		if address == I2CAlternativeAddress {
+			options.Address0.High()
+		} else {
+			options.Address0.Low()
+		}
+	}
 
 	// Probe with retries
 	var lastErr error
@@ -114,7 +153,7 @@ func NewI2C(
 	// Get the debugger from options
 	var debugger Debugger
 	if options != nil {
-		debugger = options.Debugger
+		debugger = options.Options.Debugger
 	}
 
 	// Initialize the packet reader
@@ -140,7 +179,12 @@ func NewI2C(
 	}
 
 	// Initialize the BNO08X sensor
-	bno08x, err := NewBNO08X(packetReader, packetWriter, dataBuffer, options)
+	bno08x, err := NewBNO08X(
+		packetReader,
+		packetWriter,
+		dataBuffer,
+		options.Options,
+	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize BNO08X: %w", err)
 	}

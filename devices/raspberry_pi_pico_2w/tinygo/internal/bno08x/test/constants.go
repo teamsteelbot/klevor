@@ -132,7 +132,7 @@ const (
 	ReportIDGyroscopeIntegratedRotationVector uint8 = 0x2A
 
 	// DefaultReportInterval is the default report interval in microseconds
-	DefaultReportInterval uint32 = 50000
+	DefaultReportInterval uint32 = 50_000
 
 	// QuaternionReadTimeout is the timeout for reading quaternion data in seconds
 	QuaternionReadTimeout float32 = 0.500
@@ -171,10 +171,13 @@ const (
 	DefaultWaitForPacketTypeTimeout = 5 * time.Second
 
 	// I2CDefaultAddress is the default I2C address for the BNO08x sensor
-	I2CDefaultAddress uint16 = 0x4B
+	I2CDefaultAddress uint16 = 0x4A
+
+	// I2CAlternativeAddress is the alternative I2C address for the BNO08x sensor
+	I2CAlternativeAddress uint16 = 0x4B
 
 	// I2CFrequency is the I2C bus frequency in Hz
-	I2CFrequency = 400000 // 400 kHz
+	I2CFrequency = 400_000 // 400 kHz
 
 	// I2CSetupDelay is the delay after setting up the I2C bus
 	I2CSetupDelay = 100 * time.Millisecond
@@ -199,6 +202,9 @@ const (
 )
 
 var (
+	// ReportIDProductIDRequestData is the report ID for the report product ID request data.
+	ReportIDProductIDRequestData = []byte{ReportIDProductIDRequest, 0}
+
 	// QuaternionScalar is the scalar for quaternion values
 	QuaternionScalar = math.Pow(2, 14*-1)
 

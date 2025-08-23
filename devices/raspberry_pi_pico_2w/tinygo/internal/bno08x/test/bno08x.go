@@ -281,15 +281,12 @@ func (b *BNO08X) checkID() (bool, error) {
 		return true, nil
 	}
 
-	// Prepare the ID request report
-	data := []byte{
-		ReportIDProductIDRequest,
-		0, // padding
-	}
-
 	// Send the ID request report
 	b.debug("** Sending ID Request Report **")
-	if _, err := b.packetWriter.SendPacket(ChannelControl, data); err != nil {
+	if _, err := b.packetWriter.SendPacket(
+		ChannelControl,
+		ReportIDProductIDRequestData,
+	); err != nil {
 		b.debug(fmt.Errorf("Error sending ID request Packet: %v", err))
 		return false, err
 	}
@@ -303,21 +300,31 @@ func (b *BNO08X) checkID() (bool, error) {
 			nil,
 		)
 		if err != nil {
-			b.debug("Error waiting for ID response Packet:", err)
+			b.debug(
+				fmt.Sprintf(
+					"Error waiting for ID response Packet: %v",
+					err,
+				),
+			)
 			return false, err
 		}
 
 		// Read the Packet data into the data buffer
 		sensorIDReport, err := newReportFromPacket(packet)
 		if err != nil {
-			b.debug("Error creating sensor ID report from Packet data:", err)
+			b.debug(
+				fmt.Sprintf(
+					"Error creating sensor ID report from Packet data: %v",
+					err,
+				),
+			)
 			continue
 		}
 
 		// Parse the sensor ID from the report
 		sensorID, err := newSensorID(sensorIDReport)
 		if err != nil {
-			b.debug("Error parsing sensor ID:", err)
+			b.debug(fmt.Sprintf("Error parsing sensor ID: %v", err))
 			continue
 		}
 
@@ -348,8 +355,6 @@ func (b *BNO08X) checkID() (bool, error) {
 		b.idRead = true
 		return true, nil
 	}
-	// unreachable, but for completeness
-	// return false
 }
 
 // waitForPacketType waits for a Packet of a specific type on a given channel, optionally filtering by report ID.

@@ -45,7 +45,7 @@ func NewPacketHeader(packetBytes *[]byte) (*PacketHeader, error) {
 	}
 
 	packetByteCount := binary.LittleEndian.Uint16((*packetBytes)[0:2])
-	packetByteCount &= ^uint16(0x8000)
+	packetByteCount &^= 0x8000
 	channelNumber := (*packetBytes)[2]
 	sequenceNumber := (*packetBytes)[3]
 	dataLength := int(packetByteCount) - 4
@@ -208,15 +208,19 @@ func (p *Packet) String(isBeingSent bool) *string {
 		dataLen = 0
 	}
 
+	// Title
 	var builder strings.Builder
 	if isBeingSent {
 		builder.WriteString("********** SENDING PACKET *************")
 	} else {
 		builder.WriteString("********** RECEIVED PACKET *************")
 	}
+
+	// Header section
 	builder.WriteString("\n\t HEADER")
 	builder.WriteString(fmt.Sprintf("\n\t\t Data Length: %d", dataLen))
 
+	// Channel number
 	if int(p.Header.ChannelNumber) < len(Channels) {
 		builder.WriteString(
 			fmt.Sprintf(
@@ -234,12 +238,15 @@ func (p *Packet) String(isBeingSent bool) *string {
 		)
 	}
 
+	// Sequence number
 	builder.WriteString(
 		fmt.Sprintf(
 			"\n\t\t Sequence number: %d",
 			p.Header.SequenceNumber,
 		),
 	)
+
+	// Data section
 	builder.WriteString("\n\n\t DATA")
 
 	// Optional report decoding (guard length)

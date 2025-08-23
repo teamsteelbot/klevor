@@ -30,4 +30,5 @@ var (
 	ErrInvalidChannel                            = errors.New("invalid channel number provided")
 	ErrNoPacketAvailable                         = errors.New("no Packet available to read from the I2C bus")
 	ErrNilI2CBus                                 = errors.New("nil I2C bus provided for communication")
+	ErrInvalidI2CAddress                         = errors.New("invalid I2C address provided")
 )
