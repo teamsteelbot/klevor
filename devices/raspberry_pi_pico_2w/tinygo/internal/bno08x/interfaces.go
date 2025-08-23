@@ -8,5 +8,6 @@ type (
 		GetYawDegrees() float64
 		GetPitchDegrees() float64
 		GetRollDegrees() float64
+		GetAccumulatedYaw90DegreesTurns() int
 	}
 )

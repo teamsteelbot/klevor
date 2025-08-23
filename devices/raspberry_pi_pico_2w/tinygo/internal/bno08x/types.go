@@ -3,7 +3,8 @@ package bno08x
 import (
 	"time"
 
-	bno08x "github.com/ralvarezdev/go-adafruit-bno08x"
+	// bno08x "github.com/ralvarezdev/go-adafruit-bno08x
+	bno08x "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/bno08x/test"
 	internalusbcdc "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc"
 )
 
@@ -180,4 +181,13 @@ func (h *DefaultHandler) GetPitchDegrees() float64 {
 // The yaw angle in degrees.
 func (h *DefaultHandler) GetYawDegrees() float64 {
 	return h.yawDegrees
+}
+
+// GetAccumulatedYaw90DegreesTurns returns the accumulated yaw in 90 degrees turns.
+//
+// Returns:
+//
+// The accumulated yaw in 90 degrees turns.
+func (h *DefaultHandler) GetAccumulatedYaw90DegreesTurns() int {
+	return h.accumulatedYaw90DegreesTurns
 }

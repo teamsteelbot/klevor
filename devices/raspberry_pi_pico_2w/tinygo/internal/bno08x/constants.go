@@ -5,7 +5,8 @@ import (
 
 	"machine"
 
-	bno08x "github.com/ralvarezdev/go-adafruit-bno08x"
+	// bno08x "github.com/ralvarezdev/go-adafruit-bno08x"
+	bno08x "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/bno08x/test"
 	internalusbcdc "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc"
 )
 
@@ -36,7 +37,7 @@ func init() {
 		machine.GPIO27,
 		bno08x.I2CDefaultAddress,
 		DataBuffer,
-		nil,
+		bno08x.NewOptions(bno08x.NewDefaultDebugger(), nil),
 	)
 	if err != nil {
 		panic("failed to initialize bno08x: " + err.Error())

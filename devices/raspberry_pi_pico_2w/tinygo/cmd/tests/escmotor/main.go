@@ -32,13 +32,13 @@ func main() {
 
 		// Start testing the motor forward
 		var speed uint16
-		for speed = 0; speed <= 250; speed += 1 {
+		for speed = 0; speed <= 100; speed += 1 {
 			if err := internalescmotor.ESCMotorHandler.SetSpeedForward(
 				speed,
 			); err != nil {
 				fmt.Println(err)
 			}
-			time.Sleep(10 * time.Millisecond)
+			time.Sleep(20 * time.Millisecond)
 		}
 
 		// Stop the motor for a while
@@ -48,13 +48,13 @@ func main() {
 		time.Sleep(2 * time.Second)
 
 		// Start testing the motor backward
-		for speed = 0; speed <= 250; speed += 1 {
+		for speed = 0; speed <= 100; speed += 1 {
 			if err := internalescmotor.ESCMotorHandler.SetSpeedBackward(
 				speed,
 			); err != nil {
 				fmt.Println(err)
 			}
-			time.Sleep(10 * time.Millisecond)
+			time.Sleep(20 * time.Millisecond)
 		}
 
 		// Stop the motor
