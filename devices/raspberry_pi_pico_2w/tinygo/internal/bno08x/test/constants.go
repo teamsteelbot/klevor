@@ -26,6 +26,9 @@ const (
 	// ChannelGyroRotationVector is the channel for the gyroscope rotation vector
 	ChannelGyroRotationVector uint8 = 0x5
 
+	// CommandReset is the command to reset the BNO08x sensor
+	CommandReset uint8 = 0x1
+
 	// SaveDCD is the command to save the DCD (Device Configuration Data)
 	SaveDCD uint8 = 0x6
 
@@ -143,9 +146,6 @@ const (
 	// DefaultTimeout is the default timeout for operations in seconds
 	DefaultTimeout = 2.0 * time.Second
 
-	// CommandReset is the command to reset the BNO08x sensor
-	CommandReset uint8 = 0x1
-
 	// PacketHeaderLength is the length of the Packet header in bytes
 	PacketHeaderLength int = 4
 
@@ -223,7 +223,7 @@ var (
 		ReportIDTimestampRebase:    5,
 	}
 
-	// RawReports are the raw Reports require their counterpart to be enabled
+	// RawReports are the raw SHTPCommandsNames require their counterpart to be enabled
 	RawReports = map[uint8]uint8{
 		ReportIDRawAccelerometer: ReportIDAccelerometer,
 		ReportIDRawGyroscope:     ReportIDGyroscope,

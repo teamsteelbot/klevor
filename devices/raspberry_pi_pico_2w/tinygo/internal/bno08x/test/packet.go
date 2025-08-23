@@ -243,53 +243,58 @@ func (p *Packet) String(isBeingSent bool) *string {
 	builder.WriteString("\n\n\t DATA")
 
 	// Optional report decoding (guard length)
+	var reportID uint8
 	if dataLen >= 1 {
-		reportID := p.Data[0]
-		if name, ok := Reports[reportID]; ok {
-			builder.WriteString(
-				fmt.Sprintf(
-					"\n\t\t Report Type: %s (0x%02X)",
-					name,
-					reportID,
-				),
-			)
+		reportID = p.Data[0]
+
+		// Get the report type
+		var reportIDStr string
+		channelNumber := p.ChannelNumber()
+		if channelNumber == ChannelSHTPCommand {
+			reportIDStr = SHTPCommandsNames[reportID]
+		} else if channelNumber == ChannelExe {
+			reportIDStr = ExeCommandsNames[reportID]
+		} else if channelNumber == ChannelControl {
+			reportIDStr = ControlCommandsNames[reportID]
 		} else {
-			builder.WriteString(
-				fmt.Sprintf(
-					"\n\t\t Report Type: UNKNOWN (0x%02X)",
-					reportID,
-				),
-			)
+			reportIDStr = "UNKNOWN"
 		}
 
-		// Additional interpretation (requires at least 6 data bytes)
-		if dataLen >= 6 {
-			// High report IDs (command responses / meta)
-			if reportID > 0xF0 {
-				sensorReportType := p.Data[5]
-				if name, ok := Reports[sensorReportType]; ok {
-					builder.WriteString(
-						fmt.Sprintf(
-							"\n\t\t Sensor Report Type: %s (0x%02X)",
-							name,
-							sensorReportType,
-						),
-					)
-				}
-			}
+		builder.WriteString(
+			fmt.Sprintf(
+				"\n\t\t Report Type: %s (0x%02X)",
+				reportIDStr,
+				reportID,
+			),
+		)
+	}
 
-			// 0xFC often used for "Get Feature Response" style packets
-			if reportID == 0xFC {
-				featureID := p.Data[1]
-				if name, ok := Reports[featureID]; ok {
-					builder.WriteString(
-						fmt.Sprintf(
-							"\n\t\t Enabled Feature: %s (0x%02X)",
-							name,
-							featureID,
-						),
-					)
-				}
+	// Additional interpretation (requires at least 6 data bytes)
+	if dataLen >= 6 {
+		// High report IDs (command responses / meta)
+		if isControlReport(reportID) {
+			sensorReportType := p.Data[5]
+			if name, ok := SHTPCommandsNames[sensorReportType]; ok {
+				builder.WriteString(
+					fmt.Sprintf(
+						"\n\t\t Sensor Report Type: %s (0x%02X)",
+						name,
+						sensorReportType,
+					),
+				)
+			}
+		}
+
+		if reportID == ReportIDGetFeatureResponse {
+			featureID := p.Data[1]
+			if name, ok := SHTPCommandsNames[featureID]; ok {
+				builder.WriteString(
+					fmt.Sprintf(
+						"\n\t\t Enabled Feature: %s (0x%02X)",
+						name,
+						featureID,
+					),
+				)
 			}
 		}
 	}

@@ -13,20 +13,8 @@ var (
 		ChannelGyroRotationVector:     "GYRO_ROTATION_VECTOR",
 	}
 
-	// Reports contains the report IDs and their names
-	Reports = map[uint8]string{
-		ReportIDBaseTimestamp:             "BASE_TIMESTAMP",
-		ReportIDCommandRequest:            "COMMAND_REQUEST",
-		ReportIDCommandResponse:           "COMMAND_RESPONSE",
-		ReportIDFRSReadRequest:            "FRS_READ_REQUEST",
-		ReportIDFRSReadResponse:           "FRS_READ_RESPONSE",
-		ReportIDFRSWriteData:              "FRS_WRITE_DATA",
-		ReportIDFRSWriteRequest:           "FRS_WRITE_REQUEST",
-		ReportIDFRSWriteResponse:          "FRS_WRITE_RESPONSE",
-		ReportIDGetFeatureRequest:         "GET_FEATURE_REQUEST",
-		ReportIDGetFeatureResponse:        "GET_FEATURE_RESPONSE",
-		ReportIDSetFeatureCommand:         "SET_FEATURE_COMMAND",
-		ReportIDTimestampRebase:           "TIMESTAMP_REBASE",
+	// SHTPCommandsNames contains the SHTP commands and their names
+	SHTPCommandsNames = map[uint8]string{
 		ReportIDAccelerometer:             "ACCELEROMETER",
 		0x29:                              "ARVR_STABILIZED_GAME_ROTATION_VECTOR",
 		0x28:                              "ARVR_STABILIZED_ROTATION_VECTOR",
@@ -41,8 +29,6 @@ var (
 		ReportIDActivityClassifier:        "PERSONAL_ACTIVITY_CLASSIFIER",
 		0x1B:                              "PICKUP_DETECTOR",
 		0x21:                              "POCKET_DETECTOR",
-		ReportIDProductIDRequest:          "PRODUCT_ID_REQUEST",
-		ReportIDProductIDResponse:         "PRODUCT_ID_RESPONSE",
 		ReportIDRawAccelerometer:          "RAW_ACCELEROMETER",
 		ReportIDRawGyroscope:              "RAW_GYROSCOPE",
 		ReportIDRawMagnetometer:           "RAW_MAGNETOMETER",
@@ -59,6 +45,29 @@ var (
 		0x20:                              "TILT_DETECTOR",
 		0x07:                              "UNCALIBRATED_GYROSCOPE",
 		0x0F:                              "UNCALIBRATED_MAGNETIC_FIELD",
+	}
+
+	// ExeCommandsNames contains the EXE channel commands and their names
+	ExeCommandsNames = map[uint8]string{
+		CommandReset: "RESET",
+	}
+
+	// ControlCommandsNames contains the CONTROL channel commands and their names
+	ControlCommandsNames = map[uint8]string{
+		ReportIDBaseTimestamp:      "BASE_TIMESTAMP",
+		ReportIDCommandRequest:     "COMMAND_REQUEST",
+		ReportIDCommandResponse:    "COMMAND_RESPONSE",
+		ReportIDFRSReadRequest:     "FRS_READ_REQUEST",
+		ReportIDFRSReadResponse:    "FRS_READ_RESPONSE",
+		ReportIDFRSWriteData:       "FRS_WRITE_DATA",
+		ReportIDFRSWriteRequest:    "FRS_WRITE_REQUEST",
+		ReportIDFRSWriteResponse:   "FRS_WRITE_RESPONSE",
+		ReportIDGetFeatureRequest:  "GET_FEATURE_REQUEST",
+		ReportIDGetFeatureResponse: "GET_FEATURE_RESPONSE",
+		ReportIDSetFeatureCommand:  "SET_FEATURE_COMMAND",
+		ReportIDTimestampRebase:    "TIMESTAMP_REBASE",
+		ReportIDProductIDRequest:   "PRODUCT_ID_REQUEST",
+		ReportIDProductIDResponse:  "PRODUCT_ID_RESPONSE",
 	}
 )
 

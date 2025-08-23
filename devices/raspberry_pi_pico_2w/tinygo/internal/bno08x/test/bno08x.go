@@ -204,27 +204,31 @@ func (b *BNO08X) softwareReset() error {
 	b.debug("Software resetting...")
 	data := []byte{CommandReset}
 
+	/*
+		for _ := range 2 {
+			if _, err := b.packetWriter.SendPacket(ChannelExe, data); err != nil {
+				b.debug(fmt.Sprintf("Error sending software reset Packet: %v", err))
+				return err
+			}
+			time.Sleep(ResetPacketDelay)
+		}
+	*/
 	if _, err := b.packetWriter.SendPacket(ChannelExe, data); err != nil {
 		b.debug(fmt.Sprintf("Error sending software reset Packet: %v", err))
 		return err
 	}
 	time.Sleep(ResetPacketDelay)
 
-	if _, err := b.packetWriter.SendPacket(ChannelExe, data); err != nil {
-		b.debug(
-			fmt.Sprintf(
-				"Error sending second software reset Packet: %v",
-				err,
-			),
-		)
-		return err
-	}
-	time.Sleep(ResetPacketDelay)
-
 	for i := 0; i < 3; i++ {
-		_, err := b.packetReader.ReadPacket()
+		packet, err := b.packetReader.ReadPacket()
 		if err != nil {
 			time.Sleep(ResetPacketDelay)
+		}
+
+		// Debug
+		packetStrPtr := packet.String(false)
+		if packetStrPtr != nil {
+			b.debug(*packetStrPtr)
 		}
 	}
 	b.debug("OK!")
@@ -237,9 +241,13 @@ func (b *BNO08X) softwareReset() error {
 //
 // An error if the initialization fails, otherwise nil.
 func (b *BNO08X) initialize() error {
-	b.debug("Initializing BNO08X sensor...")
+	// Check if already initialized
+	if b.initComplete {
+		return nil
+	}
 
 	// Check if the sensor ID can be read
+	b.debug("Initializing BNO08X sensor...")
 	for i := 0; i < 3; i++ {
 		// Perform hardware reset
 		b.hardwareReset()
@@ -252,13 +260,12 @@ func (b *BNO08X) initialize() error {
 
 		ok, err := b.checkID()
 		if err != nil {
-			return err
+			time.Sleep(AfterCheckIDDelay)
 		}
 		if ok {
 			b.initComplete = true
 			return nil
 		}
-		time.Sleep(AfterCheckIDDelay)
 	}
 	return ErrFailedToReadSensorID
 }
@@ -273,6 +280,8 @@ func (b *BNO08X) checkID() (bool, error) {
 	if b.idRead {
 		return true, nil
 	}
+
+	// Prepare the ID request report
 	data := []byte{
 		ReportIDProductIDRequest,
 		0, // padding
@@ -288,7 +297,7 @@ func (b *BNO08X) checkID() (bool, error) {
 
 	for {
 		reportID := ReportIDProductIDResponse
-		_, err := b.waitForPacketType(
+		packet, err := b.waitForPacketType(
 			ChannelControl,
 			&reportID,
 			nil,
@@ -299,9 +308,9 @@ func (b *BNO08X) checkID() (bool, error) {
 		}
 
 		// Read the Packet data into the data buffer
-		sensorIDReport, err := newReportFromPacketBytes(b.dataBuffer.GetData())
-		if err == nil {
-			b.debug("Error creating sensor ID report from Packet data")
+		sensorIDReport, err := newReportFromPacket(packet)
+		if err != nil {
+			b.debug("Error creating sensor ID report from Packet data:", err)
 			continue
 		}
 
@@ -397,7 +406,7 @@ func (b *BNO08X) waitForPacketType(
 		}
 		if newPacket.ChannelNumber() != ChannelExe && newPacket.ChannelNumber() != ChannelSHTPCommand {
 			b.debug("passing Packet to handler for de-slicing")
-			if err := b.handlePacket(newPacket); err != nil {
+			if err = b.handlePacket(newPacket); err != nil {
 				return nil, err
 			}
 		}
@@ -449,7 +458,6 @@ func (b *BNO08X) waitForPacket(timeout time.Duration) (*Packet, error) {
 func (b *BNO08X) handlePacket(packet *Packet) error {
 	// Split out reports first
 	if err := separateBatch(packet, &b.packetSlices); err != nil {
-		fmt.Println(packet)
 		return err
 	}
 
@@ -492,7 +500,7 @@ func (b *BNO08X) processReport(report *report) error {
 		builder.WriteString(
 			fmt.Sprintf(
 				"Processing report: ",
-				Reports[report.ID],
+				SHTPCommandsNames[report.ID],
 			),
 		)
 

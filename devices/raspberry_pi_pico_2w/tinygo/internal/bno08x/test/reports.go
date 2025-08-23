@@ -666,21 +666,9 @@ func reportLength(reportID uint8) int {
 //
 //	true if the report ID is a control report, false otherwise
 func isControlReport(reportID uint8) bool {
-	return reportID > 0xF0 && reportID < 0xFF
-}
-
-// isSensorReport checks if the report ID is a sensor report.
-//
-// Parameters:
-//
-//	reportID: The ID of the report
-//
-// Returns:
-//
-//	true if the report ID is a sensor report, false otherwise
-func isSensorReport(reportID uint8) bool {
-	// Check if the report ID is less than 0xF0
-	return reportID < 0xF0
+	// Check if the report ID is inside the control channel
+	_, ok := ControlCommandsNames[reportID]
+	return ok
 }
 
 // insertCommandRequestReport inserts a command request report into the provided buffer.

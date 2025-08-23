@@ -333,12 +333,14 @@ func (pr I2CPacketReader) readHeader() (*PacketHeader, error) {
 	}
 
 	// Debug log the header
-	headerStrPtr := header.String(false)
-	if headerStrPtr != nil {
-		pr.debug(*headerStrPtr)
-	} else {
-		pr.debug("ERROR: nil header string")
-	}
+	/*
+		headerStrPtr := header.String(false)
+		if headerStrPtr != nil {
+			pr.debug(*headerStrPtr)
+		} else {
+			pr.debug("ERROR: nil header string")
+		}
+	*/
 	return header, nil
 }
 
@@ -425,6 +427,9 @@ func (pr I2CPacketReader) ReadPacket() (*Packet, error) {
 	if err = pr.dataBuffer.UpdateSequenceNumber(newPacket); err != nil {
 		return nil, fmt.Errorf("failed to update sequence number: %w", err)
 	}
+
+	// Clear the data buffer for next read
+	// pr.dataBuffer.Clear()
 	return newPacket, nil
 }
 
@@ -448,12 +453,15 @@ func (pr I2CPacketReader) read(requestedReadLength int) error {
 	if len(*dataBufferPtr) < totalReadLength {
 		// Resize data buffer and copy existing data
 		newBuf := make([]byte, totalReadLength)
-		copy(newBuf[:totalReadLength], (*dataBufferPtr)[:totalReadLength])
+		copy(
+			newBuf[:len(*dataBufferPtr)],
+			(*dataBufferPtr)[:len(*dataBufferPtr)],
+		)
 
 		// Update data buffer reference
 		pr.dataBuffer.SetData(&newBuf)
 		dataBufferPtr = &newBuf
-		pr.debug("Resized dataBuffer to", totalReadLength, "bytes")
+		pr.debug(fmt.Printf("Resized dataBuffer to %d bytes", totalReadLength))
 	}
 
 	// Preserve first 4 header bytes already read; read payload into slice after header.
