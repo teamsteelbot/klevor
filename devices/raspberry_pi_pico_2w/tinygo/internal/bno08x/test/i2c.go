@@ -112,9 +112,6 @@ func NewI2C(
 		return nil, fmt.Errorf("i2c configure: %w", err)
 	}
 
-	// Allow sensor boot time (adjust if you have an external reset just issued)
-	time.Sleep(I2CSetupDelay)
-
 	// Check if the address is the default or the alternative
 	if address != I2CDefaultAddress && address != I2CAlternativeAddress {
 		return nil, ErrInvalidI2CAddress
@@ -142,7 +139,6 @@ func NewI2C(
 		break
 	}
 	if lastErr != nil {
-		// Option: comment this return to ignore probe failure and continue
 		return nil, fmt.Errorf(
 			"i2c probe (after %d attempts) failed: %w",
 			I2CProbeDeviceAttempts,
@@ -164,7 +160,7 @@ func NewI2C(
 		debugger,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create I2CPacketReader: %w", err)
+		return nil, fmt.Errorf("failed to create i2c packet reader: %w", err)
 	}
 
 	// Initialize the packet writer
@@ -175,7 +171,7 @@ func NewI2C(
 		debugger,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create I2CPacketWriter: %w", err)
+		return nil, fmt.Errorf("failed to create i2c packet writer: %w", err)
 	}
 
 	// Initialize the BNO08X sensor
@@ -186,7 +182,7 @@ func NewI2C(
 		options.Options,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to initialize BNO08X: %w", err)
+		return nil, fmt.Errorf("failed to initialize bno08x: %w", err)
 	}
 
 	return &I2C{
@@ -269,7 +265,7 @@ func (pw I2CPacketWriter) SendPacket(channel uint8, data []byte) (
 
 	// Pack header: first two bytes are writeLength (little-endian)
 	dataBuffer[0] = uint8(writeLength & 0xFF)
-	dataBuffer[1] = uint8((writeLength >> 8) & 0xFF)
+	dataBuffer[1] = uint8(writeLength >> 8)
 	dataBuffer[2] = channel
 	sequenceNumber, err := pw.dataBuffer.GetSequenceNumber(channel)
 	if err != nil {
@@ -285,7 +281,7 @@ func (pw I2CPacketWriter) SendPacket(channel uint8, data []byte) (
 	copy(dataBufferWriteLength, dataBuffer[:writeLength])
 	packet, err := NewPacket(&dataBufferWriteLength)
 	if err != nil {
-		return sequenceNumber, fmt.Errorf("failed to create Packet: %w", err)
+		return sequenceNumber, fmt.Errorf("failed to create packet: %w", err)
 	}
 
 	// Debug log the packet
@@ -450,13 +446,13 @@ func (pr I2CPacketReader) ReadPacket() (*Packet, error) {
 
 	// Read the remaining bytes of the Packet
 	if err = pr.read(payloadLen); err != nil {
-		return nil, fmt.Errorf("failed to read Packet data: %w", err)
+		return nil, fmt.Errorf("failed to read packet data: %w", err)
 	}
 
 	// Create a full Packet from the data buffer
 	newPacket, err := NewPacket(pr.dataBuffer.GetData())
 	if err != nil {
-		return nil, fmt.Errorf("failed to create Packet from bytes: %w", err)
+		return nil, fmt.Errorf("failed to create packet from bytes: %w", err)
 	}
 
 	// Debug log the packet
@@ -471,9 +467,6 @@ func (pr I2CPacketReader) ReadPacket() (*Packet, error) {
 	if err = pr.dataBuffer.UpdateSequenceNumber(newPacket); err != nil {
 		return nil, fmt.Errorf("failed to update sequence number: %w", err)
 	}
-
-	// Clear the data buffer for next read
-	// pr.dataBuffer.Clear()
 	return newPacket, nil
 }
 
@@ -529,7 +522,7 @@ func (pr I2CPacketReader) read(requestedReadLength int) error {
 func (pr I2CPacketReader) IsDataReady() bool {
 	// Check cached header first
 	if pr.cachedHeader != nil {
-		return pr.cachedHeader.PacketByteCount > 4 && pr.cachedHeader.DataLength > 0
+		return true
 	}
 
 	header, err := pr.readHeader()
@@ -537,16 +530,6 @@ func (pr I2CPacketReader) IsDataReady() bool {
 		pr.debug("ERROR: failed to read header: ", err)
 		return false
 	}
-	if header.ChannelNumber > 5 {
-		pr.debug("Channel number out of range: ", header.ChannelNumber)
-	}
-	if header.PacketByteCount == 0x7FFF {
-		pr.debug("Byte count is 0x7FFF/0xFFFF; Error?")
-		if header.SequenceNumber == 0xFF {
-			pr.debug("Sequence number is 0xFF; Error?")
-		}
-		return false
-	}
 	pr.cachedHeader = header
-	return header.PacketByteCount > 4 && header.DataLength > 0
+	return true
 }

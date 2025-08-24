@@ -5,21 +5,7 @@ package test
 import (
 	"errors"
 	"fmt"
-	"time"
 )
-
-// elapsedTime calculates the duration since the provided start time
-//
-// Parameters:
-//
-//	startTime: The time at which the measurement started
-//
-// Returns:
-//
-//	The elapsed time since startTime
-func elapsedTime(startTime time.Time) time.Duration {
-	return time.Now().Sub(startTime)
-}
 
 // separateBatch takes a Packet and separates it into individual reports, appending them to the provided reports.
 //

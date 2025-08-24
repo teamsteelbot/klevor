@@ -45,7 +45,7 @@ func NewPacketHeader(packetBytes *[]byte) (*PacketHeader, error) {
 	}
 
 	packetByteCount := binary.LittleEndian.Uint16((*packetBytes)[0:2])
-	packetByteCount &^= 0x8000
+	packetByteCount &= 0x7FFF
 	channelNumber := (*packetBytes)[2]
 	sequenceNumber := (*packetBytes)[3]
 	dataLength := int(packetByteCount) - 4
@@ -255,16 +255,15 @@ func (p *Packet) String(isBeingSent bool) *string {
 		reportID = p.Data[0]
 
 		// Get the report type
-		var reportIDStr string
+		reportIDStr := "UNKNOWN"
 		channelNumber := p.ChannelNumber()
-		if channelNumber == ChannelSHTPCommand {
+		switch channelNumber {
+		case ChannelSHTPCommand:
 			reportIDStr = SHTPCommandsNames[reportID]
-		} else if channelNumber == ChannelExe {
+		case ChannelExe:
 			reportIDStr = ExeCommandsNames[reportID]
-		} else if channelNumber == ChannelControl {
+		case ChannelControl:
 			reportIDStr = ControlCommandsNames[reportID]
-		} else {
-			reportIDStr = "UNKNOWN"
 		}
 
 		builder.WriteString(

@@ -204,35 +204,45 @@ func (b *BNO08X) softwareReset() error {
 	b.debug("Software resetting...")
 	data := []byte{CommandReset}
 
-	/*
-		for _ := range 2 {
-			if _, err := b.packetWriter.SendPacket(ChannelExe, data); err != nil {
-				b.debug(fmt.Sprintf("Error sending software reset Packet: %v", err))
-				return err
-			}
-			time.Sleep(ResetPacketDelay)
-		}
-	*/
 	if _, err := b.packetWriter.SendPacket(ChannelExe, data); err != nil {
 		b.debug(fmt.Sprintf("Error sending software reset Packet: %v", err))
 		return err
 	}
+
+	// Clear out any packets that may have been sent during the reset process
 	time.Sleep(ResetPacketDelay)
 
-	for i := 0; i < 3; i++ {
-		packet, err := b.packetReader.ReadPacket()
-		if err != nil {
-			time.Sleep(ResetPacketDelay)
-		}
+	// Clear out any pending packets
+	b.clearPendingPackets()
 
-		// Debug
-		packetStrPtr := packet.String(false)
-		if packetStrPtr != nil {
-			b.debug(*packetStrPtr)
-		}
-	}
+	// Wait for the reset to complete
 	b.debug("OK!")
 	return nil
+}
+
+// clearPendingPackets reads and discards pending packets
+func (b *BNO08X) clearPendingPackets() {
+	timeout := 10 * time.Millisecond
+	for {
+		packet, err := b.waitForPacket(timeout)
+		if err != nil {
+			break // No more packets
+		}
+
+		// Log what we're clearing
+		b.debug(
+			fmt.Sprintf(
+				"Clearing packet from channel %d with %d bytes",
+				packet.ChannelNumber(),
+				len(packet.Data),
+			),
+		)
+
+		// Check if this is the advertisement packet
+		if packet.ChannelNumber() == ChannelSHTPCommand && len(packet.Data) > 100 {
+			b.debug("Found SHTP advertisement packet")
+		}
+	}
 }
 
 // initialize performs the initial setup of the BNO08X sensor, including hardware and software resets.
@@ -287,7 +297,7 @@ func (b *BNO08X) checkID() (bool, error) {
 		ChannelControl,
 		ReportIDProductIDRequestData,
 	); err != nil {
-		b.debug(fmt.Errorf("Error sending ID request Packet: %v", err))
+		b.debug(fmt.Errorf("error sending id request packet: %v", err))
 		return false, err
 	}
 	b.debug("** Waiting for Packet **")
@@ -382,7 +392,7 @@ func (b *BNO08X) waitForPacketType(
 	}
 	b.debug(
 		fmt.Sprintf(
-			"** Waiting for Packet on channel %d %s **",
+			"** Waiting for Packet on Channel %d %s **",
 			channelNumber,
 			reportIDStr,
 		),
@@ -400,6 +410,7 @@ func (b *BNO08X) waitForPacketType(
 		if err != nil {
 			continue
 		}
+
 		if newPacket.ChannelNumber() == channelNumber {
 			if reportID != nil {
 				if newPacketReportID, _ := newPacket.ReportID(); newPacketReportID == *reportID {
@@ -417,7 +428,7 @@ func (b *BNO08X) waitForPacketType(
 		}
 	}
 	return nil, fmt.Errorf(
-		"Timed out waiting for a Packet on channel %d",
+		"timed out waiting for a packet on channel %d",
 		channelNumber,
 	)
 }

@@ -31,14 +31,15 @@ var (
 
 func init() {
 	// Initialize the BNO08x I2C instance with default settings.
-	reset := machine.GPIO28
+	// reset := machine.GPIO22
+	address0 := machine.GPIO28
 	i2c, err := bno08x.NewI2C(
 		machine.I2C1,
 		machine.GPIO26,
 		machine.GPIO27,
 		bno08x.I2CAlternativeAddress,
 		DataBuffer,
-		bno08x.NewI2COptions(bno08x.NewDefaultDebugger(), &reset, nil),
+		bno08x.NewI2COptions(bno08x.NewDefaultDebugger(), nil, &address0),
 	)
 	if err != nil {
 		panic("failed to initialize bno08x: " + err.Error())

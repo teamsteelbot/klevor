@@ -171,7 +171,7 @@ func newReportFromPacketBytes(packetBytes *[]byte) (*report, error) {
 	// Create a new Packet from the Packet bytes
 	packet, err := NewPacket(packetBytes)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create Packet from bytes: %w", err)
+		return nil, fmt.Errorf("failed to create packet from bytes: %w", err)
 	}
 
 	// Create a new report from the Packet
