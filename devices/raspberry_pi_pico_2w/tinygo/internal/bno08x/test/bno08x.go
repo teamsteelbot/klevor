@@ -67,6 +67,7 @@ type (
 		rawGyroscope              *[3]float64
 		rawMagnetometer           *[3]float64
 		enabledFeatures           map[uint8]bool
+		isUART                    bool
 	}
 
 	// Options struct holds configuration options for the BNO08X instance
@@ -100,6 +101,7 @@ func NewOptions(debugger Debugger, reset *machine.Pin) *Options {
 //	packetReader: The PacketReader to read packets from the BNO08X sensor.
 //	packetWriter: The PacketWriter to write packets to the BNO08X sensor.
 //	dataBuffer: The DataBuffer to store Packet data.
+//	isUART: A boolean indicating if the connection is via UART.
 //	options: Optional configuration options for the BNO08X instance.
 //
 // Returns:
@@ -109,6 +111,7 @@ func NewBNO08X(
 	packetReader PacketReader,
 	packetWriter PacketWriter,
 	dataBuffer DataBuffer,
+	isUART bool,
 	options *Options,
 ) (*BNO08X, error) {
 	// Check if packetReader, packetWriter and dataBuffer are provided
@@ -158,6 +161,7 @@ func NewBNO08X(
 		rawGyroscope:              &InitialBnoSensorReportThreeDimensional,
 		rawMagnetometer:           &InitialBnoSensorReportThreeDimensional,
 		enabledFeatures:           make(map[uint8]bool),
+		isUART:                    isUART,
 	}
 	bno08x.debug("********** NEW BNO08X *************")
 
@@ -202,8 +206,37 @@ func (b *BNO08X) hardwareReset() {
 // An error if the reset process fails, otherwise nil.
 func (b *BNO08X) softwareReset() error {
 	b.debug("Software resetting...")
-	data := []byte{CommandReset}
 
+	// Check if the protocol is UART
+	if isUART {
+		data := []byte{0, 1}
+		if _, err := b.packetWriter.SendPacket(
+			ChannelSHTPCommand,
+			data,
+		); err != nil {
+			b.debug(fmt.Sprintf("Error sending SHTP UART mode Packet: %v", err))
+			return err
+		}
+		time.Sleep(ResetPacketDelay)
+
+		for {
+			packet, err := b._read_packet()
+			if err != nil {
+				b.debug(
+					fmt.Sprintf(
+						"Error reading packet after UART mode set: %v",
+						err,
+					),
+				)
+				return err
+			}
+			if packet.ChannelNumber() == ChannelSHTPCommand {
+				break
+			}
+		}
+	}
+
+	data = []byte{CommandReset}
 	if _, err := b.packetWriter.SendPacket(ChannelExe, data); err != nil {
 		b.debug(fmt.Sprintf("Error sending software reset Packet: %v", err))
 		return err

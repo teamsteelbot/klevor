@@ -188,6 +188,18 @@ const (
 	// I2CProbeDeviceDelay is the delay between attempts to probe the device on the I2C bus
 	I2CProbeDeviceDelay = 50 * time.Millisecond
 
+	// UARTBaudRate is the baud rate for UART communication
+	UARTBaudRate uint32 = 3_000_000 // 3Mbps for UART-SHTP
+
+	// UARTStartAndEndByte is the start byte and end byte for UART communication
+	UARTStartAndEndByte = 0x7E
+
+	// UARTSHTPByte is the SHTP byte for UART communication
+	UARTSHTPByte = 0x01
+
+	// UARTControlEscape is the control escape byte for UART communication
+	UARTControlEscape = 0x7D
+
 	// QuaternionRollIndex is the index for the roll component in a quaternion
 	QuaternionRollIndex = 0
 

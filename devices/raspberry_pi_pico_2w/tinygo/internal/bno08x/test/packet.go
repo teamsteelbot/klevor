@@ -39,7 +39,7 @@ func NewPacketHeader(packetBytes *[]byte) (*PacketHeader, error) {
 		return nil, ErrNilPacketBytes
 	}
 
-	// Ensure the buffer is at least 4 bytes long to read the header
+	// Ensure the buffer is at least PacketHeaderLength bytes long to read the header
 	if len(*packetBytes) < 4 {
 		return nil, ErrBufferTooShortForHeader
 	}
@@ -48,7 +48,7 @@ func NewPacketHeader(packetBytes *[]byte) (*PacketHeader, error) {
 	packetByteCount &= 0x7FFF
 	channelNumber := (*packetBytes)[2]
 	sequenceNumber := (*packetBytes)[3]
-	dataLength := int(packetByteCount) - 4
+	dataLength := int(packetByteCount) - PacketHeaderLength
 	if dataLength < 0 {
 		dataLength = 0
 	}
@@ -308,8 +308,8 @@ func (p *Packet) String(isBeingSent bool) *string {
 	// Iterate only over actual data (exclude header bytes already removed)
 	builder.WriteString("\n\t\t Bytes:")
 	for idx := 0; idx < dataLen; idx++ {
-		packetIdx := idx + 4 // original packet offset including header
-		if (packetIdx % 4) == 0 {
+		packetIdx := idx + PacketHeaderLength // original packet offset including header
+		if (packetIdx % PacketHeaderLength) == 0 {
 			builder.WriteString(fmt.Sprintf("\n\t\t\t [0x%02X] ", packetIdx))
 		}
 		builder.WriteString(fmt.Sprintf("0x%02X ", p.Data[idx]))

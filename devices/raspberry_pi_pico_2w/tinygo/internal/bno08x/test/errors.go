@@ -31,4 +31,6 @@ var (
 	ErrNoPacketAvailable                         = errors.New("no Packet available to read from the I2C bus")
 	ErrNilI2CBus                                 = errors.New("nil I2C bus provided for communication")
 	ErrInvalidI2CAddress                         = errors.New("invalid I2C address provided")
+	ErrNilDestinationBuffer                      = errors.New("nil destination buffer provided for UART read")
+	ErrUnhandledUARTControlSHTPProtocol          = errors.New("Unhandled UART control SHTP protocol")
 )

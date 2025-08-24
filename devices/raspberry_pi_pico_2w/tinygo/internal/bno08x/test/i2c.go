@@ -42,6 +42,15 @@ type (
 )
 
 // probeDevice tries a zero-length write then a 1-byte read to confirm presence.
+//
+// Parameters:
+//
+// bus: The I2C bus to use for communication.
+// addr: The I2C address of the device to probe.
+//
+// Returns:
+//
+// An error if the probe fails, otherwise nil.
 func probeDevice(bus *machine.I2C, addr uint16) error {
 	// Zero-length write (some devices NACK this; tolerate)
 	_ = bus.Tx(addr, nil, nil)
@@ -61,6 +70,10 @@ func probeDevice(bus *machine.I2C, addr uint16) error {
 // debugger: The debugger to use for logging and debugging information (optional).
 // resetPin: The pin used to reset the BNO08X sensor (optional).
 // address0Pin: The pin used to set the I2C address (optional).
+//
+// Returns:
+//
+// A pointer to a new I2COptions instance.
 func NewI2COptions(
 	debugger Debugger,
 	resetPin *machine.Pin,
@@ -179,6 +192,7 @@ func NewI2C(
 		packetReader,
 		packetWriter,
 		dataBuffer,
+		false,
 		options.Options,
 	)
 	if err != nil {
@@ -233,7 +247,7 @@ func newI2CPacketWriter(
 // Parameters:
 //
 // args: The arguments to log as debug messages.
-func (pw I2CPacketWriter) debug(args ...interface{}) {
+func (pw I2CPacketWriter) debug(args ...any) {
 	if pw.debugger != nil {
 		pw.debugger.Debug(args...)
 	}
@@ -254,7 +268,7 @@ func (pw I2CPacketWriter) SendPacket(channel uint8, data []byte) (
 	error,
 ) {
 	dataLength := len(data)
-	writeLength := dataLength + 4
+	writeLength := dataLength + PacketHeaderLength
 
 	// Ensure buffer is large enough
 	dataBuffer := *pw.dataBuffer.GetData()
@@ -274,7 +288,7 @@ func (pw I2CPacketWriter) SendPacket(channel uint8, data []byte) (
 	dataBuffer[3] = sequenceNumber
 
 	// Copy data into buffer
-	copy(dataBuffer[4:], data)
+	copy(dataBuffer[PacketHeaderLength:], data)
 
 	// Create a new Packet from the data buffer
 	dataBufferWriteLength := make([]byte, writeLength)
@@ -362,7 +376,7 @@ func (pr I2CPacketReader) readHeader() (*PacketHeader, error) {
 	if err := pr.i2cBus.Tx(
 		pr.address,
 		nil,
-		(*pr.dataBuffer.GetData())[:4],
+		(*pr.dataBuffer.GetData())[:PacketHeaderLength],
 	); err != nil {
 		return nil, err
 	}
@@ -411,7 +425,7 @@ func (pr I2CPacketReader) ReadPacket() (*Packet, error) {
 	}
 
 	// Validate header fields
-	if header.PacketByteCount < 4 {
+	if header.PacketByteCount < PacketHeaderLength {
 		return nil, fmt.Errorf("invalid packet size %d", header.PacketByteCount)
 	}
 
@@ -429,13 +443,13 @@ func (pr I2CPacketReader) ReadPacket() (*Packet, error) {
 	}
 
 	// Skip header-only / empty packets
-	if header.PacketByteCount == 4 || header.DataLength == 0 {
+	if header.PacketByteCount == PacketHeaderLength || header.DataLength == 0 {
 		pr.debug("Skipping empty packet on channel", header.ChannelNumber)
 		return nil, ErrNoPacketAvailable
 	}
 
 	// packetByteCount includes 4 header bytes
-	payloadLen := packetByteCount - 4
+	payloadLen := packetByteCount - PacketHeaderLength
 	pr.debug(
 		fmt.Sprintf(
 			"Channel %d has %d bytes available to read",
@@ -483,7 +497,7 @@ func (pr I2CPacketReader) read(requestedReadLength int) error {
 	pr.debug(fmt.Sprintf("Trying to read %d bytes", requestedReadLength))
 
 	// Full packet (header + payload)
-	totalReadLength := requestedReadLength + 4
+	totalReadLength := requestedReadLength + PacketHeaderLength
 
 	// Check if data buffer is large enough
 	dataBufferPtr := pr.dataBuffer.GetData()
@@ -506,7 +520,7 @@ func (pr I2CPacketReader) read(requestedReadLength int) error {
 		if err := pr.i2cBus.Tx(
 			pr.address,
 			nil,
-			(*dataBufferPtr)[4:totalReadLength],
+			(*dataBufferPtr)[PacketHeaderLength:totalReadLength],
 		); err != nil {
 			return err
 		}

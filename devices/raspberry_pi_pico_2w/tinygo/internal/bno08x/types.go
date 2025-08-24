@@ -3,7 +3,7 @@ package bno08x
 import (
 	"time"
 
-	// bno08x "github.com/ralvarezdev/go-adafruit-bno08x
+	// bno08x "github.com/ralvarezdev/go-bno08x
 	bno08x "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/bno08x/test"
 	internalusbcdc "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc"
 )
