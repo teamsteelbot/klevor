@@ -151,7 +151,7 @@ func (r *UARTPacketReader) readInto(dst *[]byte, start int, end *int) error {
 	// Determine end index
 	if end == nil {
 		end = new(int)
-		*end = len(dst)
+		*end = len(*dst)
 	}
 
 	for i := start; i < *end; i++ {
@@ -166,7 +166,7 @@ func (r *UARTPacketReader) readInto(dst *[]byte, start int, end *int) error {
 			}
 			b = nb ^ 0x20
 		}
-		dst[i] = b
+		(*dst)[i] = b
 	}
 	return nil
 }
@@ -200,10 +200,11 @@ func (r *UARTPacketReader) readHeader() error {
 			return err
 		}
 	}
-	if proto != UARTSHTPByte {
+	if data != UARTSHTPByte {
 		return ErrUnhandledUARTControlSHTPProtocol
 	}
-	return r.readInto(r.dataBuffer.GetData(), 0, PacketHeaderLength)
+	end := PacketHeaderLength
+	return r.readInto(r.dataBuffer.GetData(), 0, &end)
 }
 
 // ReadPacket reads a packet from UART
@@ -218,7 +219,7 @@ func (r *UARTPacketReader) ReadPacket() (*Packet, error) {
 	}
 
 	// Parse header
-	header, err := NewPacketHeader(r.databuffer.GetData())
+	header, err := NewPacketHeader(r.dataBuffer.GetData())
 	if err != nil {
 		return nil, err
 	}
@@ -227,7 +228,7 @@ func (r *UARTPacketReader) ReadPacket() (*Packet, error) {
 	}
 
 	// Debug
-	channelNumber := header.ChannelNumber()
+	channelNumber := header.ChannelNumber
 	r.debug(
 		fmt.Sprintf(
 			"channel %d has %d bytes available",
@@ -237,11 +238,12 @@ func (r *UARTPacketReader) ReadPacket() (*Packet, error) {
 	)
 
 	// Read remaining (payload) bytes
+	end := int(header.PacketByteCount)
 	dataBuffer := r.dataBuffer.GetData()
 	if err = r.readInto(
 		dataBuffer,
 		PacketHeaderLength,
-		int(header.PacketByteCount),
+		&end,
 	); err != nil {
 		return nil, err
 	}
@@ -251,18 +253,18 @@ func (r *UARTPacketReader) ReadPacket() (*Packet, error) {
 	if err != nil {
 		return nil, err
 	}
-	if endByte != uartStartEndByte {
-		return nil, errEndMissing
+	if endByte != UARTStartAndEndByte {
+		return nil, ErrUARTEndMissing
 	}
 
 	// Construct packet data
 	packetData := make([]byte, header.PacketByteCount)
-	copy(packetData, dataBuffer[:header.PacketByteCount])
+	copy(packetData, (*dataBuffer)[:header.PacketByteCount])
 
 	// Initialize packet
 	packet := &Packet{
 		Data:   packetData,
-		Header: hdr,
+		Header: header,
 	}
 
 	// Update sequence number

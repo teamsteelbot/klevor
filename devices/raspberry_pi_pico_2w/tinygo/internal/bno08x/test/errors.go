@@ -33,4 +33,5 @@ var (
 	ErrInvalidI2CAddress                         = errors.New("invalid I2C address provided")
 	ErrNilDestinationBuffer                      = errors.New("nil destination buffer provided for UART read")
 	ErrUnhandledUARTControlSHTPProtocol          = errors.New("Unhandled UART control SHTP protocol")
+	ErrUARTEndMissing                            = errors.New("UART end byte missing from packet")
 )

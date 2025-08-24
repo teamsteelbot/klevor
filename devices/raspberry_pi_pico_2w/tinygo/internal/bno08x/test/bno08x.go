@@ -208,7 +208,7 @@ func (b *BNO08X) softwareReset() error {
 	b.debug("Software resetting...")
 
 	// Check if the protocol is UART
-	if isUART {
+	if b.isUART {
 		data := []byte{0, 1}
 		if _, err := b.packetWriter.SendPacket(
 			ChannelSHTPCommand,
@@ -220,7 +220,7 @@ func (b *BNO08X) softwareReset() error {
 		time.Sleep(ResetPacketDelay)
 
 		for {
-			packet, err := b._read_packet()
+			packet, err := b.packetReader.ReadPacket()
 			if err != nil {
 				b.debug(
 					fmt.Sprintf(
@@ -236,7 +236,7 @@ func (b *BNO08X) softwareReset() error {
 		}
 	}
 
-	data = []byte{CommandReset}
+	data := []byte{CommandReset}
 	if _, err := b.packetWriter.SendPacket(ChannelExe, data); err != nil {
 		b.debug(fmt.Sprintf("Error sending software reset Packet: %v", err))
 		return err

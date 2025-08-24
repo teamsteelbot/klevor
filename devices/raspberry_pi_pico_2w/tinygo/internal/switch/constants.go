@@ -14,7 +14,7 @@ var (
 	DefaultInterval = 10 * time.Millisecond
 
 	// PullUpHandler is the handler for the pull-up for the switch ON signal.
-	PullUpHandler internalpullup.Handler = internalpullup.NewDefaultHandler(machine.GPIO21)
+	PullUpHandler internalpullup.Handler = internalpullup.NewDefaultHandler(machine.GPIO27)
 
 	// SwitchHandler is the default switch handler that uses the pull-up handler.
 	SwitchHandler Handler
