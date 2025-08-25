@@ -64,6 +64,30 @@ class="logo--3rd-party">
 </div>
 mkdocs-only-end -->
 
+Go, also known as GoLang, is a statically tiped and compiled programming language, designed by Robert Griesemer, Rob Pike, and Ken Thompson in Google in 2009. Their main goal was to create a programming language that could solve the problems of other modern languages in an era of multi-core processors, large-scale systems and networks.
+
+Key characteristics:
+
+- Simplicity and Readability: Go's sintaxis is intentionally minimal and easy to learn. It avoids complex features present in languages like C++ or Java (such as class inheritance or complex generics), resulting in clean, readeable and easy to maintain code. The language's opinionated nature (for example, specific formatting rules enforced by gofmt) ensures code consistency across different teams.
+
+- Concurrency: This is one of the most powerful and definitive Go's characteristics. It has built-in primitives for concurrency:
+
+	1. Goroutines: These are lightweight, inexpensive threads managed by the Go runtime, not by the operating system. You can have thousands if not millions of these running at the same time.
+
+	2. Channels: A way for Goroutines to communicate and synchronize. The philosophy is "don't communicate by sharing memory, share memory by communicating". This prevents common concurrency issues.
+
+- Fast compiling: Go compiles extremely fast. This provides a developing experience similar to interpreted languages, where you can make changes and see results almost instantly.
+
+Aside from this, Go's design makes it well-suited for:
+
+- Web services and APIs: It's incredible networking capabilities and support for concurrency make it a top choice to build web high-performance, scalable, web servers and microservices.
+
+- Command-Line Tools: Its fast compilation and static binaries make it ideal for creating powerful command-line applications that can be distributed easily.
+
+- Cloud Computing: A lot of cloud infrastructure tools, such as Dooker and Kubernetes, are written in Go.
+
+In conclusion, Go is a programming language that priorizes efficency, scalability, and ease of use, which makes it a popular choice for developers who build the backend systems that power the modern web and cloud.
+
 ## TinyGo {:#tinygo}
 
 <!-- github-only-start -->
@@ -73,6 +97,7 @@ width="200">
 	<br>
 	<i>TinyGo's Logo</i>
 </p>
+
 <!-- github-only-end -->
 
 <!-- mkdocs-only-start
@@ -83,6 +108,15 @@ class="logo--3rd-party">
 </div>
 mkdocs-only-end -->
 
-# References
+TinyGo is a Go implementation for microcontrollers, like, for example, the Raspberry Pi Pico 2 W H, TinyGo is very similar to Go, however, unlike Go, which has its unique compiler infraestructure, TinyGo is built over the LLVM (Low Level Virtual Machine) compiler infrastructure. Thanks to LLVM, TinyGo is capable of implementing features such as:
 
-1. *El tutorial de Python*. (2025). Python Software Foundation. <a id="python-docs" href="https://docs.python.org/es/3/tutorial/">https://docs.python.org/es/3/tutorial/</a>
+- Drastically smaller binaries: A "Hello World!" program written in standard Go can take up several megabytes, however, the same program built on TinyGo can take up as low as a few kilobytes. This is the main characteristic for microcontrollers, because of their limited resources and flash memory.
+
+- Efficient Code Generation: LLVM's advanced optimizations can produce highly efficient machine code, often outperforming C and C++ in specific benchmark tests.
+
+
+# Referencias
+
+1. *The Python Tutorial*. (2025). Python Software Foundation. <a id="python-docs" href="https://docs.python.org/es/3/tutorial/">https://docs.python.org/es/3/tutorial/</a>
+
+2. *El tutorial de Go*. (2025). Google. <a id="go-docs" href="https://go.dev/">https://go.dev/</a>
