@@ -3,7 +3,6 @@
 package test
 
 import (
-	"encoding/binary"
 	"fmt"
 	"time"
 
@@ -14,40 +13,76 @@ type (
 	// UART represents the UART implementation of the BNO08X sensor
 	UART struct {
 		BNO08X
-		uart *machine.UART
-		ps1  machine.Pin
+		uartBus *machine.UART
+		ps0     machine.Pin
+		ps1     machine.Pin
 	}
 
 	// UARTPacketReader represents the packet reader for UART interface
 	UARTPacketReader struct {
-		uart       *machine.UART
+		uartBus    *machine.UART
 		dataBuffer DataBuffer
 		debugger   Debugger
+		ultraDebug bool
 	}
 
 	// UARTPacketWriter represents the packet writer for UART interface
 	UARTPacketWriter struct {
-		uart       *machine.UART
+		uartBus    *machine.UART
 		dataBuffer DataBuffer
 		debugger   Debugger
+		ultraDebug bool
+	}
+
+	// UARTOptions struct for configuring the BNO08X over UART.
+	UARTOptions struct {
+		Options    *Options
+		UltraDebug bool
 	}
 )
 
+// NewUARTOptions creates a new UARTOptions instance with default values.
+//
+// Parameters:
+//
+// debugger: The debugger to use for logging and debugging information (optional).
+// resetPin: The pin used to reset the BNO08X sensor (optional).
+// ultraDebug: Flag to enable ultra debug mode (optional).
+//
+// Returns:
+//
+// A pointer to a new UARTOptions instance.
+func NewUARTOptions(
+	debugger Debugger,
+	resetPin *machine.Pin,
+	ultraDebug bool,
+) *UARTOptions {
+	return &UARTOptions{
+		Options:    NewOptions(debugger, resetPin),
+		UltraDebug: ultraDebug,
+	}
+}
+
 // NewUART creates a new UART instance for the BNO08X sensor
 func NewUART(
-	uart *machine.UART,
+	uartBus *machine.UART,
 	txPin machine.Pin,
 	rxPin machine.Pin,
+	ps0 machine.Pin,
 	ps1 machine.Pin,
 	dataBuffer DataBuffer,
-	options *Options,
+	options *UARTOptions,
 ) (*UART, error) {
+	// Set PS0 pin to output and low
+	ps0.Configure(machine.PinConfig{Mode: machine.PinOutput})
+	ps0.Low()
+
 	// Set PS1 pin to output and high
 	ps1.Configure(machine.PinConfig{Mode: machine.PinOutput})
 	ps1.High()
 
 	// Configure UART
-	err := uart.Configure(
+	err := uartBus.Configure(
 		machine.UARTConfig{
 			BaudRate: UARTBaudRate,
 			TX:       txPin,
@@ -61,20 +96,28 @@ func NewUART(
 	// Get debugger from options
 	var debugger Debugger
 	if options != nil {
-		debugger = options.Debugger
+		debugger = options.Options.Debugger
 	}
 
 	// Create packet reader and writer
-	packetReader := &UARTPacketReader{
-		uart:       uart,
-		dataBuffer: dataBuffer,
-		debugger:   debugger,
+	packetReader, err := newUARTPacketReader(
+		uartBus,
+		dataBuffer,
+		debugger,
+		options.UltraDebug,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create uart packet reader: %w", err)
 	}
 
-	packetWriter := &UARTPacketWriter{
-		uart:       uart,
-		dataBuffer: dataBuffer,
-		debugger:   debugger,
+	packetWriter, err := newUARTPacketWriter(
+		uartBus,
+		dataBuffer,
+		debugger,
+		options.UltraDebug,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create uart packet writer: %w", err)
 	}
 
 	// Initialize BNO08X
@@ -82,28 +125,63 @@ func NewUART(
 		packetReader,
 		packetWriter,
 		dataBuffer,
-		true,
-		options,
+		options.Options,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to initialize BNO08X: %w", err)
+		return nil, fmt.Errorf("failed to initialize bno08x: %w", err)
 	}
 
 	return &UART{
-		BNO08X: *bno08x,
-		uart:   uart,
-		ps1:    ps1,
+		BNO08X:  *bno08x,
+		uartBus: uartBus,
+		ps1:     ps1,
 	}, nil
 }
 
-// debug logs debug messages if debugger is enabled
+// newUARTPacketReader creates a new UARTPacketReader instance.
 //
 // Parameters:
 //
-// args: The arguments to log.
-func (r *UARTPacketReader) debug(args ...any) {
-	if r.debugger != nil {
-		r.debugger.Debug(args...)
+// uartBus: The UART bus to use for communication.
+// debugger: The debugger to use for logging and debugging information.
+// dataBuffer: The data buffer to use for storing Packet data.
+// ultraDebug: Flag to enable ultra debug mode (optional).
+//
+// Returns:
+//
+// A pointer to a new UARTPacketReader instance.
+func newUARTPacketReader(
+	uartBus *machine.UART,
+	dataBuffer DataBuffer,
+	debugger Debugger,
+	ultraDebug bool,
+) (*UARTPacketReader, error) {
+	// Check if the UART bus is nil
+	if uartBus == nil {
+		return nil, ErrNilUARTBus
+	}
+
+	// Check if the dataBuffer is provided
+	if dataBuffer == nil {
+		return nil, ErrNilDataBuffer
+	}
+
+	return &UARTPacketReader{
+		uartBus:    uartBus,
+		debugger:   debugger,
+		dataBuffer: dataBuffer,
+		ultraDebug: ultraDebug,
+	}, nil
+}
+
+// debug is a helper function to log debug messages if debugging is enabled.
+//
+// Parameters:
+//
+// args: The arguments to log as debug messages.
+func (pr *UARTPacketReader) debug(args ...any) {
+	if pr.debugger != nil {
+		pr.debugger.Debug(args...)
 	}
 }
 
@@ -112,8 +190,8 @@ func (r *UARTPacketReader) debug(args ...any) {
 // Returns:
 //
 // True if data is available, otherwise false.
-func (r *UARTPacketReader) IsDataReady() bool {
-	return r.uart.Buffered() >= PacketHeaderLength
+func (pr *UARTPacketReader) IsDataReady() bool {
+	return pr.uartBus.Buffered() >= PacketHeaderLength
 }
 
 // readByte blocks until a byte is read (simple poll).
@@ -121,14 +199,19 @@ func (r *UARTPacketReader) IsDataReady() bool {
 // Returns:
 //
 // A byte read from UART and an error if any.
-func (r *UARTPacketReader) readByte() (byte, error) {
-	for {
-		if r.uart.Buffered() > 0 {
-			b, err := r.uart.ReadByte()
+func (pr *UARTPacketReader) readByte() (byte, error) {
+	startTime := time.Now()
+	for time.Now().Sub(startTime) < UARTTimeout {
+		if pr.uartBus.Buffered() > 0 {
+			b, err := pr.uartBus.ReadByte()
+			if pr.ultraDebug {
+				pr.debug(fmt.Sprintf("Received byte: 0x%02X", b))
+			}
 			return b, err
 		}
-		time.Sleep(200 * time.Microsecond)
+		time.Sleep(1 * time.Microsecond)
 	}
+	return 0, ErrUARTTimeout
 }
 
 // readInto reads bytes into the destination buffer handling escape sequences.
@@ -142,7 +225,7 @@ func (r *UARTPacketReader) readByte() (byte, error) {
 // Returns:
 //
 // An error if any occurs during reading.
-func (r *UARTPacketReader) readInto(dst *[]byte, start int, end *int) error {
+func (pr *UARTPacketReader) readInto(dst *[]byte, start int, end *int) error {
 	// Check if the dst is nil
 	if dst == nil {
 		return ErrNilDestinationBuffer
@@ -155,12 +238,12 @@ func (r *UARTPacketReader) readInto(dst *[]byte, start int, end *int) error {
 	}
 
 	for i := start; i < *end; i++ {
-		b, err := r.readByte()
+		b, err := pr.readByte()
 		if err != nil {
 			return err
 		}
 		if b == UARTControlEscape {
-			nb, err := r.readByte()
+			nb, err := pr.readByte()
 			if err != nil {
 				return err
 			}
@@ -176,10 +259,10 @@ func (r *UARTPacketReader) readInto(dst *[]byte, start int, end *int) error {
 // Returns:
 //
 // An error if any occurs during reading.
-func (r *UARTPacketReader) readHeader() error {
+func (pr *UARTPacketReader) readHeader() error {
 	// Find first initial start byte
 	for {
-		b, err := r.readByte()
+		b, err := pr.readByte()
 		if err != nil {
 			return err
 		}
@@ -189,13 +272,13 @@ func (r *UARTPacketReader) readHeader() error {
 	}
 
 	// Read protocol ID sequence
-	data, err := r.readByte()
+	data, err := pr.readByte()
 	if err != nil {
 		return err
 	}
 	if data == UARTStartAndEndByte {
 		// Consume next (real protocol byte)
-		data, err = r.readByte()
+		data, err = pr.readByte()
 		if err != nil {
 			return err
 		}
@@ -204,7 +287,8 @@ func (r *UARTPacketReader) readHeader() error {
 		return ErrUnhandledUARTControlSHTPProtocol
 	}
 	end := PacketHeaderLength
-	return r.readInto(r.dataBuffer.GetData(), 0, &end)
+
+	return pr.readInto(pr.dataBuffer.GetData(), 0, &end)
 }
 
 // ReadPacket reads a packet from UART
@@ -212,14 +296,14 @@ func (r *UARTPacketReader) readHeader() error {
 // Returns:
 //
 // A Packet object and an error if any occurs.
-func (r *UARTPacketReader) ReadPacket() (*Packet, error) {
+func (pr *UARTPacketReader) ReadPacket() (*Packet, error) {
 	// Read packet header
-	if err := r.readHeader(); err != nil {
+	if err := pr.readHeader(); err != nil {
 		return nil, err
 	}
 
 	// Parse header
-	header, err := NewPacketHeader(r.dataBuffer.GetData())
+	header, err := NewPacketHeaderFromBuffer(pr.dataBuffer.GetData())
 	if err != nil {
 		return nil, err
 	}
@@ -227,11 +311,19 @@ func (r *UARTPacketReader) ReadPacket() (*Packet, error) {
 		return nil, ErrNoPacketAvailable
 	}
 
-	// Debug
+	// Debug log the header
+	headerStrPtr := header.String(false)
+	if headerStrPtr != nil {
+		pr.debug(*headerStrPtr)
+	} else {
+		pr.debug(ErrNilPacketHeaderString.Error())
+	}
+
+	// Log available bytes
 	channelNumber := header.ChannelNumber
-	r.debug(
+	pr.debug(
 		fmt.Sprintf(
-			"channel %d has %d bytes available",
+			"Channel %d has %d bytes available",
 			channelNumber,
 			header.PacketByteCount-PacketHeaderLength,
 		),
@@ -239,8 +331,8 @@ func (r *UARTPacketReader) ReadPacket() (*Packet, error) {
 
 	// Read remaining (payload) bytes
 	end := int(header.PacketByteCount)
-	dataBuffer := r.dataBuffer.GetData()
-	if err = r.readInto(
+	dataBuffer := pr.dataBuffer.GetData()
+	if err = pr.readInto(
 		dataBuffer,
 		PacketHeaderLength,
 		&end,
@@ -249,7 +341,7 @@ func (r *UARTPacketReader) ReadPacket() (*Packet, error) {
 	}
 
 	// Expect trailing 0x7E
-	endByte, err := r.readByte()
+	endByte, err := pr.readByte()
 	if err != nil {
 		return nil, err
 	}
@@ -258,28 +350,72 @@ func (r *UARTPacketReader) ReadPacket() (*Packet, error) {
 	}
 
 	// Construct packet data
-	packetData := make([]byte, header.PacketByteCount)
-	copy(packetData, (*dataBuffer)[:header.PacketByteCount])
+	packetData := make([]byte, header.DataLength)
+	copy(packetData, (*dataBuffer)[PacketHeaderLength:header.PacketByteCount])
 
 	// Initialize packet
-	packet := &Packet{
-		Data:   packetData,
-		Header: header,
+	packet, err := NewPacket(&packetData, header)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create packet from bytes: %w", err)
+	}
+
+	// Debug log the packet
+	packetStrPtr := packet.String(false)
+	if packetStrPtr != nil {
+		pr.debug(*packetStrPtr)
+	} else {
+		pr.debug(ErrNilPacketString.Error())
 	}
 
 	// Update sequence number
-	r.dataBuffer.UpdateSequenceNumber(packet)
+	pr.dataBuffer.UpdateSequenceNumber(packet)
 	return packet, nil
 }
 
-// debug logs debug messages if debugger is enabled
+// newUARTPacketWriter creates a new UARTPacketWriter instance.
 //
 // Parameters:
 //
-// args: The arguments to log.
-func (w *UARTPacketWriter) debug(args ...any) {
-	if w.debugger != nil {
-		w.debugger.Debug(args...)
+// uartBus: The UART bus to use for communication.
+// dataBuffer: The data buffer to use for storing Packet data.
+// debugger: The debugger to use for logging and debugging information.
+// ultraDebug: Flag to enable ultra debug mode (optional).
+//
+// Returns:
+//
+// A pointer to a new UARTPacketWriter instance, or an error if the dataBuffer is nil.
+func newUARTPacketWriter(
+	uartBus *machine.UART,
+	dataBuffer DataBuffer,
+	debugger Debugger,
+	ultraDebug bool,
+) (*UARTPacketWriter, error) {
+	// Check if the UART bus is nil
+	if uartBus == nil {
+		return nil, ErrNilUARTBus
+	}
+
+	// Check if the dataBuffer is provided
+	if dataBuffer == nil {
+		return nil, ErrNilDataBuffer
+	}
+
+	return &UARTPacketWriter{
+		uartBus:    uartBus,
+		debugger:   debugger,
+		dataBuffer: dataBuffer,
+		ultraDebug: ultraDebug,
+	}, nil
+}
+
+// debug is a helper function to log debug messages if debugging is enabled.
+//
+// Parameters:
+//
+// args: The arguments to log as debug messages.
+func (pw *UARTPacketWriter) debug(args ...any) {
+	if pw.debugger != nil {
+		pw.debugger.Debug(args...)
 	}
 }
 
@@ -293,56 +429,62 @@ func (w *UARTPacketWriter) debug(args ...any) {
 // Returns:
 //
 // The sequence number used and an error if any occurs.
-func (w *UARTPacketWriter) SendPacket(channel uint8, data []byte) (
+func (pw *UARTPacketWriter) SendPacket(channel uint8, data *[]byte) (
 	uint8,
 	error,
 ) {
-	// Build packet
-	packetLength := len(data) + PacketHeaderLength
-	packet := make([]byte, packetLength)
-
-	// Header
-	binary.LittleEndian.PutUint16(packet[0:2], uint16(packetLength))
-	packet[2] = channel
-
-	// Get sequence number
-	seqNum, err := w.dataBuffer.GetSequenceNumber(channel)
+	// Get channel sequence number
+	sequenceNumber, err := pw.dataBuffer.GetSequenceNumber(channel)
 	if err != nil {
-		return 0, fmt.Errorf("failed to get sequence number: %w", err)
+		return 0, err
 	}
-	packet[3] = seqNum
 
-	// Data
-	copy(packet[PacketHeaderLength:], data)
+	// Initialize the packet from data
+	packet, err := NewPacketFromData(
+		channel,
+		sequenceNumber,
+		data,
+	)
+	if err != nil {
+		return 0, fmt.Errorf("failed to create packet: %w", err)
+	}
+
+	// Debug log the packet
+	packetStrPtr := packet.String(true)
+	if packetStrPtr != nil {
+		pw.debug(*packetStrPtr)
+	} else {
+		pw.debug(ErrNilPacketString.Error())
+	}
+
+	// Get the packet buffer
+	packetBufferPtr := packet.Buffer()
+	if packetBufferPtr == nil {
+		return 0, ErrNilPacketBuffer
+	}
 
 	// Send start byte
-	w.uart.WriteByte(UARTStartAndEndByte)
+	pw.uartBus.WriteByte(UARTStartAndEndByte)
 	time.Sleep(1 * time.Millisecond)
 
 	// Send SHTP protocol byte
-	w.uart.WriteByte(UARTSHTPByte)
+	pw.uartBus.WriteByte(UARTSHTPByte)
 	time.Sleep(1 * time.Millisecond)
 
 	// Send packet with escape sequences
-	for _, b := range packet {
-		w.uart.WriteByte(b)
+	for _, b := range *packetBufferPtr {
+		pw.uartBus.WriteByte(b)
 		time.Sleep(1 * time.Millisecond)
 	}
 
 	// Send start byte
-	w.uart.WriteByte(UARTStartAndEndByte)
+	pw.uartBus.WriteByte(UARTStartAndEndByte)
 	time.Sleep(1 * time.Millisecond)
 
 	// Update sequence number
-	w.dataBuffer.IncrementChannelSequenceNumber(channel)
-
-	w.debug(
-		fmt.Sprintf(
-			"Sent packet on channel %d len: %d",
-			channel,
-			packetLength,
-		),
-	)
-
-	return seqNum, nil
+	sequenceNumber, err = pw.dataBuffer.IncrementChannelSequenceNumber(channel)
+	if err != nil {
+		return 0, err
+	}
+	return sequenceNumber, nil
 }

@@ -192,7 +192,6 @@ func NewI2C(
 		packetReader,
 		packetWriter,
 		dataBuffer,
-		false,
 		options.Options,
 	)
 	if err != nil {
@@ -263,39 +262,24 @@ func (pw I2CPacketWriter) debug(args ...any) {
 // Returns:
 //
 // The sequence number of the Packet sent, or an error if sending fails.
-func (pw I2CPacketWriter) SendPacket(channel uint8, data []byte) (
+func (pw I2CPacketWriter) SendPacket(channel uint8, data *[]byte) (
 	uint8,
 	error,
 ) {
-	dataLength := len(data)
-	writeLength := dataLength + PacketHeaderLength
-
-	// Ensure buffer is large enough
-	dataBuffer := *pw.dataBuffer.GetData()
-	if len(dataBuffer) < writeLength {
-		dataBuffer = make([]byte, writeLength)
-		pw.dataBuffer.SetData(&dataBuffer)
-	}
-
-	// Pack header: first two bytes are writeLength (little-endian)
-	dataBuffer[0] = uint8(writeLength & 0xFF)
-	dataBuffer[1] = uint8(writeLength >> 8)
-	dataBuffer[2] = channel
+	// Get channel sequence number
 	sequenceNumber, err := pw.dataBuffer.GetSequenceNumber(channel)
 	if err != nil {
 		return 0, err
 	}
-	dataBuffer[3] = sequenceNumber
 
-	// Copy data into buffer
-	copy(dataBuffer[PacketHeaderLength:], data)
-
-	// Create a new Packet from the data buffer
-	dataBufferWriteLength := make([]byte, writeLength)
-	copy(dataBufferWriteLength, dataBuffer[:writeLength])
-	packet, err := NewPacket(&dataBufferWriteLength)
+	// Initialize the packet from data
+	packet, err := NewPacketFromData(
+		channel,
+		sequenceNumber,
+		data,
+	)
 	if err != nil {
-		return sequenceNumber, fmt.Errorf("failed to create packet: %w", err)
+		return 0, fmt.Errorf("failed to create packet: %w", err)
 	}
 
 	// Debug log the packet
@@ -303,11 +287,17 @@ func (pw I2CPacketWriter) SendPacket(channel uint8, data []byte) (
 	if packetStrPtr != nil {
 		pw.debug(*packetStrPtr)
 	} else {
-		pw.debug("ERROR: nil packet string")
+		pw.debug(ErrNilPacketString.Error())
+	}
+
+	// Get the packet buffer
+	packetBufferPtr := packet.Buffer()
+	if packetBufferPtr == nil {
+		return 0, ErrNilPacketBuffer
 	}
 
 	// Write to I2C
-	if err = pw.i2cBus.Tx(pw.address, dataBufferWriteLength, nil); err != nil {
+	if err = pw.i2cBus.Tx(pw.address, *packetBufferPtr, nil); err != nil {
 		return sequenceNumber, err
 	}
 
@@ -381,20 +371,18 @@ func (pr I2CPacketReader) readHeader() (*PacketHeader, error) {
 		return nil, err
 	}
 
-	header, err := NewPacketHeader(pr.dataBuffer.GetData())
+	header, err := NewPacketHeaderFromBuffer(pr.dataBuffer.GetData())
 	if err != nil {
 		return nil, err
 	}
 
 	// Debug log the header
-	/*
-		headerStrPtr := header.String(false)
-		if headerStrPtr != nil {
-			pr.debug(*headerStrPtr)
-		} else {
-			pr.debug("ERROR: nil header string")
-		}
-	*/
+	headerStrPtr := header.String(false)
+	if headerStrPtr != nil {
+		pr.debug(*headerStrPtr)
+	} else {
+		pr.debug(ErrNilPacketHeaderString.Error())
+	}
 	return header, nil
 }
 
@@ -464,24 +452,24 @@ func (pr I2CPacketReader) ReadPacket() (*Packet, error) {
 	}
 
 	// Create a full Packet from the data buffer
-	newPacket, err := NewPacket(pr.dataBuffer.GetData())
+	packet, err := NewPacketFromBuffer(pr.dataBuffer.GetData())
 	if err != nil {
 		return nil, fmt.Errorf("failed to create packet from bytes: %w", err)
 	}
 
 	// Debug log the packet
-	newPacketStrPtr := newPacket.String(false)
-	if newPacketStrPtr != nil {
-		pr.debug(*newPacketStrPtr)
+	packetStrPtr := packet.String(false)
+	if packetStrPtr != nil {
+		pr.debug(*packetStrPtr)
 	} else {
-		pr.debug("ERROR: nil packet string")
+		pr.debug(ErrNilPacketString.Error())
 	}
 
 	// Update the sequence number in the data buffer
-	if err = pr.dataBuffer.UpdateSequenceNumber(newPacket); err != nil {
+	if err = pr.dataBuffer.UpdateSequenceNumber(packet); err != nil {
 		return nil, fmt.Errorf("failed to update sequence number: %w", err)
 	}
-	return newPacket, nil
+	return packet, nil
 }
 
 // read reads a specified number of bytes from the I2C bus.

@@ -11,8 +11,8 @@ import (
 //
 // Parameters:
 //
-//	Packet: The Packet to separate into reports.
-//	reports: A pointer to a slice of slices where the separated reports will be appended.
+// packet: The Packet to separate into reports.
+// reports: A pointer to a slice of slices where the separated reports will be appended.
 //
 // Returns:
 //
@@ -34,7 +34,7 @@ func separateBatch(packet *Packet, reports *[]*report) error {
 		if unprocessedByteCount < requiredBytes {
 			return errors.New(
 				fmt.Sprintf(
-					"unprocessable Batch bytes: %d",
+					"unprocessable batch bytes: %d",
 					unprocessedByteCount,
 				),
 			)

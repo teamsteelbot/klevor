@@ -24,7 +24,36 @@ type (
 	}
 )
 
-// NewPacketHeader creates a PacketHeader from a given buffer.
+// NewPacketHeader creates a PacketHeader.
+//
+// Parameters:
+//
+// packetByteCount: The total byte count of the Packet.
+// channelNumber: The channel number of the Packet.
+// sequenceNumber: The sequence number of the Packet.
+//
+// Returns:
+//
+// A PacketHeader object.
+func NewPacketHeader(
+	packetByteCount uint16,
+	channelNumber uint8,
+	sequenceNumber uint8,
+) *PacketHeader {
+	dataLength := int(packetByteCount) - PacketHeaderLength
+	if dataLength < 0 {
+		dataLength = 0
+	}
+
+	return &PacketHeader{
+		ChannelNumber:   channelNumber,
+		SequenceNumber:  sequenceNumber,
+		DataLength:      dataLength,
+		PacketByteCount: int(packetByteCount),
+	}
+}
+
+// NewPacketHeaderFromBuffer creates a PacketHeader from a given buffer.
 //
 // Parameters:
 //
@@ -33,7 +62,7 @@ type (
 // Returns:
 //
 //	A PacketHeader object or an error if the buffer is too short.
-func NewPacketHeader(packetBytes *[]byte) (*PacketHeader, error) {
+func NewPacketHeaderFromBuffer(packetBytes *[]byte) (*PacketHeader, error) {
 	// Check if the provided packetBytes is nil
 	if packetBytes == nil {
 		return nil, ErrNilPacketBytes
@@ -48,17 +77,57 @@ func NewPacketHeader(packetBytes *[]byte) (*PacketHeader, error) {
 	packetByteCount &= 0x7FFF
 	channelNumber := (*packetBytes)[2]
 	sequenceNumber := (*packetBytes)[3]
-	dataLength := int(packetByteCount) - PacketHeaderLength
-	if dataLength < 0 {
-		dataLength = 0
+
+	return NewPacketHeader(
+		packetByteCount,
+		channelNumber,
+		sequenceNumber,
+	), nil
+}
+
+// NewPacketHeaderFromData creates a PacketHeader from the provided data.
+//
+// Parameters:
+//
+// channelNumber: The channel number of the Packet.
+// sequenceNumber: The sequence number of the Packet.
+// data: A pointer to a byte slice containing the Packet data.
+func NewPacketHeaderFromData(
+	channelNumber uint8,
+	sequenceNumber uint8,
+	data *[]byte,
+) (*PacketHeader, error) {
+	// Check if data is nil
+	if data == nil {
+		return nil, ErrNilDataBuffer
 	}
 
-	return &PacketHeader{
-		ChannelNumber:   channelNumber,
-		SequenceNumber:  sequenceNumber,
-		DataLength:      dataLength,
-		PacketByteCount: int(packetByteCount),
-	}, nil
+	// Calculate packet byte count
+	packetByteCount := len(*data) + PacketHeaderLength
+
+	return NewPacketHeader(
+		uint16(packetByteCount),
+		channelNumber,
+		sequenceNumber,
+	), nil
+}
+
+// Buffer returns the byte representation of the PacketHeader.
+//
+// Returns:
+//
+// A pointer to a byte slice containing the PacketHeader bytes.
+func (h *PacketHeader) Buffer() *[]byte {
+	// Initialize header buffer
+	buffer := make([]byte, PacketHeaderLength)
+
+	// First two bytes are writeLength (little-endian)
+	buffer[0] = uint8(h.PacketByteCount & 0xFF)
+	buffer[1] = uint8((h.PacketByteCount >> 8) & 0x7F)
+	buffer[2] = h.ChannelNumber
+	buffer[3] = h.SequenceNumber
+
+	return &buffer
 }
 
 // IsError checks if the provided PacketHeader indicates an error condition.
@@ -70,13 +139,13 @@ func NewPacketHeader(packetBytes *[]byte) (*PacketHeader, error) {
 // Returns:
 //
 //	True if the header indicates an error, otherwise false.
-func (header *PacketHeader) IsError() bool {
+func (h *PacketHeader) IsError() bool {
 	// Check if the channel number is greater than 5
-	if header.ChannelNumber > 5 {
+	if h.ChannelNumber > 5 {
 		return true
 	}
 	// Check if the Packet byte count and sequence number indicate an error
-	if header.PacketByteCount == 0xFFFF && header.SequenceNumber == 0xFF {
+	if h.PacketByteCount == 0xFFFF && h.SequenceNumber == 0xFF {
 		return true
 	}
 	return false
@@ -129,7 +198,34 @@ func (ph *PacketHeader) String(isBeingSent bool) *string {
 	return &str
 }
 
-// NewPacket creates a new Packet from the provided Packet bytes.
+// NewPacket creates a new Packet from the provided data and header.
+//
+// Parameters:
+//
+//	data: A pointer to a byte slice containing the Packet data.
+//	header: A pointer to the PacketHeader.
+//
+// Returns:
+//
+// A Packet object or an error if the data or header is nil.
+func NewPacket(data *[]byte, h *PacketHeader) (*Packet, error) {
+	// Check if the provided data is nil
+	if data == nil {
+		return nil, ErrNilPacketData
+	}
+
+	// Check if the provided header is nil
+	if h == nil {
+		return nil, ErrNilPacketHeader
+	}
+
+	return &Packet{
+		Header: h,
+		Data:   *data,
+	}, nil
+}
+
+// NewPacketFromBuffer creates a new Packet from the provided buffer.
 //
 // Parameters:
 //
@@ -138,21 +234,58 @@ func (ph *PacketHeader) String(isBeingSent bool) *string {
 // Returns:
 //
 //	A Packet object or an error if the Packet header could not be created.
-func NewPacket(packetBytes *[]byte) (*Packet, error) {
+func NewPacketFromBuffer(packetBytes *[]byte) (*Packet, error) {
 	// Check if the provided packetBytes is nil
 	if packetBytes == nil {
 		return nil, ErrNilPacketBytes
 	}
 
 	// Create a new PacketHeader from the Packet bytes
-	header, err := NewPacketHeader(packetBytes)
+	h, err := NewPacketHeaderFromBuffer(packetBytes)
 	if err != nil {
 		return nil, err
 	}
 
 	return &Packet{
-		Header: header,
-		Data:   (*packetBytes)[PacketHeaderLength : PacketHeaderLength+header.DataLength],
+		Header: h,
+		Data:   (*packetBytes)[PacketHeaderLength : PacketHeaderLength+h.DataLength],
+	}, nil
+}
+
+// NewPacketFromData creates a new Packet from the provided data.
+//
+// Parameters:
+//
+// channelNumber: The channel number of the Packet.
+// sequenceNumber: The sequence number of the Packet.
+// data: A pointer to a byte slice containing the Packet data.
+//
+// Returns:
+//
+// A Packet object or an error if the data is nil.
+func NewPacketFromData(
+	channelNumber uint8,
+	sequenceNumber uint8,
+	data *[]byte,
+) (*Packet, error) {
+	// Check if data is nil
+	if data == nil {
+		return nil, ErrNilDataBuffer
+	}
+
+	// Create PacketHeader from data
+	h, err := NewPacketHeaderFromData(
+		channelNumber,
+		sequenceNumber,
+		data,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Packet{
+		Header: h,
+		Data:   *data,
 	}, nil
 }
 
@@ -264,6 +397,8 @@ func (p *Packet) String(isBeingSent bool) *string {
 			reportIDStr = ExeCommandsNames[reportID]
 		case ChannelControl:
 			reportIDStr = ControlCommandsNames[reportID]
+		case ChannelInputSensorReports:
+			reportIDStr = ControlCommandsNames[reportID]
 		}
 
 		builder.WriteString(
@@ -318,4 +453,23 @@ func (p *Packet) String(isBeingSent bool) *string {
 	builder.WriteString("\n\t *******************************")
 	str := builder.String()
 	return &str
+}
+
+// Buffer returns the byte representation of the Packet.
+//
+// Returns:
+//
+// A pointer to a byte slice containing the Packet bytes.
+func (p *Packet) Buffer() *[]byte {
+	// Initialize packet buffer
+	buffer := make([]byte, p.Header.PacketByteCount)
+
+	// Copy header bytes
+	headerBuffer := p.Header.Buffer()
+	copy(buffer[:PacketHeaderLength], *headerBuffer)
+
+	// Copy data bytes
+	copy(buffer[PacketHeaderLength:], p.Data)
+
+	return &buffer
 }

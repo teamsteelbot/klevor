@@ -31,7 +31,7 @@ type (
 
 	// PacketWriter is an interface for writing packets to the BNO08x sensor
 	PacketWriter interface {
-		SendPacket(channel uint8, data []byte) (uint8, error)
+		SendPacket(channel uint8, data *[]byte) (uint8, error)
 	}
 
 	// BNO08X struct represents the BNO08x IMU sensor
@@ -67,7 +67,6 @@ type (
 		rawGyroscope              *[3]float64
 		rawMagnetometer           *[3]float64
 		enabledFeatures           map[uint8]bool
-		isUART                    bool
 	}
 
 	// Options struct holds configuration options for the BNO08X instance
@@ -101,7 +100,6 @@ func NewOptions(debugger Debugger, reset *machine.Pin) *Options {
 //	packetReader: The PacketReader to read packets from the BNO08X sensor.
 //	packetWriter: The PacketWriter to write packets to the BNO08X sensor.
 //	dataBuffer: The DataBuffer to store Packet data.
-//	isUART: A boolean indicating if the connection is via UART.
 //	options: Optional configuration options for the BNO08X instance.
 //
 // Returns:
@@ -111,7 +109,6 @@ func NewBNO08X(
 	packetReader PacketReader,
 	packetWriter PacketWriter,
 	dataBuffer DataBuffer,
-	isUART bool,
 	options *Options,
 ) (*BNO08X, error) {
 	// Check if packetReader, packetWriter and dataBuffer are provided
@@ -161,7 +158,6 @@ func NewBNO08X(
 		rawGyroscope:              &InitialBnoSensorReportThreeDimensional,
 		rawMagnetometer:           &InitialBnoSensorReportThreeDimensional,
 		enabledFeatures:           make(map[uint8]bool),
-		isUART:                    isUART,
 	}
 	bno08x.debug("********** NEW BNO08X *************")
 
@@ -207,37 +203,8 @@ func (b *BNO08X) hardwareReset() {
 func (b *BNO08X) softwareReset() error {
 	b.debug("Software resetting...")
 
-	// Check if the protocol is UART
-	if b.isUART {
-		data := []byte{0, 1}
-		if _, err := b.packetWriter.SendPacket(
-			ChannelSHTPCommand,
-			data,
-		); err != nil {
-			b.debug(fmt.Sprintf("Error sending SHTP UART mode Packet: %v", err))
-			return err
-		}
-		time.Sleep(ResetPacketDelay)
-
-		for {
-			packet, err := b.packetReader.ReadPacket()
-			if err != nil {
-				b.debug(
-					fmt.Sprintf(
-						"Error reading packet after UART mode set: %v",
-						err,
-					),
-				)
-				return err
-			}
-			if packet.ChannelNumber() == ChannelSHTPCommand {
-				break
-			}
-		}
-	}
-
 	data := []byte{CommandReset}
-	if _, err := b.packetWriter.SendPacket(ChannelExe, data); err != nil {
+	if _, err := b.packetWriter.SendPacket(ChannelExe, &data); err != nil {
 		b.debug(fmt.Sprintf("Error sending software reset Packet: %v", err))
 		return err
 	}
@@ -294,6 +261,7 @@ func (b *BNO08X) initialize() error {
 	for i := 0; i < 3; i++ {
 		// Perform hardware reset
 		b.hardwareReset()
+		// time.Sleep(AfterResetDelay)
 
 		// Perform software reset
 		if err := b.softwareReset(); err != nil {
@@ -328,7 +296,7 @@ func (b *BNO08X) checkID() (bool, error) {
 	b.debug("** Sending ID Request Report **")
 	if _, err := b.packetWriter.SendPacket(
 		ChannelControl,
-		ReportIDProductIDRequestData,
+		&ReportIDProductIDRequestData,
 	); err != nil {
 		b.debug(fmt.Errorf("error sending id request packet: %v", err))
 		return false, err
@@ -548,15 +516,21 @@ func (b *BNO08X) processReport(report *report) error {
 		var builder strings.Builder
 		builder.WriteString(
 			fmt.Sprintf(
-				"Processing report: ",
+				"Processing report: %s (0x%02X)",
 				SHTPCommandsNames[report.ID],
+				report.ID,
 			),
 		)
 
 		for idx, packetByte := range report.Data {
 			packetIndex := idx
 			if (packetIndex % 4) == 0 {
-				builder.WriteString(fmt.Sprintf("\n [0x%02X] ", packetIndex))
+				builder.WriteString(
+					fmt.Sprintf(
+						"\n\t\t [0x%02X] ",
+						packetIndex,
+					),
+				)
 			}
 			builder.WriteString(fmt.Sprintf("0x%02X ", packetByte))
 		}
@@ -775,10 +749,13 @@ func (b *BNO08X) handleControlReport(report *report) error {
 		b.debug(builder.String())
 	case ReportIDGetFeatureResponse:
 		// Parse the Get Feature report from the report bytes
-		_, err := newGetFeatureReport(report)
+		getFeatureReport, err := newGetFeatureReport(report)
 		if err != nil {
 			return fmt.Errorf("failed to parse get feature report: %w", err)
 		}
+
+		// Set the feature as enabled
+		b.enabledFeatures[getFeatureReport.FeatureReportID] = true
 	case ReportIDCommandResponse:
 		return b.handleCommandResponse(report)
 	}
@@ -1123,7 +1100,8 @@ func (b *BNO08X) EnableFeature(featureID uint8) error {
 	if ok && b.IsFeatureEnabled(featureDependency) {
 		b.debug(
 			fmt.Sprintf(
-				"Enabling feature dependency: %d",
+				"Enabling feature dependency: %s (0x%02X)",
+				SHTPCommandsNames[featureDependency],
 				featureDependency,
 			),
 		)
@@ -1132,10 +1110,16 @@ func (b *BNO08X) EnableFeature(featureID uint8) error {
 		}
 	}
 
-	b.debug(fmt.Sprintf("Enabling %d", featureID))
+	b.debug(
+		fmt.Sprintf(
+			"Enabling feature: %s (0x%02X)",
+			SHTPCommandsNames[featureID],
+			featureID,
+		),
+	)
 	if _, err := b.packetWriter.SendPacket(
 		ChannelControl,
-		setFeatureReport,
+		&setFeatureReport,
 	); err != nil {
 		return err
 	}
@@ -1150,7 +1134,11 @@ func (b *BNO08X) EnableFeature(featureID uint8) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("was not able to enable feature %d", featureID)
+	return fmt.Errorf(
+		"was not able to enable feature %s (0x%0X)",
+		SHTPCommandsNames[featureID],
+		featureID,
+	)
 }
 
 // IsFeatureEnabled checks if a specific feature is enabled on the BNO08X sensor.
@@ -1181,7 +1169,10 @@ func (b *BNO08X) BeginCalibration() {
 		0, // reserved
 		0, // reserved
 	}
-	b.sendMeCommand(params)
+	if err := b.sendMeCommand(&params); err != nil {
+		b.debug(fmt.Sprintf("Error starting calibration: %v", err))
+		return
+	}
 	b.calibrationComplete = false
 }
 
@@ -1203,7 +1194,7 @@ func (b *BNO08X) CalibrationStatus() ReportAccuracyStatus {
 		0, // reserved
 		0, // reserved
 	}
-	b.sendMeCommand(params)
+	b.sendMeCommand(&params)
 	return b.magnetometerAccuracy
 }
 
@@ -1223,29 +1214,39 @@ func (b *BNO08X) IsCalibrated() bool {
 // Parameters:
 //
 //	subcommandParams: A byte slice containing the parameters for the command.
-func (b *BNO08X) sendMeCommand(subcommandParams []byte) {
+func (b *BNO08X) sendMeCommand(subcommandParams *[]byte) error {
+	// Check if the subcommandParams is nil
+	if subcommandParams == nil {
+		return ErrNilSubcommandParams
+	}
+
 	startTime := time.Now()
 	localBuffer := b.commandBuffer
+
+	fmt.Println(1)
 
 	// Insert the command request report into the local buffer
 	err := insertCommandRequestReport(
 		MECalibrate,
 		&b.commandBuffer, // should use b.dataBuffer, but sendPacket doesn't
 		b.dataBuffer.GetReportSequenceNumber(ReportIDCommandRequest),
-		&subcommandParams,
+		subcommandParams,
 	)
 	if err != nil {
-		b.debug(fmt.Sprintf("Error inserting command request report: %v", err))
-		return
+		return fmt.Errorf("error inserting command request report: %w", err)
 	}
 
+	fmt.Println(2)
+
 	// Send the command request Packet
-	_, err = b.packetWriter.SendPacket(ChannelControl, localBuffer)
+	_, err = b.packetWriter.SendPacket(ChannelControl, &localBuffer)
 	if err != nil {
-		b.debug(fmt.Sprintf("Error sending command request Packet: %v", err))
-		return
+		return fmt.Errorf("error sending me command request packet: %w", err)
 	}
+	fmt.Println(3)
 	b.dataBuffer.IncrementReportSequenceNumber(ReportIDCommandRequest)
+
+	fmt.Println(4)
 
 	// Wait for the command response
 	for time.Since(startTime) < DefaultTimeout {
@@ -1254,6 +1255,9 @@ func (b *BNO08X) sendMeCommand(subcommandParams []byte) {
 			break
 		}
 	}
+
+	fmt.Println(5)
+	return nil
 }
 
 // SaveCalibrationData saves the self-calibration data to the BNO08X sensor.
@@ -1276,7 +1280,7 @@ func (b *BNO08X) SaveCalibrationData() error {
 	}
 
 	// Send the command request Packet to save calibration data
-	_, err = b.packetWriter.SendPacket(ChannelControl, localBuffer)
+	_, err = b.packetWriter.SendPacket(ChannelControl, &localBuffer)
 	if err != nil {
 		return err
 	}

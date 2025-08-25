@@ -190,6 +190,7 @@ const (
 
 	// UARTBaudRate is the baud rate for UART communication
 	UARTBaudRate uint32 = 3_000_000 // 3Mbps for UART-SHTP
+	// UARTBaudRate uint32 = 115_200 // 115200 for UART-SHTP
 
 	// UARTStartAndEndByte is the start byte and end byte for UART communication
 	UARTStartAndEndByte = 0x7E
@@ -199,6 +200,9 @@ const (
 
 	// UARTControlEscape is the control escape byte for UART communication
 	UARTControlEscape = 0x7D
+
+	// UARTTimeout is the timeout for UART communication in milliseconds
+	UARTTimeout = 500 * time.Millisecond
 
 	// QuaternionRollIndex is the index for the roll component in a quaternion
 	QuaternionRollIndex = 0

@@ -169,7 +169,7 @@ func newReportFromPacketBytes(packetBytes *[]byte) (*report, error) {
 	}
 
 	// Create a new Packet from the Packet bytes
-	packet, err := NewPacket(packetBytes)
+	packet, err := NewPacketFromBuffer(packetBytes)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create packet from bytes: %w", err)
 	}
@@ -225,7 +225,7 @@ func newGetFeatureReport(report *report) (
 	}
 
 	// Validate the length of the report bytes
-	if len(report.Data) < 19 {
+	if len(report.Data) < 17 {
 		return nil, ErrReportDataTooShort
 	}
 
