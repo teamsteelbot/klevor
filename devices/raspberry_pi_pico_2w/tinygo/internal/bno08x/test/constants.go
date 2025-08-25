@@ -29,17 +29,17 @@ const (
 	// CommandReset is the command to reset the BNO08x sensor
 	CommandReset uint8 = 0x1
 
-	// SaveDCD is the command to save the DCD (Device Configuration Data)
-	SaveDCD uint8 = 0x6
+	// SaveDynamicCalibrationData is the command to save the dynamic calibration data
+	SaveDynamicCalibrationData uint8 = 0x6
 
-	// MECalibrate is the command to calibrate the sensor
-	MECalibrate uint8 = 0x7
+	// MagnetometerCalibration is the command for magnetometer calibration
+	MagnetometerCalibration uint8 = 0x7
 
-	// MECalibrationConfig is the command to configure the calibration settings
-	MECalibrationConfig uint8 = 0x0
+	// MagnetometerCalibrationConfig is the command to configure the calibration settings
+	MagnetometerCalibrationConfig uint8 = 0x0
 
-	// MEGetCalibration is the command to get the calibration data
-	MEGetCalibration uint8 = 0x1
+	// MagnetometerGetCalibration is the command to get the calibration data
+	MagnetometerGetCalibration uint8 = 0x1
 
 	// ReportIDAccelerometer is the report ID for calibrated acceleration (m/s2)
 	ReportIDAccelerometer uint8 = 0x1
@@ -132,7 +132,10 @@ const (
 	ReportIDGyroscopeIntegratedRotationVector uint8 = 0x2A
 
 	// DefaultReportInterval is the default report interval in microseconds
-	DefaultReportInterval uint32 = 50_000
+	DefaultReportInterval uint32 = 60_000
+
+	// DebugReportInterval is the debug report interval in microseconds
+	DebugReportInterval uint32 = 1_000_000
 
 	// QuaternionReadTimeout is the timeout for reading quaternion data in seconds
 	QuaternionReadTimeout float32 = 0.500

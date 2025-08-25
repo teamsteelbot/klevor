@@ -197,6 +197,30 @@ func newSensorReport(scalar float64, count, reportLength int) *sensorReport {
 	}
 }
 
+// newSetFeatureEnableReportData creates a byte slice of the data to enable a feature on the BNO08X sensor.
+//
+// Parameters:
+//
+//	featureID: The ID of the feature to enable.
+//	reportInterval: The interval for reporting (default: DefaultReportInterval).
+//	sensorSpecificConfig: Sensor-specific configuration bits.
+//
+// Returns:
+//
+//	A byte slice representing the feature enable report data.
+func newSetFeatureEnableReportData(
+	featureID uint8,
+	reportInterval uint32,
+	sensorSpecificConfig uint32,
+) []byte {
+	setFeatureReport := make([]byte, 17)
+	setFeatureReport[0] = ReportIDSetFeatureCommand
+	setFeatureReport[1] = featureID
+	binary.LittleEndian.PutUint32(setFeatureReport[5:], reportInterval)
+	binary.LittleEndian.PutUint32(setFeatureReport[13:], sensorSpecificConfig)
+	return setFeatureReport
+}
+
 // newGetFeatureReport creates a new getFeatureReport from the provided report.
 //
 // Parameters:

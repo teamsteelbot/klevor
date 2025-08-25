@@ -426,7 +426,7 @@ func (p *Packet) String(isBeingSent bool) *string {
 			}
 		}
 
-		if reportID == ReportIDGetFeatureResponse {
+		if reportID == ReportIDGetFeatureResponse || reportID == ReportIDSetFeatureCommand {
 			featureID := p.Data[1]
 			if name, ok := SHTPCommandsNames[featureID]; ok {
 				builder.WriteString(

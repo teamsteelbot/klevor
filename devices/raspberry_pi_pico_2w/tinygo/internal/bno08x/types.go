@@ -1,8 +1,6 @@
 package bno08x
 
 import (
-	"time"
-
 	// bno08x "github.com/ralvarezdev/go-bno08x
 	bno08x "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/bno08x/test"
 	internalusbcdc "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc"
@@ -64,38 +62,14 @@ func NewDefaultHandler(
 
 // Setup initializes the BNO08X sensor and prepares it for use.
 func (h *DefaultHandler) Setup() error {
-	for _ = range MaxCalibrationAttempts {
-		// Calibrate the BNO08X sensor
-		h.bno08x.BeginCalibration()
-
-		// Enable quaternion feature
-		if err := h.bno08x.EnableFeature(bno08x.ReportIDRotationVector); err != nil {
-			return err
-		}
-
-		// Wait for the sensor to be calibrated
-		initialTime := time.Now()
-		for !h.bno08x.IsCalibrated() {
-			time.Sleep(10 * time.Millisecond)
-
-			if time.Since(initialTime) > MaxCalibrationDuration {
-				break
-			}
-		}
-
-		// Check if the sensor is calibrated
-		if h.bno08x.IsCalibrated() {
-			// Get the initial quaternion data
-			quaternion := h.bno08x.QuaternionEulerDegrees()
-			if quaternion == nil {
-				return ErrNilQuaternion
-			}
-			h.initialQuaternion = quaternion
-			return nil
-		}
+	// Enable quaternion feature
+	if err := h.bno08x.EnableFeature(bno08x.ReportIDRotationVector); err != nil {
+		return err
 	}
 
-	return ErrMaxCalibrationAttemptsExceeded
+	// Set the initial quaternion values
+	h.initialQuaternion = h.bno08x.QuaternionEulerDegrees()
+	return nil
 }
 
 // Update reads the quaternion data from the BNO08X sensor and updates the roll, pitch, and yaw values.

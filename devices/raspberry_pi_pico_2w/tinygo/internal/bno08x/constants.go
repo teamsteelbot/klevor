@@ -69,7 +69,8 @@ func init() {
 		machine.GPIO6,
 		machine.GPIO7,
 		DataBuffer,
-		bno08x.NewUARTOptions(bno08x.NewDefaultDebugger(), &reset, false),
+		// bno08x.NewUARTOptions(bno08x.NewDefaultDebugger(), &reset, false),
+		bno08x.NewUARTOptions(nil, &reset, false),
 	)
 	if err != nil {
 		panic("failed to initialize uart bno08x: " + err.Error())

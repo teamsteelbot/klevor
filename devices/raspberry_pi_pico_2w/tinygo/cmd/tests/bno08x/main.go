@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	internalbno08x "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/bno08x"
 )
@@ -13,6 +14,8 @@ func main() {
 			fmt.Println(fmt.Errorf("failed to update bno08x: %w", err))
 		}
 
+		fmt.Printf("\n***** Updated *****\n")
+
 		// Print the current orientation
 		fmt.Printf(
 			"Yaw: %.2f°, Pitch: %.2f°, Roll: %.2f°, Turns: %d\n",
@@ -21,5 +24,6 @@ func main() {
 			internalbno08x.BNO08XHandler.GetRollDegrees(),
 			internalbno08x.BNO08XHandler.GetAccumulatedYaw90DegreesTurns(),
 		)
+		time.Sleep(50 * time.Millisecond)
 	}
 }

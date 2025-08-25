@@ -69,6 +69,14 @@ var (
 		ReportIDProductIDRequest:   "PRODUCT_ID_REQUEST",
 		ReportIDProductIDResponse:  "PRODUCT_ID_RESPONSE",
 	}
+
+	// ReportAccuracyStatusNames contains the report accuracy status codes and their names
+	ReportAccuracyStatusNames = map[ReportAccuracyStatus]string{
+		ReportAccuracyStatusUnreliable: "UNRELIABLE",
+		ReportAccuracyStatusLow:        "LOW",
+		ReportAccuracyStatusMedium:     "MEDIUM",
+		ReportAccuracyStatusHigh:       "HIGH",
+	}
 )
 
 /*

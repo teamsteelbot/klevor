@@ -174,17 +174,6 @@ func newUARTPacketReader(
 	}, nil
 }
 
-// debug is a helper function to log debug messages if debugging is enabled.
-//
-// Parameters:
-//
-// args: The arguments to log as debug messages.
-func (pr *UARTPacketReader) debug(args ...any) {
-	if pr.debugger != nil {
-		pr.debugger.Debug(args...)
-	}
-}
-
 // IsDataReady checks if data is available on UART
 //
 // Returns:
@@ -204,8 +193,8 @@ func (pr *UARTPacketReader) readByte() (byte, error) {
 	for time.Now().Sub(startTime) < UARTTimeout {
 		if pr.uartBus.Buffered() > 0 {
 			b, err := pr.uartBus.ReadByte()
-			if pr.ultraDebug {
-				pr.debug(fmt.Sprintf("Received byte: 0x%02X", b))
+			if pr.debugger != nil && pr.ultraDebug {
+				pr.debugger.Debug(fmt.Sprintf("Received byte: 0x%02X", b))
 			}
 			return b, err
 		}
@@ -310,24 +299,26 @@ func (pr *UARTPacketReader) ReadPacket() (*Packet, error) {
 	if header.PacketByteCount == 0 {
 		return nil, ErrNoPacketAvailable
 	}
+	channelNumber := header.ChannelNumber
 
 	// Debug log the header
-	headerStrPtr := header.String(false)
-	if headerStrPtr != nil {
-		pr.debug(*headerStrPtr)
-	} else {
-		pr.debug(ErrNilPacketHeaderString.Error())
-	}
+	if pr.debugger != nil && pr.ultraDebug {
+		headerStrPtr := header.String(false)
+		if headerStrPtr != nil {
+			pr.debugger.Debug(*headerStrPtr)
+		} else {
+			pr.debugger.Debug(ErrNilPacketHeaderString.Error())
+		}
 
-	// Log available bytes
-	channelNumber := header.ChannelNumber
-	pr.debug(
-		fmt.Sprintf(
-			"Channel %d has %d bytes available",
-			channelNumber,
-			header.PacketByteCount-PacketHeaderLength,
-		),
-	)
+		// Log available bytes
+		pr.debugger.Debug(
+			fmt.Sprintf(
+				"Channel %d has %d bytes available",
+				channelNumber,
+				header.PacketByteCount-PacketHeaderLength,
+			),
+		)
+	}
 
 	// Read remaining (payload) bytes
 	end := int(header.PacketByteCount)
@@ -360,11 +351,13 @@ func (pr *UARTPacketReader) ReadPacket() (*Packet, error) {
 	}
 
 	// Debug log the packet
-	packetStrPtr := packet.String(false)
-	if packetStrPtr != nil {
-		pr.debug(*packetStrPtr)
-	} else {
-		pr.debug(ErrNilPacketString.Error())
+	if pr.debugger != nil {
+		packetStrPtr := packet.String(false)
+		if packetStrPtr != nil {
+			pr.debugger.Debug(*packetStrPtr)
+		} else {
+			pr.debugger.Debug(ErrNilPacketString.Error())
+		}
 	}
 
 	// Update sequence number
@@ -408,17 +401,6 @@ func newUARTPacketWriter(
 	}, nil
 }
 
-// debug is a helper function to log debug messages if debugging is enabled.
-//
-// Parameters:
-//
-// args: The arguments to log as debug messages.
-func (pw *UARTPacketWriter) debug(args ...any) {
-	if pw.debugger != nil {
-		pw.debugger.Debug(args...)
-	}
-}
-
 // SendPacket sends a packet over UART
 //
 // Parameters:
@@ -450,11 +432,13 @@ func (pw *UARTPacketWriter) SendPacket(channel uint8, data *[]byte) (
 	}
 
 	// Debug log the packet
-	packetStrPtr := packet.String(true)
-	if packetStrPtr != nil {
-		pw.debug(*packetStrPtr)
-	} else {
-		pw.debug(ErrNilPacketString.Error())
+	if pw.debugger == nil {
+		packetStrPtr := packet.String(true)
+		if packetStrPtr != nil {
+			pw.debugger.Debug(*packetStrPtr)
+		} else {
+			pw.debugger.Debug(ErrNilPacketString.Error())
+		}
 	}
 
 	// Get the packet buffer
