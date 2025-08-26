@@ -125,13 +125,18 @@ func NewI2C(
 		return nil, fmt.Errorf("i2c configure: %w", err)
 	}
 
+	// If options are nil, initialize with default values
+	if options == nil {
+		options = NewI2COptions(nil, nil, nil)
+	}
+
 	// Check if the address is the default or the alternative
 	if address != I2CDefaultAddress && address != I2CAlternativeAddress {
 		return nil, ErrInvalidI2CAddress
 	}
 
 	// Set the Address0 pin based on the desired address
-	if options != nil && options.Address0 != nil {
+	if options.Address0 != nil {
 		options.Address0.Configure(machine.PinConfig{Mode: machine.PinOutput})
 		if address == I2CAlternativeAddress {
 			options.Address0.High()
@@ -160,10 +165,7 @@ func NewI2C(
 	}
 
 	// Get the debugger from options
-	var debugger Debugger
-	if options != nil {
-		debugger = options.Options.Debugger
-	}
+	debugger := options.Options.Debugger
 
 	// Initialize the packet reader
 	packetReader, err := newI2CPacketReader(

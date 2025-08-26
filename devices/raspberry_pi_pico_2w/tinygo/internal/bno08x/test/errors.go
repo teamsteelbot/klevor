@@ -4,6 +4,10 @@ package test
 
 import "errors"
 
+const (
+	ErrInvalidReportIDForReportParsing = "invalid report id for report parsing, expected %d, got %d"
+)
+
 var (
 	ErrNilPacketBytes                            = errors.New("nil packet bytes provided for parsing")
 	ErrNilReport                                 = errors.New("nil report provided for parsing")
@@ -17,7 +21,6 @@ var (
 	ErrBufferTooShort                            = errors.New("buffer is too short to read the expected data")
 	ErrBufferTooShortForHeader                   = errors.New("buffer is too short to read the packet header")
 	ErrPacketDataTooShort                        = errors.New("packet data is too short to read the expected data")
-	ErrInvalidReportIDForReportParsing           = "invalid report id for report parsing, expected %d, got %d"
 	ErrUnknownReportID                           = errors.New("unknown report id received from sensor")
 	ErrNilSensorReport                           = errors.New("nil sensor report provided for parsing")
 	ErrCommandRequestTooManyArguments            = errors.New("command request cannot have more than 9 arguments")
@@ -40,7 +43,9 @@ var (
 	ErrNilPacketBuffer                           = errors.New("nil packet buffer provided for parsing")
 	ErrNilPacketHeader                           = errors.New("nil packet header provided for parsing")
 	ErrNilPacketHeaderBuffer                     = errors.New("nil packet header buffer provided for parsing")
-	ErrNilUARTBus                                = errors.New("nil uart bus provided for communication")
 	ErrUARTTimeout                               = errors.New("uart read timeout exceeded")
 	ErrNilSubcommandParams                       = errors.New("nil subcommand parameters provided")
+	ErrInvalidMaxPackets                         = errors.New("invalid max packets value provided")
+	ErrNilUARTBus                                = errors.New("nil uart bus provided for communication")
+	ErrMaxCalibrationAttemptsExceeded            = errors.New("maximum calibration attempts exceeded")
 )

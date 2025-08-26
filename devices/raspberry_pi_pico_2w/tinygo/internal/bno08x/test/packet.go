@@ -289,6 +289,15 @@ func NewPacketFromData(
 	}, nil
 }
 
+// SequenceNumber returns the sequence number of the Packet.
+//
+// Returns:
+//
+//	The sequence number as an uint8.
+func (p *Packet) SequenceNumber() uint8 {
+	return p.Header.SequenceNumber
+}
+
 // ReportID returns the report ID of the Packet.
 //
 // Returns:
@@ -308,6 +317,24 @@ func (p *Packet) ReportID() (uint8, error) {
 //	The channel number as an uint8.
 func (p *Packet) ChannelNumber() uint8 {
 	return p.Header.ChannelNumber
+}
+
+// PacketByteCount returns the total byte count of the Packet.
+//
+// Returns:
+//
+// The total byte count as an int.
+func (p *Packet) PacketByteCount() int {
+	return p.Header.PacketByteCount
+}
+
+// DataLength returns the data length of the Packet.
+//
+// Returns:
+//
+// The data length as an int.
+func (p *Packet) DataLength() int {
+	return p.Header.DataLength
 }
 
 // IsError checks if the Packet indicates an error condition.

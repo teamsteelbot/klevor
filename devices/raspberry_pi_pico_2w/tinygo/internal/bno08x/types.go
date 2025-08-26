@@ -13,6 +13,7 @@ type (
 		usbCDCHandler                internalusbcdc.Handler
 		initialQuaternion            *[3]float64
 		lastYawDegrees               float64
+		lastRelativeYawDegrees       float64
 		accumulatedYawDegrees        float64
 		accumulatedYaw90DegreesTurns int
 		lastSegmentCount             int
@@ -57,6 +58,7 @@ func NewDefaultHandler(
 		0,
 		0,
 		0,
+		0,
 	}, nil
 }
 
@@ -81,14 +83,26 @@ func (h *DefaultHandler) Update() error {
 	}
 
 	// Update roll, pitch, and yaw degrees
+	h.lastYawDegrees = h.yawDegrees
 	h.rollDegrees = quaternion[bno08x.QuaternionRollIndex]
 	h.pitchDegrees = quaternion[bno08x.QuaternionPitchIndex]
 	h.yawDegrees = quaternion[bno08x.QuaternionYawIndex]
 
 	// Send the yaw degrees message via USB CDC if enabled
 	if h.usbCDCHandler != nil {
-		if err := h.usbCDCHandler.SendBNO08XYawDegreesMessage(h.yawDegrees); err != nil {
-			return err
+		// Only send if the yaw has changed significantly
+		hasChanged := false
+		if h.yawDegrees > h.lastYawDegrees && h.yawDegrees > h.lastYawDegrees+YawDegreesDifference {
+			hasChanged = true
+		} else if h.yawDegrees < h.lastYawDegrees && h.yawDegrees < h.lastYawDegrees-YawDegreesDifference {
+			hasChanged = true
+		}
+
+		// Send the yaw degrees message if it has changed
+		if hasChanged {
+			if err := h.usbCDCHandler.SendBNO08XYawDegreesMessage(h.yawDegrees); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -101,7 +115,7 @@ func (h *DefaultHandler) Update() error {
 	}
 
 	// Calculate the change in yaw degrees since the last update
-	deltaRawYawDegrees := relativeYawDegrees - h.lastYawDegrees
+	deltaRawYawDegrees := relativeYawDegrees - h.lastRelativeYawDegrees
 	if deltaRawYawDegrees > 180 {
 		deltaRawYawDegrees -= 360
 	} else if deltaRawYawDegrees < -180 {
@@ -114,19 +128,19 @@ func (h *DefaultHandler) Update() error {
 	if currentSegmentCount != h.lastSegmentCount {
 		h.accumulatedYaw90DegreesTurns += currentSegmentCount - h.lastSegmentCount
 		h.lastSegmentCount = currentSegmentCount
-	}
 
-	// If serial communication is enabled, send the turn message
-	if h.usbCDCHandler != nil {
-		if err := h.usbCDCHandler.SendBNO08XYawTurnsMessage(
-			h.accumulatedYaw90DegreesTurns,
-		); err != nil {
-			return err
+		// If serial communication is enabled, send the turn message
+		if h.usbCDCHandler != nil {
+			if err := h.usbCDCHandler.SendBNO08XYawTurnsMessage(
+				h.accumulatedYaw90DegreesTurns,
+			); err != nil {
+				return err
+			}
 		}
 	}
 
 	// Update the last yaw degrees
-	h.lastYawDegrees = relativeYawDegrees
+	h.lastRelativeYawDegrees = relativeYawDegrees
 	return nil
 }
 

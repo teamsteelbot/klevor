@@ -123,8 +123,10 @@ func NewBNO08X(
 
 	// If options are nil, initialize with default values
 	if options == nil {
-		options = &Options{nil, nil}
+		options = NewOptions(nil, nil)
 	}
+
+	// Create the BNO08X instance
 	bno08x := BNO08X{
 		packetReader:                    packetReader,
 		packetWriter:                    packetWriter,
@@ -512,6 +514,11 @@ func (b *BNO08X) waitForPacket(timeout time.Duration) (*Packet, error) {
 //
 //	An error if the Packet cannot be processed, otherwise nil.
 func (b *BNO08X) handlePacket(packet *Packet) error {
+	// Check if the packet is nil
+	if packet == nil {
+		return ErrNilPacket
+	}
+
 	// Split out reports first
 	if err := separateBatch(packet, &b.packetSlices); err != nil {
 		return err
@@ -852,16 +859,37 @@ func (b *BNO08X) handleCommandResponse(report *report) error {
 //
 //	maxPackets: An optional pointer to an integer specifying the maximum number of packets to process. If nil, all available packets will be processed.
 func (b *BNO08X) processAvailablePackets(maxPackets *int) {
+	// Check if max packets is provided and valid
+	if maxPackets == nil {
+		maxPackets = new(int)
+		*maxPackets = DefaultMaxPackets
+	}
+	if *maxPackets <= 0 {
+		panic(ErrInvalidMaxPackets)
+	}
+
 	processedCount := 0
 	for b.packetReader.IsDataReady() {
-		if maxPackets != nil && processedCount >= *maxPackets {
-			return
+		// Check if we've reached the maximum number of packets to process
+		if processedCount >= *maxPackets {
+			break
 		}
+
+		// Read the next available Packet
 		newPacket, err := b.packetReader.ReadPacket()
 		if err != nil {
+			if b.debugger != nil {
+				b.debugger.Debug(
+					fmt.Sprintf(
+						"Error reading Packet: %v",
+						err,
+					),
+				)
+			}
 			continue
 		}
 
+		// Pass the packet to the handler
 		if err = b.handlePacket(newPacket); err != nil {
 			if b.debugger != nil {
 				b.debugger.Debug(fmt.Sprintf("Error handling Packet: %v", err))

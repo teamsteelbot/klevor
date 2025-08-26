@@ -73,6 +73,11 @@ func NewUART(
 	dataBuffer DataBuffer,
 	options *UARTOptions,
 ) (*UART, error) {
+	// Check if the UART bus is nil
+	if uartBus == nil {
+		return nil, ErrNilUARTBus
+	}
+
 	// Set PS0 pin to output and low
 	ps0.Configure(machine.PinConfig{Mode: machine.PinOutput})
 	ps0.Low()
@@ -93,11 +98,13 @@ func NewUART(
 		return nil, fmt.Errorf("failed to configure UART: %w", err)
 	}
 
-	// Get debugger from options
-	var debugger Debugger
-	if options != nil {
-		debugger = options.Options.Debugger
+	// If options are nil, initialize with default values
+	if options == nil {
+		options = NewUARTOptions(nil, nil, false)
 	}
+
+	// Get the debugger from options
+	debugger := options.Options.Debugger
 
 	// Create packet reader and writer
 	packetReader, err := newUARTPacketReader(
@@ -198,7 +205,7 @@ func (pr *UARTPacketReader) readByte() (byte, error) {
 			}
 			return b, err
 		}
-		time.Sleep(1 * time.Microsecond)
+		time.Sleep(1 * time.Millisecond)
 	}
 	return 0, ErrUARTTimeout
 }
@@ -432,7 +439,7 @@ func (pw *UARTPacketWriter) SendPacket(channel uint8, data *[]byte) (
 	}
 
 	// Debug log the packet
-	if pw.debugger == nil {
+	if pw.debugger != nil {
 		packetStrPtr := packet.String(true)
 		if packetStrPtr != nil {
 			pw.debugger.Debug(*packetStrPtr)

@@ -1,8 +1,6 @@
 package bno08x
 
 import (
-	"time"
-
 	"machine"
 
 	// bno08x "github.com/ralvarezdev/go-bno08x"
@@ -10,17 +8,12 @@ import (
 	internalusbcdc "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc"
 )
 
-const (
-	// MaxCalibrationDuration is the maximum duration for calibration of the BNO08x sensor.
-	MaxCalibrationDuration = 5 * time.Second
-
-	// MaxCalibrationAttempts is the maximum number of attempts to calibrate the BNO08x sensor.
-	MaxCalibrationAttempts = 10
-)
-
 var (
 	// DataBuffer is the default data buffer size for the BNO08x sensor.
 	DataBuffer = bno08x.NewDefaultDataBuffer()
+
+	// YawDegreesDifference is the difference in degrees to consider a yaw change.
+	YawDegreesDifference = 1.0
 
 	// I2C is the I2C instance for the BNO08x sensor.
 	// I2C *bno08x.I2C
@@ -69,8 +62,8 @@ func init() {
 		machine.GPIO6,
 		machine.GPIO7,
 		DataBuffer,
-		// bno08x.NewUARTOptions(bno08x.NewDefaultDebugger(), &reset, false),
-		bno08x.NewUARTOptions(nil, &reset, false),
+		bno08x.NewUARTOptions(bno08x.NewDefaultDebugger(), &reset, true),
+		// bno08x.NewUARTOptions(nil, &reset, false),
 	)
 	if err != nil {
 		panic("failed to initialize uart bno08x: " + err.Error())

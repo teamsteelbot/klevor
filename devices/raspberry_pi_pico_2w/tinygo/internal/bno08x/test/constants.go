@@ -144,7 +144,7 @@ const (
 	PacketReadTimeout float32 = 2.000
 
 	// FeatureEnableTimeout is the timeout for enabling features in seconds
-	FeatureEnableTimeout = 2.0 * time.Second
+	FeatureEnableTimeout = 5.0 * time.Second
 
 	// DefaultTimeout is the default timeout for operations in seconds
 	DefaultTimeout = 2.0 * time.Second
@@ -172,6 +172,9 @@ const (
 
 	// DefaultWaitForPacketTypeTimeout is the default timeout for waiting for a specific packet type in seconds
 	DefaultWaitForPacketTypeTimeout = 5 * time.Second
+
+	// DefaultMaxPackets is the default maximum number of packets to read when waiting for a specific packet type
+	DefaultMaxPackets = 25
 
 	// I2CDefaultAddress is the default I2C address for the BNO08x sensor
 	I2CDefaultAddress uint16 = 0x4A

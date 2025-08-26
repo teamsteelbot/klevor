@@ -5,7 +5,6 @@ import (
 )
 
 var (
-	ErrNilBNO08X                      = errors.New("bno08x instance cannot be nil")
-	ErrNilQuaternion                  = errors.New("quaternion data cannot be nil")
-	ErrMaxCalibrationAttemptsExceeded = errors.New("maximum calibration attempts exceeded")
+	ErrNilBNO08X     = errors.New("bno08x instance cannot be nil")
+	ErrNilQuaternion = errors.New("quaternion data cannot be nil")
 )

@@ -262,9 +262,9 @@ func (d *DefaultHandler) SendChallengeMessage() error {
 // An error if it fails to send the yaw degrees message
 func (d *DefaultHandler) SendBNO08XYawDegreesMessage(yawDegrees float64) error {
 	// Create the BNO08x yaw degrees message
-	bno08xMessage := NewOutgoingMessageFromFloat64Content(
+	bno08xMessage := NewOutgoingMessage(
 		internalusbcdcenums.OutgoingCategoryBNO08XYawDegrees,
-		yawDegrees,
+		fmt.Sprintf("%.1f", yawDegrees),
 	)
 
 	// Send the BNO08x yaw degrees message

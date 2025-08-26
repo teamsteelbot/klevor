@@ -18,9 +18,14 @@ import (
 //
 // An error if the Packet cannot be processed due to insufficient bytes or other issues.
 func separateBatch(packet *Packet, reports *[]*report) error {
-	// Check if the Packet is nil
+	// Check if the packet is nil
 	if packet == nil {
 		return ErrNilPacket
+	}
+
+	// Check if the packet header is nil
+	if packet.Header == nil {
+		return ErrNilPacketHeader
 	}
 
 	// Ensure the Packet has a valid header
