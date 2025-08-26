@@ -21,7 +21,6 @@ class="logo--3rd-party">
 </div>
 mkdocs-only-end -->
 
-
 Python was created by **Guido van Rossum**, a dutch programmer that started to work on Python in the late 80's. The first public version (version 0.9.0) was launched in February 1991.
 
 Also, Guido kept the final decision on Python's development until he retired in 2018.
@@ -41,7 +40,6 @@ Python is a high-level programming language, this language has a lot of general 
 Python is an interpreted language, which means, that the code is run line by line. Also, Python has a lot of different libraries and modules that allow to execute specific tasks without the need of writing code by scratch, which accelerates the development process.
 
 It is worth mentioning that, aside from its simplicity, Python is still a very powerful and versatile language, supporting classes, 
-Cabe destacar que, a pesar de su sencillez, Python es un lenguaje potente y versátil, con soporte a clases, abstracción, herencia, polimorfismo, funciones, módulos, multiprocesamiento, multihilo, programación asíncrona, function overloading, decoradores, y mucho más.
 
 Python's main advantage is, again, its versatility, since we don't need to run every task in a different programming language for each of them, since we can just use Python from everything, like object detection and controlling the motors, which simplifies the developing and reduces the code's complexity.
 
@@ -113,7 +111,6 @@ TinyGo is a Go implementation for microcontrollers, like, for example, the Raspb
 - Drastically smaller binaries: A "Hello World!" program written in standard Go can take up several megabytes, however, the same program built on TinyGo can take up as low as a few kilobytes. This is the main characteristic for microcontrollers, because of their limited resources and flash memory.
 
 - Efficient Code Generation: LLVM's advanced optimizations can produce highly efficient machine code, often outperforming C and C++ in specific benchmark tests.
-
 
 # Referencias
 

@@ -258,7 +258,7 @@ This means that, for every 12.69 revolutions the motor makes, the last pinion ma
 
 After this reduction, the motor has an output of 1576 RPM. However, it's worth noting that the wheel speed is also reduced, as the transmission shaft gears and differentials also reduce speed.
 
-Some components that are also in this layer are: the gyroscope ([BNO08X](../../electronic/components/current.en.md#9-axis-imu-gyroscope-gy-bno085)), and a 7.4 V and 3000 mAh battery ([URGENEX 7.4 V](../../electronic/components/current.en.md#batería-urgenex-74-v)), and also the aforementioned, motor [INJORA 48T](../../electronic/components/current.en.md#injora-180-motor-48t) and servomotor [INJORA 7 kg 2065](../../electronic/components/current.en.md#injora-7-kg-2065-micro-servo).
+Some components that are also in this layer are: the gyroscope ([BNO08X](../../electronic/components/current.en.md#9-axis-imu-gyroscope-gy-bno085)), and a 7.4 V and 3000 mAh battery ([URGENEX 7.4 V](../../electronic/components/current.en.md#urgenex-74-v-battery)), and also the aforementioned, motor [INJORA 48T](../../electronic/components/current.en.md#injora-180-motor-48t) and servomotor [INJORA 7 kg 2065](../../electronic/components/current.en.md#injora-7-kg-2065-micro-servo).
 
 ### Why is this layer designed like this?
 
