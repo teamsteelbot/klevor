@@ -196,7 +196,9 @@ const (
 
 	// UARTBaudRate is the baud rate for UART communication
 	UARTBaudRate uint32 = 3_000_000 // 3Mbps for UART-SHTP
-	// UARTBaudRate uint32 = 115_200 // 115200 for UART-SHTP
+
+	// UARTRVCBaudRate is the baud rate for UART-RVC communication
+	UARTRVCBaudRate uint32 = 115_200 // 115200 for UART-RVC
 
 	// UARTStartAndEndByte is the start byte and end byte for UART communication
 	UARTStartAndEndByte = 0x7E
@@ -207,20 +209,44 @@ const (
 	// UARTControlEscape is the control escape byte for UART communication
 	UARTControlEscape = 0x7D
 
-	// UARTTimeout is the timeout for UART communication in milliseconds
-	UARTTimeout = 500 * time.Millisecond
+	// UARTByteTimeout is the timeout for reading a byte from UART communication in milliseconds
+	UARTByteTimeout = 250 * time.Millisecond
 
-	// QuaternionRollIndex is the index for the roll component in a quaternion
-	QuaternionRollIndex = 0
+	// UARTRVCStartByte is the start byte for UART-RVC communication
+	UARTRVCStartByte = 0xAA
 
-	// QuaternionPitchIndex is the index for the pitch component in a quaternion
-	QuaternionPitchIndex = 1
+	// UARTRVCHeaderLength is the length of the UART-RVC header in bytes
+	UARTRVCHeaderLength = 5
 
-	// QuaternionYawIndex is the index for the yaw component in a quaternion
-	QuaternionYawIndex = 2
+	// UARTRVCPacketLengthBytes is the number of length bytes in a UART-RVC packet
+	UARTRVCPacketLengthBytes = 17
+
+	// EulerDegreesRollIndex is the index for the roll component in an euler degrees vector
+	EulerDegreesRollIndex = 0
+
+	// EulerDegreesPitchIndex is the index for the pitch component in an euler degrees vector
+	EulerDegreesPitchIndex = 1
+
+	// EulerDegreesYawIndex is the index for the yaw component in an euler degrees vector
+	EulerDegreesYawIndex = 2
+
+	// ThreeDimensionalXIndex is the index for the X component in a three-dimensional vector
+	ThreeDimensionalXIndex = 0
+
+	// ThreeDimensionalYIndex is the index for the Y component in a three-dimensional vector
+	ThreeDimensionalYIndex = 1
+
+	// ThreeDimensionalZIndex is the index for the Z component in a three-dimensional vector
+	ThreeDimensionalZIndex = 2
 
 	// DebugHeader is the header for debug messages
 	DebugHeader = "[BNO08x]"
+
+	// Gravity is the standard gravity in m/s^2
+	Gravity = 9.80665
+
+	// MilligToMeterPerSecondSquared is the conversion factor from millig to meters per second squared
+	MilligToMeterPerSecondSquared = Gravity / 1000.0
 )
 
 var (

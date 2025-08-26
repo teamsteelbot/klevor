@@ -50,4 +50,7 @@ var (
 	ErrMaxCalibrationAttemptsExceeded            = errors.New("maximum calibration attempts exceeded")
 	ErrRVCTimeout                                = errors.New("unable to read rvc heading message")
 	ErrInvalidChecksum                           = errors.New("invalid checksum")
+	ErrNilRotationVector                         = errors.New("nil rotation vector provided for parsing")
+	ErrNilFrame                                  = errors.New("nil frame provided for parsing")
+	ErrFrameTooShort                             = errors.New("frame data are too short to parse")
 )

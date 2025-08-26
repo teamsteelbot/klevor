@@ -214,7 +214,7 @@ func (pr *UARTPacketReader) IsDataReady() bool {
 // A byte read from UART and an error if any.
 func (pr *UARTPacketReader) readByte() (byte, error) {
 	startTime := time.Now()
-	for time.Now().Sub(startTime) < UARTTimeout {
+	for time.Since(startTime) < UARTByteTimeout {
 		if pr.uartBus.Buffered() > 0 {
 			b, err := pr.uartBus.ReadByte()
 			if pr.debugger != nil && pr.ultraDebug {

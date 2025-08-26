@@ -918,47 +918,15 @@ func (b *BNO08X) Quaternion() *[4]float64 {
 	return b.rotationVector
 }
 
-// QuaternionEulerDegrees returns the current rotation vector as Euler angles in degrees.
+// EulerDegrees returns the current rotation vector as Euler angles in degrees.
 //
 // Returns:
 //
 // A tuple of three float64 values representing the roll, pitch, and yaw angles in degrees.
-func (b *BNO08X) QuaternionEulerDegrees() *[3]float64 {
+func (b *BNO08X) EulerDegrees() *[3]float64 {
 	// Get the quaternion readings
 	b.Quaternion()
-
-	// Get the quaternion components
-	x := b.rotationVector[0]
-	y := b.rotationVector[1]
-	z := b.rotationVector[2]
-	w := b.rotationVector[3]
-
-	// Roll (X axis)
-	sinRollCosPitch := 2 * (w*x + y*z)
-	cosRollCosPitch := 1 - 2*(x*x+y*y)
-	roll := math.Atan2(sinRollCosPitch, cosRollCosPitch)
-
-	// Pitch (Y axis)
-	sinPitch := 2 * (w*y - z*x)
-	var pitch float64
-	if sinPitch >= 1 {
-		pitch = math.Pi / 2
-	} else if sinPitch <= -1 {
-		pitch = -math.Pi / 2
-	} else {
-		pitch = math.Asin(sinPitch)
-	}
-
-	// Yaw (Z axis)
-	sinYawCosPitch := 2 * (w*z + x*y)
-	cosYawCosPitch := 1 - 2*(y*y+z*z)
-	yaw := math.Atan2(sinYawCosPitch, cosYawCosPitch)
-
-	return &[3]float64{
-		roll * 180 / math.Pi,
-		pitch * 180 / math.Pi,
-		yaw * 180 / math.Pi,
-	}
+	return QuaternionToEulerDegrees(b.rotationVector)
 }
 
 // GeomagneticQuaternion returns a pointer to a [4]float64 array representing the current geomagnetic rotation vector as a quaternion.

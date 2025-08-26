@@ -77,16 +77,16 @@ func (h *DefaultHandler) Setup() error {
 // Update reads the quaternion data from the BNO08X sensor and updates the roll, pitch, and yaw values.
 func (h *DefaultHandler) Update() error {
 	// Get the latest quaternion data from the BNO08X sensor in euler degrees
-	quaternion := h.bno08x.QuaternionEulerDegrees()
+	quaternion := h.bno08x.EulerDegrees()
 	if quaternion == nil {
 		return ErrNilQuaternion
 	}
 
 	// Update roll, pitch, and yaw degrees
 	h.lastYawDegrees = h.yawDegrees
-	h.rollDegrees = quaternion[bno08x.QuaternionRollIndex]
-	h.pitchDegrees = quaternion[bno08x.QuaternionPitchIndex]
-	h.yawDegrees = quaternion[bno08x.QuaternionYawIndex]
+	h.rollDegrees = quaternion[bno08x.EulerDegreesRollIndex]
+	h.pitchDegrees = quaternion[bno08x.EulerDegreesPitchIndex]
+	h.yawDegrees = quaternion[bno08x.EulerDegreesYawIndex]
 
 	// Send the yaw degrees message via USB CDC if enabled
 	if h.usbCDCHandler != nil {
@@ -107,7 +107,7 @@ func (h *DefaultHandler) Update() error {
 	}
 
 	// Update internal yaw state
-	relativeYawDegrees := h.yawDegrees - h.initialQuaternion[bno08x.QuaternionYawIndex]
+	relativeYawDegrees := h.yawDegrees - h.initialQuaternion[bno08x.EulerDegreesYawIndex]
 	if relativeYawDegrees > 180 {
 		relativeYawDegrees -= 360
 	} else if relativeYawDegrees < -180 {
