@@ -48,4 +48,6 @@ var (
 	ErrInvalidMaxPackets                         = errors.New("invalid max packets value provided")
 	ErrNilUARTBus                                = errors.New("nil uart bus provided for communication")
 	ErrMaxCalibrationAttemptsExceeded            = errors.New("maximum calibration attempts exceeded")
+	ErrRVCTimeout                                = errors.New("unable to read rvc heading message")
+	ErrInvalidChecksum                           = errors.New("invalid checksum")
 )

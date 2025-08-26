@@ -34,8 +34,11 @@ func init() {
 			machine.GPIO26,
 			machine.GPIO27,
 			bno08x.I2CAlternativeAddress,
+			machine.GPIO6,
+			machine.GPIO7,
+			machine.GPIO4,
 			DataBuffer,
-			bno08x.NewI2COptions(bno08x.NewDefaultDebugger(), nil, &address0),
+			bno08x.NewI2COptions(bno08x.NewDefaultDebugger(), &address0),
 		)
 		if err != nil {
 			panic("failed to initialize i2c bno08x: " + err.Error())
@@ -54,16 +57,16 @@ func init() {
 	*/
 
 	// Initialize the BNO08x UART instance with default settings.
-	reset := machine.GPIO4
 	uart, err := bno08x.NewUART(
 		machine.UART1,
 		machine.GPIO8,
 		machine.GPIO9,
 		machine.GPIO6,
 		machine.GPIO7,
+		machine.GPIO4,
 		DataBuffer,
-		bno08x.NewUARTOptions(bno08x.NewDefaultDebugger(), &reset, true),
-		// bno08x.NewUARTOptions(nil, &reset, false),
+		bno08x.NewUARTOptions(bno08x.NewDefaultDebugger(), true),
+		// bno08x.NewUARTOptions(nil, false),
 	)
 	if err != nil {
 		panic("failed to initialize uart bno08x: " + err.Error())

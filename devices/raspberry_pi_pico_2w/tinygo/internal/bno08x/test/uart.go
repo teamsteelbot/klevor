@@ -10,15 +10,16 @@ import (
 )
 
 type (
-	// UART represents the UART implementation of the BNO08X sensor
+	// UART is the UART implementation of the BNO08X sensor
 	UART struct {
 		BNO08X
 		uartBus *machine.UART
 		ps0     machine.Pin
 		ps1     machine.Pin
+		reset   machine.Pin
 	}
 
-	// UARTPacketReader represents the packet reader for UART interface
+	// UARTPacketReader is the packet reader for UART interface
 	UARTPacketReader struct {
 		uartBus    *machine.UART
 		dataBuffer DataBuffer
@@ -26,7 +27,7 @@ type (
 		ultraDebug bool
 	}
 
-	// UARTPacketWriter represents the packet writer for UART interface
+	// UARTPacketWriter is the packet writer for UART interface
 	UARTPacketWriter struct {
 		uartBus    *machine.UART
 		dataBuffer DataBuffer
@@ -46,7 +47,6 @@ type (
 // Parameters:
 //
 // debugger: The debugger to use for logging and debugging information (optional).
-// resetPin: The pin used to reset the BNO08X sensor (optional).
 // ultraDebug: Flag to enable ultra debug mode (optional).
 //
 // Returns:
@@ -54,22 +54,37 @@ type (
 // A pointer to a new UARTOptions instance.
 func NewUARTOptions(
 	debugger Debugger,
-	resetPin *machine.Pin,
 	ultraDebug bool,
 ) *UARTOptions {
 	return &UARTOptions{
-		Options:    NewOptions(debugger, resetPin),
+		Options:    NewOptions(debugger),
 		UltraDebug: ultraDebug,
 	}
 }
 
 // NewUART creates a new UART instance for the BNO08X sensor
+//
+// Parameters:
+//
+// uartBus: The UART bus to use for communication.
+// txPin: The TX pin for UART communication.
+// rxPin: The RX pin for UART communication.
+// ps0: The PS0 pin to set the sensor to UART mode.
+// ps1: The PS1 pin to set the sensor to UART mode.
+// resetPin: The pin used to reset the BNO08X sensor.
+// dataBuffer: The data buffer to use for storing Packet data.
+// options: The UARTOptions for configuring the BNO08X (optional).
+//
+// Returns:
+//
+// A pointer to a new UART instance and an error if any occurs.
 func NewUART(
 	uartBus *machine.UART,
 	txPin machine.Pin,
 	rxPin machine.Pin,
 	ps0 machine.Pin,
 	ps1 machine.Pin,
+	resetPin machine.Pin,
 	dataBuffer DataBuffer,
 	options *UARTOptions,
 ) (*UART, error) {
@@ -87,20 +102,19 @@ func NewUART(
 	ps1.High()
 
 	// Configure UART
-	err := uartBus.Configure(
+	if err := uartBus.Configure(
 		machine.UARTConfig{
 			BaudRate: UARTBaudRate,
 			TX:       txPin,
 			RX:       rxPin,
 		},
-	)
-	if err != nil {
-		return nil, fmt.Errorf("failed to configure UART: %w", err)
+	); err != nil {
+		return nil, fmt.Errorf("failed to configure uart: %w", err)
 	}
 
 	// If options are nil, initialize with default values
 	if options == nil {
-		options = NewUARTOptions(nil, nil, false)
+		options = NewUARTOptions(nil, false)
 	}
 
 	// Get the debugger from options
@@ -129,6 +143,7 @@ func NewUART(
 
 	// Initialize BNO08X
 	bno08x, err := NewBNO08X(
+		resetPin,
 		packetReader,
 		packetWriter,
 		dataBuffer,
@@ -142,6 +157,8 @@ func NewUART(
 		BNO08X:  *bno08x,
 		uartBus: uartBus,
 		ps1:     ps1,
+		ps0:     ps0,
+		reset:   resetPin,
 	}, nil
 }
 

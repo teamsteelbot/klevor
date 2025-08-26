@@ -38,7 +38,7 @@ type (
 		packetReader                    PacketReader
 		packetWriter                    PacketWriter
 		debugger                        Debugger
-		reset                           *machine.Pin
+		reset                           machine.Pin
 		dataBuffer                      DataBuffer
 		commandBuffer                   []byte
 		packetSlices                    []*report
@@ -71,30 +71,29 @@ type (
 	// Options struct holds configuration options for the BNO08X instance
 	Options struct {
 		Debugger Debugger // Debugger instance for debug messages
-		Reset    *machine.Pin
 	}
 )
 
-// NewOptions creates a new Options instance with the specified debugger and reset pin.
+// NewOptions creates a new Options instance with the specified debugger.
 //
 // Parameters:
 //
 //	debugger: The Debugger instance for debug messages.
-//	reset: An optional machine.Pin for hardware reset.
 //
 // Returns:
 //
 // A pointer to a new Options instance.
-func NewOptions(debugger Debugger, reset *machine.Pin) *Options {
+func NewOptions(debugger Debugger) *Options {
 	return &Options{
 		Debugger: debugger,
-		Reset:    reset,
 	}
 }
 
 // NewBNO08X creates a new BNO08X instance with the specified reset pin and debug mode
 //
 // Parameters:
+//
+// resetPin: The pin used to reset the BNO08X sensor.
 //
 //	packetReader: The PacketReader to read packets from the BNO08X sensor.
 //	packetWriter: The PacketWriter to write packets to the BNO08X sensor.
@@ -105,6 +104,7 @@ func NewOptions(debugger Debugger, reset *machine.Pin) *Options {
 //
 // A pointer to a new BNO08X instance or an error if initialization fails.
 func NewBNO08X(
+	resetPin machine.Pin,
 	packetReader PacketReader,
 	packetWriter PacketWriter,
 	dataBuffer DataBuffer,
@@ -123,7 +123,7 @@ func NewBNO08X(
 
 	// If options are nil, initialize with default values
 	if options == nil {
-		options = NewOptions(nil, nil)
+		options = NewOptions(nil)
 	}
 
 	// Create the BNO08X instance
@@ -131,7 +131,7 @@ func NewBNO08X(
 		packetReader:                    packetReader,
 		packetWriter:                    packetWriter,
 		debugger:                        options.Debugger,
-		reset:                           options.Reset,
+		reset:                           resetPin,
 		dataBuffer:                      dataBuffer,
 		commandBuffer:                   make([]byte, CommandBufferSize),
 		packetSlices:                    make([]*report, 0),
@@ -170,10 +170,6 @@ func NewBNO08X(
 
 // hardwareReset performs a hardware reset of the BNO08X sensor to an initial unconfigured state.
 func (b *BNO08X) hardwareReset() {
-	if b.reset == nil {
-		return
-	}
-
 	if b.debugger != nil {
 		b.debugger.Debug("Hardware resetting...")
 	}

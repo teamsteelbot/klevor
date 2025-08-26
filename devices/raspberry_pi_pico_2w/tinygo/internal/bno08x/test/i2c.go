@@ -13,8 +13,11 @@ type (
 	// I2C is the I2C implementation of the BNO08X sensor.
 	I2C struct {
 		BNO08X
-		i2cBus  *machine.I2C
-		address uint16
+		i2cBus   *machine.I2C
+		address  uint16
+		ps0      machine.Pin
+		ps1      machine.Pin
+		resetPin machine.Pin
 	}
 
 	// I2CPacketReader represents the Packet reader for the I2C interface.
@@ -68,7 +71,6 @@ func probeDevice(bus *machine.I2C, addr uint16) error {
 // Parameters:
 //
 // debugger: The debugger to use for logging and debugging information (optional).
-// resetPin: The pin used to reset the BNO08X sensor (optional).
 // address0Pin: The pin used to set the I2C address (optional).
 //
 // Returns:
@@ -76,11 +78,10 @@ func probeDevice(bus *machine.I2C, addr uint16) error {
 // A pointer to a new I2COptions instance.
 func NewI2COptions(
 	debugger Debugger,
-	resetPin *machine.Pin,
 	address0Pin *machine.Pin,
 ) *I2COptions {
 	return &I2COptions{
-		Options:  NewOptions(debugger, resetPin),
+		Options:  NewOptions(debugger),
 		Address0: address0Pin,
 	}
 }
@@ -93,8 +94,9 @@ func NewI2COptions(
 // sdaPin: The SDA pin for the I2C bus.
 // sclPin: The SCL pin for the I2C bus.
 // address: The I2C address of the BNO08X sensor.
-// packetReader: The I2CPacketReader to use for reading Packets.
-// packetWriter: The I2CPacketWriter to use for writing Packets.
+// ps0: The PS0 pin to set the sensor to I2C mode.
+// ps1: The PS1 pin to set the sensor to I2C mode.
+// resetPin: The pin used to reset the BNO08X sensor.
 // dataBuffer: The DataBuffer to use for storing Packet data.
 // options: Optional configuration options for the BNO08X sensor.
 //
@@ -106,6 +108,9 @@ func NewI2C(
 	sdaPin machine.Pin,
 	sclPin machine.Pin,
 	address uint16,
+	ps0 machine.Pin,
+	ps1 machine.Pin,
+	resetPin machine.Pin,
 	dataBuffer DataBuffer,
 	options *I2COptions,
 ) (*I2C, error) {
@@ -113,6 +118,14 @@ func NewI2C(
 	if i2cBus == nil {
 		return nil, ErrNilI2CBus
 	}
+
+	// Set PS0 pin to output and low
+	ps0.Configure(machine.PinConfig{Mode: machine.PinOutput})
+	ps0.Low()
+
+	// Set PS1 pin to output and lo2
+	ps1.Configure(machine.PinConfig{Mode: machine.PinOutput})
+	ps1.Low()
 
 	// Configure the I2C bus
 	if err := i2cBus.Configure(
@@ -127,7 +140,7 @@ func NewI2C(
 
 	// If options are nil, initialize with default values
 	if options == nil {
-		options = NewI2COptions(nil, nil, nil)
+		options = NewI2COptions(nil, nil)
 	}
 
 	// Check if the address is the default or the alternative
@@ -191,6 +204,7 @@ func NewI2C(
 
 	// Initialize the BNO08X sensor
 	bno08x, err := NewBNO08X(
+		resetPin,
 		packetReader,
 		packetWriter,
 		dataBuffer,
@@ -204,6 +218,8 @@ func NewI2C(
 		BNO08X:  *bno08x,
 		i2cBus:  i2cBus,
 		address: address,
+		ps0:     ps0,
+		ps1:     ps1,
 	}, nil
 }
 
