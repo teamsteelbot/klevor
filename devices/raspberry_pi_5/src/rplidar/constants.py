@@ -1,4 +1,4 @@
-import os
+ import os
 
 # RPLidar C1 baud rate
 RPLIDAR_C1_BAUDRATE = 460800

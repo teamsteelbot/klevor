@@ -12,11 +12,11 @@ import (
 type (
 	// I2C is the I2C implementation of the BNO08X sensor.
 	I2C struct {
-		BNO08X
+		*BNO08X
 		i2cBus   *machine.I2C
 		address  uint16
-		ps0      machine.Pin
-		ps1      machine.Pin
+		ps0Pin   machine.Pin
+		ps1Pin   machine.Pin
 		resetPin machine.Pin
 	}
 
@@ -49,19 +49,19 @@ type (
 // Parameters:
 //
 // bus: The I2C bus to use for communication.
-// addr: The I2C address of the device to probe.
+// address: The I2C address of the device to probe.
 //
 // Returns:
 //
 // An error if the probe fails, otherwise nil.
-func probeDevice(bus *machine.I2C, addr uint16) error {
+func probeDevice(bus *machine.I2C, address uint16) error {
 	// Zero-length write (some devices NACK this; tolerate)
-	_ = bus.Tx(addr, nil, nil)
+	_ = bus.Tx(address, nil, nil)
 
 	// Attempt to read 1 byte (BNO08X will usually NACK but if wiring wrong we get generic error)
 	buf := make([]byte, 1)
-	if err := bus.Tx(addr, nil, buf); err != nil {
-		return fmt.Errorf("probe failed at 0x%X: %w", addr, err)
+	if err := bus.Tx(address, nil, buf); err != nil {
+		return fmt.Errorf("probe failed at 0x%X: %w", address, err)
 	}
 	return nil
 }
@@ -98,6 +98,9 @@ func NewI2COptions(
 // ps1: The PS1 pin to set the sensor to I2C mode.
 // resetPin: The pin used to reset the BNO08X sensor.
 // dataBuffer: The DataBuffer to use for storing Packet data.
+//
+//	afterResetFn: An optional function to be called after a reset.
+//
 // options: Optional configuration options for the BNO08X sensor.
 //
 // Returns:
@@ -108,10 +111,11 @@ func NewI2C(
 	sdaPin machine.Pin,
 	sclPin machine.Pin,
 	address uint16,
-	ps0 machine.Pin,
-	ps1 machine.Pin,
+	ps0Pin machine.Pin,
+	ps1Pin machine.Pin,
 	resetPin machine.Pin,
 	dataBuffer DataBuffer,
+	afterResetFn func(b *BNO08X) error,
 	options *I2COptions,
 ) (*I2C, error) {
 	// Check if the I2C bus is nil
@@ -120,12 +124,12 @@ func NewI2C(
 	}
 
 	// Set PS0 pin to output and low
-	ps0.Configure(machine.PinConfig{Mode: machine.PinOutput})
-	ps0.Low()
+	ps0Pin.Configure(machine.PinConfig{Mode: machine.PinOutput})
+	ps0Pin.Low()
 
 	// Set PS1 pin to output and lo2
-	ps1.Configure(machine.PinConfig{Mode: machine.PinOutput})
-	ps1.Low()
+	ps1Pin.Configure(machine.PinConfig{Mode: machine.PinOutput})
+	ps1Pin.Low()
 
 	// Configure the I2C bus
 	if err := i2cBus.Configure(
@@ -208,6 +212,7 @@ func NewI2C(
 		packetReader,
 		packetWriter,
 		dataBuffer,
+		afterResetFn,
 		options.Options,
 	)
 	if err != nil {
@@ -215,12 +220,30 @@ func NewI2C(
 	}
 
 	return &I2C{
-		BNO08X:  *bno08x,
+		BNO08X:  bno08x,
 		i2cBus:  i2cBus,
 		address: address,
-		ps0:     ps0,
-		ps1:     ps1,
+		ps0Pin:  ps0Pin,
+		ps1Pin:  ps1Pin,
 	}, nil
+}
+
+// GetBNO08XService returns the BNO08X service.
+//
+// Returns:
+//
+// The BNO08X service instance.
+func (i2c *I2C) GetBNO08XService() BNO08XService {
+	return i2c.BNO08X
+}
+
+// GetBNO08X returns the BNO08X instance.
+//
+// Returns:
+//
+// The BNO08X instance.
+func (i2c *I2C) GetBNO08X() *BNO08X {
+	return i2c.BNO08X
 }
 
 // newI2CPacketWriter creates a new I2CPacketWriter instance.
@@ -269,7 +292,7 @@ func newI2CPacketWriter(
 // Returns:
 //
 // The sequence number of the Packet sent, or an error if sending fails.
-func (pw I2CPacketWriter) SendPacket(channel uint8, data *[]byte) (
+func (pw *I2CPacketWriter) SendPacket(channel uint8, data *[]byte) (
 	uint8,
 	error,
 ) {
@@ -359,7 +382,7 @@ func newI2CPacketReader(
 // Returns:
 //
 // A pointer to a PacketHeader or an error if reading the header fails.
-func (pr I2CPacketReader) readHeader() (*PacketHeader, error) {
+func (pr *I2CPacketReader) readHeader() (*PacketHeader, error) {
 	// Read the first 4 bytes from the I2C bus to get the Packet header.
 	if err := pr.i2cBus.Tx(
 		pr.address,
@@ -391,7 +414,7 @@ func (pr I2CPacketReader) readHeader() (*PacketHeader, error) {
 // Returns:
 //
 // A pointer to a PacketHeader or an error if reading the header fails.
-func (pr I2CPacketReader) nextHeader() (*PacketHeader, error) {
+func (pr *I2CPacketReader) nextHeader() (*PacketHeader, error) {
 	if pr.cachedHeader != nil {
 		header := pr.cachedHeader
 		pr.cachedHeader = nil
@@ -405,7 +428,7 @@ func (pr I2CPacketReader) nextHeader() (*PacketHeader, error) {
 	return header, nil
 }
 
-func (pr I2CPacketReader) ReadPacket() (*Packet, error) {
+func (pr *I2CPacketReader) ReadPacket() (*Packet, error) {
 	// Get next header (cached or read new)
 	header, err := pr.nextHeader()
 	if err != nil {
@@ -490,7 +513,7 @@ func (pr I2CPacketReader) ReadPacket() (*Packet, error) {
 // Returns:
 //
 // An error if reading from the I2C bus fails, otherwise nil.
-func (pr I2CPacketReader) read(requestedReadLength int) error {
+func (pr *I2CPacketReader) read(requestedReadLength int) error {
 	if pr.debugger != nil {
 		pr.debugger.Debug(
 			fmt.Sprintf(
@@ -545,7 +568,7 @@ func (pr I2CPacketReader) read(requestedReadLength int) error {
 // Returns:
 //
 // True if data is ready, false otherwise. It also checks for errors in the header.
-func (pr I2CPacketReader) IsDataReady() bool {
+func (pr *I2CPacketReader) IsDataReady() bool {
 	// Check cached header first
 	if pr.cachedHeader != nil {
 		return true

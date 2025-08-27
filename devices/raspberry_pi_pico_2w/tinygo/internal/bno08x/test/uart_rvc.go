@@ -16,14 +16,15 @@ type (
 		uartBus       *machine.UART
 		txPin         machine.Pin
 		rxPin         machine.Pin
-		ps0           machine.Pin
-		ps1           machine.Pin
+		ps0Pin        machine.Pin
+		ps1Pin        machine.Pin
 		resetPin      machine.Pin
 		dataBuffer    DataBuffer
 		debugger      Debugger
 		timeout       time.Duration
 		accelerometer *[3]float64
 		eulerDegrees  *[3]float64
+		initComplete  bool
 	}
 
 	// UARTRVCOptions struct for configuring the BNO08X over UART-RVC.
@@ -60,8 +61,8 @@ func NewUARTRVCOptions(
 // uartBus: The UART bus to use for communication.
 // txPin: The TX pin for UART communication.
 // rxPin: The RX pin for UART communication.
-// ps0: The PS0 pin to set the sensor to UART mode.
-// ps1: The PS1 pin to set the sensor to UART mode.
+// ps0Pin: The PS0 pin to set the sensor to UART mode.
+// ps1Pin: The PS1 pin to set the sensor to UART mode.
 // resetPin: The pin used to reset the BNO08X sensor.
 // dataBuffer: The data buffer to use for storing Packet data.
 // options: The Options for configuring the BNO08X (optional).
@@ -73,11 +74,11 @@ func NewUARTRVC(
 	uartBus *machine.UART,
 	txPin machine.Pin,
 	rxPin machine.Pin,
-	ps0 machine.Pin,
-	ps1 machine.Pin,
+	ps0Pin machine.Pin,
+	ps1Pin machine.Pin,
 	resetPin machine.Pin,
 	dataBuffer DataBuffer,
-	options *Options,
+	options *UARTRVCOptions,
 ) (*UARTRVC, error) {
 	// Check if the UART bus is nil
 	if uartBus == nil {
@@ -85,12 +86,12 @@ func NewUARTRVC(
 	}
 
 	// Set PS0 pin to output and high
-	ps0.Configure(machine.PinConfig{Mode: machine.PinOutput})
-	ps0.High()
+	ps0Pin.Configure(machine.PinConfig{Mode: machine.PinOutput})
+	ps0Pin.High()
 
 	// Set PS1 pin to output and low
-	ps1.Configure(machine.PinConfig{Mode: machine.PinOutput})
-	ps1.Low()
+	ps1Pin.Configure(machine.PinConfig{Mode: machine.PinOutput})
+	ps1Pin.Low()
 
 	// Configure UART
 	if err := uartBus.Configure(
@@ -108,28 +109,94 @@ func NewUARTRVC(
 		options = NewUARTRVCOptions(nil, DefaultTimeout)
 	}
 
-	// Get the timeout from options or use default
+	// Get the timeout from options
 	timeout := options.Timeout
-	if timeout == nil {
-		defaultTimeout := DefaultUARTRVCTimeout
-		timeout = &defaultTimeout
-	}
 
 	// Get the debugger from options
 	debugger := options.Options.Debugger
 
-	return &UARTRVC{
+	// Create the UART-RVC instance
+	uartRVC := &UARTRVC{
 		uartBus:       uartBus,
 		txPin:         txPin,
 		rxPin:         rxPin,
-		ps0:           ps0,
-		ps1:           ps1,
+		ps0Pin:        ps0Pin,
+		ps1Pin:        ps1Pin,
 		resetPin:      resetPin,
 		dataBuffer:    dataBuffer,
 		debugger:      debugger,
 		accelerometer: &InitialBnoSensorReportThreeDimensional,
 		eulerDegrees:  &InitialBnoSensorReportThreeDimensional,
-	}, nil
+		timeout:       timeout,
+		initComplete:  false,
+	}
+
+	// Perform initialization
+	if err := uartRVC.Initialize(); err != nil {
+		return nil, fmt.Errorf(
+			"failed to initialize bno08x with uart rvc: %w",
+			err,
+		)
+	}
+	return uartRVC, nil
+}
+
+// Initialize performs the initial setup of the BNO08X sensor, including hardware and software resets.
+//
+// Returns:
+//
+// An error if the initialization fails, otherwise nil.
+func (u *UARTRVC) Initialize() error {
+	// Check if already initialized
+	if u.initComplete {
+		return nil
+	}
+
+	// Log initialization start
+	if u.debugger != nil {
+		u.debugger.Debug("Initializing BNO08X sensor with UART-RVC...")
+	}
+
+	// Perform reset
+	u.Reset()
+	u.initComplete = true
+
+	// Log
+	if u.debugger != nil {
+		u.debugger.Debug("BNO08X sensor with UART-RVC initialized successfully.")
+	}
+	return nil
+}
+
+// HardwareReset performs a hardware reset of the BNO08X sensor using the specified reset pin.
+//
+// Returns:
+//
+// An error if the reset process fails, otherwise nil.
+func (u *UARTRVC) HardwareReset() {
+	HardwareReset(u.resetPin, u.debugger)
+}
+
+// SoftwareReset performs a software reset of the BNO08X sensor.
+//
+// Returns:
+//
+// An error if the software reset fails, otherwise nil.
+func (u *UARTRVC) SoftwareReset() error {
+	return nil
+}
+
+// Reset performs a reset of the BNO08X sensor.
+//
+// Returns:
+//
+// An error if the reset fails, otherwise nil.
+func (u *UARTRVC) Reset() error {
+	// Perform hardware reset
+	u.HardwareReset()
+
+	// Perform software reset
+	return u.SoftwareReset()
 }
 
 // ParseFrame parses a heading frame from the BNO08x RVC.
@@ -147,30 +214,48 @@ func (u *UARTRVC) ParseFrame(frame *[]byte) error {
 		return ErrNilFrame
 	}
 
-	// Check if the frame length is at least 17 bytes
-	if len(*frame) < 17 {
+	// Check if the frame length is at least 19 bytes
+	if len(*frame) < UARTRVCPacketLengthBytes {
 		return ErrFrameTooShort
 	}
 
 	// Retrieve and parse fields from the frame
-	// index := frame[0]
-	yaw := int16(binary.LittleEndian.Uint16((*frame)[1:3]))
-	pitch := int16(binary.LittleEndian.Uint16((*frame)[3:5]))
-	roll := int16(binary.LittleEndian.Uint16((*frame)[5:7]))
-	xAccel := int16(binary.LittleEndian.Uint16((*frame)[7:9]))
-	yAccel := int16(binary.LittleEndian.Uint16((*frame)[9:11]))
-	zAccel := int16(binary.LittleEndian.Uint16((*frame)[11:13]))
-	// res1 := (*frame)[13]
-	// res2 := (*frame)[14]
-	// res3 := (*frame)[15]
-	checksum := (*frame)[16]
+	// index := frame[2]
+	yaw := int16(binary.LittleEndian.Uint16((*frame)[3:5]))
+	pitch := int16(binary.LittleEndian.Uint16((*frame)[5:7]))
+	roll := int16(binary.LittleEndian.Uint16((*frame)[7:9]))
+	xAccel := int16(binary.LittleEndian.Uint16((*frame)[9:11]))
+	yAccel := int16(binary.LittleEndian.Uint16((*frame)[11:13]))
+	zAccel := int16(binary.LittleEndian.Uint16((*frame)[13:15]))
+	// res1 := (*frame)[15]
+	// res2 := (*frame)[16]
+	// res3 := (*frame)[17]
+	checksum := (*frame)[18]
 
 	// Validate checksum
 	checksumCalc := byte(0)
-	for i := 0; i < 16; i++ {
+	for i := UARTRVCHeaderLength; i < UARTRVCPacketLengthBytes-1; i++ {
 		checksumCalc += (*frame)[i]
+		if u.debugger != nil {
+			u.debugger.Debug(
+				fmt.Sprintf(
+					"Checksum calc at byte %d: 0x%X",
+					i,
+					checksumCalc,
+				),
+			)
+		}
 	}
 	if checksumCalc != checksum {
+		if u.debugger != nil {
+			u.debugger.Debug(
+				fmt.Sprintf(
+					"invalid checksum: calculated 0x%X, received 0x%X",
+					checksumCalc,
+					checksum,
+				),
+			)
+		}
 		return ErrInvalidChecksum
 	}
 
@@ -194,8 +279,8 @@ func (u *UARTRVC) ParseFrame(frame *[]byte) error {
 func (u *UARTRVC) readByte() (byte, error) {
 	startTime := time.Now()
 	for time.Since(startTime) < UARTByteTimeout {
-		if pr.uartBus.Buffered() > 0 {
-			return pr.uartBus.ReadByte()
+		if u.uartBus.Buffered() > 0 {
+			return u.uartBus.ReadByte()
 		}
 		time.Sleep(1 * time.Millisecond)
 	}
@@ -215,10 +300,10 @@ func (u *UARTRVC) Read() error {
 	for time.Since(start) < u.timeout {
 		// Loop until timeout to find the start bytes
 		processedBytes := 0
-		for procesedBytes < UARTRVCHeaderLengthBytes {
+		for processedBytes < UARTRVCHeaderLength {
 			b, err := u.readByte()
 			if err != nil {
-				return nil, err
+				return err
 			}
 			frame[processedBytes] = b
 			processedBytes++
@@ -242,10 +327,15 @@ func (u *UARTRVC) Read() error {
 		for processedBytes < UARTRVCPacketLengthBytes {
 			b, err := u.readByte()
 			if err != nil {
-				return nil, err
+				return err
 			}
 			frame[processedBytes] = b
 			processedBytes++
+		}
+
+		// Print the raw frame for debugging
+		if u.debugger != nil {
+			u.debugger.Debug(fmt.Sprintf("Received frame: % X", frame))
 		}
 
 		// Parse the frame
@@ -258,23 +348,35 @@ func (u *UARTRVC) Read() error {
 		}
 		return nil
 	}
-	return ErrTimeout
+	return ErrRVCTimeout
 }
 
-// Acceleration returns the acceleration measurements on the X, Y, and Z axes in meters per second squared.
+// GetAcceleration returns the acceleration measurements on the X, Y, and Z axes in meters per second squared.
 //
 // Returns:
 //
 //	A pointer to a [3]float64 array containing the acceleration values.
-func (u *UARTRVC) Acceleration() *[3]float64 {
+func (u *UARTRVC) GetAcceleration() *[3]float64 {
+	// Read a new frame to update the euler degrees
+	if err := u.Read(); err != nil {
+		if u.debugger != nil {
+			u.debugger.Debug(fmt.Sprintf("failed to read frame: %v", err))
+		}
+	}
 	return u.accelerometer
 }
 
-// EulerDegrees returns the current rotation vector as Euler angles in degrees.
+// GetEulerDegrees returns the current rotation vector as Euler angles in degrees.
 //
 // Returns:
 //
 // A tuple of three float64 values representing the roll, pitch, and yaw angles in degrees.
-func (u *UARTRVC) EulerDegrees() *[3]float64 {
+func (u *UARTRVC) GetEulerDegrees() *[3]float64 {
+	// Read a new frame to update the euler degrees
+	if err := u.Read(); err != nil {
+		if u.debugger != nil {
+			u.debugger.Debug(fmt.Sprintf("failed to read frame: %v", err))
+		}
+	}
 	return u.eulerDegrees
 }

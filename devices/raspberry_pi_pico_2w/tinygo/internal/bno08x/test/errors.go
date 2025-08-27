@@ -53,4 +53,7 @@ var (
 	ErrNilRotationVector                         = errors.New("nil rotation vector provided for parsing")
 	ErrNilFrame                                  = errors.New("nil frame provided for parsing")
 	ErrFrameTooShort                             = errors.New("frame data are too short to parse")
+	ErrNilBNO08X                                 = errors.New("nil BNO08x instance provided")
+	ErrNilBNO08XService                          = errors.New("nil BNO08x service provided")
+	ErrNilEulerDegrees                           = errors.New("nil euler degrees provided")
 )

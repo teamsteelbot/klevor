@@ -8,6 +8,11 @@ type (
 		GetYawDegrees() float64
 		GetPitchDegrees() float64
 		GetRollDegrees() float64
+		GetEulerDegrees() *[3]float64
 		GetAccumulatedYaw90DegreesTurns() int
+		Initialize() error
+		HardwareReset()
+		SoftwareReset() error
+		Reset() error
 	}
 )

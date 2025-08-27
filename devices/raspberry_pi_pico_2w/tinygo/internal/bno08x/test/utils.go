@@ -5,7 +5,35 @@ package test
 import (
 	"errors"
 	"fmt"
+	"math"
+	"time"
+
+	"machine"
 )
+
+// HardwareReset performs a hardware reset of the BNO08X sensor to an initial unconfigured state.
+//
+// Parameters:
+//
+// reset: The machine.Pin used to perform the hardware reset.
+// debugger: An optional Debugger for logging debug information during the reset process.
+func HardwareReset(resetPin machine.Pin, debugger Debugger) {
+	if debugger != nil {
+		debugger.Debug("Hardware resetting...")
+	}
+
+	// Configure the reset pin as output
+	resetPin.Configure(machine.PinConfig{Mode: machine.PinOutput})
+
+	resetPin.High()
+	time.Sleep(10 * time.Millisecond)
+
+	resetPin.Low()
+	time.Sleep(10 * time.Millisecond)
+
+	resetPin.High()
+	time.Sleep(10 * time.Millisecond)
+}
 
 // separateBatch takes a Packet and separates it into individual reports, appending them to the provided reports.
 //
@@ -68,11 +96,11 @@ func separateBatch(packet *Packet, reports *[]*report) error {
 //
 // Returns:
 //
-// A tuple of three float64 values representing the roll, pitch, and yaw angles in degrees.
-func QuaternionToEulerDegrees(rotationVector *[4]float64) *[3]float64 {
+// A tuple of three float64 values representing the roll, pitch, and yaw angles in degrees, or an error if the input is nil.
+func QuaternionToEulerDegrees(rotationVector *[4]float64) (*[3]float64, error) {
 	// Check if the rotation vector is nil
 	if rotationVector == nil {
-		return ErrNilRotationVector
+		return nil, ErrNilRotationVector
 	}
 
 	// Get the quaternion components
@@ -106,5 +134,5 @@ func QuaternionToEulerDegrees(rotationVector *[4]float64) *[3]float64 {
 		roll * 180 / math.Pi,
 		pitch * 180 / math.Pi,
 		yaw * 180 / math.Pi,
-	}
+	}, nil
 }

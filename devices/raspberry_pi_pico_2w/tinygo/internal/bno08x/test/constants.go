@@ -162,13 +162,13 @@ const (
 	CommandBufferSize = 12
 
 	// ResetPacketDelay is the delay after sending a reset command
-	ResetPacketDelay = 500 * time.Millisecond
+	ResetPacketDelay = 100 * time.Millisecond
 
-	// AfterResetDelay is the delay after resetting the sensor
-	AfterResetDelay = 350 * time.Millisecond
+	// InitializeAttempts is the number of attempts to initialize the sensor
+	InitializeAttempts = 3
 
-	// AfterCheckIDDelay is the delay after checking the sensor ID
-	AfterCheckIDDelay = 500 * time.Millisecond
+	// CheckIDDelay is the delay after checking the sensor ID
+	CheckIDDelay = 500 * time.Millisecond
 
 	// DefaultWaitForPacketTypeTimeout is the default timeout for waiting for a specific packet type in seconds
 	DefaultWaitForPacketTypeTimeout = 5 * time.Second
@@ -216,10 +216,10 @@ const (
 	UARTRVCStartByte = 0xAA
 
 	// UARTRVCHeaderLength is the length of the UART-RVC header in bytes
-	UARTRVCHeaderLength = 5
+	UARTRVCHeaderLength = 2
 
 	// UARTRVCPacketLengthBytes is the number of length bytes in a UART-RVC packet
-	UARTRVCPacketLengthBytes = 17
+	UARTRVCPacketLengthBytes = 19
 
 	// EulerDegreesRollIndex is the index for the roll component in an euler degrees vector
 	EulerDegreesRollIndex = 0

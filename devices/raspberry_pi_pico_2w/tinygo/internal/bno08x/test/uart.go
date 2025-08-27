@@ -12,11 +12,11 @@ import (
 type (
 	// UART is the UART implementation of the BNO08X sensor
 	UART struct {
-		BNO08X
-		uartBus *machine.UART
-		ps0     machine.Pin
-		ps1     machine.Pin
-		reset   machine.Pin
+		*BNO08X
+		uartBus  *machine.UART
+		ps0Pin   machine.Pin
+		ps1Pin   machine.Pin
+		resetPin machine.Pin
 	}
 
 	// UARTPacketReader is the packet reader for UART interface
@@ -69,10 +69,13 @@ func NewUARTOptions(
 // uartBus: The UART bus to use for communication.
 // txPin: The TX pin for UART communication.
 // rxPin: The RX pin for UART communication.
-// ps0: The PS0 pin to set the sensor to UART mode.
-// ps1: The PS1 pin to set the sensor to UART mode.
+// ps0Pin: The PS0 pin to set the sensor to UART mode.
+// ps1Pin: The PS1 pin to set the sensor to UART mode.
 // resetPin: The pin used to reset the BNO08X sensor.
 // dataBuffer: The data buffer to use for storing Packet data.
+//
+//	afterResetFn: An optional function to be called after a reset.
+//
 // options: The UARTOptions for configuring the BNO08X (optional).
 //
 // Returns:
@@ -82,10 +85,11 @@ func NewUART(
 	uartBus *machine.UART,
 	txPin machine.Pin,
 	rxPin machine.Pin,
-	ps0 machine.Pin,
-	ps1 machine.Pin,
+	ps0Pin machine.Pin,
+	ps1Pin machine.Pin,
 	resetPin machine.Pin,
 	dataBuffer DataBuffer,
+	afterResetFn func(b *BNO08X) error,
 	options *UARTOptions,
 ) (*UART, error) {
 	// Check if the UART bus is nil
@@ -94,12 +98,12 @@ func NewUART(
 	}
 
 	// Set PS0 pin to output and low
-	ps0.Configure(machine.PinConfig{Mode: machine.PinOutput})
-	ps0.Low()
+	ps0Pin.Configure(machine.PinConfig{Mode: machine.PinOutput})
+	ps0Pin.Low()
 
 	// Set PS1 pin to output and high
-	ps1.Configure(machine.PinConfig{Mode: machine.PinOutput})
-	ps1.High()
+	ps1Pin.Configure(machine.PinConfig{Mode: machine.PinOutput})
+	ps1Pin.High()
 
 	// Configure UART
 	if err := uartBus.Configure(
@@ -147,6 +151,7 @@ func NewUART(
 		packetReader,
 		packetWriter,
 		dataBuffer,
+		afterResetFn,
 		options.Options,
 	)
 	if err != nil {
@@ -154,12 +159,30 @@ func NewUART(
 	}
 
 	return &UART{
-		BNO08X:  *bno08x,
-		uartBus: uartBus,
-		ps1:     ps1,
-		ps0:     ps0,
-		reset:   resetPin,
+		BNO08X:   bno08x,
+		uartBus:  uartBus,
+		ps1Pin:   ps1Pin,
+		ps0Pin:   ps0Pin,
+		resetPin: resetPin,
 	}, nil
+}
+
+// GetBNO08XService returns the BNO08X service.
+//
+// Returns:
+//
+// The BNO08X service instance.
+func (uart *UART) GetBNO08XService() BNO08XService {
+	return uart.BNO08X
+}
+
+// GetBNO08X returns the BNO08X instance.
+//
+// Returns:
+//
+// The BNO08X instance.
+func (uart *UART) GetBNO08X() *BNO08X {
+	return uart.BNO08X
 }
 
 // newUARTPacketReader creates a new UARTPacketReader instance.

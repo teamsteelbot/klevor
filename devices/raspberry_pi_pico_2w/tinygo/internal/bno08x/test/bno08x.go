@@ -38,7 +38,7 @@ type (
 		packetReader                    PacketReader
 		packetWriter                    PacketWriter
 		debugger                        Debugger
-		reset                           machine.Pin
+		resetPin                        machine.Pin
 		dataBuffer                      DataBuffer
 		commandBuffer                   []byte
 		packetSlices                    []*report
@@ -46,7 +46,6 @@ type (
 		meCalibrationStartedAt          float64
 		calibrationComplete             bool
 		magnetometerAccuracy            ReportAccuracyStatus
-		waitForInitialize               bool
 		initComplete                    bool
 		idRead                          bool
 		accelerometer                   *[3]float64
@@ -66,6 +65,7 @@ type (
 		rawGyroscope                    *[3]float64
 		rawMagnetometer                 *[3]float64
 		enabledFeatures                 map[uint8]bool
+		afterResetFn                    func(b *BNO08X) error
 	}
 
 	// Options struct holds configuration options for the BNO08X instance
@@ -95,10 +95,11 @@ func NewOptions(debugger Debugger) *Options {
 //
 // resetPin: The pin used to reset the BNO08X sensor.
 //
-//	packetReader: The PacketReader to read packets from the BNO08X sensor.
-//	packetWriter: The PacketWriter to write packets to the BNO08X sensor.
-//	dataBuffer: The DataBuffer to store Packet data.
-//	options: Optional configuration options for the BNO08X instance.
+//		packetReader: The PacketReader to read packets from the BNO08X sensor.
+//		packetWriter: The PacketWriter to write packets to the BNO08X sensor.
+//		dataBuffer: The DataBuffer to store Packet data.
+//	 afterResetFn: An optional function to be called after a reset.
+//		options: Optional configuration options for the BNO08X instance.
 //
 // Returns:
 //
@@ -108,6 +109,7 @@ func NewBNO08X(
 	packetReader PacketReader,
 	packetWriter PacketWriter,
 	dataBuffer DataBuffer,
+	afterResetFn func(b *BNO08X) error,
 	options *Options,
 ) (*BNO08X, error) {
 	// Check if packetReader, packetWriter and dataBuffer are provided
@@ -127,11 +129,11 @@ func NewBNO08X(
 	}
 
 	// Create the BNO08X instance
-	bno08x := BNO08X{
+	bno08x := &BNO08X{
 		packetReader:                    packetReader,
 		packetWriter:                    packetWriter,
 		debugger:                        options.Debugger,
-		reset:                           resetPin,
+		resetPin:                        resetPin,
 		dataBuffer:                      dataBuffer,
 		commandBuffer:                   make([]byte, CommandBufferSize),
 		packetSlices:                    make([]*report, 0),
@@ -139,7 +141,6 @@ func NewBNO08X(
 		meCalibrationStartedAt:          -1.0,
 		calibrationComplete:             false,
 		magnetometerAccuracy:            ReportAccuracyStatusUnreliable,
-		waitForInitialize:               true,
 		initComplete:                    false,
 		idRead:                          false,
 		accelerometer:                   &InitialBnoSensorReportThreeDimensional,
@@ -159,44 +160,48 @@ func NewBNO08X(
 		rawGyroscope:                    &InitialBnoSensorReportThreeDimensional,
 		rawMagnetometer:                 &InitialBnoSensorReportThreeDimensional,
 		enabledFeatures:                 make(map[uint8]bool),
+		afterResetFn:                    afterResetFn,
 	}
 	if options.Debugger != nil {
 		options.Debugger.Debug("********** NEW BNO08X *************")
 	}
 
-	// Initialize the BNO08X sensor
-	return &bno08x, bno08x.initialize()
-}
-
-// hardwareReset performs a hardware reset of the BNO08X sensor to an initial unconfigured state.
-func (b *BNO08X) hardwareReset() {
-	if b.debugger != nil {
-		b.debugger.Debug("Hardware resetting...")
+	// Perform initialization
+	if err := bno08x.Initialize(); err != nil {
+		return nil, fmt.Errorf("failed to initialize bno08x: %w", err)
 	}
-
-	// Configure the reset pin as output
-	b.reset.Configure(machine.PinConfig{Mode: machine.PinOutput})
-
-	b.reset.High()
-	time.Sleep(10 * time.Millisecond)
-
-	b.reset.Low()
-	time.Sleep(10 * time.Millisecond)
-
-	b.reset.High()
-	time.Sleep(10 * time.Millisecond)
+	return bno08x, nil
 }
 
-// softwareReset performs a software reset of the BNO08X sensor to an initial unconfigured state.
+// HardwareReset performs a hardware reset of the BNO08X sensor using the specified reset pin.
 //
 // Returns:
 //
 // An error if the reset process fails, otherwise nil.
-func (b *BNO08X) softwareReset() error {
+func (b *BNO08X) HardwareReset() {
+	HardwareReset(b.resetPin, b.debugger)
+}
+
+// SoftwareReset performs a software reset of the BNO08X sensor to an initial unconfigured state.
+//
+// Returns:
+//
+// An error if the reset process fails, otherwise nil.
+func (b *BNO08X) SoftwareReset() error {
 	if b.debugger != nil {
 		b.debugger.Debug("Software resetting...")
 	}
 
+	// Resets the sequence numbers in the data buffer
+	b.dataBuffer.ResetSequenceNumbers()
+
+	// Clear the read ID status
+	b.idRead = false
+
+	// Reset enabled features
+	b.enabledFeatures = make(map[uint8]bool)
+
+	// Send the reset command
 	data := []byte{CommandReset}
 	if _, err := b.packetWriter.SendPacket(ChannelExe, &data); err != nil {
 		if b.debugger != nil {
@@ -216,11 +221,31 @@ func (b *BNO08X) softwareReset() error {
 	// Clear out any pending packets
 	b.clearPendingPackets()
 
+	// Call after reset function if provided
+	if b.afterResetFn != nil {
+		if err := b.afterResetFn(b); err != nil {
+			return err
+		}
+	}
+
 	// Wait for the reset to complete
 	if b.debugger != nil {
 		b.debugger.Debug("OK!")
 	}
 	return nil
+}
+
+// Reset performs a hardware reset and then a software reset of the BNO08X sensor to an initial unconfigured state.
+//
+// Returns:
+//
+// An error if the reset process fails, otherwise nil.
+func (b *BNO08X) Reset() error {
+	// Perform hardware reset
+	b.HardwareReset()
+
+	// Perform software reset
+	return b.SoftwareReset()
 }
 
 // clearPendingPackets reads and discards pending packets
@@ -250,38 +275,30 @@ func (b *BNO08X) clearPendingPackets() {
 	}
 }
 
-// initialize performs the initial setup of the BNO08X sensor, including hardware and software resets.
+// Initialize performs the initial setup of the BNO08X sensor, including hardware and software resets.
 //
 // Returns:
 //
 // An error if the initialization fails, otherwise nil.
-func (b *BNO08X) initialize() error {
-	// Check if already initialized
-	if b.initComplete {
-		return nil
-	}
-
-	// Check if the sensor ID can be read
+func (b *BNO08X) Initialize() error {
+	// Log initialization start
 	if b.debugger != nil {
 		b.debugger.Debug("Initializing BNO08X sensor...")
 	}
-	for i := 0; i < 3; i++ {
-		// Perform hardware reset
-		b.hardwareReset()
-		// time.Sleep(AfterResetDelay)
 
-		// Perform software reset
-		if err := b.softwareReset(); err != nil {
+	// Try up to 3 times to initialize the sensor
+	for i := 0; i < InitializeAttempts; i++ {
+		// Reset
+		if err := b.Reset(); err != nil {
 			return err
 		}
-		time.Sleep(AfterResetDelay)
 
+		// Check if the sensor ID can be read
 		ok, err := b.checkID()
 		if err != nil {
-			time.Sleep(AfterCheckIDDelay)
+			time.Sleep(CheckIDDelay)
 		}
 		if ok {
-			b.initComplete = true
 			return nil
 		}
 	}
@@ -896,119 +913,120 @@ func (b *BNO08X) processAvailablePackets(maxPackets *int) {
 	}
 }
 
-// Magnetic returns the current magnetic field measurements on the X, Y, and Z axes.
+// GetMagnetic returns the current magnetic field measurements on the X, Y, and Z axes.
 //
 // Returns:
 //
 // A pointer to a [3]float64 array containing the magnetic field values.
-func (b *BNO08X) Magnetic() *[3]float64 {
+func (b *BNO08X) GetMagnetic() *[3]float64 {
 	// Process available packets to ensure readings are up-to-date
 	b.processAvailablePackets(nil)
 	return b.magnetometer
 }
 
-// Quaternion returns a pointer to a [4]float64 array representing the current rotation vector as a quaternion.
+// GetQuaternion returns a pointer to a [4]float64 array representing the current rotation vector as a quaternion.
 //
 // Returns:
 //
 // A pointer to a [4]float64 array containing the quaternion values.
-func (b *BNO08X) Quaternion() *[4]float64 {
+func (b *BNO08X) GetQuaternion() *[4]float64 {
 	// Process available packets to ensure readings are up-to-date
 	b.processAvailablePackets(nil)
 	return b.rotationVector
 }
 
-// EulerDegrees returns the current rotation vector as Euler angles in degrees.
+// GetEulerDegrees returns the current rotation vector as Euler angles in degrees.
 //
 // Returns:
 //
 // A tuple of three float64 values representing the roll, pitch, and yaw angles in degrees.
-func (b *BNO08X) EulerDegrees() *[3]float64 {
+func (b *BNO08X) GetEulerDegrees() *[3]float64 {
 	// Get the quaternion readings
-	b.Quaternion()
-	return QuaternionToEulerDegrees(b.rotationVector)
+	b.GetQuaternion()
+	eulerDegrees, _ := QuaternionToEulerDegrees(b.rotationVector)
+	return eulerDegrees
 }
 
-// GeomagneticQuaternion returns a pointer to a [4]float64 array representing the current geomagnetic rotation vector as a quaternion.
+// GetGeomagneticQuaternion returns a pointer to a [4]float64 array representing the current geomagnetic rotation vector as a quaternion.
 //
 // Returns:
 //
 // A pointer to a [4]float64 array containing the geomagnetic quaternion values.
-func (b *BNO08X) GeomagneticQuaternion() *[4]float64 {
+func (b *BNO08X) GetGeomagneticQuaternion() *[4]float64 {
 	// Process available packets to ensure readings are up-to-date
 	b.processAvailablePackets(nil)
 	return b.geomagneticRotationVector
 }
 
-// GameQuaternion returns a pointer to a [4]float64 array representing the current rotation vector expressed as a quaternion with no specific reference for heading.
+// GetGameQuaternion returns a pointer to a [4]float64 array representing the current rotation vector expressed as a quaternion with no specific reference for heading.
 //
 // Returns:
 //
 // A pointer to a [4]float64 array containing the game quaternion values.
-func (b *BNO08X) GameQuaternion() *[4]float64 {
+func (b *BNO08X) GetGameQuaternion() *[4]float64 {
 	// Process available packets to ensure readings are up-to-date
 	b.processAvailablePackets(nil)
 	return b.gameRotationVector
 }
 
-// Steps returns the number of steps detected since the sensor was initialized.
+// GetSteps returns the number of steps detected since the sensor was initialized.
 //
 // Returns:
 //
 //	A pointer to an uint16 representing the step count.
-func (b *BNO08X) Steps() *uint16 {
+func (b *BNO08X) GetSteps() *uint16 {
 	b.processAvailablePackets(nil)
 	return b.stepCount
 }
 
-// LinearAcceleration returns the current linear acceleration values on the X, Y, and Z axes in meters per second squared.
+// GetLinearAcceleration returns the current linear acceleration values on the X, Y, and Z axes in meters per second squared.
 //
 // Returns:
 //
 //	A pointer to a [3]float64 array containing the linear acceleration values.
-func (b *BNO08X) LinearAcceleration() *[3]float64 {
+func (b *BNO08X) GetLinearAcceleration() *[3]float64 {
 	b.processAvailablePackets(nil)
 	return b.linearAcceleration
 }
 
-// Acceleration returns the acceleration measurements on the X, Y, and Z axes in meters per second squared.
+// GetAcceleration returns the acceleration measurements on the X, Y, and Z axes in meters per second squared.
 //
 // Returns:
 //
 //	A pointer to a [3]float64 array containing the acceleration values.
-func (b *BNO08X) Acceleration() *[3]float64 {
+func (b *BNO08X) GetAcceleration() *[3]float64 {
 	b.processAvailablePackets(nil)
 	return b.accelerometer
 }
 
-// Gravity returns the gravity vector in the X, Y, and Z components in meters per second squared.
+// GetGravity returns the gravity vector in the X, Y, and Z components in meters per second squared.
 //
 // Returns:
 //
 //	A pointer to a [3]float64 array containing the gravity vector.
-func (b *BNO08X) Gravity() *[3]float64 {
+func (b *BNO08X) GetGravity() *[3]float64 {
 	b.processAvailablePackets(nil)
 	return b.gravity
 }
 
-// Gyro returns Gyro's rotation measurements on the X, Y, and Z axes in radians per second.
+// GetGyro returns Gyro's rotation measurements on the X, Y, and Z axes in radians per second.
 //
 // Returns:
 //
 //	A pointer to a [3]float64 array containing the gyroscope values.
-func (b *BNO08X) Gyro() *[3]float64 {
+func (b *BNO08X) GetGyro() *[3]float64 {
 	b.processAvailablePackets(nil)
 	return b.gyroscope
 }
 
-// GyroDegrees returns Gyro's rotation measurements on the X, Y, and Z axes in degrees per second.
+// GetGyroDegrees returns Gyro's rotation measurements on the X, Y, and Z axes in degrees per second.
 //
 // Returns:
 //
 // A pointer to a [3]float64 array containing the gyroscope values in degrees.
-func (b *BNO08X) GyroDegrees() *[3]float64 {
+func (b *BNO08X) GetGyroDegrees() *[3]float64 {
 	// Get the gyroscope readings
-	b.Gyro()
+	b.GetGyro()
 
 	// Convert radians to degrees
 	gyroDegrees := [3]float64{
@@ -1019,13 +1037,13 @@ func (b *BNO08X) GyroDegrees() *[3]float64 {
 	return &gyroDegrees
 }
 
-// Shake returns true if a shake was detected on any axis since the last time it was checked.
+// GetShake returns true if a shake was detected on any axis since the last time it was checked.
 // This method has a latching behavior: once a shake is detected, it stays "shaken" until read.
 //
 // Returns:
 //
 //	A pointer to a bool indicating if a shake was detected.
-func (b *BNO08X) Shake() *bool {
+func (b *BNO08X) GetShake() *bool {
 	b.processAvailablePackets(nil)
 	if b.shakesDetected != nil && *b.shakesDetected {
 		*b.shakesDetected = false // clear on read
@@ -1034,52 +1052,52 @@ func (b *BNO08X) Shake() *bool {
 	return b.shakesDetected
 }
 
-// StabilityClassification returns the sensor's assessment of its current stability.
+// GetStabilityClassification returns the sensor's assessment of its current stability.
 //
 // Returns:
 //
 //	A pointer to a string describing the stability classification.
-func (b *BNO08X) StabilityClassification() *string {
+func (b *BNO08X) GetStabilityClassification() *string {
 	b.processAvailablePackets(nil)
 	return b.stabilityClassification
 }
 
-// ActivityClassification returns the sensor's assessment of the activity creating the sensed motions.
+// GetActivityClassification returns the sensor's assessment of the activity creating the sensed motions.
 //
 // Returns:
 //
 //	A pointer to a map[string]int representing activity classifications.
-func (b *BNO08X) ActivityClassification() *map[string]int {
+func (b *BNO08X) GetActivityClassification() *map[string]int {
 	b.processAvailablePackets(nil)
 	return b.classifications
 }
 
-// RawAcceleration returns the sensor's raw, unscaled value from the accelerometer registers.
+// GetRawAcceleration returns the sensor's raw, unscaled value from the accelerometer registers.
 //
 // Returns:
 //
 //	A pointer to a [3]float64 array containing the raw accelerometer values.
-func (b *BNO08X) RawAcceleration() *[3]float64 {
+func (b *BNO08X) GetRawAcceleration() *[3]float64 {
 	b.processAvailablePackets(nil)
 	return b.rawAccelerometer
 }
 
-// RawGyro returns the sensor's raw, unscaled value from the gyro registers.
+// GetRawGyro returns the sensor's raw, unscaled value from the gyro registers.
 //
 // Returns:
 //
 //	A pointer to a [3]float64 array containing the raw gyroscope values.
-func (b *BNO08X) RawGyro() *[3]float64 {
+func (b *BNO08X) GetRawGyro() *[3]float64 {
 	b.processAvailablePackets(nil)
 	return b.rawGyroscope
 }
 
-// RawMagnetic returns the sensor's raw, unscaled value from the magnetometer registers.
+// GetRawMagnetic returns the sensor's raw, unscaled value from the magnetometer registers.
 //
 // Returns:
 //
 //	A pointer to a [3]float64 array containing the raw magnetometer values.
-func (b *BNO08X) RawMagnetic() *[3]float64 {
+func (b *BNO08X) GetRawMagnetic() *[3]float64 {
 	b.processAvailablePackets(nil)
 	return b.rawMagnetometer
 }
@@ -1188,8 +1206,11 @@ func (b *BNO08X) EnableFeature(featureID uint8) error {
 //
 //	A boolean indicating whether the feature is enabled.
 func (b *BNO08X) IsFeatureEnabled(featureID uint8) bool {
-	_, ok := b.enabledFeatures[featureID]
-	return ok
+	isEnabled, ok := b.enabledFeatures[featureID]
+	if !ok {
+		return false
+	}
+	return isEnabled
 }
 
 // BeginCalibration starts the self-calibration routine for the BNO08X sensor.

@@ -9,14 +9,15 @@ import (
 type (
 	// DefaultHandler is the default handler for the BNO08x sensor.
 	DefaultHandler struct {
-		bno08x                       *bno08x.BNO08X
+		bno08xService                bno08x.BNO08XService
 		usbCDCHandler                internalusbcdc.Handler
-		initialQuaternion            *[3]float64
+		initialEulerDegrees          *[3]float64
 		lastYawDegrees               float64
 		lastRelativeYawDegrees       float64
 		accumulatedYawDegrees        float64
 		accumulatedYaw90DegreesTurns int
 		lastSegmentCount             int
+		eulerDegrees                 *[3]float64
 		rollDegrees                  float64
 		pitchDegrees                 float64
 		yawDegrees                   float64
@@ -27,19 +28,19 @@ type (
 //
 // Parameters:
 //
-// bno08x: The BNO08x sensor instance.
+// bno08xService: The BNO08x sensor instance.
 // usbCDCHandler: The USB CDC handler for serial communication.
 //
 // Returns:
 //
 // An instance of DefaultHandler, or an error if the BNO08x instance is nil.
 func NewDefaultHandler(
-	bno08x *bno08x.BNO08X,
+	bno08xService bno08x.BNO08XService,
 	usbCDCHandler internalusbcdc.Handler,
 ) (*DefaultHandler, error) {
-	// Check if the BNO08X instance is nil
-	if bno08x == nil {
-		return nil, ErrNilBNO08X
+	// Check if the BNO08X service is nil
+	if bno08xService == nil {
+		return nil, bno08x.ErrNilBNO08XService
 	}
 
 	// Check if the USB CDC handler is nil
@@ -48,7 +49,7 @@ func NewDefaultHandler(
 	}
 
 	return &DefaultHandler{
-		bno08x,
+		bno08xService,
 		usbCDCHandler,
 		nil,
 		0,
@@ -56,37 +57,31 @@ func NewDefaultHandler(
 		0,
 		0,
 		0,
+		nil,
 		0,
 		0,
 		0,
 	}, nil
 }
 
-// Setup initializes the BNO08X sensor and prepares it for use.
-func (h *DefaultHandler) Setup() error {
-	// Enable quaternion feature
-	if err := h.bno08x.EnableFeature(bno08x.ReportIDRotationVector); err != nil {
-		return err
-	}
-
-	// Set the initial quaternion values
-	h.initialQuaternion = h.bno08x.QuaternionEulerDegrees()
-	return nil
-}
-
-// Update reads the quaternion data from the BNO08X sensor and updates the roll, pitch, and yaw values.
+// Update reads the euler degrees data from the BNO08X sensor and updates
+//
+// Returns:
+//
+// An error if reading from the sensor or sending messages fails
 func (h *DefaultHandler) Update() error {
-	// Get the latest quaternion data from the BNO08X sensor in euler degrees
-	quaternion := h.bno08x.EulerDegrees()
-	if quaternion == nil {
-		return ErrNilQuaternion
+	// Get the latest euler degrees from the BNO08X sensor
+	eulerDegrees := h.bno08xService.GetEulerDegrees()
+	if eulerDegrees == nil {
+		return bno08x.ErrNilEulerDegrees
 	}
 
 	// Update roll, pitch, and yaw degrees
 	h.lastYawDegrees = h.yawDegrees
-	h.rollDegrees = quaternion[bno08x.EulerDegreesRollIndex]
-	h.pitchDegrees = quaternion[bno08x.EulerDegreesPitchIndex]
-	h.yawDegrees = quaternion[bno08x.EulerDegreesYawIndex]
+	h.eulerDegrees = eulerDegrees
+	h.rollDegrees = eulerDegrees[bno08x.EulerDegreesRollIndex]
+	h.pitchDegrees = eulerDegrees[bno08x.EulerDegreesPitchIndex]
+	h.yawDegrees = eulerDegrees[bno08x.EulerDegreesYawIndex]
 
 	// Send the yaw degrees message via USB CDC if enabled
 	if h.usbCDCHandler != nil {
@@ -107,7 +102,7 @@ func (h *DefaultHandler) Update() error {
 	}
 
 	// Update internal yaw state
-	relativeYawDegrees := h.yawDegrees - h.initialQuaternion[bno08x.EulerDegreesYawIndex]
+	relativeYawDegrees := h.yawDegrees - h.initialEulerDegrees[bno08x.EulerDegreesYawIndex]
 	if relativeYawDegrees > 180 {
 		relativeYawDegrees -= 360
 	} else if relativeYawDegrees < -180 {
@@ -144,6 +139,52 @@ func (h *DefaultHandler) Update() error {
 	return nil
 }
 
+// Initialize initializes the BNO08X sensor.
+//
+// Returns:
+//
+// An error if the initialization fails
+func (h *DefaultHandler) Initialize() error {
+	return h.bno08xService.Initialize()
+}
+
+// HardwareReset performs a hardware reset of the BNO08X sensor.
+func (h *DefaultHandler) HardwareReset() {
+	h.bno08xService.HardwareReset()
+}
+
+// SoftwareReset performs a software reset of the BNO08X sensor.
+//
+// Returns:
+//
+// An error if the software reset fails
+func (h *DefaultHandler) SoftwareReset() error {
+	return h.bno08xService.SoftwareReset()
+}
+
+// Reset performs a reset of the BNO08X sensor.
+//
+// Returns:
+//
+// An error if the reset fails
+func (h *DefaultHandler) Reset() error {
+	return h.bno08xService.Reset()
+}
+
+// SetInitialEulerDegrees sets initial euler degrees as reference
+//
+// Parameters:
+//
+// eulerDegrees: The initial euler degrees to set as reference. If nil, the current
+// roll, pitch, and yaw degrees will be used as the initial reference.
+func (h *DefaultHandler) SetInitialEulerDegrees(eulerDegrees *[3]float64) {
+	if eulerDegrees != nil {
+		h.initialEulerDegrees = eulerDegrees
+	} else {
+		h.initialEulerDegrees = h.eulerDegrees
+	}
+}
+
 // GetRollDegrees returns the roll angle in degrees.
 //
 // Returns:
@@ -169,6 +210,15 @@ func (h *DefaultHandler) GetPitchDegrees() float64 {
 // The yaw angle in degrees.
 func (h *DefaultHandler) GetYawDegrees() float64 {
 	return h.yawDegrees
+}
+
+// GetEulerDegrees returns the roll, pitch, and yaw angles in degrees.
+//
+// Returns:
+//
+// A tuple of three float64 values representing the roll, pitch, and yaw angles in degrees.
+func (h *DefaultHandler) GetEulerDegrees() *[3]float64 {
+	return h.eulerDegrees
 }
 
 // GetAccumulatedYaw90DegreesTurns returns the accumulated yaw in 90 degrees turns.

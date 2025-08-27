@@ -1,5 +1,5 @@
 package internal
 
 const (
-	ErrFailedToConfigurePWM = "failed to configure PWM: %w"
+	ErrFailedToConfigurePWM = "failed to configure pwm: %w"
 )
