@@ -5,7 +5,6 @@ import (
 	"time"
 
 	internalbno08x "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/bno08x"
-	internalledonboard "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/led/onboard"
 )
 
 func main() {
@@ -27,16 +26,10 @@ func main() {
 			}
 		}
 
-		// Turn on the LED
-		internalledonboard.OnBoardHandler.SetOn()
-
 		// Update quaternion
 		if err := internalbno08x.BNO08XHandler.Update(); err != nil {
 			fmt.Println(fmt.Errorf("failed to update bno08x: %w", err))
 		}
-
-		// Turn off the LED
-		internalledonboard.OnBoardHandler.SetOff()
 
 		time.Sleep(100 * time.Millisecond)
 	}

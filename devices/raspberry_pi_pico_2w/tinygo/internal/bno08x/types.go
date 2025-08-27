@@ -1,15 +1,15 @@
 package bno08x
 
 import (
-	// bno08x "github.com/ralvarezdev/go-bno08x
-	bno08x "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/bno08x/test"
+	ralvarezdevbno08x "github.com/ralvarezdev/go-bno08x"
+	internalledonboard "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/led/onboard"
 	internalusbcdc "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc"
 )
 
 type (
 	// DefaultHandler is the default handler for the BNO08x sensor.
 	DefaultHandler struct {
-		bno08xService                bno08x.BNO08XService
+		bno08xService                ralvarezdevbno08x.BNO08XService
 		usbCDCHandler                internalusbcdc.Handler
 		initialEulerDegrees          *[3]float64
 		lastYawDegrees               float64
@@ -35,12 +35,12 @@ type (
 //
 // An instance of DefaultHandler, or an error if the BNO08x instance is nil.
 func NewDefaultHandler(
-	bno08xService bno08x.BNO08XService,
+	bno08xService ralvarezdevbno08x.BNO08XService,
 	usbCDCHandler internalusbcdc.Handler,
 ) (*DefaultHandler, error) {
 	// Check if the BNO08X service is nil
 	if bno08xService == nil {
-		return nil, bno08x.ErrNilBNO08XService
+		return nil, ralvarezdevbno08x.ErrNilBNO08XService
 	}
 
 	// Check if the USB CDC handler is nil
@@ -70,18 +70,24 @@ func NewDefaultHandler(
 //
 // An error if reading from the sensor or sending messages fails
 func (h *DefaultHandler) Update() error {
+	// Turn on the LED
+	internalledonboard.OnBoardHandler.SetOn()
+
 	// Get the latest euler degrees from the BNO08X sensor
 	eulerDegrees := h.bno08xService.GetEulerDegrees()
 	if eulerDegrees == nil {
-		return bno08x.ErrNilEulerDegrees
+		return ralvarezdevbno08x.ErrNilEulerDegrees
 	}
+
+	// Turn off the LED
+	internalledonboard.OnBoardHandler.SetOff()
 
 	// Update roll, pitch, and yaw degrees
 	h.lastYawDegrees = h.yawDegrees
 	h.eulerDegrees = eulerDegrees
-	h.rollDegrees = eulerDegrees[bno08x.EulerDegreesRollIndex]
-	h.pitchDegrees = eulerDegrees[bno08x.EulerDegreesPitchIndex]
-	h.yawDegrees = eulerDegrees[bno08x.EulerDegreesYawIndex]
+	h.rollDegrees = eulerDegrees[ralvarezdevbno08x.EulerDegreesRollIndex]
+	h.pitchDegrees = eulerDegrees[ralvarezdevbno08x.EulerDegreesPitchIndex]
+	h.yawDegrees = eulerDegrees[ralvarezdevbno08x.EulerDegreesYawIndex]
 
 	// Send the yaw degrees message via USB CDC if enabled
 	if h.usbCDCHandler != nil {
@@ -102,7 +108,7 @@ func (h *DefaultHandler) Update() error {
 	}
 
 	// Update internal yaw state
-	relativeYawDegrees := h.yawDegrees - h.initialEulerDegrees[bno08x.EulerDegreesYawIndex]
+	relativeYawDegrees := h.yawDegrees - h.initialEulerDegrees[ralvarezdevbno08x.EulerDegreesYawIndex]
 	if relativeYawDegrees > 180 {
 		relativeYawDegrees -= 360
 	} else if relativeYawDegrees < -180 {
