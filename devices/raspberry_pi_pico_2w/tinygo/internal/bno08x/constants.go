@@ -17,7 +17,7 @@ var (
 	YawDegreesDifference = 1.0
 
 	// ResetBNO08XInterval is the interval to reset the BNO08x sensor to prevent overflow.
-	ResetBNO08XInterval = 60 * time.Second
+	ResetBNO08XInterval = 2 * time.Minute
 
 	// BNO08XService is the BNO08x service.
 	BNO08XService ralvarezdevbno08x.BNO08XService

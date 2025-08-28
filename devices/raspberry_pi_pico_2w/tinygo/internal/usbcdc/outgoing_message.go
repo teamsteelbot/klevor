@@ -31,7 +31,7 @@ func NewOutgoingMessage(
 ) *OutgoingMessage {
 	return &OutgoingMessage{
 		Category: category,
-		Content:  content,
+		Content:  strings.TrimSpace(content),
 	}
 }
 

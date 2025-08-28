@@ -13,16 +13,24 @@ type (
 const (
 	IncomingCategoryNil IncomingCategory = iota
 	IncomingCategoryStatus
-	IncomingCategoryMotorSpeed
-	IncomingCategoryServoAngle
+	IncomingCategoryMotorSpeedStop
+	IncomingCategoryMotorSpeedForward
+	IncomingCategoryMotorSpeedBackward
+	IncomingCategoryServoAngleCenter
+	IncomingCategoryServoAngleToLeft
+	IncomingCategoryServoAngleToRight
 )
 
 var (
 	// IncomingCategoryNames maps a given IncomingCategory to its string name
 	IncomingCategoryNames = map[IncomingCategory]string{
-		IncomingCategoryStatus:     "status",
-		IncomingCategoryMotorSpeed: "motor_speed",
-		IncomingCategoryServoAngle: "servo_angle",
+		IncomingCategoryStatus:             "status",
+		IncomingCategoryMotorSpeedStop:     "motor_speed_stop",
+		IncomingCategoryMotorSpeedForward:  "motor_speed_forward",
+		IncomingCategoryMotorSpeedBackward: "motor_speed_backward",
+		IncomingCategoryServoAngleCenter:   "servo_angle_center",
+		IncomingCategoryServoAngleToLeft:   "servo_angle_to_left",
+		IncomingCategoryServoAngleToRight:  "servo_angle_to_right",
 	}
 )
 
@@ -31,8 +39,8 @@ var (
 // Returns:
 //
 // The string representation of the IncomingCategory enum
-func (i IncomingCategory) String() string {
-	return IncomingCategoryNames[i]
+func (i *IncomingCategory) String() string {
+	return IncomingCategoryNames[*i]
 }
 
 // IncomingCategoryFromString returns the IncomingCategory enum based on a given string
@@ -67,11 +75,33 @@ func IncomingCategoryFromString(s string) (IncomingCategory, error) {
 //
 // The IncomingCategory enum value, or an error if the key wasn't found for the given value
 func IncomingCategoryFromUint8(value uint8) (IncomingCategory, error) {
-	if value < uint8(IncomingCategoryNil) || value > uint8(IncomingCategoryServoAngle) {
+	if value <= uint8(IncomingCategoryNil) || value > uint8(len(IncomingCategoryNames)) {
 		return IncomingCategoryNil, fmt.Errorf(
 			ErrInvalidIncomingCategory,
 			value,
 		)
 	}
 	return IncomingCategory(value), nil
+}
+
+// IsAServoCategory checks if the given IncomingCategory is a servo category
+//
+// Returns:
+//
+// True if the category is a servo category, otherwise False
+func (i *IncomingCategory) IsAServoCategory() bool {
+	return *i == IncomingCategoryServoAngleCenter ||
+		*i == IncomingCategoryServoAngleToLeft ||
+		*i == IncomingCategoryServoAngleToRight
+}
+
+// IsAMotorCategory checks if the given IncomingCategory is a motor category
+//
+// Returns:
+//
+// True if the category is a motor category, otherwise False
+func (i *IncomingCategory) IsAMotorCategory() bool {
+	return *i == IncomingCategoryMotorSpeedStop ||
+		*i == IncomingCategoryMotorSpeedForward ||
+		*i == IncomingCategoryMotorSpeedBackward
 }

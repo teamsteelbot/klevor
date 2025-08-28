@@ -8,6 +8,6 @@ type (
 	// Handler is the interface to manage the switch state.
 	Handler interface {
 		internalpullup.Handler
-		Wait(onEvent func()) error
+		Wait(onEvent func() error) error
 	}
 )

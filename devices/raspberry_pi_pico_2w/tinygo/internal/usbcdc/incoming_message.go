@@ -2,6 +2,7 @@ package usbcdc
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	internalusbcdcenums "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc/enums"
@@ -31,7 +32,7 @@ func NewIncomingMessage(
 ) *IncomingMessage {
 	return &IncomingMessage{
 		Category: category,
-		Content:  content,
+		Content:  strings.TrimSpace(content),
 	}
 }
 
@@ -106,17 +107,57 @@ func NewIncomingMessageFromString(message string) (*IncomingMessage, error) {
 		return nil, err
 	}
 
+	// Check if based on the incoming category the message content can be empty or not
+	if category == internalusbcdcenums.IncomingCategoryMotorSpeedStop || category == internalusbcdcenums.IncomingCategoryServoAngleCenter {
+		return NewIncomingMessage(category, ""), nil
+	}
+
 	// Create and return the IncomingMessage object
 	return NewIncomingMessage(category, message[1:]), nil
 }
 
-/*
-def format_to_send_with_error_message(self) -> str:
-"""
-Format the message to send with an error message.
+// IsAServoMessage checks if the IncomingMessage is a servo-related message
+//
+// Returns:
+//
+// True if the message is related to servo operations, otherwise False
+func (msg *IncomingMessage) IsAServoMessage() bool {
+	return msg.Category.IsAServoCategory()
+}
 
-Returns:
-str: The formatted message string.
-"""
-return f"{self.__category}{HEADER_SEPARATOR_CHAR}{self.__content}"
-*/
+// IsAMotorMessage checks if the IncomingMessage is a motor-related message
+//
+// Returns:
+//
+// True if the message is related to motor operations, otherwise False
+func (msg *IncomingMessage) IsAMotorMessage() bool {
+	return msg.Category.IsAMotorCategory()
+}
+
+// FormatToSendAsAnErrorMessage formats the message to send as an error message.
+//
+// Returns:
+//
+// The formatted error message string.
+func (msg *IncomingMessage) FormatToSendAsAnErrorMessage() string {
+	// Format the message as an error message
+	return fmt.Sprintf(
+		"%d%s",
+		msg.Category,
+		msg.Content,
+	)
+}
+
+// GetContentAsUint16 converts the Content of the IncomingMessage to a uint16 value
+//
+// Returns:
+//
+// The uint16 representation of the Content, or an error if the conversion fails
+func (msg *IncomingMessage) GetContentAsUint16() (uint16, error) {
+	// Convert the content to uint16
+	u, err := strconv.ParseUint(msg.Content, 10, 16)
+	if err != nil {
+		return 0, fmt.Errorf("invalid uint16 value %q: %w", clean, err)
+	}
+	return uint16(u), nil
+}

@@ -29,6 +29,7 @@ type (
 		rangePulseWidth    uint16
 		servo              tinygoservo.Servo
 		speed              int16
+		microseconds       uint16
 	}
 
 	// Options are the different optional parameters for the DefaultHandler constructor
@@ -139,6 +140,7 @@ func NewDefaultHandler(
 		rangePulseWidth,
 		servo,
 		StopSpeed, // Initial speed is set to 0
+		StopMicroseconds,
 	}
 
 	// Stop the motor initially
@@ -187,7 +189,26 @@ func (e *DefaultHandler) SetSpeed(speed uint16, isForward bool) error {
 
 	// Set the servo microseconds if movement is enabled
 	if e.movementHandler.IsEnabled() {
-		e.servo.SetMicroseconds(int16(microseconds))
+		// Gradually change the speed to avoid sudden jumps
+		if e.microseconds > microseconds {
+			for us := e.microseconds; us > microseconds; us -= ChangeInterval {
+				e.servo.SetMicroseconds(int16(us))
+				time.Sleep(ChangeInternalDelay)
+			}
+		} else if e.microseconds < microseconds {
+			for us := e.microseconds; us < microseconds; us += ChangeInterval {
+				e.servo.SetMicroseconds(int16(us))
+				time.Sleep(ChangeInternalDelay)
+			}
+		}
+
+		// Finally, set the exact microseconds
+		if e.microseconds != microseconds {
+			e.servo.SetMicroseconds(int16(microseconds))
+
+			// Update the current microseconds
+			e.microseconds = microseconds
+		}
 	} else {
 		microseconds = e.halfPulseWidth
 	}

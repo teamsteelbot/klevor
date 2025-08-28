@@ -2,6 +2,7 @@ package escmotor
 
 import (
 	"fmt"
+	"time"
 
 	"machine"
 
@@ -11,9 +12,6 @@ import (
 )
 
 const (
-	// StopSpeed is the speed to stop the ESC motor
-	StopSpeed = 0
-
 	// DefaultIsPolarityInverted indicates whether the ESC motor's polarity is inverted
 	DefaultIsPolarityInverted = false
 
@@ -25,6 +23,18 @@ const (
 
 	// DefaultMaxPulseWidth is the default maximum pulse width in microseconds
 	DefaultMaxPulseWidth uint16 = 2000
+
+	// StopSpeed is the speed to stop the ESC motor
+	StopSpeed = 0
+
+	// StopMicroseconds is the microseconds to stop the ESC motor
+	StopMicroseconds = (DefaultMaxPulseWidth + DefaultMinPulseWidth) / 2
+
+	// ChangeInterval is the interval to change the speed of the ESC motor
+	ChangeInterval = 20
+
+	// ChangeInternalDelay is the internal delay to change the speed of the ESC motor
+	ChangeInternalDelay = 5 * time.Millisecond
 )
 
 var (

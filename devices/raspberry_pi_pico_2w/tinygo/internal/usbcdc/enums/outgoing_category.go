@@ -73,7 +73,7 @@ func OutgoingCategoryFromString(s string) (OutgoingCategory, error) {
 //
 // The OutgoingCategory enum value, or an error if the key wasn't found for the given value
 func OutgoingCategoryFromUint8(value uint8) (OutgoingCategory, error) {
-	if value >= uint8(len(OutgoingCategoryNames)) {
+	if value <= uint8(OutgoingCategoryNil) || value >= uint8(len(OutgoingCategoryNames)) {
 		return OutgoingCategoryNil, fmt.Errorf(
 			ErrInvalidOutgoingCategory,
 			value,

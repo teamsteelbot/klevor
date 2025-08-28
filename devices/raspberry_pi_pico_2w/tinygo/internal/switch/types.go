@@ -47,7 +47,7 @@ func NewDefaultHandler(
 // Returns:
 //
 // An error if the wait fails
-func (d *DefaultHandler) Wait(onEvent func()) error {
+func (d *DefaultHandler) Wait(onEvent func() error) error {
 	if onEvent == nil {
 		return ErrNilOnEventFunction
 	}
@@ -62,6 +62,6 @@ func (d *DefaultHandler) Wait(onEvent func()) error {
 		time.Sleep(d.interval)
 	}
 
-	go onEvent()
-	return nil
+	// Call the onEvent function
+	return onEvent()
 }
