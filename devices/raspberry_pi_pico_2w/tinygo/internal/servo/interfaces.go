@@ -1,5 +1,9 @@
 package servo
 
+import (
+	internalusbcdc "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc"
+)
+
 type (
 	// Handler is the interface to handle servo operations
 	Handler interface {
@@ -13,5 +17,6 @@ type (
 		SetDirectionToCenter() error
 		SetDirectionToRight(angle uint16) error
 		SetDirectionToLeft(angle uint16) error
+		SetDirectionBasedOnReceivedMessage(message *internalusbcdc.IncomingMessage) error
 	}
 )

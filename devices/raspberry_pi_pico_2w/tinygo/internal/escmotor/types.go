@@ -271,3 +271,48 @@ func (e *DefaultHandler) SetSpeedForward(speed uint16) error {
 func (e *DefaultHandler) SetSpeedBackward(speed uint16) error {
 	return e.SetSpeed(speed, false)
 }
+
+// SetSpeedBasedOnReceivedMessage sets the motor speed based on the received message
+//
+// Parameters:
+//
+// message: The incoming message containing the motor speed command
+//
+// Returns:
+//
+// An error if the motor speed could not be set, otherwise nil
+func (e *DefaultHandler) SetSpeedBasedOnReceivedMessage(message *internalusbcdc.IncomingMessage) error {
+	// Check if the message is nil
+	if message == nil {
+		return internalusbcdc.ErrNilIncomingMessage
+	}
+
+	// Check if the motor speed should be retrieved from the message
+	var motorSpeed uint16
+	if message.Category != internalusbcdcenums.IncomingCategoryMotorSpeedStop {
+		// Get int16 speed from message content
+		speed, err := message.GetContentAsUint16()
+		if err != nil {
+			return fmt.Errorf(
+				"invalid motor speed value: %w",
+				err,
+			)
+		}
+		motorSpeed = speed
+	}
+
+	// Check the motor speed category
+	switch message.Category {
+	case internalusbcdcenums.IncomingCategoryMotorSpeedStop:
+		return e.Stop()
+	case internalusbcdcenums.IncomingCategoryMotorSpeedForward:
+		return e.SetSpeedForward(motorSpeed)
+	case internalusbcdcenums.IncomingCategoryMotorSpeedBackward:
+		return e.SetSpeedBackward(motorSpeed)
+	default:
+		return fmt.Errorf(
+			"unknown motor speed category: %v",
+			message.Category,
+		)
+	}
+}

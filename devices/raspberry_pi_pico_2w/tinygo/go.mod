@@ -5,6 +5,7 @@ go 1.25
 require (
 	github.com/ralvarezdev/go-bno08x v0.4.0
 	github.com/soypat/cyw43439 v0.0.0-20250505012923-830110c8f4af
+	golang.org/x/sync v0.10.0
 	tinygo.org/x/drivers v0.33.0
 )
 

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"time"
@@ -12,19 +11,12 @@ import (
 	internalservo "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/servo"
 	internalswitch "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/switch"
 	internalusbcdc "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc"
-	internalusbcdcenums "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc/enums"
 	"golang.org/x/sync/errgroup"
 )
 
 const (
-	// initializationTimeout defines the maximum time allowed for initialization tasks.
-	initializationTimeout = 2 * time.Second
-
 	// stopTimeout defines the maximum time allowed for stopping tasks.
 	stopTimeout = 3 * time.Second
-
-	// updateTimeout defines the maximum time allowed for update tasks.
-	updateTimeout = 1 * time.Second
 
 	// receivingMessageTimeout defines the maximum time to wait for receiving messages.
 	receivingMessageTimeout = 1 * time.Second
@@ -49,14 +41,14 @@ var (
 	// receivedMotorsSpeedMessage indicates if a motor speed message was received in the current cycle.
 	receivedMotorsSpeedMessage *internalusbcdc.IncomingMessage
 
-	// receivedServoAngleMessage holds the last received servo angle message.
-	receivedServoAngleMessage *internalusbcdc.IncomingMessage
+	// receivedServoDirectionMessage holds the last received servo angle message.
+	receivedServoDirectionMessage *internalusbcdc.IncomingMessage
 
 	// motorSpeed holds the desired motor speed.
 	motorSpeed uint16
 
-	// servoAngle holds the desired servo angle.
-	servoAngle uint16
+	// servoDirectionAngle holds the desired servo direction.
+	servoDirectionAngle uint16
 )
 
 func init() {
@@ -66,52 +58,47 @@ func init() {
 	)
 }
 
-// stopAndCenter stops the ESC motor and centers the servo concurrently within a specified timeout.
-//
-// Parameters:
-//
-// timeout: The maximum duration to wait for both operations to complete.
+// stopAndCenter stops the ESC motor and centers the servo concurrently.
 //
 // Returns:
 //
-// An error if either operation fails or the timeout is reached.
-func stopAndCenter(timeout time.Duration) error {
-	// Context with timeout
-	ctx, cancel := context.WithTimeout(
-		context.Background(),
-		timeout,
-	)
-	g, ctx := errgroup.WithContext(ctx)
+// An error if either operation fails.
+func stopAndCenter() error {
+	g := &errgroup.Group{}
 
 	// ESC motor stop
 	g.Go(
-		func() error {
-			// Respect cancellation if long-running
-			select {
-			case <-ctx.Done():
-				return ctx.Err()
-			default:
-			}
-			return internalescmotor.ESCMotorHandler.Stop()
-		},
+		internalescmotor.ESCMotorHandler.Stop,
 	)
 
 	// Servo center
 	g.Go(
-		func() error {
-			select {
-			case <-ctx.Done():
-				return ctx.Err()
-			default:
-			}
-			return internalservo.ServoHandler.SetAngleToCenter()
-		},
+		internalservo.ServoHandler.SetDirectionToCenter,
 	)
 
 	// Wait for both; handle first error (if any)
-	err := g.Wait()
-	cancel()
-	return err
+	if err := g.Wait(); err != nil {
+		return fmt.Errorf(
+			"error stopping esc motor and centering servo: %w",
+			err,
+		)
+	}
+	return nil
+}
+
+// receiveMessages receives messages via USB CDC and updates the incomingMessages variable.
+//
+// Returns:
+//
+// An error if receiving messages fails.
+func receiveMessages() error {
+	// Receive messages
+	messages, err := internalusbcdc.USBCDCHandler.ReceiveMessages()
+	if err != nil {
+		return err
+	}
+	incomingMessages = messages
+	return nil
 }
 
 // sendErrorMessage sends an error message via USB CDC if there is an error to be sent.
@@ -130,13 +117,8 @@ func init() {
 func main() {
 	for {
 		// Stop ESC motor and center servo before waiting for switch press
-		if err := stopAndCenter(initializationTimeout); err != nil {
-			panic(
-				fmt.Errorf(
-					"error stopping esc motor and centering servo: %w",
-					err,
-				),
-			)
+		if err := stopAndCenter(); err != nil {
+			panic(err)
 		}
 
 		// Wait for switch press
@@ -146,7 +128,6 @@ func main() {
 
 		// Set the exit condition to False
 		toExit := false
-
 		for !toExit {
 			// Check if the BNO08x needs to be reset
 			if time.Since(lastBNO08XResetTime) > internalbno08x.ResetBNO08XInterval {
@@ -162,51 +143,23 @@ func main() {
 				}
 			}
 
-			// Create context with timeout for update routines
-			ctx, cancel := context.WithTimeout(
-				context.Background(),
-				updateTimeout,
-			)
-			g, ctx := errgroup.WithContext(ctx)
+			// Create the group for concurrent tasks
+			g := &errgroup.Group{}
 
 			// Update BNO08x quaternion
 			g.Go(
-				func() error {
-					// Respect cancellation if long-running
-					select {
-					case <-ctx.Done():
-						return ctx.Err()
-					default:
-					}
-					// Placeholder for BNO08x update logic
-					return internalbno08x.BNO08XHandler.Update()
-				},
+				internalbno08x.BNO08XHandler.Update,
 			)
 
 			// Receive USB CDC messages
 			g.Go(
-				func() error {
-					// Respect cancellation if long-running
-					select {
-					case <-ctx.Done():
-						return ctx.Err()
-					default:
-					}
-					// Receive messages
-					msgs, err := internalusbcdc.USBCDCHandler.ReceiveMessages()
-					if err != nil {
-						return err
-					}
-					incomingMessages = msgs
-					return nil
-				},
+				receiveMessages,
 			)
 
 			// Wait for both; handle first error (if any)
 			if err := g.Wait(); err != nil {
 				sendErrorMessage(err)
 			}
-			cancel()
 
 			// Check if there are incoming messages
 			if incomingMessages == nil {
@@ -239,13 +192,8 @@ func main() {
 					toExit = true
 
 					// Stop the motor and center the servo
-					if err := stopAndCenter(stopTimeout); err != nil {
-						sendErrorMessage(
-							fmt.Errorf(
-								"error stopping esc motor and centering servo: %w",
-								err,
-							),
-						)
+					if err := stopAndCenter(); err != nil {
+						sendErrorMessage(err)
 					}
 
 					// Send a confirmation message to the serial communication
@@ -269,10 +217,10 @@ func main() {
 					receivedMotorsSpeedMessage = &msg
 				} else if msg.Category.IsAServoCategory() {
 					// If a servo angle message was already processed, skip this one
-					if receivedServoAngleMessage != nil {
+					if receivedServoDirectionMessage != nil {
 						continue
 					}
-					receivedServoAngleMessage = &msg
+					receivedServoDirectionMessage = &msg
 				} else {
 					sendErrorMessage(
 						fmt.Errorf(
@@ -283,101 +231,30 @@ func main() {
 				}
 			}
 
-			// Check if the exit flag is set
+			// Break the loop if the exit flag is set
 			if toExit {
-				// Break the loop if the exit flag is set
 				break
 			}
 
 			// Check if we have received either or both motor speed and servo angle messages
-			if receivedMotorsSpeedMessage != nil || receivedServoAngleMessage != nil {
+			if receivedMotorsSpeedMessage != nil || receivedServoDirectionMessage != nil {
 				// Create the context for setting motor speed and servo angle
-				ctx, cancel = context.WithTimeout(
-					context.Background(),
-					updateMotorAndServoTimeout,
-				)
-				g, ctx = errgroup.WithContext(ctx)
+				g = &errgroup.Group{}
 
 				// Add the set motor speed routine if a motor speed message was received
 				if receivedMotorsSpeedMessage != nil {
 					g.Go(
 						func() error {
-							// Respect cancellation if long-running
-							select {
-							case <-ctx.Done():
-								return ctx.Err()
-							default:
-							}
-
-							// Check if the motor speed should be retrieved from the message
-							if receivedMotorsSpeedMessage.Category != internalusbcdcenums.IncomingCategoryMotorSpeedStop {
-								// Get int16 speed from message content
-								speed, err := receivedMotorsSpeedMessage.GetContentAsUint16()
-								if err != nil {
-									return fmt.Errorf(
-										"invalid motor speed value: %w",
-										err,
-									)
-								}
-								motorSpeed = speed
-							}
-
-							// Check the motor speed category
-							switch receivedMotorsSpeedMessage.Category {
-							case internalusbcdcenums.IncomingCategoryMotorSpeedStop:
-								return internalescmotor.ESCMotorHandler.Stop()
-							case internalusbcdcenums.IncomingCategoryMotorSpeedForward:
-								return internalescmotor.ESCMotorHandler.SetSpeedForward(motorSpeed)
-							case internalusbcdcenums.IncomingCategoryMotorSpeedBackward:
-								return internalescmotor.ESCMotorHandler.SetSpeedBackward(motorSpeed)
-							default:
-								return fmt.Errorf(
-									"unknown motor speed category: %v",
-									receivedMotorsSpeedMessage.Category,
-								)
-							}
+							return internalescmotor.ESCMotorHandler.SetSpeedBasedOnReceivedMessage(receivedMotorsSpeedMessage)
 						},
 					)
 				}
 
 				// Add the set servo angle routine if a servo angle message was received
-				if receivedServoAngleMessage != nil {
+				if receivedServoDirectionMessage != nil {
 					g.Go(
 						func() error {
-							// Respect cancellation if long-running
-							select {
-							case <-ctx.Done():
-								return ctx.Err()
-							default:
-							}
-
-							// Check if the servo angle should be retrieved from the message
-							if receivedServoAngleMessage.Category != internalusbcdcenums.IncomingCategoryServoAngleCenter {
-								// Get uint16 angle from message content
-								angle, err := receivedServoAngleMessage.GetContentAsUint16()
-								if err != nil {
-									return fmt.Errorf(
-										"invalid servo angle value: %w",
-										err,
-									)
-								}
-								servoAngle = angle
-							}
-
-							// Check the servo angle category
-							switch receivedServoAngleMessage.Category {
-							case internalusbcdcenums.IncomingCategoryServoAngleCenter:
-								return internalservo.ServoHandler.SetAngleToCenter()
-							case internalusbcdcenums.IncomingCategoryServoAngleToLeft:
-								return internalservo.ServoHandler.SetAngleToLeft(servoAngle)
-							case internalusbcdcenums.IncomingCategoryServoAngleToRight:
-								return internalservo.ServoHandler.SetAngleToRight(servoAngle)
-							default:
-								return fmt.Errorf(
-									"unknown servo angle category: %v",
-									receivedServoAngleMessage.Category,
-								)
-							}
+							return internalservo.ServoHandler.SetDirectionBasedOnReceivedMessage(receivedServoDirectionMessage)
 						},
 					)
 				}
@@ -386,12 +263,11 @@ func main() {
 				if err := g.Wait(); err != nil {
 					sendErrorMessage(err)
 				}
-				cancel()
 			}
 
 			// Reset the variables for the next iteration
 			receivedMotorsSpeedMessage = nil
-			receivedServoAngleMessage = nil
+			receivedServoDirectionMessage = nil
 		}
 	}
 }

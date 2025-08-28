@@ -313,3 +313,48 @@ func (s *DefaultHandler) SetDirectionToRight(angle uint16) error {
 func (s *DefaultHandler) SetDirectionToLeft(angle uint16) error {
 	return s.SetAngleToRight(angle)
 }
+
+// SetDirectionBasedOnReceivedMessage sets the servo direction based on the received message
+//
+// Parameters:
+//
+// message: The incoming message containing the servo direction command
+//
+// Returns:
+//
+// An error if the servo direction could not be set
+func (s *DefaultHandler) SetDirectionBasedOnReceivedMessage(message *internalusbcdc.IncomingMessage) error {
+	// Check if the message is nil
+	if message == nil {
+		return internalusbcdc.ErrNilIncomingMessage
+	}
+
+	// Check if the servo angle should be retrieved from the message
+	var servoDirectionAngle uint16
+	if message.Category != internalusbcdcenums.IncomingCategoryServoDirectionCenter {
+		// Get uint16 angle from message content
+		angle, err := message.GetContentAsUint16()
+		if err != nil {
+			return fmt.Errorf(
+				"invalid servo direction value: %w",
+				err,
+			)
+		}
+		servoDirectionAngle = angle
+	}
+
+	// Check the servo angle category
+	switch message.Category {
+	case internalusbcdcenums.IncomingCategoryServoDirectionCenter:
+		return s.SetDirectionToCenter()
+	case internalusbcdcenums.IncomingCategoryServoDirectionToLeft:
+		return s.SetDirectionToLeft(servoDirectionAngle)
+	case internalusbcdcenums.IncomingCategoryServoDirectionToRight:
+		return s.SetDirectionToRight(servoDirectionAngle)
+	default:
+		return fmt.Errorf(
+			"unknown servo direction category: %v",
+			message.Category,
+		)
+	}
+}

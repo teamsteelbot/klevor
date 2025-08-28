@@ -108,7 +108,7 @@ func NewIncomingMessageFromString(message string) (*IncomingMessage, error) {
 	}
 
 	// Check if based on the incoming category the message content can be empty or not
-	if category == internalusbcdcenums.IncomingCategoryMotorSpeedStop || category == internalusbcdcenums.IncomingCategoryServoAngleCenter {
+	if category == internalusbcdcenums.IncomingCategoryMotorSpeedStop || category == internalusbcdcenums.IncomingCategoryServoDirectionCenter {
 		return NewIncomingMessage(category, ""), nil
 	}
 
@@ -157,7 +157,7 @@ func (msg *IncomingMessage) GetContentAsUint16() (uint16, error) {
 	// Convert the content to uint16
 	u, err := strconv.ParseUint(msg.Content, 10, 16)
 	if err != nil {
-		return 0, fmt.Errorf("invalid uint16 value %q: %w", clean, err)
+		return 0, fmt.Errorf("invalid uint16 value %q: %w", msg.Content, err)
 	}
 	return uint16(u), nil
 }

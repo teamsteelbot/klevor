@@ -17,4 +17,5 @@ const (
 var (
 	ErrNilHandler         = errors.New("usb-cdc handler cannot be nil")
 	ErrNilOutgoingMessage = errors.New("outgoing message cannot be nil")
+	ErrNilIncomingMessage = errors.New("incoming message cannot be nil")
 )

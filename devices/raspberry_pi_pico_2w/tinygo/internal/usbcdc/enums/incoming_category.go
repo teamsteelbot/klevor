@@ -16,21 +16,21 @@ const (
 	IncomingCategoryMotorSpeedStop
 	IncomingCategoryMotorSpeedForward
 	IncomingCategoryMotorSpeedBackward
-	IncomingCategoryServoAngleCenter
-	IncomingCategoryServoAngleToLeft
-	IncomingCategoryServoAngleToRight
+	IncomingCategoryServoDirectionCenter
+	IncomingCategoryServoDirectionToLeft
+	IncomingCategoryServoDirectionToRight
 )
 
 var (
 	// IncomingCategoryNames maps a given IncomingCategory to its string name
 	IncomingCategoryNames = map[IncomingCategory]string{
-		IncomingCategoryStatus:             "status",
-		IncomingCategoryMotorSpeedStop:     "motor_speed_stop",
-		IncomingCategoryMotorSpeedForward:  "motor_speed_forward",
-		IncomingCategoryMotorSpeedBackward: "motor_speed_backward",
-		IncomingCategoryServoAngleCenter:   "servo_angle_center",
-		IncomingCategoryServoAngleToLeft:   "servo_angle_to_left",
-		IncomingCategoryServoAngleToRight:  "servo_angle_to_right",
+		IncomingCategoryStatus:                "status",
+		IncomingCategoryMotorSpeedStop:        "motor_speed_stop",
+		IncomingCategoryMotorSpeedForward:     "motor_speed_forward",
+		IncomingCategoryMotorSpeedBackward:    "motor_speed_backward",
+		IncomingCategoryServoDirectionCenter:  "servo_direction_center",
+		IncomingCategoryServoDirectionToLeft:  "servo_direction_to_left",
+		IncomingCategoryServoDirectionToRight: "servo_direction_to_right",
 	}
 )
 
@@ -90,9 +90,9 @@ func IncomingCategoryFromUint8(value uint8) (IncomingCategory, error) {
 //
 // True if the category is a servo category, otherwise False
 func (i *IncomingCategory) IsAServoCategory() bool {
-	return *i == IncomingCategoryServoAngleCenter ||
-		*i == IncomingCategoryServoAngleToLeft ||
-		*i == IncomingCategoryServoAngleToRight
+	return *i == IncomingCategoryServoDirectionCenter ||
+		*i == IncomingCategoryServoDirectionToLeft ||
+		*i == IncomingCategoryServoDirectionToRight
 }
 
 // IsAMotorCategory checks if the given IncomingCategory is a motor category
