@@ -89,7 +89,7 @@ alt="First layer, top view" class="vehicle-view-image">
 </div>
 mkdocs-only-end -->
 
-Next, We will explain how this drive system works. To achieve it, we decided to imitate the way a car works; its operation depends on a differential (a part made up of several gears covered by a housing) for the movement of two wheels, since we use four wheels, we use two differentials (one for the front, one for the rear) which are connected with a transmission shaft to make sure that the movement is uniform. These differentials move together through a gear that is connected to the transmission shaft. The transmission shaft only connects the two differentials together by means of a slot in them, and has the addition of a gear in the part where our motor goes ([INJORA 48T](../../electronic/components/current.en.md#injora-180-motor-48t)). Originally, we connected this motor directly to the transmission shaft's gear, however it didn't work since the motor didn't have enough torque to move Klevor. Due to this issue, we had to create a RPM reduction system.
+Next, We will explain how this drive system works. To achieve it, we decided to imitate the way a car works; its operation depends on a differential (a part made up of several gears covered by a casing) for the movement of two wheels, since we use four wheels, we use two differentials (one for the front, one for the rear) which are connected with a transmission shaft to make sure that the movement is uniform. These differentials move together through a gear that is connected to the transmission shaft. The transmission shaft only connects the two differentials together by means of a slot in them, and has the addition of a gear in the part where our motor goes ([INJORA 48T](../../electronic/components/current.en.md#injora-180-motor-48t)). Originally, we connected this motor directly to the transmission shaft's gear, however it didn't work since the motor didn't have enough torque to move Klevor. Due to this issue, we had to create a RPM reduction system.
 
 ## How does the RPM reduction system work?
 
@@ -108,7 +108,8 @@ Next, We will explain how this drive system works. To achieve it, we decided to 
     <i>RPM Reduction System</i>
 </div>
 mkdocs-only-end -->
- This system forces the motor, which was very fast but not strong enough, to apply more strength to move, which is something important for the challenges, which require traction and overcoming obstacles.
+ 
+This system forces the motor, which was very fast but not strong enough, to apply more strength to move, which is something important for the challenges, which require traction and overcoming obstacles.
 
 <!-- github-only-start -->
 <table>
@@ -478,4 +479,4 @@ This layer was also designed and printed by ourselves, mainly focused in reducin
 
 **Total Component Cost: $477.89**
 
-1. This product is listed at $70,000.00 COP which is roughly equivalent to $17,50 american dollars. <a id="note1" ></a>
+1. This product is listed at $70,000.00 COP which is roughly equivalent to $17,50 American Dollars. <a id="note1"></a>

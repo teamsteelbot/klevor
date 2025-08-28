@@ -192,4 +192,4 @@ Decidimos eliminar también la tercera capa que tenía el primer prototipo, ya q
 
 **Total para los Componentes: $656.79**
 
-1. El producto está listado con un valor de $70.000,00 COP lo cual es equivalente alrededor de 17,50 dólares estadounidenses a fecha del 21 de julio de 2025.<a id="note1" ></a>
+1. El producto está listado con un valor de $70.000,00 COP lo cual es equivalente a alrededor de 17,50 dólares estadounidenses. <a id="note1"></a>
