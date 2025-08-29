@@ -1,0 +1,3 @@
+@echo Compiling Go test program for RPLiDAR...
+go build -o ./output/bin/tests/rplidar ./cmd/tests/rplidar
+@echo Done.

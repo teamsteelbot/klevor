@@ -1,0 +1,3 @@
+echo Compiling Go test program for logging...
+go build -o ./output/bin/tests/log ./cmd/tests/log
+echo Done.

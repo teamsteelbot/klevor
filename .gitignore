@@ -56,3 +56,4 @@ __pycache__
 
 # Executables
 /**/*/*.exe
+/devices/raspberry_pi_5/go/output
