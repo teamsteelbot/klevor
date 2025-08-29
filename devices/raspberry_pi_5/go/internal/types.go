@@ -53,6 +53,8 @@ func validateAngle(angle float64, hasSyncBit bool) error {
 // distance: Distance of the measurement in millimeters.
 // quality: Quality of the measurement.
 // hasSyncBit: Indicates if the measurement has a sync bit.
+// isUpsideDown: Indicates if the LIDAR is upside down.
+// angleAdjustment: Angle adjustment to apply to the angle.
 //
 // Returns:
 //
@@ -61,10 +63,34 @@ func NewMeasure(
 	angle, distance float64,
 	quality int,
 	hasSyncBit bool,
+	isUpsideDown bool,
+	angleAdjustment float64,
 ) (*Measure, error) {
 	// Validate angle
 	if err := validateAngle(angle, hasSyncBit); err != nil {
 		return nil, err
+	}
+
+	// Ensure the angle is between 0 and 360 if it has a sync bit
+	if hasSyncBit {
+		angle = angle - 360.0
+	}
+
+	// Adjust angle if the LIDAR is upside down
+	if isUpsideDown {
+		angle = 360.0 - angle
+	}
+
+	// Apply angle adjustment
+	if angleAdjustment != 0 {
+		angle = angle + angleAdjustment
+	}
+
+	// Normalize angle to be within [0, 360)
+	if angle < 0 {
+		angle = angle + 360.0
+	} else if angle >= 360.0 {
+		angle = angle - 360.0
 	}
 
 	return &Measure{
@@ -75,16 +101,22 @@ func NewMeasure(
 	}, nil
 }
 
-// NewMeasureFromString creates a new Measure instance from a string representation.
+// NewMeasureFromSlamtecC1String creates a new Measure instance from a string representation specific to the Slamtec C1 model.
 //
 // Parameters:
 //
-// measureStr: String representation of the measurement in the format "angle,distance,quality".
+// measureStr: String representation of the measurement.
+// isUpsideDown: Indicates if the LIDAR is upside down.
+// angleAdjustment: Angle adjustment to apply to the angle.
 //
 // Returns:
 //
 // A Measure instance, or an error if the string is invalid.
-func NewMeasureFromString(measureStr string) (*Measure, error) {
+func NewMeasureFromSlamtecC1String(
+	measureStr string,
+	isUpsideDown bool,
+	angleAdjustment float64,
+) (*Measure, error) {
 	// Trim and split
 	fields := strings.Fields(measureStr)
 
@@ -126,7 +158,14 @@ func NewMeasureFromString(measureStr string) (*Measure, error) {
 	}
 
 	// Create the Measure instance
-	return NewMeasure(angle, distance, quality, hasSyncBit)
+	return NewMeasure(
+		angle,
+		distance,
+		quality,
+		hasSyncBit,
+		isUpsideDown,
+		angleAdjustment,
+	)
 }
 
 // GetAngle returns the angle of the measurement.

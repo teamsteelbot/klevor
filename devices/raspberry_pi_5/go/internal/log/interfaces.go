@@ -7,7 +7,6 @@ import (
 type (
 	// Logger is an interface for logging messages with different severity levels
 	Logger interface {
-		GetUniqueTag(tag string) string
 		Log(content string, category Category)
 		Info(content string)
 		Error(content string)

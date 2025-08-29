@@ -71,6 +71,11 @@ func (w *DefaultWriter) WriteReceivedMessages(ctx context.Context) error {
 		}
 	}(file)
 
+	// Log a message indicating that the writer has started
+	if _, err = file.WriteString(WriterStartedMessage.String() + "\n"); err != nil {
+		return err
+	}
+
 	// Process messages from the channel
 	for {
 		select {

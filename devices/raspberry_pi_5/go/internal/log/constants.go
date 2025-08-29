@@ -38,6 +38,13 @@ var (
 		nil,
 	)
 
+	// WriterStartedMessage is the message logged when the writer starts
+	WriterStartedMessage = NewMessage(
+		CategoryInfo,
+		"Log writer started",
+		nil,
+	)
+
 	// LogsFolder is the folder name where logs are stored
 	LogsFolder string
 
