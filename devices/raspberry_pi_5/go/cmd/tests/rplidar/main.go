@@ -1,4 +1,4 @@
-package rplidar
+package main
 
 import (
 	"context"
@@ -56,6 +56,9 @@ func main() {
 		0.0,
 		true,
 	)
+	if err != nil {
+		log.Fatalf("failed to initialize rplidar handler: %v", err)
+	}
 
 	// Create a context that is cancelled on shutdown signal
 	ctx, cancel := context.WithCancel(context.Background())
@@ -75,6 +78,17 @@ func main() {
 	g.Go(
 		func() error {
 			return rplidarHandler.ReadIncomingMeasures(ctx)
+		},
+	)
+
+	// Initialize a goroutine to print the measures map
+	g.Go(
+		func() error {
+			for measures := range measuresMapCh {
+				// Print the measures map
+				fmt.Printf("Received measures: %+v\n", measures)
+			}
+			return nil
 		},
 	)
 

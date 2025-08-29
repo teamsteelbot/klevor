@@ -26,7 +26,7 @@ type (
 		isUpsideDown        bool
 		angleAdjustment     float64
 		debug               bool
-		measuresMap         map[uint16]*internal.Measure
+		measuresMap         *map[uint16]*internal.Measure
 		stdoutLinesRead     int
 		isRotationCompleted bool
 	}
@@ -92,9 +92,10 @@ func NewSlamtecC1Handler(
 
 // resetMeasuresMap resets the measures map to its initial state.
 func (h *SlamtecC1Handler) resetMeasuresMap() {
-	h.measuresMap = make(map[uint16]*internal.Measure)
+	h.measuresMap = new(map[uint16]*internal.Measure)
+	*h.measuresMap = make(map[uint16]*internal.Measure)
 	for angle := 1; angle < 360; angle++ {
-		h.measuresMap[uint16(angle)] = nil
+		(*h.measuresMap)[uint16(angle)] = nil
 	}
 }
 
@@ -300,11 +301,11 @@ func (h *SlamtecC1Handler) handleStdoutLine(line string) error {
 	}
 
 	// Store the measure in the measures map
-	h.measuresMap[uint16(measure.GetAngle())] = measure
+	(*h.measuresMap)[uint16(measure.GetAngle())] = measure
 
 	// Send the measures map to the channel if the rotation is completed
 	if h.isRotationCompleted {
-		h.measuresMapCh <- &h.measuresMap
+		h.measuresMapCh <- h.measuresMap
 
 		// Reset the measures map
 		h.resetMeasuresMap()
