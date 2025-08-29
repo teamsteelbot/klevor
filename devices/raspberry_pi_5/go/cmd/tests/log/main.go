@@ -18,27 +18,31 @@ const (
 
 	// SendMessageInterval is the interval between sending messages
 	SendMessageInterval = 10 * time.Millisecond
+
+	// GracefulShutdownTimeout is the timeout for graceful shutdown
+	GracefulShutdownTimeout = 5 * time.Second
+
+	// ChannelBufferSize is the size of the message channel buffer
+	ChannelBufferSize = 512
 )
 
 func main() {
 	// Define flags (argument parser style)
 	logDebug := flag.Bool("debug", false, "Enable debug logging")
-	logTimeout := flag.Duration(
-		"shutdown-timeout",
-		5*time.Second,
-		"Graceful shutdown timeout",
-	)
 	flag.Parse()
 
 	// Channel for messages
-	msgCh := make(chan *internallog.Message, 128)
+	msgCh := make(chan *internallog.Message, ChannelBufferSize)
 
+	// Initialize the writer
 	writer, err := internallog.NewDefaultWriter(msgCh, *logDebug)
 	if err != nil {
-		log.Fatalf("init logger: %v", err)
+		log.Fatalf("failed to intialize writer: %v", err)
 	}
 
+	// Create a context that is cancelled on shutdown signal
 	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	// Example: simulate shutdown on SIGINT
 	go func() {
@@ -60,11 +64,12 @@ func main() {
 		close(msgCh)
 	}()
 
+	// Read the messages and write them
 	if err = writer.WriteReceivedMessages(ctx); err != nil && !errors.Is(
 		err,
 		context.Canceled,
 	) {
-		_, err = fmt.Fprintf(os.Stderr, "logger error: %v\n", err)
+		_, err = fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		if err != nil {
 			return
 		}
@@ -73,6 +78,6 @@ func main() {
 	// Optional graceful wait
 	select {
 	case <-ctx.Done():
-	case <-time.After(*logTimeout):
+	case <-time.After(GracefulShutdownTimeout):
 	}
 }
