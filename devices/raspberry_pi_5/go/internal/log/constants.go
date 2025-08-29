@@ -38,7 +38,7 @@ var (
 		nil,
 	)
 
-	// LogsFolder is the folder where logs are stored
+	// LogsFolder is the folder name where logs are stored
 	LogsFolder string
 
 	// Filename is the default log filename
@@ -58,7 +58,7 @@ var (
 
 func init() {
 	// Initialize LogsFolder with the correct path
-	LogsFolder = filepath.Join(internal.BinaryFolder, LogsFolderName)
+	LogsFolder = filepath.Join(internal.RootFolderPath, LogsFolderName)
 
 	// Initialize FilePath with the correct path
 	FilePath = filepath.Join(LogsFolder, Filename)
