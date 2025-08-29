@@ -14,7 +14,7 @@ import (
 
 const (
 	// SimulateShutdownAfter for demonstration purposes, simulate shutdown after this duration
-	SimulateShutdownAfter = 10 * time.Second
+	SimulateShutdownAfter = 5 * time.Second
 
 	// SendMessageInterval is the interval between sending messages
 	SendMessageInterval = 10 * time.Millisecond

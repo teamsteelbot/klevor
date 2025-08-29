@@ -31,7 +31,7 @@ func NewMessage(category Category, content string, tag *string) *Message {
 		category,
 		content,
 		tag,
-		time.Now().Format(time.TimeOnly),
+		time.Now().Format(TimestampFormat),
 	}
 }
 

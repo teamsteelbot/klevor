@@ -1,2 +1,3 @@
 @echo Compiling and flashing TinyGo test program for onboard LED to Raspberry Pi Pico 2W...
 tinygo flash -target pico2-w ./cmd/tests/onboard_led/main.go
+@echo Done.

@@ -1,2 +1,3 @@
 @echo Compiling and flashing TinyGo test program for BNO08x to Raspberry Pi Pico 2W...
 tinygo flash -target pico2-w ./cmd/tests/bno08x/main.go
+@echo Done.

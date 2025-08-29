@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 )
 
 type (
@@ -49,6 +50,12 @@ func NewDefaultWriter(
 //
 // An error if any issues occur during message processing or file writing.
 func (w *DefaultWriter) WriteReceivedMessages(ctx context.Context) error {
+	// Ensure parent directory exists
+	logDir := filepath.Dir(FilePath)
+	if err := os.MkdirAll(logDir, 0o755); err != nil {
+		return fmt.Errorf("creating log directory %s: %w", logDir, err)
+	}
+
 	// Open the log file in append mode
 	file, err := os.OpenFile(
 		FilePath,

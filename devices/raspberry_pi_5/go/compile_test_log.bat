@@ -1,2 +1,3 @@
-@echo
-go run build.go -src ./cmd/tests/log -outdir ./output/bin/tests -name log
+@echo Compiling Go test program for logging...
+go build -o ./output/bin/tests/log.exe ./cmd/tests/log
+@echo Done.

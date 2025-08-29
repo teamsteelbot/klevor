@@ -11,6 +11,9 @@ import (
 const (
 	// LogsFolderName is the name of the logs folder
 	LogsFolderName = "logs"
+
+	// TimestampFormat is the format for timestamps in log messages
+	TimestampFormat = "15:04:05.000"
 )
 
 var (
@@ -40,9 +43,13 @@ var (
 
 	// Filename is the default log filename
 	Filename = strings.ReplaceAll(
-		time.Now().Format(time.DateTime),
-		" ",
-		"_",
+		strings.ReplaceAll(
+			time.Now().Format(time.DateTime),
+			" ",
+			"-",
+		),
+		":",
+		"-",
 	) + ".log"
 
 	// FilePath is the default log file path

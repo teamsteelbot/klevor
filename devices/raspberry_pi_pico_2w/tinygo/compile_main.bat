@@ -1,2 +1,3 @@
 @echo Compiling and flashing TinyGo program to Raspberry Pi Pico 2W...
 tinygo flash -target pico2-w ./cmd/main/main.go
+@echo Done.
