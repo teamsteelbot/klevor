@@ -274,7 +274,7 @@ func (h *SlamtecC1Handler) handleStdoutLine(line string) error {
 	h.stdoutLinesRead++
 
 	// Check if the message should be ignored
-	if h.stdoutLinesRead <= 6 {
+	if h.stdoutLinesRead <= IgnoreFirstStdoutMessages {
 		return nil
 	}
 

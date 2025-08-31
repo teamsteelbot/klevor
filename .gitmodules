@@ -4,3 +4,6 @@
 [submodule "devices/raspberry_pi_5/hailo-model-zoo"]
 	path = devices/raspberry_pi_5/hailo-model-zoo
 	url = https://github.com/ralvarezdev/hailo-model-zoo.git
+[submodule "devices/raspberry_pi_5/hailo-clip"]
+	path = devices/raspberry_pi_5/hailo-clip
+	url = https://github.com/ralvarezdev/hailo-clip.git
