@@ -9,7 +9,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal"
 	internallog "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/log"
 	internalrplidar "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/rplidar"
 	"golang.org/x/sync/errgroup"
@@ -22,8 +21,8 @@ const (
 	// MessagesChannelBufferSize is the size of the message channel buffer
 	MessagesChannelBufferSize = 512
 
-	// MeasuresMapBufferSize is the size of the measures map channel buffer
-	MeasuresMapBufferSize = 10
+	// RotationCompletedChannelBufferSize is the size of the rotation completed channel buffer
+	RotationCompletedChannelBufferSize = 10
 )
 
 func main() {
@@ -34,10 +33,10 @@ func main() {
 	// Channel for messages
 	msgCh := make(chan *internallog.Message, MessagesChannelBufferSize)
 
-	// Channel for measures map
-	measuresMapCh := make(
-		chan *map[uint16]*internal.Measure,
-		MeasuresMapBufferSize,
+	// Channel for rotation completed signals
+	rotationCompletedCh := make(
+		chan internalrplidar.RotationCompleted,
+		RotationCompletedChannelBufferSize,
 	)
 
 	// Initialize the writer
@@ -49,7 +48,7 @@ func main() {
 	// Initialize the Slamtec C1 handler
 	rplidarHandler, err := internalrplidar.NewSlamtecC1Handler(
 		msgCh,
-		measuresMapCh,
+		rotationCompletedCh,
 		internalrplidar.SlamtecC1BaudRate,
 		internalrplidar.SlamtecC1Port,
 		true,
@@ -81,12 +80,12 @@ func main() {
 		},
 	)
 
-	// Initialize a goroutine to print the measures map
+	// Initialize a goroutine to print the measures on each rotation completed
 	g.Go(
 		func() error {
-			for measures := range measuresMapCh {
-				// Print the measures map
-				fmt.Printf("Received measures: %+v\n", measures)
+			for _ = range rotationCompletedCh {
+				// Print that a rotation has been completed
+				fmt.Println("Rotation completed")
 			}
 			return nil
 		},
@@ -104,5 +103,9 @@ func main() {
 	select {
 	case <-ctx.Done():
 	case <-time.After(GracefulShutdownTimeout):
+		// Timeout reached, close channels
+		close(msgCh)
+		close(rotationCompletedCh)
 	}
+
 }

@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal"
@@ -17,16 +18,20 @@ import (
 )
 
 type (
+	// RotationCompleted is a signal sent when a full rotation is completed
+	RotationCompleted struct{}
+
 	// SlamtecC1Handler is the handler for the Slamtec RPLiDAR C1 device
 	SlamtecC1Handler struct {
+		mutex               sync.RWMutex
 		logger              internallog.Logger
-		measuresMapCh       chan<- *map[uint16]*internal.Measure
+		rotationCompletedCh chan<- RotationCompleted
 		baudrate            int
 		port                string
 		isUpsideDown        bool
 		angleAdjustment     float64
 		debug               bool
-		measuresMap         *map[uint16]*internal.Measure
+		measures            [360]*internal.Measure
 		stdoutLinesRead     int
 		isRotationCompleted bool
 	}
@@ -37,7 +42,7 @@ type (
 // Parameters:
 //
 // writerMessagesCh: Channel to send log messages.
-// measuresMapCh: Channel to send the measures map.
+// rotationCompletedCh: Channel to signal when a full rotation is completed.
 // baudrate: Baud rate for the serial communication.
 // port: SerialCommunication port for the RPLiDAR.
 // isUpsideDown: If true, the RPLiDAR is upside down, and angles will be adjusted accordingly.
@@ -48,7 +53,7 @@ type (
 // A pointer to a SlamtecC1Handler instance or an error if any parameter is invalid.
 func NewSlamtecC1Handler(
 	writerMessagesCh chan<- *internallog.Message,
-	measuresMapCh chan<- *map[uint16]*internal.Measure,
+	rotationCompletedCh chan<- RotationCompleted,
 	baudrate int,
 	port string,
 	isUpsideDown bool,
@@ -60,9 +65,9 @@ func NewSlamtecC1Handler(
 		return nil, internallog.ErrNilWriterMessagesChannel
 	}
 
-	// Check if the measuresMapCh is nil
-	if measuresMapCh == nil {
-		return nil, ErrNilMeasuresMapChannel
+	// Check if the rotationCompletedCh is nil
+	if rotationCompletedCh == nil {
+		return nil, ErrNilRotationCompletedCh
 	}
 
 	// Initialize the logger
@@ -78,25 +83,16 @@ func NewSlamtecC1Handler(
 
 	// Create a new SlamtecC1Handler instance
 	handler := &SlamtecC1Handler{
-		logger:          logger,
-		measuresMapCh:   measuresMapCh,
-		baudrate:        baudrate,
-		port:            port,
-		isUpsideDown:    isUpsideDown,
-		angleAdjustment: angleAdjustment,
-		debug:           debug,
+		logger:              logger,
+		rotationCompletedCh: rotationCompletedCh,
+		baudrate:            baudrate,
+		port:                port,
+		isUpsideDown:        isUpsideDown,
+		angleAdjustment:     angleAdjustment,
+		debug:               debug,
 	}
 
 	return handler, nil
-}
-
-// resetMeasuresMap resets the measures map to its initial state.
-func (h *SlamtecC1Handler) resetMeasuresMap() {
-	h.measuresMap = new(map[uint16]*internal.Measure)
-	*h.measuresMap = make(map[uint16]*internal.Measure)
-	for angle := 1; angle < 360; angle++ {
-		(*h.measuresMap)[uint16(angle)] = nil
-	}
 }
 
 // ReadIncomingMeasures reads incoming measures from the RPLiDAR and processes them.
@@ -109,8 +105,8 @@ func (h *SlamtecC1Handler) resetMeasuresMap() {
 //
 // An error if any issue occurs during reading or processing measures.
 func (h *SlamtecC1Handler) ReadIncomingMeasures(ctx context.Context) error {
-	// Reset the measures map
-	h.resetMeasuresMap()
+	// Initialize the measures slice
+	h.measures = [360]*internal.Measure{}
 
 	// Reset the stdout lines read counter
 	h.stdoutLinesRead = 0
@@ -300,20 +296,38 @@ func (h *SlamtecC1Handler) handleStdoutLine(line string) error {
 		return nil // Ignore out-of-range distances
 	}
 
+	// Lock the measures map for writing
+	h.mutex.Lock()
+	defer h.mutex.Unlock()
+
 	// Store the measure in the measures map
-	(*h.measuresMap)[uint16(measure.GetAngle())] = measure
+	angle := int(measure.GetAngle()) % 360
+	h.measures[angle] = measure
 
-	// Send the measures map to the channel if the rotation is completed
+	// Send the signal if a full rotation is completed
 	if h.isRotationCompleted {
-		h.measuresMapCh <- h.measuresMap
-
-		// Reset the measures map
-		h.resetMeasuresMap()
+		h.rotationCompletedCh <- RotationCompleted{}
 
 		// Reset the rotation completed flag
 		h.isRotationCompleted = false
 	}
 	return nil
+}
+
+// GetMeasures returns a copy of the current measures.
+//
+// Returns:
+//
+// A copy of the current measures.
+func (h *SlamtecC1Handler) GetMeasures() *[360]*internal.Measure {
+	// Lock the measures map for reading
+	h.mutex.RLock()
+	defer h.mutex.RUnlock()
+
+	// Create a copy of the measures map
+	measuresCopy := [360]*internal.Measure{}
+	copy(measuresCopy[:], h.measures[:])
+	return &measuresCopy
 }
 
 // handleStderrLine processes a single line from stderr.

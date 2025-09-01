@@ -12,6 +12,7 @@ const (
 	ErrFailedToSendChunkMessage   = "failed to send chunk message: %w"
 	ErrFailedToSendMessage        = "failed to send message: %w"
 	ErrFailedToSendEndCharacter   = "failed to send end character: %w"
+	ErrFailedToConfigureUSBCDC    = "failed to configure USB CDC: %w"
 )
 
 var (

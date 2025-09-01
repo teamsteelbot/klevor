@@ -22,6 +22,9 @@ const (
 
 	// ConfirmationMessageTimeout is the timeout duration for confirmation messages
 	ConfirmationMessageTimeout = time.Second * 5
+
+	// BaudRate is the baud rate for USB-CDC communication
+	BaudRate = 921600
 )
 
 var (

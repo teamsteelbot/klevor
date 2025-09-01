@@ -18,6 +18,7 @@ type (
 	DefaultHandler struct {
 		challengeHandler internalchallenge.Handler
 		ledHandler       internalled.Handler
+		serialer         machine.Serialer
 	}
 )
 
@@ -45,9 +46,19 @@ func NewDefaultHandler(
 		return nil, internalled.ErrNilHandler
 	}
 
+	// Configure the USB CDC serial port
+	if err := machine.USBCDC.Configure(
+		machine.UARTConfig{
+			BaudRate: BaudRate,
+		},
+	); err != nil {
+		return nil, fmt.Errorf(ErrFailedToConfigureUSBCDC, err)
+	}
+
 	return &DefaultHandler{
 		challengeHandler,
 		ledHandler,
+		machine.USBCDC,
 	}, nil
 }
 
@@ -58,7 +69,7 @@ func NewDefaultHandler(
 // A pointer to a list of received messages or an error if it fails to receive messages
 func (d *DefaultHandler) ReceiveMessages() (*[]IncomingMessage, error) {
 	// If no messages are received, turn off the LED
-	if machine.Serial.Buffered() == 0 {
+	if d.serialer.Buffered() == 0 {
 		if d.ledHandler.IsOn() {
 			d.ledHandler.SetOff()
 		}
@@ -73,9 +84,9 @@ func (d *DefaultHandler) ReceiveMessages() (*[]IncomingMessage, error) {
 	// Initialize a slice to hold the messages and a buffer to hold the incoming data
 	messages := &[]IncomingMessage{}
 	buffer := make([]byte, 0, BufferSize)
-	for machine.Serial.Buffered() > 0 {
+	for d.serialer.Buffered() > 0 {
 		// Read a byte from the serial port
-		c, err := machine.Serial.ReadByte()
+		c, err := d.serialer.ReadByte()
 		if err != nil {
 			return nil, fmt.Errorf(ErrFailedReadingFromSerial, err)
 		}
@@ -115,7 +126,7 @@ func (d *DefaultHandler) SendMessage(message *OutgoingMessage) error {
 	}
 
 	// Send the message to the console port
-	if _, err := machine.Serial.Write([]byte(message.String())); err != nil {
+	if _, err := d.serialer.Write([]byte(message.String())); err != nil {
 		return fmt.Errorf(ErrFailedToSendMessage, err)
 	}
 	return nil
@@ -139,7 +150,7 @@ func (d *DefaultHandler) SendBufferMessage(
 	if category == internalusbcdcenums.OutgoingCategoryNil {
 		return fmt.Errorf(ErrNilOutgoingCategory, category)
 	}
-	machine.Serial.WriteByte(
+	d.serialer.WriteByte(
 		byte(category),
 	)
 
@@ -154,13 +165,13 @@ func (d *DefaultHandler) SendBufferMessage(
 		chunk := messageStr[i:end]
 
 		// Send the chunk to the console port
-		if _, err := machine.Serial.Write([]byte(chunk)); err != nil {
+		if _, err := d.serialer.Write([]byte(chunk)); err != nil {
 			return fmt.Errorf(ErrFailedToSendChunkMessage, err)
 		}
 	}
 
 	// Send the end character to indicate the end of the message
-	if err := machine.Serial.WriteByte(EndChar); err != nil {
+	if err := d.serialer.WriteByte(EndChar); err != nil {
 		return fmt.Errorf(ErrFailedToSendEndCharacter, err)
 	}
 	return nil
@@ -220,7 +231,7 @@ func (d *DefaultHandler) SendConfirmationMessage() error {
 // An error if it fails to send the initialization message
 func (d *DefaultHandler) SendInitializationMessage() error {
 	// Send the end character message to indicate initialization
-	return machine.Serial.WriteByte(EndChar)
+	return d.serialer.WriteByte(EndChar)
 }
 
 // SendChallengeMessage sends a challenge message to the USB CDC.

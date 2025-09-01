@@ -5,6 +5,6 @@ import (
 )
 
 var (
-	ErrNilMeasuresMapChannel = errors.New("measures map channel cannot be nil")
-	ErrNilLineHandler        = errors.New("line handler cannot be nil")
+	ErrNilRotationCompletedCh = errors.New("rotation completed channel cannot be nil")
+	ErrNilLineHandler         = errors.New("line handler cannot be nil")
 )
