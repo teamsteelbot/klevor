@@ -17,9 +17,9 @@ Actualmente, toda la documentación oficial se encuentra [aquí](https://klevor.
 </p>
 
 <p align="center">
-	<img src="assets/videos/documentation-preview.gif" alt="Peview de la documentación en GitHub Pages" width="500">
+	<img src="assets/videos/documentation-preview.gif" alt="Preview de la documentación en GitHub Pages" width="500">
 	<br>
-	<i>Peview de la documentación en GitHub Pages</i>
+	<i>Preview de la documentación en GitHub Pages</i>
 </p>
 
 > [!IMPORTANT]
