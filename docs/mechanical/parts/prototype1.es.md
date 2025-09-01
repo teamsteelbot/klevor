@@ -36,7 +36,7 @@ La base de Klevor, el robot, está diseñada especialmente para ensamblar y sopo
 </div>
 mkdocs-only-end -->
 
-Este soporte se atornilla a la caja del diferencial trasera para sostener el segundo nivel
+Este soporte se atornilla a la caja del diferencial trasera para sostener el segundo nivel.
 
 ## Soporte Superior de la Caja del Diferencial (Grueso)
 
