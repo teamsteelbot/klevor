@@ -1,6 +1,7 @@
+#!/usr/bin/env sh
 set -e
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR=$(cd "$(dirname "$0")" || exit 1; pwd)
 
 SRC="$SCRIPT_DIR/rplidar-sdk/output/Linux/Release/ultra_simple"
 DST1="$SCRIPT_DIR/go/output/bin/tests/bin"
