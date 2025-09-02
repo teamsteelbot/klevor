@@ -47,6 +47,7 @@ type (
 // port: SerialCommunication port for the RPLiDAR.
 // isUpsideDown: If true, the RPLiDAR is upside down, and angles will be adjusted accordingly.
 // angleAdjustment: Optional angle adjustment to apply to the angles.
+// debug: If true, debug logging is enabled.
 //
 // Returns:
 //
@@ -119,8 +120,8 @@ func (h *SlamtecC1Handler) ReadIncomingMeasures(ctx context.Context) error {
 
 	// Arguments (do not include the executable itself)
 	args := []string{
-		"--channel",
-		"--serial",
+		UltraSimpleChannelArgument,
+		UltraSimpleSerialArgument,
 		h.port,
 		strconv.Itoa(h.baudrate),
 	}
@@ -128,7 +129,7 @@ func (h *SlamtecC1Handler) ReadIncomingMeasures(ctx context.Context) error {
 	// Execute the command with a context
 	cmd := exec.CommandContext(ctx, UltraSimplePath, args...)
 
-	// Stream output line by line (good for long‑running tools)
+	// Stream output line by line
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		return fmt.Errorf("stdout pipe error: %w", err)
@@ -296,11 +297,11 @@ func (h *SlamtecC1Handler) handleStdoutLine(line string) error {
 		return nil // Ignore out-of-range distances
 	}
 
-	// Lock the measures map for writing
+	// Lock the measures for writing
 	h.mutex.Lock()
 	defer h.mutex.Unlock()
 
-	// Store the measure in the measures map
+	// Store the measure in the measures
 	angle := int(measure.GetAngle()) % 360
 	h.measures[angle] = measure
 
@@ -320,11 +321,11 @@ func (h *SlamtecC1Handler) handleStdoutLine(line string) error {
 //
 // A copy of the current measures.
 func (h *SlamtecC1Handler) GetMeasures() *[360]*internal.Measure {
-	// Lock the measures map for reading
+	// Lock the measures for reading
 	h.mutex.RLock()
 	defer h.mutex.RUnlock()
 
-	// Create a copy of the measures map
+	// Create a copy of the measures
 	measuresCopy := [360]*internal.Measure{}
 	copy(measuresCopy[:], h.measures[:])
 	return &measuresCopy

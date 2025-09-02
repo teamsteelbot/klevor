@@ -26,7 +26,7 @@ const (
 )
 
 func main() {
-	// Define flags (argument parser style)
+	// Define flags
 	logDebug := flag.Bool("debug", false, "Enable debug logging")
 	flag.Parse()
 

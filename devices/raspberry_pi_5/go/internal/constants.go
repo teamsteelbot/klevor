@@ -8,6 +8,9 @@ const (
 	// BinaryFolderName is the name folder where the required binaries are located
 	BinaryFolderName = "bin"
 
+	// DataFolderName is the name of the folder where data files are stored
+	DataFolderName = "data"
+
 	// AttributesSeparator is the attributes separator
 	AttributesSeparator = ","
 
@@ -22,6 +25,12 @@ const (
 
 	// QualityIndex is the index of the quality in the measure string
 	QualityIndex = 2
+
+	// LabelIndex is the index of the label in the classification string
+	LabelIndex = 0
+
+	// ConfidenceIndex is the index of the confidence in the classification string
+	ConfidenceIndex = 1
 )
 
 var (
@@ -30,6 +39,9 @@ var (
 
 	// BinaryFolderPath is the path of the folder where the required binaries are located
 	BinaryFolderPath string
+
+	// DataFolderPath is the path of the folder where data files are stored
+	DataFolderPath string
 )
 
 func init() {
@@ -42,4 +54,7 @@ func init() {
 
 	// Initialize BinaryFolderPath with the correct path
 	BinaryFolderPath = filepath.Join(RootFolderPath, BinaryFolderName)
+
+	// Initialize DataFolderPath with the correct path
+	DataFolderPath = filepath.Join(RootFolderPath, DataFolderName)
 }

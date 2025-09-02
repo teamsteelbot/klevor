@@ -1,0 +1,87 @@
+package clip
+
+import (
+	"path/filepath"
+	"time"
+
+	"github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal"
+)
+
+const (
+	// EmbeddingsJSONFilename is the filename for the embeddings
+	EmbeddingsJSONFilename = "embeddings.json"
+
+	// EmbeddingsJSONPositiveKeyName is the key name for positive embeddings in the JSON
+	EmbeddingsJSONPositiveKeyName = "positive"
+
+	// EmbeddingsJSONNegativeKeyName is the key name for negative embeddings in the JSON
+	EmbeddingsJSONNegativeKeyName = "negative"
+
+	// PipelineInitialized is the message printed on stout when the pipeline is initialized
+	PipelineInitialized = "Pipeline state changed to PLAYING successfully."
+
+	// NoClassification is the message printed on stdout when there is no classification
+	NoClassification = "None"
+
+	// GenerateEmbeddingsStartMessage is the message logged when generating embeddings starts
+	GenerateEmbeddingsStartMessage = "Generating CLIP embeddings..."
+
+	// GenerateEmbeddingsCompletedMessage is the message logged when generating embeddings is completed
+	GenerateEmbeddingsCompletedMessage = "CLIP embeddings generated successfully"
+
+	// GenerateEmbeddingsJSONPathArgument is the argument for the JSON path in the generate embeddings script
+	GenerateEmbeddingsJSONPathArgument = "--json-path"
+
+	// HandlerStartedMessage is the message logged when the handler starts
+	HandlerStartedMessage = "CLIP handler started"
+
+	// CloseTimeout is the timeout for closing the handler
+	CloseTimeout = 5 * time.Second
+
+	// InitialSizeBuffer is the initial size of the buffer for reading lines
+	InitialSizeBuffer = 1024 * 1024 // 1 MB
+
+	// MaxSizeBuffer is the maximum size of the buffer for reading lines
+	MaxSizeBuffer = 1024 * 1024 * 10 // 10 MB
+
+	// StdoutTag is the tag for standard output logs
+	StdoutTag = "STDOUT"
+
+	// StderrTag is the tag for standard error logs
+	StderrTag = "STDERR"
+
+	// IgnoreFirstStdoutMessages is the number of initial stdout messages to ignore
+	IgnoreFirstStdoutMessages = 20
+
+	// MinimumConfidenceThreshold is the minimum confidence threshold for a valid classification
+	MinimumConfidenceThreshold = 0.8
+)
+
+var (
+	// LoggerTag is the logger tag for CLIP
+	LoggerTag = "CLIP"
+
+	// EmbeddingsJSONPath is the path where the embeddings JSON file is stored
+	EmbeddingsJSONPath string
+
+	// PositiveLabels are the positive labels for CLIP
+	PositiveLabels = []internal.PositiveLabel{
+		internal.PositiveLabelMagentaBlock,
+		internal.PositiveLabelGreenBlock,
+		internal.PositiveLabelRedBlock,
+	}
+
+	// NegativeLabels are the negative labels for CLIP
+	NegativeLabels = []internal.NegativeLabel{
+		internal.NegativeLabelBackground,
+		internal.NegativeLabelBlackBlock,
+	}
+)
+
+func init() {
+	// Initialize EmbeddingsJSONFilename with the correct path
+	EmbeddingsJSONPath = filepath.Join(
+		internal.DataFolderPath,
+		EmbeddingsJSONFilename,
+	)
+}

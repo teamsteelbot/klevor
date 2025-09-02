@@ -15,6 +15,12 @@ type (
 		quality    int
 		hasSyncBit bool
 	}
+
+	// Classification is the struct for a Hailo CLIP classification
+	Classification struct {
+		Label      PositiveLabel
+		Confidence float32
+	}
 )
 
 // validateAngle validates the angle value.
@@ -218,4 +224,73 @@ func (m *Measure) String() string {
 // True if a full rotation has been completed, false otherwise.
 func (m *Measure) IsRotationCompleted() bool {
 	return m.hasSyncBit
+}
+
+// NewClassification creates a new Classification instance.
+//
+// Parameters:
+//
+// label: The positive label for the classification.
+// confidence: The confidence score for the classification.
+//
+// Returns:
+//
+// A pointer to a Classification instance or an error if any parameter is invalid.
+func NewClassification(
+	label PositiveLabel,
+	confidence float32,
+) (*Classification, error) {
+	// Check if the confidence is within the valid range [0.0, 1.0]
+	if confidence < 0.0 || confidence > 1.0 {
+		return nil, fmt.Errorf(
+			"confidence must be in [0.0, 1.0], got %f",
+			confidence,
+		)
+	}
+
+	// Create a new Classification instance
+	classification := &Classification{
+		Label:      label,
+		Confidence: confidence,
+	}
+
+	return classification, nil
+}
+
+// NewClassificationFromString creates a new Classification instance from a string.
+//
+// Parameters:
+//
+// s: The string representation of the classification in the format "label confidence".
+//
+// Returns:
+//
+// A pointer to a Classification instance or an error if the string is invalid.
+func NewClassificationFromString(s string) (*Classification, error) {
+	// Split the string into fields
+	fields := strings.Fields(s)
+	if len(fields) != 2 {
+		return nil, fmt.Errorf(
+			"expected 2 fields, got %d",
+			len(fields),
+		)
+	}
+
+	// Parse the label
+	label, err := PositiveLabelFromString(fields[LabelIndex])
+	if err != nil {
+		return nil, fmt.Errorf("invalid label: %w", err)
+	}
+
+	// Parse the confidence
+	var confidence float32
+	if err = ralvarezdevgostringsconvert.ToFloat32(
+		fields[ConfidenceIndex],
+		&confidence,
+	); err != nil {
+		return nil, fmt.Errorf("failed to parse confidence: %w", err)
+	}
+
+	// Create a new Classification instance
+	return NewClassification(label, confidence)
 }

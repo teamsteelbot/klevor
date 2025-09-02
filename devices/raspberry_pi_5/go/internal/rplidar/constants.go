@@ -43,6 +43,12 @@ const (
 
 	// IgnoreFirstStdoutMessages is the number of initial stdout messages to ignore
 	IgnoreFirstStdoutMessages = 6
+
+	// UltraSimpleChannelArgument is the argument for the channel in the ultra_simple executable
+	UltraSimpleChannelArgument = "--channel"
+
+	// UltraSimpleSerialArgument is the argument for the serial port in the ultra_simple executable
+	UltraSimpleSerialArgument = "--serial"
 )
 
 var (
