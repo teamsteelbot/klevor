@@ -1,9 +1,9 @@
-[submodule "devices/raspberry_pi_5/rplidar-sdk"]
-	path = devices/raspberry_pi_5/rplidar-sdk
+[submodule "devices/raspberry-pi-5/rplidar-sdk"]
+	path = devices/raspberry-pi-5/rplidar-sdk
 	url = https://github.com/ralvarezdev/rplidar-sdk.git
-[submodule "devices/raspberry_pi_5/hailo-model-zoo"]
-	path = devices/raspberry_pi_5/hailo-model-zoo
+[submodule "devices/raspberry-pi-5/hailo-model-zoo"]
+	path = devices/raspberry-pi-5/hailo-model-zoo
 	url = https://github.com/ralvarezdev/hailo-model-zoo.git
-[submodule "devices/raspberry_pi_5/hailo-clip"]
-	path = devices/raspberry_pi_5/hailo-clip
+[submodule "devices/raspberry-pi-5/hailo-clip"]
+	path = devices/raspberry-pi-5/hailo-clip
 	url = https://github.com/ralvarezdev/hailo-clip.git

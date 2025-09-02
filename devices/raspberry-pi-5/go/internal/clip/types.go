@@ -11,6 +11,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"path/filepath"
 
 	"github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal"
 	internallog "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/log"
@@ -58,6 +59,16 @@ func NewClipHandler(
 	// Check if the writerMessagesCh is nil
 	if writerMessagesCh == nil {
 		return nil, internallog.ErrNilWriterMessagesChannel
+	}
+
+	// Check if the generateClipEmbeddingsPath is empty
+	if generateClipEmbeddingsPath == "" {
+		return nil, ErrEmptyGenerateEmbeddingsPath
+	}
+
+	// Check if the runClipPath is empty
+	if runClipPath == "" {
+		return nil, ErrEmptyRunClipPath
 	}
 
 	// Check if the positiveLabels is nil
@@ -154,7 +165,8 @@ func (h *ClipHandler) GenerateEmbeddings() error {
 	jsonContent := h.generateEmbeddingsJSONContent()
 
 	// Ensure the directory for the JSON file exists
-	if err := os.MkdirAll(EmbeddingsJSONPath, os.ModePerm); err != nil {
+	parentDir := filepath.Dir(EmbeddingsJSONPath)
+	if err := os.MkdirAll(parentDir, os.ModePerm); err != nil {
 		return fmt.Errorf(
 			"failed to create directory for embeddings JSON file: %w",
 			err,

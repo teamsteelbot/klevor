@@ -40,6 +40,14 @@ func main() {
 	)
 	flag.Parse()
 
+	// Enforce required flags
+	if *generateClipEmbeddingsPath == "" {
+		log.Fatal("missing required flag: --generate-clip-embeddings-path")
+	}
+	if *runClipPath == "" {
+		log.Fatal("missing required flag: --run-clip-path")
+	}
+
 	// Channel for messages
 	msgCh := make(chan *internallog.Message, MessagesChannelBufferSize)
 
