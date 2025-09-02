@@ -118,6 +118,14 @@ func (h *SlamtecC1Handler) ReadIncomingMeasures(ctx context.Context) error {
 	// Log the start of reading measures
 	h.logger.Info(HandlerStartedMessage)
 
+	// Check if the ultra simple executable exists
+	if _, err := os.Stat(UltraSimplePath); errors.Is(err, os.ErrNotExist) {
+		return fmt.Errorf(
+			"ultra simple executable not found at path: %s",
+			UltraSimplePath,
+		)
+	}
+
 	// Arguments (do not include the executable itself)
 	args := []string{
 		UltraSimpleChannelArgument,

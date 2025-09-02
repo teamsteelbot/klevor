@@ -24,7 +24,7 @@ type (
 		generateClipEmbeddingsPath string
 		runClipPath                string
 		positiveLabels             *[]internal.PositiveLabel
-		negativeLabels             *[]internal.PositiveLabel
+		negativeLabels             *[]internal.NegativeLabel
 		logger                     internallog.Logger
 		classification             *internal.Classification
 		stdoutLinesRead            int
@@ -40,6 +40,8 @@ type (
 // writerMessagesCh: Channel to send log messages.
 // generateClipEmbeddingsPath: Path to the .sh file that generates CLIP embeddings.
 // runClipPath: Path to the .sh file that runs CLIP.
+// positiveLabels: Slice of positive labels for classification.
+// negativeLabels: Slice of negative labels for classification (optional, can be nil).
 // debug: If true, debug logging is enabled.
 //
 // Returns:
@@ -50,7 +52,7 @@ func NewClipHandler(
 	generateClipEmbeddingsPath,
 	runClipPath string,
 	positiveLabels *[]internal.PositiveLabel,
-	negativeLabels *[]internal.PositiveLabel,
+	negativeLabels *[]internal.NegativeLabel,
 	debug bool,
 ) (*ClipHandler, error) {
 	// Check if the writerMessagesCh is nil
@@ -168,6 +170,17 @@ func (h *ClipHandler) GenerateEmbeddings() error {
 		return fmt.Errorf("failed to write embeddings JSON file: %w", err)
 	}
 
+	// Check if the generate embeddings executable exists
+	if _, err := os.Stat(h.generateClipEmbeddingsPath); errors.Is(
+		err,
+		os.ErrNotExist,
+	) {
+		return fmt.Errorf(
+			"generate embeddings executable not found at path: %s",
+			h.generateClipEmbeddingsPath,
+		)
+	}
+
 	// Arguments (do not include the executable itself)
 	args := []string{
 		GenerateEmbeddingsJSONPathArgument,
@@ -224,6 +237,14 @@ func (h *ClipHandler) ReadIncomingClassifications(ctx context.Context) error {
 
 	// Log the start of reading measures
 	h.logger.Info(HandlerStartedMessage)
+
+	// Check if the run clip executable exists
+	if _, err := os.Stat(h.runClipPath); errors.Is(err, os.ErrNotExist) {
+		return fmt.Errorf(
+			"run clip executable not found at path: %s",
+			h.runClipPath,
+		)
+	}
 
 	// Execute the command with a context
 	cmd := exec.CommandContext(ctx, h.runClipPath)
@@ -390,6 +411,7 @@ func (h *ClipHandler) handleStdoutLine(line string) error {
 
 	// Check if there is a classification in the line
 	if line == NoClassification {
+		h.logger.Info("No classification detected")
 		h.classification = nil
 		return nil
 	}
@@ -414,6 +436,15 @@ func (h *ClipHandler) handleStdoutLine(line string) error {
 	}
 
 	// Update the current classification
+	if h.classification != classification {
+		h.logger.Info(
+			fmt.Sprintf(
+				"New classification detected for label '%s' with confidence: %f",
+				classification.Label.String(),
+				classification.Confidence,
+			),
+		)
+	}
 	h.classification = classification
 	return nil
 }

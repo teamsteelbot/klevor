@@ -53,7 +53,7 @@ func main() {
 		internalrplidar.SlamtecC1Port,
 		true,
 		0.0,
-		true,
+		*logDebug,
 	)
 	if err != nil {
 		log.Fatalf("failed to initialize rplidar handler: %v", err)
@@ -107,5 +107,4 @@ func main() {
 		close(msgCh)
 		close(rotationCompletedCh)
 	}
-
 }
