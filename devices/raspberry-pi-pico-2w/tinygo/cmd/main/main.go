@@ -11,21 +11,28 @@ import (
 	internalservo "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/servo"
 	internalswitch "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/switch"
 	internalusbcdc "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc"
+	internalusbcdcenums "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc/enums"
 	"golang.org/x/sync/errgroup"
 )
 
 const (
-	// stopTimeout defines the maximum time allowed for stopping tasks.
-	stopTimeout = 3 * time.Second
-
 	// receivingMessageTimeout defines the maximum time to wait for receiving messages.
 	receivingMessageTimeout = 1 * time.Second
-
-	// updateMotorAndServoTimeout defines the maximum time allowed for updating motor speed and servo angle.
-	updateMotorAndServoTimeout = 500 * time.Millisecond
 )
 
 var (
+	// OutgoingMaxMotorSpeedMessage is the outgoing message to send the maximum motor speed
+	OutgoingMaxMotorSpeedMessage = internalusbcdc.NewOutgoingMessageFromUint16Content(
+		internalusbcdcenums.OutgoingCategoryMaxMotorSpeedValue,
+		internalescmotor.MaxSpeed,
+	)
+
+	// OutgoingMaxServoDirectionMessage is the outgoing message to send the maximum servo direction
+	OutgoingMaxServoDirectionMessage = internalusbcdc.NewOutgoingMessageFromUint16Content(
+		internalusbcdcenums.OutgoingCategoryMaxServoDirectionValue,
+		internalservo.MaxAngle,
+	)
+
 	// switchOnEvent is called when the switch is pressed to initialize communication and provide visual feedback.
 	switchOnEvent func() error
 
@@ -43,12 +50,6 @@ var (
 
 	// receivedServoDirectionMessage holds the last received servo angle message.
 	receivedServoDirectionMessage *internalusbcdc.IncomingMessage
-
-	// motorSpeed holds the desired motor speed.
-	motorSpeed uint16
-
-	// servoDirectionAngle holds the desired servo direction.
-	servoDirectionAngle uint16
 )
 
 func init() {
@@ -206,6 +207,32 @@ func main() {
 						)
 					}
 					break
+				}
+
+				// Check if it's a request to get max motor speed
+				if msg.Category == internalusbcdcenums.IncomingCategoryGetMaxMotorSpeedValue {
+					if err := internalusbcdc.USBCDCHandler.SendMessage(OutgoingMaxMotorSpeedMessage); err != nil {
+						sendErrorMessage(
+							fmt.Errorf(
+								"error sending max motor speed message: %w",
+								err,
+							),
+						)
+					}
+					continue
+				}
+
+				// Check if it's a request to get max servo direction
+				if msg.Category == internalusbcdcenums.IncomingCategoryGetMaxServoDirectionValue {
+					if err := internalusbcdc.USBCDCHandler.SendMessage(OutgoingMaxServoDirectionMessage); err != nil {
+						sendErrorMessage(
+							fmt.Errorf(
+								"error sending max servo direction message: %w",
+								err,
+							),
+						)
+					}
+					continue
 				}
 
 				// Check if the message is to set motor speed or servo angle

@@ -2,6 +2,7 @@ package escmotor
 
 import (
 	"fmt"
+	"math"
 	"time"
 
 	"machine"
@@ -158,6 +159,16 @@ func (e *DefaultHandler) SetSpeed(speed uint16, isForward bool) error {
 	// Check if the is polarity inverted
 	if e.isPolarityInverted {
 		isForward = !isForward
+	}
+
+	// Check if the speed is within the valid range
+	if speed > MaxSpeed {
+		return fmt.Errorf(
+			ErrSpeedOutOfRange,
+			StopSpeed-MaxSpeed,
+			StopSpeed+MaxSpeed,
+			speed,
+		)
 	}
 
 	// Calculate the microseconds based on the speed and direction

@@ -25,7 +25,10 @@ const (
 	DefaultMaxPulseWidth uint16 = 2000
 
 	// StopSpeed is the speed to stop the ESC motor
-	StopSpeed = 0
+	StopSpeed uint16 = 0
+
+	// MaxSpeed is the maximum speed to run the ESC motor
+	MaxSpeed uint16 = 500
 
 	// StopMicroseconds is the microseconds to stop the ESC motor
 	StopMicroseconds = (DefaultMaxPulseWidth + DefaultMinPulseWidth) / 2

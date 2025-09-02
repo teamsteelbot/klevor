@@ -18,17 +18,21 @@ const (
 	OutgoingCategoryBNO08XYawTurns
 	OutgoingCategoryError
 	OutgoingCategoryDebug
+	OutgoingCategoryMaxMotorSpeedValue
+	OutgoingCategoryMaxServoDirectionValue
 )
 
 var (
 	// OutgoingCategoryNames maps a given OutgoingCategory to its string name
 	OutgoingCategoryNames = map[OutgoingCategory]string{
-		OutgoingCategoryChallenge:        "challenge",
-		OutgoingCategoryStatus:           "status",
-		OutgoingCategoryBNO08XYawDegrees: "bno08x_yaw_deg",
-		OutgoingCategoryBNO08XYawTurns:   "bno08x_yaw_turns",
-		OutgoingCategoryError:            "error",
-		OutgoingCategoryDebug:            "debug",
+		OutgoingCategoryChallenge:              "challenge",
+		OutgoingCategoryStatus:                 "status",
+		OutgoingCategoryBNO08XYawDegrees:       "bno08x_yaw_deg",
+		OutgoingCategoryBNO08XYawTurns:         "bno08x_yaw_turns",
+		OutgoingCategoryError:                  "error",
+		OutgoingCategoryDebug:                  "debug",
+		OutgoingCategoryMaxMotorSpeedValue:     "max_motor_speed_value",
+		OutgoingCategoryMaxServoDirectionValue: "max_servo_direction_value",
 	}
 )
 

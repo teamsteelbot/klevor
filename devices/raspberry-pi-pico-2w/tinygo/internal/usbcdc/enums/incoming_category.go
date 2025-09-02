@@ -16,21 +16,25 @@ const (
 	IncomingCategoryMotorSpeedStop
 	IncomingCategoryMotorSpeedForward
 	IncomingCategoryMotorSpeedBackward
+	IncomingCategoryGetMaxMotorSpeedValue
 	IncomingCategoryServoDirectionCenter
 	IncomingCategoryServoDirectionToLeft
 	IncomingCategoryServoDirectionToRight
+	IncomingCategoryGetMaxServoDirectionValue
 )
 
 var (
 	// IncomingCategoryNames maps a given IncomingCategory to its string name
 	IncomingCategoryNames = map[IncomingCategory]string{
-		IncomingCategoryStatus:                "status",
-		IncomingCategoryMotorSpeedStop:        "motor_speed_stop",
-		IncomingCategoryMotorSpeedForward:     "motor_speed_forward",
-		IncomingCategoryMotorSpeedBackward:    "motor_speed_backward",
-		IncomingCategoryServoDirectionCenter:  "servo_direction_center",
-		IncomingCategoryServoDirectionToLeft:  "servo_direction_to_left",
-		IncomingCategoryServoDirectionToRight: "servo_direction_to_right",
+		IncomingCategoryStatus:                    "status",
+		IncomingCategoryMotorSpeedStop:            "motor_speed_stop",
+		IncomingCategoryMotorSpeedForward:         "motor_speed_forward",
+		IncomingCategoryMotorSpeedBackward:        "motor_speed_backward",
+		IncomingCategoryGetMaxMotorSpeedValue:     "get_max_motor_speed_value",
+		IncomingCategoryServoDirectionCenter:      "servo_direction_center",
+		IncomingCategoryServoDirectionToLeft:      "servo_direction_to_left",
+		IncomingCategoryServoDirectionToRight:     "servo_direction_to_right",
+		IncomingCategoryGetMaxServoDirectionValue: "get_max_servo_direction_value",
 	}
 )
 

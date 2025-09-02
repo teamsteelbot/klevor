@@ -20,6 +20,9 @@ const (
 	// RightLimitAngle is the angle that represents the right limit position of the servo motors.
 	RightLimitAngle uint16 = 180
 
+	// MaxAngle is the maximum angle for the servo motors.
+	MaxAngle uint16 = 15
+
 	// DefaultIsDirectionInverted indicates if the servo direction is inverted.
 	DefaultIsDirectionInverted bool = true
 

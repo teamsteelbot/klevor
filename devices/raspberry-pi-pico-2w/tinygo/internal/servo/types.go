@@ -163,6 +163,14 @@ func (s *DefaultHandler) GetAngle() uint16 {
 // angle: The angle to set the servo motor to, must be between 0 and the actuation range
 func (s *DefaultHandler) SetAngle(angle uint16) error {
 	// Check if the angle is within the valid range
+	if angle < CenterAngle-MaxAngle || angle > CenterAngle+MaxAngle {
+		return fmt.Errorf(
+			ErrAngleOutOfRange,
+			CenterAngle-MaxAngle,
+			CenterAngle+MaxAngle,
+			angle,
+		)
+	}
 	if angle < LeftLimitAngle || angle > RightLimitAngle {
 		return fmt.Errorf(
 			ErrInvalidAngle,
