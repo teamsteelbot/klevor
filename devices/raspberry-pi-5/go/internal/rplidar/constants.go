@@ -17,9 +17,6 @@ const (
 	// MaxDistanceLimit is the maximum distance limit
 	MaxDistanceLimit = 3000
 
-	// DistanceDiff is the distance difference
-	DistanceDiff = 25
-
 	// UltraSimpleName is the name of the Slamtec executable
 	UltraSimpleName = "ultra_simple"
 
@@ -49,12 +46,12 @@ const (
 
 	// UltraSimpleSerialArgument is the argument for the serial port in the ultra_simple executable
 	UltraSimpleSerialArgument = "--serial"
+
+	// LoggerTag is the logger tag for RPLiDAR
+	LoggerTag = "RPLiDAR"
 )
 
 var (
-	// LoggerTag is the logger tag for RPLiDAR
-	LoggerTag = "RPLiDAR"
-
 	// UltraSimplePath is the path where the Slamtec executable is stored
 	UltraSimplePath string
 )

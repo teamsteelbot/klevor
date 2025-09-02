@@ -58,12 +58,12 @@ const (
 
 	// MinimumConfidenceThreshold is the minimum confidence threshold for a valid classification
 	MinimumConfidenceThreshold = 0.8
+
+	// LoggerTag is the logger tag for CLIP
+	LoggerTag = "CLIP"
 )
 
 var (
-	// LoggerTag is the logger tag for CLIP
-	LoggerTag = "CLIP"
-
 	// EmbeddingsJSONPath is the path where the embeddings JSON file is stored
 	EmbeddingsJSONPath string
 

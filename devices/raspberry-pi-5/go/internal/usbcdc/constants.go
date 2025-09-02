@@ -22,6 +22,18 @@ const (
 
 	// BaudRate is the baud rate for USB-CDC communication
 	BaudRate = 921600
+
+	// ConnectionAttempts is the amount of attempts to connect to the serial port
+	ConnectionAttempts = 10
+
+	// AttemptsDelay is the delay between connection attempts
+	AttemptsDelay = 1 * time.Second
+
+	// StopTimeout is the timeout duration for stopping the USB-CDC communication
+	StopTimeout = 5 * time.Second
+
+	// LoggerTag is the logger tag for USB-CDC
+	LoggerTag = "USB-CDC"
 )
 
 var (
