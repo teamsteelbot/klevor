@@ -28,18 +28,6 @@ const (
 )
 
 var (
-	// OutgoingStartMessage is the outgoing start message for USB-CDC communication
-	OutgoingStartMessage = NewOutgoingMessageFromUint8Content(
-		internalusbcdcenums.OutgoingCategoryStatus,
-		uint8(internalusbcdcenums.StatusStart),
-	)
-
-	// OutgoingOKMessage is the outgoing OK message for USB-CDC communication
-	OutgoingOKMessage = NewOutgoingMessageFromUint8Content(
-		internalusbcdcenums.OutgoingCategoryStatus,
-		uint8(internalusbcdcenums.StatusOK),
-	)
-
 	// IncomingStopMessage is the incoming stop message for USB-CDC communication
 	IncomingStopMessage = NewIncomingMessageFromUint8Content(
 		internalusbcdcenums.IncomingCategoryStatus,
@@ -56,6 +44,18 @@ var (
 	IncomingHeartbeatMessage = NewIncomingMessageFromUint8Content(
 		internalusbcdcenums.IncomingCategoryStatus,
 		uint8(internalusbcdcenums.StatusHeartbeat),
+	)
+
+	// OutgoingStartMessage is the outgoing start message for USB-CDC communication
+	OutgoingStartMessage = NewOutgoingMessageFromUint8Content(
+		internalusbcdcenums.OutgoingCategoryStatus,
+		uint8(internalusbcdcenums.StatusStart),
+	)
+
+	// OutgoingOKMessage is the outgoing OK message for USB-CDC communication
+	OutgoingOKMessage = NewOutgoingMessageFromUint8Content(
+		internalusbcdcenums.OutgoingCategoryStatus,
+		uint8(internalusbcdcenums.StatusOK),
 	)
 
 	// OutgoingChallengeWithObstaclesMessage is the outgoing challenge message with obstacles
