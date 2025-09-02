@@ -74,6 +74,7 @@ func main() {
 			return
 		}
 	}
+	close(msgCh)
 
 	// Optional graceful wait
 	select {

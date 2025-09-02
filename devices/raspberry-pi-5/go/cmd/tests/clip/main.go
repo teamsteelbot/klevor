@@ -72,7 +72,6 @@ func main() {
 
 	// Create a context that is cancelled on shutdown signal
 	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
 
 	// Create an error group to manage goroutines
 	g := errgroup.Group{}
@@ -86,9 +85,12 @@ func main() {
 
 	// Generate the CLIP embeddings
 	if err = clipHandler.GenerateEmbeddings(); err != nil {
-		log.Fatalf("failed to generate clip embeddings: %v", err)
+		// Wait for the writer goroutine to finish
+		cancel()
+		g.Wait()
 		return
 	}
+	defer cancel()
 
 	// Initialize the CLIP goroutine
 	g.Go(
@@ -103,18 +105,16 @@ func main() {
 			for {
 				select {
 				case <-ctx.Done():
-					return nil
+					return ctx.Err()
 				default:
 					classification := clipHandler.GetClassification()
 					if classification == nil {
 						fmt.Println("No classification found")
 					} else {
-						fmt.Println(
-							fmt.Sprintf(
-								"Classification found for label '%s' with confidence %.2f",
-								classification.Label,
-								classification.Confidence,
-							),
+						fmt.Printf(
+							"Classification found for label '%s' with confidence %.2f\n",
+							classification.Label,
+							classification.Confidence,
 						)
 					}
 					time.Sleep(ClassificationInterval)
@@ -130,13 +130,12 @@ func main() {
 			return
 		}
 	}
+	close(msgCh)
 
 	// Optional graceful wait
 	select {
 	case <-ctx.Done():
 	case <-time.After(GracefulShutdownTimeout):
-		// Timeout reached, close channels
-		close(msgCh)
 	}
 
 }

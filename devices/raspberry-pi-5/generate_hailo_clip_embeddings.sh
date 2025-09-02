@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 set -e
 
 # Absolute path to this script's directory
@@ -11,27 +11,37 @@ HAILO_CLIP_DIR="$SCRIPT_DIR/hailo-clip"
 SETUP_ENV_SCRIPT="$HAILO_CLIP_DIR/setup_env.sh"
 
 # Text image matcher script path
-TEXT_IMAGE_MATCHER_PATH="$HAILO_CLIP_DIR/clip_app/text_image_matcher.py"
+TEXT_IMAGE_MATCHER_FOLDER="$HAILO_CLIP_DIR/clip_app"
+TEXT_IMAGE_MATCHER_FILENAME="text_image_matcher.py"
+TEXT_IMAGE_MATCHER_PATH="$TEXT_IMAGE_MATCHER_FOLDER/$TEXT_IMAGE_MATCHER_FILENAME"
+TEXT_IMAGE_MATCHER_MODULE="clip_app.text_image_matcher"
 
 # Embeddings path
 EMBEDDINGS_PATH="$HAILO_CLIP_DIR/embeddings.json"
 
 # Script arguments
 JSON_PATH=""
+THRESHOLD=""
 
 usage() {
     echo "Usage: $(basename "$0") --json-path <input.json>"
     echo "  --json-path    Path to input JSON (required)"
+    echo "  --threshold    Threshold for classification (default: 0.8)"
     echo "  -h|--help      Show help"
     exit 1
 }
 
-# Parse args (only long option json-path)
+# Parse args
 while [ $# -gt 0 ]; do
     case "$1" in
         --json-path)
             [ -n "${2:-}" ] || usage
             JSON_PATH=$2
+            shift 2
+            ;;
+        --threshold)
+            [ -n "${2:-}" ] || usage
+            THRESHOLD=$2
             shift 2
             ;;
         -h|--help)
@@ -92,6 +102,8 @@ echo "Setting up the virtual environment..."
 echo "Generating CLIP embeddings..."
 
 # Run the text_image_matcher.py script to generate embeddings
-python3 "$TEXT_IMAGE_MATCHER_PATH" --texts-json "$JSON_PATH" --output_json "$EMBEDDINGS_PATH"
+cd "$HAILO_CLIP_DIR"
+python3 -m "$TEXT_IMAGE_MATCHER_MODULE" --texts-json "$JSON_PATH" --output "$EMBEDDINGS_PATH" --threshold "$THRESHOLD"
+cd "$SCRIPT_DIR"
 
 echo "Done."

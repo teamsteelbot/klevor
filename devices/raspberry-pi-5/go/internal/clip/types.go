@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
-	"path/filepath"
 
 	"github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal"
 	internallog "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/log"
@@ -30,7 +30,7 @@ type (
 		classification             *internal.Classification
 		stdoutLinesRead            int
 		debug                      bool
-		pipelineInitialized        bool
+		clipApplicationInitialized        bool
 	}
 )
 
@@ -197,6 +197,8 @@ func (h *ClipHandler) GenerateEmbeddings() error {
 	args := []string{
 		GenerateEmbeddingsJSONPathArgument,
 		EmbeddingsJSONPath,
+		GenerateEmbeddingsThresholdArgument,
+		fmt.Sprintf("%f", MinimumConfidenceThreshold),
 	}
 
 	// Execute the command
@@ -407,12 +409,11 @@ func (h *ClipHandler) handleStdoutLine(line string) error {
 		return nil
 	}
 
-	// Check if the pipeline has been initialized
-	if !h.pipelineInitialized {
-		parts := strings.Fields(line)
-		if parts[len(parts)-1] == PipelineInitialized {
-			h.pipelineInitialized = true
-			h.logger.Info(PipelineInitialized)
+	// Check if the Clip Application has been initialized
+	if !h.clipApplicationInitialized {
+		if line == HailoClipApplicationInitializedMessage {
+			h.clipApplicationInitialized = true
+			h.logger.Info(HailoClipApplicationInitializedMessage)
 		}
 		return nil
 	}

@@ -25,12 +25,6 @@ const (
 
 	// QualityIndex is the index of the quality in the measure string
 	QualityIndex = 2
-
-	// LabelIndex is the index of the label in the classification string
-	LabelIndex = 0
-
-	// ConfidenceIndex is the index of the confidence in the classification string
-	ConfidenceIndex = 1
 )
 
 var (

@@ -98,6 +98,8 @@ func main() {
 			return
 		}
 	}
+	close(msgCh)
+	close(rotationCompletedCh)
 
 	// Optional graceful wait
 	select {

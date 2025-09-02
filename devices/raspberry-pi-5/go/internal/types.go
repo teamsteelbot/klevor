@@ -269,15 +269,11 @@ func NewClassification(
 func NewClassificationFromString(s string) (*Classification, error) {
 	// Split the string into fields
 	fields := strings.Fields(s)
-	if len(fields) != 2 {
-		return nil, fmt.Errorf(
-			"expected 2 fields, got %d",
-			len(fields),
-		)
-	}
+	labelStr := strings.Join(fields[:len(fields)-1], " ")
+	confidenceStr := fields[len(fields)-1]
 
 	// Parse the label
-	label, err := PositiveLabelFromString(fields[LabelIndex])
+	label, err := PositiveLabelFromString(labelStr)
 	if err != nil {
 		return nil, fmt.Errorf("invalid label: %w", err)
 	}
@@ -285,7 +281,7 @@ func NewClassificationFromString(s string) (*Classification, error) {
 	// Parse the confidence
 	var confidence float32
 	if err = ralvarezdevgostringsconvert.ToFloat32(
-		fields[ConfidenceIndex],
+		confidenceStr,
 		&confidence,
 	); err != nil {
 		return nil, fmt.Errorf("failed to parse confidence: %w", err)

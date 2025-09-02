@@ -17,8 +17,8 @@ const (
 	// EmbeddingsJSONNegativeKeyName is the key name for negative embeddings in the JSON
 	EmbeddingsJSONNegativeKeyName = "negative"
 
-	// PipelineInitialized is the message printed on stout when the pipeline is initialized
-	PipelineInitialized = "Pipeline state changed to PLAYING successfully."
+	// HailoClipApplicationInitializedMessage is the message printed on stdout when the Hailo CLIP application is initialized
+	HailoClipApplicationInitializedMessage = "Calling the Hailo CLIP application..."
 
 	// NoClassification is the message printed on stdout when there is no classification
 	NoClassification = "None"
@@ -31,6 +31,9 @@ const (
 
 	// GenerateEmbeddingsJSONPathArgument is the argument for the JSON path in the generate embeddings script
 	GenerateEmbeddingsJSONPathArgument = "--json-path"
+
+	// GenerateEmbeddingsThresholdArgument is the argument for the threshold in the generate embeddings script
+	GenerateEmbeddingsThresholdArgument = "--threshold"
 
 	// HandlerStartedMessage is the message logged when the handler starts
 	HandlerStartedMessage = "CLIP handler started"
@@ -51,7 +54,7 @@ const (
 	StderrTag = "STDERR"
 
 	// IgnoreFirstStdoutMessages is the number of initial stdout messages to ignore
-	IgnoreFirstStdoutMessages = 20
+	IgnoreFirstStdoutMessages = 8
 
 	// MinimumConfidenceThreshold is the minimum confidence threshold for a valid classification
 	MinimumConfidenceThreshold = 0.8
