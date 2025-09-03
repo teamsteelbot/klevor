@@ -287,13 +287,3 @@ class Spawner:
 			except Exception as e:
 				print(f"An error occurred in the Spawner: {e}")
 				self._stop()
-
-	def __del__(self):
-		"""
-		Destructor to clean up resources when the Spawner is no longer needed.
-		"""
-		self.__stop_event.set()
-
-		print(
-			"Spawner instance is being deleted. Resources will be cleaned up.",
-			)

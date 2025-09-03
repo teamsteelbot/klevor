@@ -59,9 +59,13 @@ func main() {
 		log.Fatalf("failed to initialize rplidar handler: %v", err)
 	}
 
-	// Create a context that is cancelled on shutdown signal
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	// Context canceled on SIGINT/SIGTERM.
+	ctx, stop := signal.NotifyContext(
+		context.Background(),
+		os.Interrupt,
+		syscall.SIGTERM,
+	)
+	defer stop()
 
 	// Create an error group to manage goroutines
 	g := errgroup.Group{}

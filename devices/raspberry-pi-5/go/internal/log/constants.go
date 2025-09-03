@@ -17,6 +17,12 @@ const (
 )
 
 var (
+	// ChannelBufferSize is the size of the message channel buffer
+	ChannelBufferSize = 1024
+
+	// FileBufferSize is the size of the file buffer
+	FileBufferSize = 1024 * 1024 // 1 MB
+
 	// MessagesChannelClosedMessage is the message logged when the messages channel is closed
 	MessagesChannelClosedMessage = NewMessage(
 		CategoryInfo,

@@ -163,16 +163,12 @@ func main() {
 			}
 
 			// Check if there are incoming messages
-			if incomingMessages == nil {
-				continue
-			}
-
-			// Process incoming messages
-			if len(*incomingMessages) == 0 {
+			if incomingMessages == nil || len(*incomingMessages) == 0 {
 				// If no messages were received, check if the timeout has been reached
 				if !lastMessageReceivedTime.IsZero() && time.Since(lastMessageReceivedTime) > receivingMessageTimeout {
 					sendErrorMessage(errors.New("no messages received within the timeout period"))
 				}
+				continue
 			} else {
 				// Reset the last message received time if messages are received
 				lastMessageReceivedTime = time.Now()

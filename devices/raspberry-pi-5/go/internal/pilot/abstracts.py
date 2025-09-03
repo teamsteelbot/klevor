@@ -1,18 +1,3 @@
-from abc import ABC, abstractmethod
-from typing import Dict
-from math import ceil, floor
-
-from .constants import (
-	MOTOR_SPEED_RANGE,
-	SERVO_ACTUATION_RANGE,
-	DIRECTION_TO_ANGLE,
-	ANGLE_WIDTH,
-	)
-from ..common.measure import Measure
-from ..log import Logger
-from .enums import CardinalDirection
-
-
 class PilotABC(ABC):
 	"""
 	Abstract class for the Pilot handler.

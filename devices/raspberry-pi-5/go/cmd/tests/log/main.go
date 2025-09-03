@@ -5,8 +5,9 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"log"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	internallog "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/log"
@@ -22,8 +23,8 @@ const (
 	// GracefulShutdownTimeout is the timeout for graceful shutdown
 	GracefulShutdownTimeout = 5 * time.Second
 
-	// ChannelBufferSize is the size of the message channel buffer
-	ChannelBufferSize = 512
+	// TotalMessages to send before stopping
+	TotalMessages = 100
 )
 
 func main() {
@@ -31,50 +32,64 @@ func main() {
 	logDebug := flag.Bool("debug", false, "Enable debug logging")
 	flag.Parse()
 
-	// Channel for messages
-	msgCh := make(chan *internallog.Message, ChannelBufferSize)
+	// Initialize the logger
+	logger := internallog.NewDefaultLogger(*logDebug)
 
-	// Initialize the writer
-	writer, err := internallog.NewDefaultWriter(msgCh, *logDebug)
+	// Create a new logger producer
+	producerTag := "TestProducer"
+	producer, err := logger.NewProducer(&producerTag, true)
 	if err != nil {
-		log.Fatalf("failed to intialize writer: %v", err)
+		_, _ = fmt.Fprintf(os.Stderr, "failed to create producer: %v\n", err)
+		return
 	}
 
-	// Create a context that is cancelled on shutdown signal
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	// Context canceled on SIGINT/SIGTERM.
+	ctx, stop := signal.NotifyContext(
+		context.Background(),
+		os.Interrupt,
+		syscall.SIGTERM,
+	)
+	defer stop()
 
-	// Example: simulate shutdown on SIGINT
+	// Simulate shutdown on SIGINT
 	go func() {
 		// In real code capture os.Signal
 		time.Sleep(SimulateShutdownAfter)
-		cancel()
+		stop()
 	}()
 
 	// Example producer
 	go func() {
-		for i := 0; i < 100; i++ {
-			msgCh <- internallog.NewMessage(
-				internallog.CategoryInfo,
-				fmt.Sprintf("event %d", i),
-				nil,
-			)
+		defer logger.Close()
+		defer producer.Done()
+
+		// Send messages
+		for i := 0; i < TotalMessages; i++ {
+			select {
+			case <-ctx.Done():
+				return
+			default:
+				producer.Info(fmt.Sprintf("event %d", i))
+			}
 			time.Sleep(SendMessageInterval)
 		}
-		close(msgCh)
+
+		// Best-effort final message (non-blocking to avoid deadlock).
+		select {
+		case <-ctx.Done():
+			return
+		default:
+			producer.Info("Producer completed")
+		}
 	}()
 
-	// Read the messages and write them
-	if err = writer.WriteReceivedMessages(ctx); err != nil && !errors.Is(
+	// Run the logger (blocking)
+	if err = logger.Run(ctx); err != nil && !errors.Is(
 		err,
 		context.Canceled,
 	) {
-		_, err = fmt.Fprintf(os.Stderr, "error: %v\n", err)
-		if err != nil {
-			return
-		}
+		_, _ = fmt.Fprintf(os.Stderr, "error: %v\n", err)
 	}
-	close(msgCh)
 
 	// Optional graceful wait
 	select {
