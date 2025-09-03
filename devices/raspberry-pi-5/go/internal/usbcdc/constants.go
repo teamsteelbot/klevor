@@ -32,8 +32,8 @@ const (
 	// StopTimeout is the timeout duration for stopping the USB-CDC communication
 	StopTimeout = 5 * time.Second
 
-	// LoggerTag is the logger tag for USB-CDC
-	LoggerTag = "USB-CDC"
+	// LoggerProducerTag is the logger producer tag for USB-CDC
+	LoggerProducerTag = "USB-CDC"
 )
 
 var (

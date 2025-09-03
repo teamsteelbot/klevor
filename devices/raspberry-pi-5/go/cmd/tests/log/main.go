@@ -36,10 +36,13 @@ func main() {
 	logger := internallog.NewDefaultLogger(*logDebug)
 
 	// Create a new logger producer
-	producerTag := "TestProducer"
-	producer, err := logger.NewProducer(&producerTag, true)
+	loggerProducer, err := logger.NewProducer("TEST_PRODUCER")
 	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "failed to create producer: %v\n", err)
+		_, _ = fmt.Fprintf(
+			os.Stderr,
+			"failed to create logger producer: %v\n",
+			err,
+		)
 		return
 	}
 
@@ -53,15 +56,14 @@ func main() {
 
 	// Simulate shutdown on SIGINT
 	go func() {
-		// In real code capture os.Signal
 		time.Sleep(SimulateShutdownAfter)
 		stop()
 	}()
 
-	// Example producer
+	// Example usage of the logger producer in a separate goroutine
 	go func() {
 		defer logger.Close()
-		defer producer.Done()
+		defer loggerProducer.Close()
 
 		// Send messages
 		for i := 0; i < TotalMessages; i++ {
@@ -69,7 +71,7 @@ func main() {
 			case <-ctx.Done():
 				return
 			default:
-				producer.Info(fmt.Sprintf("event %d", i))
+				loggerProducer.Info(fmt.Sprintf("event %d", i))
 			}
 			time.Sleep(SendMessageInterval)
 		}
@@ -79,7 +81,7 @@ func main() {
 		case <-ctx.Done():
 			return
 		default:
-			producer.Info("Producer completed")
+			loggerProducer.Info("Completed")
 		}
 	}()
 

@@ -12,27 +12,21 @@ import (
 	ralvarezdevgocryptouuid "github.com/ralvarezdev/go-crypto/uuid"
 )
 
-const (
-	filePerm = 0o644
-	dirPerm  = 0o755
-)
-
 type (
 	// DefaultLoggerProducer is the default LoggerProducer implementation for messages with different severity levels
 	DefaultLoggerProducer struct {
-		sendFn func(*Message)
-		closed atomic.Bool
-		once   sync.Once
-		doneFn func()
-		tag    string
-		debug  bool
+		sendFn  func(*Message)
+		closed  atomic.Bool
+		closeFn func()
+		tag     string
+		mutex   sync.Mutex
+		debug   bool
 	}
 
 	// DefaultLogger is the default Logger implementation to handle writing log messages to a file.
 	DefaultLogger struct {
 		ch     chan *Message
 		wgProd sync.WaitGroup
-		once   sync.Once
 		closed atomic.Bool
 		mutex  sync.Mutex
 		debug  bool
@@ -44,9 +38,8 @@ type (
 // Parameters:
 //
 // sendFn: Function to send messages.
-// doneFn: Function to call when done.
-// tag: Optional tag to identify the logger instance.
-// generateUniqueTag: Whether to generate a unique tag for the logger instance.
+// closeFn: Function to call when done.
+// tag: Tag to identify the logger instance.
 // debug: Flag to indicate if the logger is in debug mode.
 //
 // Returns:
@@ -54,9 +47,8 @@ type (
 // A pointer to a DefaultLoggerProducer instance or an error if the parameters are invalid.
 func NewDefaultLoggerProducer(
 	sendFn func(*Message),
-	doneFn func(),
-	tag *string,
-	generateUniqueTag bool,
+	closeFn func(),
+	tag string,
 	debug bool,
 ) (*DefaultLoggerProducer, error) {
 	// Check if the sendFn is nil
@@ -64,33 +56,27 @@ func NewDefaultLoggerProducer(
 		return nil, ErrNilSendFunction
 	}
 
-	// Check if the doneFn is nil
-	if doneFn == nil {
-		return nil, ErrNilDoneFunction
+	// Check if the closeFn is nil
+	if closeFn == nil {
+		return nil, ErrNilCloseFunction
 	}
 
 	// Generate a unique tag if required
-	if generateUniqueTag || tag == nil {
+	if tag == "" {
 		// Generate a UUID to ensure uniqueness
 		uniqueID, err := ralvarezdevgocryptouuid.NewUUIDv4()
 		if err != nil {
 			return nil, err
 		}
-
-		if tag != nil {
-			*tag = fmt.Sprintf("%s_%s", *tag, uniqueID)
-		} else {
-			tag = new(string)
-			*tag = fmt.Sprintf("Logger_%s", uniqueID)
-		}
+		tag = uniqueID
 	}
 
 	// Create a new DefaultLoggerProducer instance
 	producer := &DefaultLoggerProducer{
-		sendFn: sendFn,
-		doneFn: doneFn,
-		tag:    *tag,
-		debug:  debug,
+		sendFn:  sendFn,
+		closeFn: closeFn,
+		tag:     tag,
+		debug:   debug,
 	}
 
 	// Log the initialization if a tag is provided
@@ -107,10 +93,10 @@ func NewDefaultLoggerProducer(
 // category: The category of the log message.
 func (l *DefaultLoggerProducer) Log(content string, category Category) {
 	// Create a message object
-	message := NewMessage(category, content, &l.tag)
+	message := NewMessage(category, content, l.tag)
 
 	// Send the message if the logger is not closed
-	if l.Closed() {
+	if l.IsClosed() {
 		fmt.Println("Logger is closed. Cannot log message: ", message.String())
 		return
 	}
@@ -155,28 +141,34 @@ func (l *DefaultLoggerProducer) Debug(content string) {
 	}
 }
 
-// Done signals that the logger is done and performs cleanup.
-func (l *DefaultLoggerProducer) Done() {
-	l.once.Do(
-		func() {
-			// Send a final debug message if in debug mode
-			l.Debug("Logger producer done")
+// Close signals that the logger is done and performs cleanup.
+func (l *DefaultLoggerProducer) Close() {
+	l.mutex.Lock()
 
-			// Mark the logger as closed
-			l.closed.Store(true)
+	// Check if already closed to prevent multiple calls
+	if l.IsClosed() {
+		l.mutex.Unlock()
+		return
+	}
 
-			// Call the done function to signal completion
-			l.doneFn()
-		},
-	)
+	// Send a final debug message if in debug mode
+	l.Debug("Closed")
+
+	// Mark the logger as closed
+	l.closed.Store(true)
+
+	l.mutex.Unlock()
+
+	// Call the close function to signal completion
+	l.closeFn()
 }
 
-// Closed returns true if the logger producer has been closed.
+// IsClosed returns true if the logger producer has been closed.
 //
 // Returns:
 //
 // True if the logger producer is closed, otherwise false.
-func (l *DefaultLoggerProducer) Closed() bool {
+func (l *DefaultLoggerProducer) IsClosed() bool {
 	return l.closed.Load()
 }
 
@@ -187,6 +179,15 @@ func (l *DefaultLoggerProducer) Closed() bool {
 // The tag string.
 func (l *DefaultLoggerProducer) Tag() string {
 	return l.tag
+}
+
+// IsDebug returns true if the logger producer is in debug mode.
+//
+// Returns:
+//
+// True if the logger producer is in debug mode, otherwise false.
+func (l *DefaultLoggerProducer) IsDebug() bool {
+	return l.debug
 }
 
 // NewDefaultLogger creates a new DefaultLogger instance.
@@ -216,7 +217,12 @@ func NewDefaultLogger(
 // Returns:
 //
 // An error if any issues occur during message processing or file writing.
-func (w *DefaultLogger) Run(ctx context.Context) error {
+func (l *DefaultLogger) Run(ctx context.Context) error {
+	// Check if the logger is already closed
+	if l.IsClosed() {
+		return ErrLoggerClosed
+	}
+
 	// Ensure parent directory exists
 	logDir := filepath.Dir(FilePath)
 	if err := os.MkdirAll(logDir, dirPerm); err != nil {
@@ -259,7 +265,7 @@ func (w *DefaultLogger) Run(ctx context.Context) error {
 	}
 
 	// Log a message indicating that the writer has started
-	if err = writeLine(WriterStartedMessage); err != nil {
+	if err = writeLine(LoggerStartedMessage); err != nil {
 		return err
 	}
 
@@ -271,7 +277,7 @@ func (w *DefaultLogger) Run(ctx context.Context) error {
 			_ = writeLine(ContextCancelledMessage)
 			_ = buf.Flush()
 			return ctx.Err()
-		case msg, ok := <-w.ch:
+		case msg, ok := <-l.ch:
 			if !ok {
 				// Channel is closed, exit the loop
 				_ = writeLine(MessagesChannelClosedMessage)
@@ -290,67 +296,97 @@ func (w *DefaultLogger) Run(ctx context.Context) error {
 //
 // Parameters:
 //
-// tag: Optional tag to identify the logger instance.
-// generateUniqueTag: Whether to generate a unique tag for the logger instance.
+// tag: Tag to identify the logger instance.
 //
 // Returns:
 //
 // A pointer to a LoggerProducer instance or an error if the parameters are invalid.
-func (w *DefaultLogger) NewProducer(
-	tag *string,
-	generateUniqueTag bool,
+func (l *DefaultLogger) NewProducer(
+	tag string,
 ) (LoggerProducer, error) {
-	w.mutex.Lock()
+	l.mutex.Lock()
 
 	// Check if the logger is already closed
-	if w.Closed() {
+	if l.IsClosed() {
 		return nil, ErrLoggerClosed
 	}
 
 	// Increment the producer wait group counter
-	w.wgProd.Add(1)
-	w.mutex.Unlock()
+	l.wgProd.Add(1)
+	l.mutex.Unlock()
 
 	// Create and return a new DefaultLoggerProducer instance
-	producer, err := NewDefaultLoggerProducer(
+	loggerProducer, err := NewDefaultLoggerProducer(
 		func(m *Message) {
-			w.ch <- m
+			l.ch <- m
 		},
-		func() { w.wgProd.Done() },
+		func() { l.wgProd.Done() },
 		tag,
-		generateUniqueTag,
-		w.debug,
+		l.debug,
 	)
 	if err != nil {
-		w.wgProd.Done()
+		l.wgProd.Done()
 		return nil, err
 	}
-	return producer, nil
+	return loggerProducer, nil
 }
 
 // Close signals no more producers will send; safe to call multiple times.
-func (w *DefaultLogger) Close() {
-	w.once.Do(
-		func() {
-			// Mark the logger as closed
-			w.mutex.Lock()
-			w.closed.Store(true)
-			w.mutex.Unlock()
+func (l *DefaultLogger) Close() {
+	l.mutex.Lock()
 
-			// Wait for all registered producers to finish, then close channel.
-			w.wgProd.Wait()
+	// Check if the logger is already closed
+	if l.IsClosed() {
+		l.mutex.Unlock()
+		return
+	}
 
-			// Close the messages channel to signal no more messages will be sent.
-			close(w.ch)
-		},
-	)
+	// Mark the logger as closed
+	l.closed.Store(true)
+
+	l.mutex.Unlock()
+
+	// Wait for all registered producers to finish, then close channel.
+	l.wgProd.Wait()
+
+	// Close the messages channel to signal no more messages will be sent.
+	close(l.ch)
 }
 
-// Closed returns true if the logger channel has been closed.
+// IsClosed returns true if the logger channel has been closed.
 //
 // Returns:
 //
 // True if the logger channel is closed, otherwise false.
-func (w *DefaultLogger) Closed() bool {
-	return w.closed.Load()
+func (l *DefaultLogger) IsClosed() bool {
+	return l.closed.Load()
+}
+
+// IsDebug returns true if the logger is in debug mode.
+//
+// Returns:
+//
+// True if the logger is in debug mode, otherwise false.
+func (l *DefaultLogger) IsDebug() bool {
+	return l.debug
+}
+
+// Reset resets the logger to its initial state.
+func (l *DefaultLogger) Reset() {
+	l.mutex.Lock()
+	defer l.mutex.Unlock()
+
+	// Only reset if the logger is closed
+	if !l.IsClosed() {
+		return
+	}
+
+	// Reset the closed state
+	l.closed.Store(false)
+
+	// Reinitialize the messages channel
+	l.ch = make(chan *Message, ChannelBufferSize)
+
+	// Reset the producer wait group
+	l.wgProd = sync.WaitGroup{}
 }

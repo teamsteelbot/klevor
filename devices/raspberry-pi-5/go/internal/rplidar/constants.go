@@ -11,20 +11,28 @@ const (
 	// SlamtecC1BaudRate is the RPLiDAR C1 baud rate
 	SlamtecC1BaudRate = 460800
 
-	// SlamtecC1Port is the RPLiDAR C1 default port
-	SlamtecC1Port = "/dev/ttyUSB0"
-
 	// MaxDistanceLimit is the maximum distance limit
 	MaxDistanceLimit = 3000
-
-	// UltraSimpleName is the name of the Slamtec executable
-	UltraSimpleName = "ultra_simple"
 
 	// HandlerStartedMessage is the message logged when the handler starts
 	HandlerStartedMessage = "RPLiDAR handler started"
 
 	// CloseTimeout is the timeout for closing the handler
 	CloseTimeout = 5 * time.Second
+
+	// UltraSimpleChannelArgument is the argument for the channel in the ultra_simple executable
+	UltraSimpleChannelArgument = "--channel"
+
+	// UltraSimpleSerialArgument is the argument for the serial port in the ultra_simple executable
+	UltraSimpleSerialArgument = "--serial"
+)
+
+var (
+	// SlamtecC1Port is the RPLiDAR C1 default port
+	SlamtecC1Port = "/dev/ttyUSB0"
+
+	// UltraSimpleName is the name of the Slamtec executable
+	UltraSimpleName = "ultra_simple"
 
 	// InitialSizeBuffer is the initial size of the buffer for reading lines
 	InitialSizeBuffer = 1024 * 1024 // 1 MB
@@ -41,14 +49,11 @@ const (
 	// IgnoreFirstStdoutMessages is the number of initial stdout messages to ignore
 	IgnoreFirstStdoutMessages = 6
 
-	// UltraSimpleChannelArgument is the argument for the channel in the ultra_simple executable
-	UltraSimpleChannelArgument = "--channel"
+	// ChannelBufferSize is the size of the rotation completed channel buffer
+	ChannelBufferSize = 10
 
-	// UltraSimpleSerialArgument is the argument for the serial port in the ultra_simple executable
-	UltraSimpleSerialArgument = "--serial"
-
-	// LoggerTag is the logger tag for RPLiDAR
-	LoggerTag = "RPLiDAR"
+	// LoggerProducerTag is the logger producer tag for RPLiDAR
+	LoggerProducerTag = "RPLiDAR"
 )
 
 var (

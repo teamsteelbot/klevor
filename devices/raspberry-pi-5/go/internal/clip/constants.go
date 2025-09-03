@@ -40,7 +40,9 @@ const (
 
 	// CloseTimeout is the timeout for closing the handler
 	CloseTimeout = 5 * time.Second
+)
 
+var (
 	// InitialSizeBuffer is the initial size of the buffer for reading lines
 	InitialSizeBuffer = 1024 * 1024 // 1 MB
 
@@ -57,13 +59,11 @@ const (
 	IgnoreFirstStdoutMessages = 8
 
 	// MinimumConfidenceThreshold is the minimum confidence threshold for a valid classification
-	MinimumConfidenceThreshold = 0.8
+	MinimumConfidenceThreshold float32 = 0.8
 
-	// LoggerTag is the logger tag for CLIP
-	LoggerTag = "CLIP"
-)
+	// LoggerProducerTag is the logger producer tag for CLIP
+	LoggerProducerTag = "CLIP"
 
-var (
 	// EmbeddingsJSONPath is the path where the embeddings JSON file is stored
 	EmbeddingsJSONPath string
 

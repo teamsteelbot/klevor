@@ -12,16 +12,20 @@ type (
 		Error(content string)
 		Warning(content string)
 		Debug(content string)
-		Done()
-		Closed() bool
+		Close()
+		IsClosed() bool
 		Tag() string
+		IsDebug() bool
 	}
 
 	// Logger is an interface for writing log messages to a file
 	Logger interface {
-		NewProducer() LoggerProducer
+		NewProducer(
+			tag string,
+		) (LoggerProducer, error)
 		Run(ctx context.Context) error
 		Close()
-		Closed() bool
+		IsClosed() bool
+		IsDebug() bool
 	}
 )

@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal"
@@ -23,14 +24,16 @@ type (
 
 	// SlamtecC1Handler is the handler for the Slamtec RPLiDAR C1 device
 	SlamtecC1Handler struct {
-		mutex               sync.RWMutex
+		handlerMutex        sync.Mutex
+		measuresMutex       sync.RWMutex
+		isRunning           atomic.Bool
 		logger              internallog.Logger
-		rotationCompletedCh chan<- RotationCompleted
+		loggerProducer      internallog.LoggerProducer
+		rotationCompletedCh chan RotationCompleted
 		baudrate            int
 		port                string
 		isUpsideDown        bool
 		angleAdjustment     float64
-		debug               bool
 		measures            [360]*internal.Measure
 		stdoutLinesRead     int
 		isRotationCompleted bool
@@ -41,62 +44,60 @@ type (
 //
 // Parameters:
 //
-// writerMessagesCh: Channel to send log messages.
-// rotationCompletedCh: Channel to signal when a full rotation is completed.
 // baudrate: Baud rate for the serial communication.
 // port: SerialCommunication port for the RPLiDAR.
 // isUpsideDown: If true, the RPLiDAR is upside down, and angles will be adjusted accordingly.
 // angleAdjustment: Optional angle adjustment to apply to the angles.
-// debug: If true, debug logging is enabled.
+// logger: Logger instance for logging messages.
 //
 // Returns:
 //
 // A pointer to a SlamtecC1Handler instance or an error if any parameter is invalid.
 func NewSlamtecC1Handler(
-	writerMessagesCh chan<- *internallog.Message,
-	rotationCompletedCh chan<- RotationCompleted,
 	baudrate int,
 	port string,
 	isUpsideDown bool,
 	angleAdjustment float64,
-	debug bool,
+	logger internallog.Logger,
 ) (*SlamtecC1Handler, error) {
-	// Check if the writerMessagesCh is nil
-	if writerMessagesCh == nil {
-		return nil, internallog.ErrNilWriterMessagesChannel
-	}
-
-	// Check if the rotationCompletedCh is nil
-	if rotationCompletedCh == nil {
-		return nil, ErrNilRotationCompletedCh
-	}
-
-	// Initialize the logger
-	logger, err := internallog.NewDefaultLogger(
-		writerMessagesCh,
-		&LoggerTag,
-		true,
-		debug,
-	)
-	if err != nil {
-		return nil, err
+	// Check if the logger is nil
+	if logger == nil {
+		return nil, internallog.ErrNilLogger
 	}
 
 	// Create a new SlamtecC1Handler instance
 	handler := &SlamtecC1Handler{
-		logger:              logger,
-		rotationCompletedCh: rotationCompletedCh,
-		baudrate:            baudrate,
-		port:                port,
-		isUpsideDown:        isUpsideDown,
-		angleAdjustment:     angleAdjustment,
-		debug:               debug,
+		logger:          logger,
+		baudrate:        baudrate,
+		port:            port,
+		isUpsideDown:    isUpsideDown,
+		angleAdjustment: angleAdjustment,
 	}
 
 	return handler, nil
 }
 
-// ReadIncomingMeasures reads incoming measures from the RPLiDAR and processes them.
+// GetRotationCompletedChannel returns the rotation completed channel.
+//
+// Returns:
+//
+// A channel that signals when a full rotation is completed.
+func (h *SlamtecC1Handler) GetRotationCompletedChannel() <-chan RotationCompleted {
+	h.handlerMutex.Lock()
+	h.handlerMutex.Unlock()
+	return h.rotationCompletedCh
+}
+
+// IsRunning checks if the handler is currently running.
+//
+// Returns:
+//
+// True if the handler is running, false otherwise.
+func (h *SlamtecC1Handler) IsRunning() bool {
+	return h.isRunning.Load()
+}
+
+// Run reads incoming measures from the RPLiDAR and processes them.
 //
 // Parameters:
 //
@@ -105,7 +106,42 @@ func NewSlamtecC1Handler(
 // Returns:
 //
 // An error if any issue occurs during reading or processing measures.
-func (h *SlamtecC1Handler) ReadIncomingMeasures(ctx context.Context) error {
+func (h *SlamtecC1Handler) Run(ctx context.Context) error {
+	h.handlerMutex.Lock()
+
+	// Check if it's already running
+	if h.IsRunning() {
+		h.handlerMutex.Unlock()
+		return ErrHandlerAlreadyRunning
+	}
+	defer func() {
+		h.handlerMutex.Lock()
+
+		// Set running to false
+		h.isRunning.Store(false)
+
+		h.handlerMutex.Unlock()
+	}()
+
+	// Create a logger producer
+	loggerProducer, err := h.logger.NewProducer(
+		LoggerProducerTag,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to create logger producer: %w", err)
+	}
+	h.loggerProducer = loggerProducer
+	defer h.loggerProducer.Close()
+
+	h.handlerMutex.Unlock()
+
+	// Initialize the rotation completed channel
+	h.rotationCompletedCh = make(
+		chan RotationCompleted,
+		ChannelBufferSize,
+	)
+	defer close(h.rotationCompletedCh)
+
 	// Initialize the measures slice
 	h.measures = [360]*internal.Measure{}
 
@@ -116,10 +152,10 @@ func (h *SlamtecC1Handler) ReadIncomingMeasures(ctx context.Context) error {
 	h.isRotationCompleted = false
 
 	// Log the start of reading measures
-	h.logger.Info(HandlerStartedMessage)
+	h.loggerProducer.Info(HandlerStartedMessage)
 
 	// Check if the ultra simple executable exists
-	if _, err := os.Stat(UltraSimplePath); errors.Is(err, os.ErrNotExist) {
+	if _, err = os.Stat(UltraSimplePath); errors.Is(err, os.ErrNotExist) {
 		return fmt.Errorf(
 			"ultra simple executable not found at path: %s",
 			UltraSimplePath,
@@ -173,10 +209,10 @@ func (h *SlamtecC1Handler) ReadIncomingMeasures(ctx context.Context) error {
 	if err = g.Wait(); err != nil {
 		// Check if the error is due to context cancellation
 		if errors.Is(err, context.Canceled) {
-			h.logger.Info(internallog.ContextCancelledMessage.Content)
+			h.loggerProducer.Info(internallog.ContextCancelledMessage.Content)
 			return ctx.Err()
 		}
-		h.logger.Error(fmt.Sprintf("Error reading lines: %v", err))
+		h.loggerProducer.Error(fmt.Sprintf("Error reading lines: %v", err))
 		return err
 	}
 
@@ -234,15 +270,15 @@ func (h *SlamtecC1Handler) scanLines(
 	for sc.Scan() {
 		select {
 		case <-ctx.Done():
-			h.logger.Info(internallog.ContextCancelledMessage.Content)
+			h.loggerProducer.Info(internallog.ContextCancelledMessage.Content)
 			return ctx.Err()
 		default:
 			// Read the line
 			line := strings.TrimSpace(sc.Text())
 
 			// Process the line
-			if h.debug {
-				h.logger.Debug(
+			if h.loggerProducer.IsDebug() {
+				h.loggerProducer.Debug(
 					fmt.Sprintf(
 						"Received line from %s: %s",
 						tag,
@@ -290,13 +326,13 @@ func (h *SlamtecC1Handler) handleStdoutLine(line string) error {
 		h.angleAdjustment,
 	)
 	if err != nil {
-		h.logger.Error(fmt.Sprintf("Failed to parse measure: %v", err))
+		h.loggerProducer.Error(fmt.Sprintf("Failed to parse measure: %v", err))
 		return nil // Ignore parsing errors
 	}
 
 	// Check if the RPLiDAR has completed a full rotation
 	if measure.IsRotationCompleted() {
-		h.logger.Info("Full rotation completed.")
+		h.loggerProducer.Info("Full rotation completed.")
 		h.isRotationCompleted = true
 	}
 
@@ -306,8 +342,8 @@ func (h *SlamtecC1Handler) handleStdoutLine(line string) error {
 	}
 
 	// Lock the measures for writing
-	h.mutex.Lock()
-	defer h.mutex.Unlock()
+	h.measuresMutex.Lock()
+	defer h.measuresMutex.Unlock()
 
 	// Store the measure in the measures
 	angle := int(measure.GetAngle()) % 360
@@ -330,8 +366,8 @@ func (h *SlamtecC1Handler) handleStdoutLine(line string) error {
 // A copy of the current measures.
 func (h *SlamtecC1Handler) GetMeasures() *[360]*internal.Measure {
 	// Lock the measures for reading
-	h.mutex.RLock()
-	defer h.mutex.RUnlock()
+	h.measuresMutex.RLock()
+	defer h.measuresMutex.RUnlock()
 
 	// Create a copy of the measures
 	measuresCopy := [360]*internal.Measure{}
@@ -350,6 +386,6 @@ func (h *SlamtecC1Handler) GetMeasures() *[360]*internal.Measure {
 // An error if any issue occurs during processing the line.
 func (h *SlamtecC1Handler) handleStderrLine(line string) error {
 	// Log the stderr line as a warning
-	h.logger.Warning(fmt.Sprintf("stderr: %s", line))
+	h.loggerProducer.Warning(fmt.Sprintf("stderr: %s", line))
 	return nil
 }

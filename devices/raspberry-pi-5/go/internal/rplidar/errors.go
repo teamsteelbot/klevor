@@ -5,6 +5,6 @@ import (
 )
 
 var (
-	ErrNilRotationCompletedCh = errors.New("rotation completed channel cannot be nil")
-	ErrNilLineHandler         = errors.New("line handler cannot be nil")
+	ErrNilLineHandler        = errors.New("line handler cannot be nil")
+	ErrHandlerAlreadyRunning = errors.New("handler is already running")
 )

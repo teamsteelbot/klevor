@@ -14,6 +14,12 @@ const (
 
 	// TimestampFormat is the format for timestamps in log messages
 	TimestampFormat = "15:04:05.000"
+
+	// filePerm is the permission for log files
+	filePerm = 0o644
+
+	// dirPerm is the permission for log directories
+	dirPerm = 0o755
 )
 
 var (
@@ -23,32 +29,35 @@ var (
 	// FileBufferSize is the size of the file buffer
 	FileBufferSize = 1024 * 1024 // 1 MB
 
+	// LoggerTag is the logger tag
+	LoggerTag = "LOGGER"
+
 	// MessagesChannelClosedMessage is the message logged when the messages channel is closed
 	MessagesChannelClosedMessage = NewMessage(
 		CategoryInfo,
 		"Messages channel closed",
-		nil,
+		LoggerTag,
 	)
 
-	// NilMessageReceivedMessage is the message logged when a nil message is received
+	// NilMessageReceivedMessage is the message logged when a LoggerTag message is received
 	NilMessageReceivedMessage = NewMessage(
 		CategoryWarning,
 		"Nil message received",
-		nil,
+		LoggerTag,
 	)
 
 	// ContextCancelledMessage is the message logged when the context is cancelled
 	ContextCancelledMessage = NewMessage(
 		CategoryInfo,
 		"Context cancelled by caller",
-		nil,
+		LoggerTag,
 	)
 
-	// WriterStartedMessage is the message logged when the writer starts
-	WriterStartedMessage = NewMessage(
+	// LoggerStartedMessage is the message logged when the logger starts
+	LoggerStartedMessage = NewMessage(
 		CategoryInfo,
-		"Log writer started",
-		nil,
+		"Started",
+		LoggerTag,
 	)
 
 	// LogsFolder is the folder name where logs are stored

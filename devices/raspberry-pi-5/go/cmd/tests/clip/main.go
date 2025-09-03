@@ -20,9 +20,6 @@ const (
 	// GracefulShutdownTimeout is the timeout for graceful shutdown
 	GracefulShutdownTimeout = 5 * time.Second
 
-	// MessagesChannelBufferSize is the size of the message channel buffer
-	MessagesChannelBufferSize = 512
-
 	// ClassificationInterval is the interval between printing the classification
 	ClassificationInterval = 100 * time.Millisecond
 )
@@ -50,23 +47,17 @@ func main() {
 		log.Fatal("missing required flag: --run-clip-path")
 	}
 
-	// Channel for messages
-	msgCh := make(chan *internallog.Message, MessagesChannelBufferSize)
-
-	// Initialize the writer
-	writer, err := internallog.NewDefaultWriter(msgCh, *logDebug)
-	if err != nil {
-		log.Fatalf("failed to initialize writter: %v", err)
-	}
+	// Initialize the logger
+	logger := internallog.NewDefaultLogger(*logDebug)
+	defer logger.Close()
 
 	// Initialize the CLIP handler
 	clipHandler, err := internalclip.NewClipHandler(
-		msgCh,
 		*generateClipEmbeddingsPath,
 		*runClipPath,
 		&internalclip.PositiveLabels,
 		&internalclip.NegativeLabels,
-		*logDebug,
+		logger,
 	)
 	if err != nil {
 		log.Fatalf("failed to initialize clip handler: %v", err)
@@ -78,31 +69,32 @@ func main() {
 		os.Interrupt,
 		syscall.SIGTERM,
 	)
-	defer stop()
 
 	// Create an error group to manage goroutines
 	g := errgroup.Group{}
 
-	// Initialize the writer goroutine
+	// Initialize the logger goroutine
 	g.Go(
 		func() error {
-			return writer.WriteReceivedMessages(ctx)
+			return logger.Run(ctx)
 		},
 	)
 
 	// Generate the CLIP embeddings
 	if err = clipHandler.GenerateEmbeddings(); err != nil {
 		// Wait for the writer goroutine to finish
-		cancel()
-		g.Wait()
+		stop()
+		if err = g.Wait(); err != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		}
 		return
 	}
-	defer cancel()
+	defer stop()
 
 	// Initialize the CLIP goroutine
 	g.Go(
 		func() error {
-			return clipHandler.ReadIncomingClassifications(ctx)
+			return clipHandler.Run(ctx)
 		},
 	)
 
@@ -137,7 +129,6 @@ func main() {
 			return
 		}
 	}
-	close(msgCh)
 
 	// Optional graceful wait
 	select {

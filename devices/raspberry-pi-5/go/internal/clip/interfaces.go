@@ -10,7 +10,8 @@ type (
 	// Handler is the interface to handle the Hailo CLIP application
 	Handler interface {
 		GenerateEmbeddings() error
-		ReadIncomingClassifications(ctx context.Context) error
+		Run(ctx context.Context) error
+		IsRunning() bool
 		GetClassification() *internal.Classification
 	}
 )

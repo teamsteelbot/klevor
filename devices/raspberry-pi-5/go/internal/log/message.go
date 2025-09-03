@@ -10,7 +10,7 @@ type (
 	Message struct {
 		Category      Category
 		Content       string
-		Tag           *string
+		Tag           string
 		formattedTime string
 	}
 )
@@ -21,12 +21,16 @@ type (
 //
 // category: Category of the log message.
 // content: Content of the log message.
-// tag: Optional tag for the log message.
+// tag: Tag for the log message.
 //
 // Returns:
 //
 // A pointer to a Message instance.
-func NewMessage(category Category, content string, tag *string) *Message {
+func NewMessage(
+	category Category,
+	content string,
+	tag string,
+) *Message {
 	return &Message{
 		category,
 		content,
@@ -41,19 +45,11 @@ func NewMessage(category Category, content string, tag *string) *Message {
 //
 // The formatted log message
 func (m *Message) String() string {
-	if m.Tag != nil {
-		return fmt.Sprintf(
-			"[%s] [%s] %s: %s",
-			m.formattedTime,
-			*m.Tag,
-			m.Category.String(),
-			m.Content,
-		)
-	}
 	return fmt.Sprintf(
-		"[%s] %s: %s",
+		"%s %s [%s] %s",
 		m.formattedTime,
 		m.Category.String(),
+		m.Tag,
 		m.Content,
 	)
 }

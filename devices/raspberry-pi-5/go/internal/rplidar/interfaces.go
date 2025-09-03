@@ -7,9 +7,11 @@ import (
 )
 
 type (
-	// Handler is the interface to handle the RPLIDAR device
+	// Handler is the interface to handle the RPLiDAR device
 	Handler interface {
-		ReadIncomingMeasures(ctx context.Context) error
+		Run(ctx context.Context) error
+		IsRunning() bool
 		GetMeasures() *[360]*internal.Measure
+		GetRotationCompletedChannel() <-chan RotationCompleted
 	}
 )
