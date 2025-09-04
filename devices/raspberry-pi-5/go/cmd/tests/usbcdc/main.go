@@ -1,57 +1,74 @@
 package main
 
 import (
+	"context"
+	"errors"
+	"flag"
 	"fmt"
-	"log"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
-	"go.bug.st/serial/enumerator"
+	internallog "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/log"
+	internalusbcdc "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/usbcdc"
+	"golang.org/x/sync/errgroup"
+)
+
+const (
+	// GracefulShutdownTimeout is the timeout for graceful shutdown
+	GracefulShutdownTimeout = 5 * time.Second
 )
 
 func main() {
-	/*
-		ports, err := serial.GetPortsList()
+	// Define flags
+	logDebug := flag.Bool("debug", false, "Enable debug logging")
+	flag.Parse()
+
+	// Initialize the logger
+	logger := internallog.NewDefaultLogger(*logDebug)
+
+	// Initialize the USB-CDC handler
+	usbCDCHandler := internalusbcdc.NewDefaultHandler(
+		internalusbcdc.BaudRate,
+	)
+
+	// Context canceled on SIGINT/SIGTERM.
+	ctx, stop := signal.NotifyContext(
+		context.Background(),
+		os.Interrupt,
+		syscall.SIGTERM,
+	)
+	defer stop()
+
+	// Create an error group to manage goroutines
+	g := errgroup.Group{}
+
+	// Initialize the logger goroutine
+	g.Go(
+		func() error {
+			return logger.Run(ctx)
+		},
+	)
+
+	// Initialize the USB-CDC goroutine
+	g.Go(
+		func() error {
+			return usbCDCHandler.Run(ctx)
+		},
+	)
+
+	// Wait for the goroutines to finish
+	if err := g.Wait(); err != nil && !errors.Is(err, context.Canceled) {
+		_, err = fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		if err != nil {
-			log.Fatalf("failed to list ports: %v", err)
-		}
-		if len(ports) == 0 {
-			fmt.Println("No serial ports found.")
 			return
 		}
-		fmt.Println("Available serial ports:")
-		for _, p := range ports {
-			fmt.Println(" -", p)
-		}
-	*/
-
-	details, err := enumerator.GetDetailedPortsList()
-	if err != nil {
-		log.Fatalf("failed to get detailed port list: %v", err)
-	}
-	if len(details) == 0 {
-		fmt.Println("No serial ports found.")
-		return
 	}
 
-	fmt.Println("Detected serial ports (USB CDC highlighted):")
-	for _, d := range details {
-		if d.IsUSB {
-			fmt.Printf(
-				"USB CDC: %s\n  VID:PID=%04X:%04X\n Product: %s\n  SerialNumber: %s\n",
-				d.Name,
-				d.VID,
-				d.PID,
-				safe(d.Product),
-				safe(d.SerialNumber),
-			)
-		} else {
-			fmt.Printf("Other: %s\n", d.Name)
-		}
+	// Optional graceful wait
+	select {
+	case <-ctx.Done():
+	case <-time.After(GracefulShutdownTimeout):
 	}
-}
-
-func safe(s string) string {
-	if s == "" {
-		return "(n/a)"
-	}
-	return s
 }

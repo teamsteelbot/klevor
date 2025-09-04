@@ -214,7 +214,7 @@ func (h *DefaultHandler) runToWrap(ctx context.Context) error {
 
 	// Open the serial port
 	mode := &serial.Mode{
-		BaudRate: BaudRate,
+		BaudRate: h.baudRate,
 	}
 	port, err := serial.Open(portName, mode)
 	if err != nil {
@@ -305,6 +305,13 @@ func (h *DefaultHandler) incomingMessagesHandler(
 
 			// Send each message to the incoming messages channel
 			for _, msg := range messages {
+				// Log the received message
+				h.loggerProducer.Info(
+					fmt.Sprintf(
+						"Received message: %s",
+						msg.String(),
+					),
+				)
 				h.incomingMessagesCh <- &msg
 			}
 		}
@@ -370,6 +377,14 @@ func (h *DefaultHandler) sendMessage(
 	if _, err := port.Write([]byte(message.String())); err != nil {
 		return fmt.Errorf(ErrFailedToSendMessage, err)
 	}
+
+	// Log the message sent
+	h.loggerProducer.Info(
+		fmt.Sprintf(
+			"Sent message: %s",
+			message.String(),
+		),
+	)
 	return nil
 }
 
