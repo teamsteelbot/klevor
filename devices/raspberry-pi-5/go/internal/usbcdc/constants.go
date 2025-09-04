@@ -40,26 +40,11 @@ var (
 	// BufferSize is the size of the buffer for USB-CDC communication
 	BufferSize uint8 = 64
 
-	// AccumulatedBufferSize is the size of the accumulated buffer for USB-CDC communication
-	AccumulatedBufferSize uint16 = 256
-
-	// ChunkSize is the default size of data chunks
-	ChunkSize = 64
-
 	// BaudRate is the baud rate for USB-CDC communication
 	BaudRate = 921600
 
-	// ConnectionAttempts is the amount of attempts to connect to the serial port
-	ConnectionAttempts = 10
-
-	// AttemptsDelay is the delay between connection attempts
-	AttemptsDelay = 1 * time.Second
-
 	// HandlerLoggerProducerTag is the logger producer tag for USB-CDC handler
 	HandlerLoggerProducerTag = "USB_CDC_HANDLER"
-
-	// SenderLoggerProducerTag is the logger producer tag for USB-CDC sender
-	SenderLoggerProducerTag = "USB_CDC_SENDER"
 
 	// IncomingMessagesChannelBufferSize is the size of the incoming messages channel buffer
 	IncomingMessagesChannelBufferSize = 100

@@ -166,6 +166,47 @@ func NewIncomingMessageFromString(message string) (*IncomingMessage, error) {
 	return NewIncomingMessage(category, message[1:]), nil
 }
 
+// NewIncomingMessagesFromBuffer creates multiple instances of IncomingMessage from a given bytes buffer
+//
+// Parameters:
+//
+// buffer: The bytes buffer containing multiple messages
+//
+// Returns:
+//
+// A slice of IncomingMessage instances, or an error if the buffer is invalid
+func NewIncomingMessagesFromBuffer(buffer *[]byte) ([]IncomingMessage, error) {
+	// Check if the buffer is nil
+	if buffer == nil {
+		return nil, ErrNilBuffer
+	}
+
+	// Parse the buffer to extract messages
+	var messages []IncomingMessage
+	var currentMessage []byte
+	var lastIndex int
+	for i, b := range *buffer {
+		if b == EndChar {
+			if len(currentMessage) > 0 {
+				msg, err := NewIncomingMessageFromString(string(currentMessage))
+				if err != nil {
+					return nil, err
+				}
+				messages = append(messages, *msg)
+				currentMessage = nil
+				lastIndex = i + 1
+			}
+		} else {
+			currentMessage = append(currentMessage, b)
+		}
+	}
+
+	// Update the buffer to remove processed messages
+	*buffer = (*buffer)[lastIndex:]
+
+	return messages, nil
+}
+
 // FormatToSendAsAnErrorMessage formats the message to send as an error message.
 //
 // Returns:

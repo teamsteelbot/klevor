@@ -12,7 +12,9 @@ type (
 	// Sender is the interface to send messages through USB CDC.
 	Sender interface {
 		SendMessage(message *OutgoingMessage) error
-		SendConfirmationMessage() error
+		SendOKMessage() error
+		SendStopMessage() error
+		SendHeartbeatMessage() error
 		IsClosed() bool
 		Close()
 	}

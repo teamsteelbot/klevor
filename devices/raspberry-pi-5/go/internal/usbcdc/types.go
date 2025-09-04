@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"sync"
 	"sync/atomic"
-	"time"
 
 	internallog "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/log"
 	internalrplidar "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/rplidar"
 	"go.bug.st/serial"
+	"golang.org/x/sync/errgroup"
 )
 
 type (
@@ -34,6 +34,7 @@ type (
 		baudRate           int
 		buffer             []byte
 		accumulatedBuffer  []byte
+		accumulatedBytes   int
 	}
 )
 
@@ -90,9 +91,19 @@ func (s *DefaultSender) SendMessage(message *OutgoingMessage) error {
 	return nil
 }
 
-// SendConfirmationMessage sends a confirmation message through USB CDC.
-func (s *DefaultSender) SendConfirmationMessage() error {
+// SendOKMessage sends an OK message through USB CDC.
+func (s *DefaultSender) SendOKMessage() error {
 	return s.SendMessage(OutgoingOKMessage)
+}
+
+// SendStopMessage sends a stop message through USB CDC.
+func (s *DefaultSender) SendStopMessage() error {
+	return s.SendMessage(OutgoingStopMessage)
+}
+
+// SendHeartbeatMessage sends a heartbeat message through USB CDC.
+func (s *DefaultSender) SendHeartbeatMessage() error {
+	return s.SendMessage(OutgoingHeartbeatMessage)
 }
 
 // Close signals that the sender is done and performs cleanup.
@@ -139,7 +150,7 @@ func NewDefaultHandler(baudRate int) *DefaultHandler {
 	buffer := make([]byte, BufferSize)
 
 	// Create an accumulated buffer for storing data
-	accumulatedBuffer := make([]byte, 0, AccumulatedBufferSize)
+	accumulatedBuffer := make([]byte, 0)
 
 	return &DefaultHandler{
 		baudRate:          baudRate,
@@ -216,15 +227,48 @@ func (h *DefaultHandler) runToWrap(ctx context.Context) error {
 	}(port)
 
 	// Set a timeout to prevent blocking forever
-	if err = port.SetReadTimeout(time.Second * 5); err != nil {
+	if err = port.SetReadTimeout(ReadTimeout); err != nil {
 		return err
 	}
 
-	// Loop to continuously read from the serial port
+	// Create an error group to manage goroutines
+	g := errgroup.Group{}
+
+	// Call the incoming messages handler
+	g.Go(
+		func() error {
+			return h.incomingMessagesHandler(ctx, port)
+		},
+	)
+
+	// Call the outgoing messages handler
+	g.Go(
+		func() error {
+			return h.outgoingMessagesHandler(ctx, port)
+		},
+	)
+
+	// Wait for both handlers to finish and return any error
+	return g.Wait()
+}
+
+// incomingMessagesHandler processes incoming messages from the serial port.
+//
+// Parameters:
+//
+// ctx: The context to control the lifecycle of the handler.
+// port: The serial port to read messages from.
+//
+// Returns:
+//
+// An error if any issue occurs during processing.
+func (h *DefaultHandler) incomingMessagesHandler(
+	ctx context.Context,
+	port serial.Port,
+) error {
 	for {
 		select {
 		case <-ctx.Done():
-			// send and read messages before returning
 			return ctx.Err()
 		default:
 			n, err := port.Read(h.buffer)
@@ -240,10 +284,93 @@ func (h *DefaultHandler) runToWrap(ctx context.Context) error {
 				// Read can return 0 bytes
 				continue
 			}
+
 			// Process the data read
-			fmt.Printf("Read %d bytes: %s\n", n, string(h.buffer[:n]))
+			h.accumulatedBuffer = append(
+				h.accumulatedBuffer,
+				h.buffer[:n]...,
+			)
+
+			// Extract messages from the accumulated buffer
+			messages, err := NewIncomingMessagesFromBuffer(&h.accumulatedBuffer)
+			if err != nil {
+				h.loggerProducer.Warning(
+					fmt.Sprintf(
+						"An error occurred while processing incoming messages: %v",
+						err,
+					),
+				)
+				continue
+			}
+
+			// Send each message to the incoming messages channel
+			for _, msg := range messages {
+				h.incomingMessagesCh <- &msg
+			}
 		}
 	}
+}
+
+// outgoingMessagesHandler processes outgoing messages and sends them through the serial port.
+//
+// Parameters:
+//
+// ctx: The context to control the lifecycle of the handler.
+// port: The serial port to send messages through.
+//
+// Returns:
+//
+// An error if any issue occurs during processing.
+func (h *DefaultHandler) outgoingMessagesHandler(
+	ctx context.Context,
+	port serial.Port,
+) error {
+	for {
+		select {
+		case <-ctx.Done():
+			// Process any remaining messages before returning
+			for outgoingMessage := range h.outgoingMessagesCh {
+				if err := h.sendMessage(port, outgoingMessage); err != nil {
+					return err
+				}
+			}
+			return ctx.Err()
+		case outgoingMessage, ok := <-h.outgoingMessagesCh:
+			if !ok {
+				return ErrOutgoingMessagesChannelClosedAheadOfTime
+			}
+			if err := h.sendMessage(port, outgoingMessage); err != nil {
+				return err
+			}
+		}
+	}
+}
+
+// sendMessage sends a message through the serial port.
+//
+// Parameters:
+//
+// port: The serial port to send the message through.
+// message: Pointer to the OutgoingMessage to be sent.
+//
+// Returns:
+//
+// An error if the message could not be sent.
+func (h *DefaultHandler) sendMessage(
+	port serial.Port,
+	message *OutgoingMessage,
+) error {
+	// Check if the message is nil
+	if message == nil {
+		h.loggerProducer.Warning("Attempted to send a nil outgoing message")
+		return nil
+	}
+
+	// Send the message to the port
+	if _, err := port.Write([]byte(message.String())); err != nil {
+		return fmt.Errorf(ErrFailedToSendMessage, err)
+	}
+	return nil
 }
 
 // Run starts the handler to read from and write to the serial port.
