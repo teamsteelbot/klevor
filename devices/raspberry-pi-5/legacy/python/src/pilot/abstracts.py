@@ -1,3 +1,18 @@
+from abc import ABC, abstractmethod
+from typing import Dict
+from math import ceil, floor
+
+from .constants import (
+	MOTOR_SPEED_RANGE,
+	SERVO_ACTUATION_RANGE,
+	DIRECTION_TO_ANGLE,
+	ANGLE_WIDTH,
+	)
+from ..common.measure import Measure
+from ..log import Logger
+from .enums import CardinalDirection
+
+
 class PilotABC(ABC):
 	"""
 	Abstract class for the Pilot handler.
@@ -37,6 +52,138 @@ class PilotABC(ABC):
 			raise ValueError(
 				f"Speed must be between {MOTOR_SPEED_RANGE[0]} and {MOTOR_SPEED_RANGE[1]}",
 				)
+
+	@classmethod
+	def _calculate_average_distance_from_angle(
+			cls,
+			measures: Dict[int, Measure],
+			middle_angle: int,
+			width: int = ANGLE_WIDTH,
+			) -> float:
+		"""
+		Calculate the average distance for a given list of angles.
+
+		Args:
+			measures (Dict[int, Measure]): Dictionary of measures indexed by angle.
+			middle_angle (int): The middle angle to start the averaging from.
+			width (int): The sum of the angles to consider with both sides and the middle angle.
+		Returns:
+			float: The average distance for the specified angles.
+		Raises:
+			ValueError: If the width is not an even number or if it is greater than or equal to 360 degrees.
+		"""
+		# Initialize total distance and count
+		total_distance = 0.0
+		count = 0
+
+		# Calculate the range of angles to consider
+		if width % 2 == 0:
+			raise ValueError("Width must be an odd number.")
+		if width < 1:
+			raise ValueError("Width must be greater than 0.")
+		if width >= 360:
+			raise ValueError("Width must be less than 360 degrees.")
+
+		# Check if the width is 1, in which case we only consider the middle angle
+		if width == 1:
+			return measures.get(
+				middle_angle,
+				Measure(middle_angle, 0.0, 0),
+				).distance
+
+		# Calculate the angles to consider
+		angles = []
+		width_per_side = (width - 1) // 2
+		left_angle = middle_angle - width_per_side
+		right_angle = middle_angle + width_per_side
+		if left_angle < 0:
+			angles = [
+				*angles,
+				*range(360 + left_angle, 360),
+				]
+		if right_angle >= 360:
+			angles = [
+				*angles,
+				*range(0, right_angle - 360 + 1),
+				]
+
+		angles = [
+			*angles,
+			*range(
+				max(left_angle, 0),
+				min(360, right_angle + 1),
+				),
+			]
+
+		for angle in angles:
+			measure = measures.get(angle, None)
+			if measure is None:
+				continue
+
+			# Check the distance and quality
+			if measure.distance == 0.0 or measure.quality == 0:
+				continue
+
+			total_distance += measure.distance
+			count += 1
+		return total_distance / count if count > 0 else 0.0
+
+	@classmethod
+	def _calculate_average_distance_from_direction(
+			cls,
+			measures: Dict[int, Measure],
+			direction: CardinalDirection,
+			width: int = ANGLE_WIDTH,
+			) -> float:
+		"""
+		Calculate the average distance for a given list of angles.
+
+		Args:
+			measures (Dict[int, Measure]): Dictionary of measures indexed by angle.
+			width (int): The sum of the angles to consider with both sides and the middle angle.
+			direction (CardinalDirection): Direction to calculate the average distance for.
+		Returns:
+			float: The average distance for the specified angles.
+		Raises:
+			ValueError: If the direction is not valid or no measures are found.
+		"""
+		direction_angle = DIRECTION_TO_ANGLE.get(direction, None)
+		if direction_angle is None:
+			raise ValueError(f"No angle found for direction: {direction}")
+
+		# Round the angle
+		direction_angle = ceil(
+			direction_angle,
+			) if direction_angle >= 180 else floor(direction_angle)
+
+		return cls._calculate_average_distance_from_angle(
+			measures,
+			int(direction_angle),
+			width,
+			)
+
+	@classmethod
+	def _calculate_average_distance(
+			cls,
+			measures: Dict[int, Measure],
+			*directions: CardinalDirection,
+			) -> Dict[CardinalDirection, float]:
+		"""
+		Calculate the average distances for the specified directions.
+
+		Args:
+			measures (Dict[int, Measure]): Dictionary of measures indexed by angle.
+			*directions (CardinalDirection): Directions to calculate the average distances for.
+		Returns:
+			Dict[Direction, float]: Dictionary with directions as keys and their average distances as values.
+		"""
+		avg_distances = {}
+		for direction in directions:
+			avg_distances[
+				direction] = cls._calculate_average_distance_from_direction(
+				measures, direction,
+				)
+		return avg_distances
 
 	@abstractmethod
 	def logger(self) -> Logger:
