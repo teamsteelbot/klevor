@@ -49,10 +49,9 @@ func main() {
 
 	// Initialize the logger
 	logger := internallog.NewDefaultLogger(*logDebug)
-	defer logger.Close()
 
 	// Initialize the CLIP handler
-	clipHandler, err := internalclip.NewClipHandler(
+	clipHandler, err := internalclip.NewDefaultHandler(
 		*generateClipEmbeddingsPath,
 		*runClipPath,
 		&internalclip.PositiveLabels,

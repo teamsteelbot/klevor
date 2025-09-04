@@ -207,9 +207,8 @@ func (s *DefaultHandler) SetAngle(angle uint16) error {
 	// Send a debug message if debug mode is enabled
 	if s.debugHandler.IsEnabled() && s.usbCDCHandler != nil {
 		err := s.usbCDCHandler.SendMessage(
-			internalusbcdc.NewOutgoingMessageFromUint8Content(
-				internalusbcdcenums.OutgoingCategoryDebug,
-				uint8(internalusbcdcenums.DebugReceivedServoAngle),
+			internalusbcdc.NewOutgoingDebugMessage(
+				internalusbcdcenums.DebugReceivedServoAngle,
 			),
 		)
 		if err != nil {

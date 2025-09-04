@@ -9,7 +9,7 @@ type (
 	LoggerProducer interface {
 		Log(content string, category Category)
 		Info(content string)
-		Error(content string)
+		Error(err error)
 		Warning(content string)
 		Debug(content string)
 		Close()
@@ -24,7 +24,7 @@ type (
 			tag string,
 		) (LoggerProducer, error)
 		Run(ctx context.Context) error
-		Close()
+		IsRunning() bool
 		IsClosed() bool
 		IsDebug() bool
 	}

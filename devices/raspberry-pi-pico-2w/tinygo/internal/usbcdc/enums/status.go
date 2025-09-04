@@ -6,25 +6,40 @@ import (
 )
 
 type (
-	// Status represents the enum status messages sent and received to the Raspberry Pi 5
-	Status uint8
+	// OutgoingStatus represents the enum status messages sent to the Raspberry Pi 5
+	OutgoingStatus uint8
+
+	// IncomingStatus represents the enum status messages received from the Raspberry Pi 5
+	IncomingStatus uint8
 )
 
 const (
-	StatusNil Status = iota
-	StatusStart
-	StatusStop
-	StatusOK
-	StatusHeartbeat
+	OutgoingStatusNil OutgoingStatus = iota
+	OutgoingStatusOK
+	OutgoingStatusHeartbeat
+	OutgoingStatusStart
+)
+
+const (
+	IncomingStatusNil IncomingStatus = iota
+	IncomingStatusHeartbeat
+	IncomingStatusOK
+	IncomingStatusStop
 )
 
 var (
-	// StatusNames maps a given Status to its string name
-	StatusNames = map[Status]string{
-		StatusStart:     "start",
-		StatusStop:      "stop",
-		StatusOK:        "ok",
-		StatusHeartbeat: "heartbeat",
+	// OutgoingStatusNames maps a given Status to its string name
+	OutgoingStatusNames = map[OutgoingStatus]string{
+		OutgoingStatusOK:        "ok",
+		OutgoingStatusHeartbeat: "heartbeat",
+		OutgoingStatusStart:     "start",
+	}
+
+	// IncomingStatusNames maps a given IncomingStatus to its string name
+	IncomingStatusNames = map[IncomingStatus]string{
+		IncomingStatusHeartbeat: "heartbeat",
+		IncomingStatusOK:        "ok",
+		IncomingStatusStop:      "stop",
 	}
 )
 
@@ -33,28 +48,59 @@ var (
 // Returns:
 //
 // The string representation of the Status enum
-func (s Status) String() string {
-	return StatusNames[s]
+func (o OutgoingStatus) String() string {
+	return OutgoingStatusNames[o]
 }
 
-// StatusFromString returns the Status enum based on a given string
+// OutgoingStatusFromString returns the OutgoingStatus enum based on a given string
 //
 // Parameters:
 //
-// s: The string name to search on StatusNames
+// s: The string name to search on OutgoingStatusNames
 //
 // Returns:
 //
-// The Status enum value, or an error if the key wasn't found for the given value
-func StatusFromString(s string) (Status, error) {
+// The OutgoingStatus enum value, or an error if the key wasn't found for the given value
+func OutgoingStatusFromString(s string) (OutgoingStatus, error) {
 	// Format the string
 	s = strings.ToLower(strings.TrimSpace(s))
 
 	// Search for the given status name
-	for key, value := range StatusNames {
+	for key, value := range OutgoingStatusNames {
 		if value == s {
 			return key, nil
 		}
 	}
-	return StatusNil, fmt.Errorf(ErrInvalidStatusName, s)
+	return OutgoingStatusNil, fmt.Errorf(ErrInvalidOutgoingStatusName, s)
+}
+
+// String returns the string representation of the IncomingStatus
+//
+// Returns:
+//
+// The string representation of the IncomingStatus enum
+func (i IncomingStatus) String() string {
+	return IncomingStatusNames[i]
+}
+
+// IncomingStatusFromString returns the IncomingStatus enum based on a given string
+//
+// Parameters:
+//
+// s: The string name to search on IncomingStatusNames
+//
+// Returns:
+//
+// The IncomingStatus enum value, or an error if the key wasn't found for the given value
+func IncomingStatusFromString(s string) (IncomingStatus, error) {
+	// Format the string
+	s = strings.ToLower(strings.TrimSpace(s))
+
+	// Search for the given status name
+	for key, value := range IncomingStatusNames {
+		if value == s {
+			return key, nil
+		}
+	}
+	return IncomingStatusNil, fmt.Errorf(ErrInvalidIncomingStatusName, s)
 }

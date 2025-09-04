@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	internalchallengeenums "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/challenge/enums"
 	internalusbcdcenums "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc/enums"
 )
 
@@ -53,6 +54,60 @@ func NewOutgoingMessageFromUint8Content(
 		Category: category,
 		Content:  fmt.Sprintf("%d", content),
 	}
+}
+
+// NewOutgoingStatusMessage creates a new instance of OutgoingMessage with status content
+//
+// Parameters:
+//
+// status: The status content of the message
+//
+// Returns:
+//
+// An instance of OutgoingMessage
+func NewOutgoingStatusMessage(
+	status internalusbcdcenums.OutgoingStatus,
+) *OutgoingMessage {
+	return NewOutgoingMessageFromUint8Content(
+		internalusbcdcenums.OutgoingCategoryStatus,
+		uint8(status),
+	)
+}
+
+// NewOutgoingChallengeMessage creates a new instance of OutgoingMessage with challenge content
+//
+// Parameters:
+//
+// challenge: The challenge content of the message
+//
+// Returns:
+//
+// An instance of OutgoingMessage
+func NewOutgoingChallengeMessage(
+	challenge internalchallengeenums.Challenge,
+) *OutgoingMessage {
+	return NewOutgoingMessageFromUint8Content(
+		internalusbcdcenums.OutgoingCategoryChallenge,
+		uint8(challenge),
+	)
+}
+
+// NewOutgoingDebugMessage creates a new instance of OutgoingMessage with debug content
+//
+// Parameters:
+//
+// debugInfo: The debug information content of the message
+//
+// Returns:
+//
+// An instance of OutgoingMessage
+func NewOutgoingDebugMessage(
+	debugInfo internalusbcdcenums.Debug,
+) *OutgoingMessage {
+	return NewOutgoingMessageFromUint8Content(
+		internalusbcdcenums.OutgoingCategoryDebug,
+		uint8(debugInfo),
+	)
 }
 
 // NewOutgoingMessageFromUint16Content creates a new instance of OutgoingMessage with uint16 content

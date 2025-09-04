@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal"
 	internalusbcdcenums "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/usbcdc/enums"
 )
 
@@ -54,6 +55,60 @@ func NewIncomingMessageFromUint8Content(
 		Category: category,
 		Content:  fmt.Sprintf("%d", content),
 	}
+}
+
+// NewIncomingStatusMessage creates a new instance of IncomingMessage with status content
+//
+// Parameters:
+//
+// status: The status content of the message
+//
+// Returns:
+//
+// An instance of IncomingMessage
+func NewIncomingStatusMessage(
+	status internalusbcdcenums.IncomingStatus,
+) *IncomingMessage {
+	return NewIncomingMessageFromUint8Content(
+		internalusbcdcenums.IncomingCategoryStatus,
+		uint8(status),
+	)
+}
+
+// NewIncomingChallengeMessage creates a new instance of IncomingMessage with challenge content
+//
+// Parameters:
+//
+// challenge: The challenge content of the message
+//
+// Returns:
+//
+// An instance of IncomingMessage
+func NewIncomingChallengeMessage(
+	challenge internal.Challenge,
+) *IncomingMessage {
+	return NewIncomingMessageFromUint8Content(
+		internalusbcdcenums.IncomingCategoryChallenge,
+		uint8(challenge),
+	)
+}
+
+// NewIncomingDebugMessage creates a new instance of IncomingMessage with debug content
+//
+// Parameters:
+//
+// debugInfo: The debug information content of the message
+//
+// Returns:
+//
+// An instance of IncomingMessage
+func NewIncomingDebugMessage(
+	debugInfo internalusbcdcenums.Debug,
+) *IncomingMessage {
+	return NewIncomingMessageFromUint8Content(
+		internalusbcdcenums.IncomingCategoryDebug,
+		uint8(debugInfo),
+	)
 }
 
 // String returns a string representation of the IncomingMessage

@@ -62,7 +62,6 @@ func main() {
 
 	// Example usage of the logger producer in a separate goroutine
 	go func() {
-		defer logger.Close()
 		defer loggerProducer.Close()
 
 		// Send messages

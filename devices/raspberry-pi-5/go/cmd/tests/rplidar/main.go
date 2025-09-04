@@ -28,7 +28,6 @@ func main() {
 
 	// Initialize the logger
 	logger := internallog.NewDefaultLogger(*logDebug)
-	defer logger.Close()
 
 	// Initialize the Slamtec C1 handler
 	rplidarHandler, err := internalrplidar.NewSlamtecC1Handler(

@@ -20,8 +20,8 @@ import (
 )
 
 type (
-	// ClipHandler is the handler for the Hailo CLIP application
-	ClipHandler struct {
+	// DefaultHandler is the handler for the Hailo CLIP application
+	DefaultHandler struct {
 		handlerMutex               sync.Mutex
 		classificationMutex        sync.RWMutex
 		isRunning                  atomic.Bool
@@ -37,7 +37,7 @@ type (
 	}
 )
 
-// NewClipHandler creates a new ClipHandler instance.
+// NewDefaultHandler creates a new DefaultHandler instance.
 //
 // Parameters:
 //
@@ -49,14 +49,14 @@ type (
 //
 // Returns:
 //
-// A pointer to a ClipHandler instance or an error if any parameter is invalid.
-func NewClipHandler(
+// A pointer to a DefaultHandler instance or an error if any parameter is invalid.
+func NewDefaultHandler(
 	generateClipEmbeddingsPath,
 	runClipPath string,
 	positiveLabels *[]internal.PositiveLabel,
 	negativeLabels *[]internal.NegativeLabel,
 	logger internallog.Logger,
-) (*ClipHandler, error) {
+) (*DefaultHandler, error) {
 	// Check if the logger is nil
 	if logger == nil {
 		return nil, internallog.ErrNilLogger
@@ -77,8 +77,8 @@ func NewClipHandler(
 		return nil, ErrNilPositiveLabels
 	}
 
-	// Create a new ClipHandler instance
-	handler := &ClipHandler{
+	// Create a new DefaultHandler instance
+	handler := &DefaultHandler{
 		generateClipEmbeddingsPath: generateClipEmbeddingsPath,
 		runClipPath:                runClipPath,
 		positiveLabels:             positiveLabels,
@@ -94,7 +94,7 @@ func NewClipHandler(
 // Returns:
 //
 // A string containing the JSON content.
-func (h *ClipHandler) generateEmbeddingsJSONContent() string {
+func (h *DefaultHandler) generateEmbeddingsJSONContent() string {
 	var builder strings.Builder
 
 	// Add the opening brace and positive labels key
@@ -146,7 +146,7 @@ func (h *ClipHandler) generateEmbeddingsJSONContent() string {
 // Returns:
 //
 // An error if any issue occurs during the execution of the script.
-func (h *ClipHandler) GenerateEmbeddings() error {
+func (h *DefaultHandler) GenerateEmbeddings() error {
 	// Log the start of generating embeddings
 	h.loggerProducer.Info(GenerateEmbeddingsStartMessage)
 
@@ -199,9 +199,9 @@ func (h *ClipHandler) GenerateEmbeddings() error {
 
 	// Run and wait
 	if err := cmd.Run(); err != nil {
-		h.loggerProducer.Error(
+		h.loggerProducer.Warning(
 			fmt.Sprintf(
-				"embeddings script failed: %v; stderr: %s",
+				"Embeddings script failed: %v; stderr: %s",
 				err,
 				strings.TrimSpace(stderrBuf.String()),
 			),
@@ -240,11 +240,11 @@ func (h *ClipHandler) GenerateEmbeddings() error {
 // Returns:
 //
 // True if the handler is running, false otherwise.
-func (h *ClipHandler) IsRunning() bool {
+func (h *DefaultHandler) IsRunning() bool {
 	return h.isRunning.Load()
 }
 
-// Run reads incoming classifications from the CLIP application.
+// runToWrap is the internal function to read incoming classifications from the CLIP application.
 //
 // Parameters:
 //
@@ -252,36 +252,8 @@ func (h *ClipHandler) IsRunning() bool {
 //
 // Returns:
 //
-// An error if any issue occurs during reading or processing classifications.
-func (h *ClipHandler) Run(ctx context.Context) error {
-	h.handlerMutex.Lock()
-
-	// Check if it's already running
-	if h.IsRunning() {
-		h.handlerMutex.Unlock()
-		return ErrHandlerAlreadyRunning
-	}
-	defer func() {
-		h.handlerMutex.Lock()
-
-		// Set running to false
-		h.isRunning.Store(false)
-
-		h.handlerMutex.Unlock()
-	}()
-
-	// Create a logger producer
-	loggerProducer, err := h.logger.NewProducer(
-		LoggerProducerTag,
-	)
-	if err != nil {
-		return fmt.Errorf("failed to create logger producer: %w", err)
-	}
-	h.loggerProducer = loggerProducer
-	defer h.loggerProducer.Close()
-
-	h.handlerMutex.Unlock()
-
+// An error if any issue occurs during execution.
+func (h *DefaultHandler) runToWrap(ctx context.Context) error {
 	// Reset the stdout lines read counter
 	h.stdoutLinesRead = 0
 
@@ -289,7 +261,7 @@ func (h *ClipHandler) Run(ctx context.Context) error {
 	h.loggerProducer.Info(HandlerStartedMessage)
 
 	// Check if the run clip executable exists
-	if _, err = os.Stat(h.runClipPath); errors.Is(err, os.ErrNotExist) {
+	if _, err := os.Stat(h.runClipPath); errors.Is(err, os.ErrNotExist) {
 		return fmt.Errorf(
 			"run clip executable not found at path: %s",
 			h.runClipPath,
@@ -338,8 +310,7 @@ func (h *ClipHandler) Run(ctx context.Context) error {
 			h.loggerProducer.Info(internallog.ContextCancelledMessage.Content)
 			return ctx.Err()
 		}
-		h.loggerProducer.Error(fmt.Sprintf("Error reading lines: %v", err))
-		return err
+		return fmt.Errorf("error reading lines: %w", err)
 	}
 
 	// Close the stdout and stderr pipes
@@ -363,6 +334,55 @@ func (h *ClipHandler) Run(ctx context.Context) error {
 	return nil
 }
 
+// Run reads incoming classifications from the CLIP application.
+//
+// Parameters:
+//
+// ctx: Context for managing cancellation and timeouts.
+//
+// Returns:
+//
+// An error if any issue occurs during reading or processing classifications.
+func (h *DefaultHandler) Run(ctx context.Context) error {
+	h.handlerMutex.Lock()
+
+	// Check if it's already running
+	if h.IsRunning() {
+		h.handlerMutex.Unlock()
+		return ErrHandlerAlreadyRunning
+	}
+	defer func() {
+		h.handlerMutex.Lock()
+
+		// Set running to false
+		h.isRunning.Store(false)
+
+		h.handlerMutex.Unlock()
+	}()
+
+	// Set running to true
+	h.isRunning.Store(true)
+
+	h.handlerMutex.Unlock()
+
+	// Create a logger producer
+	loggerProducer, err := h.logger.NewProducer(
+		LoggerProducerTag,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to create logger producer: %w", err)
+	}
+	h.loggerProducer = loggerProducer
+	defer h.loggerProducer.Close()
+
+	return internallog.LogOnError(
+		func() error {
+			return h.runToWrap(ctx)
+		},
+		h.loggerProducer,
+	)
+}
+
 // scanLines reads lines from the provided reader and processes them using the given lineHandler.
 //
 // Parameters:
@@ -375,7 +395,7 @@ func (h *ClipHandler) Run(ctx context.Context) error {
 // Returns:
 //
 // An error if any issue occurs during reading or processing lines.
-func (h *ClipHandler) scanLines(
+func (h *DefaultHandler) scanLines(
 	ctx context.Context,
 	tag string,
 	r interface{ Read([]byte) (int, error) },
@@ -436,7 +456,7 @@ func (h *ClipHandler) scanLines(
 // Returns:
 //
 // An error if any issue occurs during processing the line.
-func (h *ClipHandler) handleStdoutLine(line string) error {
+func (h *DefaultHandler) handleStdoutLine(line string) error {
 	// Increment the stdout lines read counter
 	h.stdoutLinesRead++
 
@@ -468,7 +488,7 @@ func (h *ClipHandler) handleStdoutLine(line string) error {
 	// Create a classification from the given string
 	classification, err := internal.NewClassificationFromString(line)
 	if err != nil {
-		h.loggerProducer.Error(
+		h.loggerProducer.Warning(
 			fmt.Sprintf(
 				"Failed to parse classification: %v",
 				err,
@@ -508,7 +528,7 @@ func (h *ClipHandler) handleStdoutLine(line string) error {
 // Returns:
 //
 // A copy of the current classification.
-func (h *ClipHandler) GetClassification() *internal.Classification {
+func (h *DefaultHandler) GetClassification() *internal.Classification {
 	// Lock the classification for reading
 	h.classificationMutex.RLock()
 	defer h.classificationMutex.RUnlock()
@@ -533,7 +553,7 @@ func (h *ClipHandler) GetClassification() *internal.Classification {
 // Returns:
 //
 // An error if any issue occurs during processing the line.
-func (h *ClipHandler) handleStderrLine(line string) error {
+func (h *DefaultHandler) handleStderrLine(line string) error {
 	// Log the stderr line as a warning
 	h.loggerProducer.Warning(fmt.Sprintf("stderr: %s", line))
 	return nil

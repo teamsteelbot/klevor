@@ -111,11 +111,6 @@ class Sender(SenderABC, LoggerConsumerProtocol):
 		self.__data_serial = None
 
 	@final
-	@property
-	def logger(self) -> Logger:
-		return self.__logger
-
-	@final
 	def _open_port(self, port: str) -> None:
 		try:
 			# Create a new Serial instance for the data port

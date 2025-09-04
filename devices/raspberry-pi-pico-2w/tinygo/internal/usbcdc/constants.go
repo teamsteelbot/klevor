@@ -29,52 +29,28 @@ const (
 
 var (
 	// IncomingStopMessage is the incoming stop message for USB-CDC communication
-	IncomingStopMessage = NewIncomingMessageFromUint8Content(
-		internalusbcdcenums.IncomingCategoryStatus,
-		uint8(internalusbcdcenums.StatusStop),
-	)
+	IncomingStopMessage = NewIncomingStatusMessage(internalusbcdcenums.IncomingStatusStop)
 
 	// IncomingOKMessage is the incoming OK message for USB-CDC communication
-	IncomingOKMessage = NewIncomingMessageFromUint8Content(
-		internalusbcdcenums.IncomingCategoryStatus,
-		uint8(internalusbcdcenums.StatusOK),
-	)
+	IncomingOKMessage = NewIncomingStatusMessage(internalusbcdcenums.IncomingStatusOK)
 
 	// IncomingHeartbeatMessage is the incoming heartbeat message for USB-CDC communication
-	IncomingHeartbeatMessage = NewIncomingMessageFromUint8Content(
-		internalusbcdcenums.IncomingCategoryStatus,
-		uint8(internalusbcdcenums.StatusHeartbeat),
-	)
+	IncomingHeartbeatMessage = NewIncomingStatusMessage(internalusbcdcenums.IncomingStatusHeartbeat)
 
 	// OutgoingStartMessage is the outgoing start message for USB-CDC communication
-	OutgoingStartMessage = NewOutgoingMessageFromUint8Content(
-		internalusbcdcenums.OutgoingCategoryStatus,
-		uint8(internalusbcdcenums.StatusStart),
-	)
+	OutgoingStartMessage = NewOutgoingStatusMessage(internalusbcdcenums.OutgoingStatusStart)
 
 	// OutgoingOKMessage is the outgoing OK message for USB-CDC communication
-	OutgoingOKMessage = NewOutgoingMessageFromUint8Content(
-		internalusbcdcenums.OutgoingCategoryStatus,
-		uint8(internalusbcdcenums.StatusOK),
-	)
+	OutgoingOKMessage = NewOutgoingStatusMessage(internalusbcdcenums.OutgoingStatusOK)
 
 	// OutgoingChallengeWithObstaclesMessage is the outgoing challenge message with obstacles
-	OutgoingChallengeWithObstaclesMessage = NewOutgoingMessageFromUint8Content(
-		internalusbcdcenums.OutgoingCategoryChallenge,
-		uint8(internalchallengeenums.ChallengeWithObstacles),
-	)
+	OutgoingChallengeWithObstaclesMessage = NewOutgoingChallengeMessage(internalchallengeenums.ChallengeWithObstacles)
 
 	// OutgoingChallengeWithObstaclesAndParkingMessage is the outgoing challenge message with obstacles and parking
-	OutgoingChallengeWithObstaclesAndParkingMessage = NewOutgoingMessageFromUint8Content(
-		internalusbcdcenums.OutgoingCategoryChallenge,
-		uint8(internalchallengeenums.ChallengeWithObstaclesAndParking),
-	)
+	OutgoingChallengeWithObstaclesAndParkingMessage = NewOutgoingChallengeMessage(internalchallengeenums.ChallengeWithObstaclesAndParking)
 
 	// OutgoingChallengeWithoutObstaclesMessage is the outgoing challenge message without obstacles
-	OutgoingChallengeWithoutObstaclesMessage = NewOutgoingMessageFromUint8Content(
-		internalusbcdcenums.OutgoingCategoryChallenge,
-		uint8(internalchallengeenums.ChallengeWithoutObstacles),
-	)
+	OutgoingChallengeWithoutObstaclesMessage = NewOutgoingChallengeMessage(internalchallengeenums.ChallengeWithoutObstacles)
 
 	// USBCDCHandler is the USB CDC handler for the Raspberry Pi Pico 2W
 	USBCDCHandler Handler

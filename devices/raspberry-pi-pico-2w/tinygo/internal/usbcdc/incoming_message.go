@@ -56,6 +56,24 @@ func NewIncomingMessageFromUint8Content(
 	}
 }
 
+// NewIncomingStatusMessage creates a new instance of IncomingMessage with status content
+//
+// Parameters:
+//
+// status: The status content of the message
+//
+// Returns:
+//
+// An instance of IncomingMessage
+func NewIncomingStatusMessage(
+	status internalusbcdcenums.IncomingStatus,
+) *IncomingMessage {
+	return NewIncomingMessageFromUint8Content(
+		internalusbcdcenums.IncomingCategoryStatus,
+		uint8(status),
+	)
+}
+
 // String returns a string representation of the IncomingMessage
 //
 // Returns:

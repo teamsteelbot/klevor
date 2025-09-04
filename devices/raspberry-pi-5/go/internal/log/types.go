@@ -25,11 +25,12 @@ type (
 
 	// DefaultLogger is the default Logger implementation to handle writing log messages to a file.
 	DefaultLogger struct {
-		ch     chan *Message
-		wgProd sync.WaitGroup
-		closed atomic.Bool
-		mutex  sync.Mutex
-		debug  bool
+		ch          chan *Message
+		wgProducers sync.WaitGroup
+		closed      atomic.Bool
+		isRunning   atomic.Bool
+		mutex       sync.Mutex
+		debug       bool
 	}
 )
 
@@ -116,9 +117,9 @@ func (l *DefaultLoggerProducer) Info(content string) {
 //
 // Parameters:
 //
-// content: The content of the error message.
-func (l *DefaultLoggerProducer) Error(content string) {
-	l.Log(content, CategoryError)
+// err: The error to log.
+func (l *DefaultLoggerProducer) Error(err error) {
+	l.Log(fmt.Sprintf("An error occurred: %v", err), CategoryError)
 }
 
 // Warning logs a warning message.
@@ -203,9 +204,17 @@ func NewDefaultLogger(
 	debug bool,
 ) *DefaultLogger {
 	return &DefaultLogger{
-		ch:    make(chan *Message, ChannelBufferSize),
 		debug: debug,
 	}
+}
+
+// IsRunning returns true if the logger is currently running.
+//
+// Returns:
+//
+// True if the logger is running, otherwise false.
+func (l *DefaultLogger) IsRunning() bool {
+	return l.isRunning.Load()
 }
 
 // Run processes and writes all received messages to the log file until the channel is closed or the context is cancelled.
@@ -218,10 +227,33 @@ func NewDefaultLogger(
 //
 // An error if any issues occur during message processing or file writing.
 func (l *DefaultLogger) Run(ctx context.Context) error {
-	// Check if the logger is already closed
-	if l.IsClosed() {
-		return ErrLoggerClosed
+	l.mutex.Lock()
+
+	// Check if it's already running
+	if l.IsRunning() {
+		l.mutex.Unlock()
+		return ErrLoggerAlreadyRunning
 	}
+	defer func() {
+		l.mutex.Lock()
+
+		// Set running to false
+		l.isRunning.Store(false)
+
+		l.mutex.Unlock()
+	}()
+
+	// Set running to true
+	l.isRunning.Store(true)
+
+	l.mutex.Unlock()
+
+	// Reset the closed state
+	l.closed.Store(false)
+
+	// Reinitialize the messages channel
+	l.ch = make(chan *Message, ChannelBufferSize)
+	defer l.close()
 
 	// Ensure parent directory exists
 	logDir := filepath.Dir(FilePath)
@@ -247,8 +279,7 @@ func (l *DefaultLogger) Run(ctx context.Context) error {
 	// Create a buffered writer for efficient file writing
 	buf := bufio.NewWriterSize(file, FileBufferSize)
 	defer func(buf *bufio.Writer) {
-		err := buf.Flush()
-		if err != nil {
+		if err := buf.Flush(); err != nil {
 			fmt.Printf("Error flushing buffer: %v\n", err)
 		}
 	}(buf)
@@ -312,7 +343,7 @@ func (l *DefaultLogger) NewProducer(
 	}
 
 	// Increment the producer wait group counter
-	l.wgProd.Add(1)
+	l.wgProducers.Add(1)
 	l.mutex.Unlock()
 
 	// Create and return a new DefaultLoggerProducer instance
@@ -320,19 +351,19 @@ func (l *DefaultLogger) NewProducer(
 		func(m *Message) {
 			l.ch <- m
 		},
-		func() { l.wgProd.Done() },
+		func() { l.wgProducers.Done() },
 		tag,
 		l.debug,
 	)
 	if err != nil {
-		l.wgProd.Done()
+		l.wgProducers.Done()
 		return nil, err
 	}
 	return loggerProducer, nil
 }
 
-// Close signals no more producers will send; safe to call multiple times.
-func (l *DefaultLogger) Close() {
+// close signals no more producers will send; safe to call multiple times.
+func (l *DefaultLogger) close() {
 	l.mutex.Lock()
 
 	// Check if the logger is already closed
@@ -347,10 +378,13 @@ func (l *DefaultLogger) Close() {
 	l.mutex.Unlock()
 
 	// Wait for all registered producers to finish, then close channel.
-	l.wgProd.Wait()
+	l.wgProducers.Wait()
 
 	// Close the messages channel to signal no more messages will be sent.
 	close(l.ch)
+
+	// Reset the producer wait group
+	l.wgProducers = sync.WaitGroup{}
 }
 
 // IsClosed returns true if the logger channel has been closed.
@@ -369,24 +403,4 @@ func (l *DefaultLogger) IsClosed() bool {
 // True if the logger is in debug mode, otherwise false.
 func (l *DefaultLogger) IsDebug() bool {
 	return l.debug
-}
-
-// Reset resets the logger to its initial state.
-func (l *DefaultLogger) Reset() {
-	l.mutex.Lock()
-	defer l.mutex.Unlock()
-
-	// Only reset if the logger is closed
-	if !l.IsClosed() {
-		return
-	}
-
-	// Reset the closed state
-	l.closed.Store(false)
-
-	// Reinitialize the messages channel
-	l.ch = make(chan *Message, ChannelBufferSize)
-
-	// Reset the producer wait group
-	l.wgProd = sync.WaitGroup{}
 }
