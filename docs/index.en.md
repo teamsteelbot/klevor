@@ -101,8 +101,9 @@ mkdocs-only-end -->
 		2. [Current Programming Languages](programming/languages/current.en.md)
 		3. [Future Programming Languages](programming/languages/future.en.md)
 	2. Libraries
-		1. [Python Libraries](programming/libraries/python.en.md)
-		2. [CircuitPython Libraries](programming/libraries/legacy/circuit-python.en.md)
+		1. Legacy
+			1. [CircuitPython Libraries](programming/libraries/legacy/circuit-python.en.md)
+		2. [Python Libraries](programming/libraries/python.en.md)
 	3. Diagrams
 		1. [Flowchart](programming/diagrams/flowcharts.en.md)
 	4. [Glossary](programming/glossary.en.md)
