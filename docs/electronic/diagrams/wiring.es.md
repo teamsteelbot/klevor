@@ -56,3 +56,22 @@ class="wiring-diagram-image">
     <i>Versión 3 del diagrama de Conexiones</i>
 </div>
 mkdocs-only-end -->
+
+## Versión 4: Empleada en el Prototipo 4
+
+<!-- github-only-start -->
+<p align="center">
+	<img src="../../assets/images/github/schemes/wiring/version4-wiring.png" alt="Versión 4 del diagrama de Conexiones" 
+width="1000">
+	<br>
+	<i>Versión 4 del diagrama de Conexiones</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
+<div class="hcenter">
+    <img src="/assets/images/github/schemes/wiring/version4-wiring.png" alt="Versión 4 del diagrama de Conexiones" 
+class="wiring-diagram-image">
+    <i>Versión 4 del diagrama de Conexiones</i>
+</div>
+mkdocs-only-end -->

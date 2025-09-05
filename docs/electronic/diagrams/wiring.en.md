@@ -56,3 +56,22 @@ class="wiring-diagram-image">
     <i>Wiring Diagram's Version 3</i>
 </div>
 mkdocs-only-end -->
+
+## Version 4: Used for Prototype 4
+
+<!-- github-only-start -->
+<p align="center">
+	<img src="../../assets/images/github/schemes/wiring/version4-wiring.png" alt="Wiring Diagram's Version r" 
+width="1000">
+	<br>
+	<i>Wiring Diagram's Version 4</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
+<div class="hcenter">
+    <img src="/assets/images/github/schemes/wiring/version4-wiring.png" alt="Wiring Diagram's Version 4" 
+class="wiring-diagram-image">
+    <i>Wiring Diagram's Version 4</i>
+</div>
+mkdocs-only-end -->
