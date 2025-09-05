@@ -175,14 +175,14 @@ func NewIncomingMessageFromString(message string) (*IncomingMessage, error) {
 // Returns:
 //
 // A slice of IncomingMessage instances, or an error if the buffer is invalid
-func NewIncomingMessagesFromBuffer(buffer *[]byte) ([]IncomingMessage, error) {
+func NewIncomingMessagesFromBuffer(buffer *[]byte) ([]*IncomingMessage, error) {
 	// Check if the buffer is nil
 	if buffer == nil {
 		return nil, ErrNilBuffer
 	}
 
 	// Parse the buffer to extract messages
-	var messages []IncomingMessage
+	var messages []*IncomingMessage
 	var currentMessage []byte
 	var lastIndex int
 	for i, b := range *buffer {
@@ -192,7 +192,7 @@ func NewIncomingMessagesFromBuffer(buffer *[]byte) ([]IncomingMessage, error) {
 				if err != nil {
 					return nil, err
 				}
-				messages = append(messages, *msg)
+				messages = append(messages, msg)
 				currentMessage = nil
 				lastIndex = i + 1
 			}
@@ -219,6 +219,24 @@ func (msg *IncomingMessage) FormatToSendAsAnErrorMessage() string {
 		msg.Category,
 		msg.Content,
 	)
+}
+
+// IsAChallengeMessage checks if the IncomingMessage is a challenge message
+//
+// Returns:
+//
+// True if the message is a challenge message, otherwise False
+func (msg *IncomingMessage) IsAChallengeMessage() bool {
+	return msg.Category == internalusbcdcenums.IncomingCategoryChallenge
+}
+
+// IsAnErrorMessage checks if the IncomingMessage is an error message
+//
+// Returns:
+//
+// True if the message is an error message, otherwise False
+func (msg *IncomingMessage) IsAnErrorMessage() bool {
+	return msg.Category == internalusbcdcenums.IncomingCategoryError
 }
 
 // GetContentAsUint16 converts the Content of the IncomingMessage to a uint16 value

@@ -52,7 +52,6 @@ func main() {
 		os.Interrupt,
 		syscall.SIGTERM,
 	)
-	defer stop()
 
 	// Simulate shutdown on SIGINT
 	go func() {
@@ -85,7 +84,7 @@ func main() {
 	}()
 
 	// Run the logger (blocking)
-	if err = logger.Run(ctx); err != nil && !errors.Is(
+	if err = logger.Run(ctx, stop); err != nil && !errors.Is(
 		err,
 		context.Canceled,
 	) {

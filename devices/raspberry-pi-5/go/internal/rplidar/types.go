@@ -102,11 +102,12 @@ func (h *SlamtecC1Handler) IsRunning() bool {
 // Parameters:
 //
 // ctx: Context for managing cancellation and timeouts.
+// stopFn: Function to stop the context in case of an error.
 //
 // Returns:
 //
 // An error if any issue occurs during reading or processing measures.
-func (h *SlamtecC1Handler) runToWrap(ctx context.Context) error {
+func (h *SlamtecC1Handler) runToWrap(ctx context.Context, stopFn func()) error {
 	// Initialize the measures slice
 	h.measures = [360]*internal.Measure{}
 
@@ -159,14 +160,32 @@ func (h *SlamtecC1Handler) runToWrap(ctx context.Context) error {
 	// Stream stdout
 	g.Go(
 		func() error {
-			return h.scanLines(ctx, StdoutTag, stdout, h.handleStdoutLine)
+			return internal.StopContextOnError(
+				ctx, stopFn, func(ctx context.Context) error {
+					return h.scanLines(
+						ctx,
+						StdoutTag,
+						stdout,
+						h.handleStdoutLine,
+					)
+				},
+			)
 		},
 	)
 
 	// Stream stderr
 	g.Go(
 		func() error {
-			return h.scanLines(ctx, StderrTag, stderr, h.handleStderrLine)
+			return internal.StopContextOnError(
+				ctx, stopFn, func(ctx context.Context) error {
+					return h.scanLines(
+						ctx,
+						StderrTag,
+						stderr,
+						h.handleStderrLine,
+					)
+				},
+			)
 		},
 	)
 
@@ -208,11 +227,12 @@ func (h *SlamtecC1Handler) runToWrap(ctx context.Context) error {
 // Parameters:
 //
 // ctx: Context for managing cancellation and timeouts.
+// stopFn: Function to stop the context in case of an error.
 //
 // Returns:
 //
 // An error if any issue occurs during reading or processing measures.
-func (h *SlamtecC1Handler) Run(ctx context.Context) error {
+func (h *SlamtecC1Handler) Run(ctx context.Context, stopFn func()) error {
 	h.handlerMutex.Lock()
 
 	// Check if it's already running
@@ -253,7 +273,7 @@ func (h *SlamtecC1Handler) Run(ctx context.Context) error {
 
 	return internallog.LogOnError(
 		func() error {
-			return h.runToWrap(ctx)
+			return h.runToWrap(ctx, stopFn)
 		},
 		h.loggerProducer,
 	)

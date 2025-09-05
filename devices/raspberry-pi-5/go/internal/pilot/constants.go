@@ -30,9 +30,6 @@ var (
 	// ConfirmationMessageTimeout is the timeout duration for confirmation messages
 	ConfirmationMessageTimeout = time.Second * 5
 
-	// StopTimeout is the timeout duration for stopping the USB-CDC communication
-	StopTimeout = 5 * time.Second
-
 	// ConfirmationAttempts is the number of attempts to confirm a message
 	ConfirmationAttempts = ConfirmationTimeout / IncomingDelay
 

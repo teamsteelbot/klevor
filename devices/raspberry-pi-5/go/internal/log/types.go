@@ -10,6 +10,7 @@ import (
 	"sync/atomic"
 
 	ralvarezdevgocryptouuid "github.com/ralvarezdev/go-crypto/uuid"
+	"github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal"
 )
 
 type (
@@ -217,7 +218,7 @@ func (l *DefaultLogger) IsRunning() bool {
 	return l.isRunning.Load()
 }
 
-// Run processes and writes all received messages to the log file until the channel is closed or the context is cancelled.
+// runToWrap is an internal function to process and write messages to the log file.
 //
 // Parameters:
 //
@@ -226,35 +227,7 @@ func (l *DefaultLogger) IsRunning() bool {
 // Returns:
 //
 // An error if any issues occur during message processing or file writing.
-func (l *DefaultLogger) Run(ctx context.Context) error {
-	l.mutex.Lock()
-
-	// Check if it's already running
-	if l.IsRunning() {
-		l.mutex.Unlock()
-		return ErrLoggerAlreadyRunning
-	}
-	defer func() {
-		l.mutex.Lock()
-
-		// Set running to false
-		l.isRunning.Store(false)
-
-		l.mutex.Unlock()
-	}()
-
-	// Set running to true
-	l.isRunning.Store(true)
-
-	l.mutex.Unlock()
-
-	// Reset the closed state
-	l.closed.Store(false)
-
-	// Reinitialize the messages channel
-	l.ch = make(chan *Message, ChannelBufferSize)
-	defer l.close()
-
+func (l *DefaultLogger) runToWrap(ctx context.Context) error {
 	// Ensure parent directory exists
 	logDir := filepath.Dir(FilePath)
 	if err := os.MkdirAll(logDir, dirPerm); err != nil {
@@ -321,6 +294,50 @@ func (l *DefaultLogger) Run(ctx context.Context) error {
 			_ = buf.Flush()
 		}
 	}
+}
+
+// Run processes and writes all received messages to the log file until the channel is closed or the context is cancelled.
+//
+// Parameters:
+//
+// ctx: The context to control cancellation and timeouts.
+// stopFn: Function to call when stopping the handler.
+//
+// Returns:
+//
+// An error if any issues occur during message processing or file writing.
+func (l *DefaultLogger) Run(ctx context.Context, stopFn func()) error {
+	l.mutex.Lock()
+
+	// Check if it's already running
+	if l.IsRunning() {
+		l.mutex.Unlock()
+		return ErrLoggerAlreadyRunning
+	}
+	defer func() {
+		l.mutex.Lock()
+
+		// Set running to false
+		l.isRunning.Store(false)
+
+		l.mutex.Unlock()
+	}()
+
+	// Set running to true
+	l.isRunning.Store(true)
+
+	l.mutex.Unlock()
+
+	// Reset the closed state
+	l.closed.Store(false)
+
+	// Reinitialize the messages channel
+	l.ch = make(chan *Message, ChannelBufferSize)
+	defer l.close()
+
+	return internal.StopContextOnError(
+		ctx, stopFn, l.runToWrap,
+	)
 }
 
 // NewProducer returns a new LoggerProducer instance associated with this DefaultLogger.

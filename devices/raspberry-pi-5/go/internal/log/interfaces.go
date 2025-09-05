@@ -23,7 +23,7 @@ type (
 		NewProducer(
 			tag string,
 		) (LoggerProducer, error)
-		Run(ctx context.Context) error
+		Run(ctx context.Context, stopFn func()) error
 		IsRunning() bool
 		IsClosed() bool
 		IsDebug() bool

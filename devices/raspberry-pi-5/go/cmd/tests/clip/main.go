@@ -11,7 +11,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal"
 	internalclip "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/clip"
 	internallog "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/log"
 	"golang.org/x/sync/errgroup"
@@ -76,7 +75,7 @@ func main() {
 	// Initialize the logger goroutine
 	g.Go(
 		func() error {
-			return internal.StopContextOnError(ctx, stop, logger.Run)
+			return logger.Run(ctx, stop)
 		},
 	)
 
@@ -94,7 +93,7 @@ func main() {
 	// Initialize the CLIP goroutine
 	g.Go(
 		func() error {
-			return internal.StopContextOnError(ctx, stop, clipHandler.Run)
+			return clipHandler.Run(ctx, stop)
 		},
 	)
 

@@ -19,6 +19,12 @@ var (
 	// ReadTimeout is the timeout duration for reading from the USB-CDC port
 	ReadTimeout = time.Second * 2
 
+	// StopTimeout is the timeout duration for stopping the USB-CDC communication
+	StopTimeout = 5 * time.Second
+
+	// HeartbeatInterval is the interval for sending heartbeat messages
+	HeartbeatInterval = 1 * time.Second
+
 	// BufferSize is the size of the buffer for USB-CDC communication
 	BufferSize uint8 = 64
 
@@ -27,9 +33,6 @@ var (
 
 	// HandlerLoggerProducerTag is the logger producer tag for USB-CDC handler
 	HandlerLoggerProducerTag = "USB_CDC_HANDLER"
-
-	// IncomingMessagesChannelBufferSize is the size of the incoming messages channel buffer
-	IncomingMessagesChannelBufferSize = 100
 
 	// OutgoingMessagesChannelBufferSize is the size of the outgoing messages channel buffer
 	OutgoingMessagesChannelBufferSize = 100

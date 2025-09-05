@@ -249,11 +249,12 @@ func (h *DefaultHandler) IsRunning() bool {
 // Parameters:
 //
 // ctx: Context for managing cancellation and timeouts.
+// stopFn: Function to call to stop the context.
 //
 // Returns:
 //
 // An error if any issue occurs during execution.
-func (h *DefaultHandler) runToWrap(ctx context.Context) error {
+func (h *DefaultHandler) runToWrap(ctx context.Context, stopFn func()) error {
 	// Reset the stdout lines read counter
 	h.stdoutLinesRead = 0
 
@@ -292,14 +293,32 @@ func (h *DefaultHandler) runToWrap(ctx context.Context) error {
 	// Stream stdout
 	g.Go(
 		func() error {
-			return h.scanLines(ctx, StdoutTag, stdout, h.handleStdoutLine)
+			return internal.StopContextOnError(
+				ctx, stopFn, func(ctx context.Context) error {
+					return h.scanLines(
+						ctx,
+						StdoutTag,
+						stdout,
+						h.handleStdoutLine,
+					)
+				},
+			)
 		},
 	)
 
 	// Stream stderr
 	g.Go(
 		func() error {
-			return h.scanLines(ctx, StderrTag, stderr, h.handleStderrLine)
+			return internal.StopContextOnError(
+				ctx, stopFn, func(ctx context.Context) error {
+					return h.scanLines(
+						ctx,
+						StderrTag,
+						stderr,
+						h.handleStderrLine,
+					)
+				},
+			)
 		},
 	)
 
@@ -339,11 +358,12 @@ func (h *DefaultHandler) runToWrap(ctx context.Context) error {
 // Parameters:
 //
 // ctx: Context for managing cancellation and timeouts.
+// stopFn: Function to call to stop the context.
 //
 // Returns:
 //
 // An error if any issue occurs during reading or processing classifications.
-func (h *DefaultHandler) Run(ctx context.Context) error {
+func (h *DefaultHandler) Run(ctx context.Context, stopFn func()) error {
 	h.handlerMutex.Lock()
 
 	// Check if it's already running
@@ -377,7 +397,7 @@ func (h *DefaultHandler) Run(ctx context.Context) error {
 
 	return internallog.LogOnError(
 		func() error {
-			return h.runToWrap(ctx)
+			return h.runToWrap(ctx, stopFn)
 		},
 		h.loggerProducer,
 	)

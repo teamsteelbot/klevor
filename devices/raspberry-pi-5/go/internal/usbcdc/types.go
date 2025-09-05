@@ -5,10 +5,13 @@ import (
 	"fmt"
 	"sync"
 	"sync/atomic"
+	"time"
 
+	ralvarezdevgostringsconvert "github.com/ralvarezdev/go-strings/convert"
 	"github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal"
 	internallog "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/log"
 	internalrplidar "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/rplidar"
+	internalusbcdcenums "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/usbcdc/enums"
 	"go.bug.st/serial"
 	"golang.org/x/sync/errgroup"
 )
@@ -24,19 +27,23 @@ type (
 
 	// DefaultHandler is the default implementation of the Handler interface
 	DefaultHandler struct {
-		incomingMessagesCh            chan *IncomingMessage
-		outgoingMessagesCh            chan *OutgoingMessage
-		logger                        internallog.Logger
-		loggerProducer                internallog.LoggerProducer
-		isRunning                     atomic.Bool
-		closed                        atomic.Bool
-		mutex                         sync.Mutex
-		wgSenders                     sync.WaitGroup
-		baudRate                      int
-		buffer                        []byte
-		accumulatedBuffer             []byte
-		accumulatedBytes              int
-		receivedInitializationMessage bool
+		outgoingMessagesCh             chan *OutgoingMessage
+		logger                         internallog.Logger
+		loggerProducer                 internallog.LoggerProducer
+		isRunning                      atomic.Bool
+		closed                         atomic.Bool
+		mutex                          sync.Mutex
+		wgSenders                      sync.WaitGroup
+		baudRate                       int
+		buffer                         []byte
+		accumulatedBuffer              []byte
+		receivedInitializationMessage  bool
+		receivedStartMessage           bool
+		receivedChallenge              internal.Challenge
+		receivedMaxMotorSpeedValue     uint16
+		receivedMaxServoDirectionValue uint16
+		receivedBNO08XTurns            int
+		receivedBNO08XYawDegrees       float64
 	}
 )
 
@@ -96,16 +103,6 @@ func (s *DefaultSender) SendMessage(message *OutgoingMessage) error {
 // SendOKMessage sends an OK message through USB CDC.
 func (s *DefaultSender) SendOKMessage() error {
 	return s.SendMessage(OutgoingOKMessage)
-}
-
-// SendStopMessage sends a stop message through USB CDC.
-func (s *DefaultSender) SendStopMessage() error {
-	return s.SendMessage(OutgoingStopMessage)
-}
-
-// SendHeartbeatMessage sends a heartbeat message through USB CDC.
-func (s *DefaultSender) SendHeartbeatMessage() error {
-	return s.SendMessage(OutgoingHeartbeatMessage)
 }
 
 // Close signals that the sender is done and performs cleanup.
@@ -168,17 +165,6 @@ func NewDefaultHandler(baudRate int) *DefaultHandler {
 // True if the handler is running, false otherwise
 func (h *DefaultHandler) IsRunning() bool {
 	return h.isRunning.Load()
-}
-
-// GetIncomingMessagesChannel returns the channel to receive incoming messages.
-//
-// Returns:
-//
-// A read-only channel of IncomingMessage pointers.
-func (h *DefaultHandler) GetIncomingMessagesChannel() <-chan *IncomingMessage {
-	h.mutex.Lock()
-	defer h.mutex.Unlock()
-	return h.incomingMessagesCh
 }
 
 // runToWrap is the internal function to start the handler to read from and write to the serial port.
@@ -263,7 +249,18 @@ func (h *DefaultHandler) runToWrap(ctx context.Context, stopFn func()) error {
 	)
 
 	// Wait for both handlers to finish and return any error
-	return g.Wait()
+	err = g.Wait()
+
+	// Close the port
+	if closeErr := port.Close(); closeErr != nil {
+		h.loggerProducer.Warning(
+			fmt.Sprintf(
+				"An error occurred while closing the serial port: %v",
+				closeErr,
+			),
+		)
+	}
+	return err
 }
 
 // incomingMessagesHandler processes incoming messages from the serial port.
@@ -287,25 +284,75 @@ func (h *DefaultHandler) incomingMessagesHandler(
 		case <-ctx.Done():
 			return ctx.Err()
 		default:
-			n, err := port.Read(h.buffer)
-			if err != nil {
-				h.loggerProducer.Warning(
-					fmt.Sprintf(
-						"An error occurred while reading from the serial port: %v",
-						err,
-					),
-				)
-			}
-			if n == 0 {
-				// Read can return 0 bytes
-				continue
-			}
+			// Read data from the port
+			h.readFromPort(port)
 
 			// Process the data read
-			for i := 0; i < n; i++ {
-				if h.buffer[i] == InitializationMessage {
+			for _, c := range h.accumulatedBuffer {
+				if c == InitializationMessage {
 					h.receivedInitializationMessage = true
 					h.loggerProducer.Info("Received initialization message")
+					break
+				}
+			}
+		}
+	}
+
+	// Waiting for start message
+	h.loggerProducer.Info("Waiting for start message...")
+	for !h.receivedStartMessage {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+			// Read incoming messages
+			messages := h.readIncomingMessages(port)
+
+			// Send each message to the incoming messages channel
+			for _, msg := range messages {
+				if msg.IsAnErrorMessage() {
+					return fmt.Errorf("received error message: %s", msg.Content)
+				} else if IncomingStartMessage.IsEqual(msg) {
+					h.receivedStartMessage = true
+					h.loggerProducer.Info("Received start message")
+
+					// Send a confirmation message
+					h.outgoingMessagesCh <- OutgoingOKMessage
+					break
+				}
+			}
+		}
+	}
+
+	// Wait for challenge message
+	h.loggerProducer.Info("Waiting for challenge message...")
+	for h.receivedChallenge == internal.ChallengeNil {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+			// Read incoming messages
+			messages := h.readIncomingMessages(port)
+
+			// Send each message to the incoming messages channel
+			for _, msg := range messages {
+				if msg.IsAnErrorMessage() {
+					return fmt.Errorf("received error message: %s", msg.Content)
+				} else if msg.IsAChallengeMessage() {
+					challenge, err := internal.ChallengeFromString(msg.Content)
+					if err != nil {
+						return fmt.Errorf("failed to parse challenge: %w", err)
+					}
+					h.receivedChallenge = challenge
+					h.loggerProducer.Info(
+						fmt.Sprintf(
+							"Received challenge message: %s",
+							msg.String(),
+						),
+					)
+
+					// Send a confirmation message
+					h.outgoingMessagesCh <- OutgoingOKMessage
 					break
 				}
 			}
@@ -317,60 +364,159 @@ func (h *DefaultHandler) incomingMessagesHandler(
 		case <-ctx.Done():
 			return ctx.Err()
 		default:
-			n, err := port.Read(h.buffer)
-			if err != nil {
-				h.loggerProducer.Warning(
-					fmt.Sprintf(
-						"An error occurred while reading from the serial port: %v",
-						err,
-					),
-				)
-			}
-			if n == 0 {
-				// Read can return 0 bytes
-				continue
-			}
-
-			// Process the data read
-			h.accumulatedBuffer = append(
-				h.accumulatedBuffer,
-				h.buffer[:n]...,
-			)
-
-			// Extract messages from the accumulated buffer
-			messages, err := NewIncomingMessagesFromBuffer(&h.accumulatedBuffer)
-			if err != nil {
-				h.loggerProducer.Warning(
-					fmt.Sprintf(
-						"An error occurred while processing incoming messages: %v",
-						err,
-					),
-				)
-				continue
-			}
+			// Read incoming messages
+			messages := h.readIncomingMessages(port)
 
 			// Send each message to the incoming messages channel
 			for _, msg := range messages {
-				// Log the received message
-				h.loggerProducer.Info(
-					fmt.Sprintf(
-						"Received message: %s",
-						msg.String(),
-					),
-				)
-				h.incomingMessagesCh <- &msg
+				// Check if it's an error message
+				if msg.IsAnErrorMessage() {
+					return fmt.Errorf("received error message: %s", msg.Content)
+				} else if msg.Category == internalusbcdcenums.IncomingCategoryBNO08XYawDegrees {
+					// Parse the BNO08X yaw degrees value
+					if err := ralvarezdevgostringsconvert.ToFloat64(
+						msg.Content,
+						&h.receivedBNO08XYawDegrees,
+					); err != nil {
+						return fmt.Errorf(
+							"failed to parse BNO08X yaw degrees: %w",
+							err,
+						)
+					}
+
+					// Log the received message
+					h.loggerProducer.Info(
+						fmt.Sprintf(
+							"Received BNO08X yaw degrees message: %s",
+							msg.String(),
+						),
+					)
+				} else if msg.Category == internalusbcdcenums.IncomingCategoryBNO08XYawTurns {
+					// Parse the BNO08X turns value
+					if err := ralvarezdevgostringsconvert.ToInt(
+						msg.Content,
+						&h.receivedBNO08XTurns,
+					); err != nil {
+						return fmt.Errorf(
+							"failed to parse BNO08X turns: %w",
+							err,
+						)
+					}
+
+					// Log the received message
+					h.loggerProducer.Info(
+						fmt.Sprintf(
+							"Received BNO08X turns message: %s",
+							msg.String(),
+						),
+					)
+				} else if msg.Category == internalusbcdcenums.IncomingCategoryMaxMotorSpeedValue {
+					// Parse the max motor speed value
+					if err := ralvarezdevgostringsconvert.ToUint16(
+						msg.Content,
+						&h.receivedMaxMotorSpeedValue,
+					); err != nil {
+						return fmt.Errorf(
+							"failed to parse max motor speed value: %w",
+							err,
+						)
+					}
+
+					// Log the received message
+					h.loggerProducer.Info(
+						fmt.Sprintf(
+							"Received max motor speed value message: %s",
+							msg.String(),
+						),
+					)
+				} else if msg.Category == internalusbcdcenums.IncomingCategoryMaxServoDirectionValue {
+					// Parse the max servo direction value
+					if err := ralvarezdevgostringsconvert.ToUint16(
+						msg.Content,
+						&h.receivedMaxServoDirectionValue,
+					); err != nil {
+						return fmt.Errorf(
+							"failed to parse max servo direction value: %w",
+							err,
+						)
+					}
+
+					// Log the received message
+					h.loggerProducer.Info(
+						fmt.Sprintf(
+							"Received max servo direction value message: %s",
+							msg.String(),
+						),
+					)
+				} else {
+					// Log any other received message
+					h.loggerProducer.Info(
+						fmt.Sprintf(
+							"Received message: %s",
+							msg.String(),
+						),
+					)
+				}
 			}
 		}
 	}
 }
 
-// ReceivedInitializationMessage returns true if the initialization message has been received.
+// readFromPort reads data from the serial port.
+//
+// Parameters:
+//
+// port: The serial port to read data from.
+func (h *DefaultHandler) readFromPort(port serial.Port) {
+	n, err := port.Read(h.buffer)
+	if err != nil {
+		h.loggerProducer.Warning(
+			fmt.Sprintf(
+				"An error occurred while reading from the serial port: %v",
+				err,
+			),
+		)
+	}
+	if n == 0 {
+		// Read can return 0 bytes
+		return
+	}
+
+	// Process the data read
+	h.accumulatedBuffer = append(
+		h.accumulatedBuffer,
+		h.buffer[:n]...,
+	)
+}
+
+// readIncomingMessages reads incoming messages from the serial port.
+//
+// Parameters:
+//
+// port: The serial port to read messages from.
 //
 // Returns:
 //
-// True if the initialization message has been received, otherwise false.
-func (h *DefaultHandler) ReceivedInitializationMessage() bool {
-	return h.receivedInitializationMessage
+// A slice of IncomingMessage pointers.
+func (h *DefaultHandler) readIncomingMessages(
+	port serial.Port,
+) []*IncomingMessage {
+	// Read data from the port
+	h.readFromPort(port)
+
+	// Extract messages from the accumulated buffer
+	messages, err := NewIncomingMessagesFromBuffer(&h.accumulatedBuffer)
+	if err != nil {
+		h.loggerProducer.Warning(
+			fmt.Sprintf(
+				"An error occurred while processing incoming messages: %v",
+				err,
+			),
+		)
+		return nil
+	}
+
+	return messages
 }
 
 // outgoingMessagesHandler processes outgoing messages and sends them through the serial port.
@@ -387,6 +533,7 @@ func (h *DefaultHandler) outgoingMessagesHandler(
 	ctx context.Context,
 	port serial.Port,
 ) error {
+	lastHeartbeatTime := time.Now()
 	for {
 		select {
 		case <-ctx.Done():
@@ -396,6 +543,25 @@ func (h *DefaultHandler) outgoingMessagesHandler(
 					return err
 				}
 			}
+
+			// Send the final stop message
+			if err := h.sendMessage(port, OutgoingStopMessage); err != nil {
+				return err
+			}
+
+			initialTime := time.Now()
+			for time.Since(initialTime) < StopTimeout {
+				// Read any remaining incoming messages and check if they are stop confirmations
+				incomingMessages := h.readIncomingMessages(port)
+
+				for _, msg := range incomingMessages {
+					if msg.IsEqual(IncomingOKMessage) {
+						h.loggerProducer.Info("Received stop confirmation message")
+						return nil
+					}
+				}
+			}
+
 			return ctx.Err()
 		case outgoingMessage, ok := <-h.outgoingMessagesCh:
 			if !ok {
@@ -403,6 +569,17 @@ func (h *DefaultHandler) outgoingMessagesHandler(
 			}
 			if err := h.sendMessage(port, outgoingMessage); err != nil {
 				return err
+			}
+		default:
+			if time.Since(lastHeartbeatTime) >= HeartbeatInterval {
+				// Send a heartbeat message if the interval has passed
+				if err := h.sendMessage(
+					port,
+					OutgoingHeartbeatMessage,
+				); err != nil {
+					return err
+				}
+				lastHeartbeatTime = time.Now()
 			}
 		}
 	}
@@ -488,19 +665,33 @@ func (h *DefaultHandler) Run(ctx context.Context, stopFn func()) error {
 	h.loggerProducer = loggerProducer
 	defer h.loggerProducer.Close()
 
-	// Initialize the incoming messages channel
-	h.incomingMessagesCh = make(
-		chan *IncomingMessage,
-		IncomingMessagesChannelBufferSize,
-	)
-	defer close(h.incomingMessagesCh)
-
 	// Initialize the outgoing messages channel
 	h.outgoingMessagesCh = make(
 		chan *OutgoingMessage,
 		OutgoingMessagesChannelBufferSize,
 	)
 	defer h.close()
+
+	// Reset received initialization message state
+	h.receivedInitializationMessage = false
+
+	// Reset received start message state
+	h.receivedStartMessage = false
+
+	// Reset received challenge
+	h.receivedChallenge = internal.ChallengeNil
+
+	// Reset received max motor speed value
+	h.receivedMaxMotorSpeedValue = 0
+
+	// Reset received max servo direction value
+	h.receivedMaxServoDirectionValue = 0
+
+	// Reset received BNO08X turns
+	h.receivedBNO08XTurns = 0
+
+	// Reset received BNO08X yaw degrees
+	h.receivedBNO08XYawDegrees = 0.0
 
 	return internallog.LogOnError(
 		func() error {
@@ -577,4 +768,67 @@ func (h *DefaultHandler) close() {
 // True if the outgoing messages channel is closed, otherwise false.
 func (h *DefaultHandler) IsClosed() bool {
 	return h.closed.Load()
+}
+
+// ReceivedInitializationMessage returns true if the initialization message has been received.
+//
+// Returns:
+//
+// True if the initialization message has been received, otherwise false.
+func (h *DefaultHandler) ReceivedInitializationMessage() bool {
+	return h.receivedInitializationMessage
+}
+
+// ReceivedStartMessage returns true if the start message has been received.
+//
+// Returns:
+//
+// True if the start message has been received, otherwise false.
+func (h *DefaultHandler) ReceivedStartMessage() bool {
+	return h.receivedStartMessage
+}
+
+// ReceivedChallenge returns the received challenge.
+//
+// Returns:
+//
+// The received challenge.
+func (h *DefaultHandler) ReceivedChallenge() internal.Challenge {
+	return h.receivedChallenge
+}
+
+// ReceivedMaxMotorSpeedValue returns the received maximum motor speed value.
+//
+// Returns:
+//
+// The received maximum motor speed value.
+func (h *DefaultHandler) ReceivedMaxMotorSpeedValue() uint16 {
+	return h.receivedMaxMotorSpeedValue
+}
+
+// ReceivedMaxServoDirectionValue returns the received maximum servo direction value.
+//
+// Returns:
+//
+// The received maximum servo direction value.
+func (h *DefaultHandler) ReceivedMaxServoDirectionValue() uint16 {
+	return h.receivedMaxServoDirectionValue
+}
+
+// ReceivedBNO08XTurns returns the received BNO08X turns.
+//
+// Returns:
+//
+// The received BNO08X turns.
+func (h *DefaultHandler) ReceivedBNO08XTurns() int {
+	return h.receivedBNO08XTurns
+}
+
+// ReceivedBNO08XYawDegrees returns the received BNO08X yaw degrees.
+//
+// Returns:
+//
+// The received BNO08X yaw degrees.
+func (h *DefaultHandler) ReceivedBNO08XYawDegrees() float64 {
+	return h.receivedBNO08XYawDegrees
 }

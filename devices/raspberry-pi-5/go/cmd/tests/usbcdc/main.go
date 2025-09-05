@@ -10,7 +10,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal"
 	internallog "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/log"
 	internalusbcdc "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/usbcdc"
 	"golang.org/x/sync/errgroup"
@@ -40,7 +39,6 @@ func main() {
 		os.Interrupt,
 		syscall.SIGTERM,
 	)
-	defer stop()
 
 	// Create an error group to manage goroutines
 	g := errgroup.Group{}
@@ -48,7 +46,7 @@ func main() {
 	// Initialize the logger goroutine
 	g.Go(
 		func() error {
-			return internal.StopContextOnError(ctx, stop, logger.Run)
+			return logger.Run(ctx, stop)
 		},
 	)
 

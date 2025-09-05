@@ -22,7 +22,7 @@ import (
 type (
 	// DefaultHandler is the default implementation of the Handler interface
 	DefaultHandler struct {
-		mutex            sync.Mutex
+		mutex                   sync.Mutex
 		loggerProducer          internallog.LoggerProducer
 		logger                  internallog.Logger
 		rplidarHandler          internalrplidar.Handler
@@ -40,7 +40,6 @@ type (
 		latestUpdateTime        time.Time
 		bno08xLastTurns         uint8
 		rplidarTurnsCounter     uint8
-		closed atomic.Bool
 	}
 )
 
@@ -393,8 +392,6 @@ func (h *DefaultHandler) challengeWithObstaclesHandler(ctx context.Context) erro
 	for {
 		select {
 		case <-ctx.Done():
-			// Send stop message
-			_ = h.usbCDCSender.SendStopMessage()
 			return ctx.Err()
 		default:
 			return ErrNotImplemented
@@ -415,237 +412,13 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 	// Get the rotation completed channel
 	rotationCompletedCh := h.rplidarHandler.GetRotationCompletedChannel()
 
-	for !h.IsClosed() {
+	for {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
-			case <-rotationCompletedCh:
+		case <-rotationCompletedCh:
 		}
 	}
-}
-
-// incomingMessagesHandler handles incoming messages from the USB-CDC
-//
-// Parameters:
-//
-// ctx: Context for managing cancellation and timeouts.
-//
-// Returns:
-//
-// An error if there was an issue handling incoming messages, nil otherwise
-func (h *DefaultHandler) incomingMessagesHandler(ctx context.Context) error {
-	var
-
-	for !h.IsClosed() {
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-			case
-		}
-		case
-	}
-}
-
-	/*
-	@final
-		   	@log_on_error()
-		   	def run(self) -> None:
-		   		try:
-		   			# Start the serial communication receiver
-		   			self._start()
-
-		   			# Wait for the first END_CHAR message to be received to ensure the serial port is ready
-		   			self.__logger.info(
-		   				f"Waiting for initial {repr(END_CHAR)} message to confirm serial communication is ready...",
-		   				)
-		   			while not self.__stop_event.is_set() and not self.__deleted_event.is_set():
-		   				if self.__console_serial.in_waiting == 0:
-		   					sleep(self.INCOMING_DELAY)
-		   					continue
-
-		   				# Read a single character from the console
-		   				char = self.__console_serial.read(1).decode(
-		   					ENCODE,
-		   					errors="ignore",
-		   					)
-		   				if not char:
-		   					continue
-		   				if char == END_CHAR:
-		   					break
-		   			if self.__stop_event.is_set() or self.__deleted_event.is_set():
-		   				# Stop the serial communication receiver
-		   				self._stop()
-		   				return
-
-		   			# Log
-		   			self.__logger.info(
-		   				f"Received initial {repr(END_CHAR)} message. Serial communication is ready.",
-		   				)
-
-		   			# Wait for the start message
-		   			self.__logger.info(
-		   				"Waiting for start event...",
-		   				)
-		   			while not self.__stop_event.is_set() and not self.__deleted_event.is_set():
-		   				try:
-		   					msg = self._receive_latest_message()
-		   					# If no message is received, continue to wait
-		   					if msg is None:
-		   						continue
-
-		   				except ValueError as e:
-		   					# May receive some garbage data, so we catch the exception
-		   					raise RuntimeError(
-		   						f"Received invalid message, may be garbage data: '{e}'",
-		   						)
-
-		   				if msg.is_error():
-		   					raise RuntimeError(
-		   						f"Received error message: '{msg.content}'",
-		   						)
-
-		   				elif msg.is_challenge():
-		   					# Log
-		   					self.__logger.info("Received challenge message.")
-
-		   					# Send a confirmation message
-		   					self.__serial_dispatcher.send_confirmation_message()
-
-		   					# Set the challenge as an environment variable
-		   					with self.__challenge.get_lock():
-		   						self.__challenge.value = Challenge.from_string(
-		   							msg.content,
-		   							).as_char
-
-		   					# Continue to wait for the start event
-		   					continue
-
-		   				elif msg.is_start():
-		   					# Log
-		   					self.__logger.info("Received start event.")
-
-		   					# Check if the challenge is set
-		   					if self.__challenge.value == Challenge.NONE.as_char:
-		   						raise RuntimeError(
-		   							"Challenge not set. Stopping communication.",
-		   							)
-
-		   					# Send a confirmation message
-		   					self.__serial_dispatcher.send_confirmation_message()
-
-		   					# Set the start event
-		   					self.__start_event.set()
-		   					break
-
-		   				else:
-		   					# Log the received message
-		   					self.__logger.debug(
-		   						f"Received message while waiting for start event: {msg}",
-		   						)
-
-		   			while not self.__stop_event.is_set() and not self.__deleted_event.is_set():
-		   				try:
-		   					msg = self._receive_latest_message()
-		   					if msg is None:
-		   						continue
-
-		   				except ValueError as e:
-		   					# May signal a bad code on the Pico or garbage data
-		   					self.__logger.warning(
-		   						f"Received invalid message error, skipping: '{e}'",
-		   						)
-		   					continue
-
-		   				if msg.is_error():
-		   					raise RuntimeError(
-		   						f"Received error message: '{msg.content}'",
-		   						)
-
-		   				elif msg.is_bno08x_yaw_deg():
-		   					# Log
-		   					self.__logger.debug(
-		   						f"Received BNO08X yaw degrees message: {msg.content}",
-		   						)
-
-		   					# Update the BNO08X horizontal axis angle
-		   					with self.__bno08x_yaw_deg.get_lock():
-		   						self.__bno08x_yaw_deg.value = float(msg.content)
-
-		   				elif msg.is_bno08x_turns():
-		   					# Log
-		   					self.__logger.debug(
-		   						f"Received BNO08X turns message: {msg.content}",
-		   						)
-
-		   					# Update the BNO08X turns
-		   					with self.__bno08x_turns.get_lock():
-		   						self.__bno08x_turns.value = int(msg.content)
-
-		   				else:
-		   					# Log the received message
-		   					self.__logger.debug(
-		   						f"Received message: {msg}",
-		   						)
-
-		   			# Stop
-		   			self._stop()
-
-		   		except Exception as e:
-		   			# Stop the serial communication receiver in case of an exception
-		   			self._stop()
-		   			raise e
-
-
-	   def _wait_confirmation_message(
-	   			self,
-	   			msg_to_confirm: OutgoingMessage,
-	   			attempts: int = CONFIRMATION_ATTEMPTS,
-	   			) -> None:
-	   		"""
-	   		Wait for a confirmation message from the serial port.
-
-	   		Args:
-	   			msg_to_confirm (OutgoingMessage): The message to confirm.
-	   			attempts (int): The number of attempts to wait for the confirmation message.
-	   		Raises:
-	   			RuntimeError: If the confirmation message is not received within the timeout.
-	   		"""
-	   		# Log
-	   		self.__logger.debug(
-	   			f"Waiting confirmation message for: {msg_to_confirm}",
-	   			)
-
-	   		# Wait for the confirmation message
-	   		i = 0
-	   		while i < attempts:
-	   			msg = self._receive_latest_message()
-	   			if msg is None:
-	   				i += 1
-	   				continue
-
-	   			if msg.is_error():
-	   				raise RuntimeError(
-	   					f"Received error message: {msg.content}",
-	   					)
-	   			elif msg.is_confirmation():
-	   				# Log the confirmation message
-	   				self.__logger.debug(
-	   					f"Received confirmation message: {msg.content}",
-	   					)
-	   				return
-
-	   			else:
-	   				# Log the received message
-	   				self.__logger.debug(
-	   					f"Received message while waiting for confirmation: {msg}",
-	   					)
-
-	   		raise RuntimeError(
-	   			f"Confirmation message for {msg_to_confirm} not received within timeout.",
-	   			)
-
-
-	*/
 }
 
 // runToWrap is the internal function to run the pilot handler
@@ -669,6 +442,7 @@ func (h *DefaultHandler) runToWrap(ctx context.Context, stopFn func()) error {
 		return fmt.Errorf("failed to create USB-CDC sender: %w", err)
 	}
 	h.usbCDCSender = usbCDCSender
+	defer h.usbCDCSender.Close()
 
 	// Get the start message
 }
@@ -723,7 +497,7 @@ func (h *DefaultHandler) Run() error {
 	// Initialize the logger goroutine
 	g.Go(
 		func() error {
-			return internal.StopContextOnError(ctx, stop, h.logger.Run)
+			return h.logger.Run(ctx, stop)
 		},
 	)
 
@@ -741,14 +515,14 @@ func (h *DefaultHandler) Run() error {
 	// Initialize the CLIP goroutine
 	g.Go(
 		func() error {
-			return internal.StopContextOnError(ctx, stop, h.clipHandler.Run)
+			return h.clipHandler.Run(ctx, stop)
 		},
 	)
 
 	// Initialize the RPLiDAR goroutine
 	g.Go(
 		func() error {
-			return internal.StopContextOnError(ctx, stop, h.rplidarHandler.Run)
+			return h.rplidarHandler.Run(ctx, stop)
 		},
 	)
 
@@ -761,7 +535,7 @@ func (h *DefaultHandler) Run() error {
 
 	// Initialize the run to wrap goroutine
 	g.Go(
-		func () error {
+		func() error {
 			return internallog.LogOnError(
 				func() error {
 					return h.runToWrap(ctx, stop)
@@ -773,41 +547,6 @@ func (h *DefaultHandler) Run() error {
 
 	// Wait for the goroutines to finish
 	return g.Wait()
-}
-
-// Close signals no more senders will send; safe to call multiple times.
-func (h *DefaultHandler) Close() {
-	h.mutex.Lock()
-
-	// Check if the handler is already closed
-	if h.IsClosed() {
-		h.mutex.Unlock()
-		return
-	}
-
-	// Mark the handler as closed
-	h.closed.Store(true)
-
-	h.mutex.Unlock()
-
-	// Close the logger producer
-	if h.loggerProducer != nil {
-		h.loggerProducer.Close()
-	}
-
-	// Close the USB-CDC sender
-	if h.usbCDCSender != nil {
-		h.usbCDCSender.Close()
-	}
-}
-
-// IsClosed returns true if the outgoing messages channel has been closed.
-//
-// Returns:
-//
-// True if the outgoing messages channel is closed, otherwise false.
-func (h *DefaultHandler) IsClosed() bool {
-	return h.closed.Load()
 }
 
 /*

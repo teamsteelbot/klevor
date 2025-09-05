@@ -39,10 +39,12 @@ func ExecutableDir() (string, error) {
 func StopContextOnError(
 	ctx context.Context,
 	stopFn func(),
-	fn func(ctx2 context.Context) error,
+	fn func(context.Context) error,
 ) error {
 	if err := fn(ctx); err != nil {
-		stopFn()
+		if stopFn != nil {
+			stopFn()
+		}
 		return err
 	}
 	return nil
