@@ -296,7 +296,7 @@ func (l *DefaultLogger) Run(ctx context.Context) error {
 	}
 
 	// Log a message indicating that the writer has started
-	if err = writeLine(LoggerStartedMessage); err != nil {
+	if err = writeLine(StartedMessage); err != nil {
 		return err
 	}
 

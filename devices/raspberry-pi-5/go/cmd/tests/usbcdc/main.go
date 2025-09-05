@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal"
 	internallog "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/log"
 	internalusbcdc "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/usbcdc"
 	"golang.org/x/sync/errgroup"
@@ -47,14 +48,14 @@ func main() {
 	// Initialize the logger goroutine
 	g.Go(
 		func() error {
-			return logger.Run(ctx)
+			return internal.StopContextOnError(ctx, stop, logger.Run)
 		},
 	)
 
 	// Initialize the USB-CDC goroutine
 	g.Go(
 		func() error {
-			return usbCDCHandler.Run(ctx)
+			return usbCDCHandler.Run(ctx, stop)
 		},
 	)
 

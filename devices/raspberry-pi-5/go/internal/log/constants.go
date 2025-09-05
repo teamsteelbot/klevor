@@ -53,8 +53,8 @@ var (
 		LoggerTag,
 	)
 
-	// LoggerStartedMessage is the message logged when the logger starts
-	LoggerStartedMessage = NewMessage(
+	// StartedMessage is the message logged when the logger starts
+	StartedMessage = NewMessage(
 		CategoryInfo,
 		"Started",
 		LoggerTag,

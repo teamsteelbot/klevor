@@ -26,7 +26,7 @@ type (
 		SendBNO08XYawDegreesMessage(yawDegrees float64) error
 		SendBNO08XYawTurnsMessage(turns int) error
 		SendErrorMessage(err error) error
-		Start() error
+		SendStartMessage() error
 		Stop()
 	}
 )

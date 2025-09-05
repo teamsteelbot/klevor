@@ -17,7 +17,7 @@ import (
 
 const (
 	// receivingMessageTimeout defines the maximum time to wait for receiving messages.
-	receivingMessageTimeout = 1 * time.Second
+	receivingMessageTimeout = 5 * time.Second
 )
 
 var (

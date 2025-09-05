@@ -1,11 +1,14 @@
-package internal
+package pilot
 
 type (
 	// CardinalDirection is an enum to represent the different cardinal directions that the RPLiDAR can face.
 	CardinalDirection uint8
 
-	// VehicleDirection is an enum to represent the different turn directions that the vehicle can take.
-	VehicleDirection uint8
+	// ServoDirection is an enum to represent the different servo directions for the vehicle.
+	ServoDirection uint8
+
+	// MotorDirection is an enum to represent the different motor directions for the vehicle.
+	MotorDirection uint8
 )
 
 const (
@@ -29,10 +32,17 @@ const (
 )
 
 const (
-	VehicleDirectionNil VehicleDirection = iota
-	VehicleDirectionLeft
-	VehicleDirectionRight
-	VehicleDirectionStraight
+	ServoDirectionNil ServoDirection = iota
+	ServoDirectionLeft
+	ServoDirectionRight
+	ServoDirectionStraight
+)
+
+const (
+	MotorDirectionNil MotorDirection = iota
+	MotorDirectionForward
+	MotorDirectionBackward
+	MotorDirectionStop
 )
 
 var (
@@ -76,11 +86,38 @@ var (
 		CardinalDirectionNorthNorthwest: 337.5,
 	}
 
-	// VehicleDirectionNames maps a given VehicleDirection to its string name
-	VehicleDirectionNames = map[VehicleDirection]string{
-		VehicleDirectionLeft:     "left",
-		VehicleDirectionRight:    "right",
-		VehicleDirectionStraight: "straight",
+	// CardinalDirections is a slice of all valid CardinalDirection values
+	CardinalDirections = []CardinalDirection{
+		CardinalDirectionNorth,
+		CardinalDirectionWest,
+		CardinalDirectionEast,
+		CardinalDirectionSouth,
+		CardinalDirectionNorthwest,
+		CardinalDirectionNortheast,
+		CardinalDirectionSouthwest,
+		CardinalDirectionSoutheast,
+		CardinalDirectionWestNorthwest,
+		CardinalDirectionNorthNorthwest,
+		CardinalDirectionEastNortheast,
+		CardinalDirectionNorthNortheast,
+		CardinalDirectionWestSouthwest,
+		CardinalDirectionEastSoutheast,
+		CardinalDirectionSouthSouthwest,
+		CardinalDirectionSouthSoutheast,
+	}
+
+	// ServoDirectionNames maps a given ServoDirection to its string name
+	ServoDirectionNames = map[ServoDirection]string{
+		ServoDirectionLeft:     "left",
+		ServoDirectionRight:    "right",
+		ServoDirectionStraight: "straight",
+	}
+
+	// MotorDirectionNames maps a given MotorDirection to its string name
+	MotorDirectionNames = map[MotorDirection]string{
+		MotorDirectionForward:  "forward",
+		MotorDirectionBackward: "backward",
+		MotorDirectionStop:     "stop",
 	}
 )
 
@@ -98,11 +135,20 @@ func (r CardinalDirection) Angle() float64 {
 	return CardinalDirectionAngles[r]
 }
 
-// String returns the string representation of the VehicleDirection
+// String returns the string representation of the ServoDirection
 //
 // Returns:
 //
-// The string representation of the VehicleDirection enum
-func (r VehicleDirection) String() string {
-	return VehicleDirectionNames[r]
+// The string representation of the ServoDirection enum
+func (r ServoDirection) String() string {
+	return ServoDirectionNames[r]
+}
+
+// String returns the string representation of the MotorDirection
+//
+// Returns:
+//
+// The string representation of the MotorDirection enum
+func (r MotorDirection) String() string {
+	return MotorDirectionNames[r]
 }

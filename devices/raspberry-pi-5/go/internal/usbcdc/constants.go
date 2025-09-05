@@ -11,32 +11,14 @@ const (
 	// EndChar is the message end character
 	EndChar byte = 0x04
 
-	// ConfirmationMessageTimeout is the timeout duration for confirmation messages
-	ConfirmationMessageTimeout = time.Second * 5
-
-	// StopTimeout is the timeout duration for stopping the USB-CDC communication
-	StopTimeout = 5 * time.Second
-
-	// OutgoingWaitTimeout is the timeout duration for waiting for outgoing messages to be sent
-	OutgoingWaitTimeout = 5 * time.Second
-
-	// WriteTimeout is the timeout duration for writing to the USB-CDC port
-	WriteTimeout = time.Second * 2
-
-	// IncomingDelay is the delay between incoming message checks
-	IncomingDelay = 10 * time.Millisecond
-
-	// ConfirmationTimeout is the timeout duration for confirmation messages
-	ConfirmationTimeout = 5 * time.Second
-
-	// ReadTimeout is the timeout duration for reading from the USB-CDC port
-	ReadTimeout = time.Second * 2
-
-	// ConfirmationAttempts is the number of attempts to confirm a message
-	ConfirmationAttempts = ConfirmationTimeout / IncomingDelay
+	// InitializationMessage is the initialization message sent by the Raspberry Pi Pico 2W
+	InitializationMessage = EndChar
 )
 
 var (
+	// ReadTimeout is the timeout duration for reading from the USB-CDC port
+	ReadTimeout = time.Second * 2
+
 	// BufferSize is the size of the buffer for USB-CDC communication
 	BufferSize uint8 = 64
 
@@ -60,6 +42,18 @@ var (
 
 	// OutgoingHeartbeatMessage is the outgoing heartbeat message for USB-CDC communication
 	OutgoingHeartbeatMessage = NewOutgoingStatusMessage(internalusbcdcenums.OutgoingStatusHeartbeat)
+
+	// OutgoingMotorSpeedStopMessage is the outgoing motor speed stop message for USB-CDC communication
+	OutgoingMotorSpeedStopMessage = NewOutgoingMessage(
+		internalusbcdcenums.OutgoingCategoryMotorSpeedStop,
+		"",
+	)
+
+	// OutgoingServoDirectionCenterMessage is the outgoing servo direction center message for USB-CDC communication
+	OutgoingServoDirectionCenterMessage = NewOutgoingMessage(
+		internalusbcdcenums.OutgoingCategoryServoDirectionCenter,
+		"",
+	)
 
 	// IncomingStartMessage is the incoming start message for USB-CDC communication
 	IncomingStartMessage = NewIncomingStatusMessage(internalusbcdcenums.IncomingStatusStart)

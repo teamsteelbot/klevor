@@ -11,6 +11,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal"
 	internallog "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/log"
 	internalrplidar "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/rplidar"
 	"golang.org/x/sync/errgroup"
@@ -47,7 +48,6 @@ func main() {
 		os.Interrupt,
 		syscall.SIGTERM,
 	)
-	defer stop()
 
 	// Create an error group to manage goroutines
 	g := errgroup.Group{}
@@ -55,14 +55,14 @@ func main() {
 	// Initialize the logger goroutine
 	g.Go(
 		func() error {
-			return logger.Run(ctx)
+			return internal.StopContextOnError(ctx, stop, logger.Run)
 		},
 	)
 
 	// Initialize the RPLiDAR goroutine
 	g.Go(
 		func() error {
-			return rplidarHandler.Run(ctx)
+			return internal.StopContextOnError(ctx, stop, rplidarHandler.Run)
 		},
 	)
 

@@ -9,6 +9,7 @@ const (
 )
 
 var (
+	ErrNilHandler                               = errors.New("handler cannot be nil")
 	ErrNilBuffer                                = errors.New("buffer cannot be nil")
 	ErrHandlerAlreadyRunning                    = errors.New("handler is already running")
 	ErrFailedToListPorts                        = errors.New("failed to list ports")

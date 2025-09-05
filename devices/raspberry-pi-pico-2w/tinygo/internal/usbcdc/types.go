@@ -327,12 +327,12 @@ func (d *DefaultHandler) SendErrorMessage(err error) error {
 	return d.SendMessage(errorMessage)
 }
 
-// Start is called when the USB CDC is started.
+// SendStartMessage sends a start message to the USB CDC and waits for confirmation.
 //
 // Returns:
 //
 // An error if it fails to send the start message
-func (d *DefaultHandler) Start() error {
+func (d *DefaultHandler) SendStartMessage() error {
 	// Send the start message
 	if err := d.SendMessage(OutgoingStartMessage); err != nil {
 		return err

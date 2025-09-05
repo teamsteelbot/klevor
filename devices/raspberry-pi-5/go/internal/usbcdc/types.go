@@ -6,6 +6,7 @@ import (
 	"sync"
 	"sync/atomic"
 
+	"github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal"
 	internallog "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/log"
 	internalrplidar "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/rplidar"
 	"go.bug.st/serial"
@@ -23,18 +24,19 @@ type (
 
 	// DefaultHandler is the default implementation of the Handler interface
 	DefaultHandler struct {
-		incomingMessagesCh chan *IncomingMessage
-		outgoingMessagesCh chan *OutgoingMessage
-		logger             internallog.Logger
-		loggerProducer     internallog.LoggerProducer
-		isRunning          atomic.Bool
-		closed             atomic.Bool
-		mutex              sync.Mutex
-		wgSenders          sync.WaitGroup
-		baudRate           int
-		buffer             []byte
-		accumulatedBuffer  []byte
-		accumulatedBytes   int
+		incomingMessagesCh            chan *IncomingMessage
+		outgoingMessagesCh            chan *OutgoingMessage
+		logger                        internallog.Logger
+		loggerProducer                internallog.LoggerProducer
+		isRunning                     atomic.Bool
+		closed                        atomic.Bool
+		mutex                         sync.Mutex
+		wgSenders                     sync.WaitGroup
+		baudRate                      int
+		buffer                        []byte
+		accumulatedBuffer             []byte
+		accumulatedBytes              int
+		receivedInitializationMessage bool
 	}
 )
 
@@ -184,11 +186,12 @@ func (h *DefaultHandler) GetIncomingMessagesChannel() <-chan *IncomingMessage {
 // Parameters:
 //
 // ctx: The context to control the lifecycle of the handler.
+// stopFn: Function to call when stopping the handler.
 //
 // Returns:
 //
 // An error if any issue occurs during reading or writing.
-func (h *DefaultHandler) runToWrap(ctx context.Context) error {
+func (h *DefaultHandler) runToWrap(ctx context.Context, stopFn func()) error {
 	// List available serial ports
 	ports, err := serial.GetPortsList()
 	if err != nil {
@@ -237,14 +240,25 @@ func (h *DefaultHandler) runToWrap(ctx context.Context) error {
 	// Call the incoming messages handler
 	g.Go(
 		func() error {
-			return h.incomingMessagesHandler(ctx, port)
+			return internal.StopContextOnError(
+				ctx,
+				stopFn,
+				func(ctx context.Context) error {
+					return h.incomingMessagesHandler(ctx, port)
+				},
+			)
 		},
 	)
 
 	// Call the outgoing messages handler
 	g.Go(
 		func() error {
-			return h.outgoingMessagesHandler(ctx, port)
+			return internal.StopContextOnError(
+				ctx, stopFn,
+				func(ctx context.Context) error {
+					return h.outgoingMessagesHandler(ctx, port)
+				},
+			)
 		},
 	)
 
@@ -266,6 +280,38 @@ func (h *DefaultHandler) incomingMessagesHandler(
 	ctx context.Context,
 	port serial.Port,
 ) error {
+	// Received initialization message
+	h.loggerProducer.Info("Waiting for initialization message...")
+	for !h.receivedInitializationMessage {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+			n, err := port.Read(h.buffer)
+			if err != nil {
+				h.loggerProducer.Warning(
+					fmt.Sprintf(
+						"An error occurred while reading from the serial port: %v",
+						err,
+					),
+				)
+			}
+			if n == 0 {
+				// Read can return 0 bytes
+				continue
+			}
+
+			// Process the data read
+			for i := 0; i < n; i++ {
+				if h.buffer[i] == InitializationMessage {
+					h.receivedInitializationMessage = true
+					h.loggerProducer.Info("Received initialization message")
+					break
+				}
+			}
+		}
+	}
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -316,6 +362,15 @@ func (h *DefaultHandler) incomingMessagesHandler(
 			}
 		}
 	}
+}
+
+// ReceivedInitializationMessage returns true if the initialization message has been received.
+//
+// Returns:
+//
+// True if the initialization message has been received, otherwise false.
+func (h *DefaultHandler) ReceivedInitializationMessage() bool {
+	return h.receivedInitializationMessage
 }
 
 // outgoingMessagesHandler processes outgoing messages and sends them through the serial port.
@@ -393,11 +448,12 @@ func (h *DefaultHandler) sendMessage(
 // Parameters:
 //
 // ctx: Context for managing cancellation and timeouts.
+// stopFn: Function to call when stopping the handler.
 //
 // Returns:
 //
 // An error if any issue occurs during reading or writing.
-func (h *DefaultHandler) Run(ctx context.Context) error {
+func (h *DefaultHandler) Run(ctx context.Context, stopFn func()) error {
 	h.mutex.Lock()
 
 	// Check if it's already running
@@ -448,7 +504,7 @@ func (h *DefaultHandler) Run(ctx context.Context) error {
 
 	return internallog.LogOnError(
 		func() error {
-			return h.runToWrap(ctx)
+			return h.runToWrap(ctx, stopFn)
 		},
 		h.loggerProducer,
 	)

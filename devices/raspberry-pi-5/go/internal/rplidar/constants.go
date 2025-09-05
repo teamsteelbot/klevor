@@ -54,6 +54,9 @@ var (
 
 	// LoggerProducerTag is the logger producer tag for RPLiDAR
 	LoggerProducerTag = "RPLiDAR"
+
+	// StartedMessage is the message logged when the RPLiDAR starts
+	StartedMessage = "Started"
 )
 
 var (

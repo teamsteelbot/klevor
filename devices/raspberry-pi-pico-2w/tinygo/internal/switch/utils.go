@@ -25,6 +25,11 @@ func SwitchOnEventGenerator(
 			return err
 		}
 
+		// Send start message
+		if err := usbCDChandler.SendStartMessage(); err != nil {
+			return err
+		}
+
 		// Send challenge message
 		if err := usbCDChandler.SendChallengeMessage(); err != nil {
 			return err
