@@ -36,18 +36,73 @@ var (
 		OutgoingCategoryServoDirectionToRight:     "servo_direction_to_right",
 		OutgoingCategoryGetMaxServoDirectionValue: "get_max_servo_direction_value",
 	}
+	
+	// OutgoingCategories maps a given uint8 value to its OutgoingCategory enum
+	OutgoingCategories = map[uint8]OutgoingCategory{
+		OutgoingCategoryNil.Uint8():  OutgoingCategoryNil,
+		OutgoingCategoryStatus.Uint8():  OutgoingCategoryStatus,
+		OutgoingCategoryMotorSpeedStop.Uint8():  OutgoingCategoryMotorSpeedStop,
+		OutgoingCategoryMotorSpeedForward.Uint8():  OutgoingCategoryMotorSpeedForward,
+		OutgoingCategoryMotorSpeedBackward.Uint8():  OutgoingCategoryMotorSpeedBackward,
+		OutgoingCategoryGetMaxMotorSpeedValue.Uint8():  OutgoingCategoryGetMaxMotorSpeedValue,
+		OutgoingCategoryServoDirectionCenter.Uint8():  OutgoingCategoryServoDirectionCenter,
+		OutgoingCategoryServoDirectionToLeft.Uint8():  OutgoingCategoryServoDirectionToLeft,
+		OutgoingCategoryServoDirectionToRight.Uint8():  OutgoingCategoryServoDirectionToRight,
+		OutgoingCategoryGetMaxServoDirectionValue.Uint8():  OutgoingCategoryGetMaxServoDirectionValue,
+	}
 )
+
+// Uint8 returns the uint8 representation of the OutgoingCategory
+//
+// Returns:
+//
+// The uint8 representation of the OutgoingCategory enum
+func (o OutgoingCategory) Uint8() uint8 {
+	return uint8(o)
+}
+
+// Name returns the name of the OutgoingCategory
+//
+// Returns:
+//
+// The name of the OutgoingCategory enum
+func (o OutgoingCategory) Name() string {
+	return OutgoingCategoryNames[o]
+}
 
 // String returns the string representation of the OutgoingCategory
 //
 // Returns:
 //
 // The string representation of the OutgoingCategory enum
-func (i *OutgoingCategory) String() string {
-	return OutgoingCategoryNames[*i]
+func (o OutgoingCategory) String() string {
+	return fmt.Sprintf("%d", o)
 }
 
-// OutgoingCategoryFromString returns the OutgoingCategory enum based on a given string
+// IsAServoCategory checks if the given OutgoingCategory is a servo category
+//
+// Returns:
+//
+// True if the category is a servo category, otherwise False
+func (o OutgoingCategory) IsAServoCategory() bool {
+	return o == OutgoingCategoryServoDirectionCenter ||
+		o == OutgoingCategoryServoDirectionToLeft ||
+		o == OutgoingCategoryServoDirectionToRight
+}
+
+// IsAMotorCategory checks if the given OutgoingCategory is a motor category
+//
+// Returns:
+//
+// True if the category is a motor category, otherwise False
+func (o OutgoingCategory) IsAMotorCategory() bool {
+	return o == OutgoingCategoryMotorSpeedStop ||
+		o == OutgoingCategoryMotorSpeedForward ||
+		o == OutgoingCategoryMotorSpeedBackward
+}
+
+
+// OutgoingCategoryByName returns the OutgoingCategory enum based on a given string
 //
 // Parameters:
 //
@@ -56,11 +111,11 @@ func (i *OutgoingCategory) String() string {
 // Returns:
 //
 // The OutgoingCategory enum value, or an error if the key wasn't found for the given value
-func OutgoingCategoryFromString(s string) (OutgoingCategory, error) {
+func OutgoingCategoryByName(s string) (OutgoingCategory, error) {
 	// Format the string
 	s = strings.ToLower(strings.TrimSpace(s))
 
-	// Search for the given outgoing category name
+	// Search for the given incoming category name
 	for key, value := range OutgoingCategoryNames {
 		if value == s {
 			return key, nil
@@ -69,43 +124,46 @@ func OutgoingCategoryFromString(s string) (OutgoingCategory, error) {
 	return OutgoingCategoryNil, fmt.Errorf(ErrInvalidOutgoingCategoryName, s)
 }
 
+// OutgoingCategoryFromString returns the OutgoingCategory enum based on a given string
+//
+// Parameters:
+//
+// s: The string to parse as OutgoingCategory
+//
+// Returns:
+//
+// The OutgoingCategory enum value, or an error if the key wasn't found for the given value
+func OutgoingCategoryFromString(s string) (OutgoingCategory, error) {
+	// Format the string
+	s = strings.ToLower(strings.TrimSpace(s))
+
+	// Try to parse as uint8 first
+	var value uint8
+	if _, err := fmt.Sscanf(s, "%d", &value); err != nil {
+		return OutgoingCategoryNil, fmt.Errorf(ErrInvalidOutgoingCategoryString, s)
+	}
+
+	// If the string was a number, try to get the OutgoingCategory from the uint8 value
+	category, err := OutgoingCategoryFromUint8(value);
+	if err != nil {
+		return OutgoingCategoryNil, err
+	}
+	return category, nil
+}
+
 // OutgoingCategoryFromUint8 returns the OutgoingCategory enum based on a given uint8 value
 //
 // Parameters:
 //
-// value: The uint8 value to search on OutgoingCategoryNames
+// value: The uint8 value to search on OutgoingCategories
 //
 // Returns:
 //
 // The OutgoingCategory enum value, or an error if the key wasn't found for the given value
 func OutgoingCategoryFromUint8(value uint8) (OutgoingCategory, error) {
-	if value <= uint8(OutgoingCategoryNil) || value > uint8(len(OutgoingCategoryNames)) {
-		return OutgoingCategoryNil, fmt.Errorf(
-			ErrInvalidOutgoingCategory,
-			value,
-		)
+	category, ok := OutgoingCategories[value]
+	if !ok {
+		return OutgoingCategoryNil, fmt.Errorf(ErrInvalidOutgoingCategoryUint8, value)
 	}
-	return OutgoingCategory(value), nil
-}
-
-// IsAServoCategory checks if the given OutgoingCategory is a servo category
-//
-// Returns:
-//
-// True if the category is a servo category, otherwise False
-func (i *OutgoingCategory) IsAServoCategory() bool {
-	return *i == OutgoingCategoryServoDirectionCenter ||
-		*i == OutgoingCategoryServoDirectionToLeft ||
-		*i == OutgoingCategoryServoDirectionToRight
-}
-
-// IsAMotorCategory checks if the given OutgoingCategory is a motor category
-//
-// Returns:
-//
-// True if the category is a motor category, otherwise False
-func (i *OutgoingCategory) IsAMotorCategory() bool {
-	return *i == OutgoingCategoryMotorSpeedStop ||
-		*i == OutgoingCategoryMotorSpeedForward ||
-		*i == OutgoingCategoryMotorSpeedBackward
+	return category, nil
 }

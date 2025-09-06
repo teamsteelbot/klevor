@@ -343,15 +343,29 @@ func (h *DefaultHandler) incomingMessagesHandler(
 
 			// Send each message to the incoming messages channel
 			for _, msg := range messages {
-				if msg.IsAnErrorMessage() {
-					return fmt.Errorf("received error message: %s", msg.Content)
-				} else if IncomingStartMessage.IsEqual(msg) {
+				if h.receivedStartMessage {
+					break
+				}
+
+				switch msg.Category {
+				case internalusbcdcenums.IncomingCategoryError:
+					err := fmt.Errorf("received error message: %s", msg.Content)
+					h.incomingMessagesLoggerProducer.Error(err)
+					return err
+				case internalusbcdcenums.IncomingCategoryChallenge:
 					h.receivedStartMessage = true
 					h.incomingMessagesLoggerProducer.Info("Received start message")
 
 					// Send a confirmation message
 					h.outgoingMessagesCh <- OutgoingOKMessage
-					break
+				default:
+					// Log any other received message
+					h.incomingMessagesLoggerProducer.Info(
+						fmt.Sprintf(
+							"Received message while waiting for start message: %s",
+							msg.String(),
+						),
+					)		
 				}
 			}
 		}
@@ -369,18 +383,25 @@ func (h *DefaultHandler) incomingMessagesHandler(
 
 			// Send each message to the incoming messages channel
 			for _, msg := range messages {
-				if msg.IsAnErrorMessage() {
-					return fmt.Errorf("received error message: %s", msg.Content)
-				} else if msg.IsAChallengeMessage() {
+				if h.receivedChallenge == internal.ChallengeNil {
+					break
+				}
+
+				switch msg.Category {
+				case internalusbcdcenums.IncomingCategoryError:
+					err := fmt.Errorf("received error message: %s", msg.Content)
+					h.incomingMessagesLoggerProducer.Error(err)
+					return err
+				case internalusbcdcenums.IncomingCategoryChallenge:
 					challenge, err := internal.ChallengeFromString(msg.Content)
 					if err != nil {
-						return fmt.Errorf("failed to parse challenge: %w", err)
+						return fmt.Errorf("failed to parse challenge message content: %w", err)
 					}
 					h.receivedChallenge = challenge
 					h.incomingMessagesLoggerProducer.Info(
 						fmt.Sprintf(
-							"Received challenge message: %s",
-							msg.String(),
+							"Received challenge: %s",
+							challenge.Name(),
 						),
 					)
 
@@ -389,7 +410,14 @@ func (h *DefaultHandler) incomingMessagesHandler(
 
 					// Send a confirmation message
 					h.outgoingMessagesCh <- OutgoingOKMessage
-					break
+				default:
+					// Log any other received message
+					h.incomingMessagesLoggerProducer.Info(
+						fmt.Sprintf(
+							"Received message while waiting for challenge message: %s",
+							msg.String(),
+						),
+					)
 				}
 			}
 		}
@@ -409,17 +437,30 @@ func (h *DefaultHandler) incomingMessagesHandler(
 
 			// Send each message to the incoming messages channel
 			for _, msg := range messages {
-				// Check if it's an error message
-				if msg.IsAnErrorMessage() {
-					return fmt.Errorf("received error message: %s", msg.Content)
-				} else if msg.Category == internalusbcdcenums.IncomingCategoryBNO08XYawDegrees {
+				switch msg.Category {
+				case internalusbcdcenums.IncomingCategoryChallenge:
+					err := fmt.Errorf("received error message: %s", msg.Content)
+					h.incomingMessagesLoggerProducer.Error(err)
+					return err
+				case internalusbcdcenums.IncomingCategoryDebug:
+					debug, err := internalusbcdcenums.DebugFromString(msg.Content)
+					if err != nil {
+						return fmt.Errorf("failed to parse debug message content: %w", err)
+					}
+					h.incomingMessagesLoggerProducer.Info(
+						fmt.Sprintf(
+							"Received debug: %s",
+							debug.Name(),
+						),
+					)
+				case internalusbcdcenums.IncomingCategoryBNO08XYawDegrees:
 					// Parse the BNO08X yaw degrees value
 					if err := ralvarezdevgostringsconvert.ToFloat64(
 						msg.Content,
 						&h.receivedBNO08XYawDegrees,
 					); err != nil {
 						return fmt.Errorf(
-							"failed to parse BNO08X yaw degrees: %w",
+							"failed to parse BNO08X yaw degrees message content: %w",
 							err,
 						)
 					}
@@ -427,18 +468,18 @@ func (h *DefaultHandler) incomingMessagesHandler(
 					// Log the received message
 					h.incomingMessagesLoggerProducer.Info(
 						fmt.Sprintf(
-							"Received BNO08X yaw degrees message: %s",
-							msg.String(),
+							"Received BNO08X yaw degrees: %f",
+							h.receivedBNO08XYawDegrees,
 						),
 					)
-				} else if msg.Category == internalusbcdcenums.IncomingCategoryBNO08XYawTurns {
+				case internalusbcdcenums.IncomingCategoryBNO08XYawTurns:
 					// Parse the BNO08X turns value
 					if err := ralvarezdevgostringsconvert.ToInt(
 						msg.Content,
 						&h.receivedBNO08XTurns,
 					); err != nil {
 						return fmt.Errorf(
-							"failed to parse BNO08X turns: %w",
+							"failed to parse BNO08X turns message content: %w",
 							err,
 						)
 					}
@@ -446,18 +487,18 @@ func (h *DefaultHandler) incomingMessagesHandler(
 					// Log the received message
 					h.incomingMessagesLoggerProducer.Info(
 						fmt.Sprintf(
-							"Received BNO08X turns message: %s",
-							msg.String(),
+							"Received BNO08X turns: %d",
+							h.receivedBNO08XTurns,
 						),
 					)
-				} else if msg.Category == internalusbcdcenums.IncomingCategoryMaxMotorSpeedValue {
+				case internalusbcdcenums.IncomingCategoryMaxMotorSpeedValue:
 					// Parse the max motor speed value
 					if err := ralvarezdevgostringsconvert.ToUint16(
 						msg.Content,
 						&h.receivedMaxMotorSpeedValue,
 					); err != nil {
 						return fmt.Errorf(
-							"failed to parse max motor speed value: %w",
+							"failed to parse max motor speed value message content: %w",
 							err,
 						)
 					}
@@ -465,21 +506,21 @@ func (h *DefaultHandler) incomingMessagesHandler(
 					// Log the received message
 					h.incomingMessagesLoggerProducer.Info(
 						fmt.Sprintf(
-							"Received max motor speed value message: %s",
-							msg.String(),
+							"Received max motor speed value: %d",
+							h.receivedMaxMotorSpeedValue,
 						),
 					)
 
 					// Notify listeners exactly once
 					h.notifyMaxMotorSpeedValueOnce.Do(func() { close(h.maxMotorSpeedValueReady) })
-				} else if msg.Category == internalusbcdcenums.IncomingCategoryMaxServoDirectionValue {
+				case internalusbcdcenums.IncomingCategoryMaxServoDirectionValue:
 					// Parse the max servo direction value
 					if err := ralvarezdevgostringsconvert.ToUint16(
 						msg.Content,
 						&h.receivedMaxServoDirectionValue,
 					); err != nil {
 						return fmt.Errorf(
-							"failed to parse max servo direction value: %w",
+							"failed to parse max servo direction value message content: %w",
 							err,
 						)
 					}
@@ -487,14 +528,14 @@ func (h *DefaultHandler) incomingMessagesHandler(
 					// Log the received message
 					h.incomingMessagesLoggerProducer.Info(
 						fmt.Sprintf(
-							"Received max servo direction value message: %s",
-							msg.String(),
+							"Received max servo direction value: %d",
+							h.receivedMaxServoDirectionValue,
 						),
 					)
 
 					// Notify listeners exactly once
 					h.notifyMaxServoDirectionValueOnce.Do(func() { close(h.maxServoDirectionValueReady) })
-				} else {
+				default:
 					// Log any other received message
 					h.incomingMessagesLoggerProducer.Info(
 						fmt.Sprintf(

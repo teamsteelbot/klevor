@@ -118,7 +118,7 @@ func NewIncomingDebugMessage(
 // A string that represents the IncomingMessage
 func (msg *IncomingMessage) String() string {
 	var sb strings.Builder
-	sb.WriteByte(byte(msg.Category))
+	sb.WriteByte(msg.Category.Uint8())
 	sb.WriteString(msg.Content)
 	sb.WriteByte(EndChar)
 	return sb.String()

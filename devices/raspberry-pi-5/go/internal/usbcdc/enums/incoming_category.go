@@ -34,18 +34,49 @@ var (
 		IncomingCategoryMaxMotorSpeedValue:     "max_motor_speed_value",
 		IncomingCategoryMaxServoDirectionValue: "max_servo_direction_value",
 	}
+
+	// IncomingCategories maps a given uint8 value to its IncomingCategory enum
+	IncomingCategories = map[uint8]IncomingCategory{
+		IncomingCategoryNil.Uint8():           IncomingCategoryNil,
+		IncomingCategoryChallenge.Uint8():     IncomingCategoryChallenge,
+		IncomingCategoryStatus.Uint8():        IncomingCategoryStatus,
+		IncomingCategoryBNO08XYawDegrees.Uint8():  IncomingCategoryBNO08XYawDegrees,
+		IncomingCategoryBNO08XYawTurns.Uint8():    IncomingCategoryBNO08XYawTurns,
+		IncomingCategoryError.Uint8():         IncomingCategoryError,
+		IncomingCategoryDebug.Uint8():         IncomingCategoryDebug,
+		IncomingCategoryMaxMotorSpeedValue.Uint8():    IncomingCategoryMaxMotorSpeedValue,
+		IncomingCategoryMaxServoDirectionValue.Uint8(): IncomingCategoryMaxServoDirectionValue,
+	}
 )
+
+// Uint8 returns the uint8 representation of the IncomingCategory
+//
+// Returns:
+//
+// The uint8 representation of the IncomingCategory enum
+func (i IncomingCategory) Uint8() uint8 {
+	return uint8(i)
+}
+
+// Name returns the name of the IncomingCategory
+//
+// Returns:
+//
+// The name of the IncomingCategory enum
+func (i IncomingCategory) Name() string {
+	return IncomingCategoryNames[i]
+}
 
 // String returns the string representation of the IncomingCategory
 //
 // Returns:
 //
 // The string representation of the IncomingCategory enum
-func (o IncomingCategory) String() string {
-	return IncomingCategoryNames[o]
+func (i IncomingCategory) String() string {
+	return fmt.Sprintf("%d", i)
 }
 
-// IncomingCategoryFromString returns the IncomingCategory enum based on a given string
+// IncomingCategoryByName returns the IncomingCategory enum based on a given string
 //
 // Parameters:
 //
@@ -54,7 +85,7 @@ func (o IncomingCategory) String() string {
 // Returns:
 //
 // The IncomingCategory enum value, or an error if the key wasn't found for the given value
-func IncomingCategoryFromString(s string) (IncomingCategory, error) {
+func IncomingCategoryByName(s string) (IncomingCategory, error) {
 	// Format the string
 	s = strings.ToLower(strings.TrimSpace(s))
 
@@ -67,21 +98,46 @@ func IncomingCategoryFromString(s string) (IncomingCategory, error) {
 	return IncomingCategoryNil, fmt.Errorf(ErrInvalidIncomingCategoryName, s)
 }
 
+// IncomingCategoryFromString returns the IncomingCategory enum based on a given string
+//
+// Parameters:
+//
+// s: The string to parse as IncomingCategory
+//
+// Returns:
+//
+// The IncomingCategory enum value, or an error if the key wasn't found for the given value
+func IncomingCategoryFromString(s string) (IncomingCategory, error) {
+	// Format the string
+	s = strings.ToLower(strings.TrimSpace(s))
+
+	// Try to parse as uint8 first
+	var value uint8
+	if _, err := fmt.Sscanf(s, "%d", &value); err != nil {
+		return IncomingCategoryNil, fmt.Errorf(ErrInvalidIncomingCategoryString, s)
+	}
+
+	// If the string was a number, try to get the IncomingCategory from the uint8 value
+	category, err := IncomingCategoryFromUint8(value);
+	if err != nil {
+		return IncomingCategoryNil, err
+	}
+	return category, nil
+}
+
 // IncomingCategoryFromUint8 returns the IncomingCategory enum based on a given uint8 value
 //
 // Parameters:
 //
-// value: The uint8 value to search on IncomingCategoryNames
+// value: The uint8 value to search on IncomingCategories
 //
 // Returns:
 //
 // The IncomingCategory enum value, or an error if the key wasn't found for the given value
 func IncomingCategoryFromUint8(value uint8) (IncomingCategory, error) {
-	if value <= uint8(IncomingCategoryNil) || value >= uint8(len(IncomingCategoryNames)) {
-		return IncomingCategoryNil, fmt.Errorf(
-			ErrInvalidIncomingCategory,
-			value,
-		)
+	category, ok := IncomingCategories[value]
+	if !ok {
+		return IncomingCategoryNil, fmt.Errorf(ErrInvalidIncomingCategoryUint8, value)
 	}
-	return IncomingCategory(value), nil
+	return category, nil
 }

@@ -542,6 +542,9 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 			return ctx.Err()
 		case <-rotationCompletedCh:
 			// Update the RPLiDAR average distances
+			if err := h.updateRPLiDARAverageDistances(); err != nil {
+				return fmt.Errorf("failed to update RPLiDAR average distances: %w", err)
+			}
 			westAverageDistance = h.getAverageDirectionDistance(CardinalDirectionWest)
 			eastAverageDistance = h.getAverageDirectionDistance(CardinalDirectionEast)
 			northAverageDistance = h.getAverageDirectionDistance(CardinalDirectionNorth)
@@ -601,6 +604,9 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 						return ctx.Err()
 					case <-rotationCompletedCh:
 						// Update the RPLiDAR average distances
+						if err := h.updateRPLiDARAverageDistances(); err != nil {
+							return fmt.Errorf("failed to update RPLiDAR average distances: %w", err)
+						}
 						northAverageDistance = h.getAverageDirectionDistance(CardinalDirectionNorth)
 						northNortheastAverageDistance = h.getAverageDirectionDistance(CardinalDirectionNorthNortheast)
 						northNorthwestAverageDistance = h.getAverageDirectionDistance(CardinalDirectionNorthNorthwest)
@@ -713,6 +719,9 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 						return ctx.Err()
 					case <-rotationCompletedCh:
 						// Update the RPLiDAR average distances
+						if err := h.updateRPLiDARAverageDistances(); err != nil {
+							return fmt.Errorf("failed to update RPLiDAR average distances: %w", err)
+						}
 						northAverageDistance = h.getAverageDirectionDistance(CardinalDirectionNorth)
 
 						if northAverageDistance <= StopDistanceThreshold {
