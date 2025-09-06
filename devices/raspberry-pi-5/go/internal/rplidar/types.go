@@ -84,7 +84,7 @@ func NewSlamtecC1Handler(
 // A channel that signals when a full rotation is completed.
 func (h *SlamtecC1Handler) GetRotationCompletedChannel() <-chan RotationCompleted {
 	h.handlerMutex.Lock()
-	h.handlerMutex.Unlock()
+	defer h.handlerMutex.Unlock()
 	return h.rotationCompletedCh
 }
 
@@ -252,6 +252,13 @@ func (h *SlamtecC1Handler) Run(ctx context.Context, stopFn func()) error {
 	// Set running to true
 	h.isRunning.Store(true)
 
+	// Initialize the rotation completed channel
+	h.rotationCompletedCh = make(
+		chan RotationCompleted,
+		ChannelBufferSize,
+	)
+	defer close(h.rotationCompletedCh)
+
 	h.handlerMutex.Unlock()
 
 	// Create a logger producer
@@ -263,13 +270,6 @@ func (h *SlamtecC1Handler) Run(ctx context.Context, stopFn func()) error {
 	}
 	h.loggerProducer = loggerProducer
 	defer h.loggerProducer.Close()
-
-	// Initialize the rotation completed channel
-	h.rotationCompletedCh = make(
-		chan RotationCompleted,
-		ChannelBufferSize,
-	)
-	defer close(h.rotationCompletedCh)
 
 	return internallog.LogOnError(
 		func() error {

@@ -64,6 +64,9 @@ var (
 	// LoggerProducerTag is the logger producer tag for CLIP
 	LoggerProducerTag = "CLIP"
 
+	// GenerateEmbeddingsLoggerProducerTag is the logger producer tag for the generate embeddings process
+	GenerateEmbeddingsLoggerProducerTag =   "CLIP_GENERATE_EMBEDDINGS"
+
 	// EmbeddingsJSONPath is the path where the embeddings JSON file is stored
 	EmbeddingsJSONPath string
 

@@ -873,13 +873,14 @@ func (h *DefaultHandler) runToWrap(ctx context.Context, stopFn func()) error {
 	h.maxServoDirectionValue = maxServoDirection
 
 	// Start the pilot
-	if challenge == internal.ChallengeWithObstacles {
+	switch challenge {
+	case internal.ChallengeWithObstacles:
 		h.loggerProducer.Info("Starting challenge with obstacles handler")
 		return h.challengeWithObstaclesHandler(ctx)
-	} else if challenge == internal.ChallengeWithObstaclesAndParking {
+	case internal.ChallengeWithObstaclesAndParking:
 		h.loggerProducer.Info("Starting challenge with obstacles and parking handler")
 		return h.challengeWithObstaclesAndParkingHandler(ctx)
-	} else if challenge == internal.ChallengeWithoutObstacles {
+	case internal.ChallengeWithoutObstacles:
 		h.loggerProducer.Info("Starting challenge without obstacles handler")
 		return h.challengeWithoutObstaclesHandler(ctx)
 	}

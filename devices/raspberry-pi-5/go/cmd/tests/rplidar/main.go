@@ -68,11 +68,21 @@ func main() {
 	// Initialize a goroutine to print the measures on each rotation completed
 	g.Go(
 		func() error {
-			for _ = range rplidarHandler.GetRotationCompletedChannel() {
-				// Print that a rotation has been completed
-				fmt.Println("Rotation completed")
+			// Get the rotation completed channel
+			fmt.Println("Getting rotation completed channel")
+			rotationCompletedCh := rplidarHandler.GetRotationCompletedChannel()
+			fmt.Println("Rotation completed channel obtained")
+
+			// Listen for rotation completed events
+			for {
+				select {
+				case <-rotationCompletedCh:
+					// Print that a rotation has been completed
+					fmt.Println("Rotation completed")
+				case <-ctx.Done():
+					return ctx.Err()
+				}
 			}
-			return nil
 		},
 	)
 

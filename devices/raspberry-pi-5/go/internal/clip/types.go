@@ -62,11 +62,6 @@ func NewDefaultHandler(
 		return nil, internallog.ErrNilLogger
 	}
 
-	// Check if the generateClipEmbeddingsPath is empty
-	if generateClipEmbeddingsPath == "" {
-		return nil, ErrEmptyGenerateEmbeddingsPath
-	}
-
 	// Check if the runClipPath is empty
 	if runClipPath == "" {
 		return nil, ErrEmptyRunClipPath
@@ -147,8 +142,22 @@ func (h *DefaultHandler) generateEmbeddingsJSONContent() string {
 //
 // An error if any issue occurs during the execution of the script.
 func (h *DefaultHandler) GenerateEmbeddings() error {
+	// Check if the generateClipEmbeddingsPath is empty
+	if h.generateClipEmbeddingsPath == "" {
+		return ErrEmptyGenerateEmbeddingsPath
+	}
+
+	// Create a logger producer
+	loggerProducer, err := h.logger.NewProducer(
+		GenerateEmbeddingsLoggerProducerTag,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to create logger producer: %w", err)
+	}
+	defer loggerProducer.Close()
+
 	// Log the start of generating embeddings
-	h.loggerProducer.Info(GenerateEmbeddingsStartMessage)
+	loggerProducer.Info(GenerateEmbeddingsStartMessage)
 
 	// Generate JSON file
 	jsonContent := h.generateEmbeddingsJSONContent()
@@ -199,7 +208,7 @@ func (h *DefaultHandler) GenerateEmbeddings() error {
 
 	// Run and wait
 	if err := cmd.Run(); err != nil {
-		h.loggerProducer.Warning(
+		loggerProducer.Warning(
 			fmt.Sprintf(
 				"Embeddings script failed: %v; stderr: %s",
 				err,
@@ -210,10 +219,10 @@ func (h *DefaultHandler) GenerateEmbeddings() error {
 	}
 
 	// Log outputs if debug
-	if h.loggerProducer.IsDebug() {
+	if loggerProducer.IsDebug() {
 		stdout := strings.TrimSpace(stdoutBuf.String())
 		if stdout != "" {
-			h.loggerProducer.Debug(
+			loggerProducer.Debug(
 				fmt.Sprintf(
 					"embeddings script stdout: %s",
 					stdout,
@@ -222,7 +231,7 @@ func (h *DefaultHandler) GenerateEmbeddings() error {
 		}
 		stderr := strings.TrimSpace(stderrBuf.String())
 		if stderr != "" {
-			h.loggerProducer.Debug(
+			loggerProducer.Debug(
 				fmt.Sprintf(
 					"embeddings script stderr: %s",
 					stderr,
@@ -231,7 +240,7 @@ func (h *DefaultHandler) GenerateEmbeddings() error {
 		}
 	}
 
-	h.loggerProducer.Info(GenerateEmbeddingsCompletedMessage)
+	loggerProducer.Info(GenerateEmbeddingsCompletedMessage)
 	return nil
 }
 

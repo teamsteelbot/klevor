@@ -669,20 +669,8 @@ func (h *DefaultHandler) Run(ctx context.Context, stopFn func()) error {
 	// Set running to true
 	h.isRunning.Store(true)
 
-	h.mutex.Unlock()
-
 	// Reset the closed state
 	h.closed.Store(false)
-
-	// Create a logger producer
-	loggerProducer, err := h.logger.NewProducer(
-		HandlerLoggerProducerTag,
-	)
-	if err != nil {
-		return fmt.Errorf("failed to create logger producer: %w", err)
-	}
-	h.loggerProducer = loggerProducer
-	defer h.loggerProducer.Close()
 
 	// Initialize the outgoing messages channel
 	h.outgoingMessagesCh = make(
@@ -717,6 +705,18 @@ func (h *DefaultHandler) Run(ctx context.Context, stopFn func()) error {
 
 	// Reset received BNO08X yaw degrees
 	h.receivedBNO08XYawDegrees = 0.0
+
+	h.mutex.Unlock()
+
+	// Create a logger producer
+	loggerProducer, err := h.logger.NewProducer(
+		HandlerLoggerProducerTag,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to create logger producer: %w", err)
+	}
+	h.loggerProducer = loggerProducer
+	defer h.loggerProducer.Close()
 
 	return internallog.LogOnError(
 		func() error {
@@ -801,6 +801,8 @@ func (h *DefaultHandler) IsClosed() bool {
 //
 // True if the initialization message has been received, otherwise false.
 func (h *DefaultHandler) ReceivedInitializationMessage() bool {
+	h.mutex.Lock()
+	defer h.mutex.Unlock()
 	return h.receivedInitializationMessage
 }
 
@@ -810,6 +812,8 @@ func (h *DefaultHandler) ReceivedInitializationMessage() bool {
 //
 // True if the start message has been received, otherwise false.
 func (h *DefaultHandler) ReceivedStartMessage() bool {
+	h.mutex.Lock()
+	defer h.mutex.Unlock()
 	return h.receivedStartMessage
 }
 
@@ -819,6 +823,8 @@ func (h *DefaultHandler) ReceivedStartMessage() bool {
 //
 // The received challenge.
 func (h *DefaultHandler) ReceivedChallenge() internal.Challenge {
+	h.mutex.Lock()
+	defer h.mutex.Unlock()
 	return h.receivedChallenge
 }
 
@@ -828,6 +834,8 @@ func (h *DefaultHandler) ReceivedChallenge() internal.Challenge {
 //
 // The received maximum motor speed value.
 func (h *DefaultHandler) ReceivedMaxMotorSpeedValue() uint16 {
+	h.mutex.Lock()
+	defer h.mutex.Unlock()
 	return h.receivedMaxMotorSpeedValue
 }
 
@@ -837,6 +845,8 @@ func (h *DefaultHandler) ReceivedMaxMotorSpeedValue() uint16 {
 //
 // The received maximum servo direction value.
 func (h *DefaultHandler) ReceivedMaxServoDirectionValue() uint16 {
+	h.mutex.Lock()
+	defer h.mutex.Unlock()
 	return h.receivedMaxServoDirectionValue
 }
 
@@ -846,6 +856,8 @@ func (h *DefaultHandler) ReceivedMaxServoDirectionValue() uint16 {
 //
 // The received BNO08X turns.
 func (h *DefaultHandler) ReceivedBNO08XTurns() int {
+	h.mutex.Lock()
+	defer h.mutex.Unlock()
 	return h.receivedBNO08XTurns
 }
 
@@ -855,6 +867,8 @@ func (h *DefaultHandler) ReceivedBNO08XTurns() int {
 //
 // The received BNO08X yaw degrees.
 func (h *DefaultHandler) ReceivedBNO08XYawDegrees() float64 {
+	h.mutex.Lock()
+	defer h.mutex.Unlock()
 	return h.receivedBNO08XYawDegrees
 }
 

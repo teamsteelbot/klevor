@@ -326,14 +326,14 @@ func (l *DefaultLogger) Run(ctx context.Context, stopFn func()) error {
 	// Set running to true
 	l.isRunning.Store(true)
 
-	l.mutex.Unlock()
-
 	// Reset the closed state
 	l.closed.Store(false)
 
 	// Reinitialize the messages channel
 	l.ch = make(chan *Message, ChannelBufferSize)
 	defer l.close()
+
+	l.mutex.Unlock()
 
 	return internal.StopContextOnError(
 		ctx, stopFn, l.runToWrap,

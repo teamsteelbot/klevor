@@ -40,9 +40,6 @@ func main() {
 	flag.Parse()
 
 	// Enforce required flags
-	if *generateClipEmbeddingsPath == "" {
-		log.Fatal("missing required flag: --generate-clip-embeddings-path")
-	}
 	if *runClipPath == "" {
 		log.Fatal("missing required flag: --run-clip-path")
 	}
@@ -80,13 +77,20 @@ func main() {
 	)
 
 	// Generate the CLIP embeddings
-	if err = clipHandler.GenerateEmbeddings(); err != nil {
-		// Wait for the writer goroutine to finish
-		stop()
-		if err = g.Wait(); err != nil {
-			_, _ = fmt.Fprintf(os.Stderr, "error: %v\n", err)
+	if *generateClipEmbeddingsPath == "" {
+		fmt.Println("Skipping CLIP embeddings generation")
+	} else {
+		fmt.Println("Generating CLIP embeddings")
+		if err = clipHandler.GenerateEmbeddings(); err != nil {
+			// Wait for the writer goroutine to finish
+			fmt.Println("Error generating CLIP embeddings:", err)
+			stop()
+			if err = g.Wait(); err != nil {
+				_, _ = fmt.Fprintf(os.Stderr, "error: %v\n", err)
+			}
+			return
 		}
-		return
+		fmt.Println("CLIP embeddings generated successfully")
 	}
 	defer stop()
 
