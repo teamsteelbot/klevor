@@ -38,8 +38,10 @@ type (
 		rplidarAverageDistances map[CardinalDirection]float64
 		clipClassification      *internal.Classification
 		latestUpdateTime        time.Time
-		bno08xLastTurns         uint8
-		rplidarTurnsCounter     uint8
+		bno08xLastTurns         int
+		rplidarTurnsCounter     int
+		maxMotorSpeedValue      uint16
+		maxServoDirectionValue  uint16
 	}
 )
 
@@ -156,6 +158,19 @@ func (h *DefaultHandler) setMotorSpeed(
 	return ErrInvalidMotorDirection
 }
 
+// setMotorSpeedByPercentage sets the motor speed by percentage of the maximum motor speed value
+func (h *DefaultHandler) setMotorSpeedByPercentage(
+	percentage float64,
+	direction MotorDirection,
+) error {
+	if h.maxMotorSpeedValue == 0 {
+		return ErrMaxMotorSpeedValueNotSet
+	}
+
+	speed := uint16(float64(h.maxMotorSpeedValue) * percentage)
+	return h.setMotorSpeed(speed, direction)
+}
+
 // setMotorStop stops the motor
 //
 // Returns:
@@ -178,6 +193,19 @@ func (h *DefaultHandler) setMotorForward(speed uint16) error {
 	return h.setMotorSpeed(speed, MotorDirectionForward)
 }
 
+// setMotorForwardByPercentage sets the motor speed to forward by percentage of the maximum motor speed value
+//
+// Parameters:
+//
+// percentage: The percentage of the maximum motor speed value to set the motor
+//
+// Returns:
+//
+// An error if the speed could not be set, nil otherwise
+func (h *DefaultHandler) setMotorForwardByPercentage(percentage float64) error {
+	return h.setMotorSpeedByPercentage(percentage, MotorDirectionForward)
+}
+
 // setMotorBackward sets the motor speed to backward
 //
 // Parameters:
@@ -189,6 +217,19 @@ func (h *DefaultHandler) setMotorForward(speed uint16) error {
 // An error if the speed could not be set, nil otherwise
 func (h *DefaultHandler) setMotorBackward(speed uint16) error {
 	return h.setMotorSpeed(speed, MotorDirectionBackward)
+}
+
+// setMotorBackwardByPercentage sets the motor speed to backward by percentage of the maximum motor speed value
+//
+// Parameters:
+//
+// percentage: The percentage of the maximum motor speed value to set the motor
+//
+// Returns:
+//
+// An error if the speed could not be set, nil otherwise
+func (h *DefaultHandler) setMotorBackwardByPercentage(percentage float64) error {
+	return h.setMotorSpeedByPercentage(percentage, MotorDirectionBackward)
 }
 
 // setServoDirection sets the servo direction
@@ -244,6 +285,27 @@ func (h *DefaultHandler) setServoDirection(
 	return ErrInvalidServoDirection
 }
 
+// setServoDirectionByPercentage sets the servo direction by percentage of the maximum servo direction value
+//
+// Parameters:
+//
+// percentage: The percentage of the maximum servo direction value to set the servo
+//
+// Returns:
+//
+// An error if the servo direction could not be set, nil otherwise
+func (h *DefaultHandler) setServoDirectionByPercentage(
+	percentage float64,
+	direction ServoDirection,
+) error {
+	if h.maxServoDirectionValue == 0 {
+		return ErrMaxServoDirectionValueNotSet
+	}
+
+	angle := uint16(float64(h.maxServoDirectionValue) * percentage)
+	return h.setServoDirection(angle, direction)
+}
+
 // setServoToCenter sets the servo to the center position
 //
 // Returns:
@@ -266,6 +328,19 @@ func (h *DefaultHandler) setServoToLeft(angle uint16) error {
 	return h.setServoDirection(angle, ServoDirectionLeft)
 }
 
+// setServoToLeftByPercentage sets the servo to the left direction by percentage of the maximum servo direction value
+//
+// Parameters:
+//
+// percentage: The percentage of the maximum servo direction value to set the servo
+//
+// Returns:
+//
+// An error if the servo could not be set to left, nil otherwise
+func (h *DefaultHandler) setServoToLeftByPercentage(percentage float64) error {
+	return h.setServoDirectionByPercentage(percentage, ServoDirectionLeft)
+}
+
 // setServoToRight sets the servo to the right direction
 //
 // Parameters:
@@ -279,12 +354,39 @@ func (h *DefaultHandler) setServoToRight(angle uint16) error {
 	return h.setServoDirection(angle, ServoDirectionRight)
 }
 
+// setServoToRightByPercentage sets the servo to the right direction by percentage of the maximum servo direction value
+//
+// Parameters:
+//
+// percentage: The percentage of the maximum servo direction value to set the servo
+//
+// Returns:
+//
+// An error if the servo could not be set to right, nil otherwise
+func (h *DefaultHandler) setServoToRightByPercentage(percentage float64) error {
+	return h.setServoDirectionByPercentage(percentage, ServoDirectionRight)
+}
+
 // setServoToOppositeDirection sets the servo to the opposite direction
-func (h *DefaultHandler) setServoToOppositeDirection() error {
+//
+// Parameters:
+//
+// servoAngle: The angle to set the servo. If 0, the servo will be set to center
+//
+// Returns:
+//
+// An error if the servo could not be set to the opposite direction, nil otherwise
+func (h *DefaultHandler) setServoToOppositeDirection(servoAngle uint16) error {
+	// If the servo angle is 0, set it to center
+	if h.servoAngle == 0 {
+		return h.setServoToCenter()
+	}
+
+	// Set the servo to the opposite direction
 	if h.servoDirection == ServoDirectionRight {
-		return h.setServoToLeft(h.servoAngle)
+		return h.setServoToLeft(servoAngle)
 	} else if h.servoDirection == ServoDirectionLeft {
-		return h.setServoToRight(h.servoAngle)
+		return h.setServoToRight(servoAngle)
 	}
 	return nil
 }
@@ -399,6 +501,26 @@ func (h *DefaultHandler) challengeWithObstaclesHandler(ctx context.Context) erro
 	}
 }
 
+// challengeWithObstaclesAndParkingHandler handles the challenge with obstacles and parking
+//
+// Parameters:
+//
+// ctx: The context to use for the challenge
+//
+// Returns:
+//
+// An error if the challenge could not be handled, nil otherwise
+func (h *DefaultHandler) challengeWithObstaclesAndParkingHandler(ctx context.Context) error {
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+			return ErrNotImplemented
+		}
+	}
+}
+
 // challengeWithoutObstaclesHandler handles the challenge without obstacles
 //
 // Parameters:
@@ -412,13 +534,280 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 	// Get the rotation completed channel
 	rotationCompletedCh := h.rplidarHandler.GetRotationCompletedChannel()
 
-	for {
+	var completed bool
+	var westAverageDistance, eastAverageDistance, northAverageDistance, northNortheastAverageDistance, northNorthwestAverageDistance float64
+	for !completed {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
 		case <-rotationCompletedCh:
+			// Update the RPLiDAR average distances
+			westAverageDistance = h.getAverageDirectionDistance(CardinalDirectionWest)
+			eastAverageDistance = h.getAverageDirectionDistance(CardinalDirectionEast)
+			northAverageDistance = h.getAverageDirectionDistance(CardinalDirectionNorth)
+			northNortheastAverageDistance = h.getAverageDirectionDistance(CardinalDirectionNorthNortheast)
+			northNorthwestAverageDistance = h.getAverageDirectionDistance(CardinalDirectionNorthNorthwest)
+
+			// Log the average distances
+			h.loggerProducer.Debug(
+				fmt.Sprintf(
+					"West: %f, North-Northwest: %f, North: %f, North-Northeast: %f, East: %f",
+					northAverageDistance,
+					westAverageDistance,
+					eastAverageDistance,
+					northNortheastAverageDistance,
+					northNorthwestAverageDistance,
+				),
+			)
+
+			// Check if one of them is 0
+			if westAverageDistance == 0 || eastAverageDistance == 0 || northAverageDistance == 0 || northNortheastAverageDistance == 0 || northNorthwestAverageDistance == 0 {
+				h.loggerProducer.Warning(
+					"One of the average distances is 0. This may cause unexpected behavior. Waiting for new measures...",
+				)
+				continue
+			}
+
+			// Check if the front distance is below the safety threshold
+			if northAverageDistance < SafetyFrontDistanceStartThreshold || northNortheastAverageDistance < SafetyFrontDistanceStartThreshold || northNorthwestAverageDistance < SafetyFrontDistanceStartThreshold {
+				// Store the current servo angle and motor speed
+				previousServoAngle := h.servoAngle
+				previousMotorSpeed := h.motorSpeed
+
+				// Log the warning
+				h.loggerProducer.Warning(
+					fmt.Sprintf(
+						"Front distance is below the safety threshold %f.",
+						SafetyFrontDistanceStartThreshold,
+					),
+				)
+
+				// Set the servo to center and the motor to backward
+				if err := h.setServoToCenter(); err != nil {
+					return fmt.Errorf("failed to set servo to center: %w", err)
+				}
+
+				if err := h.setMotorBackwardByPercentage(MotorNormalPercentage); err != nil {
+					return fmt.Errorf(
+						"failed to set motor to backward: %w",
+						err,
+					)
+				}
+
+				var safe bool
+				for !safe {
+					select {
+					case <-ctx.Done():
+						return ctx.Err()
+					case <-rotationCompletedCh:
+						// Update the RPLiDAR average distances
+						northAverageDistance = h.getAverageDirectionDistance(CardinalDirectionNorth)
+						northNortheastAverageDistance = h.getAverageDirectionDistance(CardinalDirectionNorthNortheast)
+						northNorthwestAverageDistance = h.getAverageDirectionDistance(CardinalDirectionNorthNorthwest)
+
+						if northAverageDistance >= SafetyFrontDistanceStopThreshold || northNortheastAverageDistance >= SafetyFrontDistanceStopThreshold || northNorthwestAverageDistance >= SafetyFrontDistanceStopThreshold {
+							h.loggerProducer.Info("Safety front distance threshold reached.")
+							safe = true
+						}
+					}
+				}
+
+				// Set previous servo angle and motor speed back to normal
+				if h.servoDirection == ServoDirectionLeft {
+					if err := h.setServoToLeft(previousServoAngle); err != nil {
+						return fmt.Errorf(
+							"failed to set servo to previous left angle: %w",
+							err,
+						)
+					}
+				} else if h.servoDirection == ServoDirectionRight {
+					if err := h.setServoToRight(previousServoAngle); err != nil {
+						return fmt.Errorf(
+							"failed to set servo to previous right angle: %w",
+							err,
+						)
+					}
+				} else {
+					if err := h.setServoToOppositeDirection(previousServoAngle); err != nil {
+						return fmt.Errorf(
+							"failed to set servo to center: %w",
+							err,
+						)
+					}
+				}
+				if err := h.setMotorSpeed(
+					previousMotorSpeed,
+					h.motorDirection,
+				); err != nil {
+					return fmt.Errorf(
+						"failed to set motor to previous speed: %w",
+						err,
+					)
+				}
+
+				continue
+			}
+
+			// Check for the current turn and center the servo if necessary
+			if h.servoDirection != ServoDirectionStraight {
+				// Get the latest BNO08x turns value
+				turns := h.usbCDCHandler.ReceivedBNO08XTurns()
+				if turns > h.bno08xLastTurns {
+					h.loggerProducer.Info(
+						fmt.Sprintf(
+							"Detected a turn. Current turns: %d, Last turns: %d",
+							turns,
+							h.bno08xLastTurns,
+						),
+					)
+
+					// Center the servo
+					if err := h.setServoToCenter(); err != nil {
+						return fmt.Errorf(
+							"failed to set servo to center: %w",
+							err,
+						)
+					}
+
+					// Update for the next check
+					h.bno08xLastTurns = turns
+
+					// Update the servo direction to straight
+					h.servoDirection = ServoDirectionStraight
+				} else if northAverageDistance >= FrontStopTurnDistanceThreshold {
+					h.loggerProducer.Info("Front distance is safe. Stopping the turning state.")
+
+					// Center the servo
+					if err := h.setServoToCenter(); err != nil {
+						return fmt.Errorf(
+							"failed to set servo to center: %w",
+							err,
+						)
+					}
+
+					// Update the servo direction to straight
+					h.servoDirection = ServoDirectionStraight
+				}
+
+				continue
+			}
+
+			// Check if it's almost time to stop
+			if h.bno08xLastTurns >= AlgorithmTurns || h.rplidarTurnsCounter >= AlgorithmTurns {
+				h.loggerProducer.Info("Almost time to stop. Monitoring front distance...")
+
+				// Set the servo to center and the motor to slow speed
+				if err := h.setServoToCenter(); err != nil {
+					return fmt.Errorf("failed to set servo to center: %w", err)
+				}
+				if err := h.setMotorForwardByPercentage(MotorSlowPercentage); err != nil {
+					return fmt.Errorf(
+						"failed to set motor to slow speed: %w",
+						err,
+					)
+				}
+
+				for !completed {
+					select {
+					case <-ctx.Done():
+						return ctx.Err()
+					case <-rotationCompletedCh:
+						// Update the RPLiDAR average distances
+						northAverageDistance = h.getAverageDirectionDistance(CardinalDirectionNorth)
+
+						if northAverageDistance <= StopDistanceThreshold {
+							completed = true
+							h.loggerProducer.Info("Challenge completed successfully. Stopping the robot.")
+						}
+					}
+				}
+				continue
+			}
+
+			// Check if the robot should move forward or turn
+			if northAverageDistance >= FrontStartTurnDistanceThreshold {
+				var motorSpeedPercentage float64
+				if northNortheastAverageDistance >= FrontStartTurnDistanceThreshold && northNorthwestAverageDistance >= FrontStartTurnDistanceThreshold {
+					motorSpeedPercentage = MotorFastPercentage
+				} else {
+					motorSpeedPercentage = MotorNormalPercentage
+				}
+
+				// Move forward
+				if err := h.setMotorForwardByPercentage(motorSpeedPercentage); err != nil {
+					return fmt.Errorf(
+						"failed to set motor to forward speed: %w",
+						err,
+					)
+				}
+
+				// Check if the servo should make a little turn to the left or right in order to center the robot
+				if eastAverageDistance >= westAverageDistance*(1+SideDistanceDifferencePercentage) {
+					if err := h.setServoToRightByPercentage(ServoSmallTurnAnglePercentage); err != nil {
+						return fmt.Errorf(
+							"failed to set servo to small right turn: %w",
+							err,
+						)
+					}
+				} else if westAverageDistance >= eastAverageDistance*(1+SideDistanceDifferencePercentage) {
+					if err := h.setServoToLeftByPercentage(ServoSmallTurnAnglePercentage); err != nil {
+						return fmt.Errorf(
+							"failed to set servo to small left turn: %w",
+							err,
+						)
+					}
+				} else {
+					if err := h.setServoToCenter(); err != nil {
+						return fmt.Errorf(
+							"failed to set servo to center: %w",
+							err,
+						)
+					}
+				}
+				continue
+			}
+
+			if err := h.setMotorForwardByPercentage(MotorNormalPercentage); err != nil {
+				return fmt.Errorf(
+					"failed to set motor to normal speed: %w",
+					err,
+				)
+			}
+
+			// Check if the robot should turn left or right based on the side distances
+			if eastAverageDistance >= SideDistanceThreshold {
+				if err := h.setServoToRightByPercentage(ServoBigTurnAnglePercentage); err != nil {
+					return fmt.Errorf(
+						"failed to set servo to big right turn: %w",
+						err,
+					)
+				}
+				h.servoDirection = ServoDirectionRight
+			} else if westAverageDistance >= SideDistanceThreshold {
+				if err := h.setServoToLeftByPercentage(ServoBigTurnAnglePercentage); err != nil {
+					return fmt.Errorf(
+						"failed to set servo to big left turn: %w",
+						err,
+					)
+				}
+				h.servoDirection = ServoDirectionLeft
+			}
+
+			// If the robot is turning, increment the RPLiDAR turns counter
+			if h.servoDirection != ServoDirectionStraight {
+				h.rplidarTurnsCounter++
+			}
 		}
 	}
+
+	// Center the servo and stop the motor
+	if err := h.setServoToCenter(); err != nil {
+		return fmt.Errorf("failed to set servo to center: %w", err)
+	}
+	if err := h.setMotorStop(); err != nil {
+		return fmt.Errorf("failed to stop the motor: %w", err)
+	}
+	return nil
 }
 
 // runToWrap is the internal function to run the pilot handler
@@ -444,7 +833,57 @@ func (h *DefaultHandler) runToWrap(ctx context.Context, stopFn func()) error {
 	h.usbCDCSender = usbCDCSender
 	defer h.usbCDCSender.Close()
 
-	// Get the start message
+	// Wait for the challenge message to be set
+	h.loggerProducer.Info("Waiting for challenge message...")
+	challenge, err := h.usbCDCHandler.WaitForChallenge(ctx)
+	if err != nil {
+		stopFn()
+		return fmt.Errorf("failed to wait for challenge message: %w", err)
+	}
+	h.loggerProducer.Info(
+		fmt.Sprintf("Challenge message received: %s", challenge.String()),
+	)
+
+	// Wait for max motor speed value to be set
+	maxMotorSpeed, err := h.usbCDCHandler.WaitForMaxMotorSpeedValue(ctx)
+	if err != nil {
+		stopFn()
+		return fmt.Errorf("failed to wait for max motor speed value: %w", err)
+	}
+	h.loggerProducer.Info(
+		fmt.Sprintf("Max motor speed value received: %d", maxMotorSpeed),
+	)
+	h.maxMotorSpeedValue = maxMotorSpeed
+
+	// Wait for max servo direction value to be set
+	maxServoDirection, err := h.usbCDCHandler.WaitForMaxServoDirectionValue(ctx)
+	if err != nil {
+		stopFn()
+		return fmt.Errorf(
+			"failed to wait for max servo direction value: %w",
+			err,
+		)
+	}
+	h.loggerProducer.Info(
+		fmt.Sprintf(
+			"Max servo direction value received: %d",
+			maxServoDirection,
+		),
+	)
+	h.maxServoDirectionValue = maxServoDirection
+
+	// Start the pilot
+	if challenge == internal.ChallengeWithObstacles {
+		h.loggerProducer.Info("Starting challenge with obstacles handler")
+		return h.challengeWithObstaclesHandler(ctx)
+	} else if challenge == internal.ChallengeWithObstaclesAndParking {
+		h.loggerProducer.Info("Starting challenge with obstacles and parking handler")
+		return h.challengeWithObstaclesAndParkingHandler(ctx)
+	} else if challenge == internal.ChallengeWithoutObstacles {
+		h.loggerProducer.Info("Starting challenge without obstacles handler")
+		return h.challengeWithoutObstaclesHandler(ctx)
+	}
+	return fmt.Errorf("unknown challenge: %s", challenge.String())
 }
 
 // Run runs the pilot handler
@@ -483,6 +922,10 @@ func (h *DefaultHandler) Run() error {
 	}
 	h.loggerProducer = loggerProducer
 	defer h.loggerProducer.Close()
+
+	// Set servo direction and motor direction to initial values
+	h.servoDirection = ServoDirectionStraight
+	h.motorDirection = MotorDirectionStop
 
 	// Context canceled on SIGINT/SIGTERM.
 	ctx, stop := signal.NotifyContext(
@@ -548,230 +991,3 @@ func (h *DefaultHandler) Run() error {
 	// Wait for the goroutines to finish
 	return g.Wait()
 }
-
-/*
-		while not self.__stop_event.is_set() and not self.__deleted_event.is_set():
-			# Get the start time
-			start_time = monotonic()
-
-			# Get the average distances from the RPLidar
-			self._update_rplidar_average_distances()
-			west_avg_dist = self._get_distance(CardinalDirection.WEST)
-			east_avg_dist = self._get_distance(CardinalDirection.EAST)
-			north_avg_dist = self._get_distance(CardinalDirection.NORTH)
-			north_northeast_avg_dist = self._get_distance(
-				CardinalDirection.NORTH_NORTHEAST,
-				)
-			north_northwest_avg_dist = self._get_distance(
-				CardinalDirection.NORTH_NORTHWEST,
-				)
-			self.__logger.debug(
-				f"North: {north_avg_dist}, West: {west_avg_dist}, East: {east_avg_dist}",
-				)
-
-			# Check if one of them is 0
-			for dist in [
-				north_avg_dist, west_avg_dist, east_avg_dist,
-				north_northwest_avg_dist, north_northeast_avg_dist,
-				]:
-				if dist == 0:
-					self.__logger.warning(
-						"One of the average distances is 0. This may cause unexpected behavior. Waiting for new measures...",
-						)
-
-					# Sleep
-					self._sleep(start_time)
-					continue
-
-			# Check if the front distance is below the safety threshold
-			if (north_avg_dist < SAFETY_FRONT_DISTANCE_START_THRESHOLD
-					or north_northeast_avg_dist < SAFETY_FRONT_DISTANCE_START_THRESHOLD
-					or north_northwest_avg_dist < SAFETY_FRONT_DISTANCE_START_THRESHOLD):
-				# Store the current servo angle
-				previous_servo_angle = self.__servo_angle
-				previous_motor_speed = self.__motor_speed
-
-				# Log the warning
-				self.__logger.warning(
-					f"Front distance {north_avg_dist} is below the safety threshold.",
-					)
-				self._set_servo_to_center()
-				self._set_motor_backward(MOTOR_SPEED_NORMAL)
-
-				# Sleep for a short time before checking again
-				self._sleep(start_time)
-
-				while not self.__stop_event.is_set() and not self.__deleted_event.is_set():
-					# Get the average distances again
-					self._update_rplidar_average_distances()
-					north_avg_dist = self.__average_distances[
-						CardinalDirection.NORTH]
-					north_northeast_avg_dist = self.__average_distances[
-						CardinalDirection.NORTH_NORTHEAST]
-					north_northwest_avg_dist = self.__average_distances[
-						CardinalDirection.NORTH_NORTHWEST]
-
-					if (north_avg_dist >= SAFETY_FRONT_DISTANCE_STOP_THRESHOLD
-							or north_northeast_avg_dist >= SAFETY_FRONT_DISTANCE_STOP_THRESHOLD
-							or north_northwest_avg_dist >= SAFETY_FRONT_DISTANCE_STOP_THRESHOLD):
-						self.__logger.info(
-							"Safety front distance threshold reached",
-							)
-						break
-
-				# Update the start time
-				start_time = monotonic()
-
-				# Set previous servo angle and motor speed back to normal
-				if self.__is_turning:
-					self._set_servo_angle(previous_servo_angle)
-				else:
-					self._set_servo_to_opposite(previous_servo_angle)
-				self._set_motor_speed(previous_motor_speed)
-
-				# Sleep for a short time before continuing
-				self._sleep(start_time)
-				continue
-
-			# Check for the current turn and center the servo if necessary
-			if self.__is_turning:
-				# Check if the front distance is safe to stop turning
-				turns = self.__bno08x_turns.value
-				if turns > last_turns:
-					self.__logger.info(
-						f"Detected a turn. Current turns: {turns}, Last turns: {last_turns}",
-						)
-					self._set_servo_to_center()
-					self.__is_turning = False
-
-					# Update for the next check
-					last_turns = turns
-
-				elif north_avg_dist >= FRONT_STOP_TURN_DISTANCE_THRESHOLD:
-					self.__logger.info(
-						"Front distance is safe. Stopping the turning state.",
-						)
-					self._set_servo_to_center()
-					self.__is_turning = False
-
-				# Sleep
-				self._sleep(start_time)
-				continue
-
-			# Check if it's almost time to stop
-			if last_turns >= TURNS or rplidar_turns_counter >= TURNS:
-				self._set_servo_to_center()
-				self._set_motor_speed(MOTOR_SPEED_NORMAL)
-
-				while not self.__stop_event.is_set() and not self.__deleted_event.is_set():
-					# Update the start time
-					start_time = monotonic()
-
-					# Get the average distances
-					self._update_rplidar_average_distances()
-					north_avg_dist = self.__average_distances[
-						CardinalDirection.NORTH]
-
-					if north_avg_dist <= STOP_DISTANCE_THRESHOLD:
-						# Set the completed event
-						self.__completed_event.set()
-
-						# Log the completion message
-						self.__logger.info(
-							"Challenge completed successfully. Stopping the robot.",
-							)
-						break
-
-					# Sleep for a short time before checking again
-					self._sleep(start_time)
-				break
-
-			# Check if the robot should move forward or turn
-			if north_avg_dist >= FRONT_START_TURN_DISTANCE_THRESHOLD:
-				if (
-						north_northeast_avg_dist >= FRONT_START_TURN_DISTANCE_THRESHOLD and
-						north_northwest_avg_dist >= FRONT_START_TURN_DISTANCE_THRESHOLD):
-					self._set_motor_speed(MOTOR_SPEED_FAST)
-				else:
-					self._set_motor_speed(MOTOR_SPEED_NORMAL)
-
-				# Check if the servo should make a little turn to the left or right in order to center the robot
-				if east_avg_dist >= west_avg_dist * (
-						1 + SIDE_DISTANCE_DIFFERENCE_PERCENTAGE):
-					self._set_servo_to_right(SERVO_SMALL_TURN_ANGLE)
-
-				elif west_avg_dist >= east_avg_dist * (
-						1 + SIDE_DISTANCE_DIFFERENCE_PERCENTAGE):
-					self._set_servo_to_left(SERVO_SMALL_TURN_ANGLE)
-
-				else:
-					self._set_servo_to_center()
-
-			else:
-				self._set_motor_speed(MOTOR_SPEED_NORMAL)
-
-				# Check if the robot should turn left or right based on the side distances
-				if east_avg_dist >= SIDE_DISTANCE_THRESHOLD:
-					self._set_servo_to_right(SERVO_BIG_TURN_ANGLE)
-					self.__is_turning = True
-
-				elif west_avg_dist >= SIDE_DISTANCE_THRESHOLD:
-					self._set_servo_to_left(SERVO_BIG_TURN_ANGLE)
-					self.__is_turning = True
-
-				if self.__is_turning:
-					rplidar_turns_counter += 1
-
-			# Sleep for the calculated delay
-			self._sleep(start_time)
-
-		# Update the start time
-		start_time = monotonic()
-
-		# Center the servo angle
-		self._set_servo_to_center()
-
-		# Stop the motor
-		self._set_motor_stop()
-
-		# Sleep for the calculated delay
-		self._sleep(start_time)
-
-	@final
-	@ignore_sigint
-	@log_on_error()
-	def run(self):
-		# Start the pilot
-		self._start()
-
-		# Wait for the start event to be set
-		self.__logger.info("Waiting for the start event...")
-		while not self.__stop_event.is_set() and not self.__deleted_event.is_set():
-			if self.__start_event.wait(timeout=self.START_WAIT_TIMEOUT):
-				break
-		if self.__stop_event.is_set() or self.__deleted_event.is_set():
-			# Stop the Pilot if the stop or deleted event is set
-			self._stop()
-			return
-		self.__logger.info("Started.")
-
-		try:
-			# Start the corresponding challenge handler
-			if self.__challenge.value == Challenge.WITHOUT_OBSTACLES.as_char:
-				self._challenge_without_obstacles()
-			elif self.__challenge.value == Challenge.WITH_OBSTACLES.as_char:
-				self._challenge_with_obstacles()
-			else:
-				raise ValueError(
-					f"Unknown challenge: {self.__challenge.value}",
-					)
-
-			# Stop the Pilot
-			self._stop()
-
-		except Exception as e:
-			# Stop the Pilot in case of an exception
-			self._stop()
-			raise e
-			)
-*/

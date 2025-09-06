@@ -58,6 +58,18 @@ var (
 		"",
 	)
 
+	// OutgoingGetMaxMotorSpeedValueMessage is the outgoing message to request the maximum motor speed value
+	OutgoingGetMaxMotorSpeedValueMessage = NewOutgoingMessage(
+		internalusbcdcenums.OutgoingCategoryGetMaxMotorSpeedValue,
+		"",
+	)
+
+	// OutgoingGetMaxServoDirectionValueMessage is the outgoing message to request the maximum servo direction value
+	OutgoingGetMaxServoDirectionValueMessage = NewOutgoingMessage(
+		internalusbcdcenums.OutgoingCategoryGetMaxServoDirectionValue,
+		"",
+	)
+
 	// IncomingStartMessage is the incoming start message for USB-CDC communication
 	IncomingStartMessage = NewIncomingStatusMessage(internalusbcdcenums.IncomingStatusStart)
 

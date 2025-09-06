@@ -27,23 +27,29 @@ type (
 
 	// DefaultHandler is the default implementation of the Handler interface
 	DefaultHandler struct {
-		outgoingMessagesCh             chan *OutgoingMessage
-		logger                         internallog.Logger
-		loggerProducer                 internallog.LoggerProducer
-		isRunning                      atomic.Bool
-		closed                         atomic.Bool
-		mutex                          sync.Mutex
-		wgSenders                      sync.WaitGroup
-		baudRate                       int
-		buffer                         []byte
-		accumulatedBuffer              []byte
-		receivedInitializationMessage  bool
-		receivedStartMessage           bool
-		receivedChallenge              internal.Challenge
-		receivedMaxMotorSpeedValue     uint16
-		receivedMaxServoDirectionValue uint16
-		receivedBNO08XTurns            int
-		receivedBNO08XYawDegrees       float64
+		outgoingMessagesCh               chan *OutgoingMessage
+		logger                           internallog.Logger
+		loggerProducer                   internallog.LoggerProducer
+		isRunning                        atomic.Bool
+		closed                           atomic.Bool
+		mutex                            sync.Mutex
+		wgSenders                        sync.WaitGroup
+		baudRate                         int
+		buffer                           []byte
+		accumulatedBuffer                []byte
+		receivedInitializationMessage    bool
+		receivedStartMessage             bool
+		receivedChallenge                internal.Challenge
+		receivedMaxMotorSpeedValue       uint16
+		receivedMaxServoDirectionValue   uint16
+		receivedBNO08XTurns              int
+		receivedBNO08XYawDegrees         float64
+		challengeReady                   chan struct{}
+		notifyChallengeOnce              sync.Once
+		maxMotorSpeedValueReady          chan struct{}
+		notifyMaxMotorSpeedValueOnce     sync.Once
+		maxServoDirectionValueReady      chan struct{}
+		notifyMaxServoDirectionValueOnce sync.Once
 	}
 )
 
@@ -351,6 +357,9 @@ func (h *DefaultHandler) incomingMessagesHandler(
 						),
 					)
 
+					// Notify listeners exactly once
+					h.notifyChallengeOnce.Do(func() { close(h.challengeReady) })
+
 					// Send a confirmation message
 					h.outgoingMessagesCh <- OutgoingOKMessage
 					break
@@ -358,6 +367,10 @@ func (h *DefaultHandler) incomingMessagesHandler(
 			}
 		}
 	}
+
+	// Send the message to get the max motor speed value and max servo direction value
+	h.outgoingMessagesCh <- OutgoingGetMaxMotorSpeedValueMessage
+	h.outgoingMessagesCh <- OutgoingGetMaxServoDirectionValueMessage
 
 	for {
 		select {
@@ -429,6 +442,9 @@ func (h *DefaultHandler) incomingMessagesHandler(
 							msg.String(),
 						),
 					)
+
+					// Notify listeners exactly once
+					h.notifyMaxMotorSpeedValueOnce.Do(func() { close(h.maxMotorSpeedValueReady) })
 				} else if msg.Category == internalusbcdcenums.IncomingCategoryMaxServoDirectionValue {
 					// Parse the max servo direction value
 					if err := ralvarezdevgostringsconvert.ToUint16(
@@ -448,6 +464,9 @@ func (h *DefaultHandler) incomingMessagesHandler(
 							msg.String(),
 						),
 					)
+
+					// Notify listeners exactly once
+					h.notifyMaxServoDirectionValueOnce.Do(func() { close(h.maxServoDirectionValueReady) })
 				} else {
 					// Log any other received message
 					h.loggerProducer.Info(
@@ -680,12 +699,18 @@ func (h *DefaultHandler) Run(ctx context.Context, stopFn func()) error {
 
 	// Reset received challenge
 	h.receivedChallenge = internal.ChallengeNil
+	h.challengeReady = make(chan struct{})
+	h.notifyChallengeOnce = sync.Once{}
 
 	// Reset received max motor speed value
 	h.receivedMaxMotorSpeedValue = 0
+	h.maxMotorSpeedValueReady = make(chan struct{})
+	h.notifyMaxMotorSpeedValueOnce = sync.Once{}
 
 	// Reset received max servo direction value
 	h.receivedMaxServoDirectionValue = 0
+	h.maxServoDirectionValueReady = make(chan struct{})
+	h.notifyMaxServoDirectionValueOnce = sync.Once{}
 
 	// Reset received BNO08X turns
 	h.receivedBNO08XTurns = 0
@@ -831,4 +856,76 @@ func (h *DefaultHandler) ReceivedBNO08XTurns() int {
 // The received BNO08X yaw degrees.
 func (h *DefaultHandler) ReceivedBNO08XYawDegrees() float64 {
 	return h.receivedBNO08XYawDegrees
+}
+
+// WaitForChallenge waits until a challenge message is received or the context is done.
+//
+// Parameters:
+//
+// ctx: The context to control cancellation and timeouts.
+//
+// Returns:
+//
+// The received challenge or an error if the context is done before receiving it.
+func (h *DefaultHandler) WaitForChallenge(ctx context.Context) (
+	internal.Challenge,
+	error,
+) {
+	if c := h.ReceivedChallenge(); c != internal.ChallengeNil {
+		return c, nil
+	}
+	select {
+	case <-ctx.Done():
+		return internal.ChallengeNil, ctx.Err()
+	case <-h.challengeReady:
+		return h.ReceivedChallenge(), nil
+	}
+}
+
+// WaitForMaxMotorSpeedValue waits until a max motor speed value message is received or the context is done.
+//
+// Parameters:
+//
+// ctx: The context to control cancellation and timeouts.
+//
+// Returns:
+//
+// The received max motor speed value or an error if the context is done before receiving it.
+func (h *DefaultHandler) WaitForMaxMotorSpeedValue(ctx context.Context) (
+	uint16,
+	error,
+) {
+	if v := h.ReceivedMaxMotorSpeedValue(); v != 0 {
+		return v, nil
+	}
+	select {
+	case <-ctx.Done():
+		return 0, ctx.Err()
+	case <-h.maxMotorSpeedValueReady:
+		return h.ReceivedMaxMotorSpeedValue(), nil
+	}
+}
+
+// WaitForMaxServoDirectionValue waits until a max servo direction value message is received or the context is done.
+//
+// Parameters:
+//
+// ctx: The context to control cancellation and timeouts.
+//
+// Returns:
+//
+// The received max servo direction value or an error if the context is done before receiving it.
+func (h *DefaultHandler) WaitForMaxServoDirectionValue(ctx context.Context) (
+	uint16,
+	error,
+) {
+	if v := h.ReceivedMaxServoDirectionValue(); v != 0 {
+		return v, nil
+	}
+	select {
+	case <-ctx.Done():
+		return 0, ctx.Err()
+	case <-h.maxServoDirectionValueReady:
+		return h.ReceivedMaxServoDirectionValue(), nil
+	}
 }

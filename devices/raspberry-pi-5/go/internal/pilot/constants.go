@@ -4,22 +4,6 @@ import (
 	"time"
 )
 
-/*
-# Start delay
-START_DELAY = 5
-
-# RPLidar wait delay
-RPLIDAR_WAIT_DELAY = 0.1
-
-# Update delay
-MOTOR_DELAY = 0.2
-SERVO_DELAY = 0.05
-GYROSCOPE_DELAY = 0.05
-
-# Wait timeout for the start event
-START_WAIT_TIMEOUT = 0.1
-*/
-
 var (
 	// IncomingDelay is the delay between incoming message checks
 	IncomingDelay = 10 * time.Millisecond
@@ -37,22 +21,22 @@ var (
 	LoggerProducerTag = "PILOT"
 
 	// MotorFastPercentage is the percentage of the maximum speed for fast motor speed
-	MotorFastPercentage = 0.7
+	MotorFastPercentage float64 = 0.7
 
 	// MotorNormalPercentage is the percentage of the maximum speed for normal motor speed
-	MotorNormalPercentage = 0.5
+	MotorNormalPercentage float64 = 0.5
 
 	// MotorSlowPercentage is the percentage of the maximum speed for slow motor speed
-	MotorSlowPercentage = 0.3
+	MotorSlowPercentage float64 = 0.3
 
 	// ServoBigTurnAnglePercentage is the percentage of the maximum angle for big turns
-	ServoBigTurnAnglePercentage = 1
+	ServoBigTurnAnglePercentage float64 = 1
 
 	// ServoMediumTurnAnglePercentage is the percentage of the maximum angle for medium turns
-	ServoMediumTurnAnglePercentage = 0.75
+	ServoMediumTurnAnglePercentage float64 = 0.75
 
 	// ServoSmallTurnAnglePercentage is the percentage of the maximum angle for small turns
-	ServoSmallTurnAnglePercentage = 0.5
+	ServoSmallTurnAnglePercentage float64 = 0.5
 
 	// AlgorithmTurns is the number of turns in the algorithm
 	AlgorithmTurns = 12

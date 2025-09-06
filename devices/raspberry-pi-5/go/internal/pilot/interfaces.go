@@ -10,6 +10,7 @@ type (
 		Run() error
 		IsRunning() bool
 		challengeWithObstaclesHandler(ctx context.Context) error
+		challengeWithObstaclesAndParkingHandler(ctx context.Context) error
 		challengeWithoutObstaclesHandler(ctx context.Context) error
 	}
 )

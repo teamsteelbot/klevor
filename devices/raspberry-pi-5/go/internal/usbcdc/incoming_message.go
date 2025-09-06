@@ -162,6 +162,11 @@ func NewIncomingMessageFromString(message string) (*IncomingMessage, error) {
 		return nil, err
 	}
 
+	// Check if the message has content
+	if len(message) < 2 {
+		return nil, ErrIncomingMessageWithoutContent
+	}
+
 	// Create and return the IncomingMessage object
 	return NewIncomingMessage(category, message[1:]), nil
 }

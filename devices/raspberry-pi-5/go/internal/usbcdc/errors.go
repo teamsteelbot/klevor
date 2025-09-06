@@ -20,4 +20,5 @@ var (
 	ErrSenderAlreadyClosed                      = errors.New("sender is already closed")
 	ErrHandlerClosed                            = errors.New("handler is closed")
 	ErrOutgoingMessagesChannelClosedAheadOfTime = errors.New("outgoing messages channel closed ahead of time")
+	ErrIncomingMessageWithoutContent            = errors.New("incoming message without content")
 )

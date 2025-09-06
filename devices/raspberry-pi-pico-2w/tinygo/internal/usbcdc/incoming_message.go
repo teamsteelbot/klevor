@@ -126,8 +126,19 @@ func NewIncomingMessageFromString(message string) (*IncomingMessage, error) {
 	}
 
 	// Check if based on the incoming category the message content can be empty or not
-	if category == internalusbcdcenums.IncomingCategoryMotorSpeedStop || category == internalusbcdcenums.IncomingCategoryServoDirectionCenter {
+	if category == internalusbcdcenums.IncomingCategoryMotorSpeedStop ||
+		category == internalusbcdcenums.IncomingCategoryServoDirectionCenter ||
+		category == internalusbcdcenums.IncomingCategoryGetMaxMotorSpeedValue ||
+		category == internalusbcdcenums.IncomingCategoryGetMaxServoDirectionValue {
 		return NewIncomingMessage(category, ""), nil
+	}
+
+	// Check if the message has content
+	if len(message) < 2 {
+		return nil, fmt.Errorf(
+			"message content cannot be empty for category %s",
+			category.String(),
+		)
 	}
 
 	// Create and return the IncomingMessage object
