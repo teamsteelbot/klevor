@@ -124,6 +124,52 @@ func (msg *IncomingMessage) String() string {
 	return sb.String()
 }
 
+// StringToPrint returns a human-readable string representation of the IncomingMessage
+//
+// Returns:
+//
+// A human-readable string that represents the IncomingMessage
+func (msg *IncomingMessage) StringToPrint() string {
+	switch msg.Category {
+	case internalusbcdcenums.IncomingCategoryChallenge:
+		challenge, _ := internal.ChallengeFromString(msg.Content)
+		if challenge != internal.ChallengeNil {
+			return fmt.Sprintf(
+				"IncomingMessage{Category: %s, Content: %s}",
+				msg.Category.Name(),
+				challenge.Name(),
+			)
+		}
+		fallthrough
+	case internalusbcdcenums.IncomingCategoryStatus:
+		incomingStatus, _ := internalusbcdcenums.IncomingStatusFromString(msg.Content)
+		if incomingStatus != internalusbcdcenums.IncomingStatusNil {
+			return fmt.Sprintf(
+				"IncomingMessage{Category: %s, Content: %s}",
+				msg.Category.Name(),
+				incomingStatus.Name(),
+			)
+		}
+		fallthrough
+	case internalusbcdcenums.IncomingCategoryDebug:
+		debug, _ := internalusbcdcenums.DebugFromString(msg.Content)
+		if debug != internalusbcdcenums.DebugNil {
+			return fmt.Sprintf(
+				"IncomingMessage{Category: %s, Content: %s}",
+				msg.Category.Name(),
+				debug.Name(),
+			)
+		}
+		fallthrough
+	default:
+		return fmt.Sprintf(
+			"IncomingMessage{Category: %s, Content: %q}",
+			msg.Category.Name(),
+			msg.Content,
+		)
+	}
+}
+
 // IsEqual compares the given instance of IncomingMessage with the current one
 //
 // Parameters:

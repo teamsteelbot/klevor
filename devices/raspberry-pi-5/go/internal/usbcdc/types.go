@@ -347,14 +347,14 @@ func (h *DefaultHandler) incomingMessagesHandler(
 			}
 
 			// Send each message to the incoming messages channel
-			for _, msg := range messages {
+			for _, message := range messages {
 				if h.receivedStartMessage {
 					break
 				}
 
-				switch msg.Category {
+				switch message.Category {
 				case internalusbcdcenums.IncomingCategoryError:
-					err := fmt.Errorf("received error message: %s", msg.Content)
+					err := fmt.Errorf("received error message: %s", message.Content)
 					h.incomingMessagesLoggerProducer.Error(err)
 					return err
 				case internalusbcdcenums.IncomingCategoryChallenge:
@@ -368,7 +368,7 @@ func (h *DefaultHandler) incomingMessagesHandler(
 					h.incomingMessagesLoggerProducer.Info(
 						fmt.Sprintf(
 							"Received message while waiting for start message: %s",
-							msg.String(),
+							message.StringToPrint(),
 						),
 					)		
 				}
@@ -390,18 +390,18 @@ func (h *DefaultHandler) incomingMessagesHandler(
 			}
 
 			// Send each message to the incoming messages channel
-			for _, msg := range messages {
+			for _, message := range messages {
 				if h.receivedChallenge == internal.ChallengeNil {
 					break
 				}
 
-				switch msg.Category {
+				switch message.Category {
 				case internalusbcdcenums.IncomingCategoryError:
-					err := fmt.Errorf("received error message: %s", msg.Content)
+					err := fmt.Errorf("received error message: %s", message.Content)
 					h.incomingMessagesLoggerProducer.Error(err)
 					return err
 				case internalusbcdcenums.IncomingCategoryChallenge:
-					challenge, err := internal.ChallengeFromString(msg.Content)
+					challenge, err := internal.ChallengeFromString(message.Content)
 					if err != nil {
 						return fmt.Errorf("failed to parse challenge message content: %w", err)
 					}
@@ -423,7 +423,7 @@ func (h *DefaultHandler) incomingMessagesHandler(
 					h.incomingMessagesLoggerProducer.Info(
 						fmt.Sprintf(
 							"Received message while waiting for challenge message: %s",
-							msg.String(),
+							message.StringToPrint(),
 						),
 					)
 				}
@@ -447,14 +447,14 @@ func (h *DefaultHandler) incomingMessagesHandler(
 			}
 
 			// Send each message to the incoming messages channel
-			for _, msg := range messages {
-				switch msg.Category {
+			for _, message := range messages {
+				switch message.Category {
 				case internalusbcdcenums.IncomingCategoryChallenge:
-					err := fmt.Errorf("received error message: %s", msg.Content)
+					err := fmt.Errorf("received error message: %s", message.Content)
 					h.incomingMessagesLoggerProducer.Error(err)
 					return err
 				case internalusbcdcenums.IncomingCategoryDebug:
-					debug, err := internalusbcdcenums.DebugFromString(msg.Content)
+					debug, err := internalusbcdcenums.DebugFromString(message.Content)
 					if err != nil {
 						return fmt.Errorf("failed to parse debug message content: %w", err)
 					}
@@ -467,7 +467,7 @@ func (h *DefaultHandler) incomingMessagesHandler(
 				case internalusbcdcenums.IncomingCategoryBNO08XYawDegrees:
 					// Parse the BNO08X yaw degrees value
 					if err := ralvarezdevgostringsconvert.ToFloat64(
-						msg.Content,
+						message.Content,
 						&h.receivedBNO08XYawDegrees,
 					); err != nil {
 						return fmt.Errorf(
@@ -486,7 +486,7 @@ func (h *DefaultHandler) incomingMessagesHandler(
 				case internalusbcdcenums.IncomingCategoryBNO08XYawTurns:
 					// Parse the BNO08X turns value
 					if err := ralvarezdevgostringsconvert.ToInt(
-						msg.Content,
+						message.Content,
 						&h.receivedBNO08XTurns,
 					); err != nil {
 						return fmt.Errorf(
@@ -505,7 +505,7 @@ func (h *DefaultHandler) incomingMessagesHandler(
 				case internalusbcdcenums.IncomingCategoryMaxMotorSpeedValue:
 					// Parse the max motor speed value
 					if err := ralvarezdevgostringsconvert.ToUint16(
-						msg.Content,
+						message.Content,
 						&h.receivedMaxMotorSpeedValue,
 					); err != nil {
 						return fmt.Errorf(
@@ -527,7 +527,7 @@ func (h *DefaultHandler) incomingMessagesHandler(
 				case internalusbcdcenums.IncomingCategoryMaxServoDirectionValue:
 					// Parse the max servo direction value
 					if err := ralvarezdevgostringsconvert.ToUint16(
-						msg.Content,
+						message.Content,
 						&h.receivedMaxServoDirectionValue,
 					); err != nil {
 						return fmt.Errorf(
@@ -551,7 +551,7 @@ func (h *DefaultHandler) incomingMessagesHandler(
 					h.incomingMessagesLoggerProducer.Info(
 						fmt.Sprintf(
 							"Received message: %s",
-							msg.String(),
+							message.StringToPrint(),
 						),
 					)
 				}
@@ -648,8 +648,8 @@ func (h *DefaultHandler) outgoingMessagesHandler(
 					return err
 				}
 
-				for _, msg := range incomingMessages {
-					if msg.IsEqual(IncomingOKMessage) {
+				for _, message := range incomingMessages {
+					if message.IsEqual(IncomingOKMessage) {
 						h.outgoingMessagesLoggerProducer.Info("Received stop confirmation message")
 						return nil
 					}
@@ -709,7 +709,7 @@ func (h *DefaultHandler) sendMessage(
 	h.outgoingMessagesLoggerProducer.Info(
 		fmt.Sprintf(
 			"Sent message: %s",
-			message.String(),
+			message.StringToPrint(),
 		),
 	)
 	return nil

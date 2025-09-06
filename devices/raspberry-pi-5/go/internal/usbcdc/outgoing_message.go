@@ -146,6 +146,40 @@ func (msg *OutgoingMessage) String() string {
 	return sb.String()
 }
 
+// StringToPrint returns a human-readable string representation of the OutgoingMessage
+//
+// Returns:
+//
+// A human-readable string that represents the OutgoingMessage
+func (msg *OutgoingMessage) StringToPrint() string {
+	switch msg.Category {
+	case internalusbcdcenums.OutgoingCategoryMotorSpeedStop,
+		internalusbcdcenums.OutgoingCategoryServoDirectionCenter,
+		internalusbcdcenums.OutgoingCategoryGetMaxMotorSpeedValue,
+		internalusbcdcenums.OutgoingCategoryGetMaxServoDirectionValue:
+		return fmt.Sprintf(
+			"OutgoingMessage{Category: %s, Content: <no content>}",
+			msg.Category.Name(),
+		)
+	case internalusbcdcenums.OutgoingCategoryStatus:
+		status, _ := internalusbcdcenums.OutgoingStatusFromString(msg.Content)
+		if status != internalusbcdcenums.OutgoingStatusNil {
+			return fmt.Sprintf(
+				"OutgoingMessage{Category: %s, Content: %s}",
+				msg.Category.Name(),
+				status.Name(),
+			)
+		}
+		fallthrough
+	default:
+		return fmt.Sprintf(
+			"OutgoingMessage{Category: %s, Content: %q}",
+			msg.Category.Name(),
+			msg.Content,
+		)
+	}
+}
+
 // IsEqual compares the given instance of OutgoingMessage with the current one
 //
 // Parameters:
