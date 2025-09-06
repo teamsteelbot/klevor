@@ -50,9 +50,13 @@ func main() {
 	}
 
 	// Initialize the USB-CDC handler
-	usbCDCHandler := internalusbcdc.NewDefaultHandler(
+	usbCDCHandler, err := internalusbcdc.NewDefaultHandler(
 		internalusbcdc.BaudRate,
+		logger,
 	)
+	if err != nil {
+		log.Fatalf("failed to initialize usb-cdc handler: %v", err)
+	}
 
 	// Initialize the Slamtec C1 handler
 	rplidarHandler, err := internalrplidar.NewSlamtecC1Handler(

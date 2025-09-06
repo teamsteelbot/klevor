@@ -2,7 +2,6 @@ package escmotor
 
 import (
 	"fmt"
-	"math"
 	"time"
 
 	"machine"
@@ -140,7 +139,7 @@ func NewDefaultHandler(
 		options.MaxPulseWidth,
 		rangePulseWidth,
 		servo,
-		StopSpeed, // Initial speed is set to 0
+		int16(StopSpeed), // Initial speed is set to 0
 		StopMicroseconds,
 	}
 
@@ -165,9 +164,9 @@ func (e *DefaultHandler) SetSpeed(speed uint16, isForward bool) error {
 	if speed > MaxSpeed {
 		return fmt.Errorf(
 			ErrSpeedOutOfRange,
-			StopSpeed-MaxSpeed,
-			StopSpeed+MaxSpeed,
-			speed,
+			int16(StopSpeed)-int16(MaxSpeed),
+			int16(StopSpeed)+int16(MaxSpeed),
+			int16(speed),
 		)
 	}
 

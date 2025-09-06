@@ -34,6 +34,12 @@ var (
 	// HandlerLoggerProducerTag is the logger producer tag for USB-CDC handler
 	HandlerLoggerProducerTag = "USB_CDC_HANDLER"
 
+	// IncomingMessagesLoggerProducerTag is the logger producer tag for incoming messages processing
+	IncomingMessagesLoggerProducerTag = "USB_CDC_INCOMING_MESSAGES"
+
+	// OutgoingMessagesLoggerProducerTag is the logger producer tag for outgoing messages processing
+	OutgoingMessagesLoggerProducerTag = "USB_CDC_OUTGOING_MESSAGES"
+
 	// OutgoingMessagesChannelBufferSize is the size of the outgoing messages channel buffer
 	OutgoingMessagesChannelBufferSize = 100
 

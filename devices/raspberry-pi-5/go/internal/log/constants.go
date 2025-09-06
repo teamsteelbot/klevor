@@ -23,41 +23,51 @@ const (
 )
 
 var (
+	// GracefulShutdownTimeout is the timeout for graceful shutdown
+	GracefulShutdownTimeout = 5 * time.Second
+
 	// ChannelBufferSize is the size of the message channel buffer
 	ChannelBufferSize = 1024
 
 	// FileBufferSize is the size of the file buffer
 	FileBufferSize = 1024 * 1024 // 1 MB
 
-	// LoggerTag is the logger tag
-	LoggerTag = "LOGGER"
+	// HandlerLoggerTag is the logger tag
+	HandlerLoggerTag = "LOGGER_HANDLER"
 
 	// MessagesChannelClosedMessage is the message logged when the messages channel is closed
 	MessagesChannelClosedMessage = NewMessage(
 		CategoryInfo,
 		"Messages channel closed",
-		LoggerTag,
+		HandlerLoggerTag,
 	)
 
 	// NilMessageReceivedMessage is the message logged when a LoggerTag message is received
 	NilMessageReceivedMessage = NewMessage(
 		CategoryWarning,
 		"Nil message received",
-		LoggerTag,
+		HandlerLoggerTag,
 	)
 
 	// ContextCancelledMessage is the message logged when the context is cancelled
 	ContextCancelledMessage = NewMessage(
 		CategoryInfo,
 		"Context cancelled by caller",
-		LoggerTag,
+		HandlerLoggerTag,
 	)
 
 	// StartedMessage is the message logged when the logger starts
 	StartedMessage = NewMessage(
 		CategoryInfo,
 		"Started",
-		LoggerTag,
+		HandlerLoggerTag,
+	)
+
+	// GracePeriodEndedMessage is the message logged when the grace period ends
+	GracePeriodEndedMessage = NewMessage(
+		CategoryInfo,
+		"Grace period ended",
+		HandlerLoggerTag,
 	)
 
 	// LogsFolder is the folder name where logs are stored

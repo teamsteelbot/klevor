@@ -61,11 +61,11 @@ var (
 	// MinimumConfidenceThreshold is the minimum confidence threshold for a valid classification
 	MinimumConfidenceThreshold float32 = 0.8
 
-	// LoggerProducerTag is the logger producer tag for CLIP
-	LoggerProducerTag = "CLIP"
+	// HandlerLoggerProducerTag is the logger producer tag for CLIP
+	HandlerLoggerProducerTag = "CLIP_HANDLER"
 
 	// GenerateEmbeddingsLoggerProducerTag is the logger producer tag for the generate embeddings process
-	GenerateEmbeddingsLoggerProducerTag =   "CLIP_GENERATE_EMBEDDINGS"
+	GenerateEmbeddingsLoggerProducerTag = "CLIP_GENERATE_EMBEDDINGS"
 
 	// EmbeddingsJSONPath is the path where the embeddings JSON file is stored
 	EmbeddingsJSONPath string

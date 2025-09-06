@@ -29,7 +29,9 @@ type (
 	DefaultHandler struct {
 		outgoingMessagesCh               chan *OutgoingMessage
 		logger                           internallog.Logger
-		loggerProducer                   internallog.LoggerProducer
+		handlerLoggerProducer                   internallog.LoggerProducer
+		incomingMessagesLoggerProducer           internallog.LoggerProducer
+		outgoingMessagesLoggerProducer          internallog.LoggerProducer
 		isRunning                        atomic.Bool
 		closed                           atomic.Bool
 		mutex                            sync.Mutex
@@ -146,11 +148,17 @@ func (s *DefaultSender) IsClosed() bool {
 // Parameters:
 //
 // baudRate: Baud rate for the serial communication.
+// logger: Logger instance for logging messages.
 //
 // Returns:
 //
 // A pointer to a DefaultHandler instance
-func NewDefaultHandler(baudRate int) *DefaultHandler {
+func NewDefaultHandler(baudRate int, logger internallog.Logger) (*DefaultHandler, error) {
+	// Check if the logger is nil
+	if logger == nil {
+		return nil, internallog.ErrNilLogger
+	}
+	
 	// Create a buffer for reading data
 	buffer := make([]byte, BufferSize)
 
@@ -161,7 +169,8 @@ func NewDefaultHandler(baudRate int) *DefaultHandler {
 		baudRate:          baudRate,
 		buffer:            buffer,
 		accumulatedBuffer: accumulatedBuffer,
-	}
+		logger:           logger,
+	}, nil
 }
 
 // IsRunning returns true if the handler is running
@@ -231,27 +240,26 @@ func (h *DefaultHandler) runToWrap(ctx context.Context, stopFn func()) error {
 
 	// Call the incoming messages handler
 	g.Go(
-		func() error {
-			return internal.StopContextOnError(
-				ctx,
-				stopFn,
-				func(ctx context.Context) error {
+		internallog.StopContextAndLogOnError(
+			ctx,
+			stopFn, 
+			func(ctx context.Context) error {
 					return h.incomingMessagesHandler(ctx, port)
 				},
-			)
-		},
+			h.incomingMessagesLoggerProducer,
+		),	
 	)
 
 	// Call the outgoing messages handler
 	g.Go(
-		func() error {
-			return internal.StopContextOnError(
-				ctx, stopFn,
-				func(ctx context.Context) error {
+		internallog.StopContextAndLogOnError(
+			ctx,
+			stopFn, 
+			func(ctx context.Context) error {
 					return h.outgoingMessagesHandler(ctx, port)
 				},
-			)
-		},
+			h.outgoingMessagesLoggerProducer,
+		),	
 	)
 
 	// Wait for both handlers to finish and return any error
@@ -259,7 +267,7 @@ func (h *DefaultHandler) runToWrap(ctx context.Context, stopFn func()) error {
 
 	// Close the port
 	if closeErr := port.Close(); closeErr != nil {
-		h.loggerProducer.Warning(
+		h.handlerLoggerProducer.Warning(
 			fmt.Sprintf(
 				"An error occurred while closing the serial port: %v",
 				closeErr,
@@ -283,8 +291,18 @@ func (h *DefaultHandler) incomingMessagesHandler(
 	ctx context.Context,
 	port serial.Port,
 ) error {
+	// Create a logger producer
+	incomingMessagesLoggerProducer, err := h.logger.NewProducer(
+		IncomingMessagesLoggerProducerTag,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to create incoming messages logger producer: %w", err)
+	}
+	h.incomingMessagesLoggerProducer = incomingMessagesLoggerProducer
+	defer h.incomingMessagesLoggerProducer.Close()
+
 	// Received initialization message
-	h.loggerProducer.Info("Waiting for initialization message...")
+	h.incomingMessagesLoggerProducer.Info("Waiting for initialization message...")
 	for !h.receivedInitializationMessage {
 		select {
 		case <-ctx.Done():
@@ -297,7 +315,7 @@ func (h *DefaultHandler) incomingMessagesHandler(
 			for _, c := range h.accumulatedBuffer {
 				if c == InitializationMessage {
 					h.receivedInitializationMessage = true
-					h.loggerProducer.Info("Received initialization message")
+					h.incomingMessagesLoggerProducer.Info("Received initialization message")
 					break
 				}
 			}
@@ -305,7 +323,7 @@ func (h *DefaultHandler) incomingMessagesHandler(
 	}
 
 	// Waiting for start message
-	h.loggerProducer.Info("Waiting for start message...")
+	h.incomingMessagesLoggerProducer.Info("Waiting for start message...")
 	for !h.receivedStartMessage {
 		select {
 		case <-ctx.Done():
@@ -320,7 +338,7 @@ func (h *DefaultHandler) incomingMessagesHandler(
 					return fmt.Errorf("received error message: %s", msg.Content)
 				} else if IncomingStartMessage.IsEqual(msg) {
 					h.receivedStartMessage = true
-					h.loggerProducer.Info("Received start message")
+					h.incomingMessagesLoggerProducer.Info("Received start message")
 
 					// Send a confirmation message
 					h.outgoingMessagesCh <- OutgoingOKMessage
@@ -331,7 +349,7 @@ func (h *DefaultHandler) incomingMessagesHandler(
 	}
 
 	// Wait for challenge message
-	h.loggerProducer.Info("Waiting for challenge message...")
+	h.incomingMessagesLoggerProducer.Info("Waiting for challenge message...")
 	for h.receivedChallenge == internal.ChallengeNil {
 		select {
 		case <-ctx.Done():
@@ -350,7 +368,7 @@ func (h *DefaultHandler) incomingMessagesHandler(
 						return fmt.Errorf("failed to parse challenge: %w", err)
 					}
 					h.receivedChallenge = challenge
-					h.loggerProducer.Info(
+					h.incomingMessagesLoggerProducer.Info(
 						fmt.Sprintf(
 							"Received challenge message: %s",
 							msg.String(),
@@ -398,7 +416,7 @@ func (h *DefaultHandler) incomingMessagesHandler(
 					}
 
 					// Log the received message
-					h.loggerProducer.Info(
+					h.incomingMessagesLoggerProducer.Info(
 						fmt.Sprintf(
 							"Received BNO08X yaw degrees message: %s",
 							msg.String(),
@@ -417,7 +435,7 @@ func (h *DefaultHandler) incomingMessagesHandler(
 					}
 
 					// Log the received message
-					h.loggerProducer.Info(
+					h.incomingMessagesLoggerProducer.Info(
 						fmt.Sprintf(
 							"Received BNO08X turns message: %s",
 							msg.String(),
@@ -436,7 +454,7 @@ func (h *DefaultHandler) incomingMessagesHandler(
 					}
 
 					// Log the received message
-					h.loggerProducer.Info(
+					h.incomingMessagesLoggerProducer.Info(
 						fmt.Sprintf(
 							"Received max motor speed value message: %s",
 							msg.String(),
@@ -458,7 +476,7 @@ func (h *DefaultHandler) incomingMessagesHandler(
 					}
 
 					// Log the received message
-					h.loggerProducer.Info(
+					h.incomingMessagesLoggerProducer.Info(
 						fmt.Sprintf(
 							"Received max servo direction value message: %s",
 							msg.String(),
@@ -469,7 +487,7 @@ func (h *DefaultHandler) incomingMessagesHandler(
 					h.notifyMaxServoDirectionValueOnce.Do(func() { close(h.maxServoDirectionValueReady) })
 				} else {
 					// Log any other received message
-					h.loggerProducer.Info(
+					h.incomingMessagesLoggerProducer.Info(
 						fmt.Sprintf(
 							"Received message: %s",
 							msg.String(),
@@ -489,7 +507,7 @@ func (h *DefaultHandler) incomingMessagesHandler(
 func (h *DefaultHandler) readFromPort(port serial.Port) {
 	n, err := port.Read(h.buffer)
 	if err != nil {
-		h.loggerProducer.Warning(
+		h.handlerLoggerProducer.Warning(
 			fmt.Sprintf(
 				"An error occurred while reading from the serial port: %v",
 				err,
@@ -526,7 +544,7 @@ func (h *DefaultHandler) readIncomingMessages(
 	// Extract messages from the accumulated buffer
 	messages, err := NewIncomingMessagesFromBuffer(&h.accumulatedBuffer)
 	if err != nil {
-		h.loggerProducer.Warning(
+		h.handlerLoggerProducer.Warning(
 			fmt.Sprintf(
 				"An error occurred while processing incoming messages: %v",
 				err,
@@ -552,6 +570,17 @@ func (h *DefaultHandler) outgoingMessagesHandler(
 	ctx context.Context,
 	port serial.Port,
 ) error {
+	// Create a logger producer
+	outgoingMessagesLoggerProducer, err := h.logger.NewProducer(
+		OutgoingMessagesLoggerProducerTag,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to create outgoing messages logger producer: %w", err)
+	}
+	h.outgoingMessagesLoggerProducer = outgoingMessagesLoggerProducer
+	defer h.outgoingMessagesLoggerProducer.Close()
+
+	// Track the last heartbeat time
 	lastHeartbeatTime := time.Now()
 	for {
 		select {
@@ -575,7 +604,7 @@ func (h *DefaultHandler) outgoingMessagesHandler(
 
 				for _, msg := range incomingMessages {
 					if msg.IsEqual(IncomingOKMessage) {
-						h.loggerProducer.Info("Received stop confirmation message")
+						h.outgoingMessagesLoggerProducer.Info("Received stop confirmation message")
 						return nil
 					}
 				}
@@ -592,6 +621,7 @@ func (h *DefaultHandler) outgoingMessagesHandler(
 		default:
 			if time.Since(lastHeartbeatTime) >= HeartbeatInterval {
 				// Send a heartbeat message if the interval has passed
+				h.outgoingMessagesLoggerProducer.Info("Sending heartbeat message")
 				if err := h.sendMessage(
 					port,
 					OutgoingHeartbeatMessage,
@@ -620,7 +650,7 @@ func (h *DefaultHandler) sendMessage(
 ) error {
 	// Check if the message is nil
 	if message == nil {
-		h.loggerProducer.Warning("Attempted to send a nil outgoing message")
+		h.handlerLoggerProducer.Warning("Attempted to send a nil outgoing message")
 		return nil
 	}
 
@@ -630,7 +660,7 @@ func (h *DefaultHandler) sendMessage(
 	}
 
 	// Log the message sent
-	h.loggerProducer.Info(
+	h.handlerLoggerProducer.Info(
 		fmt.Sprintf(
 			"Sent message: %s",
 			message.String(),
@@ -709,20 +739,20 @@ func (h *DefaultHandler) Run(ctx context.Context, stopFn func()) error {
 	h.mutex.Unlock()
 
 	// Create a logger producer
-	loggerProducer, err := h.logger.NewProducer(
+	handlerLoggerProducer, err := h.logger.NewProducer(
 		HandlerLoggerProducerTag,
 	)
 	if err != nil {
 		return fmt.Errorf("failed to create logger producer: %w", err)
 	}
-	h.loggerProducer = loggerProducer
-	defer h.loggerProducer.Close()
+	h.handlerLoggerProducer = handlerLoggerProducer
+	defer h.handlerLoggerProducer.Close()
 
 	return internallog.LogOnError(
 		func() error {
 			return h.runToWrap(ctx, stopFn)
 		},
-		h.loggerProducer,
+		h.handlerLoggerProducer,
 	)
 }
 
@@ -748,7 +778,7 @@ func (h *DefaultHandler) NewSender() (Sender, error) {
 	h.mutex.Unlock()
 
 	// Create and return a new DefaultSender instance
-	loggerProducer, err := NewDefaultSender(
+	handlerLoggerProducer, err := NewDefaultSender(
 		func(m *OutgoingMessage) {
 			h.outgoingMessagesCh <- m
 		},
@@ -758,7 +788,7 @@ func (h *DefaultHandler) NewSender() (Sender, error) {
 		h.wgSenders.Done()
 		return nil, err
 	}
-	return loggerProducer, nil
+	return handlerLoggerProducer, nil
 }
 
 // close signals no more senders will send; safe to call multiple times.

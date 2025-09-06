@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"log"
 	"os/signal"
 	"syscall"
 	"time"
@@ -29,9 +30,13 @@ func main() {
 	logger := internallog.NewDefaultLogger(*logDebug)
 
 	// Initialize the USB-CDC handler
-	usbCDCHandler := internalusbcdc.NewDefaultHandler(
+	usbCDCHandler, err := internalusbcdc.NewDefaultHandler(
 		internalusbcdc.BaudRate,
+		logger,
 	)
+	if err != nil {
+		log.Fatalf("failed to initialize usb-cdc handler: %v", err)
+	}
 
 	// Context canceled on SIGINT/SIGTERM.
 	ctx, stop := signal.NotifyContext(

@@ -22,18 +22,19 @@ import (
 type (
 	// DefaultHandler is the handler for the Hailo CLIP application
 	DefaultHandler struct {
-		handlerMutex               sync.Mutex
-		classificationMutex        sync.RWMutex
-		isRunning                  atomic.Bool
-		generateClipEmbeddingsPath string
-		runClipPath                string
-		positiveLabels             *[]internal.PositiveLabel
-		negativeLabels             *[]internal.NegativeLabel
-		classification             *internal.Classification
-		stdoutLinesRead            int
-		clipApplicationInitialized bool
-		logger                     internallog.Logger
-		loggerProducer             internallog.LoggerProducer
+		handlerMutex                     sync.Mutex
+		classificationMutex              sync.RWMutex
+		isRunning                        atomic.Bool
+		generateClipEmbeddingsPath       string
+		runClipPath                      string
+		positiveLabels                   *[]internal.PositiveLabel
+		negativeLabels                   *[]internal.NegativeLabel
+		classification                   *internal.Classification
+		stdoutLinesRead                  int
+		clipApplicationInitialized       bool
+		logger                           internallog.Logger
+		handlerLoggerProducer            internallog.LoggerProducer
+		generateEmbeddingsLoggerProducer internallog.LoggerProducer
 	}
 )
 
@@ -148,16 +149,17 @@ func (h *DefaultHandler) GenerateEmbeddings() error {
 	}
 
 	// Create a logger producer
-	loggerProducer, err := h.logger.NewProducer(
+	generateEmbeddingsLoggerProducer, err := h.logger.NewProducer(
 		GenerateEmbeddingsLoggerProducerTag,
 	)
 	if err != nil {
-		return fmt.Errorf("failed to create logger producer: %w", err)
+		return fmt.Errorf("failed to create generate embeddings logger producer: %w", err)
 	}
-	defer loggerProducer.Close()
+	h.generateEmbeddingsLoggerProducer = generateEmbeddingsLoggerProducer
+	defer h.generateEmbeddingsLoggerProducer.Close()
 
 	// Log the start of generating embeddings
-	loggerProducer.Info(GenerateEmbeddingsStartMessage)
+	h.generateEmbeddingsLoggerProducer.Info(GenerateEmbeddingsStartMessage)
 
 	// Generate JSON file
 	jsonContent := h.generateEmbeddingsJSONContent()
@@ -208,7 +210,7 @@ func (h *DefaultHandler) GenerateEmbeddings() error {
 
 	// Run and wait
 	if err := cmd.Run(); err != nil {
-		loggerProducer.Warning(
+		h.generateEmbeddingsLoggerProducer.Warning(
 			fmt.Sprintf(
 				"Embeddings script failed: %v; stderr: %s",
 				err,
@@ -219,10 +221,10 @@ func (h *DefaultHandler) GenerateEmbeddings() error {
 	}
 
 	// Log outputs if debug
-	if loggerProducer.IsDebug() {
+	if h.generateEmbeddingsLoggerProducer.IsDebug() {
 		stdout := strings.TrimSpace(stdoutBuf.String())
 		if stdout != "" {
-			loggerProducer.Debug(
+			h.generateEmbeddingsLoggerProducer.Debug(
 				fmt.Sprintf(
 					"embeddings script stdout: %s",
 					stdout,
@@ -231,7 +233,7 @@ func (h *DefaultHandler) GenerateEmbeddings() error {
 		}
 		stderr := strings.TrimSpace(stderrBuf.String())
 		if stderr != "" {
-			loggerProducer.Debug(
+			h.generateEmbeddingsLoggerProducer.Debug(
 				fmt.Sprintf(
 					"embeddings script stderr: %s",
 					stderr,
@@ -240,7 +242,7 @@ func (h *DefaultHandler) GenerateEmbeddings() error {
 		}
 	}
 
-	loggerProducer.Info(GenerateEmbeddingsCompletedMessage)
+	h.generateEmbeddingsLoggerProducer.Info(GenerateEmbeddingsCompletedMessage)
 	return nil
 }
 
@@ -268,7 +270,7 @@ func (h *DefaultHandler) runToWrap(ctx context.Context, stopFn func()) error {
 	h.stdoutLinesRead = 0
 
 	// Log the start of reading measures
-	h.loggerProducer.Info(HandlerStartedMessage)
+	h.handlerLoggerProducer.Info(HandlerStartedMessage)
 
 	// Check if the run clip executable exists
 	if _, err := os.Stat(h.runClipPath); errors.Is(err, os.ErrNotExist) {
@@ -301,43 +303,40 @@ func (h *DefaultHandler) runToWrap(ctx context.Context, stopFn func()) error {
 
 	// Stream stdout
 	g.Go(
-		func() error {
-			return internal.StopContextOnError(
-				ctx, stopFn, func(ctx context.Context) error {
-					return h.scanLines(
-						ctx,
-						StdoutTag,
-						stdout,
-						h.handleStdoutLine,
-					)
-				},
-			)
-		},
+		internallog.StopContextAndLogOnError(
+			ctx,
+			stopFn, 
+			func(ctx context.Context) error {
+				return h.scanLines(
+					ctx,
+					StdoutTag,
+					stdout,
+					h.handleStdoutLine,
+				)
+			},
+			h.handlerLoggerProducer,
+		),
 	)
 
 	// Stream stderr
 	g.Go(
-		func() error {
-			return internal.StopContextOnError(
-				ctx, stopFn, func(ctx context.Context) error {
-					return h.scanLines(
-						ctx,
-						StderrTag,
-						stderr,
-						h.handleStderrLine,
-					)
-				},
-			)
-		},
+		internallog.StopContextAndLogOnError(
+			ctx,
+			stopFn, 
+			func(ctx context.Context) error {
+				return h.scanLines(
+					ctx,
+					StderrTag,
+					stderr,
+					h.handleStderrLine,
+				)
+			},
+			h.handlerLoggerProducer,
+		),
 	)
 
 	// Wait for completion or context cancel
-	if err = g.Wait(); err != nil {
-		// Check if the error is due to context cancellation
-		if errors.Is(err, context.Canceled) {
-			h.loggerProducer.Info(internallog.ContextCancelledMessage.Content)
-			return ctx.Err()
-		}
+	if err = g.Wait(); err != nil && !errors.Is(err, context.Canceled) {
 		return fmt.Errorf("error reading lines: %w", err)
 	}
 
@@ -395,20 +394,20 @@ func (h *DefaultHandler) Run(ctx context.Context, stopFn func()) error {
 	h.handlerMutex.Unlock()
 
 	// Create a logger producer
-	loggerProducer, err := h.logger.NewProducer(
-		LoggerProducerTag,
+	handlerLoggerProducer, err := h.logger.NewProducer(
+		HandlerLoggerProducerTag,
 	)
 	if err != nil {
-		return fmt.Errorf("failed to create logger producer: %w", err)
+		return fmt.Errorf("failed to create handler logger producer: %w", err)
 	}
-	h.loggerProducer = loggerProducer
-	defer h.loggerProducer.Close()
+	h.handlerLoggerProducer = handlerLoggerProducer
+	defer h.handlerLoggerProducer.Close()
 
 	return internallog.LogOnError(
 		func() error {
 			return h.runToWrap(ctx, stopFn)
 		},
-		h.loggerProducer,
+		h.handlerLoggerProducer,
 	)
 }
 
@@ -445,15 +444,14 @@ func (h *DefaultHandler) scanLines(
 	for sc.Scan() {
 		select {
 		case <-ctx.Done():
-			h.loggerProducer.Info(internallog.ContextCancelledMessage.Content)
 			return ctx.Err()
 		default:
 			// Read the line
 			line := strings.TrimSpace(sc.Text())
 
 			// Process the line
-			if h.loggerProducer.IsDebug() {
-				h.loggerProducer.Debug(
+			if h.handlerLoggerProducer.IsDebug() {
+				h.handlerLoggerProducer.Debug(
 					fmt.Sprintf(
 						"Received line from %s: %s",
 						tag,
@@ -498,7 +496,7 @@ func (h *DefaultHandler) handleStdoutLine(line string) error {
 	if !h.clipApplicationInitialized {
 		if line == HailoClipApplicationInitializedMessage {
 			h.clipApplicationInitialized = true
-			h.loggerProducer.Info(HailoClipApplicationInitializedMessage)
+			h.handlerLoggerProducer.Info(HailoClipApplicationInitializedMessage)
 		}
 		return nil
 	}
@@ -509,7 +507,7 @@ func (h *DefaultHandler) handleStdoutLine(line string) error {
 
 	// Check if there is a classification in the line
 	if line == NoClassification {
-		h.loggerProducer.Info("No classification detected")
+		h.handlerLoggerProducer.Info("No classification detected")
 		h.classification = nil
 		return nil
 	}
@@ -517,7 +515,7 @@ func (h *DefaultHandler) handleStdoutLine(line string) error {
 	// Create a classification from the given string
 	classification, err := internal.NewClassificationFromString(line)
 	if err != nil {
-		h.loggerProducer.Warning(
+		h.handlerLoggerProducer.Warning(
 			fmt.Sprintf(
 				"Failed to parse classification: %v",
 				err,
@@ -528,7 +526,7 @@ func (h *DefaultHandler) handleStdoutLine(line string) error {
 
 	// Check if the confidence is below the threshold
 	if classification.Confidence < MinimumConfidenceThreshold {
-		h.loggerProducer.Info(
+		h.handlerLoggerProducer.Info(
 			fmt.Sprintf(
 				"Ignoring classification of label '%s' with low confidence: %f",
 				classification.Label.String(),
@@ -540,7 +538,7 @@ func (h *DefaultHandler) handleStdoutLine(line string) error {
 
 	// Update the current classification
 	if h.classification != classification {
-		h.loggerProducer.Info(
+		h.handlerLoggerProducer.Info(
 			fmt.Sprintf(
 				"New classification detected for label '%s' with confidence: %f",
 				classification.Label.String(),
@@ -584,6 +582,6 @@ func (h *DefaultHandler) GetClassification() *internal.Classification {
 // An error if any issue occurs during processing the line.
 func (h *DefaultHandler) handleStderrLine(line string) error {
 	// Log the stderr line as a warning
-	h.loggerProducer.Warning(fmt.Sprintf("stderr: %s", line))
+	h.handlerLoggerProducer.Warning(fmt.Sprintf("stderr: %s", line))
 	return nil
 }

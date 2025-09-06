@@ -24,19 +24,19 @@ type (
 
 	// SlamtecC1Handler is the handler for the Slamtec RPLiDAR C1 device
 	SlamtecC1Handler struct {
-		handlerMutex        sync.Mutex
-		measuresMutex       sync.RWMutex
-		isRunning           atomic.Bool
-		logger              internallog.Logger
-		loggerProducer      internallog.LoggerProducer
-		rotationCompletedCh chan RotationCompleted
-		baudRate            int
-		port                string
-		isUpsideDown        bool
-		angleAdjustment     float64
-		measures            [360]*internal.Measure
-		stdoutLinesRead     int
-		isRotationCompleted bool
+		handlerMutex          sync.Mutex
+		measuresMutex         sync.RWMutex
+		isRunning             atomic.Bool
+		logger                internallog.Logger
+		handlerLoggerProducer internallog.LoggerProducer
+		rotationCompletedCh   chan RotationCompleted
+		baudRate              int
+		port                  string
+		isUpsideDown          bool
+		angleAdjustment       float64
+		measures              [360]*internal.Measure
+		stdoutLinesRead       int
+		isRotationCompleted   bool
 	}
 )
 
@@ -118,7 +118,7 @@ func (h *SlamtecC1Handler) runToWrap(ctx context.Context, stopFn func()) error {
 	h.isRotationCompleted = false
 
 	// Log the start of reading measures
-	h.loggerProducer.Info(HandlerStartedMessage)
+	h.handlerLoggerProducer.Info(HandlerStartedMessage)
 
 	// Check if the ultra simple executable exists
 	if _, err := os.Stat(UltraSimplePath); errors.Is(err, os.ErrNotExist) {
@@ -159,44 +159,41 @@ func (h *SlamtecC1Handler) runToWrap(ctx context.Context, stopFn func()) error {
 
 	// Stream stdout
 	g.Go(
-		func() error {
-			return internal.StopContextOnError(
-				ctx, stopFn, func(ctx context.Context) error {
-					return h.scanLines(
-						ctx,
-						StdoutTag,
-						stdout,
-						h.handleStdoutLine,
-					)
-				},
-			)
-		},
+		internallog.StopContextAndLogOnError(
+			ctx,
+			stopFn, 
+			func(ctx context.Context) error {
+				return h.scanLines(
+					ctx,
+					StdoutTag,
+					stdout,
+					h.handleStdoutLine,
+				)
+			},
+			h.handlerLoggerProducer,
+		),
 	)
 
 	// Stream stderr
 	g.Go(
-		func() error {
-			return internal.StopContextOnError(
-				ctx, stopFn, func(ctx context.Context) error {
-					return h.scanLines(
-						ctx,
-						StderrTag,
-						stderr,
-						h.handleStderrLine,
-					)
-				},
-			)
-		},
+		internallog.StopContextAndLogOnError(
+			ctx,
+			stopFn, 
+			func(ctx context.Context) error {
+				return h.scanLines(
+					ctx,
+					StderrTag,
+					stderr,
+					h.handleStderrLine,
+				)
+			},
+			h.handlerLoggerProducer,
+		),
 	)
 
 	// Wait for completion or context cancel
-	if err = g.Wait(); err != nil {
-		// Check if the error is due to context cancellation
-		if errors.Is(err, context.Canceled) {
-			h.loggerProducer.Info(internallog.ContextCancelledMessage.Content)
-			return ctx.Err()
-		}
-		h.loggerProducer.Warning(fmt.Sprintf("Error reading lines: %v", err))
+	if err = g.Wait(); err != nil && !errors.Is(err, context.Canceled) {
+		h.handlerLoggerProducer.Warning(fmt.Sprintf("Error reading lines: %v", err))
 		return err
 	}
 
@@ -262,20 +259,20 @@ func (h *SlamtecC1Handler) Run(ctx context.Context, stopFn func()) error {
 	h.handlerMutex.Unlock()
 
 	// Create a logger producer
-	loggerProducer, err := h.logger.NewProducer(
-		LoggerProducerTag,
+	handlerLoggerProducer, err := h.logger.NewProducer(
+		HandlerLoggerProducerTag,
 	)
 	if err != nil {
-		return fmt.Errorf("failed to create logger producer: %w", err)
+		return fmt.Errorf("failed to create handler logger producer: %w", err)
 	}
-	h.loggerProducer = loggerProducer
-	defer h.loggerProducer.Close()
+	h.handlerLoggerProducer = handlerLoggerProducer
+	defer h.handlerLoggerProducer.Close()
 
 	return internallog.LogOnError(
 		func() error {
 			return h.runToWrap(ctx, stopFn)
 		},
-		h.loggerProducer,
+		h.handlerLoggerProducer,
 	)
 }
 
@@ -312,15 +309,14 @@ func (h *SlamtecC1Handler) scanLines(
 	for sc.Scan() {
 		select {
 		case <-ctx.Done():
-			h.loggerProducer.Info(internallog.ContextCancelledMessage.Content)
 			return ctx.Err()
 		default:
 			// Read the line
 			line := strings.TrimSpace(sc.Text())
 
 			// Process the line
-			if h.loggerProducer.IsDebug() {
-				h.loggerProducer.Debug(
+			if h.handlerLoggerProducer.IsDebug() {
+				h.handlerLoggerProducer.Debug(
 					fmt.Sprintf(
 						"Received line from %s: %s",
 						tag,
@@ -368,7 +364,7 @@ func (h *SlamtecC1Handler) handleStdoutLine(line string) error {
 		h.angleAdjustment,
 	)
 	if err != nil {
-		h.loggerProducer.Warning(
+		h.handlerLoggerProducer.Warning(
 			fmt.Sprintf(
 				"Failed to parse measure: %v",
 				err,
@@ -379,7 +375,7 @@ func (h *SlamtecC1Handler) handleStdoutLine(line string) error {
 
 	// Check if the RPLiDAR has completed a full rotation
 	if measure.IsRotationCompleted() {
-		h.loggerProducer.Info("Full rotation completed.")
+		h.handlerLoggerProducer.Info("Full rotation completed.")
 		h.isRotationCompleted = true
 	}
 
@@ -433,6 +429,6 @@ func (h *SlamtecC1Handler) GetMeasures() *[360]*internal.Measure {
 // An error if any issue occurs during processing the line.
 func (h *SlamtecC1Handler) handleStderrLine(line string) error {
 	// Log the stderr line as a warning
-	h.loggerProducer.Warning(fmt.Sprintf("stderr: %s", line))
+	h.handlerLoggerProducer.Warning(fmt.Sprintf("stderr: %s", line))
 	return nil
 }

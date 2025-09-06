@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	ralvarezdevgocryptouuid "github.com/ralvarezdev/go-crypto/uuid"
 	"github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal"
@@ -280,7 +281,29 @@ func (l *DefaultLogger) runToWrap(ctx context.Context) error {
 			// Log a message indicating that the context was cancelled
 			_ = writeLine(ContextCancelledMessage)
 			_ = buf.Flush()
-			return ctx.Err()
+			
+			// Start a timer to continue receiving messages for a short period
+            gracePeriod := time.Second // 1 second grace period
+            timer := time.NewTimer(gracePeriod)
+            defer timer.Stop()
+            for {
+                select {
+                case msg, ok := <-l.ch:
+                    if !ok {
+                        _ = writeLine(MessagesChannelClosedMessage)
+                        _ = buf.Flush()
+                        return ctx.Err()
+                    }
+                    if err := writeLine(msg); err != nil {
+                        return err
+                    }
+                    _ = buf.Flush()
+                case <-timer.C:
+                    _ = writeLine(GracePeriodEndedMessage)
+                    _ = buf.Flush()
+                    return ctx.Err()
+                }
+			}
 		case msg, ok := <-l.ch:
 			if !ok {
 				// Channel is closed, exit the loop
@@ -337,7 +360,7 @@ func (l *DefaultLogger) Run(ctx context.Context, stopFn func()) error {
 
 	return internal.StopContextOnError(
 		ctx, stopFn, l.runToWrap,
-	)
+	)()
 }
 
 // NewProducer returns a new LoggerProducer instance associated with this DefaultLogger.

@@ -52,8 +52,8 @@ var (
 	// ChannelBufferSize is the size of the rotation completed channel buffer
 	ChannelBufferSize = 10
 
-	// LoggerProducerTag is the logger producer tag for RPLiDAR
-	LoggerProducerTag = "RPLiDAR"
+	// HandlerLoggerProducerTag is the logger producer tag for RPLiDAR
+	HandlerLoggerProducerTag = "RPLiDAR_HANDLER"
 )
 
 var (

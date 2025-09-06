@@ -23,7 +23,7 @@ type (
 	// DefaultHandler is the default implementation of the Handler interface
 	DefaultHandler struct {
 		mutex                   sync.Mutex
-		loggerProducer          internallog.LoggerProducer
+		handlerLoggerProducer   internallog.LoggerProducer
 		logger                  internallog.Logger
 		rplidarHandler          internalrplidar.Handler
 		clipHandler             internalclip.Handler
@@ -120,7 +120,7 @@ func (h *DefaultHandler) setMotorSpeed(
 
 	// Send the outgoing message to set the motor speed
 	if direction == MotorDirectionStop || speed == 0 {
-		h.loggerProducer.Info(
+		h.handlerLoggerProducer.Info(
 			"Setting motor speed to 0, stopping the motor",
 		)
 		return h.usbCDCSender.SendMessage(
@@ -128,7 +128,7 @@ func (h *DefaultHandler) setMotorSpeed(
 		)
 	}
 	if direction == MotorDirectionForward {
-		h.loggerProducer.Info(
+		h.handlerLoggerProducer.Info(
 			fmt.Sprintf(
 				"Setting motor speed to %d in forward direction",
 				speed,
@@ -142,7 +142,7 @@ func (h *DefaultHandler) setMotorSpeed(
 		)
 	}
 	if direction == MotorDirectionBackward {
-		h.loggerProducer.Info(
+		h.handlerLoggerProducer.Info(
 			fmt.Sprintf(
 				"Setting motor speed to %d in backward direction",
 				speed,
@@ -252,13 +252,13 @@ func (h *DefaultHandler) setServoDirection(
 
 	// Send the outgoing message to set the angle speed
 	if direction == ServoDirectionStraight || angle == 90 {
-		h.loggerProducer.Info("Setting servo direction to center")
+		h.handlerLoggerProducer.Info("Setting servo direction to center")
 		return h.usbCDCSender.SendMessage(
 			internalusbcdc.OutgoingServoDirectionCenterMessage,
 		)
 	}
 	if direction == ServoDirectionLeft {
-		h.loggerProducer.Info(
+		h.handlerLoggerProducer.Info(
 			fmt.Sprintf("Setting servo direction to left with angle %d", angle),
 		)
 		return h.usbCDCSender.SendMessage(
@@ -269,7 +269,7 @@ func (h *DefaultHandler) setServoDirection(
 		)
 	}
 	if direction == ServoDirectionRight {
-		h.loggerProducer.Info(
+		h.handlerLoggerProducer.Info(
 			fmt.Sprintf(
 				"Setting servo direction to right with angle %d",
 				angle,
@@ -549,7 +549,7 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 			northNorthwestAverageDistance = h.getAverageDirectionDistance(CardinalDirectionNorthNorthwest)
 
 			// Log the average distances
-			h.loggerProducer.Debug(
+			h.handlerLoggerProducer.Debug(
 				fmt.Sprintf(
 					"West: %f, North-Northwest: %f, North: %f, North-Northeast: %f, East: %f",
 					northAverageDistance,
@@ -562,7 +562,7 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 
 			// Check if one of them is 0
 			if westAverageDistance == 0 || eastAverageDistance == 0 || northAverageDistance == 0 || northNortheastAverageDistance == 0 || northNorthwestAverageDistance == 0 {
-				h.loggerProducer.Warning(
+				h.handlerLoggerProducer.Warning(
 					"One of the average distances is 0. This may cause unexpected behavior. Waiting for new measures...",
 				)
 				continue
@@ -575,7 +575,7 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 				previousMotorSpeed := h.motorSpeed
 
 				// Log the warning
-				h.loggerProducer.Warning(
+				h.handlerLoggerProducer.Warning(
 					fmt.Sprintf(
 						"Front distance is below the safety threshold %f.",
 						SafetyFrontDistanceStartThreshold,
@@ -606,7 +606,7 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 						northNorthwestAverageDistance = h.getAverageDirectionDistance(CardinalDirectionNorthNorthwest)
 
 						if northAverageDistance >= SafetyFrontDistanceStopThreshold || northNortheastAverageDistance >= SafetyFrontDistanceStopThreshold || northNorthwestAverageDistance >= SafetyFrontDistanceStopThreshold {
-							h.loggerProducer.Info("Safety front distance threshold reached.")
+							h.handlerLoggerProducer.Info("Safety front distance threshold reached.")
 							safe = true
 						}
 					}
@@ -653,7 +653,7 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 				// Get the latest BNO08x turns value
 				turns := h.usbCDCHandler.ReceivedBNO08XTurns()
 				if turns > h.bno08xLastTurns {
-					h.loggerProducer.Info(
+					h.handlerLoggerProducer.Info(
 						fmt.Sprintf(
 							"Detected a turn. Current turns: %d, Last turns: %d",
 							turns,
@@ -675,7 +675,7 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 					// Update the servo direction to straight
 					h.servoDirection = ServoDirectionStraight
 				} else if northAverageDistance >= FrontStopTurnDistanceThreshold {
-					h.loggerProducer.Info("Front distance is safe. Stopping the turning state.")
+					h.handlerLoggerProducer.Info("Front distance is safe. Stopping the turning state.")
 
 					// Center the servo
 					if err := h.setServoToCenter(); err != nil {
@@ -694,7 +694,7 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 
 			// Check if it's almost time to stop
 			if h.bno08xLastTurns >= AlgorithmTurns || h.rplidarTurnsCounter >= AlgorithmTurns {
-				h.loggerProducer.Info("Almost time to stop. Monitoring front distance...")
+				h.handlerLoggerProducer.Info("Almost time to stop. Monitoring front distance...")
 
 				// Set the servo to center and the motor to slow speed
 				if err := h.setServoToCenter(); err != nil {
@@ -717,7 +717,7 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 
 						if northAverageDistance <= StopDistanceThreshold {
 							completed = true
-							h.loggerProducer.Info("Challenge completed successfully. Stopping the robot.")
+							h.handlerLoggerProducer.Info("Challenge completed successfully. Stopping the robot.")
 						}
 					}
 				}
@@ -834,13 +834,13 @@ func (h *DefaultHandler) runToWrap(ctx context.Context, stopFn func()) error {
 	defer h.usbCDCSender.Close()
 
 	// Wait for the challenge message to be set
-	h.loggerProducer.Info("Waiting for challenge message...")
+	h.handlerLoggerProducer.Info("Waiting for challenge message...")
 	challenge, err := h.usbCDCHandler.WaitForChallenge(ctx)
 	if err != nil {
 		stopFn()
 		return fmt.Errorf("failed to wait for challenge message: %w", err)
 	}
-	h.loggerProducer.Info(
+	h.handlerLoggerProducer.Info(
 		fmt.Sprintf("Challenge message received: %s", challenge.String()),
 	)
 
@@ -850,7 +850,7 @@ func (h *DefaultHandler) runToWrap(ctx context.Context, stopFn func()) error {
 		stopFn()
 		return fmt.Errorf("failed to wait for max motor speed value: %w", err)
 	}
-	h.loggerProducer.Info(
+	h.handlerLoggerProducer.Info(
 		fmt.Sprintf("Max motor speed value received: %d", maxMotorSpeed),
 	)
 	h.maxMotorSpeedValue = maxMotorSpeed
@@ -864,7 +864,7 @@ func (h *DefaultHandler) runToWrap(ctx context.Context, stopFn func()) error {
 			err,
 		)
 	}
-	h.loggerProducer.Info(
+	h.handlerLoggerProducer.Info(
 		fmt.Sprintf(
 			"Max servo direction value received: %d",
 			maxServoDirection,
@@ -873,18 +873,29 @@ func (h *DefaultHandler) runToWrap(ctx context.Context, stopFn func()) error {
 	h.maxServoDirectionValue = maxServoDirection
 
 	// Start the pilot
+	var handlerFn func(context.Context) error
 	switch challenge {
 	case internal.ChallengeWithObstacles:
-		h.loggerProducer.Info("Starting challenge with obstacles handler")
-		return h.challengeWithObstaclesHandler(ctx)
+		h.handlerLoggerProducer.Info("Starting challenge with obstacles handler")
+		handlerFn = h.challengeWithObstaclesHandler
 	case internal.ChallengeWithObstaclesAndParking:
-		h.loggerProducer.Info("Starting challenge with obstacles and parking handler")
-		return h.challengeWithObstaclesAndParkingHandler(ctx)
+		h.handlerLoggerProducer.Info("Starting challenge with obstacles and parking handler")
+		handlerFn = h.challengeWithObstaclesAndParkingHandler
 	case internal.ChallengeWithoutObstacles:
-		h.loggerProducer.Info("Starting challenge without obstacles handler")
-		return h.challengeWithoutObstaclesHandler(ctx)
+		h.handlerLoggerProducer.Info("Starting challenge without obstacles handler")
+		handlerFn = h.challengeWithoutObstaclesHandler
 	}
-	return fmt.Errorf("unknown challenge: %s", challenge.String())
+
+	if handlerFn == nil {
+		return fmt.Errorf("unknown challenge: %s", challenge.String())
+	}
+	return internal.StopContextOnError(
+		ctx,
+		stopFn,
+		func(ctx context.Context) error {
+			return handlerFn(ctx)
+		},
+	)()
 }
 
 // Run runs the pilot handler
@@ -915,14 +926,14 @@ func (h *DefaultHandler) Run() error {
 	h.mutex.Unlock()
 
 	// Create a logger producer
-	loggerProducer, err := h.logger.NewProducer(
-		LoggerProducerTag,
+	handlerLoggerProducer, err := h.logger.NewProducer(
+		HandlerLoggerProducerTag,
 	)
 	if err != nil {
-		return fmt.Errorf("failed to create logger producer: %w", err)
+		return fmt.Errorf("failed to create handler logger producer: %w", err)
 	}
-	h.loggerProducer = loggerProducer
-	defer h.loggerProducer.Close()
+	h.handlerLoggerProducer = handlerLoggerProducer
+	defer h.handlerLoggerProducer.Close()
 
 	// Set servo direction and motor direction to initial values
 	h.servoDirection = ServoDirectionStraight
@@ -984,7 +995,7 @@ func (h *DefaultHandler) Run() error {
 				func() error {
 					return h.runToWrap(ctx, stop)
 				},
-				h.loggerProducer,
+				h.handlerLoggerProducer,
 			)
 		},
 	)

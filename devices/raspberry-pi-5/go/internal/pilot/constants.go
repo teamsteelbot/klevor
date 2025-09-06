@@ -17,8 +17,8 @@ var (
 	// ConfirmationAttempts is the number of attempts to confirm a message
 	ConfirmationAttempts = ConfirmationTimeout / IncomingDelay
 
-	// LoggerProducerTag is the tag for the logger producer
-	LoggerProducerTag = "PILOT"
+	// HandlerLoggerProducerTag is the tag for the logger producer
+	HandlerLoggerProducerTag = "PILOT_HANDLER"
 
 	// MotorFastPercentage is the percentage of the maximum speed for fast motor speed
 	MotorFastPercentage float64 = 0.7

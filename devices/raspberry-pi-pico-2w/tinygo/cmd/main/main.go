@@ -52,13 +52,6 @@ var (
 	receivedServoDirectionMessage *internalusbcdc.IncomingMessage
 )
 
-func init() {
-	switchOnEvent = internalswitch.SwitchOnEventGenerator(
-		internalusbcdc.USBCDCHandler,
-		internalledonboard.OnBoardHandler,
-	)
-}
-
 // stopAndCenter stops the ESC motor and centers the servo concurrently.
 //
 // Returns:
@@ -113,6 +106,12 @@ func sendErrorMessage(err error) {
 func init() {
 	// Set the last reset time
 	lastBNO08XResetTime = time.Now()
+
+	// Initialize the switch on event
+	switchOnEvent = internalswitch.SwitchOnEventGenerator(
+		internalusbcdc.USBCDCHandler,
+		internalledonboard.OnBoardHandler,
+	)
 }
 
 func main() {

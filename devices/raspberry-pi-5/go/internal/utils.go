@@ -32,20 +32,23 @@ func ExecutableDir() (string, error) {
 // ctx: The context to be stopped.
 // stopFn: A function that stops the context with a given error.
 // fn: A function that returns an error.
+// loggerProducer: The logger producer to log messages.
 //
 // Returns:
 //
-// The error returned by the function, if any.
+// A function that executes the provided function and stops the context if an error occurs.
 func StopContextOnError(
 	ctx context.Context,
 	stopFn func(),
 	fn func(context.Context) error,
-) error {
-	if err := fn(ctx); err != nil {
-		if stopFn != nil {
-			stopFn()
+) func() error {
+	return func() error {
+		if err := fn(ctx); err != nil {
+			if stopFn != nil {
+				stopFn()
+			}
+			return err
 		}
-		return err
+		return nil
 	}
-	return nil
 }
