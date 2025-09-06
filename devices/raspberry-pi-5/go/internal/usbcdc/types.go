@@ -318,7 +318,9 @@ func (h *DefaultHandler) incomingMessagesHandler(
 			return ctx.Err()
 		default:
 			// Read data from the port
-			h.readFromPort(port)
+			if err := h.readFromPort(port); err != nil {
+				return err
+			}
 
 			// Process the data read
 			for _, c := range h.accumulatedBuffer {
@@ -339,7 +341,10 @@ func (h *DefaultHandler) incomingMessagesHandler(
 			return ctx.Err()
 		default:
 			// Read incoming messages
-			messages := h.readIncomingMessages(port)
+			messages, err := h.readIncomingMessages(port)
+			if err != nil {
+				return err
+			}
 
 			// Send each message to the incoming messages channel
 			for _, msg := range messages {
@@ -379,7 +384,10 @@ func (h *DefaultHandler) incomingMessagesHandler(
 			return ctx.Err()
 		default:
 			// Read incoming messages
-			messages := h.readIncomingMessages(port)
+			messages, err := h.readIncomingMessages(port)
+			if err != nil {
+				return err
+			}
 
 			// Send each message to the incoming messages channel
 			for _, msg := range messages {
@@ -433,7 +441,10 @@ func (h *DefaultHandler) incomingMessagesHandler(
 			return ctx.Err()
 		default:
 			// Read incoming messages
-			messages := h.readIncomingMessages(port)
+			messages, err := h.readIncomingMessages(port)
+			if err != nil {
+				return err
+			}
 
 			// Send each message to the incoming messages channel
 			for _, msg := range messages {
@@ -554,19 +565,21 @@ func (h *DefaultHandler) incomingMessagesHandler(
 // Parameters:
 //
 // port: The serial port to read data from.
-func (h *DefaultHandler) readFromPort(port serial.Port) {
+// 
+// Returns:
+//
+// An error if any issue occurs during reading.
+func (h *DefaultHandler) readFromPort(port serial.Port) error {
 	n, err := port.Read(h.buffer)
 	if err != nil {
-		h.incomingMessagesLoggerProducer.Warning(
-			fmt.Sprintf(
-				"An error occurred while reading from the serial port: %v",
-				err,
-			),
+		return fmt.Errorf(
+			"an error occurred while reading from the serial port: %v",
+			err,
 		)
 	}
 	if n == 0 {
 		// Read can return 0 bytes
-		return
+		return nil
 	}
 
 	// Process the data read
@@ -574,6 +587,7 @@ func (h *DefaultHandler) readFromPort(port serial.Port) {
 		h.accumulatedBuffer,
 		h.buffer[:n]...,
 	)
+	return nil
 }
 
 // readIncomingMessages reads incoming messages from the serial port.
@@ -584,26 +598,22 @@ func (h *DefaultHandler) readFromPort(port serial.Port) {
 //
 // Returns:
 //
-// A slice of IncomingMessage pointers.
+// A slice of IncomingMessage pointers or an error if any issue occurs during reading or parsing.
 func (h *DefaultHandler) readIncomingMessages(
 	port serial.Port,
-) []*IncomingMessage {
+) ([]*IncomingMessage, error) {
 	// Read data from the port
-	h.readFromPort(port)
+	if err := h.readFromPort(port); err != nil {
+		return nil, fmt.Errorf("failed to read from port: %w", err)
+	}
 
 	// Extract messages from the accumulated buffer
 	messages, err := NewIncomingMessagesFromBuffer(&h.accumulatedBuffer)
 	if err != nil {
-		h.incomingMessagesLoggerProducer.Warning(
-			fmt.Sprintf(
-				"An error occurred while processing incoming messages: %v",
-				err,
-			),
-		)
-		return nil
+		return nil, fmt.Errorf("failed to parse incoming messages: %w", err)
 	}
 
-	return messages
+	return messages, nil
 }
 
 // outgoingMessagesHandler processes outgoing messages and sends them through the serial port.
@@ -633,7 +643,10 @@ func (h *DefaultHandler) outgoingMessagesHandler(
 			initialTime := time.Now()
 			for time.Since(initialTime) < StopTimeout {
 				// Read any remaining incoming messages and check if they are stop confirmations
-				incomingMessages := h.readIncomingMessages(port)
+				incomingMessages, err := h.readIncomingMessages(port)
+				if err != nil {
+					return err
+				}
 
 				for _, msg := range incomingMessages {
 					if msg.IsEqual(IncomingOKMessage) {
