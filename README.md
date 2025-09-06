@@ -49,53 +49,53 @@ Ahora bien, la estructura de los archivos es la siguiente:
 
 ## Índice 
 
-1. **[Sobre Nosotros](about.es.md)**
+1. **[Sobre Nosotros](docs/about.es.md)**
 2. **Electrónica**
 	1. Componentes
-		1. [Componentes Previos](electronic/components/previous.es.md)
-		2. [Componentes Actuales](electronic/components/current.es.md)
-		3. [Componentes Futuros](electronic/components/future.es.md)
+		1. [Componentes Previos](docs/electronic/components/previous.es.md)
+		2. [Componentes Actuales](docs/electronic/components/current.es.md)
+		3. [Componentes Futuros](docs/electronic/components/future.es.md)
 	2. Diagramas
-		1. [Diagramas de Conexiones](electronic/diagrams/wiring.es.md)
+		1. [Diagramas de Conexiones](docs/electronic/diagrams/wiring.es.md)
 3. **Mecánica**
 	1. Piezas
 		1. Piezas Comunes
-			1. [Piezas Comunes Previas](mechanical/parts/common/previous.es.md)
-			2. [Piezas Comunes Actuales](mechanical/parts/common/current.es.md)
-		2. [Piezas del Prototipo 1](mechanical/parts/prototype1.es.md)
-		3. [Piezas del Prototipo 2](mechanical/parts/prototype2.es.md)
-		4. [Piezas del Prototipo 3](mechanical/parts/prototype3.es.md)
-		5. [Piezas del Prototipo 4](mechanical/parts/prototype4.es.md)
+			1. [Piezas Comunes Previas](docs/mechanical/parts/common/previous.es.md)
+			2. [Piezas Comunes Actuales](docs/mechanical/parts/common/current.es.md)
+		2. [Piezas del Prototipo 1](docs/mechanical/parts/prototype1.es.md)
+		3. [Piezas del Prototipo 2](docs/mechanical/parts/prototype2.es.md)
+		4. [Piezas del Prototipo 3](docs/mechanical/parts/prototype3.es.md)
+		5. [Piezas del Prototipo 4](docs/mechanical/parts/prototype4.es.md)
 	2. Prototipos
-		1. [Prototipo 1](mechanical/prototypes/prototype1.es.md)
-		2. [Prototipo 2](mechanical/prototypes/prototype2.es.md)
-		3. [Prototipo 3](mechanical/prototypes/prototype3.es.md)
-		4. [Prototipo 4](mechanical/prototypes/prototype4.es.md)
+		1. [Prototipo 1](docs/mechanical/prototypes/prototype1.es.md)
+		2. [Prototipo 2](docs/mechanical/prototypes/prototype2.es.md)
+		3. [Prototipo 3](docs/mechanical/prototypes/prototype3.es.md)
+		4. [Prototipo 4](docs/mechanical/prototypes/prototype4.es.md)
 4. **Programación**
 	1. Lenguajes de Programación
-		1. [Lenguajes de Programación Previos](programming/languages/previous.es.md)
-		2. [Lenguajes de Programación Actuales](programming/languages/current.es.md)
-		3. [Lenguajes de Programación Futuros](programming/languages/future.es.md)
+		1. [Lenguajes de Programación Previos](docs/programming/languages/previous.es.md)
+		2. [Lenguajes de Programación Actuales](docs/programming/languages/current.es.md)
+		3. [Lenguajes de Programación Futuros](docs/programming/languages/future.es.md)
 	2. Librerías
 		1. Legado:
-		   1. [Librerías de CircuitPython](programming/libraries/legacy/circuit-python.es.md)
-		2. [Librerías de Python](programming/libraries/python.es.md)
+		   1. [Librerías de CircuitPython](docs/programming/libraries/legacy/circuit-python.es.md)
+		2. [Librerías de Python](docs/programming/libraries/python.es.md)
 	3. Diagramas
-		1. [Diagramas de Flujo](programming/diagrams/flowcharts.es.md)
-	4. [Glosario de Términos](programming/glossary.es.md)
+		1. [Diagramas de Flujo](docs/programming/diagrams/flowcharts.es.md)
+	4. [Glosario de Términos](docs/programming/glossary.es.md)
 	5. Guías
 		1. Legado 
-			1. [Guía de MicroPython](programming/guides/legacy/micro-python.es.md)
-			2. [Guía de CircuitPython](programming/guides/legacy/circuit-python.es.md)
-			3. [Guía de la Raspberry Pi Pico 2 W](programming/guides/legacy/raspberry-pi-pico-2w.es.md)
-		2. [Guía de MkDocs](programming/guides/mkdocs.es.md)
-		3. [Guía de TinyGo](programming/guides/tinygo.es.md)
-		4. [Guía de la Raspberry Pi 5](programming/guides/raspberry-pi-5.es.md)
-		5. [Guía de la Raspberry Pi Pico 2 W](programming/guides/raspberry-pi-pico-2w.es.md)
-		6. [Guía de Detección de Objetos](programming/guides/object-detection.es.md)
-5. **[GitHub](github.es.md)**
-6. **[Vídeos](videos.es.md)**
-7. **[Software](software.es.md)**
-8. **[Gadgets](gadgets.es.md)**
-9. **[Patrocinadores](sponsors.es.md)**
-10. **[Contacto](contact.es.md)**
+			1. [Guía de MicroPython](docs/programming/guides/legacy/micro-python.es.md)
+			2. [Guía de CircuitPython](docs/programming/guides/legacy/circuit-python.es.md)
+			3. [Guía de la Raspberry Pi Pico 2 W](docs/programming/guides/legacy/raspberry-pi-pico-2w.es.md)
+		2. [Guía de MkDocs](docs/programming/guides/mkdocs.es.md)
+		3. [Guía de TinyGo](docs/programming/guides/tinygo.es.md)
+		4. [Guía de la Raspberry Pi 5](docs/programming/guides/raspberry-pi-5.es.md)
+		5. [Guía de la Raspberry Pi Pico 2 W](docs/programming/guides/raspberry-pi-pico-2w.es.md)
+		6. [Guía de Detección de Objetos](docs/programming/guides/object-detection.es.md)
+5. **[GitHub](docs/github.es.md)**
+6. **[Vídeos](docs/videos.es.md)**
+7. **[Software](docs/software.es.md)**
+8. **[Gadgets](docs/gadgets.es.md)**
+9. **[Patrocinadores](docs/sponsors.es.md)**
+10. **[Contacto](docs/contact.es.md)**
