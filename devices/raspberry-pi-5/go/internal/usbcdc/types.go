@@ -357,12 +357,26 @@ func (h *DefaultHandler) incomingMessagesHandler(
 					err := fmt.Errorf("received error message: %s", message.Content)
 					h.incomingMessagesLoggerProducer.Error(err)
 					return err
-				case internalusbcdcenums.IncomingCategoryChallenge:
-					h.receivedStartMessage = true
-					h.incomingMessagesLoggerProducer.Info("Received start message")
+				case internalusbcdcenums.IncomingCategoryStatus:
+					// Check if it's a start message
+					status, err := internalusbcdcenums.IncomingStatusFromString(message.Content)
+					if err != nil {
+						return fmt.Errorf("failed to parse status message content: %w", err)
+					}
 
-					// Send a confirmation message
-					h.outgoingMessagesCh <- OutgoingOKMessage
+					if status == internalusbcdcenums.IncomingStatusStart {
+						h.receivedStartMessage = true
+						h.incomingMessagesLoggerProducer.Info("Received start message")
+
+						// Send a confirmation message
+						h.outgoingMessagesCh <- OutgoingOKMessage
+
+						// Log the confirmation message sent
+						h.outgoingMessagesLoggerProducer.Info("Sent start confirmation message")
+						break
+					}
+					fallthrough
+					
 				default:
 					// Log any other received message
 					h.incomingMessagesLoggerProducer.Info(
@@ -391,7 +405,7 @@ func (h *DefaultHandler) incomingMessagesHandler(
 
 			// Send each message to the incoming messages channel
 			for _, message := range messages {
-				if h.receivedChallenge == internal.ChallengeNil {
+				if h.receivedChallenge != internal.ChallengeNil {
 					break
 				}
 
@@ -418,6 +432,9 @@ func (h *DefaultHandler) incomingMessagesHandler(
 
 					// Send a confirmation message
 					h.outgoingMessagesCh <- OutgoingOKMessage
+
+					// Log the confirmation message sent
+					h.outgoingMessagesLoggerProducer.Info("Sent challenge confirmation message")
 				default:
 					// Log any other received message
 					h.incomingMessagesLoggerProducer.Info(
@@ -449,7 +466,7 @@ func (h *DefaultHandler) incomingMessagesHandler(
 			// Send each message to the incoming messages channel
 			for _, message := range messages {
 				switch message.Category {
-				case internalusbcdcenums.IncomingCategoryChallenge:
+				case internalusbcdcenums.IncomingCategoryError:	
 					err := fmt.Errorf("received error message: %s", message.Content)
 					h.incomingMessagesLoggerProducer.Error(err)
 					return err
@@ -640,6 +657,10 @@ func (h *DefaultHandler) outgoingMessagesHandler(
 				return err
 			}
 
+			// Log the stop message sent
+			h.outgoingMessagesLoggerProducer.Info("Sent stop message, waiting for confirmation...")
+
+			// Wait for a stop confirmation message or timeout
 			initialTime := time.Now()
 			for time.Since(initialTime) < StopTimeout {
 				// Read any remaining incoming messages and check if they are stop confirmations
@@ -655,7 +676,7 @@ func (h *DefaultHandler) outgoingMessagesHandler(
 					}
 				}
 			}
-
+			h.outgoingMessagesLoggerProducer.Warning("Did not receive stop confirmation message before timeout")
 			return ctx.Err()
 		case outgoingMessage, ok := <-h.outgoingMessagesCh:
 			if !ok {

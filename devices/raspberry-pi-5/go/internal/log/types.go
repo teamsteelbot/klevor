@@ -261,7 +261,11 @@ func (l *DefaultLogger) runToWrap(ctx context.Context) error {
 	// Create a helper function to write a message to the buffer
 	writeLine := func(m *Message) error {
 		if m == nil {
-			m = NilMessageReceivedMessage
+			m = NewMessage(
+				CategoryWarning,
+				"Nil message received",
+				HandlerLoggerTag,
+			)
 		}
 		if _, err := buf.WriteString(m.String() + "\n"); err != nil {
 			return err
@@ -270,7 +274,13 @@ func (l *DefaultLogger) runToWrap(ctx context.Context) error {
 	}
 
 	// Log a message indicating that the writer has started
-	if err = writeLine(StartedMessage); err != nil {
+	if err = writeLine(
+		NewMessage(
+			CategoryInfo,
+			"Started",
+			HandlerLoggerTag,
+		),
+	); err != nil {
 		return err
 	}
 
@@ -279,35 +289,50 @@ func (l *DefaultLogger) runToWrap(ctx context.Context) error {
 		select {
 		case <-ctx.Done():
 			// Log a message indicating that the context was cancelled
-			_ = writeLine(ContextCancelledMessage)
+			_ = writeLine(
+				NewMessage(
+					CategoryInfo,
+					"Context cancelled by caller",
+					HandlerLoggerTag,
+				),
+			)
 			_ = buf.Flush()
-			
+
 			// Start a timer to continue receiving messages for a short period
-            gracePeriod := time.Second // 1 second grace period
-            timer := time.NewTimer(gracePeriod)
-            defer timer.Stop()
-            for {
-                select {
-                case msg, ok := <-l.ch:
-                    if !ok {
-                        _ = writeLine(MessagesChannelClosedMessage)
-                        _ = buf.Flush()
-                        return ctx.Err()
-                    }
-                    if err := writeLine(msg); err != nil {
-                        return err
-                    }
-                    _ = buf.Flush()
-                case <-timer.C:
-                    _ = writeLine(GracePeriodEndedMessage)
-                    _ = buf.Flush()
-                    return ctx.Err()
-                }
+			timer := time.NewTimer(GracefulShutdownTimeout)
+			defer timer.Stop()
+			for {
+				select {
+				case msg, ok := <-l.ch:
+					if !ok {
+						return ctx.Err()
+					}
+					if err := writeLine(msg); err != nil {
+						return err
+					}
+					_ = buf.Flush()
+				case <-timer.C:
+					_ = writeLine(
+						NewMessage(
+							CategoryInfo,
+							"Grace period ended",
+							HandlerLoggerTag,
+						),
+					)
+					_ = buf.Flush()
+					return ctx.Err()
+				}
 			}
 		case msg, ok := <-l.ch:
 			if !ok {
 				// Channel is closed, exit the loop
-				_ = writeLine(MessagesChannelClosedMessage)
+				_ = writeLine(
+					NewMessage(
+						CategoryInfo,
+						"Messages channel closed",
+						HandlerLoggerTag,
+					),
+				)
 				_ = buf.Flush()
 				return nil
 			}

@@ -20,7 +20,7 @@ var (
 	ReadTimeout = time.Second * 2
 
 	// StopTimeout is the timeout duration for stopping the USB-CDC communication
-	StopTimeout = 5 * time.Second
+	StopTimeout = 3 * time.Second
 
 	// HeartbeatInterval is the interval for sending heartbeat messages
 	HeartbeatInterval = 1 * time.Second

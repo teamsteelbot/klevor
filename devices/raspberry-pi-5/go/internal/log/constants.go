@@ -35,41 +35,6 @@ var (
 	// HandlerLoggerTag is the logger tag
 	HandlerLoggerTag = "LOGGER_HANDLER"
 
-	// MessagesChannelClosedMessage is the message logged when the messages channel is closed
-	MessagesChannelClosedMessage = NewMessage(
-		CategoryInfo,
-		"Messages channel closed",
-		HandlerLoggerTag,
-	)
-
-	// NilMessageReceivedMessage is the message logged when a LoggerTag message is received
-	NilMessageReceivedMessage = NewMessage(
-		CategoryWarning,
-		"Nil message received",
-		HandlerLoggerTag,
-	)
-
-	// ContextCancelledMessage is the message logged when the context is cancelled
-	ContextCancelledMessage = NewMessage(
-		CategoryInfo,
-		"Context cancelled by caller",
-		HandlerLoggerTag,
-	)
-
-	// StartedMessage is the message logged when the logger starts
-	StartedMessage = NewMessage(
-		CategoryInfo,
-		"Started",
-		HandlerLoggerTag,
-	)
-
-	// GracePeriodEndedMessage is the message logged when the grace period ends
-	GracePeriodEndedMessage = NewMessage(
-		CategoryInfo,
-		"Grace period ended",
-		HandlerLoggerTag,
-	)
-
 	// LogsFolder is the folder name where logs are stored
 	LogsFolder string
 

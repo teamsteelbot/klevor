@@ -118,12 +118,14 @@ func main() {
 	for {
 		// Stop ESC motor and center servo before waiting for switch press
 		if err := stopAndCenter(); err != nil {
-			panic(err)
+			sendErrorMessage(err)
+			continue
 		}
 
 		// Wait for switch press
 		if err := internalswitch.SwitchHandler.Wait(switchOnEvent); err != nil {
-			panic(fmt.Errorf("error waiting for switch press: %w", err))
+			sendErrorMessage(fmt.Errorf("error waiting for switch press: %w", err))
+			continue
 		}
 
 		// Set the exit condition to False
@@ -175,37 +177,17 @@ func main() {
 
 			// Process each incoming message in reversed order
 			for idx := len(*incomingMessages) - 1; idx >= 0; idx-- {
-				msg := (*incomingMessages)[idx]
-
-				// Check if is a heartbeat message
-				if msg.IsEqual(internalusbcdc.IncomingHeartbeatMessage) {
-					continue
-				}
-
-				// Check if is a stop message
-				if msg.IsEqual(internalusbcdc.IncomingStopMessage) {
-					// Set the exit condition to True
-					toExit = true
-
-					// Stop the motor and center the servo
-					if err := stopAndCenter(); err != nil {
-						sendErrorMessage(err)
-					}
-
-					// Send a confirmation message to the serial communication
-					if err := internalusbcdc.USBCDCHandler.SendConfirmationMessage(); err != nil {
-						sendErrorMessage(
-							fmt.Errorf(
-								"error sending confirmation message: %w",
-								err,
-							),
-						)
-					}
+				// Check if the exit flag is set
+				if toExit {
 					break
 				}
 
-				// Check if it's a request to get max motor speed
-				if msg.Category == internalusbcdcenums.IncomingCategoryGetMaxMotorSpeedValue {
+				// Get the message
+				message := (*incomingMessages)[idx]
+
+				// Handle specific message categories
+				switch message.Category {
+				case internalusbcdcenums.IncomingCategoryGetMaxMotorSpeedValue:
 					if err := internalusbcdc.USBCDCHandler.SendMessage(OutgoingMaxMotorSpeedMessage); err != nil {
 						sendErrorMessage(
 							fmt.Errorf(
@@ -214,11 +196,7 @@ func main() {
 							),
 						)
 					}
-					continue
-				}
-
-				// Check if it's a request to get max servo direction
-				if msg.Category == internalusbcdcenums.IncomingCategoryGetMaxServoDirectionValue {
+				case internalusbcdcenums.IncomingCategoryGetMaxServoDirectionValue:
 					if err := internalusbcdc.USBCDCHandler.SendMessage(OutgoingMaxServoDirectionMessage); err != nil {
 						sendErrorMessage(
 							fmt.Errorf(
@@ -227,29 +205,61 @@ func main() {
 							),
 						)
 					}
-					continue
-				}
+				case internalusbcdcenums.IncomingCategoryStatus:
+					// Check if it's a start message
+					status, err := internalusbcdcenums.IncomingStatusFromString(message.Content)
+					if err != nil {
+						sendErrorMessage(fmt.Errorf("failed to parse status message content: %w", err))
+					}
 
-				// Check if the message is to set motor speed or servo angle
-				if msg.Category.IsAMotorCategory() {
-					// If a motor speed message was already processed, skip this one
-					if receivedMotorsSpeedMessage != nil {
-						continue
+					switch status {
+					case internalusbcdcenums.IncomingStatusHeartbeat:
+						break
+					case internalusbcdcenums.IncomingStatusOK:
+						sendErrorMessage(
+							errors.New("received unexpected OK status message"),
+						)
+					case internalusbcdcenums.IncomingStatusStop:
+						// Set the exit condition to True
+						toExit = true
+
+						// Stop the motor and center the servo
+						if err := stopAndCenter(); err != nil {
+							sendErrorMessage(err)
+						}
+
+						// Send a confirmation message to the serial communication
+						if err := internalusbcdc.USBCDCHandler.SendConfirmationMessage(); err != nil {
+							sendErrorMessage(
+								fmt.Errorf(
+									"error sending confirmation message: %w",
+									err,
+								),
+							)
+						}
 					}
-					receivedMotorsSpeedMessage = &msg
-				} else if msg.Category.IsAServoCategory() {
-					// If a servo angle message was already processed, skip this one
-					if receivedServoDirectionMessage != nil {
-						continue
+				default:
+					// Check if the message is to set motor speed or servo angle
+					if message.Category.IsAMotorCategory() {
+						// If a motor speed message was already processed, skip this one
+						if receivedMotorsSpeedMessage != nil {
+							continue
+						}
+						receivedMotorsSpeedMessage = &message
+					} else if message.Category.IsAServoCategory() {
+						// If a servo angle message was already processed, skip this one
+						if receivedServoDirectionMessage != nil {
+							continue
+						}
+						receivedServoDirectionMessage = &message
+					} else {
+						sendErrorMessage(
+							fmt.Errorf(
+								"unknown message category: %v",
+								message.Category,
+							),
+						)
 					}
-					receivedServoDirectionMessage = &msg
-				} else {
-					sendErrorMessage(
-						fmt.Errorf(
-							"unknown message category: %v",
-							msg.Category,
-						),
-					)
 				}
 			}
 

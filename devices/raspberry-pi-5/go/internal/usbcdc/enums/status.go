@@ -15,8 +15,8 @@ type (
 
 const (
 	OutgoingStatusNil OutgoingStatus = iota
-	OutgoingStatusOK
 	OutgoingStatusHeartbeat
+	OutgoingStatusOK
 	OutgoingStatusStop
 )
 

@@ -1,6 +1,8 @@
 package bno08x
 
 import (
+	"fmt"
+
 	ralvarezdevbno08x "github.com/ralvarezdev/go-bno08x"
 	internalledonboard "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/led/onboard"
 	internalusbcdc "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc"
@@ -77,6 +79,9 @@ func (h *DefaultHandler) Update() error {
 	eulerDegrees := h.bno08xService.GetEulerDegrees()
 	if eulerDegrees == nil {
 		return ralvarezdevbno08x.ErrNilEulerDegrees
+	}
+	if len(*eulerDegrees) != 3 {
+		return fmt.Errorf(ErrInvalidEulerDegreesSize, len(*eulerDegrees))
 	}
 
 	// Turn off the LED
