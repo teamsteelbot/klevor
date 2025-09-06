@@ -193,6 +193,25 @@ func (h *DefaultHandler) IsRunning() bool {
 //
 // An error if any issue occurs during reading or writing.
 func (h *DefaultHandler) runToWrap(ctx context.Context, stopFn func()) error {
+	// Create a logger producers
+	incomingMessagesLoggerProducer, err := h.logger.NewProducer(
+		IncomingMessagesLoggerProducerTag,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to create incoming messages logger producer: %w", err)
+	}
+	h.incomingMessagesLoggerProducer = incomingMessagesLoggerProducer
+	defer h.incomingMessagesLoggerProducer.Close()
+
+	outgoingMessagesLoggerProducer, err := h.logger.NewProducer(
+		OutgoingMessagesLoggerProducerTag,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to create outgoing messages logger producer: %w", err)
+	}
+	h.outgoingMessagesLoggerProducer = outgoingMessagesLoggerProducer
+	defer h.outgoingMessagesLoggerProducer.Close()
+
 	// List available serial ports
 	ports, err := serial.GetPortsList()
 	if err != nil {
@@ -291,16 +310,6 @@ func (h *DefaultHandler) incomingMessagesHandler(
 	ctx context.Context,
 	port serial.Port,
 ) error {
-	// Create a logger producer
-	incomingMessagesLoggerProducer, err := h.logger.NewProducer(
-		IncomingMessagesLoggerProducerTag,
-	)
-	if err != nil {
-		return fmt.Errorf("failed to create incoming messages logger producer: %w", err)
-	}
-	h.incomingMessagesLoggerProducer = incomingMessagesLoggerProducer
-	defer h.incomingMessagesLoggerProducer.Close()
-
 	// Received initialization message
 	h.incomingMessagesLoggerProducer.Info("Waiting for initialization message...")
 	for !h.receivedInitializationMessage {
@@ -507,7 +516,7 @@ func (h *DefaultHandler) incomingMessagesHandler(
 func (h *DefaultHandler) readFromPort(port serial.Port) {
 	n, err := port.Read(h.buffer)
 	if err != nil {
-		h.handlerLoggerProducer.Warning(
+		h.incomingMessagesLoggerProducer.Warning(
 			fmt.Sprintf(
 				"An error occurred while reading from the serial port: %v",
 				err,
@@ -544,7 +553,7 @@ func (h *DefaultHandler) readIncomingMessages(
 	// Extract messages from the accumulated buffer
 	messages, err := NewIncomingMessagesFromBuffer(&h.accumulatedBuffer)
 	if err != nil {
-		h.handlerLoggerProducer.Warning(
+		h.incomingMessagesLoggerProducer.Warning(
 			fmt.Sprintf(
 				"An error occurred while processing incoming messages: %v",
 				err,
@@ -570,28 +579,11 @@ func (h *DefaultHandler) outgoingMessagesHandler(
 	ctx context.Context,
 	port serial.Port,
 ) error {
-	// Create a logger producer
-	outgoingMessagesLoggerProducer, err := h.logger.NewProducer(
-		OutgoingMessagesLoggerProducerTag,
-	)
-	if err != nil {
-		return fmt.Errorf("failed to create outgoing messages logger producer: %w", err)
-	}
-	h.outgoingMessagesLoggerProducer = outgoingMessagesLoggerProducer
-	defer h.outgoingMessagesLoggerProducer.Close()
-
 	// Track the last heartbeat time
 	lastHeartbeatTime := time.Now()
 	for {
 		select {
 		case <-ctx.Done():
-			// Process any remaining messages before returning
-			for outgoingMessage := range h.outgoingMessagesCh {
-				if err := h.sendMessage(port, outgoingMessage); err != nil {
-					return err
-				}
-			}
-
 			// Send the final stop message
 			if err := h.sendMessage(port, OutgoingStopMessage); err != nil {
 				return err
@@ -650,7 +642,7 @@ func (h *DefaultHandler) sendMessage(
 ) error {
 	// Check if the message is nil
 	if message == nil {
-		h.handlerLoggerProducer.Warning("Attempted to send a nil outgoing message")
+		h.outgoingMessagesLoggerProducer.Warning("Attempted to send a nil outgoing message")
 		return nil
 	}
 
@@ -660,7 +652,7 @@ func (h *DefaultHandler) sendMessage(
 	}
 
 	// Log the message sent
-	h.handlerLoggerProducer.Info(
+	h.outgoingMessagesLoggerProducer.Info(
 		fmt.Sprintf(
 			"Sent message: %s",
 			message.String(),
