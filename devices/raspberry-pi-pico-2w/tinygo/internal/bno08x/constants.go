@@ -5,7 +5,8 @@ import (
 
 	"machine"
 
-	ralvarezdevbno08x "github.com/ralvarezdev/go-bno08x"
+	ralvarezdevbno08x "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/bno08x/test"
+	//ralvarezdevbno08x "github.com/ralvarezdev/go-bno08x"
 	internalusbcdc "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc"
 )
 
@@ -33,9 +34,45 @@ var (
 
 	// BNO08XHandler is the handler for the BNO08x sensor.
 	BNO08XHandler *DefaultHandler
+
+	// InitializeAttempts is the number of attempts to initialize the BNO08x sensor.
+	InitializeAttempts = 5
 )
 
 func init() {
+	// Some delay to be able to debug the BNO08x initial packets
+	time.Sleep(5 * time.Second)
+
+	// ----- UART Instance -----
+
+	// Initialize the BNO08x UART instance with default settings.
+	for i := 0; i < InitializeAttempts; i++ {
+		uart, err := ralvarezdevbno08x.NewUART(
+			machine.UART1,
+			machine.GPIO8,
+			machine.GPIO9,
+			machine.GPIO6,
+			machine.GPIO7,
+			machine.GPIO4,
+			DataBuffer,
+			afterReset,
+			ralvarezdevbno08x.NewUARTOptions(ralvarezdevbno08x.NewDefaultDebugger(), false),
+			// ralvarezdevbno08x.NewUARTOptions(nil, false),
+		)
+		if err == nil {
+			UART = uart
+			break
+		}
+		
+	}
+
+	if UART == nil {
+		panic("failed to initialize uart bno08x")
+	}
+
+	// Get the BNO08X service from the UART
+	BNO08XService = UART.GetBNO08XService()
+
 	/*
 		// ----- I2C Instance -----
 
@@ -65,32 +102,7 @@ func init() {
 
 		// Get the BNO08X service from the I2C
 		BNO08XService = I2C.GetBNO08XService()
-	*/
 
-	// ----- UART Instance -----
-
-	// Initialize the BNO08x UART instance with default settings.
-	uart, err := ralvarezdevbno08x.NewUART(
-		machine.UART1,
-		machine.GPIO8,
-		machine.GPIO9,
-		machine.GPIO6,
-		machine.GPIO7,
-		machine.GPIO4,
-		DataBuffer,
-		afterReset,
-		// ralvarezdevbno08x.NewUARTOptions(ralvarezdevbno08x.NewDefaultDebugger(), true),
-		ralvarezdevbno08x.NewUARTOptions(nil, false),
-	)
-	if err != nil {
-		panic("failed to initialize uart bno08x: " + err.Error())
-	}
-	UART = uart
-
-	// Get the BNO08X service from the UART
-	BNO08XService = UART.GetBNO08XService()
-
-	/*
 		// ----- UART-RVC Instance -----
 
 		// Initialize the BNO08x UART-RVC instance with default settings.

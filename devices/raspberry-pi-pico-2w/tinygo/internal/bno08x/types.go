@@ -3,7 +3,8 @@ package bno08x
 import (
 	"fmt"
 
-	ralvarezdevbno08x "github.com/ralvarezdev/go-bno08x"
+	ralvarezdevbno08x "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/bno08x/test"
+	//ralvarezdevbno08x "github.com/ralvarezdev/go-bno08x"
 	internalledonboard "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/led/onboard"
 	internalusbcdc "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc"
 )
@@ -74,6 +75,9 @@ func NewDefaultHandler(
 func (h *DefaultHandler) Update() error {
 	// Turn on the LED
 	internalledonboard.OnBoardHandler.SetOn()
+
+	// Update the BNO08X service to process incoming data
+	h.bno08xService.Update()
 
 	// Get the latest euler degrees from the BNO08X sensor
 	eulerDegrees := h.bno08xService.GetEulerDegrees()

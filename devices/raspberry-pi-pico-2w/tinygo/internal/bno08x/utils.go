@@ -1,7 +1,8 @@
 package bno08x
 
 import (
-	ralvarezdevbno08x "github.com/ralvarezdev/go-bno08x"
+	ralvarezdevbno08x "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/bno08x/test"
+	//ralvarezdevbno08x "github.com/ralvarezdev/go-bno08x"
 )
 
 // afterReset is a function that is called after the BNO08x sensor is reset.
