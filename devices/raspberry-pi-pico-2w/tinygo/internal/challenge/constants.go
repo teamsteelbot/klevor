@@ -1,11 +1,12 @@
 package challenge
 
 import (
-	"fmt"
+	"errors"
 
 	"machine"
 
 	internalpullup "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/pullup"
+	tinygotypes "github.com/ralvarezdev/tinygo-types"
 )
 
 var (
@@ -29,8 +30,8 @@ func init() {
 		ObstaclesPullUpHandler,
 		ParkingPullUpHandler,
 	)
-	if err != nil {
-		panic(fmt.Errorf("failed to initialize challenge: %w", err))
+	if err != tinygotypes.ErrorCodeNil {
+		panic(errors.New("failed to initialize challenge handler"))
 	}
 	ChallengeHandler = challengeHandler
 }

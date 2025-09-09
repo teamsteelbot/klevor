@@ -1,7 +1,6 @@
 package escmotor
 
 import (
-	"fmt"
 	"time"
 
 	"machine"
@@ -11,8 +10,8 @@ import (
 	internalmovement "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/movement"
 	internalpullupenabler "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/pullup/enabler"
 	internalusbcdc "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc"
-	internalusbcdcenums "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc/enums"
 	tinygoservo "tinygo.org/x/drivers/servo"
+	tinygotypes "github.com/ralvarezdev/tinygo-types"
 )
 
 type (
@@ -87,25 +86,25 @@ func NewDefaultHandler(
 	usbCDCHandler internalusbcdc.Handler,
 	debugHandler, movementHandler internalpullupenabler.Handler,
 	options *Options,
-) (*DefaultHandler, error) {
+) (*DefaultHandler, tinygotypes.ErrorCode) {
 	// Check if the USB CDC handler is nil
 	if usbCDCHandler == nil {
-		return nil, internalusbcdc.ErrNilHandler
+		return nil, internalusbcdc.ErrorCodeUSBCDCNilHandler
 	}
 
 	// Check if the debug pull-up handler is nil
 	if debugHandler == nil {
-		return nil, internaldebug.ErrNilHandler
+		return nil, internaldebug.ErrorCodeDebugNilHandler
 	}
 
 	// Check if the movement pull-up handler is nil
 	if movementHandler == nil {
-		return nil, internalmovement.ErrNilHandler
+		return nil, internalmovement.ErrorCodeMovementNilHandler
 	}
 
 	// Check if options are nil
 	if options == nil {
-		return nil, ErrNilOptions
+		return nil, ErrorCodeESCMotorNilOptions
 	}
 
 	// Configure the PWM
@@ -114,13 +113,13 @@ func NewDefaultHandler(
 			Period: uint64(time.Second / time.Duration(options.Frequency)),
 		},
 	); err != nil {
-		return nil, fmt.Errorf(internal.ErrFailedToConfigurePWM, err)
+		return nil, internal.ErrorCodeFailedToConfigurePWM
 	}
 
 	// Create a new instance of the servo
 	servo, err := tinygoservo.New(pwm, pin)
 	if err != nil {
-		return nil, err
+		return nil, ErrorCodeESCMotorFailedToInitializeServo
 	}
 
 	// Calculate the half pulse and range pulse
@@ -146,7 +145,7 @@ func NewDefaultHandler(
 	// Stop the motor initially
 	_ = handler.Stop()
 
-	return handler, nil
+	return handler, tinygotypes.ErrorCodeNil
 }
 
 // SetSpeed sets the ESC motor speed.
@@ -154,7 +153,7 @@ func NewDefaultHandler(
 // Parameters:
 //
 // speed: Speed value between -half of the maximum pulse (full backward) and half of the maximum pulse (full forward).
-func (e *DefaultHandler) SetSpeed(speed uint16, isForward bool) error {
+func (e *DefaultHandler) SetSpeed(speed uint16, isForward bool) tinygotypes.ErrorCode {
 	// Check if the is polarity inverted
 	if e.isPolarityInverted {
 		isForward = !isForward
@@ -162,12 +161,7 @@ func (e *DefaultHandler) SetSpeed(speed uint16, isForward bool) error {
 
 	// Check if the speed is within the valid range
 	if speed > MaxSpeed {
-		return fmt.Errorf(
-			ErrSpeedOutOfRange,
-			int16(StopSpeed)-int16(MaxSpeed),
-			int16(StopSpeed)+int16(MaxSpeed),
-			int16(speed),
-		)
+		return ErrorCodeESCMotorSpeedOutOfRange
 	}
 
 	// Calculate the microseconds based on the speed and direction
@@ -182,19 +176,9 @@ func (e *DefaultHandler) SetSpeed(speed uint16, isForward bool) error {
 
 	// Ensure the microseconds is within the valid range
 	if microseconds < e.minPulseWidth {
-		return fmt.Errorf(
-			ErrSpeedBelowMinPulseWidth,
-			e.minPulseWidth,
-			-e.rangePulseWidth/2,
-			microseconds,
-		)
+		return ErrorCodeESCMotorSpeedBelowMinPulseWidth
 	} else if microseconds > e.maxPulseWidth {
-		return fmt.Errorf(
-			ErrSpeedAboveMaxPulseWidth,
-			e.maxPulseWidth,
-			e.rangePulseWidth/2,
-			microseconds,
-		)
+		return ErrorCodeESCMotorSpeedAboveMaxPulseWidth
 	}
 
 	// Set the servo microseconds if movement is enabled
@@ -225,16 +209,15 @@ func (e *DefaultHandler) SetSpeed(speed uint16, isForward bool) error {
 
 	// Send the debug message if the debug handler is enabled
 	if e.debugHandler.IsEnabled() && e.usbCDCHandler != nil {
-		err := e.usbCDCHandler.SendMessage(
+		if err := e.usbCDCHandler.SendMessage(
 			internalusbcdc.NewOutgoingDebugMessage(
-				internalusbcdcenums.DebugReceivedMotorSpeed,
+				internalusbcdc.DebugReceivedMotorSpeed,
 			),
-		)
-		if err != nil {
-			return fmt.Errorf(ErrSendingDebugMotorSpeedMessage, err)
+		); err != tinygotypes.ErrorCodeNil {
+			return ErrorCodeESCMotorFailedToSendDebugMotorSpeedMessage
 		}
 	}
-	return nil
+	return tinygotypes.ErrorCodeNil
 }
 
 // GetSpeed returns the current speed of the ESC motor.
@@ -251,7 +234,7 @@ func (e *DefaultHandler) GetSpeed() int16 {
 // Returns:
 //
 // An error if the speed could not be set to 0, otherwise nil.
-func (e *DefaultHandler) Stop() error {
+func (e *DefaultHandler) Stop() tinygotypes.ErrorCode {
 	return e.SetSpeed(StopSpeed, true)
 }
 
@@ -264,7 +247,7 @@ func (e *DefaultHandler) Stop() error {
 // Returns:
 //
 // An error if the speed could not be set, otherwise nil.
-func (e *DefaultHandler) SetSpeedForward(speed uint16) error {
+func (e *DefaultHandler) SetSpeedForward(speed uint16) tinygotypes.ErrorCode {
 	return e.SetSpeed(speed, true)
 }
 
@@ -277,7 +260,7 @@ func (e *DefaultHandler) SetSpeedForward(speed uint16) error {
 // Returns:
 //
 // An error if the speed could not be set, otherwise nil.
-func (e *DefaultHandler) SetSpeedBackward(speed uint16) error {
+func (e *DefaultHandler) SetSpeedBackward(speed uint16) tinygotypes.ErrorCode {
 	return e.SetSpeed(speed, false)
 }
 
@@ -290,38 +273,32 @@ func (e *DefaultHandler) SetSpeedBackward(speed uint16) error {
 // Returns:
 //
 // An error if the motor speed could not be set, otherwise nil
-func (e *DefaultHandler) SetSpeedBasedOnReceivedMessage(message *internalusbcdc.IncomingMessage) error {
+func (e *DefaultHandler) SetSpeedBasedOnReceivedMessage(message *internalusbcdc.IncomingMessage) tinygotypes.ErrorCode {
 	// Check if the message is nil
 	if message == nil {
-		return internalusbcdc.ErrNilIncomingMessage
+		return internalusbcdc.ErrorCodeUSBCDCNilIncomingMessage
 	}
 
 	// Check if the motor speed should be retrieved from the message
 	var motorSpeed uint16
-	if message.Category != internalusbcdcenums.IncomingCategoryMotorSpeedStop {
+	if message.Category != internalusbcdc.IncomingCategoryMotorSpeedStop {
 		// Get int16 speed from message content
 		speed, err := message.GetContentAsUint16()
-		if err != nil {
-			return fmt.Errorf(
-				"invalid motor speed value: %w",
-				err,
-			)
+		if err != tinygotypes.ErrorCodeNil {
+			return ErrorCodeESCMotorInvalidMotorSpeedValue
 		}
 		motorSpeed = speed
 	}
 
 	// Check the motor speed category
 	switch message.Category {
-	case internalusbcdcenums.IncomingCategoryMotorSpeedStop:
+	case internalusbcdc.IncomingCategoryMotorSpeedStop:
 		return e.Stop()
-	case internalusbcdcenums.IncomingCategoryMotorSpeedForward:
+	case internalusbcdc.IncomingCategoryMotorSpeedForward:
 		return e.SetSpeedForward(motorSpeed)
-	case internalusbcdcenums.IncomingCategoryMotorSpeedBackward:
+	case internalusbcdc.IncomingCategoryMotorSpeedBackward:
 		return e.SetSpeedBackward(motorSpeed)
 	default:
-		return fmt.Errorf(
-			"unknown motor speed category: %v",
-			message.Category,
-		)
+		return ErrorCodeESCMotorUnknownMotorSpeedCategory
 	}
 }

@@ -1,16 +1,13 @@
 package usbcdc
 
 import (
-	"fmt"
-	"strings"
 	"time"
 
 	"machine"
 
 	internalchallenge "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/challenge"
-	internalchallengeenums "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/challenge/enums"
 	internalled "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/led"
-	internalusbcdcenums "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc/enums"
+	tinygotypes "github.com/ralvarezdev/tinygo-types"
 )
 
 type (
@@ -19,6 +16,9 @@ type (
 		challengeHandler internalchallenge.Handler
 		ledHandler       internalled.Handler
 		serialer         machine.Serialer
+		incomingMessages []*IncomingMessage
+		buffer           []byte
+		bufferIndex      uint8
 	}
 )
 
@@ -35,15 +35,15 @@ type (
 func NewDefaultHandler(
 	challengeHandler internalchallenge.Handler,
 	ledHandler internalled.Handler,
-) (*DefaultHandler, error) {
+) (*DefaultHandler, tinygotypes.ErrorCode) {
 	// Check if the challengeHandler is nil
 	if challengeHandler == nil {
-		return nil, internalchallenge.ErrNilHandler
+		return nil, internalchallenge.ErrorCodeChallengeNilHandler
 	}
 
 	// Check if the ledHandler is nil
 	if ledHandler == nil {
-		return nil, internalled.ErrNilHandler
+		return nil, internalled.ErrorCodeLEDNilHandler
 	}
 
 	// Configure the USB CDC serial port
@@ -52,28 +52,40 @@ func NewDefaultHandler(
 			BaudRate: BaudRate,
 		},
 	); err != nil {
-		return nil, fmt.Errorf(ErrFailedToConfigureUSBCDC, err)
+		return nil, ErrorCodeUSBCDCFailedToConfigureUSBCDC
 	}
 
 	return &DefaultHandler{
-		challengeHandler,
-		ledHandler,
-		machine.USBCDC,
-	}, nil
+		challengeHandler: challengeHandler,
+		ledHandler:       ledHandler,
+		serialer:         machine.USBCDC,
+		incomingMessages: make([]*IncomingMessage, IncomingMessagesBufferSize),
+		buffer:           make([]byte, 0, BufferSize),
+		bufferIndex:      0,
+	}, tinygotypes.ErrorCodeNil
 }
 
-// ReceiveMessages receives messages from the USB CDC.
+// GetIncomingMessages returns the incoming messages received from the USB CDC.
 //
 // Returns:
 //
-// A pointer to a list of received messages or an error if it fails to receive messages
-func (d *DefaultHandler) ReceiveMessages() (*[]IncomingMessage, error) {
+// A pointer to a slice of IncomingMessage
+func (d *DefaultHandler) GetIncomingMessages() []*IncomingMessage {
+	return d.incomingMessages
+}
+
+// Update receives messages from the USB CDC.
+//
+// Returns:
+//
+// An error if it fails to receive messages
+func (d *DefaultHandler) Update() tinygotypes.ErrorCode {
 	// If no messages are received, turn off the LED
 	if d.serialer.Buffered() == 0 {
 		if d.ledHandler.IsOn() {
 			d.ledHandler.SetOff()
 		}
-		return nil, nil
+		return tinygotypes.ErrorCodeNil
 	}
 
 	// Turn on the LED to indicate a message has been received
@@ -81,33 +93,45 @@ func (d *DefaultHandler) ReceiveMessages() (*[]IncomingMessage, error) {
 		d.ledHandler.SetOn()
 	}
 
-	// Initialize a slice to hold the messages and a buffer to hold the incoming data
-	messages := &[]IncomingMessage{}
-	buffer := make([]byte, 0, BufferSize)
-	for d.serialer.Buffered() > 0 {
-		// Read a byte from the serial port
-		c, err := d.serialer.ReadByte()
-		if err != nil {
-			return nil, fmt.Errorf(ErrFailedReadingFromSerial, err)
-		}
+	// Clear the existing incoming messages
+	for i := range d.incomingMessages {
+		d.incomingMessages[i] = nil
+	}
 
-		// If the byte is the end character, process the buffer
-		if c == EndChar {
-			messageStr := string(buffer)
-			message, err := NewIncomingMessageFromString(messageStr)
+	// Initialize a slice to hold the messages and a buffer to hold the incoming data
+	for idx := 0; idx < IncomingMessagesBufferSize; idx++ {
+		for d.serialer.Buffered() > 0 {
+			// Read a byte from the serial port
+			c, err := d.serialer.ReadByte()
 			if err != nil {
-				return nil, err
+				return ErrorCodeUSBCDCFailedReadingFromSerial
 			}
-			*messages = append(*messages, *message)
+
+			// Add the byte to the buffer
+			d.buffer[d.bufferIndex] = c
+
+			// If the byte is not the end character, continue reading
+			if c != EndChar {
+				d.bufferIndex++
+				continue
+			}
+
+			// Process the buffer to create an IncomingMessage
+			message, err := NewIncomingMessage(d.buffer)
+			if err != tinygotypes.ErrorCodeNil {
+				return err
+			}
+			d.incomingMessages[idx] = message
 
 			// Clear the buffer
-			buffer = make([]byte, 0, BufferSize)
-		} else {
-			// Otherwise, add the byte to the buffer
-			buffer = append(buffer, c)
+			d.bufferIndex = 0
+			for i := range d.buffer {
+				d.buffer[i] = 0
+			}
+			break
 		}
 	}
-	return messages, nil
+	return tinygotypes.ErrorCodeNil
 }
 
 // SendMessage sends a message to the USB CDC.
@@ -119,62 +143,17 @@ func (d *DefaultHandler) ReceiveMessages() (*[]IncomingMessage, error) {
 // Returns:
 //
 // An error if it fails to send the message
-func (d *DefaultHandler) SendMessage(message *OutgoingMessage) error {
+func (d *DefaultHandler) SendMessage(message *OutgoingMessage) tinygotypes.ErrorCode {
 	// Check if the message is nil
 	if message == nil {
-		return ErrNilOutgoingMessage
+		return ErrorCodeUSBCDCNilOutgoingMessage
 	}
 
 	// Send the message to the console port
-	if _, err := d.serialer.Write([]byte(message.String())); err != nil {
-		return fmt.Errorf(ErrFailedToSendMessage, err)
+	if _, err := d.serialer.Write(message.GetBuffer()); err != nil {
+		return ErrorCodeUSBCDCFailedToSendMessage
 	}
-	return nil
-}
-
-// SendBufferMessage sends a message in chunks to the USB CDC console stream.
-//
-// Parameters:
-//
-// category: The category of the message
-// message: The message to send as a Strings.Builder object
-//
-// Returns:
-//
-// An error if there is an error in sending the message
-func (d *DefaultHandler) SendBufferMessage(
-	category internalusbcdcenums.OutgoingCategory,
-	message *strings.Builder,
-) error {
-	// Send the category header
-	if category == internalusbcdcenums.OutgoingCategoryNil {
-		return fmt.Errorf(ErrNilOutgoingCategory, category)
-	}
-	d.serialer.WriteByte(
-		byte(category),
-	)
-
-	// Send the message in chunks
-	messageStr := message.String()
-	for i := 0; i < len(messageStr); i += ChunkSize {
-		// Get the chunk of the message to send
-		end := i + ChunkSize
-		if end > len(messageStr) {
-			end = len(messageStr)
-		}
-		chunk := messageStr[i:end]
-
-		// Send the chunk to the console port
-		if _, err := d.serialer.Write([]byte(chunk)); err != nil {
-			return fmt.Errorf(ErrFailedToSendChunkMessage, err)
-		}
-	}
-
-	// Send the end character to indicate the end of the message
-	if err := d.serialer.WriteByte(EndChar); err != nil {
-		return fmt.Errorf(ErrFailedToSendEndCharacter, err)
-	}
-	return nil
+	return tinygotypes.ErrorCodeNil
 }
 
 // WaitForConfirmationMessage waits for a confirmation message from the USB CDC.
@@ -190,29 +169,21 @@ func (d *DefaultHandler) SendBufferMessage(
 func (d *DefaultHandler) WaitForConfirmationMessage(
 	messageToConfirm *OutgoingMessage,
 	timeout time.Duration,
-) error {
+) tinygotypes.ErrorCode {
 	startTime := time.Now()
 	for time.Since(startTime) < timeout {
-		messages, err := d.ReceiveMessages()
-		if err != nil {
+		if err := d.Update(); err != tinygotypes.ErrorCodeNil {
 			return err
-		}
-		if messages == nil || len(*messages) == 0 {
-			continue
 		}
 
 		// Check if any of the received messages is the confirmation message
-		for _, message := range *messages {
-			if message.IsEqual(IncomingOKMessage) {
-				return nil
+		for _, message := range d.incomingMessages {
+			if message != nil && message.IsEqual(IncomingOKMessage) {
+				return tinygotypes.ErrorCodeNil
 			}
 		}
 	}
-	return fmt.Errorf(
-		ErrConfirmationMessageTimeout,
-		messageToConfirm.FormatToSendAsAnErrorMessage(),
-		timeout.Seconds(),
-	)
+	return ErrorCodeUSBCDCConfirmationMessageTimeout
 }
 
 // SendConfirmationMessage sends a confirmation message through the USB CDC.
@@ -220,7 +191,7 @@ func (d *DefaultHandler) WaitForConfirmationMessage(
 // Returns:
 //
 // An error if it fails to send the confirmation message
-func (d *DefaultHandler) SendConfirmationMessage() error {
+func (d *DefaultHandler) SendConfirmationMessage() tinygotypes.ErrorCode {
 	return d.SendMessage(OutgoingOKMessage)
 }
 
@@ -229,7 +200,7 @@ func (d *DefaultHandler) SendConfirmationMessage() error {
 // Returns:
 //
 // An error if it fails to send the initialization message
-func (d *DefaultHandler) SendInitializationMessage() error {
+func (d *DefaultHandler) SendInitializationMessage() tinygotypes.ErrorCode {
 	// Send the end character message to indicate initialization
 	return d.serialer.WriteByte(EndChar)
 }
@@ -239,23 +210,24 @@ func (d *DefaultHandler) SendInitializationMessage() error {
 // Returns:
 //
 // An error if it fails to send the challenge message or if confirmation is not received
-func (d *DefaultHandler) SendChallengeMessage() error {
+func (d *DefaultHandler) SendChallengeMessage() tinygotypes.ErrorCode {
 	// Get the challenge type from the challenge handler
 	challengeType := d.challengeHandler.GetChallenge()
 
 	// Send the challenge message based on the challenge type
 	var challengeMessage *OutgoingMessage
-	if challengeType == internalchallengeenums.ChallengeWithObstaclesAndParking {
+	if challengeType == internalchallenge.ChallengeWithObstaclesAndParking {
 		challengeMessage = OutgoingChallengeWithObstaclesAndParkingMessage
-	} else if challengeType == internalchallengeenums.ChallengeWithObstacles {
+	} else if challengeType == internalchallenge.ChallengeWithObstacles {
 		challengeMessage = OutgoingChallengeWithObstaclesMessage
-	} else if challengeType == internalchallengeenums.ChallengeWithoutObstacles {
+	} else if challengeType == internalchallenge.ChallengeWithoutObstacles {
 		challengeMessage = OutgoingChallengeWithoutObstaclesMessage
 	} else {
-		return fmt.Errorf(ErrUnknownChallengeType, challengeType)
+		return ErrorCodeUSBCDCUnknownChallengeType
 	}
 
-	if err := d.SendMessage(challengeMessage); err != nil {
+	// Send the challenge message
+	if err := d.SendMessage(challengeMessage); err != tinygotypes.ErrorCodeNil {
 		return err
 	}
 
@@ -271,15 +243,11 @@ func (d *DefaultHandler) SendChallengeMessage() error {
 // Returns:
 //
 // An error if it fails to send the yaw degrees message
-func (d *DefaultHandler) SendBNO08XYawDegreesMessage(yawDegrees float64) error {
-	// Create the BNO08x yaw degrees message
-	bno08xMessage := NewOutgoingMessage(
-		internalusbcdcenums.OutgoingCategoryBNO08XYawDegrees,
-		fmt.Sprintf("%.1f", yawDegrees),
-	)
-
-	// Send the BNO08x yaw degrees message
-	return d.SendMessage(bno08xMessage)
+func (d *DefaultHandler) SendBNO08XYawDegreesMessage(yawDegrees float64) tinygotypes.ErrorCode {
+	return d.SendMessage(NewOutgoingMessageFromFloat64Content(
+		OutgoingCategoryBNO08XYawDegrees,
+		yawDegrees,
+	))
 }
 
 // SendBNO08XYawTurnsMessage sends a BNO08x yaw turns message to the USB CDC.
@@ -291,15 +259,11 @@ func (d *DefaultHandler) SendBNO08XYawDegreesMessage(yawDegrees float64) error {
 // Returns:
 //
 // An error if it fails to send the yaw turns message
-func (d *DefaultHandler) SendBNO08XYawTurnsMessage(turns int) error {
-	// Create the BNO08x yaw turns message
-	bno08xMessage := NewOutgoingMessageFromIntContent(
-		internalusbcdcenums.OutgoingCategoryBNO08XYawTurns,
+func (d *DefaultHandler) SendBNO08XYawTurnsMessage(turns int) tinygotypes.ErrorCode {
+	return d.SendMessage(NewOutgoingMessageFromIntContent(
+		OutgoingCategoryBNO08XYawTurns,
 		turns,
-	)
-
-	// Send the BNO08x yaw turns message
-	return d.SendMessage(bno08xMessage)
+	))
 }
 
 // SendErrorMessage sends an error message to the USB CDC.
@@ -311,20 +275,10 @@ func (d *DefaultHandler) SendBNO08XYawTurnsMessage(turns int) error {
 // Returns:
 //
 // An error if it fails to send the error message
-func (d *DefaultHandler) SendErrorMessage(err error) error {
-	// Check if the error is nil
-	if err == nil {
-		return nil
-	}
-
-	// Create the error message
-	errorMessage := NewOutgoingMessage(
-		internalusbcdcenums.OutgoingCategoryError,
-		err.Error(),
-	)
-
-	// Send the error message
-	return d.SendMessage(errorMessage)
+func (d *DefaultHandler) SendErrorMessage(err tinygotypes.ErrorCode) tinygotypes.ErrorCode {
+	return d.SendMessage(NewOutgoingErrorMessage(
+		err,
+	))
 }
 
 // SendStartMessage sends a start message to the USB CDC and waits for confirmation.
@@ -332,9 +286,9 @@ func (d *DefaultHandler) SendErrorMessage(err error) error {
 // Returns:
 //
 // An error if it fails to send the start message
-func (d *DefaultHandler) SendStartMessage() error {
+func (d *DefaultHandler) SendStartMessage() tinygotypes.ErrorCode {
 	// Send the start message
-	if err := d.SendMessage(OutgoingStartMessage); err != nil {
+	if err := d.SendMessage(OutgoingStartMessage); err != tinygotypes.ErrorCodeNil {
 		return err
 	}
 

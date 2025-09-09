@@ -1,9 +1,10 @@
 package _switch
 
 import (
-	"errors"
+	tinygotypes "github.com/ralvarezdev/tinygo-types"
+	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal"
 )
 
-var (
-	ErrNilOnEventFunction = errors.New("on event function cannot be nil")
+const (
+	ErrorCodeSwitchNilOnEventFunction tinygotypes.ErrorCode = tinygotypes.ErrorCode(iota + internal.ErrorCodeSwitchStartNumber)
 )

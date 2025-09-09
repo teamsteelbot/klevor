@@ -1,31 +1,17 @@
 package main
 
 import (
-	"fmt"
-	"strings"
 	"time"
 
-	internaldebug "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/debug"
 	internalescmotor "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/escmotor"
 	internalledonboard "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/led/onboard"
-	internalmovement "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/movement"
+	tinygotypes "github.com/ralvarezdev/tinygo-types"
 )
 
 func main() {
-	spacer := strings.Repeat("-", 40)
-
 	for {
 		// Wait 5 seconds before starting the test
 		time.Sleep(5 * time.Second)
-
-		// Print movement and debug flag
-		fmt.Printf(
-			"\n%s\nMovement flag: %t\nDebug flag: %t\n%s\n",
-			spacer,
-			internalmovement.Handler.IsEnabled(),
-			internaldebug.Handler.IsEnabled(),
-			spacer,
-		)
 
 		// Turn on the LED
 		internalledonboard.OnBoardHandler.SetOn()
@@ -35,15 +21,15 @@ func main() {
 		for speed = 0; speed <= 100; speed += 1 {
 			if err := internalescmotor.ESCMotorHandler.SetSpeedForward(
 				speed,
-			); err != nil {
-				fmt.Println(err)
+			); err != tinygotypes.ErrorCodeNil {
+				return
 			}
 			time.Sleep(20 * time.Millisecond)
 		}
 
 		// Stop the motor for a while
-		if err := internalescmotor.ESCMotorHandler.Stop(); err != nil {
-			fmt.Println(err)
+		if err := internalescmotor.ESCMotorHandler.Stop(); err != tinygotypes.ErrorCodeNil {
+			return
 		}
 		time.Sleep(2 * time.Second)
 
@@ -51,15 +37,15 @@ func main() {
 		for speed = 0; speed <= 100; speed += 1 {
 			if err := internalescmotor.ESCMotorHandler.SetSpeedBackward(
 				speed,
-			); err != nil {
-				fmt.Println(err)
+			); err != tinygotypes.ErrorCodeNil {
+				return
 			}
 			time.Sleep(20 * time.Millisecond)
 		}
 
 		// Stop the motor
-		if err := internalescmotor.ESCMotorHandler.Stop(); err != nil {
-			fmt.Println(err)
+		if err := internalescmotor.ESCMotorHandler.Stop(); err != tinygotypes.ErrorCodeNil {
+			return
 		}
 
 		// Turn off the LED

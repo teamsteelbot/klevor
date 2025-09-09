@@ -1,6 +1,6 @@
 //go:build tinygo && (rp2040 || rp2350)
 
-package go_bno08x
+package tinygo_bno08x
 
 type (
 	// DataBuffer is an interface for managing data buffers
@@ -61,8 +61,14 @@ func (db *DefaultDataBuffer) SetData(data *[]byte) {
 
 // ClearData clears the data buffer
 func (db *DefaultDataBuffer) ClearData() {
-	db.data = new([]byte)
-	*db.data = make([]byte, DataBufferSize)
+	// If the data buffer is nil, do nothing
+	if db.data == nil {
+		return
+	}
+
+	for i := range *db.data {
+		(*db.data)[i] = 0
+	}
 }
 
 // validateChannelNumber validates the channel number

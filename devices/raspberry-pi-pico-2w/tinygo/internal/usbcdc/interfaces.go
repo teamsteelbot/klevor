@@ -1,32 +1,28 @@
 package usbcdc
 
 import (
-	"strings"
 	"time"
 
-	internalusbcdcenums "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc/enums"
+	tinygotypes "github.com/ralvarezdev/tinygo-types"
 )
 
 type (
 	// Handler is the interface to manage the USB CDC connection.
 	Handler interface {
-		ReceiveMessages() (*[]IncomingMessage, error)
-		SendMessage(message *OutgoingMessage) error
-		SendBufferMessage(
-			category internalusbcdcenums.OutgoingCategory,
-			content *strings.Builder,
-		) error
-		SendConfirmationMessage() error
+		Update() tinygotypes.ErrorCode
+		GetIncomingMessages() []*IncomingMessage
+		SendMessage(message *OutgoingMessage) tinygotypes.ErrorCode
+		SendConfirmationMessage() tinygotypes.ErrorCode
 		WaitForConfirmationMessage(
 			messageToConfirm *OutgoingMessage,
 			timeout time.Duration,
-		) error
-		SendInitializationMessage() error
-		SendChallengeMessage() error
-		SendBNO08XYawDegreesMessage(yawDegrees float64) error
-		SendBNO08XYawTurnsMessage(turns int) error
-		SendErrorMessage(err error) error
-		SendStartMessage() error
+		) tinygotypes.ErrorCode
+		SendInitializationMessage() tinygotypes.ErrorCode
+		SendChallengeMessage() tinygotypes.ErrorCode
+		SendBNO08XYawDegreesMessage(yawDegrees float64) tinygotypes.ErrorCode
+		SendBNO08XYawTurnsMessage(turns int) tinygotypes.ErrorCode
+		SendErrorMessage(err tinygotypes.ErrorCode) tinygotypes.ErrorCode
+		SendStartMessage() tinygotypes.ErrorCode
 		Stop()
 	}
 )

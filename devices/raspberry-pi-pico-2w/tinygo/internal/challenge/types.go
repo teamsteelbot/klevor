@@ -1,8 +1,8 @@
 package challenge
 
 import (
-	internalchallengeenums "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/challenge/enums"
 	internalpullup "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/pullup"
+	tinygotypes "github.com/ralvarezdev/tinygo-types"
 )
 
 type (
@@ -25,18 +25,18 @@ type (
 func NewDefaultHandler(
 	obstaclesPullUpHandler internalpullup.Handler,
 	parkingPullUpHandler internalpullup.Handler,
-) (*DefaultHandler, error) {
+) (*DefaultHandler, tinygotypes.ErrorCode) {
 	if obstaclesPullUpHandler == nil {
-		return nil, ErrNilObstaclesPullUpHandler
+		return nil, ErrorCodeChallengeNilObstaclesPullUpHandler
 	}
 	if parkingPullUpHandler == nil {
-		return nil, ErrNilParkingPullUpHandler
+		return nil, ErrorCodeChallengeNilParkingPullUpHandler
 	}
 
 	return &DefaultHandler{
 		obstaclesPullUpHandler,
 		parkingPullUpHandler,
-	}, nil
+	}, tinygotypes.ErrorCodeNil
 }
 
 // IsWithObstacles checks if the challenge is with obstacles but not parking.
@@ -71,13 +71,13 @@ func (d *DefaultHandler) IsWithoutObstacles() bool {
 // Returns:
 //
 // The current challenge as an enum value.
-func (d *DefaultHandler) GetChallenge() internalchallengeenums.Challenge {
+func (d *DefaultHandler) GetChallenge() Challenge {
 	if d.IsWithObstaclesAndParking() {
-		return internalchallengeenums.ChallengeWithObstaclesAndParking
+		return ChallengeWithObstaclesAndParking
 	} else if d.IsWithObstacles() {
-		return internalchallengeenums.ChallengeWithObstacles
+		return ChallengeWithObstacles
 	} else if d.IsWithoutObstacles() {
-		return internalchallengeenums.ChallengeWithoutObstacles
+		return ChallengeWithoutObstacles
 	}
-	return internalchallengeenums.ChallengeNil
+	return ChallengeNil
 }

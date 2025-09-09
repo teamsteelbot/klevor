@@ -4,6 +4,7 @@ import (
 	"machine"
 
 	internalpullup "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/pullup"
+	tinygotypes "github.com/ralvarezdev/tinygo-types"
 )
 
 type (
@@ -24,14 +25,14 @@ type (
 //	An instance of DefaultHandler, or an error if the pull-up handler is nil
 func NewDefaultHandler(
 	pullUpHandler internalpullup.Handler,
-) (*DefaultHandler, error) {
+) (*DefaultHandler, tinygotypes.ErrorCode) {
 	if pullUpHandler == nil {
-		return nil, internalpullup.ErrNilPullUpHandler
+		return nil, internalpullup.ErrorCodePullUpResistorNilHandler
 	}
 
 	return &DefaultHandler{
 		pullUpHandler,
-	}, nil
+	}, tinygotypes.ErrorCodeNil
 }
 
 // NewDefaultHandlerFromPin creates a new default debug handler with a pull-up handler created from the given pin.

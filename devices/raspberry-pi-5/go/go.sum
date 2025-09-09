@@ -8,6 +8,8 @@ github.com/ralvarezdev/go-crypto v0.6.4 h1:eX257KaSWGa4zU+COX7Ja0yzbkAPdwRAtPlDa
 github.com/ralvarezdev/go-crypto v0.6.4/go.mod h1:jY/KGELdLAiBZSbn7x5jRGCDifEGF4X5GvhgAFZJnSM=
 github.com/ralvarezdev/go-strings v0.1.12 h1:AtOPDJ4lVO+33p7O4uECdD4C4D037h256zWz9uQ5eIQ=
 github.com/ralvarezdev/go-strings v0.1.12/go.mod h1:8sFOqmPJpqzS7bTjf91EzUCITnwpmkfifwY80GxV5r8=
+github.com/ralvarezdev/tinygo-types v0.0.2 h1:gCQyzvk6kgPJ0HQuEsYw/rAGXBJAu1au9piVhlAsIXM=
+github.com/ralvarezdev/tinygo-types v0.0.2/go.mod h1:oqYL6BcwQmVa8/AswTJkcmjezOAg86IYYaxfaVKMOOI=
 github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcUk=
 github.com/stretchr/testify v1.8.4/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
 go.bug.st/serial v1.6.4 h1:7FmqNPgVp3pu2Jz5PoPtbZ9jJO5gnEnZIvnI1lzve8A=

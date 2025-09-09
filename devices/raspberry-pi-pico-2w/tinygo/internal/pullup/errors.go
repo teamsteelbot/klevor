@@ -1,9 +1,11 @@
 package pullup
 
 import (
-	"errors"
+	tinygotypes "github.com/ralvarezdev/tinygo-types"
+	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal"
 )
 
-var (
-	ErrNilPullUpHandler = errors.New("pull-up handler cannot be nil")
+
+const (
+	ErrorCodePullUpResistorNilHandler = tinygotypes.ErrorCode(iota + internal.ErrorCodePullUpResistorStartNumber)
 )

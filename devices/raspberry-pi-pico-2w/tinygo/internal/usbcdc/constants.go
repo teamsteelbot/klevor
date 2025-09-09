@@ -1,13 +1,12 @@
 package usbcdc
 
 import (
-	"fmt"
+	"errors"
 	"time"
 
 	internalchallenge "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/challenge"
-	internalchallengeenums "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/challenge/enums"
 	internalledonboard "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/led/onboard"
-	internalusbcdcenums "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc/enums"
+	tinygo_types "github.com/ralvarezdev/tinygo-types"
 )
 
 const (
@@ -15,7 +14,7 @@ const (
 	EndChar byte = 0x04
 
 	// BufferSize is the size of the buffer for USB-CDC communication
-	BufferSize uint8 = 16
+	BufferSize uint8 = 8
 
 	// ChunkSize is the default size of data chunks
 	ChunkSize = 64
@@ -25,32 +24,35 @@ const (
 
 	// BaudRate is the baud rate for USB-CDC communication
 	BaudRate = 921600
+
+	// IncomingMessagesBufferSize is the size of the incoming messages buffer
+	IncomingMessagesBufferSize = 10
 )
 
 var (
 	// IncomingStopMessage is the incoming stop message for USB-CDC communication
-	IncomingStopMessage = NewIncomingStatusMessage(internalusbcdcenums.IncomingStatusStop)
+	IncomingStopMessage = NewIncomingStatusMessage(IncomingStatusStop)
 
 	// IncomingOKMessage is the incoming OK message for USB-CDC communication
-	IncomingOKMessage = NewIncomingStatusMessage(internalusbcdcenums.IncomingStatusOK)
+	IncomingOKMessage = NewIncomingStatusMessage(IncomingStatusOK)
 
 	// IncomingHeartbeatMessage is the incoming heartbeat message for USB-CDC communication
-	IncomingHeartbeatMessage = NewIncomingStatusMessage(internalusbcdcenums.IncomingStatusHeartbeat)
+	IncomingHeartbeatMessage = NewIncomingStatusMessage(IncomingStatusHeartbeat)
 
 	// OutgoingStartMessage is the outgoing start message for USB-CDC communication
-	OutgoingStartMessage = NewOutgoingStatusMessage(internalusbcdcenums.OutgoingStatusStart)
+	OutgoingStartMessage = NewOutgoingStatusMessage(OutgoingStatusStart)
 
 	// OutgoingOKMessage is the outgoing OK message for USB-CDC communication
-	OutgoingOKMessage = NewOutgoingStatusMessage(internalusbcdcenums.OutgoingStatusOK)
+	OutgoingOKMessage = NewOutgoingStatusMessage(OutgoingStatusOK)
 
 	// OutgoingChallengeWithObstaclesMessage is the outgoing challenge message with obstacles
-	OutgoingChallengeWithObstaclesMessage = NewOutgoingChallengeMessage(internalchallengeenums.ChallengeWithObstacles)
+	OutgoingChallengeWithObstaclesMessage = NewOutgoingChallengeMessage(internalchallenge.ChallengeWithObstacles)
 
 	// OutgoingChallengeWithObstaclesAndParkingMessage is the outgoing challenge message with obstacles and parking
-	OutgoingChallengeWithObstaclesAndParkingMessage = NewOutgoingChallengeMessage(internalchallengeenums.ChallengeWithObstaclesAndParking)
+	OutgoingChallengeWithObstaclesAndParkingMessage = NewOutgoingChallengeMessage(internalchallenge.ChallengeWithObstaclesAndParking)
 
 	// OutgoingChallengeWithoutObstaclesMessage is the outgoing challenge message without obstacles
-	OutgoingChallengeWithoutObstaclesMessage = NewOutgoingChallengeMessage(internalchallengeenums.ChallengeWithoutObstacles)
+	OutgoingChallengeWithoutObstaclesMessage = NewOutgoingChallengeMessage(internalchallenge.ChallengeWithoutObstacles)
 
 	// USBCDCHandler is the USB CDC handler for the Raspberry Pi Pico 2W
 	USBCDCHandler Handler
@@ -61,8 +63,8 @@ func init() {
 		internalchallenge.ChallengeHandler,
 		internalledonboard.OnBoardHandler,
 	)
-	if err != nil {
-		panic(fmt.Errorf("failed to initialize usb cdc: %w", err))
+	if err != tinygo_types.ErrorCodeNil {
+		panic(errors.New("failed to initialize usb cdc handler"))
 	}
 	USBCDCHandler = usbCDCHandler
 }

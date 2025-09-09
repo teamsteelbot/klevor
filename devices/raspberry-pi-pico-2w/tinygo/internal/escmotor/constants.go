@@ -1,7 +1,7 @@
 package escmotor
 
 import (
-	"fmt"
+	"errors"
 	"time"
 
 	"machine"
@@ -9,6 +9,7 @@ import (
 	internaldebug "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/debug"
 	internalmovement "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/movement"
 	internalusbcdc "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc"
+	tinygotypes "github.com/ralvarezdev/tinygo-types"
 )
 
 const (
@@ -62,8 +63,8 @@ func init() {
 		internalmovement.Handler,
 		DefaultOptions,
 	)
-	if err != nil {
-		panic(fmt.Errorf("failed to initialize esc motor handler: %w", err))
+	if err != tinygotypes.ErrorCodeNil {
+		panic(errors.New("failed to initialize esc motor handler"))
 	}
 	ESCMotorHandler = escMotorHandler
 }

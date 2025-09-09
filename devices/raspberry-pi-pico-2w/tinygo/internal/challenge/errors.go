@@ -1,11 +1,13 @@
 package challenge
 
 import (
-	"errors"
+	tinygotypes "github.com/ralvarezdev/tinygo-types"
+	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal"
 )
 
-var (
-	ErrNilHandler                = errors.New("challenge handler cannot be nil")
-	ErrNilObstaclesPullUpHandler = errors.New("obstacles pull-up handler cannot be nil")
-	ErrNilParkingPullUpHandler   = errors.New("parking pull-up handler cannot be nil")
+const (
+	ErrorCodeChallengeNilHandler tinygotypes.ErrorCode = tinygotypes.ErrorCode(iota + internal.ErrorCodeChallengeStartNumber)
+	ErrorCodeChallengeNilObstaclesPullUpHandler
+	ErrorCodeChallengeNilParkingPullUpHandler
+	ErrorCodeChallengeInvalidChallengeUint8
 )

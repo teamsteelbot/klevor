@@ -1,22 +1,30 @@
 package usbcdc
 
 import (
-	"errors"
+	tinygotypes "github.com/ralvarezdev/tinygo-types"
+	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal"
 )
 
 const (
-	ErrConfirmationMessageTimeout = "confirmation message timeout exceeded for message: %s, after %f"
-	ErrUnknownChallengeType       = "unknown challenge type: %s"
-	ErrFailedReadingFromSerial    = "failed reading from serial: %w"
-	ErrNilOutgoingCategory        = "outgoing message category cannot be nil or empty, got: %s"
-	ErrFailedToSendChunkMessage   = "failed to send chunk message: %w"
-	ErrFailedToSendMessage        = "failed to send message: %w"
-	ErrFailedToSendEndCharacter   = "failed to send end character: %w"
-	ErrFailedToConfigureUSBCDC    = "failed to configure USB CDC: %w"
-)
-
-var (
-	ErrNilHandler         = errors.New("usb-cdc handler cannot be nil")
-	ErrNilOutgoingMessage = errors.New("outgoing message cannot be nil")
-	ErrNilIncomingMessage = errors.New("incoming message cannot be nil")
+	ErrorCodeUSBCDCNilHandler tinygotypes.ErrorCode = tinygotypes.ErrorCode(iota + internal.ErrorCodeUSBCDCStartNumber)
+	ErrorCodeUSBCDCNilOutgoingMessage
+	ErrorCodeUSBCDCNilIncomingMessage
+	ErrorCodeUSBCDCConfirmationMessageTimeout
+	ErrorCodeUSBCDCUnknownChallengeType
+	ErrorCodeUSBCDCFailedReadingFromSerial
+	ErrorCodeUSBCDCNilOutgoingCategory
+	ErrorCodeUSBCDCFailedToSendChunkMessage
+	ErrorCodeUSBCDCFailedToSendMessage
+	ErrorCodeUSBCDCFailedToSendEndCharacter
+	ErrorCodeUSBCDCFailedToConfigureUSBCDC
+	ErrorCodeUSBCDCInvalidIncomingCategoryUint8
+	ErrorCodeUSBCDCInvalidOutgoingCategoryString
+	ErrorCodeUSBCDCInvalidOutgoingCategoryUint8
+	ErrorCodeUSBCDCInvalidIncomingStatusUint8
+	ErrorCodeUSBCDCInvalidOutgoingStatusUint8
+	ErrorCodeUSBCDCInvalidDebugUint8
+	ErrorCodeUSBCDCIncomingMessageEmptyContent
+	ErrorCodeUSBCDCEmptyIncomingMessageBuffer
+	ErrorCodeUSBCDCInvalidIncomingMessageContentUint16
+	ErrorCodeUSBCDCInvalidIncomingMessageMissingEndCharacter
 )

@@ -1,6 +1,6 @@
 //go:build tinygo && (rp2040 || rp2350)
 
-package go_bno08x
+package tinygo_bno08x
 
 import (
 	"math"
@@ -15,7 +15,8 @@ import (
 //
 // reset: The machine.Pin used to perform the hardware reset.
 // debugger: An optional Debugger for logging debug information during the reset process.
-func HardwareReset(resetPin machine.Pin, debugger Debugger) {
+// afterHardwareResetFn: An optional function to be called after the hardware reset is complete.
+func HardwareReset(resetPin machine.Pin, debugger Debugger, afterHardwareResetFn func() error) {
 	if debugger != nil {
 		debugger.Debug("Hardware resetting...")
 	}
@@ -31,6 +32,19 @@ func HardwareReset(resetPin machine.Pin, debugger Debugger) {
 
 	resetPin.High()
 	time.Sleep(ResetPinDelay)
+
+	// Call the afterHardwareResetFn if provided
+	if afterHardwareResetFn != nil {
+		if err := afterHardwareResetFn(); err != nil {
+			if debugger != nil {
+				debugger.Debug("Error in afterHardwareResetFn:", err)
+			}
+		}
+	}
+
+	if debugger != nil {
+		debugger.Debug("Hardware reset complete")
+	}
 }
 
 // QuaternionToEulerDegrees converts the quaternion representation of orientation to Euler angles (roll, pitch, yaw) in degrees.

@@ -1,6 +1,6 @@
 //go:build tinygo && (rp2040 || rp2350)
 
-package go_bno08x
+package tinygo_bno08x
 
 import (
 	"errors"
@@ -62,4 +62,5 @@ var (
 	ErrNilBNO08X                                 = errors.New("nil BNO08x instance provided")
 	ErrNilBNO08XService                          = errors.New("nil BNO08x service provided")
 	ErrNilEulerDegrees                           = errors.New("nil euler degrees provided")
+	ErrSPICouldNotBeWokenUp                     = errors.New("spi could not be woken up from sleep mode")
 )

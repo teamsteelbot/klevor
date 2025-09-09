@@ -1,6 +1,6 @@
 //go:build tinygo && (rp2040 || rp2350)
 
-package go_bno08x
+package tinygo_bno08x
 
 import (
 	"fmt"
@@ -22,17 +22,6 @@ Reset reasons from ID Report response:
 */
 
 type (
-	// PacketReader is an interface for reading packets from the BNO08x sensor
-	PacketReader interface {
-		ReadPacket() (*Packet, error)
-		IsDataReady() bool
-	}
-
-	// PacketWriter is an interface for writing packets to the BNO08x sensor
-	PacketWriter interface {
-		SendPacket(channel uint8, data *[]byte) (uint8, error)
-	}
-
 	// BNO08X struct represents the BNO08x IMU sensor
 	BNO08X struct {
 		packetReader                    PacketReader
@@ -41,6 +30,7 @@ type (
 		resetPin                        machine.Pin
 		dataBuffer                      DataBuffer
 		commandBuffer                   []byte
+		calibrationBuffer                []byte
 		dynamicConfigurationDataSavedAt time.Time
 		meCalibrationStartedAt          time.Time
 		calibrationComplete             bool
@@ -64,7 +54,8 @@ type (
 		rawGyroscope                    *[3]float64
 		rawMagnetometer                 *[3]float64
 		enabledFeatures                 map[uint8]bool
-		afterResetFn                    func(b *BNO08X) error
+		afterHardwareResetFn                    func(b *BNO08X) func() error
+		afterSoftwareResetFn                    func(b *BNO08X) error
 	}
 
 	// Options struct holds configuration options for the BNO08X instance
@@ -92,13 +83,13 @@ func NewOptions(debugger Debugger) *Options {
 //
 // Parameters:
 //
-// resetPin: The pin used to reset the BNO08X sensor.
-//
-//		packetReader: The PacketReader to read packets from the BNO08X sensor.
-//		packetWriter: The PacketWriter to write packets to the BNO08X sensor.
-//		dataBuffer: The DataBuffer to store Packet data.
-//	 afterResetFn: An optional function to be called after a reset.
-//		options: Optional configuration options for the BNO08X instance.
+//  resetPin: The pin used to reset the BNO08X sensor.
+//	packetReader: The PacketReader to read packets from the BNO08X sensor.
+//	packetWriter: The PacketWriter to write packets to the BNO08X sensor.
+//	dataBuffer: The DataBuffer to store Packet data.
+//	afterHardwareResetFn: An optional function to be called after a hardware reset.
+//	afterSoftwareResetFn: An optional function to be called after a software reset.
+//	options: Optional configuration options for the BNO08X instance.
 //
 // Returns:
 //
@@ -108,7 +99,8 @@ func NewBNO08X(
 	packetReader PacketReader,
 	packetWriter PacketWriter,
 	dataBuffer DataBuffer,
-	afterResetFn func(b *BNO08X) error,
+	afterHardwareResetFn func(b *BNO08X) func() error,
+	afterSoftwareResetFn func(b *BNO08X) error,
 	options *Options,
 ) (*BNO08X, error) {
 	// Check if packetReader, packetWriter and dataBuffer are provided
@@ -135,6 +127,7 @@ func NewBNO08X(
 		resetPin:                        resetPin,
 		dataBuffer:                      dataBuffer,
 		commandBuffer:                   make([]byte, CommandBufferSize),
+		calibrationBuffer:                make([]byte, MaxCalibrationDataSize),
 		calibrationComplete:             false,
 		magnetometerAccuracy:            ReportAccuracyStatusUnreliable,
 		initComplete:                    false,
@@ -156,7 +149,8 @@ func NewBNO08X(
 		rawGyroscope:                    &InitialBnoSensorReportThreeDimensional,
 		rawMagnetometer:                 &InitialBnoSensorReportThreeDimensional,
 		enabledFeatures:                 make(map[uint8]bool),
-		afterResetFn:                    afterResetFn,
+		afterHardwareResetFn:            afterHardwareResetFn,
+		afterSoftwareResetFn:            afterSoftwareResetFn,
 	}
 
 	// Perform initialization
@@ -168,7 +162,7 @@ func NewBNO08X(
 
 // HardwareReset performs a hardware reset of the BNO08X sensor using the specified reset pin.
 func (b *BNO08X) HardwareReset() {
-	HardwareReset(b.resetPin, b.debugger)
+	HardwareReset(b.resetPin, b.debugger, b.afterHardwareResetFn(b))
 }
 
 // SoftwareReset performs a software reset of the BNO08X sensor to an initial unconfigured state.
@@ -194,7 +188,7 @@ func (b *BNO08X) SoftwareReset() error {
 	b.calibrationComplete = false
 
 	// Send the reset command
-	if _, err := b.packetWriter.SendPacket(ChannelExe, &[]byte{CommandReset}); err != nil {
+	if _, err := b.packetWriter.SendPacket(ChannelExe, &ResetCommandData); err != nil {
 		return fmt.Errorf("error sending reset command: %w", err)
 	}
 
@@ -225,16 +219,16 @@ func (b *BNO08X) SoftwareReset() error {
 		}
 	}
 
-	// Call after reset function if provided
-	if b.afterResetFn != nil {
-		if err := b.afterResetFn(b); err != nil {
+	// Call after software reset function if provided
+	if b.afterSoftwareResetFn != nil {
+		if err := b.afterSoftwareResetFn(b); err != nil {
 			return err
 		}
 	}
 
 	// Wait for the reset to complete
 	if b.debugger != nil {
-		b.debugger.Debug("OK!")
+		b.debugger.Debug("Software reset complete")
 	}
 	return nil
 }
@@ -503,11 +497,22 @@ func (b *BNO08X) handlePacket(packet *Packet) error {
 	}
 
 	// Ensure the Packet has a valid header
+	fmt.Println(5)
 	idx := 0
 	for idx < packet.Header.DataLength {
+		fmt.Println(6)
 		// Check if there are enough bytes left in the Packet to read the report ID
 		reportID := packet.Data[idx]
-		requiredBytes := reportLength(reportID)
+		fmt.Println(fmt.Sprintf("Processing report ID: 0x%02X at index %d", reportID, idx))
+		requiredBytes, err := reportLength(reportID)
+		if err != nil {
+			return fmt.Errorf(
+				"failed to get report length for report ID 0x%02X: %w",
+				reportID,
+				err,
+			)
+		}
+		fmt.Println(7)
 		unprocessedByteCount := packet.Header.DataLength - idx
 
 		// If there are not enough bytes left, return an error
@@ -521,6 +526,7 @@ func (b *BNO08X) handlePacket(packet *Packet) error {
 		}
 
 		// Create a new report from the Packet data
+		fmt.Println(8)
 		reportBytes := packet.Data[idx : idx+requiredBytes]
 		report, err := newReport(reportID, &reportBytes)
 		if err != nil {
@@ -531,6 +537,7 @@ func (b *BNO08X) handlePacket(packet *Packet) error {
 		}
 
 		// Process the report
+		fmt.Println(9)
 		if err := b.processReport(report); err != nil {
 			if b.debugger != nil {
 				b.debugger.Debug(
@@ -542,9 +549,11 @@ func (b *BNO08X) handlePacket(packet *Packet) error {
 			}
 			return err
 		}
+		fmt.Println(10)
 
 		// Move to the next report in the Packet
 		idx += requiredBytes
+		fmt.Println(fmt.Sprintf("Next report index: %d", idx))
 	}
 	return nil
 }
@@ -866,6 +875,7 @@ func (b *BNO08X) processAvailablePackets() {
 		}
 
 		// Read the next available Packet
+		fmt.Println(3)
 		newPacket, err := b.packetReader.ReadPacket()
 		if err != nil {
 			if b.debugger != nil {
@@ -878,6 +888,7 @@ func (b *BNO08X) processAvailablePackets() {
 			}
 			continue
 		}
+		fmt.Println(4)
 
 		// Pass the packet to the handler
 		if err = b.handlePacket(newPacket); err != nil {
@@ -1190,7 +1201,7 @@ func (b *BNO08X) IsFeatureEnabled(featureID uint8) bool {
 // BeginCalibration starts the self-calibration routine for the BNO08X sensor.
 func (b *BNO08X) BeginCalibration() error {
 	// Begin the sensor's self-calibration routine
-	params := []byte{
+	b.calibrationBuffer = b.dataBuffer.SetData [CalibrationBufferSize]byte{
 		1, // calibrate accel
 		1, // calibrate gyro
 		1, // calibrate mag
@@ -1201,7 +1212,7 @@ func (b *BNO08X) BeginCalibration() error {
 		0, // reserved
 		0, // reserved
 	}
-	if err := b.sendMeCommand(&params); err != nil {
+	if err := b.sendMeCommand(&b.commandBuffer); err != nil {
 		return fmt.Errorf("error starting calibration: %w", err)
 	}
 	return nil
@@ -1214,7 +1225,7 @@ func (b *BNO08X) BeginCalibration() error {
 // An integer representing the calibration status, where 0 indicates no calibration needed,
 func (b *BNO08X) CalibrationStatus() ReportAccuracyStatus {
 	// Get the status of the self-calibration
-	params := []byte{
+	b.calibrationBuffer = [CalibrationBufferSize]byte{{
 		0, // calibrate accel
 		0, // calibrate gyro
 		0, // calibrate mag
@@ -1225,7 +1236,7 @@ func (b *BNO08X) CalibrationStatus() ReportAccuracyStatus {
 		0, // reserved
 		0, // reserved
 	}
-	b.sendMeCommand(&params)
+	b.sendMeCommand(&b.calibrationBuffer)
 
 	// Log the calibration status if debugger is enabled
 	if b.debugger != nil {
@@ -1262,7 +1273,6 @@ func (b *BNO08X) sendMeCommand(subcommandParams *[]byte) error {
 
 	// Start the command request process
 	startTime := time.Now()
-	localBuffer := b.commandBuffer
 
 	// Insert the command request report into the local buffer
 	if err := insertCommandRequestReport(
@@ -1275,7 +1285,7 @@ func (b *BNO08X) sendMeCommand(subcommandParams *[]byte) error {
 	}
 
 	// Send the command request Packet
-	if _, err := b.packetWriter.SendPacket(ChannelControl, &localBuffer); err != nil {
+	if _, err := b.packetWriter.SendPacket(ChannelControl, &b.commandBuffer); err != nil {
 		return fmt.Errorf("error sending me command request packet: %w", err)
 	}
 	b.dataBuffer.IncrementReportSequenceNumber(ReportIDCommandRequest)
@@ -1298,10 +1308,9 @@ func (b *BNO08X) sendMeCommand(subcommandParams *[]byte) error {
 func (b *BNO08X) SaveCalibrationData() error {
 	// Save the self-calibration data
 	startTime := time.Now()
-	localBuffer := make([]byte, 12)
 	err := insertCommandRequestReport(
 		SaveDynamicCalibrationData,
-		&localBuffer, // should use b.dataBuffer, but sendPacket doesn't
+		&b.commandBuffer, // should use b.dataBuffer, but sendPacket doesn't
 		b.dataBuffer.GetReportSequenceNumber(ReportIDCommandRequest),
 		nil,
 	)
@@ -1310,7 +1319,7 @@ func (b *BNO08X) SaveCalibrationData() error {
 	}
 
 	// Send the command request Packet to save calibration data
-	_, err = b.packetWriter.SendPacket(ChannelControl, &localBuffer)
+	_, err = b.packetWriter.SendPacket(ChannelControl, &b.commandBuffer)
 	if err != nil {
 		return err
 	}

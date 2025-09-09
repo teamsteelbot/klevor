@@ -6,16 +6,19 @@ import (
 	internalledonboard "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/led/onboard"
 )
 
+const (
+	// IntervalDuration is the duration of the LED on/off interval
+	IntervalDuration = 500 * time.Millisecond
+)
+
 func main() {
 	for {
 		// Turn LED on
 		internalledonboard.OnBoardHandler.SetOn()
-		println("LED ON")
-		time.Sleep(500 * time.Millisecond)
+		time.Sleep(IntervalDuration)
 
 		// Turn LED off
 		internalledonboard.OnBoardHandler.SetOff()
-		println("LED OFF")
-		time.Sleep(500 * time.Millisecond)
+		time.Sleep(IntervalDuration)
 	}
 }

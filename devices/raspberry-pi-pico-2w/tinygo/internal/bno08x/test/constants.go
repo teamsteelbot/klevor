@@ -1,6 +1,6 @@
 //go:build tinygo && (rp2040 || rp2350)
 
-package go_bno08x
+package tinygo_bno08x
 
 import (
 	"math"
@@ -8,6 +8,9 @@ import (
 )
 
 const (
+	// ErrorCodeBNO08XStartNumber is the starting number for BNO08X-related error codes.
+	ErrorCodeBNO08XStartNumber uint16 = 5000
+
 	// ChannelSHTPCommand is the channel for SHTP commands
 	ChannelSHTPCommand uint8 = 0x0
 
@@ -147,7 +150,7 @@ const (
 	DefaultReportInterval uint32 = 100_000
 
 	// DebugReportInterval is the debug report interval in microseconds
-	DebugReportInterval uint32 = 100_000 // 1_000_000
+	DebugReportInterval uint32 = 1_000_000
 
 	// PacketHeaderLength is the length of the Packet header in bytes
 	PacketHeaderLength int = 4
@@ -160,6 +163,9 @@ const (
 
 	// CommandBufferSize is the size of the command buffer
 	CommandBufferSize = 12
+
+	// CalibrationBufferSize is the size of the calibration buffer
+	CalibrationBufferSize = 9
 
 	// ResetPacketDelay is the delay after sending a reset command
 	ResetPacketDelay = 100 * time.Millisecond
@@ -191,11 +197,20 @@ const (
 	// I2CProbeDeviceDelay is the delay between attempts to probe the device on the I2C bus
 	I2CProbeDeviceDelay = 50 * time.Millisecond
 
+	// UARTRVCBaudRate is the baud rate for UART-RVC communication
+	UARTRVCBaudRate uint32 = 115_200 // 115200 for UART-RVC
+
 	// UARTBaudRate is the baud rate for UART communication
 	UARTBaudRate uint32 = 3_000_000 // 3Mbps for UART-SHTP
 
-	// UARTRVCBaudRate is the baud rate for UART-RVC communication
-	UARTRVCBaudRate uint32 = 115_200 // 115200 for UART-RVC
+	// UARTDataBits is the number of data bits for UART communication
+	UARTDataBits = 8
+
+	// UARTParity is the parity setting for UART communication
+	UARTParity = machine.UARTParityNone
+
+	// UARTStopBits is the number of stop bits for UART communication
+	UARTStopBits = 1
 
 	// UARTStartAndEndByte is the start byte and end byte for UART communication
 	UARTStartAndEndByte = 0x7E
@@ -206,10 +221,10 @@ const (
 	// UARTControlEscape is the control escape byte for UART communication
 	UARTControlEscape = 0x7D
 
-	// UARTByteTimeout is the timeout for reading a byte from UART communication in milliseconds
+	// UARTByteTimeout is the timeout for reading a byte from UART communication
 	UARTByteTimeout = 250 * time.Millisecond
 
-	// UARTByteDelay is the delay between bytes when writing to UART in microseconds
+	// UARTByteDelay is the delay between bytes when writing to UART
 	UARTByteDelay = 100 * time.Microsecond
 
 	// UARTRVCStartByte is the start byte for UART-RVC communication
@@ -220,6 +235,18 @@ const (
 
 	// UARTRVCPacketLengthBytes is the number of length bytes in a UART-RVC packet
 	UARTRVCPacketLengthBytes = 19
+
+	// SPIMode is the SPI mode for BNO08x communication (CPOL=1, CPHA=1)
+	SPIMode = 3
+
+	// SPIFrequency is the SPI bus frequency in Hz
+	SPIFrequency = 1_000_000 // 1MHz
+
+	// SPIIntTimeout is the timeout for waiting for the INT pin to go low
+	SPIIntTimeout = 3 * time.Millisecond
+
+	// NoByteDelay is a delay if there's no byte buffered
+	NoByteDelay = 50 * time.Microsecond
 
 	// EulerDegreesRollIndex is the index for the roll component in an euler degrees vector
 	EulerDegreesRollIndex = 0
@@ -247,6 +274,9 @@ const (
 )
 
 var (
+	// ResetCommandData is the command data for the reset command
+	ResetCommandData = []byte{CommandReset}
+
 	// DebugHeader is the header for debug messages
 	DebugHeader = "[BNO08x]"
 
@@ -259,22 +289,22 @@ var (
 	// CalibrationCommandsTimeout is the timeout for calibration commands in seconds
 	CalibrationCommandsTimeout = 5 * time.Second
 
-	// WaitForPacketTimeout is the timeout for waiting for a packet in milliseconds
-	WaitForPacketTimeout = 10 * time.Millisecond
+	// WaitForPacketTimeout is the timeout for waiting for a packet
+	WaitForPacketTimeout = 1 * time.Second
 
 	// MaxClearPendingPacketsTimeout is the maximum timeout for clearing pending packets in seconds
-	MaxClearPendingPacketsTimeout = 1 * time.Second
+	MaxClearPendingPacketsTimeout = 5 * time.Second
 
 	// QuaternionReadTimeout is the timeout for reading quaternion data in seconds
 	QuaternionReadTimeout float32 = 0.500
 
-	// FeatureEnableTimeout is the timeout for enabling features in seconds
+	// FeatureEnableTimeout is the timeout for enabling features
 	FeatureEnableTimeout = 2 * time.Second
 
-	// PacketReadyCheckDelay is the delay between checks for packet readiness in milliseconds
+	// PacketReadyCheckDelay is the delay between checks for packet readiness
 	PacketReadyCheckDelay = 5 * time.Millisecond
 
-	// UARTRVCTimeout is the timeout for UART-RVC reads in milliseconds
+	// UARTRVCTimeout is the timeout for UART-RVC reads
 	UARTRVCTimeout = 500 * time.Millisecond
 
 	// AdvertisementPacketLength is the length of the initial advertisement packet

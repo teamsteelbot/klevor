@@ -36,9 +36,6 @@ var (
 	// switchOnEvent is called when the switch is pressed to initialize communication and provide visual feedback.
 	switchOnEvent func() error
 
-	// incomingMessages is a slice to hold incoming messages from USB CDC.
-	incomingMessages *[]internalusbcdc.IncomingMessage
-
 	// lastMessageReceivedTime holds the timestamp of the last received message.
 	lastMessageReceivedTime time.Time
 
@@ -77,21 +74,6 @@ func stopAndCenter() error {
 			err,
 		)
 	}
-	return nil
-}
-
-// receiveMessages receives messages via USB CDC and updates the incomingMessages variable.
-//
-// Returns:
-//
-// An error if receiving messages fails.
-func receiveMessages() error {
-	// Receive messages
-	messages, err := internalusbcdc.USBCDCHandler.ReceiveMessages()
-	if err != nil {
-		return err
-	}
-	incomingMessages = messages
 	return nil
 }
 
@@ -155,7 +137,7 @@ func main() {
 
 			// Receive USB CDC messages
 			g.Go(
-				receiveMessages,
+				internalusbcdc.USBCDCHandler.Update,
 			)
 
 			// Wait for both; handle first error (if any)
@@ -164,16 +146,17 @@ func main() {
 			}
 
 			// Check if there are incoming messages
+			incomingMessages := internalusbcdc.USBCDCHandler.GetIncomingMessages()
 			if incomingMessages == nil || len(*incomingMessages) == 0 {
 				// If no messages were received, check if the timeout has been reached
 				if !lastMessageReceivedTime.IsZero() && time.Since(lastMessageReceivedTime) > receivingMessageTimeout {
 					sendErrorMessage(errors.New("no messages received within the timeout period"))
 				}
 				continue
-			} else {
-				// Reset the last message received time if messages are received
-				lastMessageReceivedTime = time.Now()
 			}
+
+			// Reset the last message received time if messages are received
+			lastMessageReceivedTime = time.Now()
 
 			// Process each incoming message in reversed order
 			for idx := len(*incomingMessages) - 1; idx >= 0; idx-- {
@@ -184,6 +167,11 @@ func main() {
 
 				// Get the message
 				message := (*incomingMessages)[idx]
+
+				// Check if the message is nil
+				if message == nil {
+					continue
+				}
 
 				// Handle specific message categories
 				switch message.Category {

@@ -1,6 +1,6 @@
 //go:build tinygo && (rp2040 || rp2350)
 
-package go_bno08x
+package tinygo_bno08x
 
 import (
 	"encoding/binary"
@@ -282,7 +282,7 @@ func (u *UARTRVC) readByte() (byte, error) {
 		if u.uartBus.Buffered() > 0 {
 			return u.uartBus.ReadByte()
 		}
-		time.Sleep(1 * time.Millisecond)
+		time.Sleep(NoByteDelay)
 	}
 	return 0, ErrUARTTimeout
 }

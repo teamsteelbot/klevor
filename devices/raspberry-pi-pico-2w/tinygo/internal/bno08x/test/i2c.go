@@ -1,6 +1,6 @@
 //go:build tinygo && (rp2040 || rp2350)
 
-package go_bno08x
+package tinygo_bno08x
 
 import (
 	"fmt"
@@ -98,9 +98,7 @@ func NewI2COptions(
 // ps1: The PS1 pin to set the sensor to I2C mode.
 // resetPin: The pin used to reset the BNO08X sensor.
 // dataBuffer: The DataBuffer to use for storing Packet data.
-//
-//	afterResetFn: An optional function to be called after a reset.
-//
+// afterSoftwareResetFn: An optional function to be called after a reset.
 // options: Optional configuration options for the BNO08X sensor.
 //
 // Returns:
@@ -115,7 +113,7 @@ func NewI2C(
 	ps1Pin machine.Pin,
 	resetPin machine.Pin,
 	dataBuffer DataBuffer,
-	afterResetFn func(b *BNO08X) error,
+	afterSoftwareResetFn func(b *BNO08X) error,
 	options *I2COptions,
 ) (*I2C, error) {
 	// Check if the I2C bus is nil
@@ -212,7 +210,8 @@ func NewI2C(
 		packetReader,
 		packetWriter,
 		dataBuffer,
-		afterResetFn,
+		nil,
+		afterSoftwareResetFn,
 		options.Options,
 	)
 	if err != nil {

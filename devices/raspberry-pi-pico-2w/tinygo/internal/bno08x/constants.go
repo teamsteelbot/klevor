@@ -51,12 +51,12 @@ func init() {
 			machine.UART1,
 			machine.GPIO8,
 			machine.GPIO9,
-			machine.GPIO6,
-			machine.GPIO7,
+			machine.GPIO2,
+			machine.GPIO3,
 			machine.GPIO4,
 			DataBuffer,
 			afterReset,
-			ralvarezdevbno08x.NewUARTOptions(ralvarezdevbno08x.NewDefaultDebugger(), false),
+			ralvarezdevbno08x.NewUARTOptions(ralvarezdevbno08x.NewDefaultDebugger(), true),
 			// ralvarezdevbno08x.NewUARTOptions(nil, false),
 		)
 		if err == nil {
@@ -77,14 +77,14 @@ func init() {
 		// ----- I2C Instance -----
 
 		// Initialize the BNO08x I2C instance with default settings.
-		address0 := machine.GPIO28
+		address0 := machine.GPIO0
 		i2c, err := ralvarezdevbno08x.NewI2C(
 			machine.I2C1,
 			machine.GPIO26,
 			machine.GPIO27,
 			ralvarezdevbno08x.I2CAlternativeAddress,
-			machine.GPIO6,
-			machine.GPIO7,
+			machine.GPIO2,
+			machine.GPIO3,
 			machine.GPIO4,
 			DataBuffer,
 			afterReset,
@@ -110,8 +110,8 @@ func init() {
 			machine.UART1,
 			machine.GPIO8,
 			machine.GPIO9,
-			machine.GPIO6,
-			machine.GPIO7,
+			machine.GPIO2,
+			machine.GPIO3,
 			machine.GPIO4,
 			DataBuffer,
 			ralvarezdevbno08x.NewUARTRVCOptions(

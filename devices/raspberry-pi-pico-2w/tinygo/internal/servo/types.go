@@ -1,16 +1,16 @@
 package servo
 
 import (
-	"fmt"
 	"time"
 
 	"machine"
 
+	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal"
 	internaldebug "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/debug"
 	internalmovement "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/movement"
 	internalpullupenabler "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/pullup/enabler"
 	internalusbcdc "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc"
-	internalusbcdcenums "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc/enums"
+	tinygotypes "github.com/ralvarezdev/tinygo-types"
 	tinygoservo "tinygo.org/x/drivers/servo"
 )
 
@@ -86,25 +86,25 @@ func NewDefaultHandler(
 	debugHandler,
 	movementHandler internalpullupenabler.Handler,
 	options *Options,
-) (*DefaultHandler, error) {
+) (*DefaultHandler, tinygotypes.ErrorCode) {
 	// Check if the USB CDC handler is nil
 	if usbCDCHandler == nil {
-		return nil, internalusbcdc.ErrNilHandler
+		return nil, internalusbcdc.ErrorCodeUSBCDCNilHandler
 	}
 
 	// Check if the debug pull-down handler is nil
 	if debugHandler == nil {
-		return nil, internaldebug.ErrNilHandler
+		return nil, internaldebug.ErrorCodeDebugNilHandler
 	}
 
 	// Check if the movement pull-down handler is nil
 	if movementHandler == nil {
-		return nil, internalmovement.ErrNilHandler
+		return nil, internalmovement.ErrorCodeMovementNilHandler
 	}
 
 	// Check if the options are nil
 	if options == nil {
-		return nil, ErrNilOptions
+		return nil, ErrorCodeServoNilOptions
 	}
 
 	// Configure the PWM
@@ -113,13 +113,13 @@ func NewDefaultHandler(
 			Period: uint64(time.Second / time.Duration(options.Frequency)),
 		},
 	); err != nil {
-		return nil, err
+		return nil, internal.ErrorCodeFailedToConfigurePWM
 	}
 
 	// Create a new instance of the servo
 	servo, err := tinygoservo.New(pwm, pin)
 	if err != nil {
-		return nil, err
+		return nil, ErrorCodeServoFailedToInitializeServo
 	}
 
 	// Calculate the half pulse and range pulse
@@ -143,8 +143,7 @@ func NewDefaultHandler(
 
 	// Center the servo on initialization
 	_ = handler.SetAngleToCenter()
-
-	return handler, nil
+	return handler, tinygotypes.ErrorCodeNil
 }
 
 // GetAngle returns the current angle of the servo motor
@@ -161,28 +160,18 @@ func (s *DefaultHandler) GetAngle() uint16 {
 // Parameters:
 //
 // angle: The angle to set the servo motor to, must be between 0 and the actuation range
-func (s *DefaultHandler) SetAngle(angle uint16) error {
+func (s *DefaultHandler) SetAngle(angle uint16) tinygotypes.ErrorCode {
 	// Check if the angle is within the valid range
 	if angle < CenterAngle-MaxAngle || angle > CenterAngle+MaxAngle {
-		return fmt.Errorf(
-			ErrAngleOutOfRange,
-			CenterAngle-MaxAngle,
-			CenterAngle+MaxAngle,
-			angle,
-		)
+		return ErrorCodeServoAngleOutOfRange
 	}
 	if angle < LeftLimitAngle || angle > RightLimitAngle {
-		return fmt.Errorf(
-			ErrInvalidAngle,
-			LeftLimitAngle,
-			RightLimitAngle,
-			angle,
-		)
+		return ErrorCodeServoAngleOutOfRange
 	}
 
 	// Check if the angle is the same as the current angle
 	if angle == s.angle {
-		return nil
+		return tinygotypes.ErrorCodeNil
 	}
 
 	// Check if the direction is inverted
@@ -200,23 +189,22 @@ func (s *DefaultHandler) SetAngle(angle uint16) error {
 			int(s.minPulseWidth),
 			int(s.maxPulseWidth),
 		); err != nil {
-			return err
+			return ErrorCodeServoFailedToSetServoAngle
 		}
 	}
 
 	// Send a debug message if debug mode is enabled
 	if s.debugHandler.IsEnabled() && s.usbCDCHandler != nil {
-		err := s.usbCDCHandler.SendMessage(
+		if err := s.usbCDCHandler.SendMessage(
 			internalusbcdc.NewOutgoingDebugMessage(
-				internalusbcdcenums.DebugReceivedServoAngle,
+				internalusbcdc.DebugReceivedServoAngle,
 			),
-		)
-		if err != nil {
-			return fmt.Errorf(ErrSendingDebugServoAngleMessage, err)
+		); err != tinygotypes.ErrorCodeNil {
+			return ErrorCodeServoFailedToSendDebugServoAngleMessage
 		}
 	}
 
-	return nil
+	return tinygotypes.ErrorCodeNil
 }
 
 // IsAngleCentered checks if the servo motor angle is centered
@@ -233,7 +221,7 @@ func (s *DefaultHandler) IsAngleCentered() bool {
 // Returns:
 //
 // An error if the servo motor could not be centered
-func (s *DefaultHandler) SetAngleToCenter() error {
+func (s *DefaultHandler) SetAngleToCenter() tinygotypes.ErrorCode {
 	return s.SetAngle(CenterAngle)
 }
 
@@ -246,18 +234,13 @@ func (s *DefaultHandler) SetAngleToCenter() error {
 // Returns:
 //
 // An error if the relative angle is not within the left and right limits
-func (s *DefaultHandler) SetAngleRelativeToCenter(relativeAngle int16) error {
+func (s *DefaultHandler) SetAngleRelativeToCenter(relativeAngle int16) tinygotypes.ErrorCode {
 	// Calculate the absolute angle based on the center angle and relative angle
 	absoluteAngle := int16(CenterAngle) + relativeAngle
 
 	// Check if the absolute angle is within the left and right limits
 	if absoluteAngle < int16(LeftLimitAngle) || absoluteAngle > int16(RightLimitAngle) {
-		return fmt.Errorf(
-			ErrInvalidAngle,
-			LeftLimitAngle,
-			RightLimitAngle,
-			absoluteAngle,
-		)
+		return ErrorCodeServoAngleOutOfRange
 	}
 
 	// Set the servo angle
@@ -273,7 +256,7 @@ func (s *DefaultHandler) SetAngleRelativeToCenter(relativeAngle int16) error {
 // Returns:
 //
 // An error if the angle is not within the right limit
-func (s *DefaultHandler) SetAngleToRight(angle uint16) error {
+func (s *DefaultHandler) SetAngleToRight(angle uint16) tinygotypes.ErrorCode {
 	return s.SetAngleRelativeToCenter(-int16(angle))
 }
 
@@ -286,12 +269,12 @@ func (s *DefaultHandler) SetAngleToRight(angle uint16) error {
 // Returns:
 //
 // An error if the angle is not within the left limit
-func (s *DefaultHandler) SetAngleToLeft(angle uint16) error {
+func (s *DefaultHandler) SetAngleToLeft(angle uint16) tinygotypes.ErrorCode {
 	return s.SetAngleRelativeToCenter(int16(angle))
 }
 
 // SetDirectionToCenter sets the direction to center
-func (s *DefaultHandler) SetDirectionToCenter() error {
+func (s *DefaultHandler) SetDirectionToCenter() tinygotypes.ErrorCode {
 	return s.SetAngleToCenter()
 }
 
@@ -304,7 +287,7 @@ func (s *DefaultHandler) SetDirectionToCenter() error {
 // Returns:
 //
 // An error if the angle is not within the left limit
-func (s *DefaultHandler) SetDirectionToRight(angle uint16) error {
+func (s *DefaultHandler) SetDirectionToRight(angle uint16) tinygotypes.ErrorCode {
 	return s.SetAngleToLeft(angle)
 }
 
@@ -317,7 +300,7 @@ func (s *DefaultHandler) SetDirectionToRight(angle uint16) error {
 // Returns:
 //
 // An error if the angle is not within the right limit
-func (s *DefaultHandler) SetDirectionToLeft(angle uint16) error {
+func (s *DefaultHandler) SetDirectionToLeft(angle uint16) tinygotypes.ErrorCode {
 	return s.SetAngleToRight(angle)
 }
 
@@ -330,38 +313,32 @@ func (s *DefaultHandler) SetDirectionToLeft(angle uint16) error {
 // Returns:
 //
 // An error if the servo direction could not be set
-func (s *DefaultHandler) SetDirectionBasedOnReceivedMessage(message *internalusbcdc.IncomingMessage) error {
+func (s *DefaultHandler) SetDirectionBasedOnReceivedMessage(message *internalusbcdc.IncomingMessage) tinygotypes.ErrorCode {
 	// Check if the message is nil
 	if message == nil {
-		return internalusbcdc.ErrNilIncomingMessage
+		return internalusbcdc.ErrorCodeUSBCDCNilIncomingMessage
 	}
 
 	// Check if the servo angle should be retrieved from the message
 	var servoDirectionAngle uint16
-	if message.Category != internalusbcdcenums.IncomingCategoryServoDirectionCenter {
+	if message.Category != internalusbcdc.IncomingCategoryServoDirectionCenter {
 		// Get uint16 angle from message content
 		angle, err := message.GetContentAsUint16()
-		if err != nil {
-			return fmt.Errorf(
-				"invalid servo direction value: %w",
-				err,
-			)
+		if err != tinygotypes.ErrorCodeNil {
+			return ErrorCodeServoInvalidAngleValue
 		}
 		servoDirectionAngle = angle
 	}
 
 	// Check the servo angle category
 	switch message.Category {
-	case internalusbcdcenums.IncomingCategoryServoDirectionCenter:
+	case internalusbcdc.IncomingCategoryServoDirectionCenter:
 		return s.SetDirectionToCenter()
-	case internalusbcdcenums.IncomingCategoryServoDirectionToLeft:
+	case internalusbcdc.IncomingCategoryServoDirectionToLeft:
 		return s.SetDirectionToLeft(servoDirectionAngle)
-	case internalusbcdcenums.IncomingCategoryServoDirectionToRight:
+	case internalusbcdc.IncomingCategoryServoDirectionToRight:
 		return s.SetDirectionToRight(servoDirectionAngle)
 	default:
-		return fmt.Errorf(
-			"unknown servo direction category: %v",
-			message.Category,
-		)
+		return ErrorCodeServoUnknownAngleCategory
 	}
 }

@@ -1,6 +1,6 @@
 //go:build tinygo && (rp2040 || rp2350)
 
-package go_bno08x
+package tinygo_bno08x
 
 import (
 	"fmt"
@@ -74,7 +74,7 @@ func NewUARTOptions(
 // resetPin: The pin used to reset the BNO08X sensor.
 // dataBuffer: The data buffer to use for storing Packet data.
 //
-//	afterResetFn: An optional function to be called after a reset.
+//	afterSoftwareResetFn: An optional function to be called after a reset.
 //
 // options: The UARTOptions for configuring the BNO08X (optional).
 //
@@ -89,7 +89,7 @@ func NewUART(
 	ps1Pin machine.Pin,
 	resetPin machine.Pin,
 	dataBuffer DataBuffer,
-	afterResetFn func(b *BNO08X) error,
+	afterSoftwareResetFn func(b *BNO08X) error,
 	options *UARTOptions,
 ) (*UART, error) {
 	// Check if the UART bus is nil
@@ -114,6 +114,11 @@ func NewUART(
 		},
 	); err != nil {
 		return nil, fmt.Errorf("failed to configure uart: %w", err)
+	}
+
+	// Set UART format (8N1)
+	if err := uartBus.SetFormat(UARTDataBits, UARTParity, UARTStopBits); err != nil {
+		return nil, fmt.Errorf("failed to set uart format: %w", err)
 	}
 
 	// If options are nil, initialize with default values
@@ -151,7 +156,8 @@ func NewUART(
 		packetReader,
 		packetWriter,
 		dataBuffer,
-		afterResetFn,
+		nil,
+		afterSoftwareResetFn,
 		options.Options,
 	)
 	if err != nil {
@@ -245,7 +251,7 @@ func (pr *UARTPacketReader) readByte() (byte, error) {
 			}
 			return b, err
 		}
-		time.Sleep(1 * time.Millisecond)
+		time.Sleep(NoByteDelay)
 	}
 	return 0, ErrUARTTimeout
 }

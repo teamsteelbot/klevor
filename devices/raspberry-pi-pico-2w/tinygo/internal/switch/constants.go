@@ -1,12 +1,13 @@
 package _switch
 
 import (
-	"fmt"
+	"errors"
 	"time"
 
 	"machine"
 
 	internalpullup "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/pullup"
+	tinygotypes "github.com/ralvarezdev/tinygo-types"
 )
 
 var (
@@ -25,8 +26,8 @@ func init() {
 		PullUpHandler,
 		DefaultInterval,
 	)
-	if err != nil {
-		panic(fmt.Errorf("failed to initialize switch: %w", err))
+	if err != tinygotypes.ErrorCodeNil {
+		panic(errors.New("failed to initialize switch handler"))
 	}
 	SwitchHandler = switchHandler
 

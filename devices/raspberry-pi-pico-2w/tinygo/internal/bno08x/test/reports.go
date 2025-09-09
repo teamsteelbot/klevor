@@ -1,6 +1,6 @@
 //go:build tinygo && (rp2040 || rp2350)
 
-package go_bno08x
+package tinygo_bno08x
 
 import (
 	"encoding/binary"
@@ -113,7 +113,10 @@ func newReport(id uint8, data *[]byte) (*report, error) {
 	}
 
 	// Validate the report length
-	expectedLength := reportLength(id)
+	expectedLength, err := reportLength(id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get expected report length: %w", err)
+	}
 	if expectedLength != len(*data) {
 		return nil, fmt.Errorf(
 			ErrInvalidReportLength,
@@ -706,13 +709,25 @@ func newFourDimensionalReport(
 //
 // Returns:
 //
-//	The length of the report in bytes
-func reportLength(reportID uint8) int {
-	if reportID < 0xF0 { // it's a sensor report
-		return AvailableSensorReports[reportID].ReportLength
+//	The length of the report in bytes, or an error if the report ID is unknown
+func reportLength(reportID uint8) (int, error){
+	if reportID < 0xF0 {
+		// Check if the report ID is valid
+		sensorReport, ok := AvailableSensorReports[reportID]
+		if !ok {
+			return 0, ErrUnknownReportID
+		}
+		if sensorReport == nil {
+			return 0, ErrNilSensorReport
+		}
+		return sensorReport.ReportLength, nil
 	}
 
-	return ReportLengths[reportID]
+	reportLength, ok := ReportLengths[reportID]
+	if !ok {
+		return 0, ErrUnknownReportID
+	} 
+	return reportLength, nil
 }
 
 // isControlReport checks if the report ID is a control report.

@@ -4,6 +4,7 @@ import (
 	"time"
 
 	internalpullup "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/pullup"
+	tinygotypes "github.com/ralvarezdev/tinygo-types"
 )
 
 type (
@@ -27,15 +28,15 @@ type (
 func NewDefaultHandler(
 	pullUpHandler internalpullup.Handler,
 	interval time.Duration,
-) (*DefaultHandler, error) {
+) (*DefaultHandler, tinygotypes.ErrorCode) {
 	if pullUpHandler == nil {
-		return nil, internalpullup.ErrNilPullUpHandler
+		return nil, internalpullup.ErrorCodePullUpResistorNilHandler
 	}
 
 	return &DefaultHandler{
 		pullUpHandler,
 		interval,
-	}, nil
+	}, tinygotypes.ErrorCodeNil
 }
 
 // Wait waits for the switch to be pressed
@@ -47,9 +48,9 @@ func NewDefaultHandler(
 // Returns:
 //
 // An error if the wait fails
-func (d *DefaultHandler) Wait(onEvent func() error) error {
+func (d *DefaultHandler) Wait(onEvent func() tinygotypes.ErrorCode) tinygotypes.ErrorCode {
 	if onEvent == nil {
-		return ErrNilOnEventFunction
+		return ErrorCodeSwitchNilOnEventFunction
 	}
 
 	// Check if the switch is already pressed

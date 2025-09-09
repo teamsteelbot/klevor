@@ -1,15 +1,18 @@
 package servo
 
 import (
-	"errors"
+	tinygotypes "github.com/ralvarezdev/tinygo-types"
+	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal"
 )
 
 const (
-	ErrSendingDebugServoAngleMessage = "error sending debug servo angle message: %w"
-	ErrInvalidAngle                  = "angle must be between %d and %d degrees, got %d"
-	ErrAngleOutOfRange               = "angle must be between %d and %d degrees (actuation range), got %d"
-)
-
-var (
-	ErrNilOptions = errors.New("servo options handler cannot be nil")
+	ErrorCodeServoNilOptions tinygotypes.ErrorCode = tinygotypes.ErrorCode(iota + internal.ErrorCodeServoStartNumber)
+	ErrorCodeServoFailedToInitializeServo 
+	ErrorCodeServoInvalidAngleValue
+	ErrorCodeServoAngleOutOfRange
+	ErrorCodeServoAngleBelowMinPulseWidth
+	ErrorCodeServoAngleAboveMaxPulseWidth
+	ErrorCodeServoFailedToSendDebugServoAngleMessage
+	ErrorCodeServoUnknownAngleCategory
+	ErrorCodeServoFailedToSetServoAngle
 )

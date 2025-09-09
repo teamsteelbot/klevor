@@ -1,11 +1,12 @@
 package led
 
 import (
-	"errors"
+	tinygotypes "github.com/ralvarezdev/tinygo-types"
+	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal"
 )
 
-var (
-	ErrNilHandler            = errors.New("led handler cannot be nil")
-	ErrNegativeBlinkCount    = errors.New("times cannot be negative")
-	ErrNegativeDelayDuration = errors.New("delay cannot be negative")
+const (
+	ErrorCodeLEDNilHandler tinygotypes.ErrorCode = tinygotypes.ErrorCode(iota + internal.ErrorCodeLEDStartNumber)
+	ErrorCodeLEDNegativeBlinkCount
+	ErrorCodeLEDNegativeDelayDuration
 )
