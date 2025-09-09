@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"machine"
+
+	tinygotypes "github.com/ralvarezdev/tinygo-types"
 )
 
 /*
@@ -37,25 +39,25 @@ type (
 		magnetometerAccuracy            ReportAccuracyStatus
 		initComplete                    bool
 		idRead                          bool
-		accelerometer                   *[3]float64
-		gravity                         *[3]float64
-		gyroscope                       *[3]float64
-		magnetometer                    *[3]float64
-		linearAcceleration              *[3]float64
-		rotationVector                  *[4]float64
-		geomagneticRotationVector       *[4]float64
-		gameRotationVector              *[4]float64
-		stepCount                       *uint16
-		shakesDetected                  *bool
-		stabilityClassification         *string
-		mostLikelyClassification        *string
-		classifications                 *map[string]int
-		rawAccelerometer                *[3]float64
-		rawGyroscope                    *[3]float64
-		rawMagnetometer                 *[3]float64
+		accelerometer                   [3]float64
+		gravity                         [3]float64
+		gyroscope                       [3]float64
+		magnetometer                    [3]float64
+		linearAcceleration              [3]float64
+		rotationVector                  [4]float64
+		geomagneticRotationVector       [4]float64
+		gameRotationVector              [4]float64
+		stepCount                       uint16
+		shakesDetected                  bool
+		stabilityClassification         ReportStabilityClassification
+		mostLikelyClassification        ReportClassification
+		classifications                 [ReportClassificationsNumber]int
+		rawAccelerometer                [3]float64
+		rawGyroscope                    [3]float64
+		rawMagnetometer                 [3]float64
 		enabledFeatures                 map[uint8]bool
-		afterHardwareResetFn                    func(b *BNO08X) func() error
-		afterSoftwareResetFn                    func(b *BNO08X) error
+		afterHardwareResetFn                    func(b *BNO08X) func() tinygotypes.ErrorCode
+		afterSoftwareResetFn                    func(b *BNO08X) tinygotypes.ErrorCode
 	}
 
 	// Options struct holds configuration options for the BNO08X instance
@@ -99,19 +101,19 @@ func NewBNO08X(
 	packetReader PacketReader,
 	packetWriter PacketWriter,
 	dataBuffer DataBuffer,
-	afterHardwareResetFn func(b *BNO08X) func() error,
-	afterSoftwareResetFn func(b *BNO08X) error,
+	afterHardwareResetFn func(b *BNO08X) func() tinygotypes.ErrorCode,
+	afterSoftwareResetFn func(b *BNO08X) tinygotypes.ErrorCode,
 	options *Options,
-) (*BNO08X, error) {
+) (*BNO08X, tinygotypes.ErrorCode) {
 	// Check if packetReader, packetWriter and dataBuffer are provided
 	if packetReader == nil {
-		return nil, ErrNilPacketReader
+		return nil, ErrorCodeBNO08XNilPacketReader
 	}
 	if packetWriter == nil {
-		return nil, ErrNilPacketWriter
+		return nil, ErrorCodeBNO08XNilPacketWriter
 	}
 	if dataBuffer == nil {
-		return nil, ErrNilDataBuffer
+		return nil, ErrorCodeBNO08XNilDataBuffer
 	}
 
 	// If options are nil, initialize with default values
@@ -132,22 +134,10 @@ func NewBNO08X(
 		magnetometerAccuracy:            ReportAccuracyStatusUnreliable,
 		initComplete:                    false,
 		idRead:                          false,
-		accelerometer:                   &InitialBnoSensorReportThreeDimensional,
-		gravity:                         &InitialBnoSensorReportThreeDimensional,
-		gyroscope:                       &InitialBnoSensorReportThreeDimensional,
-		magnetometer:                    &InitialBnoSensorReportThreeDimensional,
-		linearAcceleration:              &InitialBnoSensorReportThreeDimensional,
-		rotationVector:                  &InitialBnoSensorReportFourDimensional,
-		geomagneticRotationVector:       &InitialBnoSensorReportFourDimensional,
-		gameRotationVector:              &InitialBnoSensorReportFourDimensional,
-		stepCount:                       &InitialBnoStepCount,
-		shakesDetected:                  &InitialBnoShakeDetected,
-		stabilityClassification:         &InitialBnoStabilityClassification,
-		mostLikelyClassification:        &InitialBnoMostLikelyClassification,
-		classifications:                 &InitialBnoClassifications,
-		rawAccelerometer:                &InitialBnoSensorReportThreeDimensional,
-		rawGyroscope:                    &InitialBnoSensorReportThreeDimensional,
-		rawMagnetometer:                 &InitialBnoSensorReportThreeDimensional,
+		stepCount:                       false,
+		shakesDetected:                  false,
+		stabilityClassification:        ReportStabilityClassificationUnknown,
+		mostLikelyClassification:        ReportClassificationUnknown,
 		enabledFeatures:                 make(map[uint8]bool),
 		afterHardwareResetFn:            afterHardwareResetFn,
 		afterSoftwareResetFn:            afterSoftwareResetFn,
@@ -155,9 +145,9 @@ func NewBNO08X(
 
 	// Perform initialization
 	if err := bno08x.Initialize(); err != nil {
-		return nil, fmt.Errorf("failed to initialize bno08x: %w", err)
+		return nil, ErrorCodeBNO08XFailedToInitializeBNO08X
 	}
-	return bno08x, nil
+	return bno08x, tinygotypes.ErrorCodeNil
 }
 
 // HardwareReset performs a hardware reset of the BNO08X sensor using the specified reset pin.
@@ -182,7 +172,9 @@ func (b *BNO08X) SoftwareReset() error {
 	b.idRead = false
 
 	// Reset enabled features
-	b.enabledFeatures = make(map[uint8]bool)
+	for k := range b.enabledFeatures {
+		delete(b.enabledFeatures, k)
+	}
 
 	// Clear calibration status
 	b.calibrationComplete = false
@@ -283,7 +275,7 @@ func (b *BNO08X) Initialize() error {
 // A boolean indicating whether the sensor ID was successfully read, and an error if there was an issue during the process.
 func (b *BNO08X) checkID() (bool, error) {
 	if b.debugger != nil {
-		b.debugger.Debug("********** READ ID **********")
+		b.debugger.Debug("* READ ID REQUEST *")
 	}
 	if b.idRead {
 		return true, nil
@@ -574,7 +566,7 @@ func (b *BNO08X) processReport(report *report) error {
 	}
 
 	// Check if it's a control report
-	if isControlReport(report.ID) {
+	if IsControlReportID(report.ID) {
 		return b.processControlReport(report)
 	}
 
@@ -1106,7 +1098,7 @@ func (b *BNO08X) EnableFeature(featureID uint8) error {
 	if b.debugger != nil {
 		b.debugger.Debug(
 			fmt.Sprintf(
-				"********** Enabling Feature ID: 0x%02X **********",
+				"* Enabling Feature ID: 0x%02X *",
 				featureID,
 			),
 		)

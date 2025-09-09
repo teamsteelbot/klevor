@@ -2,38 +2,25 @@
 
 package tinygo_bno08x
 
-type (
-	// DataBuffer is an interface for managing data buffers
-	DataBuffer interface {
-		GetData() *[]byte
-		SetData(data *[]byte)
-		ClearData()
-		UpdateSequenceNumber(newPacket *Packet) error
-		IncrementChannelSequenceNumber(channel uint8) (uint8, error)
-		GetSequenceNumber(channel uint8) (uint8, error)
-		SetSequenceNumber(channel uint8, sequenceNumber uint8) error
-		IncrementReportSequenceNumber(reportID uint8)
-		GetReportSequenceNumber(reportID uint8) uint8
-		ResetSequenceNumbers()
-	}
+import (
+	tinygotypes "github.com/ralvarezdev/tinygo-types"
+)
 
+type (
 	// DefaultDataBuffer is a default implementation of the DataBuffer interface
 	DefaultDataBuffer struct {
-		data                    *[]byte
+		data                    []byte
 		sequenceNumber          []uint8
-		reportsSequenceNumbers map[uint8]uint8
+		reportsSequenceNumbers [256]uint8
 	}
 )
 
 // NewDefaultDataBuffer creates a new DefaultDataBuffer instance
 func NewDefaultDataBuffer() *DefaultDataBuffer {
-	// Initialize the data buffer with a size of DataBufferSize
-	data := make([]byte, DataBufferSize)
-
 	return &DefaultDataBuffer{
-		data:                    &data,
+		data:                    make([]byte, DataBufferSize),
 		sequenceNumber:          make([]uint8, MaxChannelNumber),
-		reportsSequenceNumbers: make(map[uint8]uint8),
+		reportsSequenceNumbers: [256]uint8{},
 	}
 }
 
@@ -41,8 +28,8 @@ func NewDefaultDataBuffer() *DefaultDataBuffer {
 //
 // Returns:
 //
-// A pointer to the byte slice representing the data buffer.
-func (db *DefaultDataBuffer) GetData() *[]byte {
+// A slice of bytes representing the data buffer.
+func (db *DefaultDataBuffer) GetData() []byte {
 	return db.data
 }
 
@@ -50,24 +37,24 @@ func (db *DefaultDataBuffer) GetData() *[]byte {
 //
 // Parameters:
 //
-//	data: A pointer to the byte slice to set as the data buffer. If nil, the data buffer is cleared.
-func (db *DefaultDataBuffer) SetData(data *[]byte) {
-	if data == nil {
-		db.ClearData()
-	} else {
-		db.data = data
+//	index: The index in the data buffer to set the value.
+//	value: The byte value to set at the specified index.
+//
+// Returns:
+//
+// An error if the index is out of range, otherwise nil.
+func (db *DefaultDataBuffer) SetData(index int, value byte) tinygotypes.ErrorCode {
+	if index < 0 || index >= len(db.data) {
+		return tinygotypes.ErrorCodeInvalidIndex
 	}
+	db.data[index] = value
+	return tinygotypes.ErrorCodeNil
 }
 
 // ClearData clears the data buffer
 func (db *DefaultDataBuffer) ClearData() {
-	// If the data buffer is nil, do nothing
-	if db.data == nil {
-		return
-	}
-
-	for i := range *db.data {
-		(*db.data)[i] = 0
+	for i := range db.data {
+		db.data[i] = 0
 	}
 }
 
@@ -80,11 +67,11 @@ func (db *DefaultDataBuffer) ClearData() {
 // Returns:
 //
 //	An error if the channel number is invalid, otherwise nil.
-func (db *DefaultDataBuffer) validateChannelNumber(channel uint8) error {
+func (db *DefaultDataBuffer) validateChannelNumber(channel uint8) tinygotypes.ErrorCode {
 	if int(channel) < 0 || int(channel) >= len(db.sequenceNumber) {
-		return ErrInvalidChannelNumber
+		return ErrorCodeBNO08XInvalidChannelNumber
 	}
-	return nil
+	return tinygotypes.ErrorCodeNil
 }
 
 // UpdateSequenceNumber updates the cached sequence number for the given channel using the provided Packet.
@@ -96,15 +83,15 @@ func (db *DefaultDataBuffer) validateChannelNumber(channel uint8) error {
 // Returns:
 //
 //	An error if the sequence number could not be updated, otherwise nil.
-func (db *DefaultDataBuffer) UpdateSequenceNumber(newPacket *Packet) error {
+func (db *DefaultDataBuffer) UpdateSequenceNumber(newPacket *Packet) tinygotypes.ErrorCode {
 	// Check if the packet is nil
 	if newPacket == nil {
-		return ErrNilPacket
+		return ErrorCodeBNO08XNilPacket
 	}
 
 	// Check if the packet header is nil
 	if newPacket.Header == nil {
-		return ErrNilPacketHeader
+		return ErrorCodeBNO08XNilPacketHeader
 	}
 
 	// Get the channel number and sequence number from the packet
@@ -118,7 +105,7 @@ func (db *DefaultDataBuffer) UpdateSequenceNumber(newPacket *Packet) error {
 
 	// Update the sequence number for the channel
 	db.sequenceNumber[int(channel)] = seq
-	return nil
+	return tinygotypes.ErrorCodeNil
 }
 
 // IncrementChannelSequenceNumber increments the sequence number for the given channel by the specified amount.
@@ -133,7 +120,7 @@ func (db *DefaultDataBuffer) UpdateSequenceNumber(newPacket *Packet) error {
 //	The new sequence number for the channel, or an error if the channel is invalid.
 func (db *DefaultDataBuffer) IncrementChannelSequenceNumber(channel uint8) (
 	uint8,
-	error,
+	tinygotypes.ErrorCode,
 ) {
 	// Validate the channel number
 	if err := db.validateChannelNumber(channel); err != nil {
@@ -143,7 +130,7 @@ func (db *DefaultDataBuffer) IncrementChannelSequenceNumber(channel uint8) (
 	// Increment the sequence number and wrap at 256
 	newSequenceNumber := db.sequenceNumber[int(channel)] + 1
 	db.sequenceNumber[int(channel)] = newSequenceNumber
-	return newSequenceNumber, nil
+	return newSequenceNumber, tinygotypes.ErrorCodeNil
 }
 
 // GetSequenceNumber returns the cached sequence number for the given channel.
@@ -155,7 +142,7 @@ func (db *DefaultDataBuffer) IncrementChannelSequenceNumber(channel uint8) (
 // Returns:
 //
 //	The cached sequence number for the channel, or -1 if the channel is invalid.
-func (db *DefaultDataBuffer) GetSequenceNumber(channel uint8) (uint8, error) {
+func (db *DefaultDataBuffer) GetSequenceNumber(channel uint8) (uint8, tinygotypes.ErrorCode) {
 	// Validate the channel number
 	if err := db.validateChannelNumber(channel); err != nil {
 		return 0, err
@@ -178,7 +165,7 @@ func (db *DefaultDataBuffer) GetSequenceNumber(channel uint8) (uint8, error) {
 func (db *DefaultDataBuffer) SetSequenceNumber(
 	channel uint8,
 	sequenceNumber uint8,
-) error {
+) tinygotypes.ErrorCode {
 	// Validate the channel number
 	if err := db.validateChannelNumber(channel); err != nil {
 		return err
@@ -186,7 +173,7 @@ func (db *DefaultDataBuffer) SetSequenceNumber(
 
 	// Set the sequence number for the channel
 	db.sequenceNumber[int(channel)] = sequenceNumber
-	return nil
+	return tinygotypes.ErrorCodeNil
 }
 
 // IncrementReportSequenceNumber increments the sequence number for the given report ID, wrapping at 256.
@@ -195,11 +182,7 @@ func (db *DefaultDataBuffer) SetSequenceNumber(
 //
 //	reportID: The ID of the report for which to increment the sequence number.
 func (db *DefaultDataBuffer) IncrementReportSequenceNumber(reportID uint8) {
-	current, ok := db.reportsSequenceNumbers[reportID]
-	if !ok {
-		current = 0
-	}
-	db.reportsSequenceNumbers[reportID] = current + 1
+	db.reportsSequenceNumbers[reportID]++
 }
 
 // GetReportSequenceNumber returns the current sequence number for the given report ID.
@@ -212,16 +195,18 @@ func (db *DefaultDataBuffer) IncrementReportSequenceNumber(reportID uint8) {
 //
 //	The current sequence number for the report ID.
 func (db *DefaultDataBuffer) GetReportSequenceNumber(reportID uint8) uint8 {
-	sequenceNumber, ok := db.reportsSequenceNumbers[reportID]
-	if !ok {
-		db.reportsSequenceNumbers[reportID] = 0
-		return 0
-	}
-	return sequenceNumber
+	return db.reportsSequenceNumbers[reportID]
 }
 
 // ResetSequenceNumbers resets sequence numbers
 func (db *DefaultDataBuffer) ResetSequenceNumbers() {
-	db.sequenceNumber = make([]uint8, MaxChannelNumber)
-	db.reportsSequenceNumbers = make(map[uint8]uint8)
+	// Reset the sequence numbers for all channels
+	for i := range db.sequenceNumber {
+		db.sequenceNumber[i] = 0
+	}
+
+	// Reset the sequence numbers for all reports
+	for reportID := range db.reportsSequenceNumbers {
+		db.reportsSequenceNumbers[reportID] = 0
+	}
 }

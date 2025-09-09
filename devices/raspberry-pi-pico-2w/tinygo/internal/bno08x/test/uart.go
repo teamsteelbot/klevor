@@ -3,10 +3,12 @@
 package tinygo_bno08x
 
 import (
-	"fmt"
 	"time"
+	"strconv"
 
 	"machine"
+
+	tinygotypes "github.com/ralvarezdev/tinygo-types"
 )
 
 type (
@@ -89,12 +91,12 @@ func NewUART(
 	ps1Pin machine.Pin,
 	resetPin machine.Pin,
 	dataBuffer DataBuffer,
-	afterSoftwareResetFn func(b *BNO08X) error,
+	afterSoftwareResetFn func(b *BNO08X) tinygotypes.ErrorCode,
 	options *UARTOptions,
-) (*UART, error) {
+) (*UART, tinygotypes.ErrorCode) {
 	// Check if the UART bus is nil
 	if uartBus == nil {
-		return nil, ErrNilUARTBus
+		return nil, ErrorCodeBNO08XNilUARTBus
 	}
 
 	// Set PS0 pin to output and low
@@ -113,12 +115,12 @@ func NewUART(
 			RX:       rxPin,
 		},
 	); err != nil {
-		return nil, fmt.Errorf("failed to configure uart: %w", err)
+		return nil, ErrorCodeBNO08XFailedToConfigureUART
 	}
 
 	// Set UART format (8N1)
 	if err := uartBus.SetFormat(UARTDataBits, UARTParity, UARTStopBits); err != nil {
-		return nil, fmt.Errorf("failed to set uart format: %w", err)
+		return nil, ErrorCodeBNO08XFailedToSetUARTFormat
 	}
 
 	// If options are nil, initialize with default values
@@ -137,7 +139,7 @@ func NewUART(
 		options.UltraDebug,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create uart packet reader: %w", err)
+		return nil, ErrorCodeBNO08XFailedToCreatePacketReader
 	}
 
 	packetWriter, err := newUARTPacketWriter(
@@ -147,7 +149,7 @@ func NewUART(
 		options.UltraDebug,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create uart packet writer: %w", err)
+		return nil, ErrorCodeBNO08XFailedToCreatePacketWriter
 	}
 
 	// Initialize BNO08X
@@ -161,7 +163,7 @@ func NewUART(
 		options.Options,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to initialize bno08x: %w", err)
+		return nil, ErrorCodeBNO08XFailedToCreateBNO08X
 	}
 
 	return &UART{
@@ -170,7 +172,7 @@ func NewUART(
 		ps1Pin:   ps1Pin,
 		ps0Pin:   ps0Pin,
 		resetPin: resetPin,
-	}, nil
+	}, tinygotypes.ErrorCodeNil
 }
 
 // GetBNO08XService returns the BNO08X service.
@@ -208,15 +210,15 @@ func newUARTPacketReader(
 	dataBuffer DataBuffer,
 	debugger Debugger,
 	ultraDebug bool,
-) (*UARTPacketReader, error) {
+) (*UARTPacketReader, tinygotypes.ErrorCode) {
 	// Check if the UART bus is nil
 	if uartBus == nil {
-		return nil, ErrNilUARTBus
+		return nil, ErrorCodeBNO08XNilUARTBus
 	}
 
 	// Check if the dataBuffer is provided
 	if dataBuffer == nil {
-		return nil, ErrNilDataBuffer
+		return nil, ErrorCodeBNO08XNilDataBuffer
 	}
 
 	return &UARTPacketReader{
@@ -224,7 +226,7 @@ func newUARTPacketReader(
 		debugger:   debugger,
 		dataBuffer: dataBuffer,
 		ultraDebug: ultraDebug,
-	}, nil
+	}, tinygotypes.ErrorCodeNil
 }
 
 // IsDataReady checks if data is available on UART
@@ -241,19 +243,22 @@ func (pr *UARTPacketReader) IsDataReady() bool {
 // Returns:
 //
 // A byte read from UART and an error if any.
-func (pr *UARTPacketReader) readByte() (byte, error) {
+func (pr *UARTPacketReader) readByte() (byte, tinygotypes.ErrorCode) {
 	startTime := time.Now()
 	for time.Since(startTime) < UARTByteTimeout {
 		if pr.uartBus.Buffered() > 0 {
 			b, err := pr.uartBus.ReadByte()
-			if pr.debugger != nil && pr.ultraDebug {
-				pr.debugger.Debug(fmt.Sprintf("Received byte: 0x%02X", b))
+			if err != nil {
+				return b, ErrorCodeBNO08XUARTFailedToReadByte
 			}
-			return b, err
+			if pr.debugger != nil && pr.ultraDebug {
+				pr.debugger.Debug("Received byte")
+			}
+			return b, tinygotypes.ErrorCodeNil
 		}
 		time.Sleep(NoByteDelay)
 	}
-	return 0, ErrUARTTimeout
+	return 0, ErrorCodeBNO08XUARTRVCByteTimeout
 }
 
 // readInto reads bytes into the destination buffer handling escape sequences.
@@ -262,24 +267,24 @@ func (pr *UARTPacketReader) readByte() (byte, error) {
 //
 // dst: The destination byte slice to read into.
 // start: The starting index in the destination slice.
-// end: The ending index in the destination slice (optional).
+// end: The ending index in the destination slice.
 //
 // Returns:
 //
 // An error if any occurs during reading.
-func (pr *UARTPacketReader) readInto(dst *[]byte, start int, end *int) error {
-	// Check if the dst is nil
+func (pr *UARTPacketReader) readInto(dst []byte, start int, end int) tinygotypes.ErrorCode {
+	// Check if the destination slice is nil
 	if dst == nil {
-		return ErrNilDestinationBuffer
+		return ErrorCodeBNO08XNilDestinationBuffer
 	}
 
-	// Determine end index
-	if end == nil {
-		end = new(int)
-		*end = len(*dst)
+	// Check if start and end are within bounds
+	if start < 0 || end > len(dst) || start >= end {
+		return ErrorCodeBNO08XInvalidStartOrEndIndex
 	}
 
-	for i := start; i < *end; i++ {
+	// Read bytes into the destination slice
+	for i := start; i < end; i++ {
 		b, err := pr.readByte()
 		if err != nil {
 			return err
@@ -291,7 +296,7 @@ func (pr *UARTPacketReader) readInto(dst *[]byte, start int, end *int) error {
 			}
 			b = nb ^ 0x20
 		}
-		(*dst)[i] = b
+		dst[i] = b
 	}
 	return nil
 }
@@ -301,7 +306,7 @@ func (pr *UARTPacketReader) readInto(dst *[]byte, start int, end *int) error {
 // Returns:
 //
 // An error if any occurs during reading.
-func (pr *UARTPacketReader) readHeader() error {
+func (pr *UARTPacketReader) readHeader() tinygotypes.ErrorCode {
 	// Find first initial start byte
 	for {
 		b, err := pr.readByte()
@@ -328,9 +333,7 @@ func (pr *UARTPacketReader) readHeader() error {
 	if data != UARTSHTPByte {
 		return ErrUnhandledUARTControlSHTPProtocol
 	}
-	end := PacketHeaderLength
-
-	return pr.readInto(pr.dataBuffer.GetData(), 0, &end)
+	return pr.readInto(pr.dataBuffer.GetData(), PacketHeaderLength)
 }
 
 // ReadPacket reads a packet from UART
@@ -338,7 +341,7 @@ func (pr *UARTPacketReader) readHeader() error {
 // Returns:
 //
 // A Packet object and an error if any occurs.
-func (pr *UARTPacketReader) ReadPacket() (*Packet, error) {
+func (pr *UARTPacketReader) ReadPacket() (*Packet, tinygotypes.ErrorCode) {
 	// Read packet header
 	if err := pr.readHeader(); err != nil {
 		return nil, err
@@ -350,50 +353,37 @@ func (pr *UARTPacketReader) ReadPacket() (*Packet, error) {
 		return nil, err
 	}
 	if header.PacketByteCount == 0 {
-		return nil, ErrNoPacketAvailable
+		return nil, ErrorCodeBNO08XNoPacketAvailable
 	}
 	channelNumber := header.ChannelNumber
 
 	// Check if the channel number is valid
 	if channelNumber > MaxChannelNumber {
-		return nil, ErrInvalidChannelNumber
+		return nil, ErrorCodeBNO08XInvalidChannelNumber
 	}
 
 	// Check the data length for the packet
 	if header.DataLength > MaxDataLength {
-		return nil, fmt.Errorf(
-			ErrInvalidDataLength,
-			MaxDataLength,
-			header.DataLength,
-		)
+		return nil, ErrorCodeBNO08XInvalidReportDataLength
 	}
 
 	// Debug log the header
 	if pr.debugger != nil && pr.ultraDebug {
-		headerStrPtr := header.String(false)
-		if headerStrPtr != nil {
-			pr.debugger.Debug(*headerStrPtr)
-		} else {
-			pr.debugger.Debug(ErrNilPacketHeaderString.Error())
-		}
+		headerPrintBuffer := header.PrintBuffer(false)
+		pr.debugger.Debug(headerPrintBuffer)
 
 		// Log available bytes
 		pr.debugger.Debug(
-			fmt.Sprintf(
-				"Channel %d has %d bytes available",
-				channelNumber,
-				header.PacketByteCount-PacketHeaderLength,
-			),
+			"Channel "+strconv.Itoa(int(channelNumber))+ " has "+strconv.Itoa(int(pr.uartBus.Buffered()))+" bytes available",
 		)
 	}
 
 	// Read remaining (payload) bytes
-	end := int(header.PacketByteCount)
 	dataBuffer := pr.dataBuffer.GetData()
 	if err = pr.readInto(
 		dataBuffer,
 		PacketHeaderLength,
-		&end,
+		int(header.PacketByteCount),
 	); err != nil {
 		return nil, err
 	}
@@ -404,17 +394,17 @@ func (pr *UARTPacketReader) ReadPacket() (*Packet, error) {
 		return nil, err
 	}
 	if endByte != UARTStartAndEndByte {
-		return nil, ErrUARTEndMissing
+		return nil, ErrorCodeBNO08XUARTEndMissing
 	}
 
 	// Construct packet data
 	packetData := make([]byte, header.DataLength)
-	copy(packetData, (*dataBuffer)[PacketHeaderLength:header.PacketByteCount])
+	copy(packetData, dataBuffer[PacketHeaderLength:header.PacketByteCount])
 
 	// Initialize packet
-	packet, err := NewPacket(&packetData, header)
+	packet, err := NewPacket(packetData, header)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create packet from bytes: %w", err)
+		return nil, ErrorCodeBNO08XFailedToCreatePacketFromBytes
 	}
 
 	// Debug log the packet
@@ -423,7 +413,7 @@ func (pr *UARTPacketReader) ReadPacket() (*Packet, error) {
 		if packetStrPtr != nil {
 			pr.debugger.Debug(*packetStrPtr)
 		} else {
-			pr.debugger.Debug(ErrNilPacketString.Error())
+			pw.debugger.Debug("Nil packet string provided for parsing")
 		}
 	}
 
@@ -449,15 +439,15 @@ func newUARTPacketWriter(
 	dataBuffer DataBuffer,
 	debugger Debugger,
 	ultraDebug bool,
-) (*UARTPacketWriter, error) {
+) (*UARTPacketWriter, tinygotypes.ErrorCode) {
 	// Check if the UART bus is nil
 	if uartBus == nil {
-		return nil, ErrNilUARTBus
+		return nil, ErrorCodeBNO08XNilUARTBus
 	}
 
 	// Check if the dataBuffer is provided
 	if dataBuffer == nil {
-		return nil, ErrNilDataBuffer
+		return nil, ErrorCodeBNO08XNilDataBuffer
 	}
 
 	return &UARTPacketWriter{
@@ -465,7 +455,7 @@ func newUARTPacketWriter(
 		debugger:   debugger,
 		dataBuffer: dataBuffer,
 		ultraDebug: ultraDebug,
-	}, nil
+	}, tinygotypes.ErrorCodeNil
 }
 
 // SendPacket sends a packet over UART
@@ -478,10 +468,15 @@ func newUARTPacketWriter(
 // Returns:
 //
 // The sequence number used and an error if any occurs.
-func (pw *UARTPacketWriter) SendPacket(channel uint8, data *[]byte) (
+func (pw *UARTPacketWriter) SendPacket(channel uint8, data []byte) (
 	uint8,
-	error,
+	tinygotypes.ErrorCode,
 ) {
+	// Check if the data is nil
+	if data == nil {
+		return 0, ErrorCodeBNO08XNilPacketData
+	}
+
 	// Get channel sequence number
 	sequenceNumber, err := pw.dataBuffer.GetSequenceNumber(channel)
 	if err != nil {
@@ -494,8 +489,8 @@ func (pw *UARTPacketWriter) SendPacket(channel uint8, data *[]byte) (
 		sequenceNumber,
 		data,
 	)
-	if err != nil {
-		return 0, fmt.Errorf("failed to create packet: %w", err)
+	if err != tinygotypes.ErrorCodeNil {
+		return 0, ErrorCodeBNO08XFailedToCreatePacket
 	}
 
 	// Debug log the packet
@@ -504,14 +499,8 @@ func (pw *UARTPacketWriter) SendPacket(channel uint8, data *[]byte) (
 		if packetStrPtr != nil {
 			pw.debugger.Debug(*packetStrPtr)
 		} else {
-			pw.debugger.Debug(ErrNilPacketString.Error())
+			pw.debugger.Debug("Nil packet string provided for parsing")
 		}
-	}
-
-	// Get the packet buffer
-	packetBufferPtr := packet.Buffer()
-	if packetBufferPtr == nil {
-		return 0, ErrNilPacketBuffer
 	}
 
 	// Send start byte
@@ -522,8 +511,14 @@ func (pw *UARTPacketWriter) SendPacket(channel uint8, data *[]byte) (
 	pw.uartBus.WriteByte(UARTSHTPByte)
 	time.Sleep(UARTByteDelay)
 
-	// Send packet with escape sequences
-	for _, b := range *packetBufferPtr {
+	// Send the packet header
+	for _, b := range packet.Header.Buffer {
+		pw.uartBus.WriteByte(b)
+		time.Sleep(UARTByteDelay)
+	}
+
+	// Send the packet data
+	for _, b := range packet.Data {
 		pw.uartBus.WriteByte(b)
 		time.Sleep(UARTByteDelay)
 	}

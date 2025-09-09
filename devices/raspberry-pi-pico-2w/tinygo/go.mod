@@ -1,6 +1,6 @@
 module github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo
 
-go 1.25.1
+go 1.25.0
 
 require (
 	github.com/ralvarezdev/tinygo-types v0.0.2

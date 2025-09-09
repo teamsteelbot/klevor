@@ -27,4 +27,6 @@ const (
 	ErrorCodeUSBCDCEmptyIncomingMessageBuffer
 	ErrorCodeUSBCDCInvalidIncomingMessageContentUint16
 	ErrorCodeUSBCDCInvalidIncomingMessageMissingEndCharacter
+	ErrorCodeUSBCDCNilQuaternion
+	ErrorCodeUSBCDCNilIncomingMessageBuffer
 )

@@ -146,6 +146,12 @@ const (
 	// ReportCommandResponseLength is the length of the command response report
 	ReportCommandResponseLength int = 16
 
+	// ReportBaseTimestampLength is the length of the base timestamp report
+	ReportBaseTimestampLength int = 5
+
+	// ReportTimestampRebaseLength is the length of the timestamp rebase report
+	ReportTimestampRebaseLength int = 5
+
 	// DefaultReportInterval is the default report interval in microseconds
 	DefaultReportInterval uint32 = 100_000
 
@@ -157,9 +163,6 @@ const (
 
 	// EnabledActivities is a bitmask for enabled activities. All activities; 1 bit set for each of 8 activities, + Unknown
 	EnabledActivities uint32 = 0x1FF
-
-	// DataBufferSize is the size of the data buffer used for reading and writing
-	DataBufferSize = 512
 
 	// CommandBufferSize is the size of the command buffer
 	CommandBufferSize = 12
@@ -278,7 +281,7 @@ var (
 	ResetCommandData = []byte{CommandReset}
 
 	// DebugHeader is the header for debug messages
-	DebugHeader = "[BNO08x]"
+	DebugHeader = "[BNO08x] "
 
 	// MaxPackets is the default maximum number of packets to read when waiting for a specific packet type
 	MaxPackets = 10
@@ -330,15 +333,6 @@ var (
 
 	// MagneticScalar is the scalar for magnetic field values
 	MagneticScalar = math.Pow(2, 4*-1)
-
-	// ReportLengths is a map of report IDs to their lengths
-	ReportLengths = map[uint8]int{
-		ReportIDProductIDResponse:  16,
-		ReportIDGetFeatureResponse: 17,
-		ReportIDCommandResponse:    16,
-		ReportIDBaseTimestamp:      5,
-		ReportIDTimestampRebase:    5,
-	}
 
 	// RawReports are the raw SHTPCommandsNames require their counterpart to be enabled
 	RawReports = map[uint8]uint8{
@@ -403,9 +397,6 @@ var (
 		16,
 	)
 
-	// InitialBnoSensorReportThreeDimensional is the initial state of the BNO sensor report for 3D data
-	InitialBnoSensorReportThreeDimensional = [3]float64{0.0, 0.0, 0.0}
-
 	// SensorReportRotationVector is the sensor report for the rotation vector
 	SensorReportRotationVector = newSensorReport(
 		QuaternionScalar,
@@ -427,18 +418,12 @@ var (
 		12,
 	)
 
-	// InitialBnoSensorReportFourDimensional is the initial state of the BNO sensor report for 4D data
-	InitialBnoSensorReportFourDimensional = [4]float64{0.0, 0.0, 0.0, 0.0}
-
 	// SensorReportStepCounter is the sensor report for the step counter
 	SensorReportStepCounter = newSensorReport(
 		1,
 		1,
 		12,
 	)
-
-	// InitialBnoStepCount is the initial state of the BNO step count
-	InitialBnoStepCount uint16 = 0
 
 	// SensorReportShakeDetector is the sensor report for the shake detector
 	SensorReportShakeDetector = newSensorReport(
@@ -447,9 +432,6 @@ var (
 		6,
 	)
 
-	// InitialBnoShakeDetected is the initial state of the BNO shake detection
-	InitialBnoShakeDetected = false
-
 	// SensorReportStabilityClassifier is the sensor report for the stability classifier
 	SensorReportStabilityClassifier = newSensorReport(
 		1,
@@ -457,71 +439,10 @@ var (
 		5,
 	)
 
-	// InitialBnoStabilityClassification is the initial state of the BNO stability classification
-	InitialBnoStabilityClassification = "Unknown"
-
 	// SensorReportActivityClassifier is the sensor report for the activity classifier
 	SensorReportActivityClassifier = newSensorReport(
 		1,
 		1,
 		16,
 	)
-
-	// InitialBnoMostLikelyClassification is the initial state of the BNO most likely classification
-	InitialBnoMostLikelyClassification = "Unknown"
-
-	// InitialBnoClassifications is the initial state of the BNO classifications
-	InitialBnoClassifications = map[string]int{
-		"Tilting":    -1,
-		"OnStairs":   -1,
-		"On-Foot":    -1,
-		"Other":      -1,
-		"On-Bicycle": -1,
-		"Still":      -1,
-		"Walking":    -1,
-		"Unknown":    -1,
-		"Running":    -1,
-		"In-Vehicle": -1,
-	}
-
-	// AvailableSensorReports is a map of available sensor reports
-	AvailableSensorReports = map[uint8]*sensorReport{
-		ReportIDAccelerometer:             SensorReportAccelerometer,
-		ReportIDGravity:                   SensorReportGravity,
-		ReportIDGyroscope:                 SensorReportGyroscope,
-		ReportIDMagnetometer:              SensorReportMagnetometer,
-		ReportIDLinearAcceleration:        SensorReportLinearAcceleration,
-		ReportIDRotationVector:            SensorReportRotationVector,
-		ReportIDGeomagneticRotationVector: SensorReportGeomagneticRotationVector,
-		ReportIDGameRotationVector:        SensorReportGameRotationVector,
-		ReportIDStepCounter:               SensorReportStepCounter,
-		ReportIDShakeDetector:             SensorReportShakeDetector,
-		ReportIDStabilityClassifier:       SensorReportStabilityClassifier,
-		ReportIDActivityClassifier:        SensorReportActivityClassifier,
-		ReportIDRawAccelerometer:          SensorReportRawAccelerometer,
-		ReportIDRawGyroscope:              SensorReportRawGyroscope,
-		ReportIDRawMagnetometer:           SensorReportRawMagnetometer,
-	}
-
-	// Activities is a list of activity strings
-	Activities = []string{
-		"Unknown",
-		"In-Vehicle",
-		"On-Bicycle",
-		"On-Foot",
-		"Still",
-		"Tilting",
-		"Walking",
-		"Running",
-		"OnStairs",
-	}
-
-	// StabilityClassifications is a list of stability classification strings
-	StabilityClassifications = []string{
-		"Unknown",
-		"On Table",
-		"Stationary",
-		"Stable",
-		"In motion",
-	}
 )

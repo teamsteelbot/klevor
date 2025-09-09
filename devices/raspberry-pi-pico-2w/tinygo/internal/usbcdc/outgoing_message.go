@@ -11,7 +11,7 @@ type (
 	// OutgoingMessage is the struct to handle the messages sent to the Raspberry Pi 5
 	OutgoingMessage struct {
 		Category OutgoingCategory
-		bufferfer []byte
+		Buffer []byte
 	}
 )
 
@@ -30,14 +30,14 @@ func NewOutgoingMessage(
 	content []byte,
 ) *OutgoingMessage {
 	// Create the buffer with the category, content and end character
-	buffer := make([]byte, 0, len(content)+2)
-	buffer = append(buffer, uint8(category))
-	buffer = append(buffer, content...)
-	buffer = append(buffer, EndChar)
+	buffer := make([]byte, len(content)+2)
+	buffer[0] = uint8(category)
+	copy(buffer[1:], content)
+	buffer[len(buffer)-1] = EndChar
 
 	return &OutgoingMessage{
 		Category: category,
-		bufferfer:   buffer,
+		Buffer:   buffer,
 	}
 }
 
@@ -191,13 +191,4 @@ func NewOutgoingMessageFromFloat64Content(
 		category,
 		[]byte(strconv.FormatFloat(content, 'f', -1, 64)),
 	)
-}
-
-// GetBuffer returns the byte slice representation of the OutgoingMessage
-//
-// Returns:
-//
-// A byte slice that represents the OutgoingMessage
-func (o *OutgoingMessage) GetBuffer() []byte {
-	return o.bufferfer
 }

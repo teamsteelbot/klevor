@@ -69,7 +69,7 @@ func NewDefaultHandler(
 //
 // Returns:
 //
-// A pointer to a slice of IncomingMessage
+// A slice of pointers to IncomingMessage instances.
 func (d *DefaultHandler) GetIncomingMessages() []*IncomingMessage {
 	return d.incomingMessages
 }
@@ -150,7 +150,7 @@ func (d *DefaultHandler) SendMessage(message *OutgoingMessage) tinygotypes.Error
 	}
 
 	// Send the message to the console port
-	if _, err := d.serialer.Write(message.GetBuffer()); err != nil {
+	if _, err := d.serialer.Write(message.Buffer); err != nil {
 		return ErrorCodeUSBCDCFailedToSendMessage
 	}
 	return tinygotypes.ErrorCodeNil
@@ -238,32 +238,49 @@ func (d *DefaultHandler) SendChallengeMessage() tinygotypes.ErrorCode {
 	)
 }
 
-// SendBNO08XYawDegreesMessage sends a BNO08x yaw degrees message to the USB CDC.
-//
-// Returns:
-//
-// An error if it fails to send the yaw degrees message
-func (d *DefaultHandler) SendBNO08XYawDegreesMessage(yawDegrees float64) tinygotypes.ErrorCode {
-	return d.SendMessage(NewOutgoingMessageFromFloat64Content(
-		OutgoingCategoryBNO08XYawDegrees,
-		yawDegrees,
-	))
-}
-
-// SendBNO08XYawTurnsMessage sends a BNO08x yaw turns message to the USB CDC.
+// SendBNO08XQuaternionsMessages sends BNO08X quaternion messages to the USB CDC.
 //
 // Parameters:
 //
-// turns: The number of turns to send
+// quaternion: A pointer to an array of 4 float64 values representing the quaternion (x, y, z, w).
 //
 // Returns:
 //
-// An error if it fails to send the yaw turns message
-func (d *DefaultHandler) SendBNO08XYawTurnsMessage(turns int) tinygotypes.ErrorCode {
-	return d.SendMessage(NewOutgoingMessageFromIntContent(
-		OutgoingCategoryBNO08XYawTurns,
-		turns,
-	))
+// An error if it fails to send any of the quaternion messages.
+func (d *DefaultHandler) SendBNO08XQuaternionsMessages(quaternion *[4]float64) tinygotypes.ErrorCode {
+	if quaternion == nil {
+		return ErrorCodeUSBCDCNilQuaternion
+	}
+
+	// Send the quaternion components as separate messages
+	if err := d.SendMessage(NewOutgoingMessageFromFloat64Content(
+		OutgoingCategoryQuaternionX,
+		quaternion[0],
+	)); err != tinygotypes.ErrorCodeNil {
+		return err
+	}
+
+	if err := d.SendMessage(NewOutgoingMessageFromFloat64Content(
+		OutgoingCategoryQuaternionY,
+		quaternion[1],
+	)); err != tinygotypes.ErrorCodeNil {
+		return err
+	}
+
+	if err := d.SendMessage(NewOutgoingMessageFromFloat64Content(
+		OutgoingCategoryQuaternionZ,
+		quaternion[2],
+	)); err != tinygotypes.ErrorCodeNil {
+		return err
+	}
+	
+	if err := d.SendMessage(NewOutgoingMessageFromFloat64Content(
+		OutgoingCategoryQuaternionW,
+		quaternion[3],
+	)); err != tinygotypes.ErrorCodeNil {
+		return err
+	}
+	return tinygotypes.ErrorCodeNil
 }
 
 // SendErrorMessage sends an error message to the USB CDC.

@@ -4,6 +4,8 @@ package tinygo_bno08x
 
 import (
 	"errors"
+
+	tinygotypes "github.com/ralvarezdev/tinygo-types"
 )
 
 const (
@@ -32,11 +34,9 @@ var (
 	ErrCommandRequestTooManyArguments            = errors.New("command request cannot have more than 9 arguments")
 	ErrFailedToReadSensorID                      = errors.New("failed to read sensor id from the device")
 	ErrPacketTimeout                             = errors.New("packet read timeout exceeded")
-	ErrNilPacket                                 = errors.New("nil packet provided for processing")
 	ErrFailedToSaveCalibrationData               = errors.New("failed to save calibration data to the device")
 	ErrInvalidReportIDForThreeDimensionalParsing = errors.New("invalid report id for three-dimensional parsing")
 	ErrInvalidReportIDForFourDimensionalParsing  = errors.New("invalid report id for four-dimensional parsing")
-	ErrInvalidChannelNumber                            = errors.New("invalid channel number provided")
 	ErrNoPacketAvailable                         = errors.New("no packet available to read from the i2c bus")
 	ErrNilI2CBus                                 = errors.New("nil i2c bus provided for communication")
 	ErrInvalidI2CAddress                         = errors.New("invalid i2c address provided")
@@ -47,7 +47,6 @@ var (
 	ErrNilPacketString                           = errors.New("nil packet string provided for parsing")
 	ErrNilPacketData                             = errors.New("nil packet data provided for parsing")
 	ErrNilPacketBuffer                           = errors.New("nil packet buffer provided for parsing")
-	ErrNilPacketHeader                           = errors.New("nil packet header provided for parsing")
 	ErrNilPacketHeaderBuffer                     = errors.New("nil packet header buffer provided for parsing")
 	ErrUARTTimeout                               = errors.New("uart read timeout exceeded")
 	ErrNilSubcommandParams                       = errors.New("nil subcommand parameters provided")
@@ -63,4 +62,65 @@ var (
 	ErrNilBNO08XService                          = errors.New("nil BNO08x service provided")
 	ErrNilEulerDegrees                           = errors.New("nil euler degrees provided")
 	ErrSPICouldNotBeWokenUp                     = errors.New("spi could not be woken up from sleep mode")
+)
+
+const (
+	// ErrorCodeBNO08XStartNumber is the starting number for BNO08X-related error codes.
+	ErrorCodeBNO08XStartNumber uint16 = 5000
+)
+
+const (
+	ErrorCodeBNO08XDataBufferIndexOutOfRange tinygotypes.ErrorCode = tinygotypes.ErrorCode(iota + ErrorCodeBNO08XStartNumber)
+	ErrorCodeBNO08XInvalidChannelNumber
+	ErrorCodeBNO08XNilPacket
+	ErrorCodeBNO08XNilPacketHeader
+	ErrorCodeBNO08XNilUARTBus
+	ErrorCodeBNO08XFailedToConfigureUART
+	ErrorCodeBNO08XFailedToInitializeUARTRVC
+	ErrorCodeBNO08XNilRotationVector
+	ErrorCodeBNO08XUARTRVCNilFrame
+	ErrorCodeBNO08XUARTRVCFrameTooShort
+	ErrorCodeBNO08XUARTRVCInvalidChecksum
+	ErrorCodeBNO08XUARTRVCByteTimeout
+	ErrorCodeBNO08XUARTRVCFailedToReadByte
+	ErrorCodeBNO08XFailedToParseFrame
+	ErrorCodeBNO08XUARTRVCUARTTimeout
+	ErrorCodeBNO08XFailedToCreatePacket
+	ErrorCodeBNO08XFailedToSetUARTFormat
+	ErrorCodeBNO08XFailedToCreatePacketReader
+	ErrorCodeBNO08XFailedToCreatePacketWriter
+	ErrorCodeBNO08XFailedToCreateBNO08X
+	ErrorCodeBNO08XUARTByteTimeout
+	ErrorCodeBNO08XUARTFailedToReadByte
+	ErrorCodeBNO08XFailedToInitializeBNO08X
+	ErrorCodeBNO08XNilDataBuffer
+	ErrorCodeBNO08XFailedToGetExpectedReportLength
+	ErrorCodeBNO08XInvalidReportLength
+	ErrorCodeBNO08XNilReport
+	ErrorCodeBNO08XFailedToGetReportID
+	ErrorCodeBNO08XInsertCommandRequestReportBufferTooShort
+	ErrorCodeBNO08XInsertCommandRequestReportTooManyArguments
+	ErrorCodeBNO08XUnknownReportID
+	ErrorCodeBNO08XFailedToCreatePacketFromBuffer
+	ErrorCodeBNO08XFailedToCreateReportFromPacketBuffer
+	ErrorCodeBNO08XInvalidReportIDToParseReport
+	ErrorCodeBNO08XInvalidReportStabilityClassificationUint8
+	ErrorCodeBNO08XInvalidReportActivityUint8
+	ErrorCodeBNO08XInvalidReportIDForFourDimensionalParsing
+	ErrorCodeBNO08XInvalidReportIDForThreeDimensionalParsing
+	ErrorCodeBNO08XNilSensorReport
+	ErrorCodeBNO08XInvalidReportAccuracyStatusUint8
+	ErrorCodeBNO08XSensorReportDataTooShort
+	ErrorCodeBNO08XNoPacketAvailable
+	ErrorCodeBNO08XNilPacketBuffer
+	ErrorCodeBNO08XInvalidReportDataLength
+	ErrorCodeBNO08XUARTEndMissing
+	ErrorCodeBNO08XPacketHeaderBufferTooShort
+	ErrorCodeBNO08XNilDestinationBuffer
+	ErrorCodeBNO08XInvalidStartOrEndIndex
+	ErrorCodeBNO08XNilPacketData
+	ErrorCodeBNO08XCommandRequestReportNilBuffer
+	ErrorCodeBNO08XNilReportData
+	ErrorCodeBNO08XNilCommandRequestReportParameters
+	ErrorCodeBNO08XPacketDataTooShort
 )

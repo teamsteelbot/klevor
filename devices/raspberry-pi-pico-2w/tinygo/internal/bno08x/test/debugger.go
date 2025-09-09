@@ -8,11 +8,6 @@ import (
 )
 
 type (
-	// Debugger is an interface for debugging messages
-	Debugger interface {
-		Debug(args ...any)
-	}
-
 	// DefaultDebugger is a simple implementation of the Debugger interface
 	DefaultDebugger struct{}
 )
@@ -26,20 +21,20 @@ func NewDefaultDebugger() *DefaultDebugger {
 //
 // Parameters:
 //
-//	args: The arguments to print in the debug message
-func (d *DefaultDebugger) Debug(args ...any) {
-	var b strings.Builder
-	b.WriteString(DebugHeader)
-	b.WriteString(" ")
-	for i, arg := range args {
-		// Check if the argument is nil
-		if arg == nil {
-			continue
-		}
-		if i > 0 {
-			b.WriteString("\n ")
-		}
-		b.WriteString(fmt.Sprintf("%v", arg))
+//	message: The debug message to print.
+func (d *DefaultDebugger) Debug(message string) {
+	print(DebugHeader)
+	println(message)
+}
+
+// DebugBuffer function to print debug messages with buffer content
+//
+// Parameters:
+//
+//	buffer: The byte slice to print in hexadecimal format.
+func (d *DefaultDebugger) DebugBuffer(buffer []byte) {
+	if buffer == nil {
+		return
 	}
-	fmt.Println(b.String())
+	d.Debug(string(buffer))
 }

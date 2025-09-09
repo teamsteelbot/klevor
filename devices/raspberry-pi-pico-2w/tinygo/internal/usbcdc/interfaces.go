@@ -19,8 +19,7 @@ type (
 		) tinygotypes.ErrorCode
 		SendInitializationMessage() tinygotypes.ErrorCode
 		SendChallengeMessage() tinygotypes.ErrorCode
-		SendBNO08XYawDegreesMessage(yawDegrees float64) tinygotypes.ErrorCode
-		SendBNO08XYawTurnsMessage(turns int) tinygotypes.ErrorCode
+		SendBNO08XQuaternionsMessages(quaternion *[4]float64) tinygotypes.ErrorCode
 		SendErrorMessage(err tinygotypes.ErrorCode) tinygotypes.ErrorCode
 		SendStartMessage() tinygotypes.ErrorCode
 		Stop()

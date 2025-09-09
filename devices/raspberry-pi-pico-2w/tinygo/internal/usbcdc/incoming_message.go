@@ -9,7 +9,7 @@ import (
 type (
 	// IncomingMessage is the struct to handle the buffers received to the Raspberry Pi 5
 	IncomingMessage struct {
-		buffer []byte
+		Buffer []byte
 		Category IncomingCategory
 	}
 )
@@ -26,6 +26,11 @@ type (
 func NewIncomingMessage(
 	buffer []byte,
 ) (*IncomingMessage, tinygotypes.ErrorCode) {
+	// Check if the buffer is nil
+	if buffer == nil {
+		return nil, ErrorCodeUSBCDCNilIncomingMessageBuffer
+	}
+
 	// Get the index of the end character and copy the buffer until that index
 	endIdx := -1
 	for i, b := range buffer {
@@ -60,7 +65,7 @@ func NewIncomingMessage(
 		category == IncomingCategoryGetMaxServoDirectionValue {
 		return &IncomingMessage{
 			Category: category,
-			buffer:  bufferCopy,
+			Buffer:  bufferCopy,
 		}, tinygotypes.ErrorCodeNil
 	}
 
@@ -72,7 +77,7 @@ func NewIncomingMessage(
 	// Create and return the IncomingMessage object
 	return &IncomingMessage{
 		Category: category,
-		buffer:   bufferCopy,
+		Buffer:   bufferCopy,
 	}, tinygotypes.ErrorCodeNil
 }
 
@@ -141,10 +146,7 @@ func (i *IncomingMessage) IsAMotorMessage() bool {
 //
 // A byte slice representing the content buffer, excluding the category byte.
 func (i *IncomingMessage) GetContentBuffer() []byte {
-	if len(i.buffer) <= 1 {
-		return []byte{}
-	}
-	return i.buffer[1:]
+	return i.Buffer[1:]
 }
 
 // GetContentAsUint16 converts the buffer of the IncomingMessage to a uint16 value

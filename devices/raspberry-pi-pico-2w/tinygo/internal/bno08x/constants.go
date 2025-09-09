@@ -32,9 +32,6 @@ var (
 	// UARTRVC is the UART-RVC instance for the BNO08x sensor.
 	// UARTRVC *ralvarezdevbno08x.UARTRVC
 
-	// BNO08XHandler is the handler for the BNO08x sensor.
-	BNO08XHandler *DefaultHandler
-
 	// InitializeAttempts is the number of attempts to initialize the BNO08x sensor.
 	InitializeAttempts = 5
 )
@@ -55,7 +52,7 @@ func init() {
 			machine.GPIO3,
 			machine.GPIO4,
 			DataBuffer,
-			afterReset,
+			afterSoftwareReset,
 			ralvarezdevbno08x.NewUARTOptions(ralvarezdevbno08x.NewDefaultDebugger(), true),
 			// ralvarezdevbno08x.NewUARTOptions(nil, false),
 		)
@@ -87,7 +84,8 @@ func init() {
 			machine.GPIO3,
 			machine.GPIO4,
 			DataBuffer,
-			afterReset,
+			nil, 
+			afterSoftwareReset,
 			ralvarezdevbno08x.NewI2COptions(ralvarezdevbno08x.NewDefaultDebugger(), &address0),
 		)
 		if err != nil {
@@ -113,7 +111,6 @@ func init() {
 			machine.GPIO2,
 			machine.GPIO3,
 			machine.GPIO4,
-			DataBuffer,
 			ralvarezdevbno08x.NewUARTRVCOptions(
 				// ralvarezdevbno08x.NewDefaultDebugger(),
 				nil,
@@ -128,19 +125,4 @@ func init() {
 		// Set the UART-RVC instance as the BNO08X service
 		BNO08XService = uartRVC
 	*/
-
-	// ----- All Instances -----
-
-	// Initialize the BNO08x handler with default settings.
-	bno08xHandler, err := NewDefaultHandler(
-		BNO08XService,
-		internalusbcdc.USBCDCHandler,
-	)
-	if err != nil {
-		panic("failed to initialize bno08x handler: " + err.Error())
-	}
-	BNO08XHandler = bno08xHandler
-
-	// Set the initial euler degrees to BNO08X handler
-	BNO08XHandler.SetInitialEulerDegrees(BNO08XService.GetEulerDegrees())
 }

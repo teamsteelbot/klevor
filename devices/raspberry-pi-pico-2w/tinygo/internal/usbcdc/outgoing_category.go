@@ -13,12 +13,14 @@ const (
 	OutgoingCategoryNil OutgoingCategory = iota
 	OutgoingCategoryChallenge
 	OutgoingCategoryStatus
-	OutgoingCategoryBNO08XYawDegrees
-	OutgoingCategoryBNO08XYawTurns
 	OutgoingCategoryError
 	OutgoingCategoryDebug
 	OutgoingCategoryMaxMotorSpeedValue
 	OutgoingCategoryMaxServoDirectionValue
+	OutgoingCategoryQuaternionX
+	OutgoingCategoryQuaternionY
+	OutgoingCategoryQuaternionZ
+	OutgoingCategoryQuaternionW
 )
 
 // OutgoingCategoryFromUint8 returns the OutgoingCategory enum based on a given uint8 value
@@ -38,10 +40,14 @@ func OutgoingCategoryFromUint8(value uint8) (OutgoingCategory, tinygotypes.Error
 		return OutgoingCategoryChallenge, tinygotypes.ErrorCodeNil
 	case OutgoingCategoryStatus:
 		return OutgoingCategoryStatus, tinygotypes.ErrorCodeNil
-	case OutgoingCategoryBNO08XYawDegrees:
-		return OutgoingCategoryBNO08XYawDegrees, tinygotypes.ErrorCodeNil
-	case OutgoingCategoryBNO08XYawTurns:
-		return OutgoingCategoryBNO08XYawTurns, tinygotypes.ErrorCodeNil
+	case OutgoingCategoryQuaternionX:
+		return OutgoingCategoryQuaternionX, tinygotypes.ErrorCodeNil
+	case OutgoingCategoryQuaternionY:
+		return OutgoingCategoryQuaternionY, tinygotypes.ErrorCodeNil
+	case OutgoingCategoryQuaternionZ:
+		return OutgoingCategoryQuaternionZ, tinygotypes.ErrorCodeNil
+	case OutgoingCategoryQuaternionW:
+		return OutgoingCategoryQuaternionW, tinygotypes.ErrorCodeNil
 	case OutgoingCategoryError:
 		return OutgoingCategoryError, tinygotypes.ErrorCodeNil
 	case OutgoingCategoryDebug:

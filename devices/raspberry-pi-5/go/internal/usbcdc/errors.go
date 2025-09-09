@@ -126,6 +126,8 @@ const (
 	ErrorCodeUSBCDCEmptyIncomingMessageBuffer
 	ErrorCodeUSBCDCInvalidIncomingMessageContentUint16
 	ErrorCodeUSBCDCInvalidIncomingMessageMissingEndCharacter
+	ErrorCodeUSBCDCNilQuaternion
+	ErrorCodeUSBCDCNilIncomingMessageBuffer
 )
 
 var (
@@ -182,6 +184,8 @@ var (
 		ErrorCodeUSBCDCEmptyIncomingMessageBuffer:             "incoming message buffer is empty",
 		ErrorCodeUSBCDCInvalidIncomingMessageContentUint16:    "invalid incoming message content uint16",
 		ErrorCodeUSBCDCInvalidIncomingMessageMissingEndCharacter: "invalid incoming message: missing end character",
+		ErrorCodeUSBCDCNilQuaternion:                          "nil quaternion provided",
+		ErrorCodeUSBCDCNilIncomingMessageBuffer:               "incoming message buffer cannot be nil",
 	}
 )
 
