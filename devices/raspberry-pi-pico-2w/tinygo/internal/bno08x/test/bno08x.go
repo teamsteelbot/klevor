@@ -3,7 +3,6 @@
 package tinygo_bno08x
 
 import (
-	"fmt"
 	"math"
 	"strings"
 	"time"

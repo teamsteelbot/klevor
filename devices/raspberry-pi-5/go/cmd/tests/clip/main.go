@@ -51,8 +51,8 @@ func main() {
 	clipHandler, err := internalclip.NewDefaultHandler(
 		*generateClipEmbeddingsPath,
 		*runClipPath,
-		&internalclip.PositiveLabels,
-		&internalclip.NegativeLabels,
+		internalclip.PositiveLabels,
+		internalclip.NegativeLabels,
 		logger,
 	)
 	if err != nil {

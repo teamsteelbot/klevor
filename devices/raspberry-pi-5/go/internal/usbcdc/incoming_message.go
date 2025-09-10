@@ -226,7 +226,7 @@ func NewIncomingMessageFromString(message string) (*IncomingMessage, error) {
 // Returns:
 //
 // A slice of IncomingMessage instances, or an error if the buffer is invalid
-func NewIncomingMessagesFromBuffer(buffer *[]byte) ([]*IncomingMessage, error) {
+func NewIncomingMessagesFromBuffer(buffer []byte) ([]*IncomingMessage, error) {
 	// Check if the buffer is nil
 	if buffer == nil {
 		return nil, ErrNilBuffer
@@ -236,7 +236,7 @@ func NewIncomingMessagesFromBuffer(buffer *[]byte) ([]*IncomingMessage, error) {
 	var messages []*IncomingMessage
 	var currentMessage []byte
 	var lastIndex int
-	for i, b := range *buffer {
+	for i, b := range buffer {
 		if b == EndChar {
 			if len(currentMessage) > 0 {
 				msg, err := NewIncomingMessageFromString(string(currentMessage))
@@ -253,7 +253,7 @@ func NewIncomingMessagesFromBuffer(buffer *[]byte) ([]*IncomingMessage, error) {
 	}
 
 	// Update the buffer to remove processed messages
-	*buffer = (*buffer)[lastIndex:]
+	buffer = buffer[lastIndex:]
 
 	return messages, nil
 }

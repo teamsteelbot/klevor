@@ -3,8 +3,8 @@
 package tinygo_bno08x
 
 import (
-	"time"
 	"strconv"
+	"time"
 
 	"machine"
 
@@ -369,13 +369,7 @@ func (pr *UARTPacketReader) ReadPacket() (*Packet, tinygotypes.ErrorCode) {
 
 	// Debug log the header
 	if pr.debugger != nil && pr.ultraDebug {
-		headerPrintBuffer := header.PrintBuffer(false)
-		pr.debugger.Debug(headerPrintBuffer)
-
-		// Log available bytes
-		pr.debugger.Debug(
-			"Channel "+strconv.Itoa(int(channelNumber))+ " has "+strconv.Itoa(int(pr.uartBus.Buffered()))+" bytes available",
-		)
+		pr.debugger.DebugBuffer(header.PrintBuffer(false))
 	}
 
 	// Read remaining (payload) bytes
@@ -384,13 +378,13 @@ func (pr *UARTPacketReader) ReadPacket() (*Packet, tinygotypes.ErrorCode) {
 		dataBuffer,
 		PacketHeaderLength,
 		int(header.PacketByteCount),
-	); err != nil {
+	); err != tinygotypes.ErrorCodeNil {
 		return nil, err
 	}
 
 	// Expect trailing 0x7E
 	endByte, err := pr.readByte()
-	if err != nil {
+	if err != tinygotypes.ErrorCodeNil {
 		return nil, err
 	}
 	if endByte != UARTStartAndEndByte {
@@ -404,22 +398,19 @@ func (pr *UARTPacketReader) ReadPacket() (*Packet, tinygotypes.ErrorCode) {
 	// Initialize packet
 	packet, err := NewPacket(packetData, header)
 	if err != nil {
-		return nil, ErrorCodeBNO08XFailedToCreatePacketFromBytes
+		return nil, err
 	}
 
 	// Debug log the packet
 	if pr.debugger != nil {
-		packetStrPtr := packet.String(false)
-		if packetStrPtr != nil {
-			pr.debugger.Debug(*packetStrPtr)
-		} else {
-			pw.debugger.Debug("Nil packet string provided for parsing")
-		}
+		pr.debugger.DebugBuffer(packet.PrintBuffer(false))
 	}
 
 	// Update sequence number
-	pr.dataBuffer.UpdateSequenceNumber(packet)
-	return packet, nil
+	if err := pr.dataBuffer.UpdateSequenceNumber(packet); err != tinygotypes.ErrorCodeNil {
+		return nil, err
+	}
+	return packet, tinygotypes.ErrorCodeNil
 }
 
 // newUARTPacketWriter creates a new UARTPacketWriter instance.
@@ -490,17 +481,13 @@ func (pw *UARTPacketWriter) SendPacket(channel uint8, data []byte) (
 		data,
 	)
 	if err != tinygotypes.ErrorCodeNil {
-		return 0, ErrorCodeBNO08XFailedToCreatePacket
+		return 0, err
 	}
 
 	// Debug log the packet
 	if pw.debugger != nil {
-		packetStrPtr := packet.String(true)
-		if packetStrPtr != nil {
-			pw.debugger.Debug(*packetStrPtr)
-		} else {
-			pw.debugger.Debug("Nil packet string provided for parsing")
-		}
+		pw.debugger.DebugBuffer(packet.Header.PrintBuffer(true))
+		pw.debugger.DebugBuffer(packet.PrintBuffer(true))
 	}
 
 	// Send start byte

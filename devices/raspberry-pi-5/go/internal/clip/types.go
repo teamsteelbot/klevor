@@ -27,8 +27,8 @@ type (
 		isRunning                        atomic.Bool
 		generateClipEmbeddingsPath       string
 		runClipPath                      string
-		positiveLabels                   *[]internal.PositiveLabel
-		negativeLabels                   *[]internal.NegativeLabel
+		positiveLabels                   []internal.PositiveLabel
+		negativeLabels                   []internal.NegativeLabel
 		classification                   *internal.Classification
 		stdoutLinesRead                  int
 		clipApplicationInitialized       bool
@@ -54,8 +54,8 @@ type (
 func NewDefaultHandler(
 	generateClipEmbeddingsPath,
 	runClipPath string,
-	positiveLabels *[]internal.PositiveLabel,
-	negativeLabels *[]internal.NegativeLabel,
+	positiveLabels []internal.PositiveLabel,
+	negativeLabels []internal.NegativeLabel,
 	logger internallog.Logger,
 ) (*DefaultHandler, error) {
 	// Check if the logger is nil
@@ -100,11 +100,11 @@ func (h *DefaultHandler) generateEmbeddingsJSONContent() string {
 	builder.WriteString("\": [\n")
 
 	// Add the positive labels
-	for i, label := range *h.positiveLabels {
+	for i, label := range h.positiveLabels {
 		builder.WriteString("\t\t\"")
 		builder.WriteString(label.String())
 		builder.WriteString("\"")
-		if i < len(*h.positiveLabels)-1 {
+		if i < len(h.positiveLabels)-1 {
 			builder.WriteString(",\n")
 		} else {
 			builder.WriteString("\n")
@@ -119,11 +119,11 @@ func (h *DefaultHandler) generateEmbeddingsJSONContent() string {
 		builder.WriteString("\t\"")
 		builder.WriteString(EmbeddingsJSONNegativeKeyName)
 		builder.WriteString("\": [\n")
-		for i, label := range *h.negativeLabels {
+		for i, label := range h.negativeLabels {
 			builder.WriteString("\t\t\"")
 			builder.WriteString(label.String())
 			builder.WriteString("\"")
-			if i < len(*h.negativeLabels)-1 {
+			if i < len(h.negativeLabels)-1 {
 				builder.WriteString(",\n")
 			} else {
 				builder.WriteString("\n")

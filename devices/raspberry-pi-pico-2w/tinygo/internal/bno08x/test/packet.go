@@ -4,7 +4,6 @@ package tinygo_bno08x
 
 import (
 	"encoding/binary"
-	"fmt"
 	"strconv"
 	"strings"
 
