@@ -225,15 +225,6 @@ func NewI2C(
 	}, nil
 }
 
-// GetBNO08XService returns the BNO08X service.
-//
-// Returns:
-//
-// The BNO08X service instance.
-func (i2c *I2C) GetBNO08XService() BNO08XService {
-	return i2c.BNO08X
-}
-
 // GetBNO08X returns the BNO08X instance.
 //
 // Returns:

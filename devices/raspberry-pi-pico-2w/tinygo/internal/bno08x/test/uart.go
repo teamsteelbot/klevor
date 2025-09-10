@@ -175,15 +175,6 @@ func NewUART(
 	}, tinygotypes.ErrorCodeNil
 }
 
-// GetBNO08XService returns the BNO08X service.
-//
-// Returns:
-//
-// The BNO08X service instance.
-func (uart *UART) GetBNO08XService() BNO08XService {
-	return uart.BNO08X
-}
-
 // GetBNO08X returns the BNO08X instance.
 //
 // Returns:

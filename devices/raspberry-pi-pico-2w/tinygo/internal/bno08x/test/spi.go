@@ -188,15 +188,6 @@ func NewSPI(
 	}, nil
 }
 
-// GetBNO08XService returns the BNO08X service.
-//
-// Returns:
-//
-// The BNO08X service instance.
-func (spi *SPI) GetBNO08XService() BNO08XService {
-	return spi.BNO08X
-}
-
 // GetBNO08X returns the BNO08X instance.
 //
 // Returns:

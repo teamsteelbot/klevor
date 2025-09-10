@@ -39,14 +39,44 @@ type (
 		SendPacket(channel uint8, data []byte) (uint8, tinygotypes.ErrorCode)
 	}
 
-	// BNO08XService is an interface to wrap the BNO08X implementation methods.
-	BNO08XService interface {
-		Update()
-		GetAcceleration() *[3]float64
-		GetQuaternion() *[4]float64
+	// BNO08XSimpleService is an interface to wrap the BNO08X implementation basic methods.
+	BNO08XSimpleService interface {
 		Initialize() tinygotypes.ErrorCode
 		HardwareReset()
 		SoftwareReset() tinygotypes.ErrorCode
 		Reset() tinygotypes.ErrorCode
+		Update()
+		GetAcceleration() *[3]float64
+		GetQuaternion() *[4]float64
+	}
+
+	// BNO08XService is an interface to wrap the BNO08X implementation methods.
+	BNO08XService interface {
+		Initialize() tinygotypes.ErrorCode
+		HardwareReset()
+		SoftwareReset() tinygotypes.ErrorCode
+		Reset() tinygotypes.ErrorCode
+		Update()
+		GetMagnetic() *[3]float64
+		GetQuaternion() *[4]float64
+		GetGeomagneticQuaternion() *[4]float64
+		GetGameQuaternion() *[4]float64
+		GetSteps() uint16
+		GetLinearAcceleration() *[3]float64
+		GetAcceleration() *[3]float64
+		GetGravity() *[3]float64
+		GetGyro() *[3]float64
+		GetShake() bool
+		GetStabilityClassification() ReportStabilityClassification
+		GetActivityClassification()  *[ReportClassificationsNumber]int
+		GetRawAcceleration() *[3]float64
+		GetRawGyro() *[3]float64
+		GetRawMagnetic() *[3]float64
+		EnableFeature(featureID uint8) tinygotypes.ErrorCode
+		IsFeatureEnabled(featureID uint8) bool
+		BeginCalibration() tinygotypes.ErrorCode
+		CalibrationStatus() ReportAccuracyStatus 
+		IsCalibrated() bool
+		SaveCalibrationData() tinygotypes.ErrorCode
 	}
 )

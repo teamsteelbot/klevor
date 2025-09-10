@@ -3,65 +3,7 @@
 package tinygo_bno08x
 
 import (
-	"errors"
-
 	tinygotypes "github.com/ralvarezdev/tinygo-types"
-)
-
-const (
-	ErrInvalidReportIDForReportParsing = "invalid report id for report parsing, expected 0x%02X, got 0x%02X"
-	ErrInvalidDataLength = 				"invalid data length in packet, exceeds maximum allowed length of %d bytes, got %d bytes"
-	ErrMismatchedPacketDataLength = "mismatched packet data length, expected %d, got %d"
-	ErrUnprocessableBatchBytes =  "unprocessable batch bytes for report id 0x%02X, required %d bytes, got %d bytes"
-	ErrInvalidReportLength = 		"invalid report length for report id 0x%02X, expected %d bytes, got %d bytes"
-)
-
-var (
-	ErrNilPacketBytes                            = errors.New("nil packet bytes provided for parsing")
-	ErrNilReport                                 = errors.New("nil report provided for parsing")
-	ErrNilReportData                             = errors.New("nil report data provided for parsing")
-	ErrNilBuffer                                 = errors.New("nil buffer provided for reading data")
-	ErrNilPacketReader                           = errors.New("packet reader is nil, cannot read data")
-	ErrNilPacketWriter                           = errors.New("packet writer is nil, cannot write data")
-	ErrNilDataBuffer                             = errors.New("nil data buffer provided for reading data")
-	ErrReportDataTooShort                        = errors.New("report data are too short to parse")
-	ErrStabilityClassifierTooShort               = errors.New("stability classifier report bytes are too short to parse")
-	ErrBufferTooShort                            = errors.New("buffer is too short to read the expected data")
-	ErrBufferTooShortForHeader                   = errors.New("buffer is too short to read the packet header")
-	ErrPacketDataTooShort                        = errors.New("packet data is too short to read the expected data")
-	ErrUnknownReportID                           = errors.New("unknown report id received from sensor")
-	ErrNilSensorReport                           = errors.New("nil sensor report provided for parsing")
-	ErrCommandRequestTooManyArguments            = errors.New("command request cannot have more than 9 arguments")
-	ErrFailedToReadSensorID                      = errors.New("failed to read sensor id from the device")
-	ErrPacketTimeout                             = errors.New("packet read timeout exceeded")
-	ErrFailedToSaveCalibrationData               = errors.New("failed to save calibration data to the device")
-	ErrInvalidReportIDForThreeDimensionalParsing = errors.New("invalid report id for three-dimensional parsing")
-	ErrInvalidReportIDForFourDimensionalParsing  = errors.New("invalid report id for four-dimensional parsing")
-	ErrNoPacketAvailable                         = errors.New("no packet available to read from the i2c bus")
-	ErrNilI2CBus                                 = errors.New("nil i2c bus provided for communication")
-	ErrInvalidI2CAddress                         = errors.New("invalid i2c address provided")
-	ErrNilDestinationBuffer                      = errors.New("nil destination buffer provided for uart read")
-	ErrUnhandledUARTControlSHTPProtocol          = errors.New("unhandled uart control shtp protocol")
-	ErrUARTEndMissing                            = errors.New("uart end byte missing from packet")
-	ErrNilPacketHeaderString                     = errors.New("nil packet header string provided for parsing")
-	ErrNilPacketString                           = errors.New("nil packet string provided for parsing")
-	ErrNilPacketData                             = errors.New("nil packet data provided for parsing")
-	ErrNilPacketBuffer                           = errors.New("nil packet buffer provided for parsing")
-	ErrNilPacketHeaderBuffer                     = errors.New("nil packet header buffer provided for parsing")
-	ErrUARTTimeout                               = errors.New("uart read timeout exceeded")
-	ErrNilSubcommandParams                       = errors.New("nil subcommand parameters provided")
-	ErrInvalidMaxPackets                         = errors.New("invalid max packets value provided")
-	ErrNilUARTBus                                = errors.New("nil uart bus provided for communication")
-	ErrMaxCalibrationAttemptsExceeded            = errors.New("maximum calibration attempts exceeded")
-	ErrRVCTimeout                                = errors.New("unable to read rvc heading message")
-	ErrInvalidChecksum                           = errors.New("invalid checksum")
-	ErrNilRotationVector                         = errors.New("nil rotation vector provided for parsing")
-	ErrNilFrame                                  = errors.New("nil frame provided for parsing")
-	ErrFrameTooShort                             = errors.New("frame data are too short to parse")
-	ErrNilBNO08X                                 = errors.New("nil BNO08x instance provided")
-	ErrNilBNO08XService                          = errors.New("nil BNO08x service provided")
-	ErrNilEulerDegrees                           = errors.New("nil euler degrees provided")
-	ErrSPICouldNotBeWokenUp                     = errors.New("spi could not be woken up from sleep mode")
 )
 
 const (
@@ -139,4 +81,37 @@ const (
 	ErrorCodeBNO08XSPIFailedToWritePacketHeaderBuffer
 	ErrorCodeBNO08XSPIFailedToWritePacketDataBuffer
 	ErrorCodeBNO08XSPIFailedToReadRequestedDataLength
+	ErrorCodeBNO08XFailedToEnableDependencyFeature
+	ErrorCodeBNO08XFailedToEnableFeature
+	ErrorCodeBNO08XFailedToBeginCalibration
+	ErrorCodeBNO08XNilSubcommandParams
+	ErrorCodeBNO08XFailedToInsertCommandRequestReport
+	ErrorCodeBNO08XFailedToSendMeCommandRequestPacket
+	ErrorCodeBNO08XFailedToSendCommandRequestPacketToSaveCalibrationData
+	ErrorCodeBNO08XFailedToSaveCalibrationData
+	ErrorCodeBNO08XFailedToSendResetCommandRequestPacket
+	ErrorCodeBNO08XFailedToReadSensorID
+	ErrorCodeBNO08XFailedToSendProductIDRequestPacket
+	ErrorCodeBNO08XWaitingForPacketTimedOut
+	ErrorCodeBNO08XMismatchedPacketDataLength
+	ErrorCodeBNO08XFailedToSaveDynamicCalibrationData
+	ErrorCodeBNO08XFailedToParseGetFeatureReport
+	ErrorCodeBNO08XFailedToParseSensorID
+	ErrorCodeBNO08XFailedToParseRawMagnetometerReport
+	ErrorCodeBNO08XFailedToParseStepCounterReport
+	ErrorCodeBNO08XFailedToParseShakeReport
+	ErrorCodeBNO08XFailedToParseStabilityClassifierReport
+	ErrorCodeBNO08XFailedToParseActivityClassifierReport
+	ErrorCodeBNO08XFailedToParseMagnetometerReport
+	ErrorCodeBNO08XFailedToParseRotationVectorReport
+	ErrorCodeBNO08XFailedToParseGeomagneticRotationVectorReport
+	ErrorCodeBNO08XFailedToParseGameRotationVectorReport
+	ErrorCodeBNO08XFailedToParseAccelerometerReport
+	ErrorCodeBNO08XFailedToParseLinearAccelerationReport
+	ErrorCodeBNO08XFailedToParseGravityReport
+	ErrorCodeBNO08XFailedToParseGyroscopeReport
+	ErrorCodeBNO08XFailedToParseRawGyroscopeReport
+	ErrorCodeBNO08XFailedToParseRawAccelerometerReport
+	ErrorCodeBNO08XFailedToGetReportLengthForTheGivenReportID
+	ErrorCodeBNO08XUnprocessableBatchBytes
 )

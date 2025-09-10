@@ -4,6 +4,7 @@ package tinygo_bno08x
 
 import (
 	"math"
+	"strconv"
 	"strings"
 	"time"
 
@@ -31,7 +32,6 @@ type (
 		resetPin                        machine.Pin
 		dataBuffer                      DataBuffer
 		commandBuffer                   []byte
-		calibrationBuffer                []byte
 		dynamicConfigurationDataSavedAt time.Time
 		meCalibrationStartedAt          time.Time
 		calibrationComplete             bool
@@ -128,7 +128,6 @@ func NewBNO08X(
 		resetPin:                        resetPin,
 		dataBuffer:                      dataBuffer,
 		commandBuffer:                   make([]byte, CommandBufferSize),
-		calibrationBuffer:                make([]byte, MaxCalibrationDataSize),
 		calibrationComplete:             false,
 		magnetometerAccuracy:            ReportAccuracyStatusUnreliable,
 		initComplete:                    false,
@@ -159,7 +158,7 @@ func (b *BNO08X) HardwareReset() {
 // Returns:
 //
 // An error if the reset process fails, otherwise nil.
-func (b *BNO08X) SoftwareReset() error {
+func (b *BNO08X) SoftwareReset() tinygotypes.ErrorCode {
 	if b.debugger != nil {
 		b.debugger.Debug("Software resetting...")
 	}
@@ -180,7 +179,7 @@ func (b *BNO08X) SoftwareReset() error {
 
 	// Send the reset command
 	if _, err := b.packetWriter.SendPacket(ChannelExe, &ResetCommandData); err != nil {
-		return fmt.Errorf("error sending reset command: %w", err)
+		return ErrorCodeBNO08XFailedToSendResetCommandRequestPacket
 	}
 
 	// Clear out any packets that may have been sent during the reset process
@@ -190,7 +189,7 @@ func (b *BNO08X) SoftwareReset() error {
 	startTime := time.Now()
 	for time.Since(startTime) < MaxClearPendingPacketsTimeout {
 		packet, err := b.waitForPacket(WaitForPacketTimeout)
-		if err != nil {
+		if err != tinygotypes.ErrorCodeNil {
 			break // No more packets
 		}
 
@@ -199,13 +198,7 @@ func (b *BNO08X) SoftwareReset() error {
 			if packet.ChannelNumber() == ChannelSHTPCommand && len(packet.Data) == AdvertisementPacketLength {
 				b.debugger.Debug("Found SHTP advertisement packet")
 			} else {
-				b.debugger.Debug(
-					fmt.Sprintf(
-						"Clearing packet from channel %d with %d bytes",
-						packet.ChannelNumber(),
-						len(packet.Data),
-					),
-				)
+				b.debugger.Debug("Clearing packet from channel 0x" + strconv.FormatUint(uint64(packet.ChannelNumber()), 16) + " with " + strconv.FormatInt(int64(len(packet.Data)), 10) + " bytes")
 			}
 		}
 	}
@@ -221,7 +214,7 @@ func (b *BNO08X) SoftwareReset() error {
 	if b.debugger != nil {
 		b.debugger.Debug("Software reset complete")
 	}
-	return nil
+	return tinygotypes.ErrorCodeNil
 }
 
 // Reset performs a hardware reset and then a software reset of the BNO08X sensor to an initial unconfigured state.
@@ -242,7 +235,7 @@ func (b *BNO08X) Reset() error {
 // Returns:
 //
 // An error if the initialization fails, otherwise nil.
-func (b *BNO08X) Initialize() error {
+func (b *BNO08X) Initialize() tinygotypes.ErrorCode {
 	// Log initialization start
 	if b.debugger != nil {
 		b.debugger.Debug("Initializing BNO08X sensor...")
@@ -251,20 +244,20 @@ func (b *BNO08X) Initialize() error {
 	// Try up to 3 times to initialize the sensor
 	for i := 0; i < InitializeAttempts; i++ {
 		// Reset
-		if err := b.Reset(); err != nil {
+		if err := b.Reset(); err != tinygotypes.ErrorCodeNil {
 			return err
 		}
 
 		// Check if the sensor ID can be read
 		ok, err := b.checkID()
-		if err != nil {
+		if err != tinygotypes.ErrorCodeNil {
 			time.Sleep(CheckIDDelay)
 		}
 		if ok {
-			return nil
+			return tinygotypes.ErrorCodeNil
 		}
 	}
-	return ErrFailedToReadSensorID
+	return ErrorCodeBNO08XFailedToReadSensorID
 }
 
 // checkID checks if the sensor ID can be read from the BNO08X sensor.
@@ -287,8 +280,8 @@ func (b *BNO08X) checkID() (bool, error) {
 	if _, err := b.packetWriter.SendPacket(
 		ChannelControl,
 		&ReportIDProductIDRequestData,
-	); err != nil {
-		return false, fmt.Errorf("error sending id request packet: %w", err)
+	); err != tinygocodes.ErrorCodeNil {
+		return false, err
 	}
 
 	// Wait for the ID response report
@@ -297,51 +290,29 @@ func (b *BNO08X) checkID() (bool, error) {
 		ChannelControl,
 		&reportID,
 	)
-	if err != nil {
-		return false, fmt.Errorf("error waiting for id response packet: %w", err)
+	if err != tinygotypes.ErrorCodeNil {
+		return false, err
 	}
 
 	// Read the Packet data into the data buffer
 	sensorIDReport, err := newReportFromPacket(packet)
-	if err != nil {
-		return false, fmt.Errorf("error creating sensor id report from packet data: %w", err)
+	if err != tinygotypes.ErrorCodeNil {
+		return false, err
 	}
 
 	// Parse the sensor ID from the report
 	sensorID, err := newSensorID(sensorIDReport)
-	if err != nil {
-		return false, fmt.Errorf("error parsing sensor id: %w", err)
+	if err != tinygotypes.ErrorCodeNil {
+		return false, err
 	}
 
 	// Log the sensor ID details
 	if b.debugger != nil {
-		var builder strings.Builder
-		builder.WriteString("** Sensor ID Report **")
-		builder.WriteString(
-			fmt.Sprintf(
-				"\n\t *** Part Number: %d",
-				sensorID.SoftwarePartNumber,
-			),
-		)
-		builder.WriteString(
-			fmt.Sprintf(
-				"\n\t *** Software Version: %d.%d.%d",
-				sensorID.SoftwareMajorVersion,
-				sensorID.SoftwareMinorVersion,
-				sensorID.SoftwarePatchVersion,
-			),
-		)
-		builder.WriteString(
-			fmt.Sprintf(
-				" Build: %d",
-				sensorID.SoftwareBuildNumber,
-			),
-		)
-		b.debugger.Debug(builder.String())
+		b.debugger.DebugBuffer(sensorID.PrintBuffer())
 	}
 
 	b.idRead = true
-	return true, nil
+	return true, tinygotypes.ErrorCodeNil
 }
 
 // waitForPacketType waits for a Packet of a specific type on a given channel, optionally filtering by report ID.
@@ -357,27 +328,15 @@ func (b *BNO08X) checkID() (bool, error) {
 func (b *BNO08X) waitForPacketType(
 	channelNumber uint8,
 	reportID *uint8,
-) (*Packet, error) {
+) (*Packet, tinygotypes.ErrorCode) {
 	startTime := time.Now()
 
 	// Debug message
 	if b.debugger != nil {
 		if reportID == nil {
-			b.debugger.Debug(
-				fmt.Sprintf(
-					"** Waiting for Packet on Channel %d **",
-					channelNumber,
-				),
-			)
+			b.debugger.Debug("** Waiting for Packet on Channel 0x" + strconv.FormatUint(channelNumber, 10) + " **")
 		} else {
-			b.debugger.Debug(
-				fmt.Sprintf(
-					"** Waiting for Packet with Report ID 0x%02X on Channel %d **",
-					*reportID,
-					channelNumber,
-					
-				),
-			)
+			b.debugger.Debug("** Waiting for Packet with Report ID 0x" + strconv.FormatUint(*reportID, 10) + " on Channel 0x" + strconv.FormatUint(channelNumber, 10) + " **")
 		}
 	}
 
@@ -385,19 +344,19 @@ func (b *BNO08X) waitForPacketType(
 	for time.Since(startTime) < WaitForPacketTypeTimeout {
 		// Check if data is ready to be read
 		newPacket, err := b.waitForPacket(WaitForPacketTypeTimeout - time.Since(startTime))
-		if err != nil {
+		if err != tinygotypes.ErrorCodeNil {
 			continue
 		}
 
 		// If the packet is on the desired channel, check the report ID if provided
 		if newPacket.ChannelNumber() == channelNumber {
-			if reportID == nil {
+			if reportID == tinygotypes.ErrorCodeNil {
 				return newPacket, nil
 			}
 
 			// Get the report ID of the new packet
 			newPacketReportID, err := newPacket.ReportID()
-			if err != nil {
+			if err != tinygotypes.ErrorCodeNil {
 				return nil, err
 			}
 
@@ -411,15 +370,12 @@ func (b *BNO08X) waitForPacketType(
 			if b.debugger != nil {
 				b.debugger.Debug("Passing Packet to handler for de-slicing")
 			}
-			if err = b.handlePacket(newPacket); err != nil {
+			if err = b.handlePacket(newPacket); err != tinygotypes.ErrorCodeNil {
 				return nil, err
 			}
 		}
 	}
-	return nil, fmt.Errorf(
-		"timed out waiting for a packet on channel %d",
-		channelNumber,
-	)
+	return nil, ErrorCodeBNO08XWaitingForPacketTimedOut
 }
 
 // waitForPacket waits for a Packet to be available from the Packet reader within the specified timeout.
@@ -431,7 +387,7 @@ func (b *BNO08X) waitForPacketType(
 // Returns:
 //
 //	A pointer to the Packet if available, or an error if the timeout is reached or an error occurs.
-func (b *BNO08X) waitForPacket(timeout time.Duration) (*Packet, error) {
+func (b *BNO08X) waitForPacket(timeout time.Duration) (*Packet, tinygotypes.ErrorCode) {
 	startTime := time.Now()
 	for time.Since(startTime) < timeout {
 		// Check if data is ready to be read
@@ -442,20 +398,15 @@ func (b *BNO08X) waitForPacket(timeout time.Duration) (*Packet, error) {
 
 		// Read the Packet from the Packet reader
 		newPacket, err := b.packetReader.ReadPacket()
-		if err != nil {
+		if err != tinygotypes.ErrorCodeNil {
 			if b.debugger != nil {
-				b.debugger.Debug(
-					fmt.Sprintf(
-						"An error occurred when reading a packet while waiting for a packet: %v",
-						err,
-					),
-				)
+				b.debugger.Debug("An error occurred when reading a packet while waiting for a packet")
 			}
 			continue
 		}
-		return newPacket, nil
+		return newPacket, tinygotypes.ErrorCodeNil
 	}
-	return nil, ErrPacketTimeout
+	return nil, ErrorCodeBNO08XWaitingForPacketTimedOut
 }
 
 // handlePacket processes a Packet by separating it into individual reports and processing each report.
@@ -467,86 +418,61 @@ func (b *BNO08X) waitForPacket(timeout time.Duration) (*Packet, error) {
 // Returns:
 //
 //	An error if the Packet cannot be processed, otherwise nil.
-func (b *BNO08X) handlePacket(packet *Packet) error {
+func (b *BNO08X) handlePacket(packet *Packet) tinygotypes.ErrorCode {
 	// Check if the packet is nil
 	if packet == nil {
-		return ErrNilPacket
+		return ErrorCodeBNO08XNilPacket
 	}
 
 	// Check if the packet header is nil
 	if packet.Header == nil {
-		return ErrNilPacketHeader
+		return ErrorCodeBNO08XNilPacketHeader
 	}
 
 	// Check packet data length
 	if len(packet.Data) != int(packet.Header.DataLength) {
-		return fmt.Errorf(
-			ErrMismatchedPacketDataLength,
-			packet.Header.DataLength,
-			len(packet.Data),
-		)
+		return ErrorCodeBNO08XMismatchedPacketDataLength
 	}
 
 	// Ensure the Packet has a valid header
-	fmt.Println(5)
 	idx := 0
 	for idx < packet.Header.DataLength {
-		fmt.Println(6)
 		// Check if there are enough bytes left in the Packet to read the report ID
 		reportID := packet.Data[idx]
-		fmt.Println(fmt.Sprintf("Processing report ID: 0x%02X at index %d", reportID, idx))
-		requiredBytes, err := reportLength(reportID)
-		if err != nil {
-			return fmt.Errorf(
-				"failed to get report length for report ID 0x%02X: %w",
-				reportID,
-				err,
-			)
+		
+		if b.debugger != nil {
+			b.debugger.Debug("Processing report ID: 0x" + strings.ToUpper(strconv.FormatUint(uint64(reportID), 16)) + " at index " + strconv.Itoa(idx))
 		}
-		fmt.Println(7)
+
+		requiredBytes, err := reportLength(reportID)
+		if err != tinygo {
+			return ErrorCodeBNO08XFailedToGetReportLengthForTheGivenReportID
+		}
 		unprocessedByteCount := packet.Header.DataLength - idx
 
 		// If there are not enough bytes left, return an error
 		if unprocessedByteCount < requiredBytes {
-			return fmt.Errorf(
-				ErrUnprocessableBatchBytes,
-				reportID,
-				unprocessedByteCount,
-				requiredBytes,
-			)
+			return ErrorCodeBNO08XUnprocessableBatchBytes
 		}
 
 		// Create a new report from the Packet data
-		fmt.Println(8)
-		reportBytes := packet.Data[idx : idx+requiredBytes]
-		report, err := newReport(reportID, &reportBytes)
-		if err != nil {
-			return fmt.Errorf(
-				"failed to create report from bytes: %w",
-				err,
-			)
+		reportData := packet.Data[idx : idx+requiredBytes]
+		report, err := newReport(reportID, reportData)
+		if err != tinygotypes.ErrorCodeNil {
+			return err
 		}
 
 		// Process the report
-		fmt.Println(9)
 		if err := b.processReport(report); err != nil {
 			if b.debugger != nil {
-				b.debugger.Debug(
-					fmt.Sprintf(
-						"Error processing report: %v",
-						err,
-					),
-				)
-			}
+				b.debugger.Debug("Failed to process report ID 0x" + strings.ToUpper(strconv.FormatUint(uint64(report.ID), 16)))
 			return err
 		}
-		fmt.Println(10)
 
 		// Move to the next report in the Packet
 		idx += requiredBytes
-		fmt.Println(fmt.Sprintf("Next report index: %d", idx))
 	}
-	return nil
+	return tinygotypes.ErrorCodeNil
 }
 
 // processReport processes a report by checking if it is a control report or a sensor report, and then parsing the data accordingly.
@@ -558,10 +484,10 @@ func (b *BNO08X) handlePacket(packet *Packet) error {
 // Returns:
 //
 //	An error if the report cannot be processed, otherwise nil.
-func (b *BNO08X) processReport(report *report) error {
+func (b *BNO08X) processReport(report *report) tinygotypes.ErrorCode {
 	// Check if the report is nil
 	if report == nil {
-		return ErrNilReport
+		return ErrorCodeBNO08XNilReport
 	}
 
 	// Check if it's a control report
@@ -575,29 +501,7 @@ func (b *BNO08X) processReport(report *report) error {
 	}
 
 	if b.debugger != nil {
-		var builder strings.Builder
-		builder.WriteString(
-			fmt.Sprintf(
-				"Processing report: %s (0x%02X)",
-				SHTPCommandsNames[report.ID],
-				report.ID,
-			),
-		)
-
-		// Log the report data in hex format
-		for idx, packetByte := range report.Data {
-			packetIndex := idx
-			if (packetIndex % 4) == 0 {
-				builder.WriteString(
-					fmt.Sprintf(
-						"\n\t\t [0x%02X] ",
-						packetIndex,
-					),
-				)
-			}
-			builder.WriteString(fmt.Sprintf("0x%02X ", packetByte))
-		}
-		b.debugger.Debug(builder.String())
+		b.debugger.Debug("Processing report: " + SHTPCommandNameString(report.ID) + " (0x" + strings.ToUpper(strconv.FormatUint(uint64(report.ID), 16)) + ")")
 	}
 
 	// Process the sensor report based on its ID+
@@ -605,168 +509,141 @@ func (b *BNO08X) processReport(report *report) error {
 	case ReportIDStepCounter:
 		// Parse the step counter report
 		stepCounterReport, err := newStepCounterReport(report)
-		if err != nil {
-			return fmt.Errorf("failed to parse step counter report: %w", err)
+		if err != tinygotypes.ErrorCodeNil {
+			return ErrorCodeBNO08XFailedToParseStepCounterReport
 		}
 
 		// Update the step count in the BNO08X instance
-		b.stepCount = &stepCounterReport.Count
-		return nil
+		b.stepCount = stepCounterReport.Count
 	case ReportIDShakeDetector:
 		// Parse the shake detector report
 		shakeReport, err := newShakeReport(report)
-		if err != nil {
-			return fmt.Errorf("failed to parse shake report: %w", err)
+		if err != tinygotypes.ErrorCodeNil {
+			return ErrorCodeBNO08XFailedToParseShakeReport
 		}
 
 		// Update the shake detection status in the BNO08X instance
-		b.shakesDetected = &shakeReport.AreShakesDetected
-		return nil
+		b.shakesDetected = shakeReport.AreShakesDetected
 	case ReportIDStabilityClassifier:
 		// Parse the stability classifier report
 		stabilityReport, err := newStabilityClassifierReport(report)
-		if err != nil {
-			return fmt.Errorf(
-				"failed to parse stability classifier report: %w",
-				err,
-			)
+		if err != tinygotypes.ErrorCodeNil {
+			return ErrorCodeBNO08XFailedToParseStabilityClassifierReport
 		}
 
 		// Update the stability classification in the BNO08X instance
-		b.stabilityClassification = &stabilityReport.StabilityClassification
-		return nil
+		b.stabilityClassification = stabilityReport.StabilityClassification
 	case ReportIDActivityClassifier:
 		// Parse the activity classifier report
 		activityReport, err := newActivityClassifierReport(report)
-		if err != nil {
-			return fmt.Errorf(
-				"failed to parse activity classifier report: %w",
-				err,
-			)
+		if err != tinygotypes.ErrorCodeNil {
+			return ErrorCodeBNO08XFailedToParseActivityClassifierReport
 		}
 
 		// Update the activity classification and classifications in the BNO08X instance
-		b.classifications = &activityReport.Classifications
-		return nil
+		b.classifications = activityReport.Classifications
 	case ReportIDMagnetometer:
 		// Parse the magnetometer report
 		magnetometerReport, err := newThreeDimensionalReport(report)
-		if err != nil {
-			return fmt.Errorf("failed to parse magnetometer report: %w", err)
+		if err != tinygotypes.ErrorCodeNil {
+			return ErrorCodeBNO08XFailedToParseMagnetometerReport
 		}
 
 		// Update the magnetometer readings in the BNO08X instance
 		b.magnetometerAccuracy = magnetometerReport.Accuracy
-		b.magnetometer = &magnetometerReport.Results
+		b.magnetometer = magnetometerReport.Results
 	case ReportIDRotationVector:
 		// Parse the rotation vector report
 		rotationReport, err := newFourDimensionalReport(report)
-		if err != nil {
-			return fmt.Errorf("failed to parse rotation vector report: %w", err)
+		if err != tinygotypes.ErrorCodeNil {
+			return ErrorCodeBNO08XFailedToParseRotationVectorReport
 		}
 
 		// Update the rotation vector readings in the BNO08X instance
-		b.rotationVector = &rotationReport.Results
+		b.rotationVector = rotationReport.Results
 	case ReportIDGeomagneticRotationVector:
 		// Parse the geomagnetic rotation vector report
 		geomagneticReport, err := newFourDimensionalReport(report)
-		if err != nil {
-			return fmt.Errorf(
-				"failed to parse geomagnetic rotation vector report: %w",
-				err,
-			)
+		if err != tinygotypes.ErrorCodeNil {
+			return ErrorCodeBNO08XFailedToParseGeomagneticRotationVectorReport
 		}
 
 		// Update the geomagnetic rotation vector readings in the BNO08X instance
-		b.geomagneticRotationVector = &geomagneticReport.Results
+		b.geomagneticRotationVector = geomagneticReport.Results
 	case ReportIDGameRotationVector:
 		// Parse the game rotation vector report
 		gameReport, err := newFourDimensionalReport(report)
-		if err != nil {
-			return fmt.Errorf(
-				"failed to parse game rotation vector report: %w",
-				err,
-			)
+		if err != tinygotypes.ErrorCodeNil {
+			return ErrorCodeBNO08XFailedToParseGameRotationVectorReport
 		}
 
 		// Update the game rotation vector readings in the BNO08X instance
-		b.gameRotationVector = &gameReport.Results
+		b.gameRotationVector = gameReport.Results
 	case ReportIDAccelerometer:
 		// Parse the accelerometer report
 		accelerometerReport, err := newThreeDimensionalReport(report)
-		if err != nil {
-			return fmt.Errorf("failed to parse accelerometer report: %w", err)
+		if err != tinygotypes.ErrorCodeNil {
+			return ErrorCodeBNO08XFailedToParseAccelerometerReport
 		}
 
 		// Update the accelerometer readings in the BNO08X instance
-		b.accelerometer = &accelerometerReport.Results
+		b.accelerometer = accelerometerReport.Results
 	case ReportIDLinearAcceleration:
 		// Parse the linear acceleration report
 		linearAccelerationReport, err := newThreeDimensionalReport(report)
-		if err != nil {
-			return fmt.Errorf(
-				"failed to parse linear acceleration report: %w",
-				err,
-			)
+		if err != tinygotypes.ErrorCodeNil {
+			return ErrorCodeBNO08XFailedToParseLinearAccelerationReport
 		}
 
 		// Update the linear acceleration readings in the BNO08X instance
-		b.linearAcceleration = &linearAccelerationReport.Results
+		b.linearAcceleration = linearAccelerationReport.Results
 	case ReportIDGravity:
 		// Parse the gravity report
 		gravityReport, err := newThreeDimensionalReport(report)
-		if err != nil {
-			return fmt.Errorf("failed to parse gravity report: %w", err)
+		if err != tinygotypes.ErrorCodeNil {
+			return ErrorCodeBNO08XFailedToParseGravityReport
 		}
 
 		// Update the gravity readings in the BNO08X instance
-		b.gravity = &gravityReport.Results
+		b.gravity = gravityReport.Results
 	case ReportIDGyroscope:
 		// Parse the gyroscope report
 		gyroscopeReport, err := newThreeDimensionalReport(report)
-		if err != nil {
-			return fmt.Errorf("failed to parse gyroscope report: %w", err)
+		if err != tinygotypes.ErrorCodeNil {
+			return ErrorCodeBNO08XFailedToParseGyroscopeReport
 		}
 
 		// Update the gyroscope readings in the BNO08X instance
-		b.gyroscope = &gyroscopeReport.Results
+		b.gyroscope = gyroscopeReport.Results
 	case ReportIDRawAccelerometer:
 		// Parse the raw accelerometer report
 		rawAccelerometerReport, err := newThreeDimensionalReport(report)
-		if err != nil {
-			return fmt.Errorf(
-				"failed to parse raw accelerometer report: %w",
-				err,
-			)
+		if err != tinygotypes.ErrorCodeNil {
+			return ErrorCodeBNO08XFailedToParseRawAccelerometerReport
 		}
 
 		// Update the raw accelerometer readings in the BNO08X instance
-		b.rawAccelerometer = &rawAccelerometerReport.Results
+		b.rawAccelerometer = rawAccelerometerReport.Results
 	case ReportIDRawGyroscope:
 		// Parse the raw gyroscope report
 		rawGyroscopeReport, err := newThreeDimensionalReport(report)
-		if err != nil {
-			return fmt.Errorf("failed to parse raw gyroscope report: %w", err)
+		if err != tinygotypes.ErrorCodeNil {
+			return ErrorCodeBNO08XFailedToParseRawGyroscopeReport
 		}
 
 		// Update the raw gyroscope readings in the BNO08X instance
-		b.rawGyroscope = &rawGyroscopeReport.Results
+		b.rawGyroscope = rawGyroscopeReport.Results
 	case ReportIDRawMagnetometer:
 		// Parse the raw magnetometer report
 		rawMagnetometerReport, err := newThreeDimensionalReport(report)
-		if err != nil {
-			return fmt.Errorf(
-				"failed to parse raw magnetometer report: %w",
-				err,
-			)
+		if err != tinygotypes.ErrorCodeNil {
+			return ErrorCodeBNO08XFailedToParseRawMagnetometerReport
 		}
 
 		// Update the raw magnetometer readings in the BNO08X instance
-		b.rawMagnetometer = &rawMagnetometerReport.Results
+		b.rawMagnetometer = rawMagnetometerReport.Results
 	}
-
-	// If we reach here, the report was processed successfully
-	return nil
+	return tinygotypes.ErrorCodeNil
 }
 
 // processControlReport processes control reports and updates the BNO08X state accordingly.
@@ -778,10 +655,10 @@ func (b *BNO08X) processReport(report *report) error {
 // Returns:
 //
 //	An error if the control report cannot be processed, otherwise nil.
-func (b *BNO08X) processControlReport(report *report) error {
+func (b *BNO08X) processControlReport(report *report) tinygotypes {
 	// Check if the report is nil
 	if report == nil {
-		return ErrNilReport
+		return ErrorCodeBNO08XNilReport
 	}
 
 	// Handle the control report based on its ID
@@ -789,40 +666,18 @@ func (b *BNO08X) processControlReport(report *report) error {
 	case ReportIDProductIDResponse:
 		// Parse the sensor ID from the report bytes
 		sensorID, err := newSensorID(report)
-		if err != nil {
-			return fmt.Errorf("failed to parse sensor ID: %w", err)
+		if err != tinygotypes.ErrorCodeNil {
+			return ErrorCodeBNO08XFailedToParseSensorID
 		}
 
 		if b.debugger != nil {
-			var builder strings.Builder
-			builder.WriteString("FROM PACKET SLICE:")
-			builder.WriteString(
-				fmt.Sprintf(
-					"\n\t *** Part Number: %d",
-					sensorID.SoftwarePartNumber,
-				),
-			)
-			builder.WriteString(
-				fmt.Sprintf(
-					"\n\t *** Software Version: %d.%d.%d",
-					sensorID.SoftwareMajorVersion,
-					sensorID.SoftwareMinorVersion,
-					sensorID.SoftwarePatchVersion,
-				),
-			)
-			builder.WriteString(
-				fmt.Sprintf(
-					" Build: %d",
-					sensorID.SoftwareBuildNumber,
-				),
-			)
-			b.debugger.Debug(builder.String())
+			b.debugger.DebugBuffer(sensorID.PrintBuffer())
 		}
 	case ReportIDGetFeatureResponse:
 		// Parse the Get Feature report from the report bytes
 		getFeatureReport, err := newGetFeatureReport(report)
-		if err != nil {
-			return fmt.Errorf("failed to parse get feature report: %w", err)
+		if err != tinygotypes.ErrorCodeNil {
+			return ErrorCodeBNO08XFailedToParseGetFeatureReport
 		}
 
 		// Set the feature as enabled
@@ -830,7 +685,7 @@ func (b *BNO08X) processControlReport(report *report) error {
 	case ReportIDCommandResponse:
 		// Parse the command response from the report bytes
 		commandResponse, err := newCommandResponse(report)
-		if err != nil {
+		if err != tinygotypes.ErrorCodeNil {
 			return err
 		}
 
@@ -845,15 +700,14 @@ func (b *BNO08X) processControlReport(report *report) error {
 
 		if command == SaveDynamicCalibrationData {
 			if commandStatus != 0 {
-				return ErrFailedToSaveCalibrationData
+				return ErrorCodeBNO08XFailedToSaveDynamicCalibrationData
 			}
 
 			// Record the time when dynamic configuration data was saved
 			b.dynamicConfigurationDataSavedAt = time.Now()
 		}
-		return nil
 	}
-	return nil
+	return tinygotypes.ErrorCodeNil
 }
 
 // processAvailablePackets processes all available packets from the Packet reader, handling each Packet until the maximum number of packets is reached.
@@ -866,25 +720,18 @@ func (b *BNO08X) processAvailablePackets() {
 		}
 
 		// Read the next available Packet
-		fmt.Println(3)
 		newPacket, err := b.packetReader.ReadPacket()
 		if err != nil {
 			if b.debugger != nil {
-				b.debugger.Debug(
-					fmt.Sprintf(
-						"Error reading Packet: %v",
-						err,
-					),
-				)
+				b.debugger.Debug("Error reading Packet: " + strconv.FormatUint(uint64(err), 10))
 			}
 			continue
 		}
-		fmt.Println(4)
 
 		// Pass the packet to the handler
-		if err = b.handlePacket(newPacket); err != nil {
+		if err = b.handlePacket(newPacket); err != tinygotypes.ErrorCodeNil {
 			if b.debugger != nil {
-				b.debugger.Debug(fmt.Sprintf("Error handling Packet: %v", err))
+				b.debugger.Debug("Error handling Packet: " + strconv.FormatUint(uint64(err), 10))
 			}
 			continue
 		}
@@ -915,25 +762,6 @@ func (b *BNO08X) GetQuaternion() *[4]float64 {
 	return b.rotationVector
 }
 
-// GetEulerDegrees returns the current rotation vector as Euler angles in degrees.
-//
-// Returns:
-//
-// A tuple of three float64 values representing the roll, pitch, and yaw angles in degrees.
-func (b *BNO08X) GetEulerDegrees() *[3]float64 {
-	// Get the quaternion readings
-	b.GetQuaternion()
-
-	// If rotation vector is nil, return nil
-	if b.rotationVector == nil {
-		return nil
-	}
-
-	// Convert quaternion to Euler angles in degrees
-	eulerDegrees, _ := QuaternionToEulerDegrees(b.rotationVector)
-	return eulerDegrees
-}
-
 // GetGeomagneticQuaternion returns a pointer to a [4]float64 array representing the current geomagnetic rotation vector as a quaternion.
 //
 // Returns:
@@ -957,7 +785,7 @@ func (b *BNO08X) GetGameQuaternion() *[4]float64 {
 // Returns:
 //
 //	A pointer to an uint16 representing the step count.
-func (b *BNO08X) GetSteps() *uint16 {
+func (b *BNO08X) GetSteps() uint16 {
 	return b.stepCount
 }
 
@@ -997,44 +825,21 @@ func (b *BNO08X) GetGyro() *[3]float64 {
 	return b.gyroscope
 }
 
-// GetGyroDegrees returns Gyro's rotation measurements on the X, Y, and Z axes in degrees per second.
-//
-// Returns:
-//
-// A pointer to a [3]float64 array containing the gyroscope values in degrees.
-func (b *BNO08X) GetGyroDegrees() *[3]float64 {
-	// Get the gyroscope readings
-	b.GetGyro()
-
-	// If gyroscope is nil, return nil
-	if b.gyroscope == nil {
-		return nil
-	}
-
-	// Convert radians to degrees
-	gyroDegrees := [3]float64{
-		b.gyroscope[0] * (180.0 / math.Pi),
-		b.gyroscope[1] * (180.0 / math.Pi),
-		b.gyroscope[2] * (180.0 / math.Pi),
-	}
-	return &gyroDegrees
-}
-
 // GetShake returns true if a shake was detected on any axis since the last time it was checked.
 // This method has a latching behavior: once a shake is detected, it stays "shaken" until read.
 //
 // Returns:
 //
 //	A pointer to a bool indicating if a shake was detected.
-func (b *BNO08X) GetShake() *bool {
-	// If shakesDetected is nil, return nil
+func (b *BNO08X) GetShake() bool {
+	// If shakesDetected is nil, return false
 	if b.shakesDetected == nil {
-		return nil
+		return false
 	}
 
 	// If a shake was detected, clear the flag on read
-	if *b.shakesDetected {
-		*b.shakesDetected = false
+	if b.shakesDetected {
+		b.shakesDetected = false
 	}
 	return b.shakesDetected
 }
@@ -1043,8 +848,8 @@ func (b *BNO08X) GetShake() *bool {
 //
 // Returns:
 //
-//	A pointer to a string describing the stability classification.
-func (b *BNO08X) GetStabilityClassification() *string {
+//	The stability classification as a ReportStabilityClassification value.
+func (b *BNO08X) GetStabilityClassification() ReportStabilityClassification {
 	return b.stabilityClassification
 }
 
@@ -1053,8 +858,13 @@ func (b *BNO08X) GetStabilityClassification() *string {
 // Returns:
 //
 //	A pointer to a map[string]int representing activity classifications.
-func (b *BNO08X) GetActivityClassification() *map[string]int {
-	return b.classifications
+func (b *BNO08X) GetActivityClassification() *[ReportClassificationsNumber]int {
+	// Create a copy of the classifications to return
+	copy := &[ReportClassificationsNumber]int{}
+	for i := 0; i < ReportClassificationsNumber; i++ {
+		copy[i] = b.classifications[i]
+	}
+	return copy
 }
 
 // GetRawAcceleration returns the sensor's raw, unscaled value from the accelerometer registers.
@@ -1093,14 +903,9 @@ func (b *BNO08X) GetRawMagnetic() *[3]float64 {
 // Returns:
 //
 //	An error if the feature could not be enabled.
-func (b *BNO08X) EnableFeature(featureID uint8) error {
+func (b *BNO08X) EnableFeature(featureID uint8) tinygotypes.ErrorCode {
 	if b.debugger != nil {
-		b.debugger.Debug(
-			fmt.Sprintf(
-				"* Enabling Feature ID: 0x%02X *",
-				featureID,
-			),
-		)
+		b.debugger.Debug("Enabling Feature ID: 0x" + strconv.FormatInt(int64(featureID), 16))
 	}
 
 	// Check if debug mode is enabled
@@ -1131,33 +936,21 @@ func (b *BNO08X) EnableFeature(featureID uint8) error {
 	featureDependency, ok := RawReports[featureID]
 	if ok && !b.IsFeatureEnabled(featureDependency) {
 		if b.debugger != nil {
-			b.debugger.Debug(
-				fmt.Sprintf(
-					"Enabling feature dependency: %s (0x%02X)",
-					SHTPCommandsNames[featureDependency],
-					featureDependency,
-				),
-			)
+			b.debugger.Debug("Enabling feature dependency: 0x" + strconv.FormatInt(int64(featureDependency), 16))
 		}
-		if err := b.EnableFeature(featureDependency); err != nil {
-			return err
+		if err := b.EnableFeature(featureDependency); err != tinygotypes.ErrorCodeNil {
+			return ErrorCodeBNO08XFailedToEnableDependencyFeature
 		}
 	}
 
 	// Send the feature enable report
 	if b.debugger != nil {
-		b.debugger.Debug(
-			fmt.Sprintf(
-				"Enabling feature: %s (0x%02X)",
-				SHTPCommandsNames[featureID],
-				featureID,
-			),
-		)
+		b.debugger.Debug("Enabling feature: 0x" + strconv.FormatInt(int64(featureID), 16))
 	}
 	if _, err := b.packetWriter.SendPacket(
 		ChannelControl,
-		&setFeatureReport,
-	); err != nil {
+		setFeatureReport,
+	); err != tinygotypes.ErrorCodeNil {
 		return err
 	}
 
@@ -1166,14 +959,10 @@ func (b *BNO08X) EnableFeature(featureID uint8) error {
 	for time.Since(startTime) < FeatureEnableTimeout {
 		b.Update()
 		if b.IsFeatureEnabled(featureID) {
-			return nil
+			return tinygotypes.ErrorCodeNil
 		}
 	}
-	return fmt.Errorf(
-		"was not able to enable feature %s (0x%0X)",
-		SHTPCommandsNames[featureID],
-		featureID,
-	)
+	return ErrorCodeBNO08XFailedToEnableFeature
 }
 
 // IsFeatureEnabled checks if a specific feature is enabled on the BNO08X sensor.
@@ -1190,9 +979,13 @@ func (b *BNO08X) IsFeatureEnabled(featureID uint8) bool {
 }
 
 // BeginCalibration starts the self-calibration routine for the BNO08X sensor.
-func (b *BNO08X) BeginCalibration() error {
+//
+// Returns:
+//
+// An error indicating success or failure of the calibration initiation.
+func (b *BNO08X) BeginCalibration() tinygotypes.ErrorCode {
 	// Begin the sensor's self-calibration routine
-	b.calibrationBuffer = b.dataBuffer.SetData [CalibrationBufferSize]byte{
+	calibrationBuffer := []byte{
 		1, // calibrate accel
 		1, // calibrate gyro
 		1, // calibrate mag
@@ -1203,10 +996,10 @@ func (b *BNO08X) BeginCalibration() error {
 		0, // reserved
 		0, // reserved
 	}
-	if err := b.sendMeCommand(&b.commandBuffer); err != nil {
-		return fmt.Errorf("error starting calibration: %w", err)
+	if err := b.sendMeCommand(calibrationBuffer); err != nil {
+		return ErrorCodeBNO08XFailedToBeginCalibration
 	}
-	return nil
+	return tinygotypes.ErrorCodeNil
 }
 
 // CalibrationStatus retrieves the status of the self-calibration process.
@@ -1216,7 +1009,7 @@ func (b *BNO08X) BeginCalibration() error {
 // An integer representing the calibration status, where 0 indicates no calibration needed,
 func (b *BNO08X) CalibrationStatus() ReportAccuracyStatus {
 	// Get the status of the self-calibration
-	b.calibrationBuffer = [CalibrationBufferSize]byte{{
+	calibrationBuffer := []byte{
 		0, // calibrate accel
 		0, // calibrate gyro
 		0, // calibrate mag
@@ -1227,16 +1020,11 @@ func (b *BNO08X) CalibrationStatus() ReportAccuracyStatus {
 		0, // reserved
 		0, // reserved
 	}
-	b.sendMeCommand(&b.calibrationBuffer)
+	b.sendMeCommand(calibrationBuffer)
 
 	// Log the calibration status if debugger is enabled
 	if b.debugger != nil {
-		b.debugger.Debug(
-			fmt.Sprintf(
-				"Calibration Status: %s",
-				ReportAccuracyStatusNames[b.magnetometerAccuracy],
-			),
-		)
+		b.debugger.Debug("CalibrationStatus: " + b.magnetometerAccuracy.String())
 	}
 	return b.magnetometerAccuracy
 }
@@ -1256,10 +1044,10 @@ func (b *BNO08X) IsCalibrated() bool {
 // Parameters:
 //
 //	subcommandParams: A byte slice containing the parameters for the command.
-func (b *BNO08X) sendMeCommand(subcommandParams *[]byte) error {
+func (b *BNO08X) sendMeCommand(subcommandParams []byte) tinygotypes.ErrorCode {
 	// Check if the subcommandParams is nil
 	if subcommandParams == nil {
-		return ErrNilSubcommandParams
+		return ErrorCodeBNO08XNilSubcommandParams
 	}
 
 	// Start the command request process
@@ -1268,16 +1056,16 @@ func (b *BNO08X) sendMeCommand(subcommandParams *[]byte) error {
 	// Insert the command request report into the local buffer
 	if err := insertCommandRequestReport(
 		MagnetometerCalibration,
-		&b.commandBuffer, // should use b.dataBuffer, but sendPacket doesn't
+		b.commandBuffer,
 		b.dataBuffer.GetReportSequenceNumber(ReportIDCommandRequest),
 		subcommandParams,
 	); err != nil {
-		return fmt.Errorf("error inserting command request report: %w", err)
+		return ErrorCodeBNO08XFailedToInsertCommandRequestReport
 	}
 
 	// Send the command request Packet
-	if _, err := b.packetWriter.SendPacket(ChannelControl, &b.commandBuffer); err != nil {
-		return fmt.Errorf("error sending me command request packet: %w", err)
+	if _, err := b.packetWriter.SendPacket(ChannelControl, b.commandBuffer); err != nil {
+		return ErrorCodeBNO08XFailedToSendMeCommandRequestPacket
 	}
 	b.dataBuffer.IncrementReportSequenceNumber(ReportIDCommandRequest)
 
@@ -1288,7 +1076,7 @@ func (b *BNO08X) sendMeCommand(subcommandParams *[]byte) error {
 			break
 		}
 	}
-	return nil
+	return tinygotypes.ErrorCodeNil
 }
 
 // SaveCalibrationData saves the self-calibration data to the BNO08X sensor.
@@ -1296,12 +1084,12 @@ func (b *BNO08X) sendMeCommand(subcommandParams *[]byte) error {
 // Returns:
 //
 // An error if the calibration data could not be saved, otherwise nil.
-func (b *BNO08X) SaveCalibrationData() error {
+func (b *BNO08X) SaveCalibrationData() tinygotypes.ErrorCode {
 	// Save the self-calibration data
 	startTime := time.Now()
 	err := insertCommandRequestReport(
 		SaveDynamicCalibrationData,
-		&b.commandBuffer, // should use b.dataBuffer, but sendPacket doesn't
+		b.commandBuffer,
 		b.dataBuffer.GetReportSequenceNumber(ReportIDCommandRequest),
 		nil,
 	)
@@ -1312,7 +1100,7 @@ func (b *BNO08X) SaveCalibrationData() error {
 	// Send the command request Packet to save calibration data
 	_, err = b.packetWriter.SendPacket(ChannelControl, &b.commandBuffer)
 	if err != nil {
-		return err
+		return ErrorCodeBNO08XFailedToSendCommandRequestPacketToSaveCalibrationData
 	}
 	b.dataBuffer.IncrementReportSequenceNumber(ReportIDCommandRequest)
 
@@ -1323,5 +1111,5 @@ func (b *BNO08X) SaveCalibrationData() error {
 			return nil
 		}
 	}
-	return ErrFailedToSaveCalibrationData
+	return ErrorCodeBNO08XFailedToSaveCalibrationData
 }

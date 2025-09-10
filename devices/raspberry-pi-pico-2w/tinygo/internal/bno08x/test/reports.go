@@ -4,6 +4,7 @@ package tinygo_bno08x
 
 import (
 	"encoding/binary"
+	"strconv"
 
 	tinygotypes "github.com/ralvarezdev/tinygo-types"
 )
@@ -392,6 +393,30 @@ func newSensorID(report *report) (*sensorID, tinygotypes.ErrorCodeNil) {
 		SoftwarePartNumber:   binary.LittleEndian.Uint32(report.Data[4:8]),
 		SoftwareBuildNumber:  binary.LittleEndian.Uint32(report.Data[8:12]),
 	}, nil
+}
+
+// PrintBuffer returns a byte slice representation of the sensorID for debugging purposes.
+//
+// Returns:
+//
+// A byte slice representing the sensorID
+func (s *sensorID) PrintBuffer() []byte {
+	// Preallocate a byte slice with the appropriate length
+	buffer := make([]byte, 0, 100)
+
+	// Append the sensor ID details to the buffer
+	buffer = append(buffer, "** Sensor ID Report **"...)
+	buffer = append(buffer, "\n\t *** Part Number: "...)
+	buffer = append(buffer, strconv.FormatUint(uint64(s.SoftwarePartNumber), 10)...)
+	buffer = append(buffer, "\n\t *** Software Version: "...)
+	buffer = append(buffer, strconv.FormatUint(uint64(s.SoftwareMajorVersion), 10)...)
+	buffer = append(buffer, "."...)
+	buffer = append(buffer, strconv.FormatUint(uint64(s.SoftwareMinorVersion), 10)...)
+	buffer = append(buffer, "."...)
+	buffer = append(buffer, strconv.FormatUint(uint64(s.SoftwarePatchVersion), 10)...)
+	buffer = append(buffer, "\n\t *** Build: "...)
+	buffer = append(buffer, strconv.FormatUint(uint64(s.SoftwareBuildNumber), 10)...)
+	return buffer
 }
 
 // newCommandResponse creates a new commandResponse from the provided report.

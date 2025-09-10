@@ -20,8 +20,8 @@ var (
 	// ResetBNO08XInterval is the interval to reset the BNO08x sensor to prevent overflow.
 	ResetBNO08XInterval = 2 * time.Minute
 
-	// BNO08XService is the BNO08x service.
-	BNO08XService ralvarezdevbno08x.BNO08XService
+	// BNO08XSimpleService is the BNO08x simple service.
+	BNO08XSimpleService ralvarezdevbno08x.BNO08XSimpleService
 
 	// I2C is the I2C instance for the BNO08x sensor.
 	// I2C *bno08x.I2C
@@ -67,8 +67,8 @@ func init() {
 		panic("failed to initialize uart bno08x")
 	}
 
-	// Get the BNO08X service from the UART
-	BNO08XService = UART.GetBNO08XService()
+	// Get the BNO08X simple service from the UART
+	BNO08XSimpleService = UART.GetBNO08X()
 
 	/*
 		// ----- I2C Instance -----
@@ -98,8 +98,8 @@ func init() {
 			panic("failed to enable quaternion feature: " + err.Error())
 		}
 
-		// Get the BNO08X service from the I2C
-		BNO08XService = I2C.GetBNO08XService()
+		// Get the BNO08X simple service from the I2C
+		BNO08XSimpleService = I2C.GetBNO08X()
 
 		// ----- UART-RVC Instance -----
 
@@ -122,7 +122,7 @@ func init() {
 		}
 		UARTRVC = uartRVC
 
-		// Set the UART-RVC instance as the BNO08X service
-		BNO08XService = uartRVC
+		// Set the UART-RVC instance as the BNO08X simple service
+		BNO08XSimpleService = uartRVC
 	*/
 }
