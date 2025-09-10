@@ -133,4 +133,10 @@ const (
 	ErrorCodeBNO08XDataBufferTooShortForPacketHeader
 	ErrorCodeBNO08XI2CFailedToReadRequestedDataLength
 	ErrorCodeBNO08XInvalidPacketSize
+	ErrorCodeBNO08XNilSPIBus
+	ErrorCodeBNO08XFailedToConfigureSPI
+	ErrorCodeBNO08XFailedToWakeUpSPI
+	ErrorCodeBNO08XSPIFailedToWritePacketHeaderBuffer
+	ErrorCodeBNO08XSPIFailedToWritePacketDataBuffer
+	ErrorCodeBNO08XSPIFailedToReadRequestedDataLength
 )

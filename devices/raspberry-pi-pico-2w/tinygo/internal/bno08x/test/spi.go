@@ -3,9 +3,12 @@
 package tinygo_bno08x
 
 import (
+	"strconv"
 	"time"
 
 	"machine"
+
+	tinygotypes "github.com/ralvarezdev/tinygo-types"
 )
 
 type (
@@ -95,12 +98,12 @@ func NewSPI(
 	ps1Pin machine.Pin,
 	resetPin machine.Pin,
 	dataBuffer DataBuffer,
-	afterSoftwareResetFn func(b *BNO08X) error,
+	afterSoftwareResetFn func(b *BNO08X) tinygotypes.ErrorCode,
 	options *SPIOptions,
-) (*SPI, error) {
+) (*SPI, tinygotypes.ErrorCode) {
 	// Check if the SPI bus is nil
 	if spiBus == nil {
-		return nil, ErrNilSPIBus
+		return nil, ErrorCodeBNO08XNilSPIBus
 	}
 
 	// Configure CS pin as output and high
@@ -129,7 +132,7 @@ func NewSPI(
 			SDI:       misoPin,
 		},
 	); err != nil {
-		return nil, fmt.Errorf("failed to configure spi: %w", err)
+		return nil, ErrorCodeBNO08XFailedToConfigureSPI
 	}
 
 	// If options are nil, initialize with default values
@@ -149,7 +152,7 @@ func NewSPI(
 		options.UltraDebug,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create spi packet reader: %w", err)
+		return nil, ErrorCodeBNO08XFailedToCreatePacketReader
 	}
 
 	packetWriter, err := newSPIPacketWriter(
@@ -159,7 +162,7 @@ func NewSPI(
 		options.UltraDebug,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create spi packet writer: %w", err)
+		return nil, ErrorCodeBNO08XFailedToCreatePacketWriter
 	}
 
 	// Initialize BNO08X
@@ -173,7 +176,7 @@ func NewSPI(
 		options.Options,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to initialize bno08x: %w", err)
+		return nil, ErrorCodeBNO08XFailedToCreateBNO08X
 	}
 
 	return &SPI{
@@ -222,15 +225,15 @@ func newSPIPacketReader(
 	dataBuffer DataBuffer,
 	debugger Debugger,
 	ultraDebug bool,
-) (*SPIPacketReader, error) {
+) (*SPIPacketReader, tinygotypes.ErrorCode) {
 	// Check if the SPI bus is nil
 	if spiBus == nil {
-		return nil, ErrNilSPIBus
+		return nil, ErrorCodeBNO08XNilSPIBus
 	}
 
 	// Check if the dataBuffer is provided
 	if dataBuffer == nil {
-		return nil, ErrNilDataBuffer
+		return nil, ErrorCodeBNO08XNilDataBuffer
 	}
 
 	return &SPIPacketReader{
@@ -239,7 +242,7 @@ func newSPIPacketReader(
 		debugger:   debugger,
 		dataBuffer: dataBuffer,
 		ultraDebug: ultraDebug,
-	}, nil
+	}, tinygotypes.ErrorCodeNil
 }
 
 // waitForInt waits for the INT pin to go low, indicating data is ready.
@@ -247,7 +250,7 @@ func newSPIPacketReader(
 // Returns:
 //
 // An error if the wait times out.
-func (pr *SPIPacketReader) waitForInt() error {
+func (pr *SPIPacketReader) waitForInt() tinygotypes.ErrorCode {
 	if pr.debugger != nil {
 		pr.debugger.Debug("Waiting for INT...")
 	}
@@ -258,7 +261,7 @@ func (pr *SPIPacketReader) waitForInt() error {
 			break
 		}
 	}
-	return ErrSPICouldNotBeWokenUp
+	return ErrorCodeBNO08XFailedToWakeUpSPI
 }
 
 // IsDataReady checks if data is available on SPI
@@ -273,317 +276,138 @@ func (pr *SPIPacketReader) IsDataReady() bool {
 	return true
 }
 
-// read reads a specified number of bytes from the I2C bus.
-//
-// Parameters:
-//
-// requestedReadLength: The number of bytes to read from the I2C bus.
+// readHeader reads the Packet header from the SPI bus.
 //
 // Returns:
 //
-// An error if reading from the I2C bus fails, otherwise nil.
-func (pr *I2CPacketReader) read(requestedReadLength int) error {
-	if pr.debugger != nil {
-		pr.debugger.Debug(
-			fmt.Sprintf(
-				"Trying to read %d bytes",
-				requestedReadLength,
-			),
-		)
-	}
-
-	// Full packet (header + payload)
-	totalReadLength := requestedReadLength + PacketHeaderLength
-
-	// Check if data buffer is large enough
-	dataBufferPtr := pr.dataBuffer.GetData()
-	if len(*dataBufferPtr) < totalReadLength {
-		// Resize data buffer and copy existing data
-		newBuf := make([]byte, totalReadLength)
-		copy(
-			newBuf[:len(*dataBufferPtr)],
-			(*dataBufferPtr)[:len(*dataBufferPtr)],
-		)
-
-		// Update data buffer reference
-		pr.dataBuffer.SetData(&newBuf)
-		dataBufferPtr = &newBuf
-
-		if pr.debugger != nil {
-			pr.debugger.Debug(
-				fmt.Printf(
-					"Resized dataBuffer to %d bytes",
-					totalReadLength,
-				),
-			)
-		}
-	}
-
-	// Preserve first 4 header bytes already read; read payload into slice after header.
-	if requestedReadLength > 0 {
-		if err := pr.i2cBus.Tx(
-			pr.address,
-			nil,
-			(*dataBufferPtr)[PacketHeaderLength:totalReadLength],
-		); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-
-// readInto reads bytes into the destination buffer handling escape sequences.
-//
-// Parameters:
-//
-// dst: The destination byte slice to read into.
-// start: The starting index in the destination slice.
-// end: The ending index in the destination slice (optional).
-//
-// Returns:
-//
-// An error if any occurs during reading.
-func (pr *SPIPacketReader) readInto(dst *[]byte, start int, end *int) error {
-	// Check if the data is ready
-	if !pr.IsDataReady() {
-		return ErrSPICouldNotBeWokenUp
-	}
-
-	// Check if the dst is nil
-	if dst == nil {
-		return ErrNilDestinationBuffer
-	}
-
-	// Determine end index
-	if end == nil {
-		end = new(int)
-		*end = len(*dst)
-	}
-
-	for i := start; i < *end; i++ {
-		b, err := pr.readByte()
-		if err != nil {
-			return err
-		}
-		if b == SPIControlEscape {
-			nb, err := pr.readByte()
-			if err != nil {
-				return err
-			}
-			b = nb ^ 0x20
-		}
-		(*dst)[i] = b
-	}
-	return nil
-}
-
-/*
- def _read_into(self, buf, start=0, end=None):
-        self._wait_for_int()
-
-        with self._spi as spi:
-            spi.readinto(buf, start=start, end=end, write_value=0x00)
-        # print("SPI Read buffer (", end-start, "b )", [hex(i) for i in buf[start:end]])
-*/
-
-// readHeader reads the SPI packet header.
-//
-// Returns:
-//
-// An error if any occurs during reading.
-func (pr *SPIPacketReader) readHeader() error {
-	// Find first initial start byte
-	for {
-		b, err := pr.readByte()
-		if err != nil {
-			return err
-		}
-		if b == SPIStartAndEndByte {
-			break
-		}
-	}
-
-	// Read protocol ID sequence
-	data, err := pr.readByte()
-	if err != nil {
-		return err
-	}
-	if data == SPIStartAndEndByte {
-		// Consume next (real protocol byte)
-		data, err = pr.readByte()
-		if err != nil {
-			return err
-		}
-	}
-	if data != SPISHTPByte {
-		return ErrUnhandledSPIControlSHTPProtocol
-	}
-	end := PacketHeaderLength
-
-	return pr.readInto(pr.dataBuffer.GetData(), 0, &end)
-}
-
-// ReadPacket reads a packet from SPI
-//
-// Returns:
-//
-// A Packet object and an error if any occurs.
-func (pr *SPIPacketReader) ReadPacket() (*Packet, error) {
-	// Read packet header
-	if err := pr.readHeader(); err != nil {
+// A pointer to a PacketHeader or an error if reading the header fails.
+func (pr *SPIPacketReader) readHeader() (*PacketHeader, tinygotypes.ErrorCode) {
+	// Wait for INT pin to go low
+	if err := pr.waitForInt(); err != tinygotypes.ErrorCodeNil {
 		return nil, err
 	}
 
-	// Parse header
-	header, err := NewPacketHeaderFromBuffer(pr.dataBuffer.GetData())
-	if err != nil {
-		return nil, err
-	}
-	if header.PacketByteCount == 0 {
-		return nil, ErrNoPacketAvailable
-	}
-	channelNumber := header.ChannelNumber
-
-	// Check if the channel number is valid
-	if channelNumber > MaxChannelNumber {
-		return nil, ErrInvalidChannelNumber
+	// Check if the destination slice is nil
+	data := pr.dataBuffer.GetData()
+	if data == nil {
+		return nil, ErrorCodeBNO08XNilDestinationBuffer
 	}
 
-	// Check the data length for the packet
-	if header.DataLength > MaxDataLength {
-		return nil, fmt.Errorf(
-			ErrInvalidDataLength,
-			MaxDataLength,
-			header.DataLength,
-		)
+	// Check if start and end are within bounds
+	if len(data) < PacketHeaderLength {
+		return nil, ErrorCodeBNO08XDataBufferTooShortForPacketHeader
 	}
 
-	// Debug log the header
-	if pr.debugger != nil && pr.ultraDebug {
-		headerStrPtr := header.String(false)
-		if headerStrPtr != nil {
-			pr.debugger.Debug(*headerStrPtr)
-		} else {
-			pr.debugger.Debug(ErrNilPacketHeaderString.Error())
-		}
-
-		// Log available bytes
-		pr.debugger.Debug(
-			fmt.Sprintf(
-				"Channel %d has %d bytes available",
-				channelNumber,
-				header.PacketByteCount-PacketHeaderLength,
-			),
-		)
-	}
-
-	// Read remaining (payload) bytes
-	end := int(header.PacketByteCount)
-	dataBuffer := pr.dataBuffer.GetData()
-	if err = pr.readInto(
-		dataBuffer,
-		PacketHeaderLength,
-		&end,
+	// Read the first 4 bytes from the SPI bus to get the Packet header.
+	if err := pr.spiBus.Tx(
+		nil,
+		data[:PacketHeaderLength],
 	); err != nil {
 		return nil, err
 	}
 
-	// Expect trailing 0x7E
-	endByte, err := pr.readByte()
+	header, err := NewPacketHeaderFromBuffer(data)
 	if err != nil {
 		return nil, err
 	}
-	if endByte != SPIStartAndEndByte {
-		return nil, ErrSPIEndMissing
+
+	// Debug log the header
+	if pr.debugger != nil {
+		pr.debugger.DebugBuffer(header.PrintBuffer(false))
+	}
+	return header, tinygotypes.ErrorCodeNil
+}
+
+// ReadPacket reads a Packet from the SPI bus.
+//
+// Returns:
+//
+// A pointer to a Packet or an error if reading the Packet fails.
+func (pr *SPIPacketReader) ReadPacket() (*Packet, tinygotypes.ErrorCode) {
+	// Read the Packet header
+	header, err := pr.readHeader()
+	if err != nil {
+		return nil, err
 	}
 
-	// Construct packet data
-	packetData := make([]byte, header.DataLength)
-	copy(packetData, (*dataBuffer)[PacketHeaderLength:header.PacketByteCount])
+	// Validate header fields
+	if header.PacketByteCount < PacketHeaderLength {
+		return nil, ErrorCodeBNO08XInvalidPacketSize
+	}
 
-	// Initialize packet
-	packet, err := NewPacket(&packetData, header)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create packet from bytes: %w", err)
+	// Extract header fields
+	packetByteCount := header.PacketByteCount
+	channelNumber := header.ChannelNumber
+	sequenceNumber := header.SequenceNumber
+
+	// Set sequence number in data buffer
+	if err = pr.dataBuffer.SetSequenceNumber(
+		channelNumber,
+		sequenceNumber,
+	); err != nil {
+		return nil, err
+	}
+
+	// Skip header-only / empty packets
+	if header.PacketByteCount == PacketHeaderLength || header.DataLength == 0 {
+		if pr.debugger != nil {
+			pr.debugger.Debug("Header-only packet received; skipping read")
+		}
+		return nil, ErrorCodeBNO08XNoPacketAvailable
+	}
+
+	// packetByteCount includes 4 header bytes
+	payloadLength := packetByteCount - PacketHeaderLength
+
+	if pr.debugger != nil {
+		pr.debugger.Debug("Reading " + strconv.Itoa(payloadLength) + " bytes from SPI bus")
+	}
+
+	// Check if data buffer is large enough
+	data := pr.dataBuffer.GetData()
+	if len(data) < packetByteCount {
+		// Resize data buffer and copy existing data
+		newBuf := make([]byte, packetByteCount)
+		copy(
+			newBuf[:len(data)],
+			data[:len(data)],
+		)
+
+		// Update data buffer reference
+		pr.dataBuffer.SetData(data)
+
+		if pr.debugger != nil {
+			pr.debugger.Debug("Resized data buffer to " + strconv.Itoa(packetByteCount) + " bytes")
+		}
+	}
+
+	// Preserve first 4 header bytes already read; read payload into slice after header.
+	if payloadLength > 0 {
+		if err := pr.spiBus.Tx(
+			nil,
+			data[PacketHeaderLength:packetByteCount],
+		); err != nil {
+			return ErrorCodeBNO08XSPIFailedToReadRequestedDataLength
+		}
+	}
+
+	// Create a full Packet from the data buffer
+	packet, err := NewPacketFromBuffer(pr.dataBuffer.GetData())
+	if err != tinygotypes.ErrorCodeNil {
+		return nil, err
 	}
 
 	// Debug log the packet
 	if pr.debugger != nil {
-		packetStrPtr := packet.String(false)
-		if packetStrPtr != nil {
-			pr.debugger.Debug(*packetStrPtr)
-		} else {
-			pr.debugger.Debug(ErrNilPacketString.Error())
-		}
+		pr.debugger.DebugBuffer(packet.PrintBuffer(false))
 	}
 
-	// Update sequence number
-	pr.dataBuffer.UpdateSequenceNumber(packet)
+	// Update the sequence number in the data buffer
+	if err = pr.dataBuffer.UpdateSequenceNumber(packet); err != nil {
+		return nil, err
+	}
 	return packet, nil
 }
-
-
-/*
-   
-    def _read_header(self):
-        """Reads the first 4 bytes available as a header"""
-        self._wait_for_int()
-
-        # read header
-        with self._spi as spi:
-            spi.readinto(self._data_buffer, end=4, write_value=0x00)
-        self._dbg("")
-        self._dbg("SHTP READ packet header: ", [hex(x) for x in self._data_buffer[0:4]])
-
-    def _read_packet(self):
-        self._read_header()
-        halfpacket = False
-
-        print([hex(x) for x in self._data_buffer[0:4]])
-        if self._data_buffer[1] & 0x80:
-            halfpacket = True
-        header = Packet.header_from_buffer(self._data_buffer)
-        packet_byte_count = header.packet_byte_count
-        channel_number = header.channel_number
-        sequence_number = header.sequence_number
-
-        self._sequence_number[channel_number] = sequence_number
-        if packet_byte_count == 0:
-            raise PacketError("No packet available")
-
-        self._dbg("channel %d has %d bytes available" % (channel_number, packet_byte_count - 4))
-
-        if packet_byte_count > DATA_BUFFER_SIZE:
-            self._data_buffer = bytearray(packet_byte_count)
-
-        # re-read header bytes since this is going to be a new transaction
-        self._read_into(self._data_buffer, start=0, end=packet_byte_count)
-        # print("Packet: ", [hex(i) for i in self._data_buffer[0:packet_byte_count]])
-
-        if halfpacket:
-            raise PacketError("read partial packet")
-        new_packet = Packet(self._data_buffer)
-        if self._debug:
-            print(new_packet)
-        self._update_sequence_number(new_packet)
-        return new_packet
-
-    def _read(self, requested_read_length):
-        self._dbg("trying to read", requested_read_length, "bytes")
-        unread_bytes = 0
-        # +4 for the header
-        total_read_length = requested_read_length + 4
-        if total_read_length > DATA_BUFFER_SIZE:
-            unread_bytes = total_read_length - DATA_BUFFER_SIZE
-            total_read_length = DATA_BUFFER_SIZE
-
-        with self._spi as spi:
-            spi.readinto(self._data_buffer, end=total_read_length)
-        return unread_bytes > 0
-
-*/
-
 
 // newSPIPacketWriter creates a new SPIPacketWriter instance.
 //
@@ -602,15 +426,15 @@ func newSPIPacketWriter(
 	dataBuffer DataBuffer,
 	debugger Debugger,
 	ultraDebug bool,
-) (*SPIPacketWriter, error) {
+) (*SPIPacketWriter, tinygotypes.ErrorCode) {
 	// Check if the SPI bus is nil
 	if spiBus == nil {
-		return nil, ErrNilSPIBus
+		return nil, ErrorCodeBNO08XNilSPIBus
 	}
 
 	// Check if the dataBuffer is provided
 	if dataBuffer == nil {
-		return nil, ErrNilDataBuffer
+		return nil, ErrorCodeBNO08XNilDataBuffer
 	}
 
 	return &SPIPacketWriter{
@@ -618,7 +442,7 @@ func newSPIPacketWriter(
 		debugger:   debugger,
 		dataBuffer: dataBuffer,
 		ultraDebug: ultraDebug,
-	}, nil
+	}, tinygotypes.ErrorCodeNil
 }
 
 // SendPacket sends a packet over SPI, waiting for INT pin before sending.
@@ -631,7 +455,12 @@ func newSPIPacketWriter(
 // Returns:
 //
 // The sequence number used and an error if any occurs.
-func (pw *SPIPacketWriter) SendPacket(channel uint8, data *[]byte) (uint8, error) {
+func (pw *SPIPacketWriter) SendPacket(channel uint8, data []byte) (uint8, tinygotypes.ErrorCode) {
+	// Check if the data is nil
+	if data == nil {
+		return 0, ErrorCodeBNO08XNilPacketData
+	}
+
 	// Get channel sequence number
 	sequenceNumber, err := pw.dataBuffer.GetSequenceNumber(channel)
 	if err != nil {
@@ -645,23 +474,13 @@ func (pw *SPIPacketWriter) SendPacket(channel uint8, data *[]byte) (uint8, error
 		data,
 	)
 	if err != nil {
-		return 0, fmt.Errorf("failed to create packet: %w", err)
+		return 0, err
 	}
 
 	// Debug log the packet
 	if pw.debugger != nil {
-		packetStrPtr := packet.String(true)
-		if packetStrPtr != nil {
-			pw.debugger.Debug(*packetStrPtr)
-		} else {
-			pw.debugger.Debug(ErrNilPacketString.Error())
-		}
-	}
-
-	// Get the packet buffer
-	packetBufferPtr := packet.Buffer()
-	if packetBufferPtr == nil {
-		return 0, ErrNilPacketBuffer
+		pw.debugger.DebugBuffer(packet.Header.PrintBuffer(true))
+		pw.debugger.DebugBuffer(packet.PrintBuffer(true))
 	}
 
 	// Wait for INT pin to go low before sending
@@ -669,13 +488,14 @@ func (pw *SPIPacketWriter) SendPacket(channel uint8, data *[]byte) (uint8, error
 		return 0, err
 	}
 
-	// Write packet to SPI
-	for _, b := range *packetBufferPtr {
-		if err := pw.spiBus.WriteByte(b); err != nil {
-			return seqNum, err
-		}
+	// Write to SPI
+	if err = pw.spiBus.Tx(packet.Header.Buffer, nil); err != nil {
+		return sequenceNumber, ErrorCodeBNO08XSPIFailedToWritePacketHeaderBuffer
 	}
-    
+	if err = pw.spiBus.Tx(packet.Data, nil); err != nil {
+		return sequenceNumber, ErrorCodeBNO08XSPIFailedToWritePacketDataBuffer
+	}
+
 	// Update sequence number
 	sequenceNumber, err = pw.dataBuffer.IncrementChannelSequenceNumber(channel)
 	if err != nil {

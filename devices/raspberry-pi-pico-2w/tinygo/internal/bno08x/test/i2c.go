@@ -468,11 +468,38 @@ func (pr *I2CPacketReader) ReadPacket() (*Packet, tinygotypes.ErrorCode) {
 	}
 
 	// packetByteCount includes 4 header bytes
-	payloadLen := packetByteCount - PacketHeaderLength
+	payloadLength := packetByteCount - PacketHeaderLength
+	if pr.debugger != nil {
+		pr.debugger.Debug("Reading " + strconv.Itoa(payloadLength) + " bytes from I2C bus")
+	}
 
-	// Read the remaining bytes of the Packet
-	if err = pr.read(payloadLen); err != nil {
-		return nil, err
+	// Check if data buffer is large enough
+	data := pr.dataBuffer.GetData()
+	if len(data) < packetByteCount {
+		// Resize data buffer and copy existing data
+		newBuf := make([]byte, packetByteCount)
+		copy(
+			newBuf[:len(data)],
+			data[:len(data)],
+		)
+
+		// Update data buffer reference
+		pr.dataBuffer.SetData(data)
+
+		if pr.debugger != nil {
+			pr.debugger.Debug("Resized data buffer to " + strconv.Itoa(packetByteCount) + " bytes")
+		}
+	}
+
+	// Preserve first 4 header bytes already read; read payload into slice after header.
+	if payloadLength > 0 {
+		if err := pr.i2cBus.Tx(
+			pr.address,
+			nil,
+			data[PacketHeaderLength:packetByteCount],
+		); err != nil {
+			return ErrorCodeBNO08XI2CFailedToReadRequestedDataLength
+		}
 	}
 
 	// Create a full Packet from the data buffer
@@ -491,54 +518,6 @@ func (pr *I2CPacketReader) ReadPacket() (*Packet, tinygotypes.ErrorCode) {
 		return nil, err
 	}
 	return packet, nil
-}
-
-// read reads a specified number of bytes from the I2C bus.
-//
-// Parameters:
-//
-// requestedReadLength: The number of bytes to read from the I2C bus.
-//
-// Returns:
-//
-// An error if reading from the I2C bus fails, otherwise nil.
-func (pr *I2CPacketReader) read(requestedReadLength int) tinygotypes.ErrorCode {
-	if pr.debugger != nil {
-		pr.debugger.Debug("Reading " + strconv.Itoa(requestedReadLength) + " bytes from I2C bus")
-	}
-
-	// Full packet (header + payload)
-	totalReadLength := requestedReadLength + PacketHeaderLength
-
-	// Check if data buffer is large enough
-	data := pr.dataBuffer.GetData()
-	if len(data) < totalReadLength {
-		// Resize data buffer and copy existing data
-		newBuf := make([]byte, totalReadLength)
-		copy(
-			newBuf[:len(data)],
-			data[:len(data)],
-		)
-
-		// Update data buffer reference
-		pr.dataBuffer.SetData(data)
-
-		if pr.debugger != nil {
-			pr.debugger.Debug("Resized data buffer to " + strconv.Itoa(totalReadLength) + " bytes")
-		}
-	}
-
-	// Preserve first 4 header bytes already read; read payload into slice after header.
-	if requestedReadLength > 0 {
-		if err := pr.i2cBus.Tx(
-			pr.address,
-			nil,
-			data[PacketHeaderLength:totalReadLength],
-		); err != nil {
-			return ErrorCodeBNO08XI2CFailedToReadRequestedDataLength
-		}
-	}
-	return nil
 }
 
 // IsDataReady checks if there is data ready to be read from the I2C bus.
