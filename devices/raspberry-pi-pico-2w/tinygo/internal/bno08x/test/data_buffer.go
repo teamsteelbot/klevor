@@ -33,7 +33,7 @@ func (db *DefaultDataBuffer) GetData() []byte {
 	return db.data
 }
 
-// SetData sets the data buffer
+// SetDataValue sets the data buffer value at the specified index
 //
 // Parameters:
 //
@@ -43,11 +43,28 @@ func (db *DefaultDataBuffer) GetData() []byte {
 // Returns:
 //
 // An error if the index is out of range, otherwise nil.
-func (db *DefaultDataBuffer) SetData(index int, value byte) tinygotypes.ErrorCode {
+func (db *DefaultDataBuffer) SetDataValue(index int, value byte) tinygotypes.ErrorCode {
 	if index < 0 || index >= len(db.data) {
-		return tinygotypes.ErrorCodeInvalidIndex
+		return ErrorCodeBNO08XDataBufferIndexOutOfRange
 	}
 	db.data[index] = value
+	return tinygotypes.ErrorCodeNil
+}
+
+// SetData sets the data buffer with the provided data slice
+//
+// Parameters:
+//
+//	data: The byte slice to set as the data buffer.
+//
+// Returns:
+//
+// An error if the data slice is nil or exceeds the buffer size, otherwise nil.
+func (db *DefaultDataBuffer) SetData(data []byte) tinygotypes.ErrorCode {
+	if data == nil {
+		return ErrorCodeBNO08XNilDataBuffer
+	}
+	db.data = data
 	return tinygotypes.ErrorCodeNil
 }
 
@@ -99,7 +116,7 @@ func (db *DefaultDataBuffer) UpdateSequenceNumber(newPacket *Packet) tinygotypes
 	seq := newPacket.Header.SequenceNumber
 
 	// Validate the channel number
-	if err := db.validateChannelNumber(channel); err != nil {
+	if err := db.validateChannelNumber(channel); err != tinygotypes.ErrorCodeNil {
 		return err
 	}
 
@@ -123,7 +140,7 @@ func (db *DefaultDataBuffer) IncrementChannelSequenceNumber(channel uint8) (
 	tinygotypes.ErrorCode,
 ) {
 	// Validate the channel number
-	if err := db.validateChannelNumber(channel); err != nil {
+	if err := db.validateChannelNumber(channel); err != tinygotypes.ErrorCodeNil {
 		return 0, err
 	}
 
@@ -144,12 +161,12 @@ func (db *DefaultDataBuffer) IncrementChannelSequenceNumber(channel uint8) (
 //	The cached sequence number for the channel, or -1 if the channel is invalid.
 func (db *DefaultDataBuffer) GetSequenceNumber(channel uint8) (uint8, tinygotypes.ErrorCode) {
 	// Validate the channel number
-	if err := db.validateChannelNumber(channel); err != nil {
+	if err := db.validateChannelNumber(channel); err != tinygotypes.ErrorCodeNil {
 		return 0, err
 	}
 
 	// Return the sequence number for the channel
-	return db.sequenceNumber[int(channel)], nil
+	return db.sequenceNumber[int(channel)], tinygotypes.ErrorCodeNil
 }
 
 // SetSequenceNumber sets the cached sequence number for the given channel.
@@ -167,7 +184,7 @@ func (db *DefaultDataBuffer) SetSequenceNumber(
 	sequenceNumber uint8,
 ) tinygotypes.ErrorCode {
 	// Validate the channel number
-	if err := db.validateChannelNumber(channel); err != nil {
+	if err := db.validateChannelNumber(channel); err != tinygotypes.ErrorCodeNil {
 		return err
 	}
 

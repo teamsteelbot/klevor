@@ -7,7 +7,7 @@ import (
 
 	ralvarezdevbno08x "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/bno08x/test"
 	//ralvarezdevbno08x "github.com/ralvarezdev/go-bno08x"
-	internalusbcdc "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc"
+	tinygotypes "github.com/ralvarezdev/tinygo-types"
 )
 
 var (
@@ -52,11 +52,11 @@ func init() {
 			machine.GPIO3,
 			machine.GPIO4,
 			DataBuffer,
-			afterSoftwareReset,
+			afterReset,
 			ralvarezdevbno08x.NewUARTOptions(ralvarezdevbno08x.NewDefaultDebugger(), true),
 			// ralvarezdevbno08x.NewUARTOptions(nil, false),
 		)
-		if err == nil {
+		if err == tinygotypes.ErrorCodeNil {
 			UART = uart
 			break
 		}
@@ -85,10 +85,10 @@ func init() {
 			machine.GPIO4,
 			DataBuffer,
 			nil, 
-			afterSoftwareReset,
+			afterReset,
 			ralvarezdevbno08x.NewI2COptions(ralvarezdevbno08x.NewDefaultDebugger(), &address0),
 		)
-		if err != nil {
+		if err != tinygotypes.ErrorCodeNil {
 			panic("failed to initialize i2c bno08x: " + err.Error())
 		}
 		I2C = i2c

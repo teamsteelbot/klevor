@@ -35,6 +35,7 @@ type (
 	// SPIPacketWriter is the packet writer for SPI interface
 	SPIPacketWriter struct {
 		spiBus     *machine.SPI
+		intPin    machine.Pin
 		dataBuffer DataBuffer
 		debugger   Debugger
 		ultraDebug bool
@@ -81,7 +82,7 @@ func NewSPIOptions(
 // ps1Pin: The PS1 pin to set the sensor to SPI mode.
 // resetPin: The pin used to reset the BNO08X sensor.
 // dataBuffer: The data buffer to use for storing Packet data.
-// afterSoftwareResetFn: An optional function to be called after a reset.
+// afterResetFn: An optional function to be called after a reset.
 // options: The SPIOptions for configuring the BNO08X (optional).
 //
 // Returns:
@@ -98,7 +99,7 @@ func NewSPI(
 	ps1Pin machine.Pin,
 	resetPin machine.Pin,
 	dataBuffer DataBuffer,
-	afterSoftwareResetFn func(b *BNO08X) tinygotypes.ErrorCode,
+	afterResetFn func(b *BNO08X) tinygotypes.ErrorCode,
 	options *SPIOptions,
 ) (*SPI, tinygotypes.ErrorCode) {
 	// Check if the SPI bus is nil
@@ -151,17 +152,18 @@ func NewSPI(
 		debugger,
 		options.UltraDebug,
 	)
-	if err != nil {
+	if err != tinygotypes.ErrorCodeNil {
 		return nil, ErrorCodeBNO08XFailedToCreatePacketReader
 	}
 
 	packetWriter, err := newSPIPacketWriter(
 		spiBus,
+		intPin,
 		dataBuffer,
 		debugger,
 		options.UltraDebug,
 	)
-	if err != nil {
+	if err != tinygotypes.ErrorCodeNil {
 		return nil, ErrorCodeBNO08XFailedToCreatePacketWriter
 	}
 
@@ -172,10 +174,10 @@ func NewSPI(
 		packetWriter,
 		dataBuffer,
 		nil,
-		afterSoftwareResetFn,
+		afterResetFn,
 		options.Options,
 	)
-	if err != nil {
+	if err != tinygotypes.ErrorCodeNil {
 		return nil, ErrorCodeBNO08XFailedToCreateBNO08X
 	}
 
@@ -185,7 +187,7 @@ func NewSPI(
 		ps1Pin:   ps1Pin,
 		ps0Pin:   ps0Pin,
 		resetPin: resetPin,
-	}, nil
+	}, tinygotypes.ErrorCodeNil
 }
 
 // GetBNO08X returns the BNO08X instance.
@@ -195,6 +197,30 @@ func NewSPI(
 // The BNO08X instance.
 func (spi *SPI) GetBNO08X() *BNO08X {
 	return spi.BNO08X
+}
+
+// waitForInt waits for the INT pin to go low, indicating data is ready.
+//
+// Parameters:
+//
+// intPin: The INT pin to monitor for data readiness.
+// debugger: The debugger to use for logging and debugging information (optional).
+//
+// Returns:
+//
+// An error if the wait times out.
+func waitForInt(intPin machine.Pin, debugger Debugger) tinygotypes.ErrorCode {
+	if debugger != nil {
+		debugger.Debug("Waiting for INT...")
+	}
+
+	startTime := time.Now()
+	for time.Since(startTime) < SPIIntTimeout {
+		if !intPin.Get() {
+			break
+		}
+	}
+	return ErrorCodeBNO08XFailedToWakeUpSPI
 }
 
 // newSPIPacketReader creates a new SPIPacketReader instance.
@@ -242,17 +268,7 @@ func newSPIPacketReader(
 //
 // An error if the wait times out.
 func (pr *SPIPacketReader) waitForInt() tinygotypes.ErrorCode {
-	if pr.debugger != nil {
-		pr.debugger.Debug("Waiting for INT...")
-	}
-
-	startTime := time.Now()
-	for time.Since(startTime) < SPIIntTimeout {
-		if !pr.intPin.Get() {
-			break
-		}
-	}
-	return ErrorCodeBNO08XFailedToWakeUpSPI
+	return waitForInt(pr.intPin, pr.debugger)
 }
 
 // IsDataReady checks if data is available on SPI
@@ -261,7 +277,7 @@ func (pr *SPIPacketReader) waitForInt() tinygotypes.ErrorCode {
 //
 // True if data is available, otherwise false.
 func (pr *SPIPacketReader) IsDataReady() bool {
-	if err := pr.waitForInt(); err != nil {
+	if err := pr.waitForInt(); err != tinygotypes.ErrorCodeNil {
 		return false
 	}
 	return true
@@ -294,11 +310,11 @@ func (pr *SPIPacketReader) readHeader() (*PacketHeader, tinygotypes.ErrorCode) {
 		nil,
 		data[:PacketHeaderLength],
 	); err != nil {
-		return nil, err
+		return nil, ErrorCodeBNO08XSPIFailedToReadPacketHeader
 	}
 
 	header, err := NewPacketHeaderFromBuffer(data)
-	if err != nil {
+	if err != tinygotypes.ErrorCodeNil {
 		return nil, err
 	}
 
@@ -316,9 +332,9 @@ func (pr *SPIPacketReader) readHeader() (*PacketHeader, tinygotypes.ErrorCode) {
 // A pointer to a Packet or an error if reading the Packet fails.
 func (pr *SPIPacketReader) ReadPacket() (*Packet, tinygotypes.ErrorCode) {
 	// Read the Packet header
-	header, err := pr.readHeader()
-	if err != nil {
-		return nil, err
+	header, errorCode := pr.readHeader()
+	if errorCode != tinygotypes.ErrorCodeNil {
+		return nil, errorCode
 	}
 
 	// Validate header fields
@@ -332,11 +348,11 @@ func (pr *SPIPacketReader) ReadPacket() (*Packet, tinygotypes.ErrorCode) {
 	sequenceNumber := header.SequenceNumber
 
 	// Set sequence number in data buffer
-	if err = pr.dataBuffer.SetSequenceNumber(
+	if errorCode = pr.dataBuffer.SetSequenceNumber(
 		channelNumber,
 		sequenceNumber,
-	); err != nil {
-		return nil, err
+	); errorCode != tinygotypes.ErrorCodeNil {
+		return nil, errorCode
 	}
 
 	// Skip header-only / empty packets
@@ -378,14 +394,14 @@ func (pr *SPIPacketReader) ReadPacket() (*Packet, tinygotypes.ErrorCode) {
 			nil,
 			data[PacketHeaderLength:packetByteCount],
 		); err != nil {
-			return ErrorCodeBNO08XSPIFailedToReadRequestedDataLength
+			return nil, ErrorCodeBNO08XSPIFailedToReadRequestedDataLength
 		}
 	}
 
 	// Create a full Packet from the data buffer
-	packet, err := NewPacketFromBuffer(pr.dataBuffer.GetData())
-	if err != tinygotypes.ErrorCodeNil {
-		return nil, err
+	packet, errorCode := NewPacketFromBuffer(pr.dataBuffer.GetData())
+	if errorCode != tinygotypes.ErrorCodeNil {
+		return nil, errorCode
 	}
 
 	// Debug log the packet
@@ -394,10 +410,10 @@ func (pr *SPIPacketReader) ReadPacket() (*Packet, tinygotypes.ErrorCode) {
 	}
 
 	// Update the sequence number in the data buffer
-	if err = pr.dataBuffer.UpdateSequenceNumber(packet); err != nil {
-		return nil, err
+	if errorCode = pr.dataBuffer.UpdateSequenceNumber(packet); errorCode != tinygotypes.ErrorCodeNil {
+		return nil, errorCode
 	}
-	return packet, nil
+	return packet, tinygotypes.ErrorCodeNil
 }
 
 // newSPIPacketWriter creates a new SPIPacketWriter instance.
@@ -405,6 +421,7 @@ func (pr *SPIPacketReader) ReadPacket() (*Packet, tinygotypes.ErrorCode) {
 // Parameters:
 //
 // spiBus: The SPI bus to use for communication.
+// intPin: The INT pin to monitor for data readiness.
 // dataBuffer: The data buffer to use for storing Packet data.
 // debugger: The debugger to use for logging and debugging information.
 // ultraDebug: Flag to enable ultra debug mode (optional).
@@ -414,6 +431,7 @@ func (pr *SPIPacketReader) ReadPacket() (*Packet, tinygotypes.ErrorCode) {
 // A pointer to a new SPIPacketWriter instance, or an error if the dataBuffer is nil.
 func newSPIPacketWriter(
 	spiBus *machine.SPI,
+	intPin machine.Pin,
 	dataBuffer DataBuffer,
 	debugger Debugger,
 	ultraDebug bool,
@@ -430,10 +448,20 @@ func newSPIPacketWriter(
 
 	return &SPIPacketWriter{
 		spiBus:     spiBus,
+		intPin:    intPin,
 		debugger:   debugger,
 		dataBuffer: dataBuffer,
 		ultraDebug: ultraDebug,
 	}, tinygotypes.ErrorCodeNil
+}
+
+// waitForInt waits for the INT pin to go low, indicating data is ready.
+//
+// Returns:
+//
+// An error if the wait times out.
+func (pw *SPIPacketWriter) waitForInt() tinygotypes.ErrorCode {
+	return waitForInt(pw.intPin, pw.debugger)
 }
 
 // SendPacket sends a packet over SPI, waiting for INT pin before sending.
@@ -453,19 +481,19 @@ func (pw *SPIPacketWriter) SendPacket(channel uint8, data []byte) (uint8, tinygo
 	}
 
 	// Get channel sequence number
-	sequenceNumber, err := pw.dataBuffer.GetSequenceNumber(channel)
-	if err != nil {
-		return 0, err
+	sequenceNumber, errorCode := pw.dataBuffer.GetSequenceNumber(channel)
+	if errorCode != tinygotypes.ErrorCodeNil {
+		return 0, errorCode
 	}
 
 	// Initialize the packet from data
-	packet, err := NewPacketFromData(
+	packet, errorCode := NewPacketFromData(
 		channel,
 		sequenceNumber,
 		data,
 	)
-	if err != nil {
-		return 0, err
+	if errorCode != tinygotypes.ErrorCodeNil {
+		return 0, errorCode
 	}
 
 	// Debug log the packet
@@ -475,22 +503,22 @@ func (pw *SPIPacketWriter) SendPacket(channel uint8, data []byte) (uint8, tinygo
 	}
 
 	// Wait for INT pin to go low before sending
-	if err := pw.waitForInt(); err != nil {
-		return 0, err
+	if errorCode := pw.waitForInt(); errorCode != tinygotypes.ErrorCodeNil {
+		return 0, errorCode
 	}
 
 	// Write to SPI
-	if err = pw.spiBus.Tx(packet.Header.Buffer, nil); err != nil {
+	if err := pw.spiBus.Tx(packet.Header.Buffer, nil); err != nil {
 		return sequenceNumber, ErrorCodeBNO08XSPIFailedToWritePacketHeaderBuffer
 	}
-	if err = pw.spiBus.Tx(packet.Data, nil); err != nil {
+	if err := pw.spiBus.Tx(packet.Data, nil); err != nil {
 		return sequenceNumber, ErrorCodeBNO08XSPIFailedToWritePacketDataBuffer
 	}
 
 	// Update sequence number
-	sequenceNumber, err = pw.dataBuffer.IncrementChannelSequenceNumber(channel)
-	if err != nil {
-		return 0, err
+	sequenceNumber, errorCode = pw.dataBuffer.IncrementChannelSequenceNumber(channel)
+	if errorCode != tinygotypes.ErrorCodeNil {
+		return 0, errorCode
 	}
-	return sequenceNumber, nil
+	return sequenceNumber, tinygotypes.ErrorCodeNil
 }

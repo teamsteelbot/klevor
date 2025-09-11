@@ -16,6 +16,8 @@ const (
 	ErrorCodeBNO08XInvalidChannelNumber
 	ErrorCodeBNO08XNilPacket
 	ErrorCodeBNO08XNilPacketHeader
+	ErrorCodeBNO08XNilPacketReader
+	ErrorCodeBNO08XNilPacketWriter
 	ErrorCodeBNO08XNilUARTBus
 	ErrorCodeBNO08XFailedToConfigureUART
 	ErrorCodeBNO08XFailedToInitializeUARTRVC
@@ -114,4 +116,8 @@ const (
 	ErrorCodeBNO08XFailedToParseRawAccelerometerReport
 	ErrorCodeBNO08XFailedToGetReportLengthForTheGivenReportID
 	ErrorCodeBNO08XUnprocessableBatchBytes
+	ErrorCodeBNO08XI2CFailedToReadPacketHeader
+	ErrorCodeBNO08XSPIFailedToReadPacketHeader
+	ErrorCodeBNO08XUnhandledUARTControlSHTPProtocol
+	ErrorCodeBNO08XNilBNO08XInstance
 )

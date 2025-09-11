@@ -10,7 +10,8 @@ type (
 	// DataBuffer is an interface for managing data buffers
 	DataBuffer interface {
 		GetData() []byte
-		SetData(index int, value byte) tinygotypes.ErrorCode
+		SetDataValue(index int, value byte) tinygotypes.ErrorCode
+		SetData(data []byte) tinygotypes.ErrorCode
 		ClearData()
 		UpdateSequenceNumber(newPacket *Packet) tinygotypes.ErrorCode
 		IncrementChannelSequenceNumber(channel uint8) (uint8, tinygotypes.ErrorCode)
@@ -46,8 +47,8 @@ type (
 		SoftwareReset() tinygotypes.ErrorCode
 		Reset() tinygotypes.ErrorCode
 		Update()
-		GetAcceleration() *[3]float64
-		GetQuaternion() *[4]float64
+		GetAcceleration() [3]float64
+		GetQuaternion() [4]float64
 	}
 
 	// BNO08XService is an interface to wrap the BNO08X implementation methods.
@@ -57,21 +58,21 @@ type (
 		SoftwareReset() tinygotypes.ErrorCode
 		Reset() tinygotypes.ErrorCode
 		Update()
-		GetMagnetic() *[3]float64
-		GetQuaternion() *[4]float64
-		GetGeomagneticQuaternion() *[4]float64
-		GetGameQuaternion() *[4]float64
+		GetMagnetic() [3]float64
+		GetQuaternion() [4]float64
+		GetGeomagneticQuaternion() [4]float64
+		GetGameQuaternion() [4]float64
 		GetSteps() uint16
-		GetLinearAcceleration() *[3]float64
-		GetAcceleration() *[3]float64
-		GetGravity() *[3]float64
-		GetGyro() *[3]float64
+		GetLinearAcceleration() [3]float64
+		GetAcceleration() [3]float64
+		GetGravity() [3]float64
+		GetGyro() [3]float64
 		GetShake() bool
 		GetStabilityClassification() ReportStabilityClassification
-		GetActivityClassification()  *[ReportClassificationsNumber]int
-		GetRawAcceleration() *[3]float64
-		GetRawGyro() *[3]float64
-		GetRawMagnetic() *[3]float64
+		GetActivityClassification()  [ReportClassificationsNumber]int
+		GetRawAcceleration() [3]float64
+		GetRawGyro() [3]float64
+		GetRawMagnetic() [3]float64
 		EnableFeature(featureID uint8) tinygotypes.ErrorCode
 		IsFeatureEnabled(featureID uint8) bool
 		BeginCalibration() tinygotypes.ErrorCode

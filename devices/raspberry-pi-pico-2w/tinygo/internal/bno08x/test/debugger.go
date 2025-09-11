@@ -2,11 +2,6 @@
 
 package tinygo_bno08x
 
-import (
-	"fmt"
-	"strings"
-)
-
 type (
 	// DefaultDebugger is a simple implementation of the Debugger interface
 	DefaultDebugger struct{}

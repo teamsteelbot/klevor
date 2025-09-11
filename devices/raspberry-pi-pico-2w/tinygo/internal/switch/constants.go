@@ -1,7 +1,6 @@
 package _switch
 
 import (
-	"errors"
 	"time"
 
 	"machine"
@@ -27,7 +26,7 @@ func init() {
 		DefaultInterval,
 	)
 	if err != tinygotypes.ErrorCodeNil {
-		panic(errors.New("failed to initialize switch handler"))
+		panic("failed to initialize switch handler")
 	}
 	SwitchHandler = switchHandler
 

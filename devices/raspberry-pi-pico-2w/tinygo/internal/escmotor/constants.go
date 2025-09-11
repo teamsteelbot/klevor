@@ -1,7 +1,6 @@
 package escmotor
 
 import (
-	"errors"
 	"time"
 
 	"machine"
@@ -64,7 +63,7 @@ func init() {
 		DefaultOptions,
 	)
 	if err != tinygotypes.ErrorCodeNil {
-		panic(errors.New("failed to initialize esc motor handler"))
+		panic("failed to initialize esc motor handler")
 	}
 	ESCMotorHandler = escMotorHandler
 }

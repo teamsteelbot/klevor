@@ -4,6 +4,8 @@ package tinygo_bno08x
 
 import (
 	"time"
+	"strconv"
+	"strings"
 
 	"machine"
 
@@ -38,7 +40,7 @@ func HardwareReset(resetPin machine.Pin, debugger Debugger, afterHardwareResetFn
 	if afterHardwareResetFn != nil {
 		if err := afterHardwareResetFn(); err != tinygotypes.ErrorCodeNil {
 			if debugger != nil {
-				debugger.Debug("Error in afterHardwareResetFn:", err)
+				debugger.Debug("Error in afterHardwareResetFn: " + uint16ToHex(uint16(err)))
 			}
 		}
 	}
@@ -46,4 +48,82 @@ func HardwareReset(resetPin machine.Pin, debugger Debugger, afterHardwareResetFn
 	if debugger != nil {
 		debugger.Debug("Hardware reset complete")
 	}
+}
+
+// uint8ToString converts a uint8 value to its string representation.
+//
+// Parameters:
+//
+// value: The uint8 value to convert.
+//
+// Returns:
+//
+// A string representation of the uint8 value.
+func uint8ToString(value uint8) string {
+	return strconv.FormatUint(uint64(value), 10)
+}
+
+// uint8ToHex converts a uint8 value to its hexadecimal string representation.
+//
+// Parameters:
+//
+// value: The uint8 value to convert.
+//
+// Returns:
+//
+// A hexadecimal string representation of the uint8 value.
+func uint8ToHex(value uint8) string {
+	return "0x" + strings.ToUpper(strconv.FormatUint(uint64(value), 16))
+}
+
+// uint16ToString converts a uint16 value to its string representation.
+//
+// Parameters:
+//
+// value: The uint16 value to convert.
+//
+// Returns:
+//
+// A string representation of the uint16 value.
+func uint16ToString(value uint16) string {
+	return strconv.FormatUint(uint64(value), 10)
+}
+
+// uint16ToHex converts a uint16 value to its hexadecimal string representation.
+//
+// Parameters:
+//
+// value: The uint16 value to convert.
+//
+// Returns:
+//
+// A hexadecimal string representation of the uint16 value.
+func uint16ToHex(value uint16) string {
+	return "0x" + strings.ToUpper(strconv.FormatUint(uint64(value), 16))
+}
+
+// uint32ToString converts a uint32 value to its string representation.
+//
+// Parameters:
+//
+// value: The uint32 value to convert.
+//
+// Returns:
+//
+// A string representation of the uint32 value.
+func uint32ToString(value uint32) string {
+	return strconv.FormatUint(uint64(value), 10)
+}
+
+// intToString converts an int value to its string representation.
+//
+// Parameters:
+//
+// value: The int value to convert.
+//
+// Returns:
+//
+// A string representation of the int value.
+func intToString(value int) string {
+	return strconv.Itoa(value)
 }

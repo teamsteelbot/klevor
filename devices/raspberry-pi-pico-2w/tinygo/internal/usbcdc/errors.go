@@ -29,4 +29,5 @@ const (
 	ErrorCodeUSBCDCInvalidIncomingMessageMissingEndCharacter
 	ErrorCodeUSBCDCNilQuaternion
 	ErrorCodeUSBCDCNilIncomingMessageBuffer
+	ErrorCodeUSBCDCFailedToSendInitializationMessage
 )

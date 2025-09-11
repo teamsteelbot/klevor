@@ -124,17 +124,15 @@ func NewUARTRVC(
 		resetPin:      resetPin,
 		debugger:      debugger,
 		buffer:        make([]byte, UARTRVCPacketLengthBytes),
-		accelerometer: [3]float64{},
-		eulerDegrees:  [3]float64{},
 		timeout:       timeout,
 		initComplete:  false,
 	}
 
 	// Perform initialization
-	if err := uartRVC.Initialize(); err != nil {
+	if err := uartRVC.Initialize(); err != tinygotypes.ErrorCodeNil {
 		return nil, ErrorCodeBNO08XFailedToInitializeUARTRVC
 	}
-	return uartRVC, nil
+	return uartRVC, tinygotypes.ErrorCodeNil
 }
 
 // Initialize performs the initial setup of the BNO08X sensor, including hardware and software resets.
@@ -145,7 +143,7 @@ func NewUARTRVC(
 func (u *UARTRVC) Initialize() tinygotypes.ErrorCode {
 	// Check if already initialized
 	if u.initComplete {
-		return nil
+		return tinygotypes.ErrorCodeNil
 	}
 
 	// Log initialization start
@@ -161,7 +159,7 @@ func (u *UARTRVC) Initialize() tinygotypes.ErrorCode {
 	if u.debugger != nil {
 		u.debugger.Debug("BNO08X sensor with UART-RVC initialized successfully.")
 	}
-	return nil
+	return tinygotypes.ErrorCodeNil
 }
 
 // HardwareReset performs a hardware reset of the BNO08X sensor using the specified reset pin.
@@ -262,7 +260,7 @@ func (u *UARTRVC) readByte() (byte, tinygotypes.ErrorCode) {
 // Returns:
 //
 // An error if reading fails or times out.
-func (u *UARTRVC) Read() error {
+func (u *UARTRVC) Read() tinygotypes.ErrorCode {
 	// Clear frame buffer
 	for i := range u.buffer {
 		u.buffer[i] = 0
@@ -318,7 +316,7 @@ func (u *UARTRVC) Read() error {
 			}
 			return ErrorCodeBNO08XFailedToParseFrame
 		}
-		return nil
+		return tinygotypes.ErrorCodeNil
 	}
 	return ErrorCodeBNO08XUARTRVCUARTTimeout
 }
@@ -337,7 +335,7 @@ func (u *UARTRVC) Update() tinygotypes.ErrorCode {
 // Returns:
 //
 //	A pointer to a [3]float64 array containing the acceleration values.
-func (u *UARTRVC) GetAcceleration() *[3]float64 {
+func (u *UARTRVC) GetAcceleration() [3]float64 {
 	return u.accelerometer
 }
 
@@ -346,6 +344,6 @@ func (u *UARTRVC) GetAcceleration() *[3]float64 {
 // Returns:
 //
 // A tuple of three float64 values representing the roll, pitch, and yaw angles in degrees.
-func (u *UARTRVC) GetEulerDegrees() *[3]float64 {
+func (u *UARTRVC) GetEulerDegrees() [3]float64 {
 	return u.eulerDegrees
 }

@@ -5,12 +5,11 @@ package tinygo_bno08x
 import (
 	"math"
 	"time"
+
+	"machine"
 )
 
 const (
-	// ErrorCodeBNO08XStartNumber is the starting number for BNO08X-related error codes.
-	ErrorCodeBNO08XStartNumber uint16 = 5000
-
 	// ChannelSHTPCommand is the channel for SHTP commands
 	ChannelSHTPCommand uint8 = 0x0
 
@@ -164,6 +163,9 @@ const (
 	// EnabledActivities is a bitmask for enabled activities. All activities; 1 bit set for each of 8 activities, + Unknown
 	EnabledActivities uint32 = 0x1FF
 
+	// DataBufferSize is the size of the data buffer
+	DataBufferSize = 512
+
 	// CommandBufferSize is the size of the command buffer
 	CommandBufferSize = 12
 
@@ -210,7 +212,7 @@ const (
 	UARTDataBits = 8
 
 	// UARTParity is the parity setting for UART communication
-	UARTParity = machine.UARTParityNone
+	UARTParity = machine.ParityNone
 
 	// UARTStopBits is the number of stop bits for UART communication
 	UARTStopBits = 1
@@ -250,6 +252,18 @@ const (
 
 	// NoByteDelay is a delay if there's no byte buffered
 	NoByteDelay = 50 * time.Microsecond
+
+	// QuaternionXIndex is index for the X component in quaternion
+	QuaternionXIndex = 0
+
+	// QuaternionYIndex is index for the Y component in quaternion
+	QuaternionYIndex = 1
+
+	// QuaternionZIndex is index for the Z component in quaternion
+	QuaternionZIndex = 2
+
+	// QuaternionWIndex is index for the W component in quaternion
+	QuaternionWIndex = 3
 
 	// EulerDegreesRollIndex is the index for the roll component in an euler degrees vector
 	EulerDegreesRollIndex = 0

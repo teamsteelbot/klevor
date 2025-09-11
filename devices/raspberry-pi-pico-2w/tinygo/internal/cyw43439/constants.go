@@ -1,8 +1,6 @@
 package cyw43439
 
 import (
-	"errors"
-
 	soypatcyw43439 "github.com/soypat/cyw43439"
 )
 
@@ -17,6 +15,6 @@ var (
 // init initializes the CYW43439 device with the default Wi-Fi configuration.
 func init() {
 	if err := Device.Init(WifiConfig); err != nil {
-		panic(errors.New("failed to initialize cyw43439 device"))
+		panic("failed to initialize cyw43439 device")
 	}
 }

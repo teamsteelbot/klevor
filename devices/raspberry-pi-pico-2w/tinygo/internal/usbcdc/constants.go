@@ -1,7 +1,6 @@
 package usbcdc
 
 import (
-	"errors"
 	"time"
 
 	internalchallenge "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/challenge"
@@ -64,7 +63,7 @@ func init() {
 		internalledonboard.OnBoardHandler,
 	)
 	if err != tinygo_types.ErrorCodeNil {
-		panic(errors.New("failed to initialize usb cdc handler"))
+		panic("failed to initialize usb cdc handler")
 	}
 	USBCDCHandler = usbCDCHandler
 }

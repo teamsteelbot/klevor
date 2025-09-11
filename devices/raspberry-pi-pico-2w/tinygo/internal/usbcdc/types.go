@@ -117,9 +117,9 @@ func (d *DefaultHandler) Update() tinygotypes.ErrorCode {
 			}
 
 			// Process the buffer to create an IncomingMessage
-			message, err := NewIncomingMessage(d.buffer)
-			if err != tinygotypes.ErrorCodeNil {
-				return err
+			message, errCode := NewIncomingMessage(d.buffer)
+			if errCode != tinygotypes.ErrorCodeNil {
+				return errCode
 			}
 			d.incomingMessages[idx] = message
 
@@ -202,7 +202,10 @@ func (d *DefaultHandler) SendConfirmationMessage() tinygotypes.ErrorCode {
 // An error if it fails to send the initialization message
 func (d *DefaultHandler) SendInitializationMessage() tinygotypes.ErrorCode {
 	// Send the end character message to indicate initialization
-	return d.serialer.WriteByte(EndChar)
+	if err := d.serialer.WriteByte(EndChar); err != nil {
+		return ErrorCodeUSBCDCFailedToSendInitializationMessage
+	}
+	return tinygotypes.ErrorCodeNil
 }
 
 // SendChallengeMessage sends a challenge message to the USB CDC.

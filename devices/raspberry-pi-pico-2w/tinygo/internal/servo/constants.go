@@ -1,8 +1,6 @@
 package servo
 
 import (
-	"errors"
-
 	"machine"
 
 	internaldebug "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/debug"
@@ -60,7 +58,7 @@ func init() {
 		DefaultOptions,
 	)
 	if err != tinygotypes.ErrorCodeNil {
-		panic(errors.New("failed to initialize servo handler"))
+		panic("failed to initialize servo handler")
 	}
 	ServoHandler = servoHandler
 }

@@ -128,6 +128,7 @@ const (
 	ErrorCodeUSBCDCInvalidIncomingMessageMissingEndCharacter
 	ErrorCodeUSBCDCNilQuaternion
 	ErrorCodeUSBCDCNilIncomingMessageBuffer
+	ErrorCodeUSBCDCFailedToSendInitializationMessage
 )
 
 var (
@@ -186,6 +187,7 @@ var (
 		ErrorCodeUSBCDCInvalidIncomingMessageMissingEndCharacter: "invalid incoming message: missing end character",
 		ErrorCodeUSBCDCNilQuaternion:                          "nil quaternion provided",
 		ErrorCodeUSBCDCNilIncomingMessageBuffer:               "incoming message buffer cannot be nil",
+		ErrorCodeUSBCDCFailedToSendInitializationMessage:      "failed to send initialization message",
 	}
 )
 

@@ -4,7 +4,6 @@ package tinygo_bno08x
 
 import (
 	"encoding/binary"
-	"strconv"
 
 	tinygotypes "github.com/ralvarezdev/tinygo-types"
 )
@@ -65,14 +64,14 @@ type (
 
 	// stabilityClassifierReport represents a stability classification report from the BNO08x device
 	stabilityClassifierReport struct {
-		StabilityClassification string
+		StabilityClassification ReportStabilityClassification
 	}
 
 	// sensorID represents the identification of a sensor
 	sensorID struct {
-		SoftwareMajorVersion uint32
-		SoftwareMinorVersion uint32
-		SoftwarePatchVersion uint32
+		SoftwareMajorVersion uint8
+		SoftwareMinorVersion uint8
+		SoftwarePatchVersion uint16
 		SoftwarePartNumber   uint32
 		SoftwareBuildNumber  uint32
 	}
@@ -93,7 +92,7 @@ type (
 		Delay                    byte
 		PageNumber               byte
 		MostLikely               byte
-		MostLikelyClassification string
+		MostLikelyClassification ReportClassification
 		Classifications          [ReportClassificationsNumber]int
 	}
 )
@@ -108,7 +107,7 @@ type (
 // Returns:
 //
 //	A report object containing the ID and data, or an error if the report length is invalid
-func newReport(id uint8, data []byte) (*report, tinygotypes.ErrorCodeNil) {
+func newReport(id uint8, data []byte) (*report, tinygotypes.ErrorCode) {
 	// Check for nil data
 	if data == nil {
 		return nil, ErrorCodeBNO08XNilReportData
@@ -116,7 +115,7 @@ func newReport(id uint8, data []byte) (*report, tinygotypes.ErrorCodeNil) {
 
 	// Validate the report length
 	expectedLength, err := ReportLength(id)
-	if err != nil {
+	if err != tinygotypes.ErrorCodeNil {
 		return nil, ErrorCodeBNO08XFailedToGetExpectedReportLength
 	}
 	if expectedLength != len(data) {
@@ -146,7 +145,7 @@ func newReportFromPacket(packet *Packet) (*report, tinygotypes.ErrorCode) {
 
 	// Get the report ID from the Packet
 	reportID, err := packet.ReportID()
-	if err != nil {
+	if err != tinygotypes.ErrorCodeNil {
 		return nil, ErrorCodeBNO08XFailedToGetReportID
 	}
 
@@ -171,7 +170,7 @@ func newReportFromPacketBuffer(buffer []byte) (*report, tinygotypes.ErrorCode) {
 
 	// Create a new Packet from the Packet bytes
 	packet, err := NewPacketFromBuffer(buffer)
-	if err != nil {
+	if err != tinygotypes.ErrorCodeNil {
 		return nil, ErrorCodeBNO08XFailedToCreateReportFromPacketBuffer
 	}
 
@@ -233,7 +232,7 @@ func newSetFeatureEnableReportData(
 //	A pointer to the newly created getFeatureReport, or an error if the report bytes are too short
 func newGetFeatureReport(report *report) (
 	*getFeatureReport,
-	tinygotypes.ErrorCodeNil,
+	tinygotypes.ErrorCode,
 ) {
 	// Check if the provided report is nil
 	if report == nil {
@@ -258,7 +257,7 @@ func newGetFeatureReport(report *report) (
 		ReportInterval:           binary.LittleEndian.Uint32(report.Data[5:9]),
 		BatchIntervalWord:        binary.LittleEndian.Uint32(report.Data[9:13]),
 		SensorSpecificConfigWord: binary.LittleEndian.Uint32(report.Data[13:17]),
-	}, nil
+	}, tinygotypes.ErrorCodeNil
 }
 
 // newShakeReport creates a new shakeReport from the provided report.
@@ -270,7 +269,7 @@ func newGetFeatureReport(report *report) (
 // Returns:
 //
 //	A pointer to the newly created shakeReport or an error if the report bytes are too short
-func newShakeReport(report *report) (*shakeReport, tinygotypes.ErrorCodeNil) {
+func newShakeReport(report *report) (*shakeReport, tinygotypes.ErrorCode) {
 	// Check if the provided report is nil
 	if report == nil {
 		return nil, ErrorCodeBNO08XNilReport
@@ -288,7 +287,7 @@ func newShakeReport(report *report) (*shakeReport, tinygotypes.ErrorCodeNil) {
 
 	return &shakeReport{
 		AreShakesDetected: binary.LittleEndian.Uint16(report.Data[4:6])&0x111 > 0,
-	}, nil
+	}, tinygotypes.ErrorCodeNil
 }
 
 // newStepCounterReport creates a new stepCounterReport from the provided report.
@@ -300,7 +299,7 @@ func newShakeReport(report *report) (*shakeReport, tinygotypes.ErrorCodeNil) {
 // Returns:
 //
 //	A pointer to the newly created stepCounterReport or an error if the report bytes are too short
-func newStepCounterReport(report *report) (*stepCounterReport, tinygotypes.ErrorCodeNil) {
+func newStepCounterReport(report *report) (*stepCounterReport, tinygotypes.ErrorCode) {
 	// Check if the provided report is nil
 	if report == nil {
 		return nil, ErrorCodeBNO08XNilReport
@@ -318,7 +317,7 @@ func newStepCounterReport(report *report) (*stepCounterReport, tinygotypes.Error
 
 	return &stepCounterReport{
 		Count: binary.LittleEndian.Uint16(report.Data[8:10]),
-	}, nil
+	}, tinygotypes.ErrorCodeNil
 }
 
 // newStabilityClassifierReport creates a new stabilityClassifierReport from the provided report.
@@ -332,7 +331,7 @@ func newStepCounterReport(report *report) (*stepCounterReport, tinygotypes.Error
 //	A pointer to the newly created stabilityClassifierReport or an error if the report bytes are too short
 func newStabilityClassifierReport(report *report) (
 	*stabilityClassifierReport,
-	tinygotypes.ErrorCodeNil,
+	tinygotypes.ErrorCode,
 ) {
 	// Check if the provided report is nil
 	if report == nil {
@@ -358,7 +357,7 @@ func newStabilityClassifierReport(report *report) (
 
 	return &stabilityClassifierReport{
 		StabilityClassification: stabilityClassification,
-	}, nil
+	}, tinygotypes.ErrorCodeNil
 }
 
 // newSensorID parses the sensor ID from the provided report.
@@ -370,7 +369,7 @@ func newStabilityClassifierReport(report *report) (
 // Returns:
 //
 //	A pointer to the newly created sensorID or an error if the buffer is too short
-func newSensorID(report *report) (*sensorID, tinygotypes.ErrorCodeNil) {
+func newSensorID(report *report) (*sensorID, tinygotypes.ErrorCode) {
 	// Check if the provided report is nil
 	if report == nil {
 		return nil, ErrorCodeBNO08XNilReport
@@ -387,12 +386,12 @@ func newSensorID(report *report) (*sensorID, tinygotypes.ErrorCodeNil) {
 	}
 
 	return &sensorID{
-		SoftwareMajorVersion: uint32(report.Data[2]),
-		SoftwareMinorVersion: uint32(report.Data[3]),
-		SoftwarePatchVersion: uint32(binary.LittleEndian.Uint16(report.Data[12:14])),
+		SoftwareMajorVersion: report.Data[2],
+		SoftwareMinorVersion: report.Data[3],
+		SoftwarePatchVersion: binary.LittleEndian.Uint16(report.Data[12:14]),
 		SoftwarePartNumber:   binary.LittleEndian.Uint32(report.Data[4:8]),
 		SoftwareBuildNumber:  binary.LittleEndian.Uint32(report.Data[8:12]),
-	}, nil
+	}, tinygotypes.ErrorCodeNil
 }
 
 // PrintBuffer returns a byte slice representation of the sensorID for debugging purposes.
@@ -405,17 +404,17 @@ func (s *sensorID) PrintBuffer() []byte {
 	buffer := make([]byte, 0, 100)
 
 	// Append the sensor ID details to the buffer
-	buffer = append(buffer, "** Sensor ID Report **"...)
-	buffer = append(buffer, "\n\t *** Part Number: "...)
-	buffer = append(buffer, strconv.FormatUint(uint64(s.SoftwarePartNumber), 10)...)
-	buffer = append(buffer, "\n\t *** Software Version: "...)
-	buffer = append(buffer, strconv.FormatUint(uint64(s.SoftwareMajorVersion), 10)...)
+	buffer = append(buffer, "Sensor ID Report"...)
+	buffer = append(buffer, "\n\t Part Number: "...)
+	buffer = append(buffer, uint32ToString(s.SoftwarePartNumber)...)
+	buffer = append(buffer, "\n\t Version: "...)
+	buffer = append(buffer, uint8ToString(s.SoftwareMajorVersion)...)
 	buffer = append(buffer, "."...)
-	buffer = append(buffer, strconv.FormatUint(uint64(s.SoftwareMinorVersion), 10)...)
+	buffer = append(buffer, uint8ToString(s.SoftwareMinorVersion)...)
 	buffer = append(buffer, "."...)
-	buffer = append(buffer, strconv.FormatUint(uint64(s.SoftwarePatchVersion), 10)...)
-	buffer = append(buffer, "\n\t *** Build: "...)
-	buffer = append(buffer, strconv.FormatUint(uint64(s.SoftwareBuildNumber), 10)...)
+	buffer = append(buffer, uint16ToString(s.SoftwarePatchVersion)...)
+	buffer = append(buffer, "\n\t Build: "...)
+	buffer = append(buffer, uint32ToString(s.SoftwareBuildNumber)...)
 	return buffer
 }
 
@@ -428,7 +427,7 @@ func (s *sensorID) PrintBuffer() []byte {
 // Returns:
 //
 //	A pointer to the newly created commandResponse or an error if the report bytes are too short
-func newCommandResponse(report *report) (*commandResponse, tinygotypes.ErrorCodeNil) {
+func newCommandResponse(report *report) (*commandResponse, tinygotypes.ErrorCode) {
 	// Check if the provided report is nil
 	if report == nil {
 		return nil, ErrorCodeBNO08XNilReport
@@ -450,7 +449,7 @@ func newCommandResponse(report *report) (*commandResponse, tinygotypes.ErrorCode
 		CommandSequenceNumber:  report.Data[3],
 		ResponseSequenceNumber: report.Data[4],
 		ResponseValues:         report.Data[5:16],
-	}, nil
+	}, tinygotypes.ErrorCodeNil
 }
 
 // Status is the status of the command response.
@@ -476,7 +475,7 @@ func (cr *commandResponse) Status() byte {
 //	A pointer to the newly created activityClassifierReport or an error if the report bytes are too short
 func newActivityClassifierReport(report *report) (
 	*activityClassifierReport,
-	tinygotypes.ErrorCodeNil,
+	tinygotypes.ErrorCode,
 ) {
 	// Check if the provided report is nil
 	if report == nil {
@@ -497,11 +496,8 @@ func newActivityClassifierReport(report *report) (
 	pageNumber := report.Data[4] & 0x7F
 	confidences := report.Data[6:15]
 
-	// Get the most likely activity classification
-	mostLikelyClassification := ReportActivityUnknown
-
 	// Create a map to hold the classifications with their confidence levels
-	classifications := make([ReportClassificationsNumber]int)
+	classifications := [ReportClassificationsNumber]int{}
 	for idx, rawConfidence := range confidences {
 		confidence := int(10*pageNumber) + int(rawConfidence)
 		classification, err := ReportActivityFromUint8(uint8(idx))
@@ -517,9 +513,9 @@ func newActivityClassifierReport(report *report) (
 		Delay:                    report.Data[3],
 		PageNumber:               pageNumber,
 		MostLikely:               mostLikely,
-		MostLikelyClassification: mostLikelyClassification,
+		MostLikelyClassification: ReportClassificationUnknown,
 		Classifications:          classifications,
-	}, nil
+	}, tinygotypes.ErrorCodeNil
 }
 
 // newSensorReportData parses sensor reports with only 16-bit fields.
@@ -531,7 +527,7 @@ func newActivityClassifierReport(report *report) (
 // Returns:
 //
 //	A pointer to the newly created sensorReportData or an error if the report bytes are too short
-func newSensorReportData(report *report) (*sensorReportData, tinygotypes.ErrorCodeNil) {
+func newSensorReportData(report *report) (*sensorReportData, tinygotypes.ErrorCode) {
 	// Check if the provided report is nil
 	if report == nil {
 		return nil, ErrorCodeBNO08XNilReport
@@ -564,7 +560,7 @@ func newSensorReportData(report *report) (*sensorReportData, tinygotypes.ErrorCo
 
 	// Get the accuracy and results from the report bytes
 	accuracy, err := ReportAccuracyStatusFromUint8((report.Data)[2] & 0b11)
-	if err != nil {
+	if err != tinygotypes.ErrorCodeNil {
 		return nil, err
 	}
 	results := make([]float64, 0, count)
@@ -591,7 +587,7 @@ func newSensorReportData(report *report) (*sensorReportData, tinygotypes.ErrorCo
 		Count:    count,
 		Results:  results,
 		Accuracy: accuracy,
-	}, nil
+	}, tinygotypes.ErrorCodeNil
 }
 
 // newThreeDimensionalReport creates a new threeDimensionalReport from the provided report.
@@ -605,10 +601,10 @@ func newSensorReportData(report *report) (*sensorReportData, tinygotypes.ErrorCo
 //	A pointer to the newly created threeDimensionalReport or an error if the report bytes are too short
 func newThreeDimensionalReport(
 	report *report,
-) (*threeDimensionalReport, tinygotypes.ErrorCodeNil) {
+) (*threeDimensionalReport, tinygotypes.ErrorCode) {
 	// Initialize the sensorReportData
 	sensorReportData, err := newSensorReportData(report)
-	if err != nil {
+	if err != tinygotypes.ErrorCodeNil {
 		return nil, err
 	}
 
@@ -624,7 +620,7 @@ func newThreeDimensionalReport(
 			sensorReportData.Results[1],
 			sensorReportData.Results[2],
 		},
-	}, nil
+	}, tinygotypes.ErrorCodeNil
 }
 
 // newFourDimensionalReport creates a new fourDimensionalReport from the provided report.
@@ -638,10 +634,10 @@ func newThreeDimensionalReport(
 //	A pointer to the newly created fourDimensionalReport or an error if the report bytes are too short
 func newFourDimensionalReport(
 	report *report,
-) (*fourDimensionalReport, tinygotypes.ErrorCodeNil) {
+) (*fourDimensionalReport, tinygotypes.ErrorCode) {
 	// Initialize the sensorReportData
 	sensorReportData, err := newSensorReportData(report)
-	if err != nil {
+	if err != tinygotypes.ErrorCodeNil {
 		return nil, err
 	}
 
@@ -658,7 +654,7 @@ func newFourDimensionalReport(
 			sensorReportData.Results[2],
 			sensorReportData.Results[3],
 		},
-	}, nil
+	}, tinygotypes.ErrorCodeNil
 }
 
 // SensorReportFromReportID returns the sensorReport based on the report ID.
@@ -703,7 +699,7 @@ func SensorReportFromReportID(reportID uint8) (*sensorReport, tinygotypes.ErrorC
 	case ReportIDRawMagnetometer:
 		return SensorReportRawMagnetometer, tinygotypes.ErrorCodeNil
 	default:
-		return 0, ErrorCodeBNO08XUnknownReportID
+		return nil, ErrorCodeBNO08XUnknownReportID
 	}
 }
 

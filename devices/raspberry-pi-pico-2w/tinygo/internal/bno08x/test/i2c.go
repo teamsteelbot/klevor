@@ -100,7 +100,7 @@ func NewI2COptions(
 // ps1: The PS1 pin to set the sensor to I2C mode.
 // resetPin: The pin used to reset the BNO08X sensor.
 // dataBuffer: The DataBuffer to use for storing Packet data.
-// afterSoftwareResetFn: An optional function to be called after a reset.
+// afterResetFn: An optional function to be called after a reset.
 // options: Optional configuration options for the BNO08X sensor.
 //
 // Returns:
@@ -115,7 +115,7 @@ func NewI2C(
 	ps1Pin machine.Pin,
 	resetPin machine.Pin,
 	dataBuffer DataBuffer,
-	afterSoftwareResetFn func(b *BNO08X) tinygotypes.ErrorCode,
+	afterResetFn func(b *BNO08X) tinygotypes.ErrorCode,
 	options *I2COptions,
 ) (*I2C, tinygotypes.ErrorCode) {
 	// Check if the I2C bus is nil
@@ -163,17 +163,16 @@ func NewI2C(
 	}
 
 	// Probe with retries
-	var lastErr error
+	isGood := false
 	for i := 0; i < I2CProbeDeviceAttempts; i++ {
-		if err := probeDevice(i2cBus, address); err != nil {
-			lastErr = err
+		if err := probeDevice(i2cBus, address); err != tinygotypes.ErrorCodeNil {
 			time.Sleep(I2CProbeDeviceDelay)
 			continue
 		}
-		lastErr = nil
+		isGood = true
 		break
 	}
-	if lastErr != nil {
+	if !isGood {
 		return nil, ErrorCodeBNO08XI2CFailedToProbeDeviceRepeatly
 	}
 
@@ -187,7 +186,7 @@ func NewI2C(
 		dataBuffer,
 		debugger,
 	)
-	if err != nil {
+	if err != tinygotypes.ErrorCodeNil {
 		return nil, ErrorCodeBNO08XFailedToCreatePacketReader
 	}
 
@@ -198,7 +197,7 @@ func NewI2C(
 		dataBuffer,
 		debugger,
 	)
-	if err != nil {
+	if err != tinygotypes.ErrorCodeNil {
 		return nil, ErrorCodeBNO08XFailedToCreatePacketWriter
 	}
 
@@ -209,10 +208,10 @@ func NewI2C(
 		packetWriter,
 		dataBuffer,
 		nil,
-		afterSoftwareResetFn,
+		afterResetFn,
 		options.Options,
 	)
-	if err != nil {
+	if err != tinygotypes.ErrorCodeNil {
 		return nil, ErrorCodeBNO08XFailedToCreateBNO08X
 	}
 
@@ -222,7 +221,7 @@ func NewI2C(
 		address: address,
 		ps0Pin:  ps0Pin,
 		ps1Pin:  ps1Pin,
-	}, nil
+	}, tinygotypes.ErrorCodeNil
 }
 
 // GetBNO08X returns the BNO08X instance.
@@ -290,18 +289,18 @@ func (pw *I2CPacketWriter) SendPacket(channel uint8, data []byte) (
 	}
 
 	// Get channel sequence number
-	sequenceNumber, err := pw.dataBuffer.GetSequenceNumber(channel)
-	if err != nil {
-		return 0, err
+	sequenceNumber, errCode := pw.dataBuffer.GetSequenceNumber(channel)
+	if errCode != tinygotypes.ErrorCodeNil {
+		return 0, errCode
 	}
 
 	// Initialize the packet from data
-	packet, err := NewPacketFromData(
+	packet, errCode := NewPacketFromData(
 		channel,
 		sequenceNumber,
 		data,
 	)
-	if err != nil {
+	if errCode != tinygotypes.ErrorCodeNil {
 		return 0, ErrorCodeBNO08XFailedToCreatePacket
 	}
 
@@ -312,17 +311,17 @@ func (pw *I2CPacketWriter) SendPacket(channel uint8, data []byte) (
 	}
 
 	// Write to I2C
-	if err = pw.i2cBus.Tx(pw.address, packet.Header.Buffer, nil); err != nil {
+	if err := pw.i2cBus.Tx(pw.address, packet.Header.Buffer, nil); err != nil {
 		return sequenceNumber, ErrorCodeBNO08XI2CFailedToWritePacketHeaderBuffer
 	}
-	if err = pw.i2cBus.Tx(pw.address, packet.Data, nil); err != nil {
+	if err := pw.i2cBus.Tx(pw.address, packet.Data, nil); err != nil {
 		return sequenceNumber, ErrorCodeBNO08XI2CFailedToWritePacketDataBuffer
 	}
 
 	// Update sequence number
-	sequenceNumber, err = pw.dataBuffer.IncrementChannelSequenceNumber(channel)
-	if err != tinygotypes.ErrorCodeNil {
-		return 0, err
+	sequenceNumber, errCode = pw.dataBuffer.IncrementChannelSequenceNumber(channel)
+	if errCode != tinygotypes.ErrorCodeNil {
+		return 0, errCode
 	}
 	return sequenceNumber, tinygotypes.ErrorCodeNil
 }
@@ -386,11 +385,11 @@ func (pr *I2CPacketReader) readHeader() (*PacketHeader, tinygotypes.ErrorCode) {
 		nil,
 		data[:PacketHeaderLength],
 	); err != nil {
-		return nil, err
+		return nil, ErrorCodeBNO08XI2CFailedToReadPacketHeader
 	}
 
 	header, err := NewPacketHeaderFromBuffer(data)
-	if err != nil {
+	if err != tinygotypes.ErrorCodeNil {
 		return nil, err
 	}
 
@@ -414,7 +413,7 @@ func (pr *I2CPacketReader) nextHeader() (*PacketHeader, tinygotypes.ErrorCode) {
 	}
 
 	header, err := pr.readHeader()
-	if err != nil {
+	if err != tinygotypes.ErrorCodeNil {
 		return nil, err
 	}
 	return header, tinygotypes.ErrorCodeNil
@@ -428,7 +427,7 @@ func (pr *I2CPacketReader) nextHeader() (*PacketHeader, tinygotypes.ErrorCode) {
 func (pr *I2CPacketReader) ReadPacket() (*Packet, tinygotypes.ErrorCode) {
 	// Get next header (cached or read new)
 	header, err := pr.nextHeader()
-	if err != nil {
+	if err != tinygotypes.ErrorCodeNil {
 		return nil, err
 	}
 
@@ -446,7 +445,7 @@ func (pr *I2CPacketReader) ReadPacket() (*Packet, tinygotypes.ErrorCode) {
 	if err = pr.dataBuffer.SetSequenceNumber(
 		channelNumber,
 		sequenceNumber,
-	); err != nil {
+	); err != tinygotypes.ErrorCodeNil {
 		return nil, err
 	}
 
@@ -489,7 +488,7 @@ func (pr *I2CPacketReader) ReadPacket() (*Packet, tinygotypes.ErrorCode) {
 			nil,
 			data[PacketHeaderLength:packetByteCount],
 		); err != nil {
-			return ErrorCodeBNO08XI2CFailedToReadRequestedDataLength
+			return nil, ErrorCodeBNO08XI2CFailedToReadRequestedDataLength
 		}
 	}
 
@@ -505,10 +504,10 @@ func (pr *I2CPacketReader) ReadPacket() (*Packet, tinygotypes.ErrorCode) {
 	}
 
 	// Update the sequence number in the data buffer
-	if err = pr.dataBuffer.UpdateSequenceNumber(packet); err != nil {
+	if err = pr.dataBuffer.UpdateSequenceNumber(packet); err != tinygotypes.ErrorCodeNil {
 		return nil, err
 	}
-	return packet, nil
+	return packet, tinygotypes.ErrorCodeNil
 }
 
 // IsDataReady checks if there is data ready to be read from the I2C bus.
@@ -523,7 +522,7 @@ func (pr *I2CPacketReader) IsDataReady() bool {
 	}
 
 	header, err := pr.readHeader()
-	if err != nil {
+	if err != tinygotypes.ErrorCodeNil {
 		return false
 	}
 	pr.cachedHeader = header

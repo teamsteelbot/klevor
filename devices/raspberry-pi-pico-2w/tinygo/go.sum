@@ -1,5 +1,9 @@
+github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 h1:El6M4kTTCOh6aBiKaUGG7oYTSPP8MxqL4YI3kZKwcP4=
+github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510/go.mod h1:pupxD2MaaD3pAXIBCelhxNneeOaAeabZDe5s4K6zSpQ=
 github.com/ralvarezdev/tinygo-types v0.0.2 h1:gCQyzvk6kgPJ0HQuEsYw/rAGXBJAu1au9piVhlAsIXM=
 github.com/ralvarezdev/tinygo-types v0.0.2/go.mod h1:oqYL6BcwQmVa8/AswTJkcmjezOAg86IYYaxfaVKMOOI=
+github.com/ralvarezdev/tinygo-types v0.0.3 h1:h8ogOD2lOVxR+w5i6o+v/8qTROFA2KBjVXBM7NT3SMc=
+github.com/ralvarezdev/tinygo-types v0.0.3/go.mod h1:2u3ApwAtIqGZ6wDsmUYt44bIk1DEn06INNjtfWndCr4=
 github.com/soypat/cyw43439 v0.0.0-20250505012923-830110c8f4af h1:ZfFq94aH/BCSWWKd9RPUgdHOdgGKCnfl2VdvU9UksTA=
 github.com/soypat/cyw43439 v0.0.0-20250505012923-830110c8f4af/go.mod h1:MUaGO5m6X7xrkHrPDmnaxCEcuCCFN/0ZFh9oie+exbU=
 github.com/soypat/seqs v0.0.0-20250630134107-01c3f05666ba h1:NaIxs8iRVTAGBY4xiCy1Jqex3mIPodyLHppYvxUjJEk=
@@ -10,5 +14,7 @@ golang.org/x/exp v0.0.0-20250819193227-8b4c13bb791b h1:DXr+pvt3nC887026GRP39Ej11
 golang.org/x/exp v0.0.0-20250819193227-8b4c13bb791b/go.mod h1:4QTo5u+SEIbbKW1RacMZq1YEfOBqeXa19JeshGi+zc4=
 golang.org/x/sync v0.16.0 h1:ycBJEhp9p4vXvUZNszeOq0kGTPghopOL8q0fq3vstxw=
 golang.org/x/sync v0.16.0/go.mod h1:1dzgHSNfp02xaA81J2MS99Qcpr2w7fw1gpm99rleRqA=
+golang.org/x/sync v0.17.0 h1:l60nONMj9l5drqw6jlhIELNv9I0A4OFgRsG9k2oT9Ug=
+golang.org/x/sync v0.17.0/go.mod h1:9KTHXmSnoGruLpwFjVSX0lNNA75CykiMECbovNTZqGI=
 tinygo.org/x/drivers v0.33.0 h1:5r8Ab0IxjWQi7LzYLNWpya6U4nedo9ZtxeMaAzrJTG8=
 tinygo.org/x/drivers v0.33.0/go.mod h1:ZdErNrApSABdVXjA1RejD67R8SNRI6RKVfYgQDZtKtk=

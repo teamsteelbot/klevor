@@ -111,11 +111,11 @@ func (i *IncomingMessage) IsEqual(other *IncomingMessage) bool {
 	}
 
 	// Compare the buffers
-	if len(i.buffer) != len(other.buffer) {
+	if len(i.Buffer) != len(other.Buffer) {
 		return false
 	}
-	for idx := range i.buffer {
-		if i.buffer[idx] != other.buffer[idx] {
+	for idx := range i.Buffer {
+		if i.Buffer[idx] != other.Buffer[idx] {
 			return false
 		}
 	}

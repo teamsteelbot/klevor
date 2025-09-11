@@ -6,15 +6,15 @@ import (
 	tinygotypes "github.com/ralvarezdev/tinygo-types"
 )
 
-// afterSoftwareReset is a function that is called after a software reset of the BNO08X sensor.
+// afterReset is a function that is called after a reset of the BNO08X sensor.
 //
 // Returns:
 //
 // An error if the BNO08X instance is nil or if enabling the quaternion feature fails.
-func afterSoftwareReset(b *ralvarezdevbno08x.BNO08X) tinygotypes.ErrorCode {
+func afterReset(b *ralvarezdevbno08x.BNO08X) tinygotypes.ErrorCode {
 	// Check if the BNO08X instance is nil
 	if b == nil {
-		return ralvarezdevbno08x.ErrNilBNO08X
+		return ralvarezdevbno08x.ErrorCodeBNO08XNilBNO08XInstance
 	}
 
 	// Enable quaternion feature

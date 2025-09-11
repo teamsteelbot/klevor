@@ -5,7 +5,6 @@ package tinygo_bno08x
 import (
 	"encoding/binary"
 	"strconv"
-	"strings"
 
 	tinygotypes "github.com/ralvarezdev/tinygo-types"
 )
@@ -17,7 +16,7 @@ type (
 		SequenceNumber  uint8
 		DataLength      int
 		PacketByteCount int
-		Buffer          [PacketHeaderLength]byte
+		Buffer          []byte
 	}
 
 	// Packet represents a BNO08x Packet
@@ -32,7 +31,7 @@ type (
 // Returns:
 //
 // The channel number as a string.
-func (h *PacketHeader) ChannelNumberString() string {
+func (ph *PacketHeader) ChannelNumberString() string {
 	switch ph.ChannelNumber {
 	case ChannelSHTPCommand:
 		return "SHTP_COMMAND"
@@ -138,12 +137,6 @@ func SHTPCommandNameString(commandID uint8) string {
 // The command name as a string or "UNKNOWN_COMMAND" if not found.
 func ControlCommandNameString(commandID uint8) string {
 	switch commandID {
-	case ReportIDError:
-		return "ERROR"
-	case ReportIDCoreConfiguration:
-		return "CORE_CONFIGURATION"
-	case ReportIDCoreConfigurationResponse:
-		return "CORE_CONFIGURATION_RESPONSE"
 	case ReportIDCommandRequest:
 		return "COMMAND_REQUEST"
 	case ReportIDCommandResponse:
@@ -358,9 +351,9 @@ func (ph *PacketHeader) PrintBuffer(isBeingSent bool) []byte {
 	buffer := make([]byte, 0, 128) // Pre-allocate enough space
 
 	if isBeingSent {
-		buffer = append(buffer, "* SENDING PACKET HEADER *"...)
+		buffer = append(buffer, "SENDING PACKET HEADER"...)
 	} else {
-		buffer = append(buffer, "* RECEIVED PACKET HEADER *"...)
+		buffer = append(buffer, "RECEIVED PACKET HEADER"...)
 	}
 
 	buffer = append(buffer, "\n\t Data Length: "...)
@@ -418,14 +411,14 @@ func NewPacketFromBuffer(buffer []byte) (*Packet, tinygotypes.ErrorCode) {
 
 	// Create a new PacketHeader from the Packet bytes
 	header, err := NewPacketHeaderFromBuffer(buffer)
-	if err != nil {
+	if err != tinygotypes.ErrorCodeNil {
 		return nil, err
 	}
 
 	return &Packet{
 		Header: header,
 		Data:   buffer[PacketHeaderLength : PacketHeaderLength+header.DataLength],
-	}, nil
+	}, tinygotypes.ErrorCodeNil
 }
 
 // NewPacketFromData creates a new Packet from the provided data.
@@ -443,7 +436,7 @@ func NewPacketFromData(
 	channelNumber uint8,
 	sequenceNumber uint8,
 	data []byte,
-) (*Packet, error) {
+) (*Packet, tinygotypes.ErrorCode) {
 	// Check if data is nil
 	if data == nil {
 		return nil, ErrorCodeBNO08XNilReportData
@@ -455,14 +448,14 @@ func NewPacketFromData(
 		sequenceNumber,
 		data,
 	)
-	if err != nil {
+	if err != tinygotypes.ErrorCodeNil {
 		return nil, err
 	}
 
 	return &Packet{
 		Header: header,
 		Data:   data,
-	}, nil
+	}, tinygotypes.ErrorCodeNil
 }
 
 // SequenceNumber returns the sequence number of the Packet.
@@ -479,11 +472,11 @@ func (p *Packet) SequenceNumber() uint8 {
 // Returns:
 //
 //	The report ID as an uint8 or an error if the data is too short.
-func (p *Packet) ReportID() (uint8, error) {
+func (p *Packet) ReportID() (uint8, tinygotypes.ErrorCode) {
 	if len(p.Data) < 1 {
 		return 0, ErrorCodeBNO08XPacketDataTooShort
 	}
-	return p.Data[0], nil
+	return p.Data[0], tinygotypes.ErrorCodeNil
 }
 
 // ChannelNumber returns the channel number of the Packet.
@@ -549,9 +542,9 @@ func (p *Packet) PrintBuffer(isBeingSent bool) []byte {
 
 	// Title
 	if isBeingSent {
-		buffer = append(buffer, "* SENDING PACKET *"...)
+		buffer = append(buffer, "SENDING PACKET"...)
 	} else {
-		buffer = append(buffer, "* RECEIVED PACKET *"...)
+		buffer = append(buffer, "RECEIVED PACKET"...)
 	}
 
 	// Data section
@@ -568,6 +561,7 @@ func (p *Packet) PrintBuffer(isBeingSent bool) []byte {
 
 	// Get the report type
 	channelNumber := p.ChannelNumber()
+	var reportIDStr string
 	switch channelNumber {
 	case ChannelSHTPCommand:
 		reportIDStr = SHTPCommandNameString(reportID)
@@ -581,8 +575,8 @@ func (p *Packet) PrintBuffer(isBeingSent bool) []byte {
 
 	buffer = append(buffer, "\n\t\t Report Type: "...)
 	buffer = append(buffer, reportIDStr...)
-	buffer = append(buffer, " (0x"...)
-	buffer = append(buffer, strings.ToUpper(strconv.FormatUint(uint64(reportID), 16))...)
+	buffer = append(buffer, " ("...)
+	buffer = append(buffer, uint8ToHex(reportID)...)
 	buffer = append(buffer, ")"...)
 
 	// Additional interpretation (requires at least 6 data bytes)
@@ -593,19 +587,20 @@ func (p *Packet) PrintBuffer(isBeingSent bool) []byte {
 	// High report IDs (command responses / meta)
 	if IsControlReportID(reportID) {
 		sensorReportType := p.Data[5]
-		buffer = append(buffer, "\n\t\t Sensor Report Type: "...)
-		buffer = append(buffer, SHTPCommandNameString(sensorReportType)...)
-		buffer = append(buffer, " (0x"...)
-		buffer = append(buffer, strings.ToUpper(strconv.FormatUint(uint64(sensorReportType), 16))...)
-		buffer = append(buffer, ")"...)
+		sensorReportTypeStr := SHTPCommandNameString(sensorReportType)
+		if sensorReportTypeStr != "UNKNOWN_COMMAND" {
+			buffer = append(buffer, "\n\t\t Sensor Report Type: "...)
+			buffer = append(buffer, SHTPCommandNameString(sensorReportType)...)
+			buffer = append(buffer, " ("...)
+			buffer = append(buffer, uint8ToHex(sensorReportType)...)
+			buffer = append(buffer, ")"...)
+		}
 	}
 
 	if reportID == ReportIDGetFeatureResponse || reportID == ReportIDSetFeatureCommand {
 		featureID := p.Data[1]
 		buffer = append(buffer, "\n\t\t Feature ID: "...)
-		buffer = append(buffer, "0x"...)
-		buffer = append(buffer, strings.ToUpper(strconv.FormatUint(uint64(featureID), 16))...)
-		buffer = append(buffer, ")"...)
+		buffer = append(buffer, uint8ToHex(featureID)...)
 	}
 
 	return buffer
