@@ -6,7 +6,7 @@ import (
 	internalbno08x "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/bno08x"
 	ralvarezdevbno08x "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/bno08x/test"
 	//ralvarezdevbno08x "github.com/ralvarezdev/tinygo-bno08x"
-	tinygotypes "github.com/ralvarezdev/tinygo-types"
+	//tinygotypes "github.com/ralvarezdev/tinygo-types"
 )
 
 const (
@@ -15,18 +15,10 @@ const (
 )
 
 func main() {
-	startTime := time.Now()
-	for {
-		// Check if the BNO08X needs to be reset
-		if time.Since(startTime) >= internalbno08x.ResetBNO08XInterval {
-			// Reset BNO08X
-			if err := internalbno08x.BNO08XSimpleService.Reset(); err != tinygotypes.ErrorCodeNil {
-				return
-			} else {
-				startTime = time.Now()
-			}
-		}
+	// Wait 5 seconds before starting the test
+	time.Sleep(5 * time.Second)
 
+	for {
 		// Update quaternion
 		internalbno08x.BNO08XSimpleService.Update()
 
@@ -36,7 +28,11 @@ func main() {
 		y := q[ralvarezdevbno08x.QuaternionYIndex]
 		z := q[ralvarezdevbno08x.QuaternionZIndex]
 		w := q[ralvarezdevbno08x.QuaternionWIndex]
-		println("Quaternion: W:", w, " X:", x, " Y:", y, " Z:", z)
+
+		// Get the formatted time string
+		currentTime := time.Now()
+		timeString := currentTime.Format("15:04:05.000")
+		println("[" + timeString + "] Quaternion: x =" + x + ", y =" + y + ", z =" + z + ", w =" + w)
 
 		// Sleep for the interval duration
 		time.Sleep(IntervalDuration)

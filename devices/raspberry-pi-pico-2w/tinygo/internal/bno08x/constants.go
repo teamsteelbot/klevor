@@ -1,6 +1,8 @@
 package bno08x
 
 import (
+	"strconv"
+	"strings"
 	"time"
 
 	"machine"
@@ -17,20 +19,11 @@ var (
 	// YawDegreesDifference is the difference in degrees to consider a yaw change.
 	YawDegreesDifference = 1.0
 
-	// ResetBNO08XInterval is the interval to reset the BNO08x sensor to prevent overflow.
-	ResetBNO08XInterval = 2 * time.Minute
-
 	// BNO08XSimpleService is the BNO08x simple service.
 	BNO08XSimpleService ralvarezdevbno08x.BNO08XSimpleService
 
-	// I2C is the I2C instance for the BNO08x sensor.
-	// I2C *bno08x.I2C
-
 	// UART is the UART instance for the BNO08x sensor.
 	UART *ralvarezdevbno08x.UART
-
-	// UARTRVC is the UART-RVC instance for the BNO08x sensor.
-	// UARTRVC *ralvarezdevbno08x.UARTRVC
 
 	// InitializeAttempts is the number of attempts to initialize the BNO08x sensor.
 	InitializeAttempts = 5
@@ -53,76 +46,19 @@ func init() {
 			machine.GPIO4,
 			DataBuffer,
 			afterReset,
-			ralvarezdevbno08x.NewUARTOptions(ralvarezdevbno08x.NewDefaultDebugger(), true),
-			// ralvarezdevbno08x.NewUARTOptions(nil, false),
+			// ralvarezdevbno08x.NewUARTOptions(ralvarezdevbno08x.NewDefaultDebugger(), true),
+			ralvarezdevbno08x.NewUARTOptions(nil, false),
 		)
 		if err == tinygotypes.ErrorCodeNil {
 			UART = uart
 			break
 		}
-		
+		println("failed to initialize uart bno08x: " + strings.ToUpper(strconv.FormatUint(uint64(err), 16)))
 	}
-
 	if UART == nil {
 		panic("failed to initialize uart bno08x")
 	}
-
+	
 	// Get the BNO08X simple service from the UART
 	BNO08XSimpleService = UART.GetBNO08X()
-
-	/*
-		// ----- I2C Instance -----
-
-		// Initialize the BNO08x I2C instance with default settings.
-		address0 := machine.GPIO0
-		i2c, err := ralvarezdevbno08x.NewI2C(
-			machine.I2C1,
-			machine.GPIO26,
-			machine.GPIO27,
-			ralvarezdevbno08x.I2CAlternativeAddress,
-			machine.GPIO2,
-			machine.GPIO3,
-			machine.GPIO4,
-			DataBuffer,
-			nil, 
-			afterReset,
-			ralvarezdevbno08x.NewI2COptions(ralvarezdevbno08x.NewDefaultDebugger(), &address0),
-		)
-		if err != tinygotypes.ErrorCodeNil {
-			panic("failed to initialize i2c bno08x: " + err.Error())
-		}
-		I2C = i2c
-
-		// Enable quaternion feature
-		if err = I2C.EnableFeature(ralvarezdevbno08x.ReportIDRotationVector); err != nil {
-			panic("failed to enable quaternion feature: " + err.Error())
-		}
-
-		// Get the BNO08X simple service from the I2C
-		BNO08XSimpleService = I2C.GetBNO08X()
-
-		// ----- UART-RVC Instance -----
-
-		// Initialize the BNO08x UART-RVC instance with default settings.
-		uartRVC, err := ralvarezdevbno08x.NewUARTRVC(
-			machine.UART1,
-			machine.GPIO8,
-			machine.GPIO9,
-			machine.GPIO2,
-			machine.GPIO3,
-			machine.GPIO4,
-			ralvarezdevbno08x.NewUARTRVCOptions(
-				// ralvarezdevbno08x.NewDefaultDebugger(),
-				nil,
-				ralvarezdevbno08x.DefaultTimeout,
-			),
-		)
-		if err != nil {
-			panic("failed to initialize uart rvc bno08x: " + err.Error())
-		}
-		UARTRVC = uartRVC
-
-		// Set the UART-RVC instance as the BNO08X simple service
-		BNO08XSimpleService = uartRVC
-	*/
 }

@@ -162,7 +162,7 @@ func NewUART(
 		options.Options,
 	)
 	if err != tinygotypes.ErrorCodeNil {
-		return nil, ErrorCodeBNO08XFailedToCreateBNO08X
+		return nil, err
 	}
 
 	return &UART{
@@ -225,7 +225,7 @@ func newUARTPacketReader(
 //
 // True if data is available, otherwise false.
 func (pr *UARTPacketReader) IsDataReady() bool {
-	return pr.uartBus.Buffered() >= PacketHeaderLength
+	return pr.uartBus.Buffered() > 0
 }
 
 // readByte blocks until a byte is read (simple poll).
@@ -242,13 +242,13 @@ func (pr *UARTPacketReader) readByte() (byte, tinygotypes.ErrorCode) {
 				return b, ErrorCodeBNO08XUARTFailedToReadByte
 			}
 			if pr.debugger != nil && pr.ultraDebug {
-				pr.debugger.Debug("Received byte")
+				pr.debugger.Debug("Received byte: " + uint8ToHex(b))
 			}
 			return b, tinygotypes.ErrorCodeNil
 		}
 		time.Sleep(NoByteDelay)
 	}
-	return 0, ErrorCodeBNO08XUARTRVCByteTimeout
+	return 0, ErrorCodeBNO08XUARTByteTimeout
 }
 
 // readInto reads bytes into the destination buffer handling escape sequences.

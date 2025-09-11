@@ -212,7 +212,7 @@ func NewI2C(
 		options.Options,
 	)
 	if err != tinygotypes.ErrorCodeNil {
-		return nil, ErrorCodeBNO08XFailedToCreateBNO08X
+		return nil, err
 	}
 
 	return &I2C{

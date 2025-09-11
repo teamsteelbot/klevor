@@ -20,7 +20,7 @@ const (
 	ErrorCodeBNO08XNilPacketWriter
 	ErrorCodeBNO08XNilUARTBus
 	ErrorCodeBNO08XFailedToConfigureUART
-	ErrorCodeBNO08XFailedToInitializeUARTRVC
+	ErrorCodeBNO08XFailedToResetUARTRVC
 	ErrorCodeBNO08XNilRotationVector
 	ErrorCodeBNO08XUARTRVCNilFrame
 	ErrorCodeBNO08XUARTRVCFrameTooShort
@@ -33,10 +33,9 @@ const (
 	ErrorCodeBNO08XFailedToSetUARTFormat
 	ErrorCodeBNO08XFailedToCreatePacketReader
 	ErrorCodeBNO08XFailedToCreatePacketWriter
-	ErrorCodeBNO08XFailedToCreateBNO08X
 	ErrorCodeBNO08XUARTByteTimeout
 	ErrorCodeBNO08XUARTFailedToReadByte
-	ErrorCodeBNO08XFailedToInitializeBNO08X
+	ErrorCodeBNO08XFailedToResetBNO08X
 	ErrorCodeBNO08XNilDataBuffer
 	ErrorCodeBNO08XFailedToGetExpectedReportLength
 	ErrorCodeBNO08XInvalidReportLength

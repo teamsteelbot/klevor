@@ -178,7 +178,7 @@ func NewSPI(
 		options.Options,
 	)
 	if err != tinygotypes.ErrorCodeNil {
-		return nil, ErrorCodeBNO08XFailedToCreateBNO08X
+		return nil, err
 	}
 
 	return &SPI{

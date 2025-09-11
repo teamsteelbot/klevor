@@ -128,69 +128,21 @@ func NewUARTRVC(
 		initComplete:  false,
 	}
 
-	// Perform initialization
-	if err := uartRVC.Initialize(); err != tinygotypes.ErrorCodeNil {
-		return nil, ErrorCodeBNO08XFailedToInitializeUARTRVC
+	// Perform reset
+	if err := uartRVC.Reset(); err != tinygotypes.ErrorCodeNil {
+		return nil, ErrorCodeBNO08XFailedToResetUARTRVC
 	}
 	return uartRVC, tinygotypes.ErrorCodeNil
 }
 
-// Initialize performs the initial setup of the BNO08X sensor, including hardware and software resets.
-//
-// Returns:
-//
-// An error if the initialization fails, otherwise nil.
-func (u *UARTRVC) Initialize() tinygotypes.ErrorCode {
-	// Check if already initialized
-	if u.initComplete {
-		return tinygotypes.ErrorCodeNil
-	}
-
-	// Log initialization start
-	if u.debugger != nil {
-		u.debugger.Debug("Initializing BNO08X sensor with UART-RVC...")
-	}
-
-	// Perform reset
-	u.Reset()
-	u.initComplete = true
-
-	// Log
-	if u.debugger != nil {
-		u.debugger.Debug("BNO08X sensor with UART-RVC initialized successfully.")
-	}
-	return tinygotypes.ErrorCodeNil
-}
-
-// HardwareReset performs a hardware reset of the BNO08X sensor using the specified reset pin.
+// Reset performs a hardware reset of the BNO08X sensor using the specified reset pin.
 //
 // Returns:
 //
 // An error if the reset process fails, otherwise nil.
-func (u *UARTRVC) HardwareReset() {
+func (u *UARTRVC) Reset() tinygotypes.ErrorCode  {
 	HardwareReset(u.resetPin, u.debugger, nil)
-}
-
-// SoftwareReset performs a software reset of the BNO08X sensor.
-//
-// Returns:
-//
-// An error if the software reset fails, otherwise nil.
-func (u *UARTRVC) SoftwareReset() tinygotypes.ErrorCode {
 	return tinygotypes.ErrorCodeNil
-}
-
-// Reset performs a reset of the BNO08X sensor.
-//
-// Returns:
-//
-// An error if the reset fails, otherwise nil.
-func (u *UARTRVC) Reset() tinygotypes.ErrorCode {
-	// Perform hardware reset
-	u.HardwareReset()
-
-	// Perform software reset
-	return u.SoftwareReset()
 }
 
 // ParseFrame parses a heading frame from the BNO08x RVC.

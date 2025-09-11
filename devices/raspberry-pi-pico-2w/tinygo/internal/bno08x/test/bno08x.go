@@ -34,7 +34,6 @@ type (
 		calibrationComplete             bool
 		magnetometerAccuracy            ReportAccuracyStatus
 		initComplete                    bool
-		idRead                          bool
 		accelerometer                   [3]float64
 		gravity                         [3]float64
 		gyroscope                       [3]float64
@@ -128,7 +127,6 @@ func NewBNO08X(
 		calibrationComplete:             false,
 		magnetometerAccuracy:            ReportAccuracyStatusUnreliable,
 		initComplete:                    false,
-		idRead:                          false,
 		stepCount:                       0,
 		shakesDetected:                  false,
 		stabilityClassification:        ReportStabilityClassificationUnknown,
@@ -138,15 +136,15 @@ func NewBNO08X(
 		afterResetFn:            afterResetFn,
 	}
 
-	// Perform initialization
-	if err := bno08x.Initialize(); err != tinygotypes.ErrorCodeNil {
-		return nil, ErrorCodeBNO08XFailedToInitializeBNO08X
+	// Perform reset
+	if err := bno08x.Reset(); err != tinygotypes.ErrorCodeNil {
+		return nil, ErrorCodeBNO08XFailedToResetBNO08X
 	}
 	return bno08x, tinygotypes.ErrorCodeNil
 }
 
-// HardwareReset performs a hardware reset of the BNO08X sensor using the specified reset pin.
-func (b *BNO08X) HardwareReset() {
+// hardwareReset performs a hardware reset of the BNO08X sensor using the specified reset pin.
+func (b *BNO08X) hardwareReset() {
 	if b.afterHardwareResetFn == nil {
 		HardwareReset(b.resetPin, b.debugger, nil)
 	} else {
@@ -154,29 +152,15 @@ func (b *BNO08X) HardwareReset() {
 	}
 }
 
-// SoftwareReset performs a software reset of the BNO08X sensor to an initial unconfigured state.
+// softwareReset performs a software reset of the BNO08X sensor to an initial unconfigured state.
 //
 // Returns:
 //
 // An error if the reset process fails, otherwise nil.
-func (b *BNO08X) SoftwareReset() tinygotypes.ErrorCode {
+func (b *BNO08X) softwareReset() tinygotypes.ErrorCode {
 	if b.debugger != nil {
 		b.debugger.Debug("Software resetting...")
 	}
-
-	// Resets the sequence numbers in the data buffer
-	b.dataBuffer.ResetSequenceNumbers()
-
-	// Clear the read ID status
-	b.idRead = false
-
-	// Reset enabled features
-	for k := range b.enabledFeatures {
-		delete(b.enabledFeatures, k)
-	}
-
-	// Clear calibration status
-	b.calibrationComplete = false
 
 	// Send the reset command
 	if _, err := b.packetWriter.SendPacket(ChannelExe, ResetCommandData); err != tinygotypes.ErrorCodeNil {
@@ -190,7 +174,7 @@ func (b *BNO08X) SoftwareReset() tinygotypes.ErrorCode {
 	startTime := time.Now()
 	for time.Since(startTime) < MaxClearPendingPacketsTimeout {
 		packet, err := b.waitForPacket(WaitForPacketTimeout)
-		if err == ErrorCodeBNO08XNoPacketAvailable {
+		if err == ErrorCodeBNO08XWaitingForPacketTimedOut {
 			break
 		}
 		if err != tinygotypes.ErrorCodeNil {
@@ -219,52 +203,44 @@ func (b *BNO08X) SoftwareReset() tinygotypes.ErrorCode {
 	return tinygotypes.ErrorCodeNil
 }
 
-// Reset performs a hardware reset and then a software reset of the BNO08X sensor to an initial unconfigured state.
-//
-// Returns:
-//
-// An error if the reset process fails, otherwise nil.
-func (b *BNO08X) Reset() tinygotypes.ErrorCode {
-	// Perform hardware reset
-	b.HardwareReset()
-
-	// Perform software reset
-	return b.SoftwareReset()
-}
-
-// Initialize performs the initial setup of the BNO08X sensor, including hardware and software resets.
+// Reset performs the initial setup of the BNO08X sensor, including hardware and software resets.
 //
 // Returns:
 //
 // An error if the initialization fails, otherwise nil.
-func (b *BNO08X) Initialize() tinygotypes.ErrorCode {
-	// Log initialization start
-	if b.debugger != nil {
-		b.debugger.Debug("Initializing BNO08X sensor...")
-	}
-
+func (b *BNO08X) Reset() tinygotypes.ErrorCode {
 	// Try up to 3 times to initialize the sensor
-	for i := 0; i < InitializeAttempts; i++ {
-		// Reset
-		if err := b.Reset(); err != tinygotypes.ErrorCodeNil {
+	for i := 0; i < ResetAttempts; i++ {
+		// Hardware reset
+		b.hardwareReset()
+
+		// Software reset
+		if err := b.softwareReset(); err != tinygotypes.ErrorCodeNil {
 			return err
 		}
 
+		// Reset enabled features
+		for k := range b.enabledFeatures {
+			delete(b.enabledFeatures, k)
+		}
+
+		// Clear calibration status
+		b.calibrationComplete = false
+
+		// Check if the sensor ID can be read
+		if err := b.checkID(); err != tinygotypes.ErrorCodeNil {
+			b.debugger.Debug("An error ocurred while waiting for the sensor ID: " + uint16ToHex(uint16(err)))
+			time.Sleep(CheckIDDelay)
+			continue
+		}
+		
 		// Call after reset function if provided
 		if b.afterResetFn != nil {
 			if err := b.afterResetFn(b); err != tinygotypes.ErrorCodeNil {
 				return err
 			}
 		}
-
-		// Check if the sensor ID can be read
-		ok, err := b.checkID()
-		if err != tinygotypes.ErrorCodeNil {
-			time.Sleep(CheckIDDelay)
-		}
-		if ok {
-			return tinygotypes.ErrorCodeNil
-		}
+		return tinygotypes.ErrorCodeNil
 	}
 	return ErrorCodeBNO08XFailedToReadSensorID
 }
@@ -273,13 +249,10 @@ func (b *BNO08X) Initialize() tinygotypes.ErrorCode {
 //
 // Returns:
 //
-// A boolean indicating whether the sensor ID was successfully read, and an error if there was an issue during the process.
-func (b *BNO08X) checkID() (bool, tinygotypes.ErrorCode) {
+// An error if there was an issue during the ID check process, otherwise nil.
+func (b *BNO08X) checkID() tinygotypes.ErrorCode {
 	if b.debugger != nil {
 		b.debugger.Debug("READ ID REQUEST")
-	}
-	if b.idRead {
-		return true, tinygotypes.ErrorCodeNil
 	}
 
 	// Send the ID request report
@@ -290,7 +263,7 @@ func (b *BNO08X) checkID() (bool, tinygotypes.ErrorCode) {
 		ChannelControl,
 		ReportIDProductIDRequestData,
 	); err != tinygotypes.ErrorCodeNil {
-		return false, err
+		return err
 	}
 
 	// Wait for the ID response report
@@ -300,28 +273,26 @@ func (b *BNO08X) checkID() (bool, tinygotypes.ErrorCode) {
 		&reportID,
 	)
 	if err != tinygotypes.ErrorCodeNil {
-		return false, err
+		return err
 	}
 
 	// Read the Packet data into the data buffer
 	sensorIDReport, err := newReportFromPacket(packet)
 	if err != tinygotypes.ErrorCodeNil {
-		return false, err
+		return err
 	}
 
 	// Parse the sensor ID from the report
 	sensorID, err := newSensorID(sensorIDReport)
 	if err != tinygotypes.ErrorCodeNil {
-		return false, err
+		return err
 	}
 
 	// Log the sensor ID details
 	if b.debugger != nil {
 		b.debugger.DebugBuffer(sensorID.PrintBuffer())
 	}
-
-	b.idRead = true
-	return true, tinygotypes.ErrorCodeNil
+	return tinygotypes.ErrorCodeNil
 }
 
 // waitForPacketType waits for a Packet of a specific type on a given channel, optionally filtering by report ID.
@@ -409,7 +380,7 @@ func (b *BNO08X) waitForPacket(timeout time.Duration) (*Packet, tinygotypes.Erro
 		newPacket, err := b.packetReader.ReadPacket()
 		if err != tinygotypes.ErrorCodeNil {
 			if b.debugger != nil {
-				b.debugger.Debug("An error occurred when reading a packet while waiting for a packet")
+				b.debugger.Debug("An error occurred when reading a packet while waiting for a packet: " + uint16ToHex(uint16(err)))
 			}
 			continue
 		}
@@ -904,56 +875,58 @@ func (b *BNO08X) GetRawMagnetic() [3]float64 {
 //
 //	An error if the feature could not be enabled.
 func (b *BNO08X) EnableFeature(featureID uint8) tinygotypes.ErrorCode {
-	if b.debugger != nil {
-		b.debugger.Debug("Enabling Feature ID: " + uint8ToHex(featureID))
-	}
-
-	// Check if debug mode is enabled
-	var interval uint32
-	if b.debugger != nil {
-		interval = DebugReportInterval
-	} else {
-		interval = DefaultReportInterval
-	}
-
-	// Create the feature enable report based on the feature ID
-	var setFeatureReport []byte
-	if featureID == ReportIDActivityClassifier {
-		setFeatureReport = newSetFeatureEnableReportData(
-			featureID,
-			interval,
-			EnabledActivities,
-		)
-	} else {
-		setFeatureReport = newSetFeatureEnableReportData(
-			featureID,
-			interval,
-			0,
-		)
-	}
-
-	// Check if the feature has a dependency
-	featureDependency, ok := RawReports[featureID]
-	if ok && !b.IsFeatureEnabled(featureDependency) {
-		if err := b.EnableFeature(featureDependency); err != tinygotypes.ErrorCodeNil {
-			return ErrorCodeBNO08XFailedToEnableDependencyFeature
+	for i := 0; i < EnableFeatureAttempts; i++ {
+		if b.debugger != nil {
+			b.debugger.Debug("Enabling Feature ID: " + uint8ToHex(featureID))
 		}
-	}
 
-	// Send the feature enable report
-	if _, err := b.packetWriter.SendPacket(
-		ChannelControl,
-		setFeatureReport,
-	); err != tinygotypes.ErrorCodeNil {
-		return err
-	}
+		// Check if debug mode is enabled
+		var interval uint32
+		if b.debugger != nil {
+			interval = DebugReportInterval
+		} else {
+			interval = DefaultReportInterval
+		}
 
-	// Wait for the feature to be enabled
-	startTime := time.Now()
-	for time.Since(startTime) < FeatureEnableTimeout {
-		b.Update()
-		if b.IsFeatureEnabled(featureID) {
-			return tinygotypes.ErrorCodeNil
+		// Create the feature enable report based on the feature ID
+		var setFeatureReport []byte
+		if featureID == ReportIDActivityClassifier {
+			setFeatureReport = newSetFeatureEnableReportData(
+				featureID,
+				interval,
+				EnabledActivities,
+			)
+		} else {
+			setFeatureReport = newSetFeatureEnableReportData(
+				featureID,
+				interval,
+				0,
+			)
+		}
+
+		// Check if the feature has a dependency
+		featureDependency, ok := RawReports[featureID]
+		if ok && !b.IsFeatureEnabled(featureDependency) {
+			if err := b.EnableFeature(featureDependency); err != tinygotypes.ErrorCodeNil {
+				continue
+			}
+		}
+
+		// Send the feature enable report
+		if _, err := b.packetWriter.SendPacket(
+			ChannelControl,
+			setFeatureReport,
+		); err != tinygotypes.ErrorCodeNil {
+			continue
+		}
+
+		// Wait for the feature to be enabled
+		startTime := time.Now()
+		for time.Since(startTime) < FeatureEnableTimeout {
+			b.Update()
+			if b.IsFeatureEnabled(featureID) {
+				return tinygotypes.ErrorCodeNil
+			}
 		}
 	}
 	return ErrorCodeBNO08XFailedToEnableFeature

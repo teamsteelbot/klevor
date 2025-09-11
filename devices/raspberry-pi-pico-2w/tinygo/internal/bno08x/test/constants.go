@@ -140,7 +140,7 @@ const (
 	ReportGetFeatureResponseLength int = 17
 
 	// ReportProductIDResponseLength is the length of the Product ID response report
-	ReportProductIDResponseLength int = 14
+	ReportProductIDResponseLength int = 16
 
 	// ReportCommandResponseLength is the length of the command response report
 	ReportCommandResponseLength int = 16
@@ -152,7 +152,7 @@ const (
 	ReportTimestampRebaseLength int = 5
 
 	// DefaultReportInterval is the default report interval in microseconds
-	DefaultReportInterval uint32 = 100_000
+	DefaultReportInterval uint32 = 50_000
 
 	// DebugReportInterval is the debug report interval in microseconds
 	DebugReportInterval uint32 = 1_000_000
@@ -178,8 +178,11 @@ const (
 	// ResetPinDelay is the delay after toggling the reset pin
 	ResetPinDelay = 10 * time.Millisecond
 
-	// InitializeAttempts is the number of attempts to initialize the sensor
-	InitializeAttempts = 3
+	// ResetAttempts is the number of attempts to reset the sensor
+	ResetAttempts = 3
+
+	// EnableFeatureAttempts is the number of attempts to enable a feature
+	EnableFeatureAttempts = 5
 
 	// CheckIDDelay is the delay after checking the sensor ID
 	CheckIDDelay = 500 * time.Millisecond
@@ -316,7 +319,7 @@ var (
 	QuaternionReadTimeout float32 = 0.500
 
 	// FeatureEnableTimeout is the timeout for enabling features
-	FeatureEnableTimeout = 2 * time.Second
+	FeatureEnableTimeout = 500 * time.Millisecond
 
 	// PacketReadyCheckDelay is the delay between checks for packet readiness
 	PacketReadyCheckDelay = 5 * time.Millisecond

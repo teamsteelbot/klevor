@@ -42,9 +42,6 @@ type (
 
 	// BNO08XSimpleService is an interface to wrap the BNO08X implementation basic methods.
 	BNO08XSimpleService interface {
-		Initialize() tinygotypes.ErrorCode
-		HardwareReset()
-		SoftwareReset() tinygotypes.ErrorCode
 		Reset() tinygotypes.ErrorCode
 		Update()
 		GetAcceleration() [3]float64
@@ -53,9 +50,6 @@ type (
 
 	// BNO08XService is an interface to wrap the BNO08X implementation methods.
 	BNO08XService interface {
-		Initialize() tinygotypes.ErrorCode
-		HardwareReset()
-		SoftwareReset() tinygotypes.ErrorCode
 		Reset() tinygotypes.ErrorCode
 		Update()
 		GetMagnetic() [3]float64

@@ -137,6 +137,8 @@ func SHTPCommandNameString(commandID uint8) string {
 // The command name as a string or "UNKNOWN_COMMAND" if not found.
 func ControlCommandNameString(commandID uint8) string {
 	switch commandID {
+	case ReportIDBaseTimestamp:
+		return "BASE_TIMESTAMP"
 	case ReportIDCommandRequest:
 		return "COMMAND_REQUEST"
 	case ReportIDCommandResponse:
