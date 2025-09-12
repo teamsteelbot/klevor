@@ -93,26 +93,6 @@ func ReportAccuracyStatusFromUint8(value uint8) (ReportAccuracyStatus, tinygotyp
 	}
 }
 
-// ReportAccuracyStatusString returns the string representation of a ReportAccuracyStatus enum value
-//
-// Returns:
-//
-// The string representation of the ReportAccuracyStatus enum value
-func (ras ReportAccuracyStatus) String() string {
-	switch ras {
-	case ReportAccuracyStatusUnreliable:
-		return "UNRELIABLE"
-	case ReportAccuracyStatusLow:
-		return "LOW"
-	case ReportAccuracyStatusMedium:
-		return "MEDIUM"
-	case ReportAccuracyStatusHigh:
-		return "HIGH"
-	default:
-		return "UNKNOWN"
-	}
-}
-
 // ReportActivityFromUint8 returns the ReportActivity enum based on a given uint8 value
 //
 // Parameters:

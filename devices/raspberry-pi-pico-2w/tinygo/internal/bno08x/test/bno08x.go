@@ -25,10 +25,9 @@ type (
 	BNO08X struct {
 		packetReader                    PacketReader
 		packetWriter                    PacketWriter
-		debugger                        Debugger
+		logger                        Logger
 		resetPin                        machine.Pin
-		dataBuffer                      DataBuffer
-		commandBuffer                   []byte
+		packetBuffer                      PacketBuffer
 		dynamicConfigurationDataSavedAt time.Time
 		meCalibrationStartedAt          time.Time
 		calibrationComplete             bool
@@ -57,22 +56,78 @@ type (
 
 	// Options struct holds configuration options for the BNO08X instance
 	Options struct {
-		Debugger Debugger // Debugger instance for debug messages
+		Logger Logger // Logger instance for debug messages
 	}
 )
 
-// NewOptions creates a new Options instance with the specified debugger.
+var (
+	// softwareResetStart is the initial message printed when performing a software reset
+	softwareResetStart = []byte("Software resetting...")
+
+	// softwareResetComplete is the message printed when a software reset is complete
+	softwareResetComplete = []byte("Software reset complete")
+
+	// foundSHTPAdvertisementPacket is the message printed when an SHTP advertisement packet is found
+	foundSHTPAdvertisementPacket = []byte("Found SHTP advertisement packet")
+
+	// clearingPacketFromChannel is the prefix message printed when clearing a packet from a channel
+	clearingPacketFromChannel = []byte("Clearing packet from channel ")
+
+	// errorWaitingForPacket is the message printed when there is an error waiting for a packet
+	errorWaitingForPacket = []byte("Error waiting for packet: ")
+
+	// sendingIDRequestReport is the message printed when sending an ID request report
+	sendingIDRequestReport = []byte("Sending ID Request Report...")
+
+	// waitingForPacketOnChannel is the prefix message printed when waiting for a packet on a channel
+	waitingForPacketOnChannel = []byte("Waiting for Packet on Channel: ")
+
+	// waitingForPacketWithReportIDOnChannel is the prefix message printed when waiting for a packet with a specific report ID on a channel
+	waitingForPacketWithReportIDOnChannel = []byte("*Waiting for Packet with Report ID: ")
+
+	// errorOccurredWhileWaitingForSensorID is the message printed when there is an error while waiting for the sensor ID
+	errorOccurredWhileWaitingForSensorID = []byte("An error occurred while waiting for the sensor ID: ")
+
+	// errorOccurredWhileWaitingForPacket is the message printed when there is an error while waiting for a packet
+	errorOccurredWhileWaitingForPacket = []byte("An error occurred while waiting for a packet: ")
+
+	// passingPacketToHandlerForDeSlicing is the message printed when passing a packet to the handler for de-slicing
+	passingPacketToHandlerForDeSlicing = []byte("Passing Packet to handler for de-slicing")
+
+	// processingReportID is the prefix message printed when processing a report ID
+	processingReportID = []byte("Processing report ID: ")
+
+	// failedToProcessReportID is the prefix message printed when failing to process a report ID
+	failedToProcessReportID = []byte("Failed to process report ID: ")
+
+	// enablingFeatureID is the prefix message printed when enabling a feature ID
+	enablingFeatureID = []byte("Enabling feature ID: ")
+
+	// errorReadingPacket is the prefix message printed when there is an error reading a packet
+	errorReadingPacket = []byte("Error reading packet: ")
+
+	// errorHandlingPacket is the prefix message printed when there is an error handling a packet
+	errorHandlingPacket = []byte("Error handling packet: ")
+
+	// processingReport is the prefix message printed when processing a report
+	processingReport = []byte("Processing report: ")
+
+	// commandParametersBuffer is the size of the command parameters buffer
+	commandParametersBuffer = make([]byte, commandParametersBufferSize)
+)
+
+// NewOptions creates a new Options instance with the specified logger.
 //
 // Parameters:
 //
-//	debugger: The Debugger instance for debug messages.
+//	logger: The Logger instance for debug messages.
 //
 // Returns:
 //
 // A pointer to a new Options instance.
-func NewOptions(debugger Debugger) *Options {
+func NewOptions(logger Logger) *Options {
 	return &Options{
-		Debugger: debugger,
+		Logger: logger,
 	}
 }
 
@@ -83,7 +138,7 @@ func NewOptions(debugger Debugger) *Options {
 //  resetPin: The pin used to reset the BNO08X sensor.
 //	packetReader: The PacketReader to read packets from the BNO08X sensor.
 //	packetWriter: The PacketWriter to write packets to the BNO08X sensor.
-//	dataBuffer: The DataBuffer to store Packet data.
+//	packetBuffer: The PacketBuffer to store Packet data.
 //	afterHardwareResetFn: An optional function to be called after a hardware reset.
 //	afterResetFn: An optional function to be called after a software reset.
 //	options: Optional configuration options for the BNO08X instance.
@@ -95,20 +150,20 @@ func NewBNO08X(
 	resetPin machine.Pin,
 	packetReader PacketReader,
 	packetWriter PacketWriter,
-	dataBuffer DataBuffer,
+	packetBuffer PacketBuffer,
 	afterHardwareResetFn func(b *BNO08X) func() tinygotypes.ErrorCode,
 	afterResetFn func(b *BNO08X) tinygotypes.ErrorCode,
 	options *Options,
 ) (*BNO08X, tinygotypes.ErrorCode) {
-	// Check if packetReader, packetWriter and dataBuffer are provided
+	// Check if packetReader, packetWriter and packetBuffer are provided
 	if packetReader == nil {
 		return nil, ErrorCodeBNO08XNilPacketReader
 	}
 	if packetWriter == nil {
 		return nil, ErrorCodeBNO08XNilPacketWriter
 	}
-	if dataBuffer == nil {
-		return nil, ErrorCodeBNO08XNilDataBuffer
+	if packetBuffer == nil {
+		return nil, ErrorCodeBNO08XNilPacketBuffer
 	}
 
 	// If options are nil, initialize with default values
@@ -120,10 +175,9 @@ func NewBNO08X(
 	bno08x := &BNO08X{
 		packetReader:                    packetReader,
 		packetWriter:                    packetWriter,
-		debugger:                        options.Debugger,
+		logger:                        options.Logger,
 		resetPin:                        resetPin,
-		dataBuffer:                      dataBuffer,
-		commandBuffer:                   make([]byte, CommandBufferSize),
+		packetBuffer:                      packetBuffer,
 		calibrationComplete:             false,
 		magnetometerAccuracy:            ReportAccuracyStatusUnreliable,
 		initComplete:                    false,
@@ -146,9 +200,9 @@ func NewBNO08X(
 // hardwareReset performs a hardware reset of the BNO08X sensor using the specified reset pin.
 func (b *BNO08X) hardwareReset() {
 	if b.afterHardwareResetFn == nil {
-		HardwareReset(b.resetPin, b.debugger, nil)
+		HardwareReset(b.resetPin, b.logger, nil)
 	} else {
-		HardwareReset(b.resetPin, b.debugger, b.afterHardwareResetFn(b))
+		HardwareReset(b.resetPin, b.logger, b.afterHardwareResetFn(b))
 	}
 }
 
@@ -158,8 +212,8 @@ func (b *BNO08X) hardwareReset() {
 //
 // An error if the reset process fails, otherwise nil.
 func (b *BNO08X) softwareReset() tinygotypes.ErrorCode {
-	if b.debugger != nil {
-		b.debugger.Debug("Software resetting...")
+	if b.logger != nil {
+		b.logger.LogMessage(softwareResetStart, true, true)
 	}
 
 	// Send the reset command
@@ -179,26 +233,26 @@ func (b *BNO08X) softwareReset() tinygotypes.ErrorCode {
 		}
 		if err != tinygotypes.ErrorCodeNil {
 			// Log the error
-			if b.debugger != nil {
-				b.debugger.Debug("Error waiting for packet: " + uint16ToHex(uint16(err)))
+			if b.logger != nil {
+				b.logger.LogMessageWithUint16AsHexCode(errorWaitingForPacket, uint16(err), true, true)
 			}
 			continue
 		}
 
 		// Log what we're clearing
-		if b.debugger != nil {
+		if b.logger != nil {
 			if packet.ChannelNumber() == ChannelSHTPCommand && len(packet.Data) == AdvertisementPacketLength {
-				b.debugger.Debug("Found SHTP advertisement packet")
+				b.logger.LogMessage(foundSHTPAdvertisementPacket, true, true)
 			} else {
-				b.debugger.Debug("Clearing packet from channel " + uint8ToHex(packet.ChannelNumber()) + " with " + intToString(len(packet.Data)) + " bytes")
+				b.logger.LogMessageWithUint8AsHexCode(clearingPacketFromChannel, packet.ChannelNumber(), true, true)
 			}
 		}
 	}
 	
 
 	// Wait for the reset to complete
-	if b.debugger != nil {
-		b.debugger.Debug("Software reset complete")
+	if b.logger != nil {
+		b.logger.LogMessage(softwareResetComplete, true, true)
 	}
 	return tinygotypes.ErrorCodeNil
 }
@@ -229,7 +283,7 @@ func (b *BNO08X) Reset() tinygotypes.ErrorCode {
 
 		// Check if the sensor ID can be read
 		if err := b.checkID(); err != tinygotypes.ErrorCodeNil {
-			b.debugger.Debug("An error ocurred while waiting for the sensor ID: " + uint16ToHex(uint16(err)))
+			b.logger.LogMessageWithErrorCode(errorOccurredWhileWaitingForSensorID, err)
 			time.Sleep(CheckIDDelay)
 			continue
 		}
@@ -251,13 +305,9 @@ func (b *BNO08X) Reset() tinygotypes.ErrorCode {
 //
 // An error if there was an issue during the ID check process, otherwise nil.
 func (b *BNO08X) checkID() tinygotypes.ErrorCode {
-	if b.debugger != nil {
-		b.debugger.Debug("READ ID REQUEST")
-	}
-
 	// Send the ID request report
-	if b.debugger != nil {
-		b.debugger.Debug("Sending ID Request Report")
+	if b.logger != nil {
+		b.logger.LogMessage(sendingIDRequestReport, true, true)
 	}
 	if _, err := b.packetWriter.SendPacket(
 		ChannelControl,
@@ -276,7 +326,7 @@ func (b *BNO08X) checkID() tinygotypes.ErrorCode {
 		return err
 	}
 
-	// Read the Packet data into the data buffer
+	// Read the Packet data into the packet buffer
 	sensorIDReport, err := newReportFromPacket(packet)
 	if err != tinygotypes.ErrorCodeNil {
 		return err
@@ -289,8 +339,8 @@ func (b *BNO08X) checkID() tinygotypes.ErrorCode {
 	}
 
 	// Log the sensor ID details
-	if b.debugger != nil {
-		b.debugger.DebugBuffer(sensorID.PrintBuffer())
+	if b.logger != nil {
+		b.logger.LogMessage(sensorID.PrintBuffer(), true, true)
 	}
 	return tinygotypes.ErrorCodeNil
 }
@@ -311,12 +361,12 @@ func (b *BNO08X) waitForPacketType(
 ) (*Packet, tinygotypes.ErrorCode) {
 	startTime := time.Now()
 
-	// Debug message
-	if b.debugger != nil {
+	// Log message
+	if b.logger != nil {
 		if reportID == nil {
-			b.debugger.Debug("** Waiting for Packet on Channel " + uint8ToHex(channelNumber) + " **")
+			b.logger.LogMessageWithUint8AsHexCode(waitingForPacketOnChannel, channelNumber, true, true)
 		} else {
-			b.debugger.Debug("** Waiting for Packet with Report ID " + uint8ToHex(*reportID) + " on Channel " + uint8ToHex(channelNumber) + " **")
+			b.logger.LogMessageWithUint8AsHexCode(waitingForPacketWithReportIDOnChannel, *reportID, true, true)
 		}
 	}
 
@@ -347,8 +397,8 @@ func (b *BNO08X) waitForPacketType(
 		}
 
 		if newPacket.ChannelNumber() != ChannelExe && newPacket.ChannelNumber() != ChannelSHTPCommand {
-			if b.debugger != nil {
-				b.debugger.Debug("Passing Packet to handler for de-slicing")
+			if b.logger != nil {
+				b.logger.LogMessage(passingPacketToHandlerForDeSlicing, true, true)
 			}
 			if err = b.handlePacket(newPacket); err != tinygotypes.ErrorCodeNil {
 				return nil, err
@@ -379,8 +429,8 @@ func (b *BNO08X) waitForPacket(timeout time.Duration) (*Packet, tinygotypes.Erro
 		// Read the Packet from the Packet reader
 		newPacket, err := b.packetReader.ReadPacket()
 		if err != tinygotypes.ErrorCodeNil {
-			if b.debugger != nil {
-				b.debugger.Debug("An error occurred when reading a packet while waiting for a packet: " + uint16ToHex(uint16(err)))
+			if b.logger != nil {
+				b.logger.LogMessageWithErrorCode(errorOccurredWhileWaitingForPacket, err, true, true)
 			}
 			continue
 		}
@@ -420,8 +470,8 @@ func (b *BNO08X) handlePacket(packet *Packet) tinygotypes.ErrorCode {
 		// Check if there are enough bytes left in the Packet to read the report ID
 		reportID := packet.Data[idx]
 		
-		if b.debugger != nil {
-			b.debugger.Debug("Processing report ID: " + uint8ToHex(reportID) + " at index " + intToString(idx))
+		if b.logger != nil {
+			b.logger.LogMessageWithUint8AsHexCode(processingReportID, reportID, true, true)
 		}
 
 		requiredBytes, err := ReportLength(reportID)
@@ -444,8 +494,8 @@ func (b *BNO08X) handlePacket(packet *Packet) tinygotypes.ErrorCode {
 
 		// Process the report
 		if err := b.processReport(report); err != tinygotypes.ErrorCodeNil {
-			if b.debugger != nil {
-				b.debugger.Debug("Failed to process report ID " + uint8ToHex(report.ID))
+			if b.logger != nil {
+				b.logger.LogMessageWithUint8AsHexCode(failedToProcessReportID, report.ID. true, true)
 			}
 			return err
 		}
@@ -481,8 +531,8 @@ func (b *BNO08X) processReport(report *report) tinygotypes.ErrorCode {
 		b.enabledFeatures[report.ID] = true
 	}
 
-	if b.debugger != nil {
-		b.debugger.Debug("Processing report: " + SHTPCommandNameString(report.ID) + " (" + uint8ToHex(report.ID) + ")")
+	if b.logger != nil {
+		b.logger.LogMessageWithUint8AsHexCode(processingReport, report.ID)
 	}
 
 	// Process the sensor report based on its ID+
@@ -651,8 +701,8 @@ func (b *BNO08X) processControlReport(report *report) tinygotypes.ErrorCode {
 			return ErrorCodeBNO08XFailedToParseSensorID
 		}
 
-		if b.debugger != nil {
-			b.debugger.DebugBuffer(sensorID.PrintBuffer())
+		if b.logger != nil {
+			b.logger.LogMessage(sensorID.PrintBuffer(), true, true)
 		}
 	case ReportIDGetFeatureResponse:
 		// Parse the Get Feature report from the report bytes
@@ -703,16 +753,16 @@ func (b *BNO08X) processAvailablePackets() {
 		// Read the next available Packet
 		newPacket, err := b.packetReader.ReadPacket()
 		if err != tinygotypes.ErrorCodeNil {
-			if b.debugger != nil {
-				b.debugger.Debug("Error reading Packet: " + uint16ToHex(uint16(err)))
+			if b.logger != nil {
+				b.logger.LogMessageWithErrorCode(errorReadingPacket, err)
 			}
 			continue
 		}
 
 		// Pass the packet to the handler
 		if err = b.handlePacket(newPacket); err != tinygotypes.ErrorCodeNil {
-			if b.debugger != nil {
-				b.debugger.Debug("Error handling Packet: " + uint16ToHex(uint16(err)))
+			if b.logger != nil {
+				b.logger.LogMessageWithErrorCode(errorHandlingPacket, err)
 			}
 			continue
 		}
@@ -876,13 +926,13 @@ func (b *BNO08X) GetRawMagnetic() [3]float64 {
 //	An error if the feature could not be enabled.
 func (b *BNO08X) EnableFeature(featureID uint8) tinygotypes.ErrorCode {
 	for i := 0; i < EnableFeatureAttempts; i++ {
-		if b.debugger != nil {
-			b.debugger.Debug("Enabling Feature ID: " + uint8ToHex(featureID))
+		if b.logger != nil {
+			b.logger.LogMessageWithUint8AsHexCode(enablingFeatureID, featureID)
 		}
 
 		// Check if debug mode is enabled
 		var interval uint32
-		if b.debugger != nil {
+		if b.logger != nil {
 			interval = DebugReportInterval
 		} else {
 			interval = DefaultReportInterval
@@ -951,19 +1001,21 @@ func (b *BNO08X) IsFeatureEnabled(featureID uint8) bool {
 //
 // An error indicating success or failure of the calibration initiation.
 func (b *BNO08X) BeginCalibration() tinygotypes.ErrorCode {
+	// Clear the command paramters buffer
+	commandParametersBuffer = commandParametersBuffer[:0]
+
 	// Begin the sensor's self-calibration routine
-	calibrationBuffer := []byte{
-		1, // calibrate accel
-		1, // calibrate gyro
-		1, // calibrate mag
-		MagnetometerCalibrationConfig,
-		0, // calibrate planar acceleration
-		0, // 'on_table' calibration
-		0, // reserved
-		0, // reserved
-		0, // reserved
-	}
-	if err := b.sendMeCommand(calibrationBuffer); err != tinygotypes.ErrorCodeNil {
+	commandParametersBuffer = append(commandParametersBuffer, 1) // calibrate accel
+	commandParametersBuffer = append(commandParametersBuffer, 1) // calibrate gyro
+	commandParametersBuffer = append(commandParametersBuffer, 1) // calibrate mag
+	commandParametersBuffer = append(commandParametersBuffer, MagnetometerCalibrationConfig)
+	commandParametersBuffer = append(commandParametersBuffer, 0) // calibrate planar acceleration
+	commandParametersBuffer = append(commandParametersBuffer, 0) // 'on_table' calibration
+	commandParametersBuffer = append(commandParametersBuffer, 0)
+	commandParametersBuffer = append(commandParametersBuffer, 0)
+	commandParametersBuffer = append(commandParametersBuffer, 0)
+
+	if err := b.sendMeCommand(commandParametersBuffer); err != tinygotypes.ErrorCodeNil {
 		return ErrorCodeBNO08XFailedToBeginCalibration
 	}
 	return tinygotypes.ErrorCodeNil
@@ -975,24 +1027,21 @@ func (b *BNO08X) BeginCalibration() tinygotypes.ErrorCode {
 //
 // An integer representing the calibration status, where 0 indicates no calibration needed,
 func (b *BNO08X) CalibrationStatus() ReportAccuracyStatus {
-	// Get the status of the self-calibration
-	calibrationBuffer := []byte{
-		0, // calibrate accel
-		0, // calibrate gyro
-		0, // calibrate mag
-		MagnetometerGetCalibration,
-		0, // calibrate planar acceleration
-		0, // 'on_table' calibration
-		0, // reserved
-		0, // reserved
-		0, // reserved
-	}
-	b.sendMeCommand(calibrationBuffer)
+	// Clear the command paramters buffer
+	commandParametersBuffer = commandParametersBuffer[:0]
 
-	// Log the calibration status if debugger is enabled
-	if b.debugger != nil {
-		b.debugger.Debug("CalibrationStatus: " + b.magnetometerAccuracy.String())
-	}
+	// Get the status of the self-calibration
+	commandParametersBuffer = append(commandParametersBuffer, 0) // calibrate accel
+	commandParametersBuffer = append(commandParametersBuffer, 0) // calibrate gyro
+	commandParametersBuffer = append(commandParametersBuffer, 0) // calibrate mag
+	commandParametersBuffer = append(commandParametersBuffer, MagnetometerGetCalibration)
+	commandParametersBuffer = append(commandParametersBuffer, 0) // calibrate planar acceleration
+	commandParametersBuffer = append(commandParametersBuffer, 0) // 'on_table' calibration
+	commandParametersBuffer = append(commandParametersBuffer, 0) // reserved
+	commandParametersBuffer = append(commandParametersBuffer, 0) // reserved
+	commandParametersBuffer = append(commandParametersBuffer, 0) // reserved
+	
+	b.sendMeCommand(commandParametersBuffer)
 	return b.magnetometerAccuracy
 }
 
@@ -1021,20 +1070,21 @@ func (b *BNO08X) sendMeCommand(subcommandParams []byte) tinygotypes.ErrorCode {
 	startTime := time.Now()
 
 	// Insert the command request report into the local buffer
+	packetBuffer = b.packetBuffer.GetBuffer()
 	if err := insertCommandRequestReport(
 		MagnetometerCalibration,
-		b.commandBuffer,
-		b.dataBuffer.GetReportSequenceNumber(ReportIDCommandRequest),
+		packetBuffer[:CommandBufferSize],
+		b.packetBuffer.GetReportSequenceNumber(ReportIDCommandRequest),
 		subcommandParams,
 	); err != tinygotypes.ErrorCodeNil {
 		return ErrorCodeBNO08XFailedToInsertCommandRequestReport
 	}
 
 	// Send the command request Packet
-	if _, err := b.packetWriter.SendPacket(ChannelControl, b.commandBuffer); err != tinygotypes.ErrorCodeNil {
+	if _, err := b.packetWriter.SendPacket(ChannelControl, packetBuffer[:CommandBufferSize]); err != tinygotypes.ErrorCodeNil {
 		return ErrorCodeBNO08XFailedToSendMeCommandRequestPacket
 	}
-	b.dataBuffer.IncrementReportSequenceNumber(ReportIDCommandRequest)
+	b.packetBuffer.IncrementReportSequenceNumber(ReportIDCommandRequest)
 
 	// Wait for the command response
 	for time.Since(startTime) < CalibrationCommandsTimeout {
@@ -1054,10 +1104,11 @@ func (b *BNO08X) sendMeCommand(subcommandParams []byte) tinygotypes.ErrorCode {
 func (b *BNO08X) SaveCalibrationData() tinygotypes.ErrorCode {
 	// Save the self-calibration data
 	startTime := time.Now()
+	packetBuffer := b.packetBuffer.GetBuffer()
 	err := insertCommandRequestReport(
 		SaveDynamicCalibrationData,
-		b.commandBuffer,
-		b.dataBuffer.GetReportSequenceNumber(ReportIDCommandRequest),
+		packetBuffer[:CommandBufferSize],
+		b.packetBuffer.GetReportSequenceNumber(ReportIDCommandRequest),
 		nil,
 	)
 	if err != tinygotypes.ErrorCodeNil {
@@ -1065,11 +1116,11 @@ func (b *BNO08X) SaveCalibrationData() tinygotypes.ErrorCode {
 	}
 
 	// Send the command request Packet to save calibration data
-	_, err = b.packetWriter.SendPacket(ChannelControl, b.commandBuffer)
+	_, err = b.packetWriter.SendPacket(ChannelControl, packetBuffer[:CommandBufferSize])
 	if err != tinygotypes.ErrorCodeNil {
 		return ErrorCodeBNO08XFailedToSendCommandRequestPacketToSaveCalibrationData
 	}
-	b.dataBuffer.IncrementReportSequenceNumber(ReportIDCommandRequest)
+	b.packetBuffer.IncrementReportSequenceNumber(ReportIDCommandRequest)
 
 	// Wait for the command response indicating that the calibration data was saved
 	for time.Since(startTime) < CalibrationCommandsTimeout {

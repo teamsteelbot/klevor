@@ -196,9 +196,7 @@ func (s *DefaultHandler) SetAngle(angle uint16) tinygotypes.ErrorCode {
 	// Send a debug message if debug mode is enabled
 	if s.debugHandler.IsEnabled() && s.usbCDCHandler != nil {
 		if err := s.usbCDCHandler.SendMessage(
-			internalusbcdc.NewOutgoingDebugMessage(
-				internalusbcdc.DebugReceivedServoAngle,
-			),
+			internalusbcdc.OutgoingDebugReceivedServoAngleMessage,
 		); err != tinygotypes.ErrorCodeNil {
 			return ErrorCodeServoFailedToSendDebugServoAngleMessage
 		}

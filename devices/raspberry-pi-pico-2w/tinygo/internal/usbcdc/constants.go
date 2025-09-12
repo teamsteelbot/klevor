@@ -53,6 +53,16 @@ var (
 	// OutgoingChallengeWithoutObstaclesMessage is the outgoing challenge message without obstacles
 	OutgoingChallengeWithoutObstaclesMessage = NewOutgoingChallengeMessage(internalchallenge.ChallengeWithoutObstacles)
 
+	// OutgoingDebugReceivedMotorSpeedMessage is the outgoing debug message for received motor speed
+	OutgoingDebugReceivedMotorSpeedMessage = NewOutgoingDebugMessage(
+		DebugReceivedMotorSpeed,
+	)
+
+	// OutgoingDebugReceivedServoAngleMessage is the outgoing debug message for received servo angle
+	OutgoingDebugReceivedServoAngleMessage = NewOutgoingDebugMessage(
+		DebugReceivedServoAngle,
+	)
+
 	// USBCDCHandler is the USB CDC handler for the Raspberry Pi Pico 2W
 	USBCDCHandler Handler
 )

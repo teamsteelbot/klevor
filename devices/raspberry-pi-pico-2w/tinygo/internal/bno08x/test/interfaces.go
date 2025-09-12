@@ -7,12 +7,12 @@ import (
 )
 
 type (
-	// DataBuffer is an interface for managing data buffers
-	DataBuffer interface {
-		GetData() []byte
-		SetDataValue(index int, value byte) tinygotypes.ErrorCode
-		SetData(data []byte) tinygotypes.ErrorCode
-		ClearData()
+	// PacketBuffer is an interface for managing packet buffers
+	PacketBuffer interface {
+		GetBuffer() []byte
+		SetBufferValue(index int, value byte) tinygotypes.ErrorCode
+		SetBuffer(data []byte) tinygotypes.ErrorCode
+		ClearBuffer()
 		UpdateSequenceNumber(newPacket *Packet) tinygotypes.ErrorCode
 		IncrementChannelSequenceNumber(channel uint8) (uint8, tinygotypes.ErrorCode)
 		GetSequenceNumber(channel uint8) (uint8, tinygotypes.ErrorCode)
@@ -22,17 +22,22 @@ type (
 		ResetSequenceNumbers()
 	}
 
-
-	// Debugger is an interface for debugging messages
-	Debugger interface {
-		Debug(message string)
-		DebugBuffer(buffer []byte)
+	// Logger is an interface for logging messages
+	Logger interface {
+		LogMessage(messageBuffer []byte, header bool, newline bool)
+		LogMessageWithHexCode(messageBuffer []byte, hexBuffer []byte, header bool, newline bool)
+		LogMessageWithUint8AsHexCode(messageBuffer []byte, value uint8, header bool, newline bool)
+		LogMessageWithUint16AsHexCode(messageBuffer []byte, value uint16, header bool, newline bool)
+		LogMessageWithUint32AsHexCode(messageBuffer []byte, value uint32, header bool, newline bool)
+		LogMessageWithErrorCode(messageBuffer []byte, errCode tinygotypes.ErrorCode, header bool, newline bool)
+		LogErrorCode(errCode tinygotypes.ErrorCode, header bool, newline bool)
+		LogHexCode(hexBuffer []byte, header bool, newline bool)
 	}
 
 	// PacketReader is an interface for reading packets from the BNO08x sensor
 	PacketReader interface {
 		ReadPacket() (*Packet, tinygotypes.ErrorCode)
-		IsDataReady() bool
+		IsAvailableToRead() bool
 	}
 
 	// PacketWriter is an interface for writing packets to the BNO08x sensor

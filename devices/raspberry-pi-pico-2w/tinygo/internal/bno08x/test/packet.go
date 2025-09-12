@@ -26,6 +26,11 @@ type (
 	}
 )
 
+var (
+	// PacketHeaderPrintBuffer is a reusable buffer for printing PacketHeader details
+	PacketHeaderPrintBuffer = make([]byte, 0, 128)
+)
+
 // ChannelNumberString returns the string representation of the channel number.
 //
 // Returns:
@@ -350,7 +355,8 @@ func (h *PacketHeader) IsError() bool {
 //
 // A byte slice containing the PacketHeader details.
 func (ph *PacketHeader) PrintBuffer(isBeingSent bool) []byte {
-	buffer := make([]byte, 0, 128) // Pre-allocate enough space
+	// Clear the reusable buffer
+	buffer := PacketHeaderPrintBuffer[:0]
 
 	if isBeingSent {
 		buffer = append(buffer, "SENDING PACKET HEADER"...)

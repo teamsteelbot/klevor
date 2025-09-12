@@ -4,8 +4,10 @@ set -e
 # Absolute path to this script's directory
 SCRIPT_DIR=$(cd "$(dirname "$0")" || exit 1; pwd)
 
-# Path to the test main.go
+# Path to the test main.go and output file
 MAIN_GO="${SCRIPT_DIR}/cmd/tests/bno08x/main.go"
+OUTPUT_DIR="${SCRIPT_DIR}/output/bin/tests/bno08x"
+OUTPUT_FILE="${OUTPUT_DIR}/flash.uf2"
 
 # Check tinygo availability
 if ! command -v tinygo >/dev/null 2>&1; then
@@ -19,8 +21,17 @@ if [ ! -f "${MAIN_GO}" ]; then
   exit 1
 fi
 
-echo "Compiling and flashing TinyGo BNO08x test to Raspberry Pi Pico 2W..."
+# Ensure output directory exists
+if [ ! -d "${OUTPUT_DIR}" ]; then
+  mkdir -p "${OUTPUT_DIR}"
+  if [ $? -ne 0 ]; then
+    echo "Error: Failed to create output directory at: ${OUTPUT_DIR}" >&2
+    exit 1
+  fi
+fi
 
-tinygo flash -target pico2-w "${MAIN_GO}"
+echo "Compiling TinyGo BNO08x test..."
+
+tinygo build -o="${OUTPUT_FILE}" -target=pico2-w -size=full -print-allocs=. "${MAIN_GO}"
 
 echo "Done."

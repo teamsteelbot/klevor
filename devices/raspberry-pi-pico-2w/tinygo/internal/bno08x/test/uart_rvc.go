@@ -20,7 +20,7 @@ type (
 		ps0Pin        machine.Pin
 		ps1Pin        machine.Pin
 		resetPin      machine.Pin
-		debugger      Debugger
+		logger      Logger
 		timeout       time.Duration
 		accelerometer [3]float64
 		eulerDegrees  [3]float64
@@ -35,22 +35,33 @@ type (
 	}
 )
 
+var (
+	// invalidChecksumMessage is the message printed when an invalid checksum is detected
+	invalidChecksumMessage = []byte("Invalid checksum detected")
+
+	// receivedFrameMessage is the message printed when a frame is received
+	receivedFrameMessage = []byte("Received frame")
+
+	// failedToParseFrameMessage is the message printed when parsing a frame fails
+	failedToParseFrameMessage = []byte("Failed to parse frame")
+)
+
 // NewUARTRVCOptions creates a new UARTRVCOptions instance with default values.
 //
 // Parameters:
 //
-// debugger: The debugger to use for logging and debugging information (optional).
+// logger: The logger to use for logging and debugging information (optional).
 // timeout: The timeout duration for reading data (optional).
 //
 // Returns:
 //
 // A pointer to a new UARTRVCOptions instance.
 func NewUARTRVCOptions(
-	debugger Debugger,
+	logger Logger,
 	timeout time.Duration,
 ) *UARTRVCOptions {
 	return &UARTRVCOptions{
-		Options: NewOptions(debugger),
+		Options: NewOptions(logger),
 		Timeout: timeout,
 	}
 }
@@ -111,8 +122,8 @@ func NewUARTRVC(
 	// Get the timeout from options
 	timeout := options.Timeout
 
-	// Get the debugger from options
-	debugger := options.Options.Debugger
+	// Get the logger from options
+	logger := options.Options.Logger
 
 	// Create the UART-RVC instance
 	uartRVC := &UARTRVC{
@@ -122,7 +133,7 @@ func NewUARTRVC(
 		ps0Pin:        ps0Pin,
 		ps1Pin:        ps1Pin,
 		resetPin:      resetPin,
-		debugger:      debugger,
+		logger:      logger,
 		buffer:        make([]byte, UARTRVCPacketLengthBytes),
 		timeout:       timeout,
 		initComplete:  false,
@@ -141,7 +152,7 @@ func NewUARTRVC(
 //
 // An error if the reset process fails, otherwise nil.
 func (u *UARTRVC) Reset() tinygotypes.ErrorCode  {
-	HardwareReset(u.resetPin, u.debugger, nil)
+	HardwareReset(u.resetPin, u.logger, nil)
 	return tinygotypes.ErrorCodeNil
 }
 
@@ -170,8 +181,8 @@ func (u *UARTRVC) ParseFrame() tinygotypes.ErrorCode {
 		checksumCalc += u.buffer[i]
 	}
 	if checksumCalc != checksum {
-		if u.debugger != nil {
-			u.debugger.Debug("invalid checksum")
+		if u.logger != nil {
+			u.logger.LogMessage(invalidChecksumMessage, true, true)
 		}
 		return ErrorCodeBNO08XUARTRVCInvalidChecksum
 	}
@@ -257,14 +268,14 @@ func (u *UARTRVC) Read() tinygotypes.ErrorCode {
 		}
 
 		// Print the raw frame for debugging
-		if u.debugger != nil {
-			u.debugger.Debug("Received frame")
+		if u.logger != nil {
+			u.logger.LogMessage(receivedFrameMessage, true, true)
 		}
 
 		// Parse the frame
 		if err := u.ParseFrame(); err != tinygotypes.ErrorCodeNil {
-			if u.debugger != nil {
-				u.debugger.Debug("Failed to parse frame")
+			if u.logger != nil {
+				u.logger.LogMessage(failedToParseFrameMessage, true, true)
 			}
 			return ErrorCodeBNO08XFailedToParseFrame
 		}

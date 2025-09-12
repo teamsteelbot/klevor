@@ -210,9 +210,7 @@ func (e *DefaultHandler) SetSpeed(speed uint16, isForward bool) tinygotypes.Erro
 	// Send the debug message if the debug handler is enabled
 	if e.debugHandler.IsEnabled() && e.usbCDCHandler != nil {
 		if err := e.usbCDCHandler.SendMessage(
-			internalusbcdc.NewOutgoingDebugMessage(
-				internalusbcdc.DebugReceivedMotorSpeed,
-			),
+			internalusbcdc.OutgoingDebugReceivedMotorSpeedMessage,
 		); err != tinygotypes.ErrorCodeNil {
 			return ErrorCodeESCMotorFailedToSendDebugMotorSpeedMessage
 		}

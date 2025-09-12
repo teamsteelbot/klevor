@@ -3,6 +3,7 @@ package main
 import (
 	"time"
 
+	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal"
 	internalbno08x "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/bno08x"
 	ralvarezdevbno08x "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/bno08x/test"
 	//ralvarezdevbno08x "github.com/ralvarezdev/tinygo-bno08x"
@@ -32,9 +33,12 @@ func main() {
 		// Get the formatted time string
 		currentTime := time.Now()
 		timeString := currentTime.Format("15:04:05.000")
-		println("[" + timeString + "] Quaternion: x =" + x + ", y =" + y + ", z =" + z + ", w =" + w)
+		println("[", timeString, "] Quaternion: x =", x, "y =", y, "z =", z, "w =", w)
 
 		// Sleep for the interval duration
 		time.Sleep(IntervalDuration)
+
+		// Print memory stats
+		internal.PrintMemory()
 	}
 }

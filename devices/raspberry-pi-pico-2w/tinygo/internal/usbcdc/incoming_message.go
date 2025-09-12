@@ -1,8 +1,6 @@
 package usbcdc
 
 import (
-	"strconv"
-
 	tinygotypes "github.com/ralvarezdev/tinygo-types"
 )
 
@@ -155,10 +153,13 @@ func (i *IncomingMessage) GetContentBuffer() []byte {
 //
 // The uint16 representation of the buffer, or an error if the conversion fails
 func (i *IncomingMessage) GetContentAsUint16() (uint16, tinygotypes.ErrorCode) {
-	// Convert the content to uint16
-	u, err := strconv.ParseUint(string(i.GetContentBuffer()), 10, 16)
-	if err != nil {
-		return 0, ErrorCodeUSBCDCInvalidIncomingMessageContentUint16
-	}
-	return uint16(u), tinygotypes.ErrorCodeNil
+	buf := i.GetContentBuffer()
+    var val uint16
+    for _, b := range buf {
+        if b < '0' || b > '9' {
+            return 0, ErrorCodeUSBCDCInvalidIncomingMessageContentUint16
+        }
+        val = val*10 + uint16(b-'0')
+    }
+    return val, tinygotypes.ErrorCodeNil
 }

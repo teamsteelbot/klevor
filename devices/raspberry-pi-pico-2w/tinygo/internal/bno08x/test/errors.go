@@ -12,7 +12,7 @@ const (
 )
 
 const (
-	ErrorCodeBNO08XDataBufferIndexOutOfRange tinygotypes.ErrorCode = tinygotypes.ErrorCode(iota + ErrorCodeBNO08XStartNumber)
+	ErrorCodeBNO08XPacketBufferIndexOutOfRange tinygotypes.ErrorCode = tinygotypes.ErrorCode(iota + ErrorCodeBNO08XStartNumber)
 	ErrorCodeBNO08XInvalidChannelNumber
 	ErrorCodeBNO08XNilPacket
 	ErrorCodeBNO08XNilPacketHeader
@@ -36,7 +36,7 @@ const (
 	ErrorCodeBNO08XUARTByteTimeout
 	ErrorCodeBNO08XUARTFailedToReadByte
 	ErrorCodeBNO08XFailedToResetBNO08X
-	ErrorCodeBNO08XNilDataBuffer
+	ErrorCodeBNO08XNilPacketBuffer
 	ErrorCodeBNO08XFailedToGetExpectedReportLength
 	ErrorCodeBNO08XInvalidReportLength
 	ErrorCodeBNO08XNilReport
@@ -55,7 +55,6 @@ const (
 	ErrorCodeBNO08XInvalidReportAccuracyStatusUint8
 	ErrorCodeBNO08XSensorReportDataTooShort
 	ErrorCodeBNO08XNoPacketAvailable
-	ErrorCodeBNO08XNilPacketBuffer
 	ErrorCodeBNO08XInvalidReportDataLength
 	ErrorCodeBNO08XUARTEndMissing
 	ErrorCodeBNO08XPacketHeaderBufferTooShort
@@ -72,15 +71,16 @@ const (
 	ErrorCodeBNO08XInvalidI2CAddress
 	ErrorCodeBNO08XFailedToConfigureI2C
 	ErrorCodeBNO08XI2CFailedToWritePacketHeaderBuffer
-	ErrorCodeBNO08XI2CFailedToWritePacketDataBuffer
-	ErrorCodeBNO08XDataBufferTooShortForPacketHeader
+	ErrorCodeBNO08XI2CFailedToWritePacketPacketBuffer
+	ErrorCodeBNO08XPacketBufferTooShortForPacketHeader
+	ErrorCodeBNO08XPacketBufferTooShortForPacket
 	ErrorCodeBNO08XI2CFailedToReadRequestedDataLength
 	ErrorCodeBNO08XInvalidPacketSize
 	ErrorCodeBNO08XNilSPIBus
 	ErrorCodeBNO08XFailedToConfigureSPI
 	ErrorCodeBNO08XFailedToWakeUpSPI
 	ErrorCodeBNO08XSPIFailedToWritePacketHeaderBuffer
-	ErrorCodeBNO08XSPIFailedToWritePacketDataBuffer
+	ErrorCodeBNO08XSPIFailedToWritePacketPacketBuffer
 	ErrorCodeBNO08XSPIFailedToReadRequestedDataLength
 	ErrorCodeBNO08XFailedToEnableDependencyFeature
 	ErrorCodeBNO08XFailedToEnableFeature

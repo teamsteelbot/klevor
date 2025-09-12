@@ -97,6 +97,8 @@ type (
 	}
 )
 
+//
+
 // newReport creates a new report from the Packet data.
 //
 // Parameters:
@@ -151,31 +153,6 @@ func newReportFromPacket(packet *Packet) (*report, tinygotypes.ErrorCode) {
 
 	// Create a new report from the Packet data
 	return newReport(reportID, packet.Data)
-}
-
-// newReportFromPacketBuffer creates a new report from the provided Packet buffer.
-//
-// Parameters:
-//
-//	buffer: A byte slice containing the Packet bytes.
-//
-// Returns:
-//
-// A pointer to the newly created report or an error if the Packet bytes are invalid
-func newReportFromPacketBuffer(buffer []byte) (*report, tinygotypes.ErrorCode) {
-	// Check for nil buffer
-	if buffer == nil {
-		return nil, ErrorCodeBNO08XNilPacketBuffer
-	}
-
-	// Create a new Packet from the Packet bytes
-	packet, err := NewPacketFromBuffer(buffer)
-	if err != tinygotypes.ErrorCodeNil {
-		return nil, ErrorCodeBNO08XFailedToCreateReportFromPacketBuffer
-	}
-
-	// Create a new report from the Packet
-	return newReportFromPacket(packet)
 }
 
 // newSensorReport creates a new sensorReport from the provided report bytes.

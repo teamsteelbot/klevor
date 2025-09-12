@@ -163,14 +163,11 @@ const (
 	// EnabledActivities is a bitmask for enabled activities. All activities; 1 bit set for each of 8 activities, + Unknown
 	EnabledActivities uint32 = 0x1FF
 
-	// DataBufferSize is the size of the data buffer
-	DataBufferSize = 512
+	// PacketBufferSize is the size of the packet buffer
+	PacketBufferSize = 512
 
-	// CommandBufferSize is the size of the command buffer
-	CommandBufferSize = 12
-
-	// CalibrationBufferSize is the size of the calibration buffer
-	CalibrationBufferSize = 9
+	// commandParametersBufferSize is the size of the command parameters buffer
+	commandParametersBufferSize = 9
 
 	// ResetPacketDelay is the delay after sending a reset command
 	ResetPacketDelay = 100 * time.Millisecond
@@ -297,8 +294,8 @@ var (
 	// ResetCommandData is the command data for the reset command
 	ResetCommandData = []byte{CommandReset}
 
-	// DebugHeader is the header for debug messages
-	DebugHeader = "[BNO08x] "
+	// ReportIDProductIDRequestData is the report ID for the report product ID request data.
+	ReportIDProductIDRequestData = []byte{ReportIDProductIDRequest, 0}
 
 	// MaxPackets is the default maximum number of packets to read when waiting for a specific packet type
 	MaxPackets = 10
@@ -315,9 +312,6 @@ var (
 	// MaxClearPendingPacketsTimeout is the maximum timeout for clearing pending packets in seconds
 	MaxClearPendingPacketsTimeout = 5 * time.Second
 
-	// QuaternionReadTimeout is the timeout for reading quaternion data in seconds
-	QuaternionReadTimeout float32 = 0.500
-
 	// FeatureEnableTimeout is the timeout for enabling features
 	FeatureEnableTimeout = 500 * time.Millisecond
 
@@ -326,15 +320,6 @@ var (
 
 	// UARTRVCTimeout is the timeout for UART-RVC reads
 	UARTRVCTimeout = 500 * time.Millisecond
-
-	// AdvertisementPacketLength is the length of the initial advertisement packet
-	AdvertisementPacketLength = 272
-
-	// MaxDataLength is the maximum length of data in a packet (considering the advertisement packet as the largest)
-	MaxDataLength = AdvertisementPacketLength
-
-	// ReportIDProductIDRequestData is the report ID for the report product ID request data.
-	ReportIDProductIDRequestData = []byte{ReportIDProductIDRequest, 0}
 
 	// QuaternionScalar is the scalar for quaternion values
 	QuaternionScalar = math.Pow(2, 14*-1)

@@ -57,3 +57,4 @@ __pycache__
 # Executables
 /**/*/*.exe
 /devices/raspberry-pi-5/go/output
+/devices/raspberry-pi-pico-2w/tinygo/output
