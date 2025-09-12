@@ -24,14 +24,30 @@ type (
 
 	// Logger is an interface for logging messages
 	Logger interface {
-		LogMessage(messageBuffer []byte, header bool, newline bool)
-		LogMessageWithHexCode(messageBuffer []byte, hexBuffer []byte, header bool, newline bool)
-		LogMessageWithUint8AsHexCode(messageBuffer []byte, value uint8, header bool, newline bool)
-		LogMessageWithUint16AsHexCode(messageBuffer []byte, value uint16, header bool, newline bool)
-		LogMessageWithUint32AsHexCode(messageBuffer []byte, value uint32, header bool, newline bool)
-		LogMessageWithErrorCode(messageBuffer []byte, errCode tinygotypes.ErrorCode, header bool, newline bool)
-		LogErrorCode(errCode tinygotypes.ErrorCode, header bool, newline bool)
-		LogHexCode(hexBuffer []byte, header bool, newline bool)
+		AddSpace()
+		AddNewline()
+		AddTab()
+		AddHexCode(hexCode []byte, newline bool)
+		AddErrorCode(errCode tinygotypes.ErrorCode, newline bool)
+		AddUint8(value uint8, newline bool, hexCode bool)
+		AddUint16(value uint16, newline bool, hexCode bool)
+		AddUint32(value uint32, newline bool, hexCode bool)
+		AddMessage(message []byte, newline bool)
+		AddMessageWithHexCode(message []byte, hexBuffer []byte, separate bool, newline bool)
+		AddMessageWithErrorCode(message []byte, errCode tinygotypes.ErrorCode, separate bool, newline bool)
+		AddMessageWithUint8(message []byte, value uint8, separate bool, newline bool, hexCode bool)
+		AddMessageWithUint16(message []byte, value uint16, separate bool, newline bool, hexCode bool)
+		AddMessageWithUint32(message []byte, value uint32, separate bool, newline bool, hexCode bool)
+		Debug()
+		DebugMessage(message []byte)
+		Info()
+		InfoMessage(message []byte)
+		Warning()
+		WarningMessage(message []byte)
+		WarningMessageWithErrorCode(message []byte, errCode tinygotypes.ErrorCode, separate bool)
+		Error()
+		ErrorMessage(message []byte)
+		ErrorMessageWithErrorCode(message []byte, errCode tinygotypes.ErrorCode, separate bool)
 	}
 
 	// PacketReader is an interface for reading packets from the BNO08x sensor
