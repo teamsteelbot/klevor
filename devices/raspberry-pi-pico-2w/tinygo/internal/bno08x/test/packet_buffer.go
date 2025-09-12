@@ -101,16 +101,6 @@ func (pb *DefaultPacketBuffer) validateChannelNumber(channel uint8) tinygotypes.
 //
 //	An error if the sequence number could not be updated, otherwise nil.
 func (pb *DefaultPacketBuffer) UpdateSequenceNumber(newPacket Packet) tinygotypes.ErrorCode {
-	// Check if the packet is nil
-	if newPacket == nil {
-		return ErrorCodeBNO08XNilPacket
-	}
-
-	// Check if the packet header is nil
-	if newPacket.Header == nil {
-		return ErrorCodeBNO08XNilPacketHeader
-	}
-
 	// Get the channel number and sequence number from the packet
 	channel := newPacket.ChannelNumber()
 	seq := newPacket.Header.SequenceNumber

@@ -386,7 +386,7 @@ func (b *BNO08X) waitForPacketType(
 			// Get the report ID of the new packet
 			newPacketReportID, err := newPacket.ReportID()
 			if err != tinygotypes.ErrorCodeNil {
-				return nil, err
+				return Packet{}, err
 			}
 
 			// If the report ID matches, return the packet
@@ -400,11 +400,11 @@ func (b *BNO08X) waitForPacketType(
 				b.logger.InfoMessage(passingPacketToHandlerForDeSlicing)
 			}
 			if err = b.handlePacket(newPacket); err != tinygotypes.ErrorCodeNil {
-				return nil, err
+				return Packet{}, err
 			}
 		}
 	}
-	return nil, ErrorCodeBNO08XWaitingForPacketTimedOut
+	return Packet{}, ErrorCodeBNO08XWaitingForPacketTimedOut
 }
 
 // waitForPacket waits for a Packet to be available from the Packet reader within the specified timeout.
@@ -420,7 +420,7 @@ func (b *BNO08X) waitForPacket(timeout time.Duration) (Packet, tinygotypes.Error
 	startTime := time.Now()
 	for time.Since(startTime) < timeout {
 		// Check if data is ready to be read
-		if !b.packetReader.IsDataReady() {
+		if !b.packetReader.IsAvailableToRead() {
 			time.Sleep(PacketReadyCheckDelay)
 			continue
 		}
@@ -435,7 +435,7 @@ func (b *BNO08X) waitForPacket(timeout time.Duration) (Packet, tinygotypes.Error
 		}
 		return newPacket, tinygotypes.ErrorCodeNil
 	}
-	return nil, ErrorCodeBNO08XWaitingForPacketTimedOut
+	return Packet{}, ErrorCodeBNO08XWaitingForPacketTimedOut
 }
 
 // handlePacket processes a Packet by separating it into individual reports and processing each report.
@@ -448,16 +448,6 @@ func (b *BNO08X) waitForPacket(timeout time.Duration) (Packet, tinygotypes.Error
 //
 //	An error if the Packet cannot be processed, otherwise nil.
 func (b *BNO08X) handlePacket(packet Packet) tinygotypes.ErrorCode {
-	// Check if the packet is nil
-	if packet == nil {
-		return ErrorCodeBNO08XNilPacket
-	}
-
-	// Check if the packet header is nil
-	if packet.Header == nil {
-		return ErrorCodeBNO08XNilPacketHeader
-	}
-
 	// Check packet data length
 	if len(packet.Data) != int(packet.Header.DataLength) {
 		return ErrorCodeBNO08XMismatchedPacketDataLength
@@ -517,11 +507,6 @@ func (b *BNO08X) handlePacket(packet Packet) tinygotypes.ErrorCode {
 //
 //	An error if the report cannot be processed, otherwise nil.
 func (b *BNO08X) processReport(report report) tinygotypes.ErrorCode {
-	// Check if the report is nil
-	if report == nil {
-		return ErrorCodeBNO08XNilReport
-	}
-
 	// Check if it's a control report
 	if IsControlReportID(report.ID) {
 		return b.processControlReport(report)
@@ -689,11 +674,6 @@ func (b *BNO08X) processReport(report report) tinygotypes.ErrorCode {
 //
 //	An error if the control report cannot be processed, otherwise nil.
 func (b *BNO08X) processControlReport(report report) tinygotypes.ErrorCode {
-	// Check if the report is nil
-	if report == nil {
-		return ErrorCodeBNO08XNilReport
-	}
-
 	// Handle the control report based on its ID
 	switch report.ID {
 	case ReportIDProductIDResponse:
@@ -745,7 +725,7 @@ func (b *BNO08X) processControlReport(report report) tinygotypes.ErrorCode {
 // processAvailablePackets processes all available packets from the Packet reader, handling each Packet until the maximum number of packets is reached.
 func (b *BNO08X) processAvailablePackets() {
 	processedCount := 0
-	for b.packetReader.IsDataReady() {
+	for b.packetReader.IsAvailableToRead() {
 		// Check if we've reached the maximum number of packets to process
 		if processedCount >= MaxPackets {
 			break
@@ -942,7 +922,7 @@ func (b *BNO08X) EnableFeature(featureID uint8) tinygotypes.ErrorCode {
 
 		// Get the feature enable report buffer
 		packetBuffer := b.packetBuffer.GetBuffer()
-		setFeatureEnableReportBuffer := packetBuffer[PacketHeaderLength : PacketHeaderLength+SetFeatureCommandReportLength]
+		setFeatureEnableReportBuffer := packetBuffer[PacketHeaderLength : PacketHeaderLength+ReportSetFeatureCommandLength]
 
 		// Create the feature enable report based on the feature ID
 		if featureID == ReportIDActivityClassifier {
@@ -1084,7 +1064,7 @@ func (b *BNO08X) sendMeCommand(subcommandParams []byte) tinygotypes.ErrorCode {
 	startTime := time.Now()
 
 	// Insert the command request report into the local buffer
-	packetBuffer = b.packetBuffer.GetBuffer()
+	packetBuffer := b.packetBuffer.GetBuffer()
 	packetDataBuffer := packetBuffer[PacketHeaderLength:CommandBufferSize+PacketHeaderLength]
 	if err := insertCommandRequestReport(
 		MagnetometerCalibration,

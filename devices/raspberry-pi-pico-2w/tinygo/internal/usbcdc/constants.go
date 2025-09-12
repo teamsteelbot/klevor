@@ -6,6 +6,7 @@ import (
 	internalchallenge "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/challenge"
 	internalledonboard "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/led/onboard"
 	tinygo_types "github.com/ralvarezdev/tinygo-types"
+	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal"
 )
 
 const (
@@ -65,6 +66,9 @@ var (
 
 	// USBCDCHandler is the USB CDC handler for the Raspberry Pi Pico 2W
 	USBCDCHandler Handler
+
+	// failedToInitializeUSBMessage is the message printed when USB initialization fails
+	failedToInitializeUSBMessage = []byte("Failed to initialize USB-CDC handler:")
 )
 
 func init() {
@@ -73,7 +77,7 @@ func init() {
 		internalledonboard.OnBoardHandler,
 	)
 	if err != tinygo_types.ErrorCodeNil {
-		panic("failed to initialize usb cdc handler")
+		internal.Logger.ErrorMessageWithErrorCode(failedToInitializeUSBMessage, err)
 	}
 	USBCDCHandler = usbCDCHandler
 }

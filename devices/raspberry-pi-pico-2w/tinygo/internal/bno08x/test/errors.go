@@ -14,14 +14,11 @@ const (
 const (
 	ErrorCodeBNO08XPacketBufferIndexOutOfRange tinygotypes.ErrorCode = tinygotypes.ErrorCode(iota + ErrorCodeBNO08XStartNumber)
 	ErrorCodeBNO08XInvalidChannelNumber
-	ErrorCodeBNO08XNilPacket
-	ErrorCodeBNO08XNilPacketHeader
 	ErrorCodeBNO08XNilPacketReader
 	ErrorCodeBNO08XNilPacketWriter
 	ErrorCodeBNO08XNilUARTBus
 	ErrorCodeBNO08XFailedToConfigureUART
 	ErrorCodeBNO08XFailedToResetUARTRVC
-	ErrorCodeBNO08XNilRotationVector
 	ErrorCodeBNO08XUARTRVCNilFrame
 	ErrorCodeBNO08XUARTRVCFrameTooShort
 	ErrorCodeBNO08XUARTRVCInvalidChecksum
@@ -39,7 +36,6 @@ const (
 	ErrorCodeBNO08XNilPacketBuffer
 	ErrorCodeBNO08XFailedToGetExpectedReportLength
 	ErrorCodeBNO08XInvalidReportLength
-	ErrorCodeBNO08XNilReport
 	ErrorCodeBNO08XFailedToGetReportID
 	ErrorCodeBNO08XInsertCommandRequestReportBufferTooShort
 	ErrorCodeBNO08XInsertCommandRequestReportTooManyArguments

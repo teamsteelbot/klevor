@@ -5,6 +5,7 @@ import (
 
 	internalpullup "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/pullup"
 	tinygotypes "github.com/ralvarezdev/tinygo-types"
+	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal"
 )
 
 var (
@@ -16,6 +17,9 @@ var (
 
 	// ChallengeHandler is the default challenge handler that uses the pull-up handler.
 	ChallengeHandler Handler
+
+	// failedToInitializeChallengeMessage is the message printed when challenge initialization fails
+	failedToInitializeChallengeMessage = []byte("Failed to initialize challenge handler:")
 )
 
 func init() {
@@ -29,7 +33,7 @@ func init() {
 		ParkingPullUpHandler,
 	)
 	if err != tinygotypes.ErrorCodeNil {
-		panic("failed to initialize challenge handler")
+		internal.Logger.ErrorMessageWithErrorCode(failedToInitializeChallengeMessage, err)
 	}
 	ChallengeHandler = challengeHandler
 }

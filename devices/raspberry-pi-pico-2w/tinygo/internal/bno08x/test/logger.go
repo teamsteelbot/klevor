@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 	"encoding/binary"
+	"math"
 
 	tinygotypes "github.com/ralvarezdev/tinygo-types"
 )
@@ -60,6 +61,9 @@ var (
 
 	// uint64Buffer is the buffer used for hex code messages
 	uint64Buffer = [8]byte{}
+
+	// float64Buffer is the buffer used for float64 messages
+	float64Buffer = [8]byte{}
 )
 
 // NewDefaultLogger creates a new DefaultLogger instance
@@ -243,6 +247,18 @@ func (l *DefaultLogger) AddUint64(value uint64, newline bool, hexCode bool) {
 	}
 }
 
+// AddFloat64 function to add a float64 value to the messageBuffer
+//
+// Parameters:
+//
+//	value: The float64 value to add.
+//	newline: Whether to include a newline at the end of the log message.
+func (l *DefaultLogger) AddFloat64(value float64, newline bool) {
+	// Store the float64 value in the buffer
+	binary.BigEndian.PutUint64(float64Buffer[:], math.Float64bits(value))
+	l.AddMessage(float64Buffer[:], newline)
+}
+
 // AddMessage function to add a message to the messageBuffer
 //
 // Parameters:
@@ -359,6 +375,22 @@ func (l *DefaultLogger) AddMessageWithUint64(message []byte, value uint64, separ
 		l.AddSpace()
 	}
 	l.AddUint64(value, newline, hexCode)
+}
+
+// AddMessageWithFloat64 function to add a message and float64 value to the messageBuffer
+//
+// Parameters:
+//
+//	message: The byte slice representing the message to add.
+//	value: The float64 value to add.
+//	separate: Whether to include a space between the message and float64 value.
+//	newline: Whether to include a newline at the end of the log message.
+func (l *DefaultLogger) AddMessageWithFloat64(message []byte, value float64, separate bool, newline bool) {
+	l.AddMessage(message, false)
+	if separate {
+		l.AddSpace()
+	}
+	l.AddFloat64(value, newline)
 }
 
 // log functions for different log levels

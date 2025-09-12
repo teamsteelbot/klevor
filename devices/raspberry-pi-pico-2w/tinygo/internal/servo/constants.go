@@ -7,6 +7,7 @@ import (
 	internalmovement "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/movement"
 	internalusbcdc "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc"
 	tinygotypes "github.com/ralvarezdev/tinygo-types"
+	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal"
 )
 
 const (
@@ -46,6 +47,9 @@ var (
 
 	// ServoHandler is the default servo handler using the Raspberry Pi Pico 2W's PWM1 and GPIO2.
 	ServoHandler Handler
+
+	// failedToInitializeServoMessage is the message printed when servo initialization fails
+	failedToInitializeServoMessage = []byte("Failed to initialize Servo handler:")
 )
 
 func init() {
@@ -58,7 +62,7 @@ func init() {
 		DefaultOptions,
 	)
 	if err != tinygotypes.ErrorCodeNil {
-		panic("failed to initialize servo handler")
+		internal.Logger.ErrorMessageWithErrorCode(failedToInitializeServoMessage, err)
 	}
 	ServoHandler = servoHandler
 }

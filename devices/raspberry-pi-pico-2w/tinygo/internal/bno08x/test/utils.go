@@ -4,9 +4,6 @@ package tinygo_bno08x
 
 import (
 	"time"
-	"strconv"
-	"strings"
-	"os"
 
 	"machine"
 

@@ -3,7 +3,6 @@
 package tinygo_bno08x
 
 import (
-	"strconv"
 	"time"
 
 	"machine"
@@ -28,7 +27,8 @@ type (
 		packetBuffer   PacketBuffer
 		logger     Logger
 		address      uint16 // I2C address of the device
-		cachedHeader *PacketHeader
+		cachedHeader PacketHeader
+		isHeaderCached bool
 	}
 
 	// I2CPacketWriter represents the Packet writer for the I2C interface.
@@ -49,9 +49,6 @@ type (
 var (
 	// probeDeviceBuffer is a buffer used for probing the I2C device.
 	probeDeviceBuffer = [1]byte{}
-
-	// headerOnlyPacketMessage is the message printed when a header-only packet is received
-	headerOnlyPacketMessage = []byte("Header-only packet received; skipping read")
 )
 
 // probeDevice tries a zero-length write then a 1-byte read to confirm presence.
@@ -374,14 +371,14 @@ func newI2CPacketReader(
 // A PacketHeader or an error if reading the header fails.
 func (pr *I2CPacketReader) readHeader() (PacketHeader, tinygotypes.ErrorCode) {
 	// Check if the destination slice is nil
-	packetBuffer := pr.packetBuffer.GetData()
+	packetBuffer := pr.packetBuffer.GetBuffer()
 	if packetBuffer == nil {
-		return nil, ErrorCodeBNO08XNilDestinationBuffer
+		return PacketHeader{}, ErrorCodeBNO08XNilDestinationBuffer
 	}
 
 	// Check if start and end are within bounds
 	if len(packetBuffer) < PacketHeaderLength {
-		return nil, ErrorCodeBNO08XPacketBufferTooShortForPacketHeader
+		return PacketHeader{}, ErrorCodeBNO08XPacketBufferTooShortForPacketHeader
 	}
 
 	// Read the first 4 bytes from the I2C bus to get the Packet header.
@@ -390,12 +387,12 @@ func (pr *I2CPacketReader) readHeader() (PacketHeader, tinygotypes.ErrorCode) {
 		nil,
 		packetBuffer[:PacketHeaderLength],
 	); err != nil {
-		return nil, ErrorCodeBNO08XI2CFailedToReadPacketHeader
+		return PacketHeader{}, ErrorCodeBNO08XI2CFailedToReadPacketHeader
 	}
 
 	header, err := NewPacketHeaderFromBuffer(packetBuffer[:PacketHeaderLength])
 	if err != tinygotypes.ErrorCodeNil {
-		return nil, err
+		return PacketHeader{}, err
 	}
 
 	// Debug log the header
@@ -408,16 +405,16 @@ func (pr *I2CPacketReader) readHeader() (PacketHeader, tinygotypes.ErrorCode) {
 // Returns:
 //
 // A PacketHeader or an error if reading the header fails.
-func (pr *I2CPacketReader) nextHeader() (*PacketHeader, tinygotypes.ErrorCode) {
-	if pr.cachedHeader != nil {
-		header := pr.cachedHeader
-		pr.cachedHeader = nil
-		return header, tinygotypes.ErrorCodeNil
+func (pr *I2CPacketReader) nextHeader() (PacketHeader, tinygotypes.ErrorCode) {
+	// Return cached header if available
+	if  pr.isHeaderCached {
+		pr.isHeaderCached = false
+		return pr.cachedHeader, tinygotypes.ErrorCodeNil
 	}
 
 	header, err := pr.readHeader()
 	if err != tinygotypes.ErrorCodeNil {
-		return nil, err
+		return PacketHeader{}, err
 	}
 	return header, tinygotypes.ErrorCodeNil
 }
@@ -431,12 +428,12 @@ func (pr *I2CPacketReader) ReadPacket() (Packet, tinygotypes.ErrorCode) {
 	// Get next header (cached or read new)
 	header, err := pr.nextHeader()
 	if err != tinygotypes.ErrorCodeNil {
-		return nil, err
+		return Packet{}, err
 	}
 
 	// Validate header fields
 	if header.PacketByteCount < PacketHeaderLength {
-		return nil, ErrorCodeBNO08XInvalidPacketSize
+		return Packet{}, ErrorCodeBNO08XInvalidPacketSize
 	}
 
 	// Extract header fields
@@ -449,7 +446,7 @@ func (pr *I2CPacketReader) ReadPacket() (Packet, tinygotypes.ErrorCode) {
 		channelNumber,
 		sequenceNumber,
 	); err != tinygotypes.ErrorCodeNil {
-		return nil, err
+		return Packet{}, err
 	}
 
 	// Skip header-only / empty packets
@@ -457,33 +454,34 @@ func (pr *I2CPacketReader) ReadPacket() (Packet, tinygotypes.ErrorCode) {
 		if pr.logger != nil {
 			pr.logger.WarningMessage(headerOnlyPacketMessage)
 		}
-		return nil, ErrorCodeBNO08XNoPacketAvailable
+		return Packet{}, ErrorCodeBNO08XNoPacketAvailable
 	}
 
 	// packetByteCount includes 4 header bytes
-	payloadLength := packetByteCount - PacketHeaderLength
+	dataLength := packetByteCount - PacketHeaderLength
 
 	// Check if packet buffer is large enough
-	packetBuffer := pr.packetBuffer.GetData()
+	packetBuffer := pr.packetBuffer.GetBuffer()
 	if len(packetBuffer) < packetByteCount {
-		return nil, ErrorCodeBNO08XPacketBufferTooShortForPacket
+		return Packet{}, ErrorCodeBNO08XPacketBufferTooShortForPacket
 	}
 
 	// Preserve first 4 header bytes already read; read payload into slice after header.
-	if payloadLength > 0 {
+	dataBuffer := packetBuffer[PacketHeaderLength:PacketHeaderLength+dataLength]
+	if dataLength > 0 {
 		if err := pr.i2cBus.Tx(
 			pr.address,
 			nil,
-			packetBuffer[PacketHeaderLength:packetByteCount],
+			dataBuffer,
 		); err != nil {
-			return nil, ErrorCodeBNO08XI2CFailedToReadRequestedDataLength
+			return Packet{}, ErrorCodeBNO08XI2CFailedToReadRequestedDataLength
 		}
 	}
 
 	// Create a full Packet from the packet buffer
-	packet, err := NewPacket(packetBuffer[packetByteCount], header)
+	packet, err := NewPacket(dataBuffer, header)
 	if err != tinygotypes.ErrorCodeNil {
-		return nil, err
+		return Packet{}, err
 	}
 
 	// Debug log the packet
@@ -491,7 +489,7 @@ func (pr *I2CPacketReader) ReadPacket() (Packet, tinygotypes.ErrorCode) {
 
 	// Update the sequence number in the packet buffer
 	if err = pr.packetBuffer.UpdateSequenceNumber(packet); err != tinygotypes.ErrorCodeNil {
-		return nil, err
+		return Packet{}, err
 	}
 	return packet, tinygotypes.ErrorCodeNil
 }
@@ -502,8 +500,8 @@ func (pr *I2CPacketReader) ReadPacket() (Packet, tinygotypes.ErrorCode) {
 //
 // True if data is ready, false otherwise. It also checks for errors in the header.
 func (pr *I2CPacketReader) IsAvailableToRead() bool {
-	// Check cached header first
-	if pr.cachedHeader != nil {
+	// Check if header is already cached
+	if pr.isHeaderCached {
 		return true
 	}
 
@@ -512,5 +510,6 @@ func (pr *I2CPacketReader) IsAvailableToRead() bool {
 		return false
 	}
 	pr.cachedHeader = header
+	pr.isHeaderCached = true
 	return true
 }

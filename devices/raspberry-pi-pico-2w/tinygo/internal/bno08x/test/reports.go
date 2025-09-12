@@ -175,11 +175,6 @@ func newReport(id uint8, data []byte) (report, tinygotypes.ErrorCode) {
 //
 // A report object containing the ID and data, or an error if the Packet is nil or if the report ID cannot be retrieved
 func newReportFromPacket(packet Packet) (report, tinygotypes.ErrorCode) {
-	// Check if the provided Packet is nil
-	if packet == nil {
-		return report{}, ErrorCodeBNO08XNilPacket
-	}
-
 	// Get the report ID from the Packet
 	reportID, err := packet.ReportID()
 	if err != tinygotypes.ErrorCodeNil {
@@ -392,7 +387,7 @@ func (s *sensorID) Log(logger Logger) {
 	logger.AddMessageWithUint32(sensorIDReportPartNumberPrefix, s.SoftwarePartNumber, true, true, false)
 
 	// Log the software version
-	logger.AddMessageWithUint32(sensorIDReportVersionPrefix, s.SoftwareMajorVersion, true, false, false)
+	logger.AddMessageWithUint8(sensorIDReportVersionPrefix, s.SoftwareMajorVersion, true, false, false)
 	logger.AddMessageWithUint8(sensorIDSoftwareVersionSeparator, s.SoftwareMinorVersion, false, false, false)
 	logger.AddMessageWithUint16(sensorIDSoftwareVersionSeparator, s.SoftwarePatchVersion, false, true, false)
 

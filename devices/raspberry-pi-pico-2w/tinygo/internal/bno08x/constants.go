@@ -7,14 +7,15 @@ import (
 
 	"machine"
 
+	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal"
 	ralvarezdevbno08x "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/bno08x/test"
 	//ralvarezdevbno08x "github.com/ralvarezdev/go-bno08x"
 	tinygotypes "github.com/ralvarezdev/tinygo-types"
 )
 
 var (
-	// DataBuffer is the default data buffer size for the BNO08x sensor.
-	DataBuffer = ralvarezdevbno08x.NewDefaultDataBuffer()
+	// PacketBuffer is the default packet buffer for the BNO08x sensor.
+	PacketBuffer = ralvarezdevbno08x.NewDefaultPacketBuffer()
 
 	// YawDegreesDifference is the difference in degrees to consider a yaw change.
 	YawDegreesDifference = 1.0
@@ -44,10 +45,10 @@ func init() {
 			machine.GPIO2,
 			machine.GPIO3,
 			machine.GPIO4,
-			DataBuffer,
+			PacketBuffer,
 			afterReset,
-			// ralvarezdevbno08x.NewUARTOptions(ralvarezdevbno08x.NewDefaultDebugger(), true),
-			ralvarezdevbno08x.NewUARTOptions(nil, false),
+			ralvarezdevbno08x.NewUARTOptions(internal.Logger, true),
+			// ralvarezdevbno08x.NewUARTOptions(nil, false),
 		)
 		if err == tinygotypes.ErrorCodeNil {
 			UART = uart

@@ -182,7 +182,7 @@ func (u *UARTRVC) ParseFrame() tinygotypes.ErrorCode {
 	}
 	if checksumCalc != checksum {
 		if u.logger != nil {
-			u.logger.InfoMessage(invalidChecksumMessage, true)
+			u.logger.InfoMessage(invalidChecksumMessage)
 		}
 		return ErrorCodeBNO08XUARTRVCInvalidChecksum
 	}
@@ -269,13 +269,13 @@ func (u *UARTRVC) Read() tinygotypes.ErrorCode {
 
 		// Print the raw frame for debugging
 		if u.logger != nil {
-			u.logger.InfoMessage(receivedFrameMessage, true)
+			u.logger.InfoMessage(receivedFrameMessage)
 		}
 
 		// Parse the frame
 		if err := u.ParseFrame(); err != tinygotypes.ErrorCodeNil {
 			if u.logger != nil {
-				u.logger.InfoMessage(failedToParseFrameMessage, true)
+				u.logger.WarningMessage(failedToParseFrameMessage)
 			}
 			return ErrorCodeBNO08XFailedToParseFrame
 		}

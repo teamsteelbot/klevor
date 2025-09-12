@@ -337,31 +337,31 @@ func (pr *UARTPacketReader) readHeader() tinygotypes.ErrorCode {
 // Returns:
 //
 // A Packet object and an error if any occurs.
-func (pr *UARTPacketReader) ReadPacket() (*Packet, tinygotypes.ErrorCode) {
+func (pr *UARTPacketReader) ReadPacket() (Packet, tinygotypes.ErrorCode) {
 	// Read packet header
 	if err := pr.readHeader(); err != tinygotypes.ErrorCodeNil {
-		return nil, err
+		return Packet{}, err
 	}
 
 	// Parse header
 	packetBuffer := pr.packetBuffer.GetBuffer()
 	header, err := NewPacketHeaderFromBuffer(packetBuffer[:PacketHeaderLength])
 	if err != tinygotypes.ErrorCodeNil {
-		return nil, err
+		return Packet{}, err
 	}
 	if header.PacketByteCount == 0 {
-		return nil, ErrorCodeBNO08XNoPacketAvailable
+		return Packet{}, ErrorCodeBNO08XNoPacketAvailable
 	}
 	channelNumber := header.ChannelNumber
 
 	// Check if the channel number is valid
 	if channelNumber > MaxChannelNumber {
-		return nil, ErrorCodeBNO08XInvalidChannelNumber
+		return Packet{}, ErrorCodeBNO08XInvalidChannelNumber
 	}
 
 	// Check the data length for the packet
 	if header.DataLength > MaxDataLength {
-		return nil, ErrorCodeBNO08XInvalidReportDataLength
+		return Packet{}, ErrorCodeBNO08XInvalidReportDataLength
 	}
 
 	// Log the header
@@ -373,22 +373,22 @@ func (pr *UARTPacketReader) ReadPacket() (*Packet, tinygotypes.ErrorCode) {
 		0,
 		int(header.PacketByteCount),
 	); err != tinygotypes.ErrorCodeNil {
-		return nil, err
+		return Packet{}, err
 	}
 
 	// Expect trailing 0x7E
 	endByte, err := pr.readByte()
 	if err != tinygotypes.ErrorCodeNil {
-		return nil, err
+		return Packet{}, err
 	}
 	if endByte != UARTStartAndEndByte {
-		return nil, ErrorCodeBNO08XUARTEndMissing
+		return Packet{}, ErrorCodeBNO08XUARTEndMissing
 	}
 
 	// Initialize packet
 	packet, err := NewPacket(packetBuffer[PacketHeaderLength:header.PacketByteCount], header)
 	if err != tinygotypes.ErrorCodeNil {
-		return nil, err
+		return Packet{}, err
 	}
 
 	// Log the packet
@@ -396,7 +396,7 @@ func (pr *UARTPacketReader) ReadPacket() (*Packet, tinygotypes.ErrorCode) {
 
 	// Update sequence number
 	if err := pr.packetBuffer.UpdateSequenceNumber(packet); err != tinygotypes.ErrorCodeNil {
-		return nil, err
+		return Packet{}, err
 	}
 	return packet, tinygotypes.ErrorCodeNil
 }

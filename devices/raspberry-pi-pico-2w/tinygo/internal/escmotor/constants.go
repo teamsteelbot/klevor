@@ -9,6 +9,7 @@ import (
 	internalmovement "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/movement"
 	internalusbcdc "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc"
 	tinygotypes "github.com/ralvarezdev/tinygo-types"
+	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal"
 )
 
 const (
@@ -51,6 +52,9 @@ var (
 
 	// ESCMotorHandler is the default handler for ESC motors
 	ESCMotorHandler Handler
+
+	// failedToInitializeEscMotorMessage is the message printed when esc motor initialization fails
+	failedToInitializeEscMotorMessage = []byte("Failed to initialize ESC Motor handler:")
 )
 
 func init() {
@@ -63,7 +67,7 @@ func init() {
 		DefaultOptions,
 	)
 	if err != tinygotypes.ErrorCodeNil {
-		panic("failed to initialize esc motor handler")
+		internal.Logger.ErrorMessageWithErrorCode(failedToInitializeEscMotorMessage, err)
 	}
 	ESCMotorHandler = escMotorHandler
 }

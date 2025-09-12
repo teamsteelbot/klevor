@@ -7,6 +7,7 @@ import (
 
 	internalpullup "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/pullup"
 	tinygotypes "github.com/ralvarezdev/tinygo-types"
+	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal"
 )
 
 var (
@@ -18,6 +19,9 @@ var (
 
 	// SwitchHandler is the default switch handler that uses the pull-up handler.
 	SwitchHandler Handler
+
+	// failedToInitializeSwitchMessage is the message printed when switch initialization fails
+	failedToInitializeSwitchMessage = []byte("Failed to initialize switch handler:")
 )
 
 func init() {
@@ -26,7 +30,7 @@ func init() {
 		DefaultInterval,
 	)
 	if err != tinygotypes.ErrorCodeNil {
-		panic("failed to initialize switch handler")
+		internal.Logger.ErrorMessageWithErrorCode(failedToInitializeSwitchMessage, err)
 	}
 	SwitchHandler = switchHandler
 

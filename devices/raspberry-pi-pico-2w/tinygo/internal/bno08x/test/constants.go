@@ -121,6 +121,9 @@ const (
 	// ReportIDSleepDetector is the report ID for the sleep detector.
 	ReportIDSleepDetector uint8 = 0x1F
 
+	// ReportIDTiltDetector is the report ID for the tilt detector.
+	ReportIDTiltDetector uint8 = 0x20
+
 	// ReportIDPocketDetector is the report ID for the pocket detector.
 	ReportIDPocketDetector uint8 = 0x21
 
@@ -195,6 +198,12 @@ const (
 
 	// ReportTimestampRebaseLength is the length of the timestamp rebase report
 	ReportTimestampRebaseLength int = 5
+
+	// AdvertisementPacketLength is the length of the advertisement packet
+	AdvertisementPacketLength int = 272
+
+	// MaxDataLength is the maximum data length for a packet
+	MaxDataLength = AdvertisementPacketLength
 
 	// DefaultReportInterval is the default report interval in microseconds
 	DefaultReportInterval uint32 = 50_000
@@ -495,4 +504,7 @@ var (
 		1,
 		16,
 	)
+
+	// headerOnlyPacketMessage is the message printed when a header-only packet is received
+	headerOnlyPacketMessage = []byte("Header-only packet received; skipping read")
 )

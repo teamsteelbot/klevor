@@ -4,7 +4,6 @@ package tinygo_bno08x
 
 import (
 	"encoding/binary"
-	"strconv"
 
 	tinygotypes "github.com/ralvarezdev/tinygo-types"
 )
@@ -192,8 +191,8 @@ var (
 	// sendingPacketHeaderMessage is the message printed when sending a packet header
 	sendingPacketHeaderMessage = []byte("SENDING PACKET HEADER: ")
 
-	// receivingPacketHeaderMessage is the message printed when receiving a packet header
-	receivingPacketHeaderMessage = []byte("RECEIVED PACKET HEADER: ")
+	// receivedPacketHeaderMessage is the message printed when receiving a packet header
+	receivedPacketHeaderMessage = []byte("RECEIVED PACKET HEADER: ")
 
 	// dataLengthPrefix is the prefix for the data length in the packet header log
 	dataLengthPrefix = []byte("\t Data Length: ")
@@ -207,8 +206,8 @@ var (
 	// sendingPacketDataMessage is the message printed when sending a packet data
 	sendingPacketDataMessage = []byte("SENDING PACKET DATA: ")
 
-	// receivingPacketDataMessage is the message printed when receiving a packet data
-	receivingPacketDataMessage = []byte("RECEIVED PACKET DATA: ")
+	// receivedPacketDataMessage is the message printed when receiving a packet data
+	receivedPacketDataMessage = []byte("RECEIVED PACKET DATA: ")
 
 	// noDataMessage is the message printed when there is no data in the packet
 	noDataMessage = []byte("\t No data")
@@ -584,10 +583,10 @@ func (ph *PacketHeader) Log(isBeingSent bool, logger Logger) {
 	if isBeingSent {
 		logger.AddMessage(sendingPacketHeaderMessage, true)
 	} else {
-		logger.AddMessage(receivingPacketHeaderMessage, true)
+		logger.AddMessage(receivedPacketHeaderMessage, true)
 	}
 
-	logger.AddMessageWithUint64(dataLengthPrefix, uint(ph.DataLength), true, true, false)
+	logger.AddMessageWithUint64(dataLengthPrefix, uint64(ph.DataLength), true, true, false)
 	logger.AddMessageWithUint8(channelPrefix, ph.ChannelNumber, true, true, true)
 	logger.AddMessageWithUint8(sequenceNumberPrefix, ph.SequenceNumber, true, true, false)
 	logger.Debug()
