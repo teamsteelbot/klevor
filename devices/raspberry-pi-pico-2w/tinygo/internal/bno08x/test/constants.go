@@ -31,8 +31,8 @@ const (
 	// MaxChannelNumber is the maximum valid channel number
 	MaxChannelNumber uint8 = ChannelGyroRotationVector
 
-	// CommandReset is the command to reset the BNO08x sensor
-	CommandReset uint8 = 0x1
+	// ExecCommandReset is the command to reset the BNO08x sensor
+	ExecCommandReset uint8 = 0x1
 
 	// SaveDynamicCalibrationData is the command to save the dynamic calibration data
 	SaveDynamicCalibrationData uint8 = 0x6
@@ -64,14 +64,26 @@ const (
 	// ReportIDGravity is the report ID for gravity vector (m/s2). Vector direction of gravity
 	ReportIDGravity uint8 = 0x6
 
+	// ReportIDUncalibratedGyroscope is the report ID for uncalibrated gyroscope
+	ReportIDUncalibratedGyroscope uint8 = 0x7
+
 	// ReportIDGameRotationVector is the report ID for game rotation vector
 	ReportIDGameRotationVector uint8 = 0x8
 
 	// ReportIDGeomagneticRotationVector is the report ID for geomagnetic rotation vector
 	ReportIDGeomagneticRotationVector uint8 = 0x9
 
+	// ReportIDUncalibratedMagneticField is the report ID for uncalibrated magnetic field
+	ReportIDUncalibratedMagneticField uint8 = 0x0F
+
+	// ReportIDTapDetector is the report ID for the tap detector.
+	ReportIDTapDetector uint8 = 0x10
+
 	// ReportIDStepCounter is the report ID for the step counter.
 	ReportIDStepCounter uint8 = 0x11
+
+	// ReportIDSignificantMotion is the report ID for significant motion detection.
+	ReportIDSignificantMotion uint8 = 0x12
 
 	// ReportIDStabilityClassifier is the report ID for the stability classifier.
 	ReportIDStabilityClassifier uint8 = 0x13
@@ -85,11 +97,41 @@ const (
 	// ReportIDRawMagnetometer is the report ID for the raw magnetic field measurement (ADC units). Direct data from the magnetometer. Used for testing
 	ReportIDRawMagnetometer uint8 = 0x16
 
+	// ReportIDSAR is the report ID for SAR (Specific Absorption Rate) data.
+	ReportIDSAR uint8 = 0x17
+
+	// ReportIDStepDetector is the report ID for the step detector.
+	ReportIDStepDetector uint8 = 0x18
+
 	// ReportIDShakeDetector is the report ID for the shake detector.
 	ReportIDShakeDetector uint8 = 0x19
 
+	// ReportIDFlipDetector is the report ID for the flip detector.
+	ReportIDFlipDetector uint8 = 0x1A
+
+	// ReportIDPickupDetector is the report ID for the pickup detector.
+	ReportIDPickupDetector uint8 = 0x1B
+
+	// ReportIDStabilityDetector is the report ID for the stability detector.
+	ReportIDStabilityDetector uint8 = 0x1C
+
 	// ReportIDActivityClassifier is the report ID for the activity classifier.
 	ReportIDActivityClassifier uint8 = 0x1E
+
+	// ReportIDSleepDetector is the report ID for the sleep detector.
+	ReportIDSleepDetector uint8 = 0x1F
+
+	// ReportIDPocketDetector is the report ID for the pocket detector.
+	ReportIDPocketDetector uint8 = 0x21
+
+	// ReportIDCircleDetector is the report ID for the circle detector.
+	ReportIDCircleDetector uint8 = 0x22
+
+	// ReportIDARVRStabilizedRotationVector is the report ID for the AR/VR stabilized rotation vector.
+	ReportIDARVRStabilizedRotationVector uint8 = 0x28
+
+	// ReportIDARVRStabilizedGameRotationVector is the report ID for the AR/VR stabilized game rotation vector.
+	ReportIDARVRStabilizedGameRotationVector uint8 = 0x29
 
 	// ReportIDCommandResponse is the report ID for command responses
 	ReportIDCommandResponse uint8 = 0xF1
@@ -136,6 +178,9 @@ const (
 	// ReportIDGyroscopeIntegratedRotationVector is the report ID for the gyroscope integrated rotation vector.
 	ReportIDGyroscopeIntegratedRotationVector uint8 = 0x2A
 
+	// ReportSetFeatureCommandLength is the length of the Set Feature command report
+	ReportSetFeatureCommandLength int = 17
+
 	// ReportGetFeatureResponseLength is the length of the Get Feature response report
 	ReportGetFeatureResponseLength int = 17
 
@@ -166,8 +211,11 @@ const (
 	// PacketBufferSize is the size of the packet buffer
 	PacketBufferSize = 512
 
-	// commandParametersBufferSize is the size of the command parameters buffer
-	commandParametersBufferSize = 9
+	// CommandBufferSize is the size of the command buffer
+	CommandBufferSize = 12
+
+	// CommandParametersBufferSize is the size of the command parameters buffer
+	CommandParametersBufferSize = 9
 
 	// ResetPacketDelay is the delay after sending a reset command
 	ResetPacketDelay = 100 * time.Millisecond
@@ -291,8 +339,8 @@ const (
 )
 
 var (
-	// ResetCommandData is the command data for the reset command
-	ResetCommandData = []byte{CommandReset}
+	// ExecCommandResetData is the command data for the reset command
+	ExecCommandResetData = []byte{ExecCommandReset}
 
 	// ReportIDProductIDRequestData is the report ID for the report product ID request data.
 	ReportIDProductIDRequestData = []byte{ReportIDProductIDRequest, 0}

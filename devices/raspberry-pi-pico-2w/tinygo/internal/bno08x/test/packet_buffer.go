@@ -95,12 +95,12 @@ func (pb *DefaultPacketBuffer) validateChannelNumber(channel uint8) tinygotypes.
 //
 // Parameters:
 //
-//	newPacket: A pointer to the Packet containing the channel and sequence number.
+//	newPacket: A Packet containing the channel and sequence number.
 //
 // Returns:
 //
 //	An error if the sequence number could not be updated, otherwise nil.
-func (pb *DefaultPacketBuffer) UpdateSequenceNumber(newPacket *Packet) tinygotypes.ErrorCode {
+func (pb *DefaultPacketBuffer) UpdateSequenceNumber(newPacket Packet) tinygotypes.ErrorCode {
 	// Check if the packet is nil
 	if newPacket == nil {
 		return ErrorCodeBNO08XNilPacket

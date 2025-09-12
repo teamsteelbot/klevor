@@ -51,7 +51,6 @@ const (
 	ErrorCodeBNO08XInvalidReportActivityUint8
 	ErrorCodeBNO08XInvalidReportIDForFourDimensionalParsing
 	ErrorCodeBNO08XInvalidReportIDForThreeDimensionalParsing
-	ErrorCodeBNO08XNilSensorReport
 	ErrorCodeBNO08XInvalidReportAccuracyStatusUint8
 	ErrorCodeBNO08XSensorReportDataTooShort
 	ErrorCodeBNO08XNoPacketAvailable
@@ -119,4 +118,7 @@ const (
 	ErrorCodeBNO08XSPIFailedToReadPacketHeader
 	ErrorCodeBNO08XUnhandledUARTControlSHTPProtocol
 	ErrorCodeBNO08XNilBNO08XInstance
+	ErrorCodeBNO08XSetFeatureEnableReportDataNilBuffer
+	ErrorCodeBNO08XSetFeatureEnableReportDataBufferTooShort
+	ErrorCodeBNO08XReportHeaderBufferTooShort
 )

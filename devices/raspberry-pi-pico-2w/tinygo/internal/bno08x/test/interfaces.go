@@ -13,7 +13,7 @@ type (
 		SetBufferValue(index int, value byte) tinygotypes.ErrorCode
 		SetBuffer(data []byte) tinygotypes.ErrorCode
 		ClearBuffer()
-		UpdateSequenceNumber(newPacket *Packet) tinygotypes.ErrorCode
+		UpdateSequenceNumber(newPacket Packet) tinygotypes.ErrorCode
 		IncrementChannelSequenceNumber(channel uint8) (uint8, tinygotypes.ErrorCode)
 		GetSequenceNumber(channel uint8) (uint8, tinygotypes.ErrorCode)
 		SetSequenceNumber(channel uint8, sequenceNumber uint8) tinygotypes.ErrorCode
@@ -32,12 +32,14 @@ type (
 		AddUint8(value uint8, newline bool, hexCode bool)
 		AddUint16(value uint16, newline bool, hexCode bool)
 		AddUint32(value uint32, newline bool, hexCode bool)
+		AddUint64(value uint64, newline bool, hexCode bool)
 		AddMessage(message []byte, newline bool)
 		AddMessageWithHexCode(message []byte, hexBuffer []byte, separate bool, newline bool)
 		AddMessageWithErrorCode(message []byte, errCode tinygotypes.ErrorCode, separate bool, newline bool)
 		AddMessageWithUint8(message []byte, value uint8, separate bool, newline bool, hexCode bool)
 		AddMessageWithUint16(message []byte, value uint16, separate bool, newline bool, hexCode bool)
 		AddMessageWithUint32(message []byte, value uint32, separate bool, newline bool, hexCode bool)
+		AddMessageWithUint64(message []byte, value uint64, separate bool, newline bool, hexCode bool)
 		Debug()
 		DebugMessage(message []byte)
 		Info()
@@ -52,7 +54,7 @@ type (
 
 	// PacketReader is an interface for reading packets from the BNO08x sensor
 	PacketReader interface {
-		ReadPacket() (*Packet, tinygotypes.ErrorCode)
+		ReadPacket() (Packet, tinygotypes.ErrorCode)
 		IsAvailableToRead() bool
 	}
 

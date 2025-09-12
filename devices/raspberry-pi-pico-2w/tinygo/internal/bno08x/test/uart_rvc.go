@@ -182,7 +182,7 @@ func (u *UARTRVC) ParseFrame() tinygotypes.ErrorCode {
 	}
 	if checksumCalc != checksum {
 		if u.logger != nil {
-			u.logger.LogMessage(invalidChecksumMessage, true, true)
+			u.logger.InfoMessage(invalidChecksumMessage, true)
 		}
 		return ErrorCodeBNO08XUARTRVCInvalidChecksum
 	}
@@ -269,13 +269,13 @@ func (u *UARTRVC) Read() tinygotypes.ErrorCode {
 
 		// Print the raw frame for debugging
 		if u.logger != nil {
-			u.logger.LogMessage(receivedFrameMessage, true, true)
+			u.logger.InfoMessage(receivedFrameMessage, true)
 		}
 
 		// Parse the frame
 		if err := u.ParseFrame(); err != tinygotypes.ErrorCodeNil {
 			if u.logger != nil {
-				u.logger.LogMessage(failedToParseFrameMessage, true, true)
+				u.logger.InfoMessage(failedToParseFrameMessage, true)
 			}
 			return ErrorCodeBNO08XFailedToParseFrame
 		}
@@ -297,7 +297,7 @@ func (u *UARTRVC) Update() tinygotypes.ErrorCode {
 //
 // Returns:
 //
-//	A pointer to a [3]float64 array containing the acceleration values.
+//	A [3]float64 array containing the acceleration values.
 func (u *UARTRVC) GetAcceleration() [3]float64 {
 	return u.accelerometer
 }

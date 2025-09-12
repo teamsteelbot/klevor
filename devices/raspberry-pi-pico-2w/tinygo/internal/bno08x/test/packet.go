@@ -21,41 +21,225 @@ type (
 
 	// Packet represents a BNO08x Packet
 	Packet struct {
-		Header *PacketHeader
+		Header PacketHeader
 		Data   []byte
 	}
 )
 
 var (
-	// PacketHeaderPrintBuffer is a reusable buffer for printing PacketHeader details
-	PacketHeaderPrintBuffer = make([]byte, 0, 128)
+	// channelSHTPCommandName is the name of the SHTP Command channel
+	channelSHTPCommandName = []byte("SHTP_COMMAND")
+
+	// channelExeName is the name of the Exe channel
+	channelExeName = []byte("EXE")
+
+	// channelControlName is the name of the Control channel
+	channelControlName = []byte("CONTROL")
+
+	// channelInputSensorReportsName is the name of the Input Sensor Reports channel
+	channelInputSensorReportsName = []byte("INPUT_SENSOR_REPORTS")
+
+	// channelWakeInputSensorReportsName is the name of the Wake Input Sensor Reports channel
+	channelWakeInputSensorReportsName = []byte("WAKE_INPUT_SENSOR_REPORTS")
+
+	// channelGyroRotationVectorName is the name of the Gyro Rotation Vector channel
+	channelGyroRotationVectorName = []byte("GYRO_ROTATION_VECTOR")
+
+	// channelUnknownName is the name of an unknown channel
+	channelUnknownName = []byte("UNKNOWN_CHANNEL")
+
+	// reportIDAccelerometerName is the name of the Accelerometer report ID
+	reportIDAccelerometerName = []byte("ACCELEROMETER")
+
+	// reportIDAVRStabilizedGameRotationVectorName is the name of the AR/VR Stabilized Game Rotation Vector report ID
+	reportIDARVRStabilizedGameRotationVectorName = []byte("ARVR_STABILIZED_GAME_ROTATION_VECTOR")
+
+	// reportIDARVRStabilizedRotationVectorName is the name of the AR/VR Stabilized Rotation Vector report ID
+	reportIDARVRStabilizedRotationVectorName = []byte("ARVR_STABILIZED_ROTATION_VECTOR")
+
+	// reportIDCircleDetectorName is the name of the Circle Detector report ID
+	reportIDCircleDetectorName = []byte("CIRCLE_DETECTOR")
+
+	// reportIDFlipDetectorName is the name of the Flip Detector report ID
+	reportIDFlipDetectorName = []byte("FLIP_DETECTOR")
+
+	// reportIDGameRotationVectorName is the name of the Game Rotation Vector report ID
+	reportIDGameRotationVectorName = []byte("GAME_ROTATION_VECTOR")
+
+	// reportIDGeomagneticRotationVectorName is the name of the Geomagnetic Rotation Vector report ID
+	reportIDGeomagneticRotationVectorName = []byte("GEOMAGNETIC_ROTATION_VECTOR")
+
+	// reportIDGravityName is the name of the Gravity report ID
+	reportIDGravityName = []byte("GRAVITY")
+
+	// reportIDGyroscopeName is the name of the Gyroscope report ID
+	reportIDGyroscopeName = []byte("GYROSCOPE")
+
+	// reportIDLinearAccelerationName is the name of the Linear Acceleration report ID
+	reportIDLinearAccelerationName = []byte("LINEAR_ACCELERATION")
+
+	// reportIDMagnetometerName is the name of the Magnetometer report ID
+	reportIDMagnetometerName = []byte("MAGNETIC_FIELD")
+
+	// reportIDActivityClassifierName is the name of the Activity Classifier report ID
+	reportIDActivityClassifierName = []byte("PERSONAL_ACTIVITY_CLASSIFIER")
+
+	// reportIDPickupDetectorName is the name of the Pickup Detector report ID
+	reportIDPickupDetectorName = []byte("PICKUP_DETECTOR")
+
+	// reportIDPocketDetectorName is the name of the Pocket Detector report ID
+	reportIDPocketDetectorName = []byte("POCKET_DETECTOR")
+
+	// reportIDRawAccelerometerName is the name of the Raw Accelerometer report ID
+	reportIDRawAccelerometerName = []byte("RAW_ACCELEROMETER")
+
+	// reportIDRawGyroscopeName is the name of the Raw Gyroscope report ID
+	reportIDRawGyroscopeName = []byte("RAW_GYROSCOPE")
+
+	// reportIDRawMagnetometerName is the name of the Raw Magnetometer report ID
+	reportIDRawMagnetometerName = []byte("RAW_MAGNETOMETER")
+
+	// reportIDRotationVectorName is the name of the Rotation Vector report ID
+	reportIDRotationVectorName = []byte("ROTATION_VECTOR")
+
+	// reportIDSARName is the name of the SAR report ID
+	reportIDSARName = []byte("SAR")
+
+	// reportIDShakeDetectorName is the name of the Shake Detector report ID
+	reportIDShakeDetectorName = []byte("SHAKE_DETECTOR")
+
+	// reportIDSignificantMotionName is the name of the Significant Motion report ID
+	reportIDSignificantMotionName = []byte("SIGNIFICANT_MOTION")
+
+	// reportIDSleepDetectorName is the name of the Sleep Detector report ID
+	reportIDSleepDetectorName = []byte("SLEEP_DETECTOR")
+
+	// reportIDStabilityClassifierName is the name of the Stability Classifier report ID
+	reportIDStabilityClassifierName = []byte("STABILITY_CLASSIFIER")
+
+	// reportIDStabilityDetectorName is the name of the Stability Detector report ID
+	reportIDStabilityDetectorName = []byte("STABILITY_DETECTOR")
+
+	// reportIDStepCounterName is the name of the Step Counter report ID
+	reportIDStepCounterName = []byte("STEP_COUNTER")
+
+	// reportIDStepDetectorName is the name of the Step Detector report ID
+	reportIDStepDetectorName = []byte("STEP_DETECTOR")
+
+	// reportIDTapDetectorName is the name of the Tap Detector report ID
+	reportIDTapDetectorName = []byte("TAP_DETECTOR")
+
+	// reportITiltDetectorName is the name of the Tilt Detector report ID
+	reportIDTiltDetectorName = []byte("TILT_DETECTOR")
+
+	// reportIDUncalibratedGyroscopeName is the name of the Uncalibrated Gyroscope report ID
+	reportIDUncalibratedGyroscopeName = []byte("UNCALIBRATED_GYROSCOPE")
+
+	// reportIDUncalibratedMagneticFieldName is the name of the Uncalibrated Magnetic Field report ID
+	reportIDUncalibratedMagneticFieldName = []byte("UNCALIBRATED_MAGNETIC_FIELD")
+
+	// reportIDBaseTimestampName is the name of the Base Timestamp report ID
+	reportIDBaseTimestampName = []byte("BASE_TIMESTAMP")
+
+	// reportIDCommandRequestName is the name of the Command Request report ID
+	reportIDCommandRequestName = []byte("COMMAND_REQUEST")
+
+	// reportIDCommandResponseName is the name of the Command Response report ID
+	reportIDCommandResponseName = []byte("COMMAND_RESPONSE")
+
+	// reportIDFRSReadRequestName is the name of the FRS Read Request report ID
+	reportIDFRSReadRequestName = []byte("FRS_READ_REQUEST")
+
+	// reportIDFRSReadResponseName is the name of the FRS Read Response report ID
+	reportIDFRSReadResponseName = []byte("FRS_READ_RESPONSE")
+
+	// reportIDFRSWriteDataName is the name of the FRS Write Data report ID
+	reportIDFRSWriteDataName = []byte("FRS_WRITE_DATA")
+
+	// reportIDFRSWriteRequestName is the name of the FRS Write Request report ID
+	reportIDFRSWriteRequestName = []byte("FRS_WRITE_REQUEST")
+
+	// reportIDFRSWriteResponseName is the name of the FRS Write Response report ID
+	reportIDFRSWriteResponseName = []byte("FRS_WRITE_RESPONSE")
+
+	// reportIDGetFeatureRequestName is the name of the Get Feature Request report ID
+	reportIDGetFeatureRequestName = []byte("GET_FEATURE_REQUEST")
+
+	// reportIDGetFeatureResponseName is the name of the Get Feature Response report ID
+	reportIDGetFeatureResponseName = []byte("GET_FEATURE_RESPONSE")
+
+	// reportIDSetFeatureCommandName is the name of the Set Feature Command report ID
+	reportIDSetFeatureCommandName = []byte("SET_FEATURE_COMMAND")
+
+	// reportIDTimestampRebaseName is the name of the Timestamp Rebase report ID
+	reportIDTimestampRebaseName = []byte("TIMESTAMP_REBASE")
+
+	// reportIDProductIDRequestName is the name of the Product ID Request report ID
+	reportIDProductIDRequestName = []byte("PRODUCT_ID_REQUEST")
+
+	// reportIDProductIDResponseName is the name of the Product ID Response report ID
+	reportIDProductIDResponseName = []byte("PRODUCT_ID_RESPONSE")
+
+	// reportIDUnknownName is the name of an unknown report ID
+	reportIDUnknownName = []byte("UNKNOWN_COMMAND")
+
+	// ExecCommandResetName is the name of the EXE Command Reset
+	ExecCommandResetName = []byte("RESET")
+
+	// ExecCommandUnknownName is the name of an unknown EXE command
+	ExecCommandUnknownName = []byte("UNKNOWN_COMMAND")
+
+	// sendingPacketHeaderMessage is the message printed when sending a packet header
+	sendingPacketHeaderMessage = []byte("SENDING PACKET HEADER: ")
+
+	// receivingPacketHeaderMessage is the message printed when receiving a packet header
+	receivingPacketHeaderMessage = []byte("RECEIVED PACKET HEADER: ")
+
+	// dataLengthPrefix is the prefix for the data length in the packet header log
+	dataLengthPrefix = []byte("\t Data Length: ")
+
+	// channelPrefix is the prefix for the channel in the packet header log
+	channelPrefix = []byte("\t Channel: ")
+
+	// sequenceNumberPrefix is the prefix for the sequence number in the packet header log
+	sequenceNumberPrefix = []byte("\t Sequence number: ")
+
+	// sendingPacketDataMessage is the message printed when sending a packet data
+	sendingPacketDataMessage = []byte("SENDING PACKET DATA: ")
+
+	// receivingPacketDataMessage is the message printed when receiving a packet data
+	receivingPacketDataMessage = []byte("RECEIVED PACKET DATA: ")
 )
 
-// ChannelNumberString returns the string representation of the channel number.
+// channelNumberNameBuffer returns the name of the channel as a byte slice.
+//
+// Parameters:
+//
+// 	channelNumber: The channel number to get the name for.
 //
 // Returns:
 //
-// The channel number as a string.
-func (ph *PacketHeader) ChannelNumberString() string {
-	switch ph.ChannelNumber {
+// The channel name as a byte slice.
+func ChannelNumberNameBuffer(channelNumber uint8) []byte {
+	switch channelNumber {
 	case ChannelSHTPCommand:
-		return "SHTP_COMMAND"
+		return channelSHTPCommandName
 	case ChannelExe:
-		return "EXE"
+		return channelExeName
 	case ChannelControl:
-		return "CONTROL"
+		return channelControlName
 	case ChannelInputSensorReports:
-		return "INPUT_SENSOR_REPORTS"
+		return channelInputSensorReportsName
 	case ChannelWakeInputSensorReports:
-		return "WAKE_INPUT_SENSOR_REPORTS"
+		return channelWakeInputSensorReportsName
 	case ChannelGyroRotationVector:
-		return "GYRO_ROTATION_VECTOR"
+		return channelGyroRotationVectorName
 	default:
-		return "UNKNOWN_CHANNEL"
+		return channelUnknownName
 	}
 }
 
-// SHTPCommandNameString returns the string representation of the SHTP command.
+// SHTPCommandNameBuffer returns the string representation of the SHTP command.
 //
 // Parameters:
 //
@@ -63,75 +247,75 @@ func (ph *PacketHeader) ChannelNumberString() string {
 //
 // Returns:
 //
-// The command name as a string or "UNKNOWN_COMMAND" if not found.
-func SHTPCommandNameString(commandID uint8) string {
+// The command name as a byte slice or "UNKNOWN_COMMAND" if not found.
+func SHTPCommandNameBuffer(commandID uint8) []byte {
 	switch commandID {
 	case ReportIDAccelerometer:
-		return "ACCELEROMETER"
-	case 0x29:
-		return "ARVR_STABILIZED_GAME_ROTATION_VECTOR"
-	case 0x28:
-		return "ARVR_STABILIZED_ROTATION_VECTOR"
-	case 0x22:
-		return "CIRCLE_DETECTOR"
-	case 0x1A:
-		return "FLIP_DETECTOR"
+		return reportIDAccelerometerName
+	case ReportIDARVRStabilizedGameRotationVector:
+		return reportIDARVRStabilizedGameRotationVectorName
+	case ReportIDARVRStabilizedRotationVector:
+		return reportIDARVRStabilizedRotationVectorName
+	case ReportIDCircleDetector:
+		return reportIDCircleDetectorName
+	case ReportIDFlipDetector:
+		return reportIDFlipDetectorName
 	case ReportIDGameRotationVector:
-		return "GAME_ROTATION_VECTOR"
+		return reportIDGameRotationVectorName
 	case ReportIDGeomagneticRotationVector:
-		return "GEOMAGNETIC_ROTATION_VECTOR"
+		return reportIDGeomagneticRotationVectorName
 	case ReportIDGravity:
-		return "GRAVITY"
+		return reportIDGravityName
 	case ReportIDGyroscope:
-		return "GYROSCOPE"
+		return reportIDGyroscopeName
 	case ReportIDLinearAcceleration:
-		return "LINEAR_ACCELERATION"
+		return reportIDLinearAccelerationName
 	case ReportIDMagnetometer:
-		return "MAGNETIC_FIELD"
+		return reportIDMagnetometerName
 	case ReportIDActivityClassifier:
-		return "PERSONAL_ACTIVITY_CLASSIFIER"
-	case 0x1B:
-		return "PICKUP_DETECTOR"
-	case 0x21:
-		return "POCKET_DETECTOR"
+		return reportIDActivityClassifierName
+	case ReportIDPickupDetector:
+		return reportIDPickupDetectorName
+	case ReportIDPocketDetector:
+		return reportIDPocketDetectorName
 	case ReportIDRawAccelerometer:
-		return "RAW_ACCELEROMETER"
+		return reportIDRawAccelerometerName
 	case ReportIDRawGyroscope:
-		return "RAW_GYROSCOPE"
+		return reportIDRawGyroscopeName
 	case ReportIDRawMagnetometer:
-		return "RAW_MAGNETOMETER"
+		return reportIDRawMagnetometerName
 	case ReportIDRotationVector:
-		return "ROTATION_VECTOR"
-	case 0x17:
-		return "SAR"
+		return reportIDRotationVectorName
+	case ReportIDSAR:
+		return reportIDSARName
 	case ReportIDShakeDetector:
-		return "SHAKE_DETECTOR"
-	case 0x12:
-		return "SIGNIFICANT_MOTION"
-	case 0x1F:
-		return "SLEEP_DETECTOR"
+		return reportIDShakeDetectorName
+	case ReportIDSignificantMotion:
+		return reportIDSignificantMotionName
+	case ReportIDSleepDetector:
+		return reportIDSleepDetectorName
 	case ReportIDStabilityClassifier:
-		return "STABILITY_CLASSIFIER"
-	case 0x1C:
-		return "STABILITY_DETECTOR"
+		return reportIDStabilityClassifierName
+	case ReportIDStabilityDetector:
+		return reportIDStabilityDetectorName
 	case ReportIDStepCounter:
-		return "STEP_COUNTER"
-	case 0x18:
-		return "STEP_DETECTOR"
-	case 0x10:
-		return "TAP_DETECTOR"
-	case 0x20:
-		return "TILT_DETECTOR"
-	case 0x07:
-		return "UNCALIBRATED_GYROSCOPE"
-	case 0x0F:
-		return "UNCALIBRATED_MAGNETIC_FIELD"
+		return reportIDStepCounterName
+	case ReportIDStepDetector:
+		return reportIDStepDetectorName
+	case ReportIDTapDetector:
+		return reportIDTapDetectorName
+	case ReportIDTiltDetector:
+		return reportIDTiltDetectorName
+	case ReportIDUncalibratedGyroscope:
+		return reportIDUncalibratedGyroscopeName
+	case ReportIDUncalibratedMagneticField:
+		return reportIDUncalibratedMagneticFieldName
 	default:
-		return "UNKNOWN_COMMAND"
+		return reportIDUnknownName
 	}
 }
 
-// ControlCommandNameString returns the string representation of the CONTROL command.
+// ControlCommandNameBuffer returns the name of the control command as a byte slice.
 //
 // Parameters:
 //
@@ -139,39 +323,39 @@ func SHTPCommandNameString(commandID uint8) string {
 //
 // Returns:
 //
-// The command name as a string or "UNKNOWN_COMMAND" if not found.
-func ControlCommandNameString(commandID uint8) string {
+// The command name as a byte slice or "UNKNOWN_COMMAND" if not found.
+func ControlCommandNameBuffer(commandID uint8) []byte {
 	switch commandID {
 	case ReportIDBaseTimestamp:
-		return "BASE_TIMESTAMP"
+		return reportIDBaseTimestampName
 	case ReportIDCommandRequest:
-		return "COMMAND_REQUEST"
+		return reportIDCommandRequestName
 	case ReportIDCommandResponse:
-		return "COMMAND_RESPONSE"
+		return reportIDCommandResponseName
 	case ReportIDFRSReadRequest:
-		return "FRS_READ_REQUEST"
+		return reportIDFRSReadRequestName
 	case ReportIDFRSReadResponse:
-		return "FRS_READ_RESPONSE"
+		return reportIDFRSReadResponseName
 	case ReportIDFRSWriteData:
-		return "FRS_WRITE_DATA"
+		return reportIDFRSWriteDataName
 	case ReportIDFRSWriteRequest:
-		return "FRS_WRITE_REQUEST"
+		return reportIDFRSWriteRequestName
 	case ReportIDFRSWriteResponse:
-		return "FRS_WRITE_RESPONSE"
+		return reportIDFRSWriteResponseName
 	case ReportIDGetFeatureRequest:
-		return "GET_FEATURE_REQUEST"
+		return reportIDGetFeatureRequestName
 	case ReportIDGetFeatureResponse:
-		return "GET_FEATURE_RESPONSE"
+		return reportIDGetFeatureResponseName
 	case ReportIDSetFeatureCommand:
-		return "SET_FEATURE_COMMAND"
+		return reportIDSetFeatureCommandName
 	case ReportIDTimestampRebase:
-		return "TIMESTAMP_REBASE"
+		return reportIDTimestampRebaseName
 	case ReportIDProductIDRequest:
-		return "PRODUCT_ID_REQUEST"
+		return reportIDProductIDRequestName
 	case ReportIDProductIDResponse:
-		return "PRODUCT_ID_RESPONSE"
+		return reportIDProductIDResponseName
 	default:
-		return "UNKNOWN_COMMAND"
+		return reportIDUnknownName
 	}
 }
 
@@ -206,7 +390,7 @@ func IsControlReportID(reportID uint8) bool {
 	}
 }
 
-// ExeCommandNameString returns the string representation of the EXE command.
+// ExecCommandNameBuffer returns the name of the EXE command as a byte slice.
 //
 // Parameters:
 //
@@ -214,13 +398,13 @@ func IsControlReportID(reportID uint8) bool {
 //
 // Returns:
 //
-// The command name as a string or "UNKNOWN_COMMAND" if not found.
-func ExeCommandNameString(commandID uint8) string {
+// The command name as a byte slice or "UNKNOWN_COMMAND" if not found.
+func ExecCommandNameBuffer(commandID uint8) []byte {
 	switch commandID {
-	case CommandReset:
-		return "RESET"
+	case ExecCommandReset:
+		return ExecCommandResetName
 	default:
-		return "UNKNOWN_COMMAND"
+		return ExecCommandUnknownName
 	}
 }
 
@@ -231,22 +415,26 @@ func ExeCommandNameString(commandID uint8) string {
 // packetByteCount: The total byte count of the Packet.
 // channelNumber: The channel number of the Packet.
 // sequenceNumber: The sequence number of the Packet.
+// buffer: A byte slice to hold the PacketHeader data.
 //
 // Returns:
 //
-// A PacketHeader object.
+// A PacketHeader object, or an error if the buffer is too short.
 func NewPacketHeader(
 	packetByteCount uint16,
 	channelNumber uint8,
 	sequenceNumber uint8,
-) *PacketHeader {
+	buffer []byte,
+) (PacketHeader, tinygotypes.ErrorCode) {
 	dataLength := int(packetByteCount) - PacketHeaderLength
 	if dataLength < 0 {
 		dataLength = 0
 	}
 
-	// Initialize header buffer
-	buffer := make([]byte, PacketHeaderLength)
+	// Ensure the buffer is at least PacketHeaderLength bytes long
+	if len(buffer) < PacketHeaderLength {
+		return PacketHeader{}, ErrorCodeBNO08XReportHeaderBufferTooShort
+	}
 
 	// First two bytes are writeLength (little-endian)
 	buffer[0] = uint8(packetByteCount & 0xFF)
@@ -254,13 +442,13 @@ func NewPacketHeader(
 	buffer[2] = channelNumber
 	buffer[3] = sequenceNumber
 
-	return &PacketHeader{
+	return PacketHeader{
 		ChannelNumber:   channelNumber,
 		SequenceNumber:  sequenceNumber,
 		DataLength:      dataLength,
 		PacketByteCount: int(packetByteCount),
 		Buffer:          buffer,
-	}
+	}, tinygotypes.ErrorCodeNil
 }
 
 // NewPacketHeaderFromBuffer creates a PacketHeader from a given buffer.
@@ -272,10 +460,10 @@ func NewPacketHeader(
 // Returns:
 //
 //	A PacketHeader object or an error if the buffer is too short.
-func NewPacketHeaderFromBuffer(buffer []byte) (*PacketHeader, tinygotypes.ErrorCode) {
+func NewPacketHeaderFromBuffer(buffer []byte) (PacketHeader, tinygotypes.ErrorCode) {
 	// Ensure the buffer is at least PacketHeaderLength bytes long to read the header
 	if len(buffer) < PacketHeaderLength {
-		return nil, ErrorCodeBNO08XPacketHeaderBufferTooShort
+		return PacketHeader{}, ErrorCodeBNO08XPacketHeaderBufferTooShort
 	}
 
 	// Parse the header fields from the buffer
@@ -284,7 +472,7 @@ func NewPacketHeaderFromBuffer(buffer []byte) (*PacketHeader, tinygotypes.ErrorC
 	channelNumber := buffer[2]
 	sequenceNumber := buffer[3]
 
-	return &PacketHeader{
+	return PacketHeader{
 		ChannelNumber:   channelNumber,
 		SequenceNumber:  sequenceNumber,
 		DataLength:      int(packetByteCount) - PacketHeaderLength,
@@ -300,6 +488,7 @@ func NewPacketHeaderFromBuffer(buffer []byte) (*PacketHeader, tinygotypes.ErrorC
 // channelNumber: The channel number of the Packet.
 // sequenceNumber: The sequence number of the Packet.
 // data: A byte slice containing the Packet data.
+// headerBuffer: A byte slice to hold the PacketHeader data.
 //
 // Returns:
 //
@@ -308,20 +497,28 @@ func NewPacketHeaderFromData(
 	channelNumber uint8,
 	sequenceNumber uint8,
 	data []byte,
-) (*PacketHeader, tinygotypes.ErrorCode) {
+	headerBuffer []byte,
+) (PacketHeader, tinygotypes.ErrorCode) {
 	// Check if data is nil
 	if data == nil {
-		return nil, ErrorCodeBNO08XNilReportData
+		return PacketHeader{}, ErrorCodeBNO08XNilReportData
 	}
 
 	// Calculate packet byte count
 	packetByteCount := len(data) + PacketHeaderLength
 
-	return NewPacketHeader(
+	// Create PacketHeader
+	header, err := NewPacketHeader(
 		uint16(packetByteCount),
 		channelNumber,
 		sequenceNumber,
-	), tinygotypes.ErrorCodeNil
+		headerBuffer,
+	)
+	if err != tinygotypes.ErrorCodeNil {
+		return PacketHeader{}, err
+	}
+
+	return header, tinygotypes.ErrorCodeNil
 }
 
 // IsError checks if the provided PacketHeader indicates an error condition.
@@ -345,58 +542,51 @@ func (h *PacketHeader) IsError() bool {
 	return false
 }
 
-// PrintBuffer returns a byte slice representation of the PacketHeader for debugging purposes.
+// Log returns a byte slice representation of the PacketHeader for debugging purposes.
 //
 // Parameters:
 //
 // isBeingSent: A boolean indicating if the PacketHeader is being sent (true) or received (false).
+// logger: A Logger interface for logging messages.
 //
 // Returns:
 //
 // A byte slice containing the PacketHeader details.
-func (ph *PacketHeader) PrintBuffer(isBeingSent bool) []byte {
-	// Clear the reusable buffer
-	buffer := PacketHeaderPrintBuffer[:0]
-
-	if isBeingSent {
-		buffer = append(buffer, "SENDING PACKET HEADER"...)
-	} else {
-		buffer = append(buffer, "RECEIVED PACKET HEADER"...)
+func (ph *PacketHeader) Log(isBeingSent bool, logger Logger) {
+	// Check if logger is nil
+	if logger == nil {
+		return
 	}
 
-	buffer = append(buffer, "\n\t Data Length: "...)
-	buffer = append(buffer, strconv.Itoa(ph.DataLength)...)
+	if isBeingSent {
+		logger.AddMessage(sendingPacketHeaderMessage, true)
+	} else {
+		logger.AddMessage(receivingPacketHeaderMessage, true)
+	}
 
-	buffer = append(buffer, "\n\t Channel: "...)
-	buffer = append(buffer, ph.ChannelNumberString()...)
-
-	buffer = append(buffer, "\n\t Sequence number: "...)
-	buffer = append(buffer, strconv.Itoa(int(ph.SequenceNumber))...)
-	return buffer
+	logger.AddMessageWithUint64(dataLengthPrefix, uint(ph.DataLength), true, true, false)
+	logger.AddMessageWithUint8(channelPrefix, ph.ChannelNumber, true, true, true)
+	logger.AddMessageWithUint8(sequenceNumberPrefix, ph.SequenceNumber, true, true, false)
+	logger.Debug()
 }
 
 // NewPacket creates a new Packet from the provided data and header.
 //
 // Parameters:
 //
-//	data: A pointer to a byte slice containing the Packet data.
-//	header: A pointer to the PacketHeader.
+//	data: A byte slice containing the Packet data.
+//	header: A PacketHeader.
 //
 // Returns:
 //
 // A Packet object or an error if the data or header is nil.
-func NewPacket(data []byte, header *PacketHeader) (*Packet, tinygotypes.ErrorCode) {
+func NewPacket(data []byte, header PacketHeader) (Packet, tinygotypes.ErrorCode) {
 	// Check if data is nil
 	if data == nil {
-		return nil, ErrorCodeBNO08XNilReportData
+		return Packet{}, ErrorCodeBNO08XNilReportData
 	}
 
-	// Check if the provided header is nil
-	if header == nil {
-		return nil, ErrorCodeBNO08XNilPacketHeader
-	}
-
-	return &Packet{
+	return Packet{
 		Header: header,
 		Data:   data,
 	}, tinygotypes.ErrorCodeNil
@@ -406,7 +596,7 @@ func NewPacket(data []byte, header *PacketHeader) (*Packet, tinygotypes.ErrorCod
 //
 // Parameters:
 //
-//	buffer: A pointer to a byte slice containing the Packet data.
+//	buffer: A byte slice containing the Packet data.
 //
 // Returns:
 //
@@ -435,7 +625,7 @@ func NewPacketFromBuffer(buffer []byte) (*Packet, tinygotypes.ErrorCode) {
 //
 // channelNumber: The channel number of the Packet.
 // sequenceNumber: The sequence number of the Packet.
-// data: A pointer to a byte slice containing the Packet data.
+// data: A byte slice containing the Packet data.
 //
 // Returns:
 //
@@ -444,7 +634,7 @@ func NewPacketFromData(
 	channelNumber uint8,
 	sequenceNumber uint8,
 	data []byte,
-) (*Packet, tinygotypes.ErrorCode) {
+) (Packet, tinygotypes.ErrorCode) {
 	// Check if data is nil
 	if data == nil {
 		return nil, ErrorCodeBNO08XNilReportData
@@ -460,7 +650,7 @@ func NewPacketFromData(
 		return nil, err
 	}
 
-	return &Packet{
+	return Packet{
 		Header: header,
 		Data:   data,
 	}, tinygotypes.ErrorCodeNil
@@ -528,11 +718,13 @@ func (p *Packet) IsError() bool {
 // Parameters:
 //
 // isBeingSent: A boolean indicating if the Packet is being sent (true) or received (false).
+// logHeader: A boolean indicating if the PacketHeader should be logged (true) or not (false).
+// logger: A Logger interface for logging messages.
 //
 // Returns:
 //
 // A byte slice containing the Packet details or nil if the Packet or its header is nil.
-func (p *Packet) PrintBuffer(isBeingSent bool) []byte {
+func (p *Packet) PrintBuffer(isBeingSent bool, logHeader bool, logger Logger) []byte {
 	if p.Header == nil {
 		return nil
 	}
@@ -543,6 +735,11 @@ func (p *Packet) PrintBuffer(isBeingSent bool) []byte {
 		dataLen = len(p.Data)
 	} else if dataLen < 0 {
 		dataLen = 0
+	}
+
+	// Log header
+	if logHeader {
+		p.Header.Log(isBeingSent, logger)
 	}
 
 	// Avoid multiple allocations by pre-allocating a sufficiently large buffer

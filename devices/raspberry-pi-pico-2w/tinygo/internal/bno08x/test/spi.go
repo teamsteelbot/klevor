@@ -219,7 +219,7 @@ func (spi *SPI) GetBNO08X() *BNO08X {
 // An error if the wait times out.
 func waitForInt(intPin machine.Pin, logger Logger) tinygotypes.ErrorCode {
 	if logger != nil {
-		logger.LogMessage(waitingForINTMessage, true, true)
+		logger.InfoMessage(waitingForINTMessage, true)
 	}
 
 	startTime := time.Now()
@@ -295,7 +295,7 @@ func (pr *SPIPacketReader) IsAvailableToRead() bool {
 //
 // Returns:
 //
-// A pointer to a PacketHeader or an error if reading the header fails.
+// A PacketHeader or an error if reading the header fails.
 func (pr *SPIPacketReader) readHeader() (*PacketHeader, tinygotypes.ErrorCode) {
 	// Wait for INT pin to go low
 	if err := pr.waitForInt(); err != tinygotypes.ErrorCodeNil {
@@ -327,9 +327,7 @@ func (pr *SPIPacketReader) readHeader() (*PacketHeader, tinygotypes.ErrorCode) {
 	}
 
 	// Debug log the header
-	if pr.logger != nil {
-		pr.logger.LogMessage(header.PrintBuffer(false), true, true)
-	}
+	header.Log(false, pr.logger)
 	return header, tinygotypes.ErrorCodeNil
 }
 
@@ -337,7 +335,7 @@ func (pr *SPIPacketReader) readHeader() (*PacketHeader, tinygotypes.ErrorCode) {
 //
 // Returns:
 //
-// A pointer to a Packet or an error if reading the Packet fails.
+// A Packet or an error if reading the Packet fails.
 func (pr *SPIPacketReader) ReadPacket() (*Packet, tinygotypes.ErrorCode) {
 	// Read the Packet header
 	header, errorCode := pr.readHeader()
@@ -366,7 +364,7 @@ func (pr *SPIPacketReader) ReadPacket() (*Packet, tinygotypes.ErrorCode) {
 	// Skip header-only / empty packets
 	if header.PacketByteCount == PacketHeaderLength || header.DataLength == 0 {
 		if pr.logger != nil {
-			pr.logger.LogMessage(headerOnlyPacketMessage, true, true)
+			pr.logger.WarningMessage(headerOnlyPacketMessage)
 		}
 		return nil, ErrorCodeBNO08XNoPacketAvailable
 	}
@@ -397,9 +395,7 @@ func (pr *SPIPacketReader) ReadPacket() (*Packet, tinygotypes.ErrorCode) {
 	}
 
 	// Debug log the packet
-	if pr.logger != nil {
-		pr.logger.LogMessage(packet.PrintBuffer(false), true, true)
-	}
+	packet.Log(false, false, pr.logger)
 
 	// Update the sequence number in the packet buffer
 	if errorCode = pr.packetBuffer.UpdateSequenceNumber(packet); errorCode != tinygotypes.ErrorCodeNil {
@@ -489,10 +485,7 @@ func (pw *SPIPacketWriter) SendPacket(channel uint8, data []byte) (uint8, tinygo
 	}
 
 	// Debug log the packet
-	if pw.logger != nil {
-		pw.logger.DebugBuffer(packet.Header.PrintBuffer(true), true, true)
-		pw.logger.DebugBuffer(packet.PrintBuffer(true), true, true)
-	}
+	packet.Log(true, true, pw.logger)
 
 	// Wait for INT pin to go low before sending
 	if errorCode := pw.waitForInt(); errorCode != tinygotypes.ErrorCodeNil {

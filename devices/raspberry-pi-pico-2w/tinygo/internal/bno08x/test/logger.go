@@ -57,6 +57,9 @@ var (
 
 	// uint32Buffer is the buffer used for hex code messages
 	uint32Buffer = [4]byte{}
+
+	// uint64Buffer is the buffer used for hex code messages
+	uint64Buffer = [8]byte{}
 )
 
 // NewDefaultLogger creates a new DefaultLogger instance
@@ -222,6 +225,24 @@ func (l *DefaultLogger) AddUint32(value uint32, newline bool, hexCode bool) {
 	}
 }
 
+// AddUint64 function to add a uint64 value to the messageBuffer
+//
+// Parameters:
+//
+//	value: The uint64 value to add.
+//	newline: Whether to include a newline at the end of the log message.
+// hexCode: Whether to add the uint64 value in hexadecimal format.
+func (l *DefaultLogger) AddUint64(value uint64, newline bool, hexCode bool) {
+	// Store the uint64 value in the buffer
+	binary.BigEndian.PutUint64(uint64Buffer[:], value)
+	
+	if hexCode {
+		l.AddHexCode(uint64Buffer[:], newline)
+	} else {
+		l.AddMessage(uint64Buffer[:], newline)
+	}
+}
+
 // AddMessage function to add a message to the messageBuffer
 //
 // Parameters:
@@ -321,6 +342,23 @@ func (l *DefaultLogger) AddMessageWithUint32(message []byte, value uint32, separ
 		l.AddSpace()
 	}
 	l.AddUint32(value, newline, hexCode)
+}
+
+// AddMessageWithUint64 function to add a message and uint64 value to the messageBuffer
+//
+// Parameters:
+//
+//	message: The byte slice representing the message to add.
+//	value: The uint64 value to add.
+//	separate: Whether to include a space between the message and uint64 value.
+//	newline: Whether to include a newline at the end of the log message.
+//	hexCode: Whether to add the uint64 value in hexadecimal format.
+func (l *DefaultLogger) AddMessageWithUint64(message []byte, value uint64, separate bool, newline bool, hexCode bool) {
+	l.AddMessage(message, false)
+	if separate {
+		l.AddSpace()
+	}
+	l.AddUint64(value, newline, hexCode)
 }
 
 // log functions for different log levels

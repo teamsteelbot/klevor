@@ -21,7 +21,7 @@ var (
 	hardwareResetComplete = []byte("Hardware reset complete")
 
 	// errorInAfterHardwareResetFn is the message printed when there is an error in the afterHardwareResetFn
-	errorInAfterHardwareResetFn = []byte("Error in afterHardwareResetFn: ")
+	errorInAfterHardwareResetFn = []byte("Error in afterHardwareResetFn:")
 )
 
 // HardwareReset performs a hardware reset of the BNO08X sensor to an initial unconfigured state.
@@ -33,7 +33,7 @@ var (
 // afterHardwareResetFn: An optional function to be called after the hardware reset is complete.
 func HardwareReset(resetPin machine.Pin, logger Logger, afterHardwareResetFn func() tinygotypes.ErrorCode) {
 	if logger != nil {
-		logger.LogMessage(hardwareResetStart, true, true)
+		logger.InfoMessage(hardwareResetStart)
 	}
 
 	// Configure the reset pin as output
@@ -52,12 +52,12 @@ func HardwareReset(resetPin machine.Pin, logger Logger, afterHardwareResetFn fun
 	if afterHardwareResetFn != nil {
 		if err := afterHardwareResetFn(); err != tinygotypes.ErrorCodeNil {
 			if logger != nil {
-				logger.LogMessageWithErrorCode(errorInAfterHardwareResetFn, err, true, true)
+				logger.ErrorMessageWithErrorCode(errorInAfterHardwareResetFn, err, true)
 			}
 		}
 	}
 
 	if logger != nil {
-		logger.LogMessage(hardwareResetComplete, true, true)
+		logger.InfoMessage(hardwareResetComplete)
 	}
 }
