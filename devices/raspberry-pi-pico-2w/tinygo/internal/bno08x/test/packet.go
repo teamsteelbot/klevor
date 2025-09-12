@@ -209,6 +209,24 @@ var (
 
 	// receivingPacketDataMessage is the message printed when receiving a packet data
 	receivingPacketDataMessage = []byte("RECEIVED PACKET DATA: ")
+
+	// noDataMessage is the message printed when there is no data in the packet
+	noDataMessage = []byte("\t No data")
+
+	// reportIDPrefix is the prefix for the report ID in the packet data log
+	reportIDPrefix = []byte("\t Report ID: ")
+
+	// reportNamePrefix is the prefix for the report name in the packet data log
+	reportNamePrefix = []byte(" (")
+
+	// reportNameSuffix is the suffix for the report name in the packet data log
+	reportNameSuffix = []byte(")")
+
+	// sensorReportIDPrefix is the prefix for the sensor report ID in the packet data log
+	sensorReportIDPrefix = []byte("\t Sensor Report ID: ")
+
+	// featureIDPrefix is the prefix for the feature ID in the packet data log
+	featureIDPrefix = []byte("\t Feature ID: ")
 )
 
 // channelNumberNameBuffer returns the name of the channel as a byte slice.
@@ -431,6 +449,11 @@ func NewPacketHeader(
 		dataLength = 0
 	}
 
+	// Check if buffer is nil
+	if buffer == nil {
+		return PacketHeader{}, ErrorCodeBNO08XNilPacketHeaderBuffer
+	}
+
 	// Ensure the buffer is at least PacketHeaderLength bytes long
 	if len(buffer) < PacketHeaderLength {
 		return PacketHeader{}, ErrorCodeBNO08XReportHeaderBufferTooShort
@@ -592,33 +615,6 @@ func NewPacket(data []byte, header PacketHeader) (Packet, tinygotypes.ErrorCode)
 	}, tinygotypes.ErrorCodeNil
 }
 
-// NewPacketFromBuffer creates a new Packet from the provided buffer.
-//
-// Parameters:
-//
-//	buffer: A byte slice containing the Packet data.
-//
-// Returns:
-//
-//	A Packet object or an error if the Packet header could not be created.
-func NewPacketFromBuffer(buffer []byte) (*Packet, tinygotypes.ErrorCode) {
-	// Check if the provided buffer is nil
-	if buffer == nil {
-		return nil, ErrorCodeBNO08XNilPacketBuffer
-	}
-
-	// Create a new PacketHeader from the Packet bytes
-	header, err := NewPacketHeaderFromBuffer(buffer)
-	if err != tinygotypes.ErrorCodeNil {
-		return nil, err
-	}
-
-	return &Packet{
-		Header: header,
-		Data:   buffer[PacketHeaderLength : PacketHeaderLength+header.DataLength],
-	}, tinygotypes.ErrorCodeNil
-}
-
 // NewPacketFromData creates a new Packet from the provided data.
 //
 // Parameters:
@@ -626,6 +622,7 @@ func NewPacketFromBuffer(buffer []byte) (*Packet, tinygotypes.ErrorCode) {
 // channelNumber: The channel number of the Packet.
 // sequenceNumber: The sequence number of the Packet.
 // data: A byte slice containing the Packet data.
+// headerBuffer: A byte slice to hold the PacketHeader data.
 //
 // Returns:
 //
@@ -634,10 +631,11 @@ func NewPacketFromData(
 	channelNumber uint8,
 	sequenceNumber uint8,
 	data []byte,
+	headerBuffer []byte,
 ) (Packet, tinygotypes.ErrorCode) {
 	// Check if data is nil
 	if data == nil {
-		return nil, ErrorCodeBNO08XNilReportData
+		return Packet{}, ErrorCodeBNO08XNilReportData
 	}
 
 	// Create PacketHeader from data
@@ -645,9 +643,10 @@ func NewPacketFromData(
 		channelNumber,
 		sequenceNumber,
 		data,
+		headerBuffer,
 	)
 	if err != tinygotypes.ErrorCodeNil {
-		return nil, err
+		return Packet{}, err
 	}
 
 	return Packet{
@@ -713,28 +712,17 @@ func (p *Packet) IsError() bool {
 	return p.Header.IsError()
 }
 
-// PrintBuffer returns a byte slice representation of the Packet for debugging purposes.
+// Log logs the Packet details for debugging purposes.
 //
 // Parameters:
 //
 // isBeingSent: A boolean indicating if the Packet is being sent (true) or received (false).
 // logHeader: A boolean indicating if the PacketHeader should be logged (true) or not (false).
 // logger: A Logger interface for logging messages.
-//
-// Returns:
-//
-// A byte slice containing the Packet details or nil if the Packet or its header is nil.
-func (p *Packet) PrintBuffer(isBeingSent bool, logHeader bool, logger Logger) []byte {
-	if p.Header == nil {
-		return nil
-	}
-
-	// Derive safe data length
-	dataLen := p.Header.DataLength
-	if dataLen > len(p.Data) {
-		dataLen = len(p.Data)
-	} else if dataLen < 0 {
-		dataLen = 0
+func (p *Packet) Log(isBeingSent bool, logHeader bool, logger Logger){
+	// Check if logger is nil
+	if logger == nil {
+		return
 	}
 
 	// Log header
@@ -742,71 +730,76 @@ func (p *Packet) PrintBuffer(isBeingSent bool, logHeader bool, logger Logger) []
 		p.Header.Log(isBeingSent, logger)
 	}
 
-	// Avoid multiple allocations by pre-allocating a sufficiently large buffer
-	buffer := make([]byte, 0, 128)
-
 	// Title
 	if isBeingSent {
-		buffer = append(buffer, "SENDING PACKET"...)
+		logger.AddMessage(sendingPacketDataMessage, true)
 	} else {
-		buffer = append(buffer, "RECEIVED PACKET"...)
+		logger.AddMessage(receivedPacketDataMessage, true)
 	}
 
-	// Data section
-	buffer = append(buffer, "\n\t DATA"...)
+	// Get data length
+	dataLength := len(p.Data)
 
-	// Optional report decoding (guard length)
-	var reportID uint8
-	if dataLen == 0 {
-		buffer = append(buffer, "\n\t\t Report Type: N/A"...)
-		return buffer
+	// Check if there is data
+	if dataLength == 0 {
+		logger.AddMessage(noDataMessage, true)
+		logger.Debug()
+		return
 	}
 
-	reportID = p.Data[0]
+	// Get the report ID
+	reportID := p.Data[0]
+	logger.AddMessageWithUint8(reportIDPrefix, reportID, true, false, true)
 
 	// Get the report type
-	channelNumber := p.ChannelNumber()
-	var reportIDStr string
-	switch channelNumber {
+	logger.AddMessage(reportNamePrefix, false)
+	switch p.ChannelNumber() {
 	case ChannelSHTPCommand:
-		reportIDStr = SHTPCommandNameString(reportID)
+		logger.AddMessage(SHTPCommandNameBuffer(reportID), false)
 	case ChannelExe:
-		reportIDStr = ExeCommandNameString(reportID)
-	case ChannelControl:
-		reportIDStr = ControlCommandNameString(reportID)
-	case ChannelInputSensorReports:
-		reportIDStr = ControlCommandNameString(reportID)
+		logger.AddMessage(ExecCommandNameBuffer(reportID), false)
+	case ChannelControl, ChannelInputSensorReports:
+		logger.AddMessage(ControlCommandNameBuffer(reportID), false)
 	}
-
-	buffer = append(buffer, "\n\t\t Report Type: "...)
-	buffer = append(buffer, reportIDStr...)
-	buffer = append(buffer, " ("...)
-	buffer = append(buffer, uint8ToHex(reportID)...)
-	buffer = append(buffer, ")"...)
+	logger.AddMessage(reportNameSuffix, true)
 
 	// Additional interpretation (requires at least 6 data bytes)
-	if dataLen < 6 {
-		return buffer
+	if dataLength < 6 {
+		logger.Debug()
+		return
 	}
 
 	// High report IDs (command responses / meta)
 	if IsControlReportID(reportID) {
-		sensorReportType := p.Data[5]
-		sensorReportTypeStr := SHTPCommandNameString(sensorReportType)
-		if sensorReportTypeStr != "UNKNOWN_COMMAND" {
-			buffer = append(buffer, "\n\t\t Sensor Report Type: "...)
-			buffer = append(buffer, SHTPCommandNameString(sensorReportType)...)
-			buffer = append(buffer, " ("...)
-			buffer = append(buffer, uint8ToHex(sensorReportType)...)
-			buffer = append(buffer, ")"...)
+		// Get the sensor report ID
+		sensorReportID := p.Data[5]
+
+		// Only log if not unknown
+		sensorReportNameBuffer := SHTPCommandNameBuffer(sensorReportID)
+		isUnknown := len(sensorReportNameBuffer) == len(reportIDUnknownName)
+		if isUnknown {
+			isUnknown = true
+			for i := range sensorReportNameBuffer {
+				if sensorReportNameBuffer[i] != reportIDUnknownName[i] {
+					isUnknown = false
+					break
+				}
+			}
+
+			if isUnknown {
+				logger.AddMessageWithUint8(sensorReportIDPrefix, sensorReportID, true, false, true)
+				logger.AddMessage(reportNamePrefix, false)
+				logger.AddMessage(sensorReportNameBuffer, false)
+				logger.AddMessage(reportNameSuffix, true)
+			}
 		}
 	}
 
 	if reportID == ReportIDGetFeatureResponse || reportID == ReportIDSetFeatureCommand {
 		featureID := p.Data[1]
-		buffer = append(buffer, "\n\t\t Feature ID: "...)
-		buffer = append(buffer, uint8ToHex(featureID)...)
+		logger.AddMessageWithUint8(featureIDPrefix, featureID, true, true, true)
 	}
 
-	return buffer
+	logger.Debug()
+	return
 }

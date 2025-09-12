@@ -344,7 +344,8 @@ func (pr *UARTPacketReader) ReadPacket() (*Packet, tinygotypes.ErrorCode) {
 	}
 
 	// Parse header
-	header, err := NewPacketHeaderFromBuffer(pr.packetBuffer.GetBuffer())
+	packetBuffer := pr.packetBuffer.GetBuffer()
+	header, err := NewPacketHeaderFromBuffer(packetBuffer[:PacketHeaderLength])
 	if err != tinygotypes.ErrorCodeNil {
 		return nil, err
 	}
@@ -367,10 +368,9 @@ func (pr *UARTPacketReader) ReadPacket() (*Packet, tinygotypes.ErrorCode) {
 	header.Log(false, pr.logger)
 
 	// Read remaining (payload) bytes
-	packetBuffer := pr.packetBuffer.GetBuffer()
 	if err = pr.readInto(
-		packetBuffer,
-		PacketHeaderLength,
+		packetBuffer[PacketHeaderLength:],
+		0,
 		int(header.PacketByteCount),
 	); err != tinygotypes.ErrorCodeNil {
 		return nil, err
@@ -467,6 +467,7 @@ func (pw *UARTPacketWriter) SendPacket(channel uint8, data []byte) (
 		channel,
 		sequenceNumber,
 		data,
+		pw.packetBuffer.GetBuffer()[:PacketHeaderLength], // Reuse header buffer
 	)
 	if err != tinygotypes.ErrorCodeNil {
 		return 0, err

@@ -306,6 +306,7 @@ func (pw *I2CPacketWriter) SendPacket(channel uint8, data []byte) (
 		channel,
 		sequenceNumber,
 		data,
+		pw.packetBuffer.GetBuffer()[:PacketHeaderLength], // Reuse header buffer
 	)
 	if errCode != tinygotypes.ErrorCodeNil {
 		return 0, ErrorCodeBNO08XFailedToCreatePacket
@@ -480,7 +481,7 @@ func (pr *I2CPacketReader) ReadPacket() (Packet, tinygotypes.ErrorCode) {
 	}
 
 	// Create a full Packet from the packet buffer
-	packet, err := NewPacketFromBuffer(packetBuffer[packetByteCount])
+	packet, err := NewPacket(packetBuffer[packetByteCount], header)
 	if err != tinygotypes.ErrorCodeNil {
 		return nil, err
 	}

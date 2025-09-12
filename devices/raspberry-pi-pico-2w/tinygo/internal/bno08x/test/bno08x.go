@@ -111,9 +111,6 @@ var (
 
 	// processingReport is the prefix message printed when processing a report
 	processingReport = []byte("Processing report:")
-
-	// setFeatureEnableReportBuffer is the buffer used for creating Set Feature Enable report data
-	setFeatureEnableReportBuffer = make([]byte, ReportSetFeatureCommandLength)
 )
 
 // NewOptions creates a new Options instance with the specified logger.
@@ -943,6 +940,10 @@ func (b *BNO08X) EnableFeature(featureID uint8) tinygotypes.ErrorCode {
 			interval = DefaultReportInterval
 		}
 
+		// Get the feature enable report buffer
+		packetBuffer := b.packetBuffer.GetBuffer()
+		setFeatureEnableReportBuffer := packetBuffer[PacketHeaderLength : PacketHeaderLength+SetFeatureCommandReportLength]
+
 		// Create the feature enable report based on the feature ID
 		if featureID == ReportIDActivityClassifier {
 			if err := newSetFeatureCommandReport(
@@ -1084,9 +1085,10 @@ func (b *BNO08X) sendMeCommand(subcommandParams []byte) tinygotypes.ErrorCode {
 
 	// Insert the command request report into the local buffer
 	packetBuffer = b.packetBuffer.GetBuffer()
+	packetDataBuffer := packetBuffer[PacketHeaderLength:CommandBufferSize+PacketHeaderLength]
 	if err := insertCommandRequestReport(
 		MagnetometerCalibration,
-		packetBuffer[:CommandBufferSize],
+		packetDataBuffer,
 		b.packetBuffer.GetReportSequenceNumber(ReportIDCommandRequest),
 		subcommandParams,
 	); err != tinygotypes.ErrorCodeNil {
@@ -1094,7 +1096,7 @@ func (b *BNO08X) sendMeCommand(subcommandParams []byte) tinygotypes.ErrorCode {
 	}
 
 	// Send the command request Packet
-	if _, err := b.packetWriter.SendPacket(ChannelControl, packetBuffer[:CommandBufferSize]); err != tinygotypes.ErrorCodeNil {
+	if _, err := b.packetWriter.SendPacket(ChannelControl, packetDataBuffer); err != tinygotypes.ErrorCodeNil {
 		return ErrorCodeBNO08XFailedToSendMeCommandRequestPacket
 	}
 	b.packetBuffer.IncrementReportSequenceNumber(ReportIDCommandRequest)
@@ -1118,9 +1120,10 @@ func (b *BNO08X) SaveCalibrationData() tinygotypes.ErrorCode {
 	// Save the self-calibration data
 	startTime := time.Now()
 	packetBuffer := b.packetBuffer.GetBuffer()
+	packetDataBuffer := packetBuffer[PacketHeaderLength:CommandBufferSize+PacketHeaderLength]
 	err := insertCommandRequestReport(
 		SaveDynamicCalibrationData,
-		packetBuffer[:CommandBufferSize],
+		packetDataBuffer,
 		b.packetBuffer.GetReportSequenceNumber(ReportIDCommandRequest),
 		nil,
 	)
@@ -1129,7 +1132,7 @@ func (b *BNO08X) SaveCalibrationData() tinygotypes.ErrorCode {
 	}
 
 	// Send the command request Packet to save calibration data
-	_, err = b.packetWriter.SendPacket(ChannelControl, packetBuffer[:CommandBufferSize])
+	_, err = b.packetWriter.SendPacket(ChannelControl, packetDataBuffer)
 	if err != tinygotypes.ErrorCodeNil {
 		return ErrorCodeBNO08XFailedToSendCommandRequestPacketToSaveCalibrationData
 	}

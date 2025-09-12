@@ -389,7 +389,7 @@ func (pr *SPIPacketReader) ReadPacket() (*Packet, tinygotypes.ErrorCode) {
 	}
 
 	// Create a full Packet from the packet buffer
-	packet, errorCode := NewPacketFromBuffer(packetBuffer[:packetByteCount])
+	packet, errorCode := NewPacket(packetBuffer[:packetByteCount], header)
 	if errorCode != tinygotypes.ErrorCodeNil {
 		return nil, errorCode
 	}
@@ -479,6 +479,7 @@ func (pw *SPIPacketWriter) SendPacket(channel uint8, data []byte) (uint8, tinygo
 		channel,
 		sequenceNumber,
 		data,
+		pw.packetBuffer.GetBuffer()[:PacketHeaderLength], // Reuse header buffer
 	)
 	if errorCode != tinygotypes.ErrorCodeNil {
 		return 0, errorCode

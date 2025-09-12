@@ -120,5 +120,6 @@ const (
 	ErrorCodeBNO08XNilBNO08XInstance
 	ErrorCodeBNO08XSetFeatureEnableReportDataNilBuffer
 	ErrorCodeBNO08XSetFeatureEnableReportDataBufferTooShort
+	ErrorCodeBNO08XNilPacketHeaderBuffer
 	ErrorCodeBNO08XReportHeaderBufferTooShort
 )
