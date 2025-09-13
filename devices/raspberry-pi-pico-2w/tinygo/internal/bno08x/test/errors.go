@@ -118,4 +118,7 @@ const (
 	ErrorCodeBNO08XSetFeatureEnableReportDataBufferTooShort
 	ErrorCodeBNO08XNilPacketHeaderBuffer
 	ErrorCodeBNO08XReportHeaderBufferTooShort
+	ErrorCodeBNO08XNilWaitForPacketFunction
+	ErrorCodeBNO08XInvalidMode
+	ErrorCodeBNO08XUnknownModeAttemptingSoftwareReset
 )

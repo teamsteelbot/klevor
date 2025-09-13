@@ -232,8 +232,8 @@ const (
 	// ResetAttempts is the number of attempts to reset the sensor
 	ResetAttempts = 3
 
-	// ResetPacketDelay is the delay after sending a reset command before reading packets
-	ResetPacketDelay = 500 * time.Millisecond
+	// ResetCommandDelay is the delay after sending a reset command before reading packets
+	ResetCommandDelay = 500 * time.Millisecond
 
 	// EnableFeatureAttempts is the number of attempts to enable a feature
 	EnableFeatureAttempts = 5
@@ -287,7 +287,7 @@ const (
 	UARTByteTimeout = 50 * time.Millisecond
 
 	// UARTByteDelay is the delay between bytes when writing to UART
-	UARTByteDelay = 200 * time.Microsecond // 100 microseconds more than the recommended 100 microseconds
+	UARTByteDelay = 1 * time.Millisecond
 
 	// UARTRVCStartByte is the start byte for UART-RVC communication
 	UARTRVCStartByte = 0xAA
@@ -298,8 +298,8 @@ const (
 	// UARTRVCPacketLengthBytes is the number of length bytes in a UART-RVC packet
 	UARTRVCPacketLengthBytes = 19
 
-	// SPIMode is the SPI mode for BNO08x communication (CPOL=1, CPHA=1)
-	SPIMode = 3
+	// SPIWireMode is the SPI mode for BNO08x communication (CPOL=1, CPHA=1)
+	SPIWireMode = 3
 
 	// SPIFrequency is the SPI bus frequency in Hz
 	SPIFrequency = 1_000_000 // 1MHz
@@ -355,7 +355,10 @@ var (
 	MaxPackets = 10
 
 	// WaitForPacketTypeTimeout is the default timeout for waiting for a specific packet type in seconds
-	WaitForPacketTypeTimeout = 1* time.Second
+	WaitForPacketTypeTimeout = 1 * time.Second
+
+	// MaxClearPendingPacketsTimeout is the maximum timeout for clearing pending packets in seconds
+	MaxClearPendingPacketsTimeout = 5 * time.Second
 
 	// CalibrationCommandsTimeout is the timeout for calibration commands in seconds
 	CalibrationCommandsTimeout = 5 * time.Second

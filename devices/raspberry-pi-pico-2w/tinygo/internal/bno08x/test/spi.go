@@ -127,7 +127,7 @@ func NewSPI(
 		machine.SPIConfig{
 			Frequency: SPIFrequency,
 			LSBFirst:  false,
-			Mode:      SPIMode,
+			Mode:      SPIWireMode,
 			SCK:       sckPin,
 			SDO:       mosiPin,
 			SDI:       misoPin,
@@ -171,6 +171,7 @@ func NewSPI(
 		packetReader,
 		packetWriter,
 		packetBuffer,
+		SPIMode,
 		afterResetFn,
 		options.Options,
 	)
@@ -373,11 +374,6 @@ func (pr *SPIPacketReader) ReadPacket() (Packet, tinygotypes.ErrorCode) {
 
 	// Debug log the packet
 	packet.Log(false, false, pr.logger)
-
-	// Update the sequence number in the packet buffer
-	if errorCode = pr.packetBuffer.UpdateChannelSequenceNumber(packet); errorCode != tinygotypes.ErrorCodeNil {
-		return Packet{}, errorCode
-	}
 	return packet, tinygotypes.ErrorCodeNil
 }
 

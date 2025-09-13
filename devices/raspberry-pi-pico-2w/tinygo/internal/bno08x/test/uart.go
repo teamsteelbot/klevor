@@ -157,6 +157,7 @@ func NewUART(
 		packetReader,
 		packetWriter,
 		packetBuffer,
+		UARTMode,
 		afterResetFn,
 		options.Options,
 	)
@@ -232,7 +233,7 @@ var (
 //
 // True if data is available, otherwise false.
 func (pr *UARTPacketReader) IsAvailableToRead() bool {
-	return pr.uartBus.Buffered() > 0
+	return pr.uartBus.Buffered() >= 4
 }
 
 // readByte blocks until a byte is read (simple poll).
@@ -394,11 +395,6 @@ func (pr *UARTPacketReader) ReadPacket() (Packet, tinygotypes.ErrorCode) {
 
 	// Log the packet
 	packet.Log(false, false, pr.logger)
-
-	// Update sequence number
-	if err := pr.packetBuffer.UpdateChannelSequenceNumber(packet); err != tinygotypes.ErrorCodeNil {
-		return Packet{}, err
-	}
 	return packet, tinygotypes.ErrorCodeNil
 }
 

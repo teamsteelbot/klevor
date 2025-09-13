@@ -18,6 +18,9 @@ type (
 
 	// ReportStabilityClassification is an enumeration of stability classification keys
 	ReportStabilityClassification uint8
+
+	// Mode is an enumeration of operation modes
+	Mode uint8
 )
 
 const (
@@ -67,6 +70,14 @@ const (
 	ReportStabilityClassificationStable
 	ReportStabilityClassificationInMotion
 	ReportStabilityClassificationNil
+)
+
+const (
+	ModeNil Mode = iota
+	I2CMode 
+	UARTMode
+	UARTRVCMode
+	SPIMode
 )
 
 // ReportAccuracyStatusFromUint8 returns the ReportAccuracyStatus enum based on a given uint8 value

@@ -50,6 +50,7 @@ type (
 		rawGyroscope                    [3]float64
 		rawMagnetometer                 [3]float64
 		enabledFeatures                 map[uint8]bool
+		mode                            Mode
 		afterResetFn                    func(b *BNO08X) tinygotypes.ErrorCode
 	}
 
@@ -60,18 +61,6 @@ type (
 )
 
 var (
-	// softwareResetStart is the initial message printed when performing a software reset
-	softwareResetStart = []byte("Software resetting...")
-
-	// softwareResetComplete is the message printed when a software reset is complete
-	softwareResetComplete = []byte("Software reset complete")
-
-	// foundSHTPAdvertisementPacket is the message printed when an SHTP advertisement packet is found
-	foundSHTPAdvertisementPacket = []byte("Found SHTP advertisement packet")
-
-	// clearingPacketFromChannel is the prefix message printed when clearing a packet from a channel
-	clearingPacketFromChannel = []byte("Clearing packet from channel")
-
 	// errorWaitingForPacket is the message printed when there is an error waiting for a packet
 	errorWaitingForPacket = []byte("Error waiting for packet:")
 
@@ -135,6 +124,7 @@ func NewOptions(logger Logger) *Options {
 //		packetReader: The PacketReader to read packets from the BNO08X sensor.
 //		packetWriter: The PacketWriter to write packets to the BNO08X sensor.
 //		packetBuffer: The PacketBuffer to store Packet data.
+//		mode: The operation mode of the BNO08X sensor (I2C, UART, SPI, etc.).
 //		afterResetFn: An optional function to be called after a software reset.
 //		options: Optional configuration options for the BNO08X instance.
 //
@@ -146,6 +136,7 @@ func NewBNO08X(
 	packetReader PacketReader,
 	packetWriter PacketWriter,
 	packetBuffer PacketBuffer,
+	mode Mode,
 	afterResetFn func(b *BNO08X) tinygotypes.ErrorCode,
 	options *Options,
 ) (*BNO08X, tinygotypes.ErrorCode) {
@@ -158,6 +149,11 @@ func NewBNO08X(
 	}
 	if packetBuffer == nil {
 		return nil, ErrorCodeBNO08XNilPacketBuffer
+	}
+
+	// Validate the mode
+	if mode != I2CMode && mode != UARTMode && mode != SPIMode {
+		return nil, ErrorCodeBNO08XInvalidMode
 	}
 
 	// If options are nil, initialize with default values
@@ -180,6 +176,7 @@ func NewBNO08X(
 		stabilityClassification:  ReportStabilityClassificationUnknown,
 		mostLikelyClassification: ReportClassificationUnknown,
 		enabledFeatures:          make(map[uint8]bool),
+		mode:                     mode,
 		afterResetFn:             afterResetFn,
 	}
 
@@ -201,44 +198,12 @@ func (b *BNO08X) hardwareReset() {
 //
 // An error if the reset process fails, otherwise nil.
 func (b *BNO08X) softwareReset() tinygotypes.ErrorCode {
-	if b.logger != nil {
-		b.logger.InfoMessage(softwareResetStart)
+	if b.mode == I2CMode || b.mode == SPIMode {
+		return SoftwareResetForI2CAndSPIMode(b.packetWriter, b.logger, b.waitForPacket)
+	} else if b.mode == UARTMode || b.mode == UARTRVCMode {
+		return SoftwareResetForUARTMode(b.packetWriter, b.logger, b.waitForPacket)
 	}
-
-	// Send the reset command
-	if _, err := b.packetWriter.SendPacket(ChannelExe, ExecCommandResetData); err != tinygotypes.ErrorCodeNil {
-		return ErrorCodeBNO08XFailedToSendResetCommandRequestPacket
-	}
-
-	time.Sleep(500 * time.Millisecond)
-
-	// Clear out any pending packets
-	for _ = range 2 {
-		packet, err := b.waitForPacket(WaitForPacketTimeout)
-		if err != tinygotypes.ErrorCodeNil {
-			// Log the error
-			if b.logger != nil {
-				b.logger.WarningMessageWithErrorCode(errorWaitingForPacket, err, true)
-			}
-
-		} else if b.logger != nil {
-			if packet.ChannelNumber() == ChannelSHTPCommand && len(packet.Data) == AdvertisementPacketLength {
-				b.logger.InfoMessage(foundSHTPAdvertisementPacket)
-			} else {
-				b.logger.AddMessageWithUint8(clearingPacketFromChannel, packet.ChannelNumber(), true, true, true)
-				b.logger.Info()
-			}
-		}
-	}
-
-	// Clear out any packets that may have been sent during the reset process
-	// time.Sleep(ResetPacketDelay)
-
-	// Wait for the reset to complete
-	if b.logger != nil {
-		b.logger.InfoMessage(softwareResetComplete)
-	}
-	return tinygotypes.ErrorCodeNil
+	return ErrorCodeBNO08XUnknownModeAttemptingSoftwareReset
 }
 
 // Reset performs the initial setup of the BNO08X sensor, including hardware and software resets.
@@ -249,7 +214,6 @@ func (b *BNO08X) softwareReset() tinygotypes.ErrorCode {
 func (b *BNO08X) Reset() tinygotypes.ErrorCode {
 	// Try up to 3 times to initialize the sensor
 	for i := 0; i < ResetAttempts; i++ {
-		// Reset enabled features
 		for k := range b.enabledFeatures {
 			delete(b.enabledFeatures, k)
 		}
@@ -257,11 +221,11 @@ func (b *BNO08X) Reset() tinygotypes.ErrorCode {
 		// Clear calibration status
 		b.calibrationComplete = false
 
-		// Hardware reset
-		b.hardwareReset()
-
 		// Reset sequence numbers in the packet buffer
 		b.packetBuffer.ResetSequenceNumbers()
+
+		// Hardware reset
+		b.hardwareReset()
 
 		// Software reset
 		if err := b.softwareReset(); err != tinygotypes.ErrorCodeNil {
@@ -384,13 +348,11 @@ func (b *BNO08X) waitForPacketType(
 			}
 		}
 
-		if newPacket.ChannelNumber() != ChannelExe && newPacket.ChannelNumber() != ChannelSHTPCommand {
-			if b.logger != nil {
-				b.logger.InfoMessage(passingPacketToHandlerForDeSlicing)
-			}
-			if err = b.handlePacket(newPacket); err != tinygotypes.ErrorCodeNil {
-				return Packet{}, err
-			}
+		if b.logger != nil {
+			b.logger.InfoMessage(passingPacketToHandlerForDeSlicing)
+		}
+		if err = b.handlePacket(newPacket); err != tinygotypes.ErrorCodeNil {
+			return Packet{}, err
 		}
 	}
 	return Packet{}, ErrorCodeBNO08XWaitingForPacketTimedOut

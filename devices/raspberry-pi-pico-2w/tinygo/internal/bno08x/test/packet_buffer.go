@@ -91,30 +91,6 @@ func (pb *DefaultPacketBuffer) validateChannelNumber(channel uint8) tinygotypes.
 	return tinygotypes.ErrorCodeNil
 }
 
-// UpdateChannelSequenceNumber updates the cached sequence number for the given channel using the provided Packet.
-//
-// Parameters:
-//
-//	newPacket: A Packet containing the channel and sequence number.
-//
-// Returns:
-//
-//	An error if the sequence number could not be updated, otherwise nil.
-func (pb *DefaultPacketBuffer) UpdateChannelSequenceNumber(newPacket Packet) tinygotypes.ErrorCode {
-	// Get the channel number and sequence number from the packet
-	channel := newPacket.ChannelNumber()
-	seq := newPacket.Header.SequenceNumber
-
-	// Validate the channel number
-	if err := pb.validateChannelNumber(channel); err != tinygotypes.ErrorCodeNil {
-		return err
-	}
-
-	// Update the sequence number for the channel
-	pb.sequenceNumber[int(channel)] = seq + 1
-	return tinygotypes.ErrorCodeNil
-}
-
 // IncrementChannelSequenceNumber increments the sequence number for the given channel by the specified amount.
 // It wraps at 256.
 //

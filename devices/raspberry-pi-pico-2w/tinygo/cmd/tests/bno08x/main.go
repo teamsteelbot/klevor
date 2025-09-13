@@ -44,45 +44,51 @@ var (
 )
 
 func main() {
-	// Wait 5 seconds before starting the test
-	time.Sleep(5 * time.Second)
+	// Check if both BNO08x interfaces are not initialized
+	if internalbno08x.UART == nil && internalbno08x.UARTRVC == nil {
+		return
+	}
 
 	for {
 		/*
-		// Update quaternion
-		internalbno08x.UART.Update()
+		if internalbno08x.UART != nil {
+			// Update quaternion
+			internalbno08x.UART.Update()
 
-		// Get the quaternion
-		q := internalbno08x.UART.GetQuaternion()
-		x := q[ralvarezdevbno08x.QuaternionXIndex]
-		y := q[ralvarezdevbno08x.QuaternionYIndex]
-		z := q[ralvarezdevbno08x.QuaternionZIndex]
-		w := q[ralvarezdevbno08x.QuaternionWIndex]
+			// Get the quaternion
+			q := internalbno08x.UART.GetQuaternion()
+			x := q[ralvarezdevbno08x.QuaternionXIndex]
+			y := q[ralvarezdevbno08x.QuaternionYIndex]
+			z := q[ralvarezdevbno08x.QuaternionZIndex]
+			w := q[ralvarezdevbno08x.QuaternionWIndex]
 
-		// Log the quaternion values
-		internal.Logger.AddMessage(quaternionHeader, true, true)
-		internal.Logger.AddMessageWithFloat64(quaternionXPrefix, x, true, true)
-		internal.Logger.AddMessageWithFloat64(quaternionYPrefix, y, true, true)
-		internal.Logger.AddMessageWithFloat64(quaternionZPrefix, z, true, true)
-		internal.Logger.AddMessageWithFloat64(quaternionWPrefix, w, true, true)
-		internal.Logger.Debug()
+			// Log the quaternion values
+			internal.Logger.AddMessage(quaternionHeader, true)
+			internal.Logger.AddMessageWithFloat64(quaternionXPrefix, x, true, true)
+			internal.Logger.AddMessageWithFloat64(quaternionYPrefix, y, true, true)
+			internal.Logger.AddMessageWithFloat64(quaternionZPrefix, z, true, true)
+			internal.Logger.AddMessageWithFloat64(quaternionWPrefix, w, true, true)
+			internal.Logger.Debug()
+		}
 		*/
 
-		// Update euler degrees
-		internalbno08x.UARTRVC.Update()
+		if internalbno08x.UARTRVC != nil {
+			// Update euler degrees
+			internalbno08x.UARTRVC.Update()
 
-		// Get the euler degrees
-		e := internalbno08x.UARTRVC.GetEulerDegrees()
-		yaw := e[ralvarezdevbno08x.EulerDegreesYawIndex]
-		pitch := e[ralvarezdevbno08x.EulerDegreesPitchIndex]
-		roll := e[ralvarezdevbno08x.EulerDegreesRollIndex]
+			// Get the euler degrees
+			e := internalbno08x.UARTRVC.GetEulerDegrees()
+			yaw := e[ralvarezdevbno08x.EulerDegreesYawIndex]
+			pitch := e[ralvarezdevbno08x.EulerDegreesPitchIndex]
+			roll := e[ralvarezdevbno08x.EulerDegreesRollIndex]
 
-		// Log the euler degrees values
-		internal.Logger.AddMessage(eulerHeader, true)
-		internal.Logger.AddMessageWithFloat64(yawDegreesPrefix, yaw, true, true)
-		internal.Logger.AddMessageWithFloat64(pitchDegreesPrefix, pitch, true, true)
-		internal.Logger.AddMessageWithFloat64(rollDegreesPrefix, roll, true, true)
-		internal.Logger.Debug()
+			// Log the euler degrees values
+			internal.Logger.AddMessage(eulerHeader, true)
+			internal.Logger.AddMessageWithFloat64(yawDegreesPrefix, yaw, true, true)
+			internal.Logger.AddMessageWithFloat64(pitchDegreesPrefix, pitch, true, true)
+			internal.Logger.AddMessageWithFloat64(rollDegreesPrefix, roll, true, true)
+			internal.Logger.Debug()
+		}
 
 		// Sleep for the interval duration
 		time.Sleep(IntervalDuration)

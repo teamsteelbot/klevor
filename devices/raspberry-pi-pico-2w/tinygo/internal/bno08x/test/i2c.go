@@ -211,6 +211,7 @@ func NewI2C(
 		packetReader,
 		packetWriter,
 		packetBuffer,
+		I2CMode,
 		afterResetFn,
 		options.Options,
 	)
@@ -475,11 +476,6 @@ func (pr *I2CPacketReader) ReadPacket() (Packet, tinygotypes.ErrorCode) {
 
 	// Debug log the packet
 	packet.Log(false, false, pr.logger)
-
-	// Update the sequence number in the packet buffer
-	if err = pr.packetBuffer.UpdateChannelSequenceNumber(packet); err != tinygotypes.ErrorCodeNil {
-		return Packet{}, err
-	}
 	return packet, tinygotypes.ErrorCodeNil
 }
 

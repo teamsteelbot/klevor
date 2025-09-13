@@ -46,7 +46,7 @@ func init() {
 		machine.GPIO4,
 		PacketBuffer,
 		afterReset,
-		ralvarezdevbno08x.NewUARTOptions(internal.Logger, true),
+		ralvarezdevbno08x.NewUARTOptions(internal.Logger, false),
 		// ralvarezdevbno08x.NewUARTOptions(nil, false),
 	)
 	if err != tinygotypes.ErrorCodeNil {
