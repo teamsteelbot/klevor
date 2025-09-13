@@ -211,7 +211,6 @@ func NewI2C(
 		packetReader,
 		packetWriter,
 		packetBuffer,
-		nil,
 		afterResetFn,
 		options.Options,
 	)
@@ -293,7 +292,7 @@ func (pw *I2CPacketWriter) SendPacket(channel uint8, data []byte) (
 	}
 
 	// Get channel sequence number
-	sequenceNumber, errCode := pw.packetBuffer.GetSequenceNumber(channel)
+	sequenceNumber, errCode := pw.packetBuffer.GetChannelSequenceNumber(channel)
 	if errCode != tinygotypes.ErrorCodeNil {
 		return 0, errCode
 	}
@@ -438,16 +437,6 @@ func (pr *I2CPacketReader) ReadPacket() (Packet, tinygotypes.ErrorCode) {
 
 	// Extract header fields
 	packetByteCount := header.PacketByteCount
-	channelNumber := header.ChannelNumber
-	sequenceNumber := header.SequenceNumber
-
-	// Set sequence number in packet buffer
-	if err = pr.packetBuffer.SetSequenceNumber(
-		channelNumber,
-		sequenceNumber,
-	); err != tinygotypes.ErrorCodeNil {
-		return Packet{}, err
-	}
 
 	// Skip header-only / empty packets
 	if header.PacketByteCount == PacketHeaderLength || header.DataLength == 0 {
@@ -488,7 +477,7 @@ func (pr *I2CPacketReader) ReadPacket() (Packet, tinygotypes.ErrorCode) {
 	packet.Log(false, false, pr.logger)
 
 	// Update the sequence number in the packet buffer
-	if err = pr.packetBuffer.UpdateSequenceNumber(packet); err != tinygotypes.ErrorCodeNil {
+	if err = pr.packetBuffer.UpdateChannelSequenceNumber(packet); err != tinygotypes.ErrorCodeNil {
 		return Packet{}, err
 	}
 	return packet, tinygotypes.ErrorCodeNil

@@ -20,5 +20,6 @@ var (
 func init() {
 	if err := Device.Init(WifiConfig); err != nil {
 		internal.Logger.ErrorMessageWithErrorCode(failedToInitializeCwy43439Message, err)
+		return
 	}
 }

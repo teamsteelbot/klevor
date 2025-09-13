@@ -6,8 +6,6 @@ import (
 	"time"
 
 	"machine"
-
-	tinygotypes "github.com/ralvarezdev/tinygo-types"
 )
 
 var (
@@ -27,8 +25,7 @@ var (
 //
 // reset: The machine.Pin used to perform the hardware reset.
 // logger: An optional Logger for logging debug information during the reset process.
-// afterHardwareResetFn: An optional function to be called after the hardware reset is complete.
-func HardwareReset(resetPin machine.Pin, logger Logger, afterHardwareResetFn func() tinygotypes.ErrorCode) {
+func HardwareReset(resetPin machine.Pin, logger Logger) {
 	if logger != nil {
 		logger.InfoMessage(hardwareResetStart)
 	}
@@ -44,15 +41,6 @@ func HardwareReset(resetPin machine.Pin, logger Logger, afterHardwareResetFn fun
 
 	resetPin.High()
 	time.Sleep(ResetPinDelay)
-
-	// Call the afterHardwareResetFn if provided
-	if afterHardwareResetFn != nil {
-		if err := afterHardwareResetFn(); err != tinygotypes.ErrorCodeNil {
-			if logger != nil {
-				logger.ErrorMessageWithErrorCode(errorInAfterHardwareResetFn, err, true)
-			}
-		}
-	}
 
 	if logger != nil {
 		logger.InfoMessage(hardwareResetComplete)

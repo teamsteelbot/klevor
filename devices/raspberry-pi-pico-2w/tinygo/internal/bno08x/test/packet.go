@@ -232,7 +232,7 @@ var (
 //
 // Parameters:
 //
-// 	channelNumber: The channel number to get the name for.
+//	channelNumber: The channel number to get the name for.
 //
 // Returns:
 //
@@ -718,7 +718,7 @@ func (p *Packet) IsError() bool {
 // isBeingSent: A boolean indicating if the Packet is being sent (true) or received (false).
 // logHeader: A boolean indicating if the PacketHeader should be logged (true) or not (false).
 // logger: A Logger interface for logging messages.
-func (p *Packet) Log(isBeingSent bool, logHeader bool, logger Logger){
+func (p *Packet) Log(isBeingSent bool, logHeader bool, logger Logger) {
 	// Check if logger is nil
 	if logger == nil {
 		return
@@ -778,19 +778,19 @@ func (p *Packet) Log(isBeingSent bool, logHeader bool, logger Logger){
 		isUnknown := len(sensorReportNameBuffer) == len(reportIDUnknownName)
 		if isUnknown {
 			isUnknown = true
-			for i := range sensorReportNameBuffer {
+			for i, _ := range sensorReportNameBuffer {
 				if sensorReportNameBuffer[i] != reportIDUnknownName[i] {
 					isUnknown = false
 					break
 				}
 			}
+		}
 
-			if isUnknown {
-				logger.AddMessageWithUint8(sensorReportIDPrefix, sensorReportID, true, false, true)
-				logger.AddMessage(reportNamePrefix, false)
-				logger.AddMessage(sensorReportNameBuffer, false)
-				logger.AddMessage(reportNameSuffix, true)
-			}
+		if !isUnknown {
+			logger.AddMessageWithUint8(sensorReportIDPrefix, sensorReportID, true, false, true)
+			logger.AddMessage(reportNamePrefix, false)
+			logger.AddMessage(sensorReportNameBuffer, false)
+			logger.AddMessage(reportNameSuffix, true)
 		}
 	}
 

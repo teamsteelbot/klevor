@@ -171,7 +171,6 @@ func NewSPI(
 		packetReader,
 		packetWriter,
 		packetBuffer,
-		nil,
 		afterResetFn,
 		options.Options,
 	)
@@ -337,16 +336,6 @@ func (pr *SPIPacketReader) ReadPacket() (Packet, tinygotypes.ErrorCode) {
 
 	// Extract header fields
 	packetByteCount := header.PacketByteCount
-	channelNumber := header.ChannelNumber
-	sequenceNumber := header.SequenceNumber
-
-	// Set sequence number in packet buffer
-	if errorCode = pr.packetBuffer.SetSequenceNumber(
-		channelNumber,
-		sequenceNumber,
-	); errorCode != tinygotypes.ErrorCodeNil {
-		return Packet{}, errorCode
-	}
 
 	// Skip header-only / empty packets
 	if header.PacketByteCount == PacketHeaderLength || header.DataLength == 0 {
@@ -386,7 +375,7 @@ func (pr *SPIPacketReader) ReadPacket() (Packet, tinygotypes.ErrorCode) {
 	packet.Log(false, false, pr.logger)
 
 	// Update the sequence number in the packet buffer
-	if errorCode = pr.packetBuffer.UpdateSequenceNumber(packet); errorCode != tinygotypes.ErrorCodeNil {
+	if errorCode = pr.packetBuffer.UpdateChannelSequenceNumber(packet); errorCode != tinygotypes.ErrorCodeNil {
 		return Packet{}, errorCode
 	}
 	return packet, tinygotypes.ErrorCodeNil
@@ -454,7 +443,7 @@ func (pw *SPIPacketWriter) SendPacket(channel uint8, data []byte) (uint8, tinygo
 	}
 
 	// Get channel sequence number
-	sequenceNumber, errorCode := pw.packetBuffer.GetSequenceNumber(channel)
+	sequenceNumber, errorCode := pw.packetBuffer.GetChannelSequenceNumber(channel)
 	if errorCode != tinygotypes.ErrorCodeNil {
 		return 0, errorCode
 	}

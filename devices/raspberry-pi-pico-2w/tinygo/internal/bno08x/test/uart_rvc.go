@@ -31,7 +31,6 @@ type (
 	// UARTRVCOptions struct for configuring the BNO08X over UART-RVC.
 	UARTRVCOptions struct {
 		Options *Options
-		Timeout time.Duration
 	}
 )
 
@@ -51,18 +50,15 @@ var (
 // Parameters:
 //
 // logger: The logger to use for logging and debugging information (optional).
-// timeout: The timeout duration for reading data (optional).
 //
 // Returns:
 //
 // A pointer to a new UARTRVCOptions instance.
 func NewUARTRVCOptions(
 	logger Logger,
-	timeout time.Duration,
 ) *UARTRVCOptions {
 	return &UARTRVCOptions{
 		Options: NewOptions(logger),
-		Timeout: timeout,
 	}
 }
 
@@ -116,11 +112,8 @@ func NewUARTRVC(
 
 	// If options are nil, initialize with default values
 	if options == nil {
-		options = NewUARTRVCOptions(nil, UARTRVCTimeout)
+		options = NewUARTRVCOptions(nil)
 	}
-
-	// Get the timeout from options
-	timeout := options.Timeout
 
 	// Get the logger from options
 	logger := options.Options.Logger
@@ -135,7 +128,7 @@ func NewUARTRVC(
 		resetPin:      resetPin,
 		logger:      logger,
 		buffer:        make([]byte, UARTRVCPacketLengthBytes),
-		timeout:       timeout,
+		timeout:       UARTRVCTimeout,
 		initComplete:  false,
 	}
 
@@ -152,7 +145,7 @@ func NewUARTRVC(
 //
 // An error if the reset process fails, otherwise nil.
 func (u *UARTRVC) Reset() tinygotypes.ErrorCode  {
-	HardwareReset(u.resetPin, u.logger, nil)
+	HardwareReset(u.resetPin, u.logger)
 	return tinygotypes.ErrorCodeNil
 }
 
@@ -213,7 +206,6 @@ func (u *UARTRVC) readByte() (byte, tinygotypes.ErrorCode) {
 			}
 			return 0, ErrorCodeBNO08XUARTRVCFailedToReadByte
 		}
-		time.Sleep(NoByteDelay)
 	}
 	return 0, ErrorCodeBNO08XUARTRVCByteTimeout
 }

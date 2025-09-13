@@ -68,6 +68,7 @@ func init() {
 	)
 	if err != tinygotypes.ErrorCodeNil {
 		internal.Logger.ErrorMessageWithErrorCode(failedToInitializeEscMotorMessage, err)
+		return
 	}
 	ESCMotorHandler = escMotorHandler
 }

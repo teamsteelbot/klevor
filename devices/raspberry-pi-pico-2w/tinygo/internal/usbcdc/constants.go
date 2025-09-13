@@ -78,6 +78,7 @@ func init() {
 	)
 	if err != tinygo_types.ErrorCodeNil {
 		internal.Logger.ErrorMessageWithErrorCode(failedToInitializeUSBMessage, err)
+		return
 	}
 	USBCDCHandler = usbCDCHandler
 }

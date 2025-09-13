@@ -91,7 +91,7 @@ func (pb *DefaultPacketBuffer) validateChannelNumber(channel uint8) tinygotypes.
 	return tinygotypes.ErrorCodeNil
 }
 
-// UpdateSequenceNumber updates the cached sequence number for the given channel using the provided Packet.
+// UpdateChannelSequenceNumber updates the cached sequence number for the given channel using the provided Packet.
 //
 // Parameters:
 //
@@ -100,7 +100,7 @@ func (pb *DefaultPacketBuffer) validateChannelNumber(channel uint8) tinygotypes.
 // Returns:
 //
 //	An error if the sequence number could not be updated, otherwise nil.
-func (pb *DefaultPacketBuffer) UpdateSequenceNumber(newPacket Packet) tinygotypes.ErrorCode {
+func (pb *DefaultPacketBuffer) UpdateChannelSequenceNumber(newPacket Packet) tinygotypes.ErrorCode {
 	// Get the channel number and sequence number from the packet
 	channel := newPacket.ChannelNumber()
 	seq := newPacket.Header.SequenceNumber
@@ -111,7 +111,7 @@ func (pb *DefaultPacketBuffer) UpdateSequenceNumber(newPacket Packet) tinygotype
 	}
 
 	// Update the sequence number for the channel
-	pb.sequenceNumber[int(channel)] = seq
+	pb.sequenceNumber[int(channel)] = seq + 1
 	return tinygotypes.ErrorCodeNil
 }
 
@@ -140,7 +140,7 @@ func (pb *DefaultPacketBuffer) IncrementChannelSequenceNumber(channel uint8) (
 	return newSequenceNumber, tinygotypes.ErrorCodeNil
 }
 
-// GetSequenceNumber returns the cached sequence number for the given channel.
+// GetChannelSequenceNumber returns the cached sequence number for the given channel.
 //
 // Parameters:
 //
@@ -149,7 +149,7 @@ func (pb *DefaultPacketBuffer) IncrementChannelSequenceNumber(channel uint8) (
 // Returns:
 //
 //	The cached sequence number for the channel, or -1 if the channel is invalid.
-func (pb *DefaultPacketBuffer) GetSequenceNumber(channel uint8) (uint8, tinygotypes.ErrorCode) {
+func (pb *DefaultPacketBuffer) GetChannelSequenceNumber(channel uint8) (uint8, tinygotypes.ErrorCode) {
 	// Validate the channel number
 	if err := pb.validateChannelNumber(channel); err != tinygotypes.ErrorCodeNil {
 		return 0, err

@@ -25,9 +25,9 @@ type (
 	BNO08X struct {
 		packetReader                    PacketReader
 		packetWriter                    PacketWriter
-		logger                        Logger
+		logger                          Logger
 		resetPin                        machine.Pin
-		packetBuffer                      PacketBuffer
+		packetBuffer                    PacketBuffer
 		dynamicConfigurationDataSavedAt time.Time
 		meCalibrationStartedAt          time.Time
 		calibrationComplete             bool
@@ -50,7 +50,6 @@ type (
 		rawGyroscope                    [3]float64
 		rawMagnetometer                 [3]float64
 		enabledFeatures                 map[uint8]bool
-		afterHardwareResetFn                    func(b *BNO08X) func() tinygotypes.ErrorCode
 		afterResetFn                    func(b *BNO08X) tinygotypes.ErrorCode
 	}
 
@@ -83,7 +82,7 @@ var (
 	waitingForPacketOnChannel = []byte("Waiting for Packet on Channel:")
 
 	// waitingForPacketWithReportIDOnChannel is the prefix message printed when waiting for a packet with a specific report ID on a channel
-	waitingForPacketWithReportIDOnChannel = []byte("*Waiting for Packet with Report ID:")
+	waitingForPacketWithReportIDOnChannel = []byte("Waiting for Packet with Report ID:")
 
 	// errorOccurredWhileWaitingForSensorID is the message printed when there is an error while waiting for the sensor ID
 	errorOccurredWhileWaitingForSensorID = []byte("An error occurred while waiting for the sensor ID:")
@@ -132,13 +131,12 @@ func NewOptions(logger Logger) *Options {
 //
 // Parameters:
 //
-//  resetPin: The pin used to reset the BNO08X sensor.
-//	packetReader: The PacketReader to read packets from the BNO08X sensor.
-//	packetWriter: The PacketWriter to write packets to the BNO08X sensor.
-//	packetBuffer: The PacketBuffer to store Packet data.
-//	afterHardwareResetFn: An optional function to be called after a hardware reset.
-//	afterResetFn: An optional function to be called after a software reset.
-//	options: Optional configuration options for the BNO08X instance.
+//	 resetPin: The pin used to reset the BNO08X sensor.
+//		packetReader: The PacketReader to read packets from the BNO08X sensor.
+//		packetWriter: The PacketWriter to write packets to the BNO08X sensor.
+//		packetBuffer: The PacketBuffer to store Packet data.
+//		afterResetFn: An optional function to be called after a software reset.
+//		options: Optional configuration options for the BNO08X instance.
 //
 // Returns:
 //
@@ -148,7 +146,6 @@ func NewBNO08X(
 	packetReader PacketReader,
 	packetWriter PacketWriter,
 	packetBuffer PacketBuffer,
-	afterHardwareResetFn func(b *BNO08X) func() tinygotypes.ErrorCode,
 	afterResetFn func(b *BNO08X) tinygotypes.ErrorCode,
 	options *Options,
 ) (*BNO08X, tinygotypes.ErrorCode) {
@@ -170,21 +167,20 @@ func NewBNO08X(
 
 	// Create the BNO08X instance
 	bno08x := &BNO08X{
-		packetReader:                    packetReader,
-		packetWriter:                    packetWriter,
-		logger:                        options.Logger,
-		resetPin:                        resetPin,
-		packetBuffer:                      packetBuffer,
-		calibrationComplete:             false,
-		magnetometerAccuracy:            ReportAccuracyStatusUnreliable,
-		initComplete:                    false,
-		stepCount:                       0,
-		shakesDetected:                  false,
-		stabilityClassification:        ReportStabilityClassificationUnknown,
-		mostLikelyClassification:        ReportClassificationUnknown,
-		enabledFeatures:                 make(map[uint8]bool),
-		afterHardwareResetFn:            afterHardwareResetFn,
-		afterResetFn:            afterResetFn,
+		packetReader:             packetReader,
+		packetWriter:             packetWriter,
+		logger:                   options.Logger,
+		resetPin:                 resetPin,
+		packetBuffer:             packetBuffer,
+		calibrationComplete:      false,
+		magnetometerAccuracy:     ReportAccuracyStatusUnreliable,
+		initComplete:             false,
+		stepCount:                0,
+		shakesDetected:           false,
+		stabilityClassification:  ReportStabilityClassificationUnknown,
+		mostLikelyClassification: ReportClassificationUnknown,
+		enabledFeatures:          make(map[uint8]bool),
+		afterResetFn:             afterResetFn,
 	}
 
 	// Perform reset
@@ -196,11 +192,7 @@ func NewBNO08X(
 
 // hardwareReset performs a hardware reset of the BNO08X sensor using the specified reset pin.
 func (b *BNO08X) hardwareReset() {
-	if b.afterHardwareResetFn == nil {
-		HardwareReset(b.resetPin, b.logger, nil)
-	} else {
-		HardwareReset(b.resetPin, b.logger, b.afterHardwareResetFn(b))
-	}
+	HardwareReset(b.resetPin, b.logger)
 }
 
 // softwareReset performs a software reset of the BNO08X sensor to an initial unconfigured state.
@@ -218,26 +210,18 @@ func (b *BNO08X) softwareReset() tinygotypes.ErrorCode {
 		return ErrorCodeBNO08XFailedToSendResetCommandRequestPacket
 	}
 
-	// Clear out any packets that may have been sent during the reset process
-	time.Sleep(ResetPacketDelay)
+	time.Sleep(500 * time.Millisecond)
 
 	// Clear out any pending packets
-	startTime := time.Now()
-	for time.Since(startTime) < MaxClearPendingPacketsTimeout {
+	for _ = range 2 {
 		packet, err := b.waitForPacket(WaitForPacketTimeout)
-		if err == ErrorCodeBNO08XWaitingForPacketTimedOut {
-			break
-		}
 		if err != tinygotypes.ErrorCodeNil {
 			// Log the error
 			if b.logger != nil {
 				b.logger.WarningMessageWithErrorCode(errorWaitingForPacket, err, true)
 			}
-			continue
-		}
 
-		// Log what we're clearing
-		if b.logger != nil {
+		} else if b.logger != nil {
 			if packet.ChannelNumber() == ChannelSHTPCommand && len(packet.Data) == AdvertisementPacketLength {
 				b.logger.InfoMessage(foundSHTPAdvertisementPacket)
 			} else {
@@ -246,7 +230,9 @@ func (b *BNO08X) softwareReset() tinygotypes.ErrorCode {
 			}
 		}
 	}
-	
+
+	// Clear out any packets that may have been sent during the reset process
+	// time.Sleep(ResetPacketDelay)
 
 	// Wait for the reset to complete
 	if b.logger != nil {
@@ -263,14 +249,6 @@ func (b *BNO08X) softwareReset() tinygotypes.ErrorCode {
 func (b *BNO08X) Reset() tinygotypes.ErrorCode {
 	// Try up to 3 times to initialize the sensor
 	for i := 0; i < ResetAttempts; i++ {
-		// Hardware reset
-		b.hardwareReset()
-
-		// Software reset
-		if err := b.softwareReset(); err != tinygotypes.ErrorCodeNil {
-			return err
-		}
-
 		// Reset enabled features
 		for k := range b.enabledFeatures {
 			delete(b.enabledFeatures, k)
@@ -278,6 +256,17 @@ func (b *BNO08X) Reset() tinygotypes.ErrorCode {
 
 		// Clear calibration status
 		b.calibrationComplete = false
+
+		// Hardware reset
+		b.hardwareReset()
+
+		// Reset sequence numbers in the packet buffer
+		b.packetBuffer.ResetSequenceNumbers()
+
+		// Software reset
+		if err := b.softwareReset(); err != tinygotypes.ErrorCodeNil {
+			return err
+		}
 
 		// Check if the sensor ID can be read
 		if err := b.checkID(); err != tinygotypes.ErrorCodeNil {
@@ -287,7 +276,7 @@ func (b *BNO08X) Reset() tinygotypes.ErrorCode {
 			time.Sleep(CheckIDDelay)
 			continue
 		}
-		
+
 		// Call after reset function if provided
 		if b.afterResetFn != nil {
 			if err := b.afterResetFn(b); err != tinygotypes.ErrorCodeNil {
@@ -458,7 +447,7 @@ func (b *BNO08X) handlePacket(packet Packet) tinygotypes.ErrorCode {
 	for idx < packet.Header.DataLength {
 		// Check if there are enough bytes left in the Packet to read the report ID
 		reportID := packet.Data[idx]
-		
+
 		if b.logger != nil {
 			b.logger.AddMessageWithUint8(processingReportID, reportID, true, true, true)
 			b.logger.Info()
@@ -705,7 +694,6 @@ func (b *BNO08X) processControlReport(report report) tinygotypes.ErrorCode {
 		command := commandResponse.Command
 		commandStatus := commandResponse.Status()
 
-		
 		if command == MagnetometerCalibration && commandStatus == 0 {
 			b.meCalibrationStartedAt = time.Now()
 		}
@@ -994,7 +982,7 @@ func (b *BNO08X) IsFeatureEnabled(featureID uint8) bool {
 func (b *BNO08X) BeginCalibration() tinygotypes.ErrorCode {
 	// Get the command parameters buffer
 	packetBuffer := b.packetBuffer.GetBuffer()
-	commandParametersBuffer := packetBuffer[CommandBufferSize:CommandBufferSize+CommandParametersBufferSize]
+	commandParametersBuffer := packetBuffer[CommandBufferSize : CommandBufferSize+CommandParametersBufferSize]
 
 	// Begin the sensor's self-calibration routine
 	commandParametersBuffer[0] = 1 // calibrate accel
@@ -1021,8 +1009,7 @@ func (b *BNO08X) BeginCalibration() tinygotypes.ErrorCode {
 func (b *BNO08X) CalibrationStatus() ReportAccuracyStatus {
 	// Get the command parameters buffer
 	packetBuffer := b.packetBuffer.GetBuffer()
-	commandParametersBuffer := packetBuffer[CommandBufferSize:CommandBufferSize+CommandParametersBufferSize]
-
+	commandParametersBuffer := packetBuffer[CommandBufferSize : CommandBufferSize+CommandParametersBufferSize]
 
 	// Get the status of the self-calibration
 	commandParametersBuffer[0] = 0 // calibrate accel
@@ -1065,7 +1052,7 @@ func (b *BNO08X) sendMeCommand(subcommandParams []byte) tinygotypes.ErrorCode {
 
 	// Insert the command request report into the local buffer
 	packetBuffer := b.packetBuffer.GetBuffer()
-	packetDataBuffer := packetBuffer[PacketHeaderLength:CommandBufferSize+PacketHeaderLength]
+	packetDataBuffer := packetBuffer[PacketHeaderLength : CommandBufferSize+PacketHeaderLength]
 	if err := insertCommandRequestReport(
 		MagnetometerCalibration,
 		packetDataBuffer,
@@ -1100,7 +1087,7 @@ func (b *BNO08X) SaveCalibrationData() tinygotypes.ErrorCode {
 	// Save the self-calibration data
 	startTime := time.Now()
 	packetBuffer := b.packetBuffer.GetBuffer()
-	packetDataBuffer := packetBuffer[PacketHeaderLength:CommandBufferSize+PacketHeaderLength]
+	packetDataBuffer := packetBuffer[PacketHeaderLength : CommandBufferSize+PacketHeaderLength]
 	err := insertCommandRequestReport(
 		SaveDynamicCalibrationData,
 		packetDataBuffer,

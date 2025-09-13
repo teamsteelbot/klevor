@@ -38,6 +38,9 @@ var (
 	// infoHeader is the default header for info messages
 	infoHeader = []byte("INFO")
 
+	// fullBufferHeader is the header for full buffer messages
+	fullBufferHeader = []byte("FULL_BUFFER")
+
 	// whitespaceBuffer is a byte slice representing a whitespace character
 	whitespaceBuffer = []byte(" ")
 	
@@ -47,23 +50,29 @@ var (
 	// tabBuffer is a byte slice representing a tab character
 	tabBuffer = []byte("\t")
 
+	// twoPointsBuffer is a byte slice representing two points
+	twoPointsBuffer = []byte(":")
+
+	// dotBuffer is a byte slice representing a dot character
+	dotBuffer = []byte(".")
+
 	// hexPrefix is the prefix for error codes
 	hexPrefix = []byte("0x")
 
-	// uint8Buffer is the buffer used for hex code messages
-	uint8Buffer = [1]byte{}
-
-	// uint16Buffer is the buffer used for hex code messages
-	uint16Buffer = [2]byte{}
-
-	// uint32Buffer is the buffer used for hex code messages
-	uint32Buffer = [4]byte{}
-
-	// uint64Buffer is the buffer used for hex code messages
-	uint64Buffer = [8]byte{}
-
 	// float64Buffer is the buffer used for float64 messages
 	float64Buffer = [8]byte{}
+
+	// asciiHexDigits is a byte slice representing ASCII hex digits
+	asciiHexDigits = []byte("0123456789ABCDEF")
+
+	// asciiDecimalDigits is a byte slice representing ASCII decimal digits
+	asciiDecimalDigits = []byte("0123456789")
+
+	// uintToHexBuffer is a buffer used for converting uint64 to hex
+	uintToHexBuffer = [16]byte{}
+
+	// uintToDecimalBuffer is a buffer used for converting uint64 to decimal
+	uintToDecimalBuffer = [20]byte{}
 )
 
 // NewDefaultLogger creates a new DefaultLogger instance
@@ -71,11 +80,176 @@ func NewDefaultLogger() *DefaultLogger {
 	return &DefaultLogger{}
 }
 
+// uintToHexIndex returns the index in the asciiHexDigits for a given uint value
+//
+// Parameters:
+//
+//	value: The uint value to convert.
+// size: The size of the uint (8, 16, 32, or 64).
+// pos: The position of the hex digit to retrieve (0-based).
+//
+// Returns:
+//
+// The index in the asciiHexDigits for the specified hex digit, or -1 if the position is out of range.
+func (l *DefaultLogger) uintToHexIndex(value uint64, size int, pos int) int {
+	if pos < 0 || pos > (size/4)-1 {
+		return -1
+	}
+	shift := (size/4-1 - pos) * 4
+	return int((value >> shift) & 0x0F)
+}
+
+// uint8ToHex converts a uint8 value to its hexadecimal representation
+//
+// Parameters:
+//
+//	value: The uint8 value to convert.
+//
+// Returns:
+//
+// A byte slice representing the hexadecimal representation of the uint8 value.
+func (l *DefaultLogger) uint8ToHex(value uint8) []byte {
+	for c := range uintToHexBuffer {
+		index := l.uintToHexIndex(uint64(value), 8, c)
+		if index >= 0 {
+			uintToHexBuffer[c] = asciiHexDigits[index]
+		}
+	}
+	return uintToHexBuffer[:2]
+}
+
+// uint16ToHex converts a uint16 value to its hexadecimal representation
+//
+// Parameters:
+//
+//	value: The uint16 value to convert.
+//
+// Returns:
+//
+// A byte slice representing the hexadecimal representation of the uint16 value.
+func (l *DefaultLogger) uint16ToHex(value uint16) []byte {
+	for c := range uintToHexBuffer {
+		index := l.uintToHexIndex(uint64(value), 16, c)
+		if index >= 0 {
+			uintToHexBuffer[c] = asciiHexDigits[index]
+		}
+	}
+	return uintToHexBuffer[:4]
+}
+
+// uint32ToHex converts a uint32 value to its hexadecimal representation
+//
+// Parameters:
+//
+//	value: The uint32 value to convert.
+//
+// Returns:
+//
+// A byte slice representing the hexadecimal representation of the uint32 value.
+func (l *DefaultLogger) uint32ToHex(value uint32) []byte {
+	for c := range uintToHexBuffer {
+		index := l.uintToHexIndex(uint64(value), 32, c)
+		if index >= 0 {
+			uintToHexBuffer[c] = asciiHexDigits[index]
+		}
+	}
+	return uintToHexBuffer[:8]
+}
+
+// uint64ToHex converts a uint64 value to its hexadecimal representation
+//
+// Parameters:
+//
+//	value: The uint64 value to convert.
+//
+// Returns:
+//
+// A byte slice representing the hexadecimal representation of the uint64 value.
+func (l *DefaultLogger) uint64ToHex(value uint64) []byte {
+	for c := range uintToHexBuffer {
+		index := l.uintToHexIndex(value, 64, c)
+		if index >= 0 {
+			uintToHexBuffer[c] = asciiHexDigits[index]
+		}
+	}
+	return uintToHexBuffer[:16]
+}
+
+// uintToDecimal converts a uint8 value to its decimal representation
+//
+// Parameters:
+//
+//	value: The uint8 value to convert.
+//
+// Returns:
+//
+// A byte slice representing the decimal representation of the uint8 value.
+func (l *DefaultLogger) uintToDecimal(value uint64) []byte {
+    // Fill buffer from the end
+    i := len(uintToDecimalBuffer)
+    v := value
+    if v == 0 {
+        i--
+        uintToDecimalBuffer[i] = asciiDecimalDigits[0]
+    }
+    for v > 0 && i > 0 {
+        i--
+        uintToDecimalBuffer[i] = asciiDecimalDigits[v%10]
+        v /= 10
+    }
+    return uintToDecimalBuffer[i:]
+}
+
+// uintToDecimalFixed converts a uint value to its decimal representation with fixed width
+//
+// Parameters:
+//
+//	value: The uint value to convert.
+//	width: The fixed width for the decimal representation.
+//
+// Returns:
+//
+// A byte slice representing the decimal representation of the uint value with leading zeros if necessary.
+func (l *DefaultLogger) uintToDecimalFixed(value uint64, width int) []byte {
+    buffer := l.uintToDecimal(uint64(value))
+    pad := width - len(buffer)
+
+	// Check if padding is needed
+	if pad <= 0 {
+		return buffer
+	}
+    
+	// Move existing digits to the right
+	copy(uintToDecimalBuffer[pad:], buffer)
+    // Prepend leading zeros
+    for i := 0; i < pad; i++ {
+        uintToDecimalBuffer[i] = asciiDecimalDigits[0]
+    }
+    return uintToDecimalBuffer[:width]
+}
+
 // writeTimestamp is a helper function to print the current timestamp
 func (l *DefaultLogger) writeTimestamp() {
 	now := time.Now().UnixNano() / int64(time.Millisecond)
-	binary.BigEndian.PutUint64(timestampBuffer[:], uint64(now))
-	os.Stdout.Write(timestampBuffer[:])
+
+	// Get the hour, minute, second, and millisecond components
+	hour := now / time.Hour.Milliseconds()
+	minute := (now % time.Hour.Milliseconds()) / time.Minute.Milliseconds()
+	second := (now % time.Minute.Milliseconds()) / time.Second.Milliseconds()
+	millisecond := now % time.Second.Milliseconds()
+
+	// Print the timestamp in the format HH:MM:SS.mmm
+	buffer := l.uintToDecimalFixed(uint64(hour), 2)
+	os.Stdout.Write(buffer)
+	os.Stdout.Write(twoPointsBuffer)
+	buffer = l.uintToDecimalFixed(uint64(minute), 2)
+	os.Stdout.Write(buffer)
+	os.Stdout.Write(twoPointsBuffer)
+	buffer = l.uintToDecimalFixed(uint64(second), 2)
+	os.Stdout.Write(buffer)
+	os.Stdout.Write(dotBuffer)
+	buffer = l.uintToDecimalFixed(uint64(millisecond), 3)
+	os.Stdout.Write(buffer)
 }
 
 // writeNewline is a helper function to print a newline 
@@ -113,6 +287,8 @@ func (l *DefaultLogger) writeMessage() {
 // checkIndex checks if the messageIndex exceeds the messageBuffer size
 func (l *DefaultLogger) checkIndex() {
 	if messageIndex >= len(messageBuffer) {
+		// Buffer full, print the message and reset the index
+		l.log(fullBufferHeader)
 		messageIndex = 0 // Reset index if it exceeds buffer size
 	}
 }
@@ -170,9 +346,7 @@ func (l *DefaultLogger) AddHexCode(hexBuffer []byte, newline bool) {
 //	errCode: The error code to add to the message buffer.
 // newline: Whether to include a newline at the end of the log message.
 func (l *DefaultLogger) AddErrorCode(errCode tinygotypes.ErrorCode, newline bool) {
-	// Store the error code in the buffer
-	binary.BigEndian.PutUint16(uint16Buffer[:], uint16(errCode))
-	l.AddHexCode(uint16Buffer[:], newline)
+	l.AddUint16(uint16(errCode), newline, true)
 }
 
 // AddUint8 function to add a uint8 value to the messageBuffer
@@ -183,13 +357,12 @@ func (l *DefaultLogger) AddErrorCode(errCode tinygotypes.ErrorCode, newline bool
 //	newline: Whether to include a newline at the end of the log message.
 //	hexCode: Whether to add the uint8 value in hexadecimal format.
 func (l *DefaultLogger) AddUint8(value uint8, newline bool, hexCode bool) {
-	// Store the uint8 value in the buffer
-	uint8Buffer[0] = value
-
 	if hexCode {
-		l.AddHexCode(uint8Buffer[:], newline)
+		buffer := l.uint8ToHex(value)
+		l.AddHexCode(buffer, newline)
 	} else {
-		l.AddMessage(uint8Buffer[:], newline)
+		buffer := l.uintToDecimal(uint64(value))
+		l.AddMessage(buffer, newline)
 	}
 }
 
@@ -201,13 +374,12 @@ func (l *DefaultLogger) AddUint8(value uint8, newline bool, hexCode bool) {
 //	newline: Whether to include a newline at the end of the log message.
 // hexCode: Whether to add the uint16 value in hexadecimal format.
 func (l *DefaultLogger) AddUint16(value uint16, newline bool, hexCode bool) {
-	// Store the uint16 value in the buffer
-	binary.BigEndian.PutUint16(uint16Buffer[:], value)
-
 	if hexCode {
-		l.AddHexCode(uint16Buffer[:], newline)
+		buffer := l.uint16ToHex(value)
+		l.AddHexCode(buffer, newline)
 	} else {
-		l.AddMessage(uint16Buffer[:], newline)
+		buffer := l.uintToDecimal(uint64(value))
+		l.AddMessage(buffer, newline)
 	}
 }
 
@@ -219,13 +391,12 @@ func (l *DefaultLogger) AddUint16(value uint16, newline bool, hexCode bool) {
 //	newline: Whether to include a newline at the end of the log message.
 // hexCode: Whether to add the uint32 value in hexadecimal format.
 func (l *DefaultLogger) AddUint32(value uint32, newline bool, hexCode bool) {
-	// Store the uint32 value in the buffer
-	binary.BigEndian.PutUint32(uint32Buffer[:], value)
-	
 	if hexCode {
-		l.AddHexCode(uint32Buffer[:], newline)
+		buffer := l.uint32ToHex(value)
+		l.AddHexCode(buffer, newline)
 	} else {
-		l.AddMessage(uint32Buffer[:], newline)
+		buffer := l.uintToDecimal(uint64(value))
+		l.AddMessage(buffer, newline)
 	}
 }
 
@@ -237,13 +408,12 @@ func (l *DefaultLogger) AddUint32(value uint32, newline bool, hexCode bool) {
 //	newline: Whether to include a newline at the end of the log message.
 // hexCode: Whether to add the uint64 value in hexadecimal format.
 func (l *DefaultLogger) AddUint64(value uint64, newline bool, hexCode bool) {
-	// Store the uint64 value in the buffer
-	binary.BigEndian.PutUint64(uint64Buffer[:], value)
-	
 	if hexCode {
-		l.AddHexCode(uint64Buffer[:], newline)
+		buffer := l.uint64ToHex(value)
+		l.AddHexCode(buffer, newline)
 	} else {
-		l.AddMessage(uint64Buffer[:], newline)
+		buffer := l.uintToDecimal(uint64(value))
+		l.AddMessage(buffer, newline)
 	}
 }
 
@@ -304,9 +474,7 @@ func (l *DefaultLogger) AddMessageWithHexCode(message []byte, hexBuffer []byte, 
 //	separate: Whether to include a space between the message and error code.
 //	newline: Whether to include a newline at the end of the log message.
 func (l *DefaultLogger) AddMessageWithErrorCode(message []byte, errCode tinygotypes.ErrorCode, separate bool, newline bool) {
-	// Store the error code in the buffer
-	binary.BigEndian.PutUint16(uint16Buffer[:], uint16(errCode))
-	l.AddMessageWithHexCode(message, uint16Buffer[:], separate, newline)
+	l.AddMessageWithUint16(message, uint16(errCode), separate, newline, true)
 }
 
 // AddMessageWithUint8 function to add a message and uint8 value to the messageBuffer
@@ -401,7 +569,6 @@ func (l *DefaultLogger) AddMessageWithFloat64(message []byte, value float64, sep
 func (l *DefaultLogger) log(header []byte) {
 	l.writeHeader(header)
 	l.writeMessage()
-	l.writeNewline()
 }
 
 // Debug function to print debug messages with messageBuffer content

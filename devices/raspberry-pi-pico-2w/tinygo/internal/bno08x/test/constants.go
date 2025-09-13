@@ -226,14 +226,14 @@ const (
 	// CommandParametersBufferSize is the size of the command parameters buffer
 	CommandParametersBufferSize = 9
 
-	// ResetPacketDelay is the delay after sending a reset command
-	ResetPacketDelay = 100 * time.Millisecond
-
 	// ResetPinDelay is the delay after toggling the reset pin
 	ResetPinDelay = 10 * time.Millisecond
 
 	// ResetAttempts is the number of attempts to reset the sensor
 	ResetAttempts = 3
+
+	// ResetPacketDelay is the delay after sending a reset command before reading packets
+	ResetPacketDelay = 500 * time.Millisecond
 
 	// EnableFeatureAttempts is the number of attempts to enable a feature
 	EnableFeatureAttempts = 5
@@ -284,10 +284,10 @@ const (
 	UARTControlEscape = 0x7D
 
 	// UARTByteTimeout is the timeout for reading a byte from UART communication
-	UARTByteTimeout = 250 * time.Millisecond
+	UARTByteTimeout = 50 * time.Millisecond
 
 	// UARTByteDelay is the delay between bytes when writing to UART
-	UARTByteDelay = 100 * time.Microsecond
+	UARTByteDelay = 200 * time.Microsecond // 100 microseconds more than the recommended 100 microseconds
 
 	// UARTRVCStartByte is the start byte for UART-RVC communication
 	UARTRVCStartByte = 0xAA
@@ -306,9 +306,6 @@ const (
 
 	// SPIIntTimeout is the timeout for waiting for the INT pin to go low
 	SPIIntTimeout = 3 * time.Millisecond
-
-	// NoByteDelay is a delay if there's no byte buffered
-	NoByteDelay = 50 * time.Microsecond
 
 	// QuaternionXIndex is index for the X component in quaternion
 	QuaternionXIndex = 0
@@ -358,7 +355,7 @@ var (
 	MaxPackets = 10
 
 	// WaitForPacketTypeTimeout is the default timeout for waiting for a specific packet type in seconds
-	WaitForPacketTypeTimeout = 1 * time.Second
+	WaitForPacketTypeTimeout = 1* time.Second
 
 	// CalibrationCommandsTimeout is the timeout for calibration commands in seconds
 	CalibrationCommandsTimeout = 5 * time.Second
@@ -366,14 +363,11 @@ var (
 	// WaitForPacketTimeout is the timeout for waiting for a packet
 	WaitForPacketTimeout = 1 * time.Second
 
-	// MaxClearPendingPacketsTimeout is the maximum timeout for clearing pending packets in seconds
-	MaxClearPendingPacketsTimeout = 5 * time.Second
-
 	// FeatureEnableTimeout is the timeout for enabling features
 	FeatureEnableTimeout = 500 * time.Millisecond
 
 	// PacketReadyCheckDelay is the delay between checks for packet readiness
-	PacketReadyCheckDelay = 5 * time.Millisecond
+	PacketReadyCheckDelay = 50 * time.Microsecond
 
 	// UARTRVCTimeout is the timeout for UART-RVC reads
 	UARTRVCTimeout = 500 * time.Millisecond

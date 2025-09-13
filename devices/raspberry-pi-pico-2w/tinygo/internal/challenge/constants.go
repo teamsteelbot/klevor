@@ -34,6 +34,7 @@ func init() {
 	)
 	if err != tinygotypes.ErrorCodeNil {
 		internal.Logger.ErrorMessageWithErrorCode(failedToInitializeChallengeMessage, err)
+		return
 	}
 	ChallengeHandler = challengeHandler
 }

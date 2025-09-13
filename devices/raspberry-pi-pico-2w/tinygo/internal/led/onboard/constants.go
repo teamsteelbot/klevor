@@ -19,6 +19,7 @@ func init() {
 	onBoardHandler, err := NewDefaultHandler(internalcyw43439.Device)
 	if err != tinygotypes.ErrorCodeNil {
 		internal.Logger.ErrorMessageWithErrorCode(failedToInitializeOnBoardMessage, err)
+		return
 	}
 	OnBoardHandler = onBoardHandler
 }

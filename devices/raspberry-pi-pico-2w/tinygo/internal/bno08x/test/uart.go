@@ -157,7 +157,6 @@ func NewUART(
 		packetReader,
 		packetWriter,
 		packetBuffer,
-		nil,
 		afterResetFn,
 		options.Options,
 	)
@@ -222,6 +221,9 @@ func newUARTPacketReader(
 var (
 	// receivedBytePrefix is the prefix for received bytes in debug logs
 	receivedBytePrefix = []byte("Received byte:")
+
+	// sentBytePrefix is the prefix for sent bytes in debug logs
+	sentBytePrefix = []byte("Sent byte:")
 )
 
 // IsAvailableToRead checks if data is available on UART
@@ -252,7 +254,6 @@ func (pr *UARTPacketReader) readByte() (byte, tinygotypes.ErrorCode) {
 			}
 			return b, tinygotypes.ErrorCodeNil
 		}
-		time.Sleep(NoByteDelay)
 	}
 	return 0, ErrorCodeBNO08XUARTByteTimeout
 }
@@ -369,9 +370,9 @@ func (pr *UARTPacketReader) ReadPacket() (Packet, tinygotypes.ErrorCode) {
 
 	// Read remaining (payload) bytes
 	if err = pr.readInto(
-		packetBuffer[PacketHeaderLength:],
+		packetBuffer[PacketHeaderLength:header.PacketByteCount],
 		0,
-		int(header.PacketByteCount),
+		int(header.DataLength),
 	); err != tinygotypes.ErrorCodeNil {
 		return Packet{}, err
 	}
@@ -395,7 +396,7 @@ func (pr *UARTPacketReader) ReadPacket() (Packet, tinygotypes.ErrorCode) {
 	packet.Log(false, false, pr.logger)
 
 	// Update sequence number
-	if err := pr.packetBuffer.UpdateSequenceNumber(packet); err != tinygotypes.ErrorCodeNil {
+	if err := pr.packetBuffer.UpdateChannelSequenceNumber(packet); err != tinygotypes.ErrorCodeNil {
 		return Packet{}, err
 	}
 	return packet, tinygotypes.ErrorCodeNil
@@ -437,6 +438,29 @@ func newUARTPacketWriter(
 	}, tinygotypes.ErrorCodeNil
 }
 
+// writeByte writes a byte to UART.
+//
+// Parameters:
+//
+// b: The byte to write.
+// isData: Flag indicating if the byte is data (true) or control (false).
+func (pw *UARTPacketWriter) writeByte(b byte, isData bool) {
+	// Escape byte if needed
+	if isData && (b == UARTStartAndEndByte || b == UARTControlEscape) {
+		pw.uartBus.WriteByte(UARTControlEscape)
+		time.Sleep(UARTByteDelay)
+		b ^= 0x20
+	}
+
+	// Write byte to UART
+	pw.uartBus.WriteByte(b)
+	if pw.logger != nil && pw.ultraDebug {
+		pw.logger.AddMessageWithUint8(sentBytePrefix, b, true, true, true)
+		pw.logger.Debug()
+	}
+	time.Sleep(UARTByteDelay)
+}
+
 // SendPacket sends a packet over UART
 //
 // Parameters:
@@ -457,7 +481,7 @@ func (pw *UARTPacketWriter) SendPacket(channel uint8, data []byte) (
 	}
 
 	// Get channel sequence number
-	sequenceNumber, err := pw.packetBuffer.GetSequenceNumber(channel)
+	sequenceNumber, err := pw.packetBuffer.GetChannelSequenceNumber(channel)
 	if err != tinygotypes.ErrorCodeNil {
 		return 0, err
 	}
@@ -477,28 +501,23 @@ func (pw *UARTPacketWriter) SendPacket(channel uint8, data []byte) (
 	packet.Log(true, true, pw.logger)
 
 	// Send start byte
-	pw.uartBus.WriteByte(UARTStartAndEndByte)
-	time.Sleep(UARTByteDelay)
+	pw.writeByte(UARTStartAndEndByte, false)
 
 	// Send SHTP protocol byte
-	pw.uartBus.WriteByte(UARTSHTPByte)
-	time.Sleep(UARTByteDelay)
+	pw.writeByte(UARTSHTPByte, false)
 
 	// Send the packet header
 	for _, b := range packet.Header.Buffer {
-		pw.uartBus.WriteByte(b)
-		time.Sleep(UARTByteDelay)
+		pw.writeByte(b, true)
 	}
 
 	// Send the packet data
 	for _, b := range packet.Data {
-		pw.uartBus.WriteByte(b)
-		time.Sleep(UARTByteDelay)
+		pw.writeByte(b, true)
 	}
 
 	// Send start byte
-	pw.uartBus.WriteByte(UARTStartAndEndByte)
-	time.Sleep(UARTByteDelay)
+	pw.writeByte(UARTStartAndEndByte, false)
 
 	// Update sequence number
 	sequenceNumber, err = pw.packetBuffer.IncrementChannelSequenceNumber(channel)

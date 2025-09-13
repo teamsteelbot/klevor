@@ -63,6 +63,7 @@ func init() {
 	)
 	if err != tinygotypes.ErrorCodeNil {
 		internal.Logger.ErrorMessageWithErrorCode(failedToInitializeServoMessage, err)
+		return
 	}
 	ServoHandler = servoHandler
 }
