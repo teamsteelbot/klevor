@@ -1,8 +1,7 @@
 package bno08x
 
 import (
-	ralvarezdevbno08x "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/bno08x/test"
-	//ralvarezdevbno08x "github.com/ralvarezdev/tinygo-bno08x"
+	tinygobno08x "github.com/ralvarezdev/tinygo-bno08x"
 	tinygotypes "github.com/ralvarezdev/tinygo-types"
 )
 
@@ -11,12 +10,12 @@ import (
 // Returns:
 //
 // An error if the BNO08X instance is nil or if enabling the quaternion feature fails.
-func afterReset(b *ralvarezdevbno08x.BNO08X) tinygotypes.ErrorCode {
+func afterReset(b *tinygobno08x.BNO08X) tinygotypes.ErrorCode {
 	// Check if the BNO08X instance is nil
 	if b == nil {
-		return ralvarezdevbno08x.ErrorCodeBNO08XNilBNO08XInstance
+		return tinygobno08x.ErrorCodeBNO08XNilBNO08XInstance
 	}
 
 	// Enable quaternion feature
-	return b.EnableFeature(ralvarezdevbno08x.ReportIDRotationVector)
+	return b.EnableFeature(tinygobno08x.ReportIDRotationVector)
 }

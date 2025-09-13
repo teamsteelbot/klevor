@@ -2,10 +2,13 @@
 package internal
 
 import (
-	ralvarezdevbno08x "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/bno08x/test"
+	tinygologger "github.com/ralvarezdev/tinygo-logger"
 )
 
 var (
+	// LoggerBufferSize is the size of the logger buffer.
+	LoggerBufferSize uint64 = 512
+
 	// Logger is the default logger instance.
-	Logger ralvarezdevbno08x.Logger = ralvarezdevbno08x.NewDefaultLogger()
+	Logger tinygologger.Logger = tinygologger.NewDefaultLogger(LoggerBufferSize)
 )

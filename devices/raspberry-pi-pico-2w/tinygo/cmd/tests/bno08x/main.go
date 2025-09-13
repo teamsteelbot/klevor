@@ -5,8 +5,7 @@ import (
 
 	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal"
 	internalbno08x "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/bno08x"
-	ralvarezdevbno08x "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/bno08x/test"
-	//ralvarezdevbno08x "github.com/ralvarezdev/tinygo-bno08x"
+	tinygobno08x "github.com/ralvarezdev/tinygo-bno08x"
 )
 
 const (
@@ -57,10 +56,10 @@ func main() {
 
 			// Get the quaternion
 			q := internalbno08x.UART.GetQuaternion()
-			x := q[ralvarezdevbno08x.QuaternionXIndex]
-			y := q[ralvarezdevbno08x.QuaternionYIndex]
-			z := q[ralvarezdevbno08x.QuaternionZIndex]
-			w := q[ralvarezdevbno08x.QuaternionWIndex]
+			x := q[tinygobno08x.QuaternionXIndex]
+			y := q[tinygobno08x.QuaternionYIndex]
+			z := q[tinygobno08x.QuaternionZIndex]
+			w := q[tinygobno08x.QuaternionWIndex]
 
 			// Log the quaternion values
 			internal.Logger.AddMessage(quaternionHeader, true)
@@ -78,9 +77,9 @@ func main() {
 
 			// Get the euler degrees
 			e := internalbno08x.UARTRVC.GetEulerDegrees()
-			yaw := e[ralvarezdevbno08x.EulerDegreesYawIndex]
-			pitch := e[ralvarezdevbno08x.EulerDegreesPitchIndex]
-			roll := e[ralvarezdevbno08x.EulerDegreesRollIndex]
+			yaw := e[tinygobno08x.EulerDegreesYawIndex]
+			pitch := e[tinygobno08x.EulerDegreesPitchIndex]
+			roll := e[tinygobno08x.EulerDegreesRollIndex]
 
 			// Log the euler degrees values
 			internal.Logger.AddMessage(eulerHeader, true)

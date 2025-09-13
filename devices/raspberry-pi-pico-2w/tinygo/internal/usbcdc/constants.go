@@ -5,7 +5,7 @@ import (
 
 	internalchallenge "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/challenge"
 	internalledonboard "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/led/onboard"
-	tinygo_types "github.com/ralvarezdev/tinygo-types"
+	tinygotypes "github.com/ralvarezdev/tinygo-types"
 	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal"
 )
 
@@ -76,7 +76,7 @@ func init() {
 		internalchallenge.ChallengeHandler,
 		internalledonboard.OnBoardHandler,
 	)
-	if err != tinygo_types.ErrorCodeNil {
+	if err != tinygotypes.ErrorCodeNil {
 		internal.Logger.ErrorMessageWithErrorCode(failedToInitializeUSBMessage, err)
 		return
 	}
