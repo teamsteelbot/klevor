@@ -9,14 +9,15 @@ import (
 	"sync/atomic"
 	"syscall"
 	"time"
+	
+	"golang.org/x/sync/errgroup"
 
+	gorplidarsdkhandler "github.com/ralvarezdev/go-rplidar-sdk-handler"
 	"github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal"
 	internalclip "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/clip"
 	internallog "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/log"
-	internalrplidar "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/rplidar"
 	internalusbcdc "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/usbcdc"
 	internalusbcdcenums "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/usbcdc/enums"
-	"golang.org/x/sync/errgroup"
 )
 
 type (
@@ -25,7 +26,7 @@ type (
 		mutex                   sync.Mutex
 		handlerLoggerProducer   internallog.LoggerProducer
 		logger                  internallog.Logger
-		rplidarHandler          internalrplidar.Handler
+		rplidarHandler          gorplidarsdkhandler.Handler
 		clipHandler             internalclip.Handler
 		usbCDCHandler           internalusbcdc.Handler
 		usbCDCSender            internalusbcdc.Sender
@@ -407,45 +408,15 @@ func (h *DefaultHandler) updateCLIPClassification() (
 	return h.clipClassification, nil
 }
 
-// updateRPLiDARMeasures retrieves the latest RPLiDAR measures
-//
-// Returns:
-//
-// A pointer to an array of 360 Measure pointers indexed by angle, or an error if the measures could not be retrieved
-func (h *DefaultHandler) updateRPLiDARMeasures() (
-	*[360]*internal.Measure,
-	error,
-) {
-	// Update the RPLiDAR measures
-	h.rplidarMeasures = h.rplidarHandler.GetMeasures()
-
-	// Get the measures from the RPLiDAR handler
-	return h.rplidarMeasures, nil
-}
-
 // updateRPLiDARAverageDistances updates the average distances from the RPLiDAR measures
 //
 // Returns:
 //
 // An error if the average distances could not be updated, nil otherwise
 func (h *DefaultHandler) updateRPLiDARAverageDistances() error {
-	// Get the RPLiDAR measures
-	measures, err := h.updateRPLiDARMeasures()
-	if err != nil {
-		return fmt.Errorf(
-			"RPLiDAR measures could not be retrieved: %w",
-			err,
-		)
-	}
-	if measures == nil {
-		return ErrNilRPLiDARMeasures
-	}
-
 	// Calculate the average north, west and east distances
-	averageDistances, err := CalculateAverageDistances(
-		measures,
+	averageDistances, err := h.rplidarHandler.GetAverageDistancesFromAllDirections(
 		AverageAngleWidth,
-		CardinalDirections...,
 	)
 	if err != nil {
 		return fmt.Errorf(

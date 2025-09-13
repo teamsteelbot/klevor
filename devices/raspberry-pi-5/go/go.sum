@@ -4,8 +4,16 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
+github.com/ralvarezdev/go-concurrent-logger v0.1.1 h1:90oGDkInTattnUEnoWDhfvfav1tWf+VsVxy6UaPFkhM=
+github.com/ralvarezdev/go-concurrent-logger v0.1.1/go.mod h1:/T1w3OR/3ja6Ir6c/PauLjS6StDzU8ag3dAqvQr2l5E=
+github.com/ralvarezdev/go-context v0.0.1 h1:FInuzYGKiPBenD6+doVrrvu6C2s/Oh93h6lO7rWujMI=
+github.com/ralvarezdev/go-context v0.0.1/go.mod h1:wOyMbWyhhM8GwT3bzZ6Gvx8rJQfAXYpDwN9PUB7uR0M=
 github.com/ralvarezdev/go-crypto v0.6.4 h1:eX257KaSWGa4zU+COX7Ja0yzbkAPdwRAtPlDaejLWqE=
 github.com/ralvarezdev/go-crypto v0.6.4/go.mod h1:jY/KGELdLAiBZSbn7x5jRGCDifEGF4X5GvhgAFZJnSM=
+github.com/ralvarezdev/go-hailo-clip-handler v0.1.2 h1:kIrnUbvVoop7JlwXi6hbO2KTuxjEbVum86h078et+fc=
+github.com/ralvarezdev/go-hailo-clip-handler v0.1.2/go.mod h1:IaiK0/f7wIPZWzO/owHrduXSAxPo8jx/0autD7eONsk=
+github.com/ralvarezdev/go-rplidar-sdk-handler v0.1.2 h1:ap/J3bwfUBB0WLq4KvlLy+53sAv4RnGSBwY/Tkzc6t0=
+github.com/ralvarezdev/go-rplidar-sdk-handler v0.1.2/go.mod h1:6Raz4FpHXQufyqRXi2o5/UDK+quwDUwtWYrmVsW1uHA=
 github.com/ralvarezdev/go-strings v0.1.12 h1:AtOPDJ4lVO+33p7O4uECdD4C4D037h256zWz9uQ5eIQ=
 github.com/ralvarezdev/go-strings v0.1.12/go.mod h1:8sFOqmPJpqzS7bTjf91EzUCITnwpmkfifwY80GxV5r8=
 github.com/ralvarezdev/tinygo-types v0.0.2 h1:gCQyzvk6kgPJ0HQuEsYw/rAGXBJAu1au9piVhlAsIXM=
@@ -14,8 +22,8 @@ github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcU
 github.com/stretchr/testify v1.8.4/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
 go.bug.st/serial v1.6.4 h1:7FmqNPgVp3pu2Jz5PoPtbZ9jJO5gnEnZIvnI1lzve8A=
 go.bug.st/serial v1.6.4/go.mod h1:nofMJxTeNVny/m6+KaafC6vJGj3miwQZ6vW4BZUGJPI=
-golang.org/x/sync v0.16.0 h1:ycBJEhp9p4vXvUZNszeOq0kGTPghopOL8q0fq3vstxw=
-golang.org/x/sync v0.16.0/go.mod h1:1dzgHSNfp02xaA81J2MS99Qcpr2w7fw1gpm99rleRqA=
+golang.org/x/sync v0.17.0 h1:l60nONMj9l5drqw6jlhIELNv9I0A4OFgRsG9k2oT9Ug=
+golang.org/x/sync v0.17.0/go.mod h1:9KTHXmSnoGruLpwFjVSX0lNNA75CykiMECbovNTZqGI=
 golang.org/x/sys v0.19.0 h1:q5f1RH2jigJ1MoAWp2KTp3gm5zAGFUTarQZ5U386+4o=
 golang.org/x/sys v0.19.0/go.mod h1:/VUhepiaJMQUp4+oa/7Zr1D23ma6VTLIYjOOTFZPUcA=
 gopkg.in/yaml.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=

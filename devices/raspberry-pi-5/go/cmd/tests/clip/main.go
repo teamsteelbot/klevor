@@ -45,7 +45,10 @@ func main() {
 	}
 
 	// Initialize the logger
-	logger := internallog.NewDefaultLogger(*logDebug)
+	logger, err := internallog.NewDefaultLogger(*logDebug)
+	if err != nil {
+		log.Fatalf("failed to create logger: %v\n", err)
+	}
 
 	// Initialize the CLIP handler
 	clipHandler, err := internalclip.NewDefaultHandler(
@@ -109,7 +112,10 @@ func main() {
 				case <-ctx.Done():
 					return ctx.Err()
 				default:
-					classification := clipHandler.GetClassification()
+					classification, err := clipHandler.GetClassification()
+					if err != nil {
+						fmt.Printf("failed to get classification: %v\n", err)
+					}
 					if classification == nil {
 						fmt.Println("No classification found")
 					} else {

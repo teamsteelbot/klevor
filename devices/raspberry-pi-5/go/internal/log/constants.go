@@ -14,12 +14,6 @@ const (
 
 	// TimestampFormat is the format for timestamps in log messages
 	TimestampFormat = "15:04:05.000"
-
-	// filePerm is the permission for log files
-	filePerm = 0o644
-
-	// dirPerm is the permission for log directories
-	dirPerm = 0o755
 )
 
 var (
@@ -34,9 +28,6 @@ var (
 
 	// HandlerLoggerTag is the logger tag
 	HandlerLoggerTag = "LOGGER_HANDLER"
-
-	// LogsFolder is the folder name where logs are stored
-	LogsFolder string
 
 	// Filename is the default log filename
 	Filename = strings.ReplaceAll(
@@ -54,9 +45,9 @@ var (
 )
 
 func init() {
-	// Initialize LogsFolder with the correct path
-	LogsFolder = filepath.Join(internal.RootFolderPath, LogsFolderName)
+	// Initialize logs folder with the correct path
+	logsFolder := filepath.Join(internal.RootFolderPath, LogsFolderName)
 
 	// Initialize FilePath with the correct path
-	FilePath = filepath.Join(LogsFolder, Filename)
+	FilePath = filepath.Join(logsFolder, Filename)
 }

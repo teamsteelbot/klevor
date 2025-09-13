@@ -27,7 +27,10 @@ func main() {
 	flag.Parse()
 
 	// Initialize the logger
-	logger := internallog.NewDefaultLogger(*logDebug)
+	logger, err := internallog.NewDefaultLogger(*logDebug)
+	if err != nil {
+		log.Fatalf("failed to create logger: %v\n", err)
+	}
 
 	// Initialize the USB-CDC handler
 	usbCDCHandler, err := internalusbcdc.NewDefaultHandler(

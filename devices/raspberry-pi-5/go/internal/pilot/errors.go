@@ -5,9 +5,6 @@ import (
 )
 
 var (
-	ErrAngleWidthMustBeOdd          = errors.New("angle width must be odd")
-	ErrAngleWidthTooSmall           = errors.New("angle width must be greater than 0")
-	ErrAngleWidthTooLarge           = errors.New("angle width must be less than 360 degrees")
 	ErrInvalidMotorDirection        = errors.New("invalid motor direction")
 	ErrInvalidServoDirection        = errors.New("invalid servo direction")
 	ErrNilRPLiDARMeasures           = errors.New("rplidar measures cannot be nil")

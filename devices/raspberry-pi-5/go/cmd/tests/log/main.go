@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+	"log"
 
 	internallog "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/log"
 )
@@ -33,17 +34,15 @@ func main() {
 	flag.Parse()
 
 	// Initialize the logger
-	logger := internallog.NewDefaultLogger(*logDebug)
+	logger, err := internallog.NewDefaultLogger(*logDebug)
+	if err != nil {
+		log.Fatalf("failed to create logger: %v\n", err)
+	}
 
 	// Create a new logger producer
 	loggerProducer, err := logger.NewProducer("TEST_PRODUCER")
 	if err != nil {
-		_, _ = fmt.Fprintf(
-			os.Stderr,
-			"failed to create logger producer: %v\n",
-			err,
-		)
-		return
+		log.Fatalf("failed to create logger producer: %v\n", err)
 	}
 
 	// Context canceled on SIGINT/SIGTERM.

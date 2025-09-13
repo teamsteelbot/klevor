@@ -13,18 +13,6 @@ const (
 
 	// AttributesSeparator is the attributes separator
 	AttributesSeparator = ","
-
-	// SyncBitCharacter is the sync bit character
-	SyncBitCharacter = "S"
-
-	// AngleIndex is the index of the angle in the measure string
-	AngleIndex = 0
-
-	// DistanceIndex is the index of the distance in the measure string
-	DistanceIndex = 1
-
-	// QualityIndex is the index of the quality in the measure string
-	QualityIndex = 2
 )
 
 var (

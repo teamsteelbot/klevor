@@ -27,16 +27,13 @@ func main() {
 	flag.Parse()
 
 	// Initialize the logger
-	logger := internallog.NewDefaultLogger(*logDebug)
+	logger, err := internallog.NewDefaultLogger(*logDebug)
+	if err != nil {
+		log.Fatalf("failed to create logger: %v\n", err)
+	}
 
 	// Initialize the Slamtec C1 handler
-	rplidarHandler, err := internalrplidar.NewSlamtecC1Handler(
-		internalrplidar.SlamtecC1BaudRate,
-		internalrplidar.SlamtecC1Port,
-		true,
-		0.0,
-		logger,
-	)
+	rplidarHandler, err := internalrplidar.NewSlamtecC1Handler(logger)
 	if err != nil {
 		log.Fatalf("failed to initialize rplidar handler: %v", err)
 	}
