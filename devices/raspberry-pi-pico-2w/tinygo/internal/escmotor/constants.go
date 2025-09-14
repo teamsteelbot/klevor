@@ -32,7 +32,7 @@ const (
 	ChangeInterval = 20
 
 	// ChangeInternalDelay is the internal delay to change the speed of the ESC motor
-	ChangeInternalDelay = 5 * time.Millisecond
+	ChangeInternalDelay = 2 * time.Millisecond
 )
 
 var (
@@ -59,7 +59,7 @@ func init() {
 		nil, // internal.Logger
 	)
 	if err != tinygotypes.ErrorCodeNil {
-		internal.Logger.ErrorMessageWithErrorCode(failedToInitializeEscMotorMessage, err)
+		internal.Logger.ErrorMessageWithErrorCode(failedToInitializeEscMotorMessage, err, true)
 		os.Exit(1)
 	}
 	ESCMotorHandler = escMotorHandler

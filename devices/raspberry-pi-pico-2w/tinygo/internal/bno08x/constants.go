@@ -24,6 +24,12 @@ var (
 	// UARTRVC is the UART-RVC instance for the BNO08x sensor.
 	UARTRVC *tinygobno08x.UARTRVC
 
+	// Frequency is the frequency to read the sensor data.
+	Frequency = 100 // Hz
+
+	// Interval is the interval to read the sensor data.
+	Interval = time.Second / time.Duration(Frequency) // ms
+
 	// failedToInitializeBNO08xErrorMessage is the error message for failed BNO08x initialization.
 	failedToInitializeBNO08xErrorMessage = []byte("Failed to initialize BNO08x sensor")
 )

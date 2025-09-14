@@ -1,17 +1,20 @@
 package main
 
 import (
-	"errors"
+	"fmt"
+	"os"
+	"sync"
 	"time"
 
+	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal"
 	internalbno08x "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/bno08x"
 	internalescmotor "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/escmotor"
 	internalledonboard "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/led/onboard"
 	internalservo "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/servo"
 	internalswitch "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/switch"
 	internalusbcdc "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc"
-	//internalusbcdcenums "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc/enums"
-	"golang.org/x/sync/errgroup"
+	tinygobuffers "github.com/ralvarezdev/tinygo-buffers"
+	tinygotypes "github.com/ralvarezdev/tinygo-types"
 )
 
 const (
@@ -20,74 +23,71 @@ const (
 )
 
 var (
-	// OutgoingMaxMotorSpeedMessage is the outgoing message to send the maximum motor speed
-	OutgoingMaxMotorSpeedMessage = internalusbcdc.NewOutgoingMessageFromUint16Content(
-		internalusbcdcenums.OutgoingCategoryMaxMotorSpeedValue,
-		internalescmotor.MaxSpeed,
-	)
+	// failedToSendErrorMessage is the message printed when sending an error message fails.
+	failedToSendErrorMessage = []byte("Failed to send error message via USB-CDC:")
 
-	// OutgoingMaxServoDirectionMessage is the outgoing message to send the maximum servo direction
-	OutgoingMaxServoDirectionMessage = internalusbcdc.NewOutgoingMessageFromUint16Content(
-		internalusbcdcenums.OutgoingCategoryMaxServoDirectionValue,
-		internalservo.MaxAngle,
-	)
+	// failedToWaitForSwitchPressMessage is the message printed when waiting for switch press fails.
+	failedToWaitForSwitchPressMessage = []byte("Failed to wait for switch press:")
 
 	// switchOnEvent is called when the switch is pressed to initialize communication and provide visual feedback.
-	switchOnEvent func() error
+	switchOnEvent func() tinygotypes.ErrorCode
 
 	// lastMessageReceivedTime holds the timestamp of the last received message.
 	lastMessageReceivedTime time.Time
 
-	// lastBNO08XResetTime holds the timestamp of the last BNO08x reset.
-	lastBNO08XResetTime time.Time
+	// hasNewMessageArrived indicates if a new message has arrived.
+	hasNewMessageArrived bool
 
-	// receivedMotorsSpeedMessage indicates if a motor speed message was received in the current cycle.
-	receivedMotorsSpeedMessage *internalusbcdc.IncomingMessage
-
-	// receivedServoDirectionMessage holds the last received servo angle message.
-	receivedServoDirectionMessage *internalusbcdc.IncomingMessage
+	// newMessage is the newly received message.
+	newMessage internalusbcdc.IncomingMessage
 )
 
-// stopAndCenter stops the ESC motor and centers the servo concurrently.
+// sendErrorMessage sends an error message via USB CDC if there is an error to be sent.
 //
-// Returns:
+// Parameters:
 //
-// An error if either operation fails.
-func stopAndCenter() error {
-	g := &errgroup.Group{}
-
-	// ESC motor stop
-	g.Go(
-		internalescmotor.ESCMotorHandler.Stop,
-	)
-
-	// Servo center
-	g.Go(
-		internalservo.ServoHandler.SetDirectionToCenter,
-	)
-
-	// Wait for both; handle first error (if any)
-	if err := g.Wait(); err != nil {
-		return fmt.Errorf(
-			"error stopping esc motor and centering servo: %w",
-			err,
-		)
+// err: The error to be sent.
+func sendErrorMessage(err tinygotypes.ErrorCode) {
+	err = internalusbcdc.USBCDCHandler.SendErrorMessage(err)
+	if err != tinygotypes.ErrorCodeNil {
+		internal.Logger.ErrorMessageWithErrorCode(failedToSendErrorMessage, err, true)
+		os.Exit(1)
 	}
-	return nil
 }
 
-// sendErrorMessage sends an error message via USB CDC if there is an error to be sent.
-func sendErrorMessage(err error) {
-	err = internalusbcdc.USBCDCHandler.SendErrorMessage(err)
-	if err != nil {
-		panic(fmt.Errorf("error sending error message: %w", err))
+// sendErrorMessageOnError sends an error message via USB CDC if there is an error to be sent.
+//
+// Parameters:
+//
+// fn: A function that returns a tinygotypes.ErrorCode to be checked.
+func sendErrorMessageOnError(fn func() tinygotypes.ErrorCode) {
+	if err := fn(); err != tinygotypes.ErrorCodeNil {
+		sendErrorMessage(err)
 	}
+}
+
+// stopAndCenter stops the ESC motor and centers the servo concurrently.
+func stopAndCenter() {
+	var wg sync.WaitGroup
+
+	// ESC motor stop
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		sendErrorMessageOnError(internalescmotor.ESCMotorHandler.Stop)
+	}()
+
+	// Servo center
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		sendErrorMessageOnError(internalservo.ServoHandler.SetDirectionToCenter)
+	}()
+
+	wg.Wait()
 }
 
 func init() {
-	// Set the last reset time
-	lastBNO08XResetTime = time.Now()
-
 	// Initialize the switch on event
 	switchOnEvent = internalswitch.SwitchOnEventGenerator(
 		internalusbcdc.USBCDCHandler,
@@ -98,195 +98,162 @@ func init() {
 func main() {
 	for {
 		// Stop ESC motor and center servo before waiting for switch press
-		if err := stopAndCenter(); err != nil {
-			sendErrorMessage(err)
-			continue
-		}
+		stopAndCenter()
 
 		// Wait for switch press
-		if err := internalswitch.SwitchHandler.Wait(switchOnEvent); err != nil {
-			sendErrorMessage(fmt.Errorf("error waiting for switch press: %w", err))
-			continue
+		if err := internalswitch.SwitchHandler.Wait(switchOnEvent); err != tinygotypes.ErrorCodeNil {
+			internal.Logger.ErrorMessageWithErrorCode(failedToWaitForSwitchPressMessage, err, true)
+			os.Exit(1)
 		}
+
+		// Last time the BNO08X was updated
+		lastBNO08XUpdateTime := time.Now()
 
 		// Set the exit condition to False
 		toExit := false
 		for !toExit {
-			// Check if the BNO08x needs to be reset
-			if time.Since(lastBNO08XResetTime) > internalbno08x.ResetBNO08XInterval {
-				if err := internalbno08x.BNO08XHandler.Reset(); err != nil {
-					sendErrorMessage(
-						fmt.Errorf(
-							"error resetting BNO08x: %w",
-							err,
-						),
-					)
-				} else {
-					lastBNO08XResetTime = time.Now()
-				}
+			// Check if the last message received time exceeds the timeout
+			if time.Since(lastMessageReceivedTime) >= receivingMessageTimeout {
+				toExit = true
+
+				// Stop the motor and center the servo
+				stopAndCenter()
+				break
 			}
 
-			// Create the group for concurrent tasks
-			g := &errgroup.Group{}
+			// Create a wait group to handle concurrent tasks
+			var wg sync.WaitGroup
 
-			// Update BNO08x quaternion
-			g.Go(
-				internalbno08x.BNO08XHandler.Update,
-			)
+			// Check if the BNO08X needs to be updated
+			if time.Since(lastBNO08XUpdateTime) >= internalbno08x.Interval {
+				internalbno08x.UARTRVC.Update()
+				lastBNO08XUpdateTime = time.Now()
+
+				wg.Add(1)
+				go func() {
+					defer wg.Done()
+
+					// Update the BNO08X sensor data
+					sendErrorMessageOnError(
+						internalbno08x.UARTRVC.Update,
+					)
+
+					// Get the Euler degrees from the BNO08X sensor
+					eulerDegrees := internalbno08x.UARTRVC.GetEulerDegrees()
+
+					// Send the Euler degrees messages via USB CDC
+					sendErrorMessageOnError(
+						func() tinygotypes.ErrorCode {
+							return internalusbcdc.USBCDCHandler.SendBNO08XEulerDegreesMessages(eulerDegrees)
+						},
+					)
+				}()
+			}
 
 			// Receive USB CDC messages
-			g.Go(
-				internalusbcdc.USBCDCHandler.Update,
-			)
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
 
-			// Wait for both; handle first error (if any)
-			if err := g.Wait(); err != nil {
-				sendErrorMessage(err)
-			}
-
-			// Check if there are incoming messages
-			incomingMessages := internalusbcdc.USBCDCHandler.GetIncomingMessages()
-			if incomingMessages == nil || len(*incomingMessages) == 0 {
-				// If no messages were received, check if the timeout has been reached
-				if !lastMessageReceivedTime.IsZero() && time.Since(lastMessageReceivedTime) > receivingMessageTimeout {
-					sendErrorMessage(errors.New("no messages received within the timeout period"))
+				// Read a message with a timeout
+				hasNewMessageArrived = false
+				message, err := internalusbcdc.USBCDCHandler.ReadMessage(internalbno08x.Interval)
+				if err != tinygotypes.ErrorCodeNil {
+					sendErrorMessage(err)
 				}
+				newMessage = message
+				hasNewMessageArrived = true
+			}()
+
+			// Wait for both to finish
+			wg.Wait()
+
+			// Check if a new message has arrived
+			if !hasNewMessageArrived {
 				continue
 			}
 
 			// Reset the last message received time if messages are received
 			lastMessageReceivedTime = time.Now()
 
-			// Process each incoming message in reversed order
-			for idx := len(*incomingMessages) - 1; idx >= 0; idx-- {
-				// Check if the exit flag is set
-				if toExit {
-					break
-				}
-
-				// Get the message
-				message := (*incomingMessages)[idx]
-
-				// Check if the message is nil
-				if message == nil {
+			// Handle specific message categories
+			switch newMessage.Category {
+			case internalusbcdc.IncomingCategoryGetMaxMotorSpeedValue:
+				sendErrorMessageOnError(
+					func() tinygotypes.ErrorCode {
+						return internalusbcdc.USBCDCHandler.SendMaxMotorSpeedValueMessage(internalescmotor.MaxSpeed)
+					},
+				)
+			case internalusbcdc.IncomingCategoryGetMaxServoDirectionValue:
+				sendErrorMessageOnError(
+					func() tinygotypes.ErrorCode {
+						return internalusbcdc.USBCDCHandler.SendMaxServoDirectionValueMessage(internalservo.MaxDirection)
+					},
+				)
+			case internalusbcdc.IncomingCategoryMotorSpeedStop:
+				sendErrorMessageOnError(internalescmotor.ESCMotorHandler.Stop)
+			case internalusbcdc.IncomingCategoryServoDirectionCenter:
+				sendErrorMessageOnError(internalservo.ServoHandler.SetDirectionToCenter)
+			case internalusbcdc.IncomingCategoryServoDirectionToLeft, internalusbcdc.IncomingCategoryServoDirectionToRight:
+				sendErrorMessageOnError(
+					func() tinygotypes.ErrorCode {
+						return internalservo.SetDirectionBasedOnReceivedMessage(newMessage)
+					},
+				)
+			case internalusbcdc.IncomingCategoryMotorSpeedForward, internalusbcdc.IncomingCategoryMotorSpeedBackward:
+				sendErrorMessageOnError(
+					func() tinygotypes.ErrorCode {
+						return internalescmotor.SetSpeedBasedOnReceivedMessage(newMessage)
+					},
+				)
+			case internalusbcdc.IncomingCategoryStatus:
+				// Get the first byte of the message content
+				if len(newMessage.Data) < 1 {
+					sendErrorMessage(internalusbcdc.ErrorCodeUSBCDCInvalidMessageDataLength)
 					continue
 				}
 
-				// Handle specific message categories
-				switch message.Category {
-				case internalusbcdcenums.IncomingCategoryGetMaxMotorSpeedValue:
-					if err := internalusbcdc.USBCDCHandler.SendMessage(OutgoingMaxMotorSpeedMessage); err != nil {
-						sendErrorMessage(
-							fmt.Errorf(
-								"error sending max motor speed message: %w",
-								err,
-							),
-						)
-					}
-				case internalusbcdcenums.IncomingCategoryGetMaxServoDirectionValue:
-					if err := internalusbcdc.USBCDCHandler.SendMessage(OutgoingMaxServoDirectionMessage); err != nil {
-						sendErrorMessage(
-							fmt.Errorf(
-								"error sending max servo direction message: %w",
-								err,
-							),
-						)
-					}
-				case internalusbcdcenums.IncomingCategoryStatus:
-					// Check if it's a start message
-					status, err := internalusbcdcenums.IncomingStatusFromString(message.Content)
-					if err != nil {
-						sendErrorMessage(fmt.Errorf("failed to parse status message content: %w", err))
-					}
-
-					switch status {
-					case internalusbcdcenums.IncomingStatusHeartbeat:
-						break
-					case internalusbcdcenums.IncomingStatusOK:
-						sendErrorMessage(
-							errors.New("received unexpected OK status message"),
-						)
-					case internalusbcdcenums.IncomingStatusStop:
-						// Set the exit condition to True
-						toExit = true
-
-						// Stop the motor and center the servo
-						if err := stopAndCenter(); err != nil {
-							sendErrorMessage(err)
-						}
-
-						// Send a confirmation message to the serial communication
-						if err := internalusbcdc.USBCDCHandler.SendConfirmationMessage(); err != nil {
-							sendErrorMessage(
-								fmt.Errorf(
-									"error sending confirmation message: %w",
-									err,
-								),
-							)
-						}
-					}
-				default:
-					// Check if the message is to set motor speed or servo angle
-					if message.Category.IsAMotorCategory() {
-						// If a motor speed message was already processed, skip this one
-						if receivedMotorsSpeedMessage != nil {
-							continue
-						}
-						receivedMotorsSpeedMessage = &message
-					} else if message.Category.IsAServoCategory() {
-						// If a servo angle message was already processed, skip this one
-						if receivedServoDirectionMessage != nil {
-							continue
-						}
-						receivedServoDirectionMessage = &message
-					} else {
-						sendErrorMessage(
-							fmt.Errorf(
-								"unknown message category: %v",
-								message.Category,
-							),
-						)
-					}
-				}
-			}
-
-			// Break the loop if the exit flag is set
-			if toExit {
-				break
-			}
-
-			// Check if we have received either or both motor speed and servo angle messages
-			if receivedMotorsSpeedMessage != nil || receivedServoDirectionMessage != nil {
-				// Create the context for setting motor speed and servo angle
-				g = &errgroup.Group{}
-
-				// Add the set motor speed routine if a motor speed message was received
-				if receivedMotorsSpeedMessage != nil {
-					g.Go(
-						func() error {
-							return internalescmotor.ESCMotorHandler.SetSpeedBasedOnReceivedMessage(receivedMotorsSpeedMessage)
-						},
-					)
-				}
-
-				// Add the set servo angle routine if a servo angle message was received
-				if receivedServoDirectionMessage != nil {
-					g.Go(
-						func() error {
-							return internalservo.ServoHandler.SetDirectionBasedOnReceivedMessage(receivedServoDirectionMessage)
-						},
-					)
-				}
-
-				// Wait for both; handle first error (if any)
-				if err := g.Wait(); err != nil {
+				// Parse the status from the first byte
+				statusUint8, err := tinygobuffers.BytesToUint8(newMessage.Data[0])
+				if err != tinygotypes.ErrorCodeNil {
 					sendErrorMessage(err)
+					continue
+				}
+
+				// Get the status from the message content
+				status, err := internalusbcdc.IncomingStatusFromUint8(statusUint8)
+				if err != nil {
+					sendErrorMessage(err)
+					continue
+				}
+
+				switch status {
+				case internalusbcdc.IncomingStatusHeartbeat:
+					break
+				case internalusbcdc.IncomingStatusOK:
+					sendErrorMessage(internalusbcdc.ErrorCodeUSBCDCReceivedUnexpectedConfirmationMessage)
+					continue
+				case internalusbcdc.IncomingStatusStop:
+					// Set the exit condition to True
+					toExit = true
+
+					// Stop the motor and center the servo
+					stopAndCenter()
+
+					// Send a confirmation message to the serial communication
+					sendErrorMessageOnError(
+						func() tinygotypes.ErrorCode {
+							return internalusbcdc.USBCDCHandler.SendConfirmationMessage()
+						},
+					)
 				}
 			}
-
-			// Reset the variables for the next iteration
-			receivedMotorsSpeedMessage = nil
-			receivedServoDirectionMessage = nil
 		}
+
+		// Break the loop if the exit flag is set
+		if toExit {
+			break
+		}
+
 	}
 }

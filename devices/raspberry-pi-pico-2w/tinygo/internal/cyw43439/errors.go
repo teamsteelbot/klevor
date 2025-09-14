@@ -11,4 +11,5 @@ const (
 
 const (
 	ErrorCodeCyw43439NilDevice tinygotypes.ErrorCode = tinygotypes.ErrorCode(iota + ErrorCodeCyw43439StartNumber)
+	ErrorCodeCyw43439FailedToInitialize
 )

@@ -1,7 +1,6 @@
 package usbcdc
 
 import (
-	"math"
 	"time"
 
 	"machine"
@@ -18,7 +17,8 @@ type (
 		challengeHandler internalchallenge.Handler
 		ledHandler       internalled.Handler
 		serialer         machine.Serialer
-		messageBuffer []byte
+		incomingMessageBuffer []byte
+		outgoingMessageBuffer []byte
 	}
 )
 
@@ -55,17 +55,9 @@ func NewDefaultHandler(
 		return nil, ErrorCodeUSBCDCFailedToConfigureUSBCDC
 	}
 
-	// Check if the MaxIncomingMessageDataSize and MaxOutgoingMessageDataSize are valid
-	if MaxIncomingMessageDataSize < 0 || MaxOutgoingMessageDataSize < 0 {
-		return nil, ErrorCodeUSBCDCInvalidMaxMessageDataSize
-	}
-
-	// Create a buffer big enough to hold the maximum incoming message data size and outgoing message data size
-	var messageBuffer []byte
-	if MaxIncomingMessageDataSize >= MaxOutgoingMessageDataSize {
-		messageBuffer = make([]byte, MaxIncomingMessageDataSize)
-	} else {
-		messageBuffer = make([]byte, MaxOutgoingMessageDataSize)
+	// Check if the MaxIncomingMessageDataLength and MaxOutgoingMessageDataLength are valid
+	if MaxIncomingMessageDataLength < 0 || MaxOutgoingMessageDataLength < 0 {
+		return nil, ErrorCodeUSBCDCInvalidMaxMessageDataLength
 	}
 
 	// Return the new DefaultHandler instance
@@ -73,68 +65,142 @@ func NewDefaultHandler(
 		challengeHandler: challengeHandler,
 		ledHandler:       ledHandler,
 		serialer:         machine.USBCDC,
-		messageBuffer:    messageBuffer,
+		incomingMessageBuffer: make([]byte, MaxIncomingMessageDataLength),
+		outgoingMessageBuffer: make([]byte, MaxOutgoingMessageDataLength),
 	}, tinygotypes.ErrorCodeNil
 }
 
-// Update receives messages from the USB CDC.
+// IsAvailableToRead checks if there are messages available to read from the USB CDC.
 //
 // Returns:
 //
-// An error if it fails to receive messages
-func (d *DefaultHandler) Update() tinygotypes.ErrorCode {
-	// If no messages are received, turn off the LED
-	if d.serialer.Buffered() == 0 {
-		if d.ledHandler.IsOn() {
-			d.ledHandler.SetOff()
-		}
-		return tinygotypes.ErrorCodeNil
-	}
+// true if there are messages available to read, false otherwise
+func (d *DefaultHandler) IsAvailableToRead() bool {
+	return d.serialer.Buffered() > 0
+}
 
-	// Turn on the LED to indicate a message has been received
-	if d.ledHandler.IsOff() {
-		d.ledHandler.SetOn()
-	}
-
-	// Clear the existing incoming messages
-	for i := range d.incomingMessages {
-		d.incomingMessages[i] = nil
-	}
-
-	// Initialize a slice to hold the messages and a buffer to hold the incoming data
-	for idx := 0; idx < IncomingMessagesBufferSize; idx++ {
-		for d.serialer.Buffered() > 0 {
-			// Read a byte from the serial port
+// readByte reads a single byte from the USB CDC.
+//
+// Parameters:
+//
+// timeout: The maximum time to wait for a byte
+//
+// Returns:
+//
+// The byte read and an error if it fails to read the byte
+func (d *DefaultHandler) readByte(timeout time.Duration) (byte, tinygotypes.ErrorCode) {
+	startTime := time.Now()
+	for time.Since(startTime) < timeout {
+		if d.serialer.Buffered() > 0 {
 			c, err := d.serialer.ReadByte()
 			if err != nil {
-				return ErrorCodeUSBCDCFailedReadingFromSerial
+				return 0, ErrorCodeUSBCDCFailedReadingFromSerial
 			}
-
-			// Add the byte to the buffer
-			d.buffer[d.bufferIndex] = c
-
-			// If the byte is not the end character, continue reading
-			if c != EndChar {
-				d.bufferIndex++
-				continue
-			}
-
-			// Process the buffer to create an IncomingMessage
-			message, errCode := NewIncomingMessage(d.buffer)
-			if errCode != tinygotypes.ErrorCodeNil {
-				return errCode
-			}
-			d.incomingMessages[idx] = message
-
-			// Clear the buffer
-			d.bufferIndex = 0
-			for i := range d.buffer {
-				d.buffer[i] = 0
-			}
-			break
+			return c, tinygotypes.ErrorCodeNil
 		}
 	}
-	return tinygotypes.ErrorCodeNil
+	return 0, ErrorCodeUSBCDCReadByteTimeout
+}
+
+// ReadMessage reads a message from the USB CDC.
+//
+// Parameters:
+//
+// timeout: The maximum time to wait for a message
+//
+// Returns:
+//
+// The incoming message and an error if it fails to read the message
+func (d *DefaultHandler) ReadMessage(timeout time.Duration) (IncomingMessage, tinygotypes.ErrorCode) {
+	// If no messages are received, turn off the LED
+	if d.serialer.Buffered() == 0 && d.ledHandler.IsOn() {
+		d.ledHandler.SetOff()
+	}
+	
+	startTime := time.Now()
+	for time.Since(startTime) < timeout {
+		// If there are no bytes available, continue waiting
+		if d.serialer.Buffered() == 0 {
+			continue
+		}
+
+		// Read a byte from the serial port until the start character is found
+		for {
+			c, err := d.readByte(timeout - time.Since(startTime))
+			if err != tinygotypes.ErrorCodeNil {
+				return IncomingMessage{}, err
+			}
+			if c == StartAndEndChar {
+				break
+			}
+		}
+
+		// Get the next byte as the category, omit if it's another start character
+		c, err := d.readByte(timeout - time.Since(startTime))
+		if err != tinygotypes.ErrorCodeNil {
+			return IncomingMessage{}, err
+		}
+		if c == StartAndEndChar {
+			// Read the next byte as the category
+			c, err = d.readByte(timeout - time.Since(startTime))
+			if err != tinygotypes.ErrorCodeNil {
+				return IncomingMessage{}, err
+			}
+		}
+		
+		// Convert the byte to IncomingCategory
+		category, err := IncomingCategoryFromUint8(c)
+		if err != tinygotypes.ErrorCodeNil {
+			return IncomingMessage{}, err
+		}
+
+		// Get the next byte as the data length
+		dataLengthByte, err := d.readByte(timeout - time.Since(startTime))
+		if err != tinygotypes.ErrorCodeNil {
+			return IncomingMessage{}, err
+		}
+		dataLength := int(dataLengthByte)
+
+		// Check if the data length is valid
+		if dataLength < 0 || dataLength > MaxIncomingMessageDataLength {
+			return IncomingMessage{}, ErrorCodeUSBCDCInvalidIncomingMessageDataLength
+		}
+
+		// Compare the data length with the expected length for the category
+		expectedDataLength, err := IncomingCategoryDataLength(category)
+		if err != tinygotypes.ErrorCodeNil {
+			return IncomingMessage{}, err
+		}
+		if dataLength != expectedDataLength {
+			return IncomingMessage{}, ErrorCodeUSBCDCInvalidIncomingMessageDataLength
+		}
+
+		// Read the data bytes
+		data := d.incomingMessageBuffer[:dataLength]
+		for i := 0; i < dataLength; i++ {
+			c, err := d.readByte(timeout - time.Since(startTime))
+			if err != tinygotypes.ErrorCodeNil {
+				return IncomingMessage{}, err
+			}
+			if c == ControlChar {
+				// Read the next byte and XOR it with 0x20
+				c, err = d.readByte(timeout - time.Since(startTime))
+				if err != tinygotypes.ErrorCodeNil {
+					return IncomingMessage{}, err
+				}
+				c ^= 0x20
+			}
+			data[i] = c
+		}
+
+		// Create the IncomingMessage
+		message := IncomingMessage{
+			Category: category,
+			Data:     data,
+		}
+		return message, tinygotypes.ErrorCodeNil
+	}
+	return IncomingMessage{}, ErrorCodeUSBCDCReadMessageTimeout
 }
 
 // SendMessage sends a message to the USB CDC.
@@ -153,15 +219,26 @@ func (d *DefaultHandler) SendMessage(message OutgoingMessage) tinygotypes.ErrorC
 	}
 
 	// Send the message category byte
-	if err := d.serialer.WriteByte(message.Category); err != nil {
+	if err := d.serialer.WriteByte(uint8(message.Category)); err != nil {
 		return ErrorCodeBNO08XFailedToSendOutgoingCategory
 	}
 
 	// Send data length byte
 	dataLength := len(message.Data)
-	if dataLength > math.MaxUint8 {
-		return ErrorCodeUSBCDCOutgoingMessageDataTooLarge
+	if dataLength > MaxOutgoingMessageDataLength {
+		return ErrorCodeUSBCDCInvalidOutgoingMessageDataLength
 	}
+
+	// Compare the data length with the expected length for the category
+	expectedDataLength, err := OutgoingCategoryDataLength(OutgoingCategory(message.Category))
+	if err != tinygotypes.ErrorCodeNil {
+		return err
+	}
+	if dataLength != expectedDataLength {
+		return ErrorCodeUSBCDCInvalidOutgoingMessageDataLength
+	}
+
+	// Write the data length byte
 	if err := d.serialer.WriteByte(uint8(dataLength)); err != nil {
 		return ErrorCodeUSBCDCFailedToSendControlCharacter
 	}
@@ -229,7 +306,7 @@ func (d *DefaultHandler) SendBNO08XQuaternionMessages(quaternion [4]float64) tin
 		message, err := NewOutgoingMessageFromFloat64Data(
 			category,
 			value,
-			d.messageBuffer[:Float64BufferSize],
+			d.outgoingMessageBuffer[:Float64BufferSize],
 		)
 		if err != tinygotypes.ErrorCodeNil {
 			return err
@@ -270,7 +347,7 @@ func (d *DefaultHandler) SendBNO08XEulerDegreesMessages(eulerDegrees [3]float64)
 		message, err := NewOutgoingMessageFromFloat64Data(
 			category,
 			value,
-			d.messageBuffer[:Float64BufferSize],
+			d.outgoingMessageBuffer[:Float64BufferSize],
 		)
 		if err != tinygotypes.ErrorCodeNil {
 			return err
@@ -296,7 +373,7 @@ func (d *DefaultHandler) SendChallengeMessage() tinygotypes.ErrorCode {
 	// Create the challenge message
 	challengeMessage, err := NewOutgoingChallengeMessage(
 		challenge,
-		d.messageBuffer[:Uint8BufferSize],
+		d.outgoingMessageBuffer[:Uint8BufferSize],
 	)
 	if err != tinygotypes.ErrorCodeNil {
 		return err
@@ -326,7 +403,7 @@ func (d *DefaultHandler) SendErrorMessage(errorCode tinygotypes.ErrorCode) tinyg
 	// Create the error message
 	errorMessage, err := NewOutgoingErrorMessage(
 		errorCode,
-		d.messageBuffer[:Uint16BufferSize],
+		d.outgoingMessageBuffer[:Uint16BufferSize],
 	)
 	if err != tinygotypes.ErrorCodeNil {
 		return err
@@ -343,7 +420,7 @@ func (d *DefaultHandler) SendStartMessage() tinygotypes.ErrorCode {
 	// Create the start message
 	startMessage, err := NewOutgoingStatusMessage(
 		OutgoingStatusStart,
-		d.messageBuffer[:Uint8BufferSize],
+		d.outgoingMessageBuffer[:Uint8BufferSize],
 	)
 	if err != tinygotypes.ErrorCodeNil {
 		return err
@@ -369,7 +446,7 @@ func (d *DefaultHandler) SendConfirmationMessage() tinygotypes.ErrorCode {
 	// Create the confirmation message
 	confirmationMessage, err := NewOutgoingStatusMessage(
 		OutgoingStatusOK,
-		d.messageBuffer[:Uint8BufferSize],
+		d.outgoingMessageBuffer[:Uint8BufferSize],
 	)
 	if err != tinygotypes.ErrorCodeNil {
 		return err
@@ -391,7 +468,7 @@ func (d *DefaultHandler) SendMaxMotorSpeedValueMessage(maxMotorSpeed uint16) tin
 	maxMotorSpeedMessage, err := NewOutgoingMessageFromUint16Data(
 		OutgoingCategoryMaxMotorSpeedValue,
 		maxMotorSpeed,
-		d.messageBuffer[:Uint16BufferSize],
+		d.outgoingMessageBuffer[:Uint16BufferSize],
 	)
 	if err != tinygotypes.ErrorCodeNil {
 		return err
@@ -413,7 +490,7 @@ func (d *DefaultHandler) SendMaxServoDirectionValueMessage(maxServoDirection uin
 	maxServoDirectionMessage, err := NewOutgoingMessageFromUint16Data(
 		OutgoingCategoryMaxServoDirectionValue,
 		maxServoDirection,
-		d.messageBuffer[:Uint16BufferSize],
+		d.outgoingMessageBuffer[:Uint16BufferSize],
 	)
 	if err != tinygotypes.ErrorCodeNil {
 		return err
@@ -435,15 +512,15 @@ func (d *DefaultHandler) WaitForConfirmationMessage(
 ) tinygotypes.ErrorCode {
 	startTime := time.Now()
 	for time.Since(startTime) < timeout {
-		// Read packet 
-		packet, err := d.ReadPacket(timeout - time.Since(startTime))
+		// Read message with the remaining timeout duration
+		message, err := d.ReadMessage(timeout - time.Since(startTime))
 		if err != tinygotypes.ErrorCodeNil {
 			return err
 		}
 
 		// Check if any of the received messages is the confirmation message
-		if packet.Category == IncomingCategoryStatus && len(packet.Data) == 1 {
-			if packet.Data[0] == byte(OutgoingStatusOK) {
+		if message.Category == IncomingCategoryStatus && len(message.Data) == 1 {
+			if message.Data[0] == byte(OutgoingStatusOK) {
 				return tinygotypes.ErrorCodeNil
 			}
 		}

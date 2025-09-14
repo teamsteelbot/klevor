@@ -21,7 +21,7 @@ var (
 // init initializes the CYW43439 device with the default Wi-Fi configuration.
 func init() {
 	if err := Device.Init(WifiConfig); err != nil {
-		internal.Logger.ErrorMessageWithErrorCode(failedToInitializeCwy43439Message, err)
+		internal.Logger.ErrorMessageWithErrorCode(failedToInitializeCwy43439Message, ErrorCodeCyw43439FailedToInitialize, true)
 		os.Exit(1)
 	}
 }

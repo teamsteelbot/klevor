@@ -32,11 +32,11 @@ const (
 	// Float64BufferSize is the size of the buffer to hold a float64 value in bytes
 	Float64BufferSize = 8
 
-	// MaxIncomingMessageDataSize is the maximum size of incoming message data
-	MaxIncomingMessageDataSize = 2
+	// MaxIncomingMessageDataLength is the maximum size of incoming message data
+	MaxIncomingMessageDataLength = 2
 
-	// MaxOutgoingMessageDataSize is the maximum size of outgoing message data
-	MaxOutgoingMessageDataSize = Float64BufferSize
+	// MaxOutgoingMessageDataLength is the maximum size of outgoing message data
+	MaxOutgoingMessageDataLength = Float64BufferSize
 )
 
 var (
@@ -54,7 +54,7 @@ func init() {
 		internalledonboard.OnBoardHandler,
 	)
 	if err != tinygotypes.ErrorCodeNil {
-		internal.Logger.ErrorMessageWithErrorCode(failedToInitializeUSBMessage, err)
+		internal.Logger.ErrorMessageWithErrorCode(failedToInitializeUSBMessage, err, true)
 		os.Exit(1)
 	}
 	USBCDCHandler = usbCDCHandler

@@ -1,10 +1,9 @@
 package escmotor
 
 import (
-	"machine"
-
-	tinygoescmotor "github.com/ralvarezdev/tinygo-escmotor"
+	internalusbcdc "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc"
 	tinygotypes "github.com/ralvarezdev/tinygo-types"
+	tinygobuffers "github.com/ralvarezdev/tinygo-buffers"
 )
 
 
@@ -17,15 +16,14 @@ import (
 // Returns:
 //
 // An error if the motor speed could not be set, otherwise nil
-func (e *DefaultHandler) SetSpeedBasedOnReceivedMessage(message internalusbcdc.IncomingMessage) tinygotypes.ErrorCode {
-
+func SetSpeedBasedOnReceivedMessage(message internalusbcdc.IncomingMessage) tinygotypes.ErrorCode {
 	// Check if the motor speed should be retrieved from the message
 	var motorSpeed uint16
 	if message.Category != internalusbcdc.IncomingCategoryMotorSpeedStop {
 		// Get int16 speed from message content
-		speed, err := message.GetContentAsUint16()
+		speed, err := tinygobuffers.BytesToUint16(message.Data)
 		if err != tinygotypes.ErrorCodeNil {
-			return ErrorCodeESCMotorInvalidMotorSpeedValue
+			return err
 		}
 		motorSpeed = speed
 	}
@@ -33,12 +31,12 @@ func (e *DefaultHandler) SetSpeedBasedOnReceivedMessage(message internalusbcdc.I
 	// Check the motor speed category
 	switch message.Category {
 	case internalusbcdc.IncomingCategoryMotorSpeedStop:
-		return e.Stop()
+		return ESCMotorHandler.Stop()
 	case internalusbcdc.IncomingCategoryMotorSpeedForward:
-		return e.SetSpeedForward(motorSpeed)
+		return ESCMotorHandler.SetSpeedForward(motorSpeed)
 	case internalusbcdc.IncomingCategoryMotorSpeedBackward:
-		return e.SetSpeedBackward(motorSpeed)
+		return ESCMotorHandler.SetSpeedBackward(motorSpeed)
 	default:
-		return ErrorCodeESCMotorUnknownMotorSpeedCategory
+		return internalusbcdc.ErrorCodeUSBCDCUnknownIncomingCategory
 	}
 }

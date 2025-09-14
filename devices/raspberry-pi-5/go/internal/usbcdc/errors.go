@@ -47,6 +47,7 @@ const (
 
 const (
 	ErrorCodeCyw43439NilDevice tinygotypes.ErrorCode = tinygotypes.ErrorCode(iota + ErrorCodeCyw43439StartNumber)
+	ErrorCodeCyw43439FailedToInitialize
 )
 
 const (
@@ -111,6 +112,17 @@ const (
 	ErrorCodeUSBCDCNilQuaternion
 	ErrorCodeUSBCDCNilIncomingMessageBuffer
 	ErrorCodeUSBCDCFailedToSendInitializationMessage
+)
+
+
+const (
+	// ErrorCodeBuffersStartNumber is the starting number for error code buffers
+	ErrorCodeBuffersStartNumber = 4000
+)
+
+const (
+	ErrorCodeBuffersInvalidBufferSize tinygotypes.ErrorCode = ErrorCodeBuffersStartNumber + iota
+	
 )
 
 const (

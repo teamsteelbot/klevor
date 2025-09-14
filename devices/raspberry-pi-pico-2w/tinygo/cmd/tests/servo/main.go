@@ -37,7 +37,7 @@ func main() {
 			if err := internalservo.ServoHandler.SetAngleToRight(
 				angle,
 			); err != tinygotypes.ErrorCodeNil {
-				internal.Logger.ErrorMessageWithErrorCode(failedToServoAngleToRightMessage, err)
+				internal.Logger.ErrorMessageWithErrorCode(failedToServoAngleToRightMessage, err, true)
 				return
 			}
 			time.Sleep(50 * time.Millisecond)
@@ -45,7 +45,7 @@ func main() {
 
 		// Center the servo for a while
 		if err := internalservo.ServoHandler.SetAngleToCenter(); err != tinygotypes.ErrorCodeNil {
-			internal.Logger.ErrorMessageWithErrorCode(failedToServoAngleToCenterMessage, err)
+			internal.Logger.ErrorMessageWithErrorCode(failedToServoAngleToCenterMessage, err, true)
 			return
 		}
 		time.Sleep(2 * time.Second)
@@ -55,7 +55,7 @@ func main() {
 			if err := internalservo.ServoHandler.SetAngleToLeft(
 				angle,
 			); err != tinygotypes.ErrorCodeNil {
-				internal.Logger.ErrorMessageWithErrorCode(failedToServoAngleToLeftMessage, err)
+				internal.Logger.ErrorMessageWithErrorCode(failedToServoAngleToLeftMessage, err, true)
 				return
 			}
 			time.Sleep(50 * time.Millisecond)
@@ -63,7 +63,7 @@ func main() {
 
 		// Center the servo
 		if err := internalservo.ServoHandler.SetAngleToCenter(); err != tinygotypes.ErrorCodeNil {
-			internal.Logger.ErrorMessageWithErrorCode(failedToServoAngleToCenterMessage, err)
+			internal.Logger.ErrorMessageWithErrorCode(failedToServoAngleToCenterMessage, err, true)
 			return
 		}
 		time.Sleep(2 * time.Second)
@@ -71,7 +71,7 @@ func main() {
 		// Test servo full range
 		for angle = 0; angle <= 180; angle += 1 {
 			if err := internalservo.ServoHandler.SetAngle(angle); err != tinygotypes.ErrorCodeNil {
-				internal.Logger.ErrorMessageWithErrorCode(failedToSetServoAngleMessage, err)
+				internal.Logger.ErrorMessageWithErrorCode(failedToSetServoAngleMessage, err, true)
 				return
 			}
 			time.Sleep(50 * time.Millisecond)
@@ -79,7 +79,7 @@ func main() {
 
 		// Center the servo
 		if err := internalservo.ServoHandler.SetAngleToCenter(); err != tinygotypes.ErrorCodeNil {
-			internal.Logger.ErrorMessageWithErrorCode(failedToServoAngleToCenterMessage, err)
+			internal.Logger.ErrorMessageWithErrorCode(failedToServoAngleToCenterMessage, err, true)
 			return
 		}
 

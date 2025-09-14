@@ -35,7 +35,7 @@ func init() {
 		ParkingPullUpHandler,
 	)
 	if err != tinygotypes.ErrorCodeNil {
-		internal.Logger.ErrorMessageWithErrorCode(failedToInitializeChallengeMessage, err)
+		internal.Logger.ErrorMessageWithErrorCode(failedToInitializeChallengeMessage, err, true)
 		os.Exit(1)
 	}
 	ChallengeHandler = challengeHandler

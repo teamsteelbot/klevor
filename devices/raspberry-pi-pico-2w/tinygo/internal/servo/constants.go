@@ -49,10 +49,11 @@ func init() {
 		MaxPulseWidth,
 		CenterAngle,
 		MaxAngle,
+		IsDirectionInverted,
 		nil, // internal.Logger
 	)
 	if err != tinygotypes.ErrorCodeNil {
-		internal.Logger.ErrorMessageWithErrorCode(failedToInitializeServoMessage, err)
+		internal.Logger.ErrorMessageWithErrorCode(failedToInitializeServoMessage, err, true)
 		os.Exit(1)
 	}
 	ServoHandler = servoHandler

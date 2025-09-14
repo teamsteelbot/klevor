@@ -37,7 +37,7 @@ func main() {
 			if err := internalescmotor.ESCMotorHandler.SetSpeedForward(
 				speed,
 			); err != tinygotypes.ErrorCodeNil {
-				internal.Logger.ErrorMessageWithErrorCode(failedToSetMotorSpeedForwardMessage, err)
+				internal.Logger.ErrorMessageWithErrorCode(failedToSetMotorSpeedForwardMessage, err, true)
 				return
 			}
 			time.Sleep(20 * time.Millisecond)
@@ -45,7 +45,7 @@ func main() {
 
 		// Stop the motor for a while
 		if err := internalescmotor.ESCMotorHandler.Stop(); err != tinygotypes.ErrorCodeNil {
-			internal.Logger.ErrorMessageWithErrorCode(failedToStopMotorMessage, err)
+			internal.Logger.ErrorMessageWithErrorCode(failedToStopMotorMessage, err, true)
 			return
 		}
 		time.Sleep(2 * time.Second)
@@ -55,7 +55,7 @@ func main() {
 			if err := internalescmotor.ESCMotorHandler.SetSpeedBackward(
 				speed,
 			); err != tinygotypes.ErrorCodeNil {
-				internal.Logger.ErrorMessageWithErrorCode(failedToSetMotorSpeedBackwardMessage, err)
+				internal.Logger.ErrorMessageWithErrorCode(failedToSetMotorSpeedBackwardMessage, err, true)
 				return
 			}
 			time.Sleep(20 * time.Millisecond)
@@ -63,7 +63,7 @@ func main() {
 
 		// Stop the motor
 		if err := internalescmotor.ESCMotorHandler.Stop(); err != tinygotypes.ErrorCodeNil {
-			internal.Logger.ErrorMessageWithErrorCode(failedToStopMotorMessage, err)
+			internal.Logger.ErrorMessageWithErrorCode(failedToStopMotorMessage, err, true)
 			return
 		}
 

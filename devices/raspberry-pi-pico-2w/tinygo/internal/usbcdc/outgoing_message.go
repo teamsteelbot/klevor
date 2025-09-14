@@ -1,11 +1,9 @@
 package usbcdc
 
 import (
-	"encoding/binary"
-	"math"
-
 	internalchallenge "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/challenge"
 	tinygotypes "github.com/ralvarezdev/tinygo-types"
+	tinygobuffers "github.com/ralvarezdev/tinygo-buffers"
 )
 
 type (
@@ -130,7 +128,7 @@ func NewOutgoingMessageFromUint16Data(
 	}
 
 	// Convert the uint16 to raw bytes
-	binary.BigEndian.PutUint16(buffer[:Uint16BufferSize], data)
+	tinygobuffers.Uint16ToBytes(data, buffer)
 
 	return NewOutgoingMessage(
 		category,
@@ -181,7 +179,7 @@ func NewOutgoingMessageFromFloat64Data(
 	}
 
 	// Convert the float64 to raw bytes
-	binary.BigEndian.PutUint64(buffer[:Float64BufferSize], math.Float64bits(value))
+	tinygobuffers.Float64ToBytes(value, buffer)
 
 	return NewOutgoingMessage(
 		category,

@@ -31,7 +31,7 @@ func init() {
 		DefaultInterval,
 	)
 	if err != tinygotypes.ErrorCodeNil {
-		internal.Logger.ErrorMessageWithErrorCode(failedToInitializeSwitchMessage, err)
+		internal.Logger.ErrorMessageWithErrorCode(failedToInitializeSwitchMessage, err, true)
 		os.Exit(1)
 	}
 	SwitchHandler = switchHandler

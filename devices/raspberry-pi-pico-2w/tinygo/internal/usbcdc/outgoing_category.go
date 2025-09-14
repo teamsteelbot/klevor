@@ -25,6 +25,30 @@ const (
 	OutgoingCategoryEulerDegreesRoll
 )
 
+// OutgoingCategoryDataLength returns the size in bytes of the data for a given OutgoingCategory
+//
+// Parameters:
+//
+// category: The OutgoingCategory to get the data size for
+//
+// Returns:
+//
+// The size in bytes of the data for the given category, or an error if the category is invalid
+func OutgoingCategoryDataLength(category OutgoingCategory) (int, tinygotypes.ErrorCode) {
+	switch category {
+	case OutgoingCategoryNil:
+		return 0, ErrorCodeUSBCDCNilOutgoingCategory
+	case OutgoingCategoryStatus, OutgoingCategoryChallenge:
+		return 1, tinygotypes.ErrorCodeNil
+	case OutgoingCategoryError, OutgoingCategoryMaxMotorSpeedValue, OutgoingCategoryMaxServoDirectionValue:
+		return 2, tinygotypes.ErrorCodeNil
+	case OutgoingCategoryQuaternionX, OutgoingCategoryQuaternionY, OutgoingCategoryQuaternionZ, OutgoingCategoryQuaternionW, OutgoingCategoryEulerDegreesYaw, OutgoingCategoryEulerDegreesPitch, OutgoingCategoryEulerDegreesRoll:
+		return 8, tinygotypes.ErrorCodeNil
+	default:
+		return 0, ErrorCodeUSBCDCUnknownOutgoingCategory
+	}
+}
+
 // OutgoingCategoryFromUint8 returns the OutgoingCategory enum based on a given uint8 value
 //
 // Parameters:

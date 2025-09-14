@@ -22,6 +22,30 @@ const (
 	IncomingCategoryGetMaxServoDirectionValue
 )
 
+// IncomingCategoryDataLength returns the size in bytes of the data for a given IncomingCategory
+//
+// Parameters:
+//
+// category: The IncomingCategory to get the data size for
+//
+// Returns:
+//
+// The size in bytes of the data for the given category, or an error if the category is invalid
+func IncomingCategoryDataLength(category IncomingCategory) (int, tinygotypes.ErrorCode) {
+	switch category {
+	case IncomingCategoryNil:
+		return 0, ErrorCodeUSBCDCNilIncomingCategory
+	case IncomingCategoryMotorSpeedStop, IncomingCategoryServoDirectionCenter, IncomingCategoryGetMaxMotorSpeedValue, IncomingCategoryGetMaxServoDirectionValue:
+		return 0, tinygotypes.ErrorCodeNil
+	case IncomingCategoryStatus:
+		return 1, tinygotypes.ErrorCodeNil
+	case IncomingCategoryMotorSpeedForward, IncomingCategoryMotorSpeedBackward, IncomingCategoryServoDirectionToLeft, IncomingCategoryServoDirectionToRight:
+		return 2, tinygotypes.ErrorCodeNil
+	default:
+		return 0, ErrorCodeUSBCDCUnknownIncomingCategory
+	}
+}
+
 // IsAServoCategory checks if the given IncomingCategory is a servo category
 //
 // Returns:
