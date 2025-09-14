@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"sync"
 	"time"
@@ -13,7 +12,6 @@ import (
 	internalservo "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/servo"
 	internalswitch "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/switch"
 	internalusbcdc "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc"
-	tinygobuffers "github.com/ralvarezdev/tinygo-buffers"
 	tinygotypes "github.com/ralvarezdev/tinygo-types"
 )
 
@@ -187,7 +185,7 @@ func main() {
 			case internalusbcdc.IncomingCategoryGetMaxServoDirectionValue:
 				sendErrorMessageOnError(
 					func() tinygotypes.ErrorCode {
-						return internalusbcdc.USBCDCHandler.SendMaxServoDirectionValueMessage(internalservo.MaxDirection)
+						return internalusbcdc.USBCDCHandler.SendMaxServoDirectionValueMessage(internalservo.MaxAngle)
 					},
 				)
 			case internalusbcdc.IncomingCategoryMotorSpeedStop:
@@ -209,20 +207,13 @@ func main() {
 			case internalusbcdc.IncomingCategoryStatus:
 				// Get the first byte of the message content
 				if len(newMessage.Data) < 1 {
-					sendErrorMessage(internalusbcdc.ErrorCodeUSBCDCInvalidMessageDataLength)
-					continue
-				}
-
-				// Parse the status from the first byte
-				statusUint8, err := tinygobuffers.BytesToUint8(newMessage.Data[0])
-				if err != tinygotypes.ErrorCodeNil {
-					sendErrorMessage(err)
+					sendErrorMessage(internalusbcdc.ErrorCodeUSBCDCInvalidIncomingMessageDataLength)
 					continue
 				}
 
 				// Get the status from the message content
-				status, err := internalusbcdc.IncomingStatusFromUint8(statusUint8)
-				if err != nil {
+				status, err := internalusbcdc.IncomingStatusFromUint8(newMessage.Data[0])
+				if err != tinygotypes.ErrorCodeNil {
 					sendErrorMessage(err)
 					continue
 				}
@@ -254,6 +245,5 @@ func main() {
 		if toExit {
 			break
 		}
-
 	}
 }
