@@ -19,6 +19,9 @@ import (
 const (
 	// GracefulShutdownTimeout is the timeout for graceful shutdown
 	GracefulShutdownTimeout = 5 * time.Second
+
+	// RPLiDARPrintInterval is the interval between printing the RPLiDAR measures
+	RPLiDARPrintInterval = 100 * time.Millisecond
 )
 
 func main() {
@@ -65,19 +68,19 @@ func main() {
 	// Initialize a goroutine to print the measures on each rotation completed
 	g.Go(
 		func() error {
-			// Get the rotation completed channel
-			fmt.Println("Getting rotation completed channel")
-			rotationCompletedCh := rplidarHandler.GetRotationCompletedChannel()
-			fmt.Println("Rotation completed channel obtained")
-
 			// Listen for rotation completed events
 			for {
 				select {
-				case <-rotationCompletedCh:
-					// Print that a rotation has been completed
-					fmt.Println("Rotation completed")
 				case <-ctx.Done():
+					// Context canceled, return the error
+					fmt.Println("Context canceled")
 					return ctx.Err()
+				default:
+					// Print the measures
+					fmt.Println(*rplidarHandler.GetMeasures())
+
+					// Print the measures every RPLiDARPrintInterval
+					time.Sleep(RPLiDARPrintInterval)
 				}
 			}
 		},

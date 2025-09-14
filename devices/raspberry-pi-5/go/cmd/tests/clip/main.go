@@ -110,6 +110,8 @@ func main() {
 			for {
 				select {
 				case <-ctx.Done():
+					// Context canceled, return the error
+					fmt.Println("Context canceled")
 					return ctx.Err()
 				default:
 					classification, err := clipHandler.GetClassification()

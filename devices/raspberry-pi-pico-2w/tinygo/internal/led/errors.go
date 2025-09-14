@@ -2,11 +2,15 @@ package led
 
 import (
 	tinygotypes "github.com/ralvarezdev/tinygo-types"
-	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal"
 )
 
 const (
-	ErrorCodeLEDNilHandler tinygotypes.ErrorCode = tinygotypes.ErrorCode(iota + internal.ErrorCodeLEDStartNumber)
+	// ErrorCodeLEDStartNumber is the starting number for LED-related error codes.
+	ErrorCodeLEDStartNumber uint16 = 20
+)
+
+const (
+	ErrorCodeLEDNilHandler tinygotypes.ErrorCode = tinygotypes.ErrorCode(iota + ErrorCodeLEDStartNumber)
 	ErrorCodeLEDNegativeBlinkCount
 	ErrorCodeLEDNegativeDelayDuration
 )

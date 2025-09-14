@@ -76,6 +76,6 @@ func IncomingCategoryFromUint8(value uint8) (IncomingCategory, tinygotypes.Error
 	case IncomingCategoryGetMaxServoDirectionValue:
 		return IncomingCategoryGetMaxServoDirectionValue, tinygotypes.ErrorCodeNil
 	default:
-		return IncomingCategoryNil, ErrorCodeUSBCDCInvalidIncomingCategoryUint8
+		return IncomingCategoryNil, ErrorCodeUSBCDCUnknownIncomingCategory
 	}
 }

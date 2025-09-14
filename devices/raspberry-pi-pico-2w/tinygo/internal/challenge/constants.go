@@ -1,19 +1,21 @@
 package challenge
 
 import (
+	"os"
+
 	"machine"
 
-	internalpullup "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/pullup"
+	tinygopullup "github.com/ralvarezdev/tinygo-pullup"
 	tinygotypes "github.com/ralvarezdev/tinygo-types"
 	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal"
 )
 
 var (
 	// ObstaclesPullUpHandler is the handler for the pull-up to enable/disable obstacles.
-	ObstaclesPullUpHandler internalpullup.Handler = internalpullup.NewDefaultHandler(machine.GPIO21)
+	ObstaclesPullUpHandler = tinygopullup.NewDefaultHandler(machine.GPIO21)
 
 	// ParkingPullUpHandler is the handler for the pull-up to enable/disable parking.
-	ParkingPullUpHandler internalpullup.Handler = internalpullup.NewDefaultHandler(machine.GPIO17)
+	ParkingPullUpHandler = tinygopullup.NewDefaultHandler(machine.GPIO17)
 
 	// ChallengeHandler is the default challenge handler that uses the pull-up handler.
 	ChallengeHandler Handler
@@ -34,7 +36,7 @@ func init() {
 	)
 	if err != tinygotypes.ErrorCodeNil {
 		internal.Logger.ErrorMessageWithErrorCode(failedToInitializeChallengeMessage, err)
-		return
+		os.Exit(1)
 	}
 	ChallengeHandler = challengeHandler
 }

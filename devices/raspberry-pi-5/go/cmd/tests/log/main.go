@@ -63,9 +63,11 @@ func main() {
 		defer loggerProducer.Close()
 
 		// Send messages
-		for i := 0; i < TotalMessages; i++ {
+		for i := range TotalMessages {
 			select {
 			case <-ctx.Done():
+				// Context canceled, return
+				fmt.Println("Context canceled, stopping message sending")
 				return
 			default:
 				loggerProducer.Info(fmt.Sprintf("event %d", i))

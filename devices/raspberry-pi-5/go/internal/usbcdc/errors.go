@@ -7,45 +7,35 @@ import (
 )
 
 const (
-	// ErrorCodeGeneralStartNumber is the starting number for general error codes.
-	ErrorCodeGeneralStartNumber uint16 = 1
-
 	// ErrorCodeChallengeStartNumber is the starting number for challenge-related error codes.
-	ErrorCodeChallengeStartNumber uint16 = 100
+	ErrorCodeChallengeStartNumber uint16 = 1
 
 	// ErrorCodeCyw43439StartNumber is the starting number for CYW43439-related error codes.
-	ErrorCodeCyw43439StartNumber uint16 = 200
-
-	// ErrorCodeDebugStartNumber is the starting number for debug-related error codes.
-	ErrorCodeDebugStartNumber uint16 = 300
+	ErrorCodeCyw43439StartNumber uint16 = 10
 
 	// ErrorCodeESCMotorStartNumber is the starting number for ESC motor-related error codes.
-	ErrorCodeESCMotorStartNumber uint16 = 400
+	ErrorCodeESCMotorStartNumber uint16 = 5210
 
 	// ErrorCodeLEDStartNumber is the starting number for LED-related error codes.
-	ErrorCodeLEDStartNumber uint16 = 500
+	ErrorCodeLEDStartNumber uint16 = 20
 
 	// ErrorCodeMovementStartNumber is the starting number for movement-related error codes.
-	ErrorCodeMovementStartNumber uint16 = 600
+	ErrorCodeMovementStartNumber uint16 = 30
 
 	// ErrorCodePullUpResistorStartNumber is the starting number for pull-up resistor-related error codes.
-	ErrorCodePullUpResistorStartNumber uint16 = 700
+	ErrorCodePullUpResistorStartNumber uint16 = 5200
 
 	// ErrorCodeServoStartNumber is the starting number for servo-related error codes.
-	ErrorCodeServoStartNumber uint16 = 800
+	ErrorCodeServoStartNumber uint16 = 5230
 
 	// ErrorCodeSwitchStartNumber is the starting number for switch-related error codes.
-	ErrorCodeSwitchStartNumber uint16 = 900
+	ErrorCodeSwitchStartNumber uint16 = 40
 
 	// ErrorCodeUSBCDCStartNumber is the starting number for USB CDC-related error codes.
-	ErrorCodeUSBCDCStartNumber uint16 = 1000
+	ErrorCodeUSBCDCStartNumber uint16 = 50
 
 	// ErrorCodeBNO08XStartNumber is the starting number for BNO08X-related error codes.
 	ErrorCodeBNO08XStartNumber uint16 = 5000
-)
-
-const (
-	ErrorCodeFailedToConfigurePWM tinygotypes.ErrorCode = tinygotypes.ErrorCode(iota + ErrorCodeGeneralStartNumber)
 )
 
 const (
@@ -60,18 +50,12 @@ const (
 )
 
 const (
-	ErrorCodeDebugNilHandler tinygotypes.ErrorCode = tinygotypes.ErrorCode(iota + ErrorCodeDebugStartNumber)
-)
-
-const (
-	ErrorCodeESCMotorNilOptions tinygotypes.ErrorCode = tinygotypes.ErrorCode(iota + ErrorCodeESCMotorStartNumber)
+	ErrorCodeESCMotorFailedToConfigurePWM tinygotypes.ErrorCode = tinygotypes.ErrorCode(iota + ErrorCodeESCMotorStartNumber)
 	ErrorCodeESCMotorFailedToInitializeServo
-	ErrorCodeESCMotorInvalidMotorSpeedValue
 	ErrorCodeESCMotorSpeedOutOfRange
 	ErrorCodeESCMotorSpeedBelowMinPulseWidth
 	ErrorCodeESCMotorSpeedAboveMaxPulseWidth
-	ErrorCodeESCMotorFailedToSendDebugMotorSpeedMessage
-	ErrorCodeESCMotorUnknownMotorSpeedCategory
+	ErrorCodeESCMotorNilHandler
 )
 
 const (
@@ -89,15 +73,13 @@ const (
 )
 
 const (
-	ErrorCodeServoNilOptions tinygotypes.ErrorCode = tinygotypes.ErrorCode(iota + ErrorCodeServoStartNumber)
-	ErrorCodeServoFailedToInitializeServo 
-	ErrorCodeServoInvalidAngleValue
+	ErrorCodeServoFailedToConfigurePWM tinygotypes.ErrorCode = tinygotypes.ErrorCode(iota + ErrorCodeServoStartNumber)
+	ErrorCodeServoFailedToInitializeServo
 	ErrorCodeServoAngleOutOfRange
 	ErrorCodeServoAngleBelowMinPulseWidth
 	ErrorCodeServoAngleAboveMaxPulseWidth
-	ErrorCodeServoFailedToSendDebugServoAngleMessage
-	ErrorCodeServoUnknownAngleCategory
 	ErrorCodeServoFailedToSetServoAngle
+	ErrorCodeServoNilHandler
 )
 
 const (
@@ -246,35 +228,29 @@ const (
 var (
 	// ErrorCodeMessages is a map of error codes to their messages.
 	ErrorCodeMessages = map[tinygotypes.ErrorCode]string{
-		ErrorCodeFailedToConfigurePWM: "failed to configure pwm",
 		ErrorCodeChallengeNilHandler:   "challenge handler cannot be nil",
 		ErrorCodeChallengeNilObstaclesPullUpHandler: "challenge obstacles pull-up handler cannot be nil",
 		ErrorCodeChallengeNilParkingPullUpHandler:   "challenge parking pull-up handler cannot be nil",
 		ErrorCodeChallengeInvalidChallengeUint8:     "invalid challenge uint8",
 		ErrorCodeCyw43439NilDevice:    "cyw43439 device cannot be nil",
-		ErrorCodeDebugNilHandler:      "debug handler cannot be nil",
-		ErrorCodeESCMotorNilOptions:   "esc motor options cannot be nil",
+		ErrorCodeESCMotorFailedToConfigurePWM:    "failed to configure esc motor pwm",
 		ErrorCodeESCMotorFailedToInitializeServo: "failed to initialize esc motor servo",
-		ErrorCodeESCMotorInvalidMotorSpeedValue: "invalid motor speed value",
 		ErrorCodeESCMotorSpeedOutOfRange:                       "esc motor speed out of range",
 		ErrorCodeESCMotorSpeedBelowMinPulseWidth:               "esc motor speed below min pulse width",
 		ErrorCodeESCMotorSpeedAboveMaxPulseWidth:               "esc motor speed above max pulse width",
-		ErrorCodeESCMotorFailedToSendDebugMotorSpeedMessage:    "failed to send debug motor speed message",
-		ErrorCodeESCMotorUnknownMotorSpeedCategory:               "unknown motor speed category",
+		ErrorCodeESCMotorNilHandler:                            "esc motor handler cannot be nil",
 		ErrorCodeLEDNilHandler:                               "led handler cannot be nil",
 		ErrorCodeLEDNegativeBlinkCount:                       "times cannot be negative",
 		ErrorCodeLEDNegativeDelayDuration:                    "delay cannot be negative",
 		ErrorCodeMovementNilHandler:                            "movement handler cannot be nil",
 		ErrorCodePullUpResistorNilHandler:                           "pull-up handler cannot be nil",
-		ErrorCodeServoNilOptions:                               "servo options cannot be nil",
+		ErrorCodeServoFailedToConfigurePWM:                       "failed to configure servo pwm",
 		ErrorCodeServoFailedToInitializeServo:                 "failed to initialize servo",
-		ErrorCodeServoInvalidAngleValue:                        "invalid servo angle value",
 		ErrorCodeServoAngleOutOfRange:                          "servo angle out of range",
 		ErrorCodeServoAngleBelowMinPulseWidth:                  "servo angle below min pulse width",
 		ErrorCodeServoAngleAboveMaxPulseWidth:                  "servo angle above max pulse width",
-		ErrorCodeServoFailedToSendDebugServoAngleMessage:       "failed to send debug servo angle message",
-		ErrorCodeServoUnknownAngleCategory:                     "unknown servo angle category",
 		ErrorCodeServoFailedToSetServoAngle:                    "failed to set servo angle",
+		ErrorCodeServoNilHandler:                              "servo handler cannot be nil",
 		ErrorCodeSwitchNilOnEventFunction:                     "onEvent function cannot be nil",
 		ErrorCodeUSBCDCNilHandler:                               "usb-cdc handler cannot be nil",
 		ErrorCodeUSBCDCNilOutgoingMessage:                       "outgoing message cannot be nil",

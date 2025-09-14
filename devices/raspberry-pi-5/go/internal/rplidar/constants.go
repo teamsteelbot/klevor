@@ -18,9 +18,6 @@ const (
 
 	// UltraSimpleName is the name of the Slamtec executable
 	UltraSimpleName = "ultra_simple"
-
-	// ChannelBufferSize is the size of the rotation completed channel buffer
-	ChannelBufferSize = 10
 )
 
 var (

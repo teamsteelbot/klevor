@@ -29,7 +29,7 @@ if [ ! -d "${OUTPUT_DIR}" ]; then
   fi
 fi
 
-echo "Compiling Go test program for logging..."
+echo "Compiling Go test program for RPLiDAR..."
 
 go build -o "${OUTPUT_DIR}/rplidar" "${SOURCE_DIR}"
 

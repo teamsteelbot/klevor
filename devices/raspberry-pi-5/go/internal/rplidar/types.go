@@ -21,7 +21,6 @@ func NewSlamtecC1Handler(logger goconcurrentlogger.Logger) (*gorplidarsdkhandler
 		AngleAdjustment,
 		logger,
 		UltraSimplePath,
-		ChannelBufferSize,
 		MaxDistanceLimit,
 	)
 }

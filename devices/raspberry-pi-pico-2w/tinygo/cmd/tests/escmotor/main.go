@@ -3,9 +3,24 @@ package main
 import (
 	"time"
 
+	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal"
 	internalescmotor "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/escmotor"
 	internalledonboard "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/led/onboard"
 	tinygotypes "github.com/ralvarezdev/tinygo-types"
+)
+
+var (
+	// failedToSetMotorSpeedForwardMessage is the message printed when setting the motor speed forward fails
+	failedToSetMotorSpeedForwardMessage = []byte("Failed to set motor speed forward:")
+
+	// failedToSetMotorSpeedBackwardMessage is the message printed when setting the motor speed backward fails
+	failedToSetMotorSpeedBackwardMessage = []byte("Failed to set motor speed backward:")
+
+	// failedToStopMotorMessage is the message printed when stopping the motor fails
+	failedToStopMotorMessage = []byte("Failed to stop motor:")
+
+	// failedToSetMotorSpeedMessage is the message printed when setting the motor speed fails
+	failedToSetMotorSpeedMessage = []byte("Failed to set motor speed:")
 )
 
 func main() {
@@ -22,6 +37,7 @@ func main() {
 			if err := internalescmotor.ESCMotorHandler.SetSpeedForward(
 				speed,
 			); err != tinygotypes.ErrorCodeNil {
+				internal.Logger.ErrorMessageWithErrorCode(failedToSetMotorSpeedForwardMessage, err)
 				return
 			}
 			time.Sleep(20 * time.Millisecond)
@@ -29,6 +45,7 @@ func main() {
 
 		// Stop the motor for a while
 		if err := internalescmotor.ESCMotorHandler.Stop(); err != tinygotypes.ErrorCodeNil {
+			internal.Logger.ErrorMessageWithErrorCode(failedToStopMotorMessage, err)
 			return
 		}
 		time.Sleep(2 * time.Second)
@@ -38,6 +55,7 @@ func main() {
 			if err := internalescmotor.ESCMotorHandler.SetSpeedBackward(
 				speed,
 			); err != tinygotypes.ErrorCodeNil {
+				internal.Logger.ErrorMessageWithErrorCode(failedToSetMotorSpeedBackwardMessage, err)
 				return
 			}
 			time.Sleep(20 * time.Millisecond)
@@ -45,6 +63,7 @@ func main() {
 
 		// Stop the motor
 		if err := internalescmotor.ESCMotorHandler.Stop(); err != tinygotypes.ErrorCodeNil {
+			internal.Logger.ErrorMessageWithErrorCode(failedToStopMotorMessage, err)
 			return
 		}
 

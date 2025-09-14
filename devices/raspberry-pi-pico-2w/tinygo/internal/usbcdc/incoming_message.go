@@ -7,12 +7,32 @@ import (
 type (
 	// IncomingMessage is the struct to handle the buffers received to the Raspberry Pi 5
 	IncomingMessage struct {
-		Buffer []byte
 		Category IncomingCategory
+		Data     []byte
 	}
 )
 
 // NewIncomingMessage creates a new instance of IncomingMessage
+//
+// Parameters:
+//
+// category: The category of the incoming message
+// data: The data buffer of the incoming message
+//
+// Returns:
+//
+// An instance of IncomingMessage
+func NewIncomingMessage(
+	category IncomingCategory,
+	data []byte,
+) IncomingMessage {
+	return IncomingMessage{
+		Category: category,
+		Data:     data,
+	}
+}
+
+// NewIncomingMessageFromBuffer creates a new instance of IncomingMessage
 //
 // Parameters:
 //
@@ -21,12 +41,12 @@ type (
 // Returns:
 //
 // An instance of IncomingMessage
-func NewIncomingMessage(
+func NewIncomingMessageFromBuffer(
 	buffer []byte,
-) (*IncomingMessage, tinygotypes.ErrorCode) {
+) (IncomingMessage, tinygotypes.ErrorCode) {
 	// Check if the buffer is nil
 	if buffer == nil {
-		return nil, ErrorCodeUSBCDCNilIncomingMessageBuffer
+		return IncomingMessage{}, ErrorCodeUSBCDCNilIncomingMessageBuffer
 	}
 
 	// Get the index of the end character and copy the buffer until that index
@@ -89,7 +109,7 @@ func NewIncomingMessage(
 //
 // An instance of IncomingMessage
 func NewIncomingStatusMessage(status IncomingStatus) *IncomingMessage {
-	i, _ := NewIncomingMessage([]byte{uint8(IncomingCategoryStatus), uint8(status), EndChar})
+	i, _ := NewIncomingMessageFromBuffer([]byte{uint8(IncomingCategoryStatus), uint8(status), EndChar})
 	return i
 }
 

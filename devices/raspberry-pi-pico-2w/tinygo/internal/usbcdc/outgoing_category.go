@@ -14,13 +14,15 @@ const (
 	OutgoingCategoryChallenge
 	OutgoingCategoryStatus
 	OutgoingCategoryError
-	OutgoingCategoryDebug
 	OutgoingCategoryMaxMotorSpeedValue
 	OutgoingCategoryMaxServoDirectionValue
 	OutgoingCategoryQuaternionX
 	OutgoingCategoryQuaternionY
 	OutgoingCategoryQuaternionZ
 	OutgoingCategoryQuaternionW
+	OutgoingCategoryEulerDegreesYaw
+	OutgoingCategoryEulerDegreesPitch
+	OutgoingCategoryEulerDegreesRoll
 )
 
 // OutgoingCategoryFromUint8 returns the OutgoingCategory enum based on a given uint8 value
@@ -36,10 +38,16 @@ func OutgoingCategoryFromUint8(value uint8) (OutgoingCategory, tinygotypes.Error
 	switch OutgoingCategory(value) {
 	case OutgoingCategoryNil:
 		return OutgoingCategoryNil, tinygotypes.ErrorCodeNil
-	case OutgoingCategoryChallenge:
-		return OutgoingCategoryChallenge, tinygotypes.ErrorCodeNil
 	case OutgoingCategoryStatus:
 		return OutgoingCategoryStatus, tinygotypes.ErrorCodeNil
+	case OutgoingCategoryChallenge:
+		return OutgoingCategoryChallenge, tinygotypes.ErrorCodeNil
+	case OutgoingCategoryError:
+		return OutgoingCategoryError, tinygotypes.ErrorCodeNil
+	case OutgoingCategoryMaxMotorSpeedValue:
+		return OutgoingCategoryMaxMotorSpeedValue, tinygotypes.ErrorCodeNil
+	case OutgoingCategoryMaxServoDirectionValue:
+		return OutgoingCategoryMaxServoDirectionValue, tinygotypes.ErrorCodeNil
 	case OutgoingCategoryQuaternionX:
 		return OutgoingCategoryQuaternionX, tinygotypes.ErrorCodeNil
 	case OutgoingCategoryQuaternionY:
@@ -48,15 +56,13 @@ func OutgoingCategoryFromUint8(value uint8) (OutgoingCategory, tinygotypes.Error
 		return OutgoingCategoryQuaternionZ, tinygotypes.ErrorCodeNil
 	case OutgoingCategoryQuaternionW:
 		return OutgoingCategoryQuaternionW, tinygotypes.ErrorCodeNil
-	case OutgoingCategoryError:
-		return OutgoingCategoryError, tinygotypes.ErrorCodeNil
-	case OutgoingCategoryDebug:
-		return OutgoingCategoryDebug, tinygotypes.ErrorCodeNil
-	case OutgoingCategoryMaxMotorSpeedValue:
-		return OutgoingCategoryMaxMotorSpeedValue, tinygotypes.ErrorCodeNil
-	case OutgoingCategoryMaxServoDirectionValue:
-		return OutgoingCategoryMaxServoDirectionValue, tinygotypes.ErrorCodeNil
+	case OutgoingCategoryEulerDegreesYaw:
+		return OutgoingCategoryEulerDegreesYaw, tinygotypes.ErrorCodeNil
+	case OutgoingCategoryEulerDegreesPitch:
+		return OutgoingCategoryEulerDegreesPitch, tinygotypes.ErrorCodeNil
+	case OutgoingCategoryEulerDegreesRoll:
+		return OutgoingCategoryEulerDegreesRoll, tinygotypes.ErrorCodeNil
 	default:
-		return OutgoingCategoryNil, ErrorCodeUSBCDCInvalidOutgoingCategoryUint8
+		return OutgoingCategoryNil, ErrorCodeUSBCDCUnknownOutgoingCategory
 	}		
 }

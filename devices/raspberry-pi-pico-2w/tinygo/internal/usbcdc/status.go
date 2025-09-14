@@ -46,7 +46,7 @@ func OutgoingStatusFromUint8(value uint8) (OutgoingStatus, tinygotypes.ErrorCode
 	case OutgoingStatusStart:
 		return OutgoingStatusStart, tinygotypes.ErrorCodeNil
 	default:
-		return OutgoingStatusNil, ErrorCodeUSBCDCInvalidOutgoingStatusUint8
+		return OutgoingStatusNil, ErrorCodeUSBCDCUnknownOutgoingStatus
 	}
 }
 
@@ -70,6 +70,6 @@ func IncomingStatusFromUint8(value uint8) (IncomingStatus, tinygotypes.ErrorCode
 	case IncomingStatusStop:
 		return IncomingStatusStop, tinygotypes.ErrorCodeNil
 	default:
-		return IncomingStatusNil, ErrorCodeUSBCDCInvalidIncomingStatusUint8
+		return IncomingStatusNil, ErrorCodeUSBCDCUnknownIncomingStatus
 	}
 }

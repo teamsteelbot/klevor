@@ -1,15 +1,15 @@
 package challenge
 
 import (
-	internalpullup "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/pullup"
+	tinygopullup "github.com/ralvarezdev/tinygo-pullup"
 	tinygotypes "github.com/ralvarezdev/tinygo-types"
 )
 
 type (
 	// DefaultHandler is the default implementation of the Handler interface.
 	DefaultHandler struct {
-		obstaclesPullUpHandler internalpullup.Handler
-		parkingPullUpHandler   internalpullup.Handler
+		obstaclesPullUpHandler tinygopullup.Handler
+		parkingPullUpHandler   tinygopullup.Handler
 	}
 )
 
@@ -23,9 +23,10 @@ type (
 //
 // An instance of DefaultHandler, or an error if the pull-up handler is nil
 func NewDefaultHandler(
-	obstaclesPullUpHandler internalpullup.Handler,
-	parkingPullUpHandler internalpullup.Handler,
+	obstaclesPullUpHandler tinygopullup.Handler,
+	parkingPullUpHandler tinygopullup.Handler,
 ) (*DefaultHandler, tinygotypes.ErrorCode) {
+	// Check if one of the pull-up handlers is nil
 	if obstaclesPullUpHandler == nil {
 		return nil, ErrorCodeChallengeNilObstaclesPullUpHandler
 	}

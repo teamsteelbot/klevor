@@ -2,9 +2,13 @@ package movement
 
 import (
 	tinygotypes "github.com/ralvarezdev/tinygo-types"
-	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal"
 )
 
 const (
-	ErrorCodeMovementNilHandler tinygotypes.ErrorCode = tinygotypes.ErrorCode(iota + internal.ErrorCodeMovementStartNumber)
+	// ErrorCodeMovementStartNumber is the starting number for movement-related error codes.
+	ErrorCodeMovementStartNumber uint16 = 30
+)
+
+const (
+	ErrorCodeMovementNilHandler tinygotypes.ErrorCode = tinygotypes.ErrorCode(iota + ErrorCodeMovementStartNumber)
 )

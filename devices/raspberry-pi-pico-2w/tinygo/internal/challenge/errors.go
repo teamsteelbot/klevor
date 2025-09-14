@@ -2,11 +2,15 @@ package challenge
 
 import (
 	tinygotypes "github.com/ralvarezdev/tinygo-types"
-	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal"
 )
 
 const (
-	ErrorCodeChallengeNilHandler tinygotypes.ErrorCode = tinygotypes.ErrorCode(iota + internal.ErrorCodeChallengeStartNumber)
+	// ErrorCodeChallengeStartNumber is the starting number for challenge-related error codes.
+	ErrorCodeChallengeStartNumber uint16 = 1
+)
+
+const (
+	ErrorCodeChallengeNilHandler tinygotypes.ErrorCode = tinygotypes.ErrorCode(iota + ErrorCodeChallengeStartNumber)
 	ErrorCodeChallengeNilObstaclesPullUpHandler
 	ErrorCodeChallengeNilParkingPullUpHandler
 	ErrorCodeChallengeInvalidChallengeUint8

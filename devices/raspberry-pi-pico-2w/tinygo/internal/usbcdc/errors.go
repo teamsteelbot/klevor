@@ -2,32 +2,43 @@ package usbcdc
 
 import (
 	tinygotypes "github.com/ralvarezdev/tinygo-types"
-	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal"
 )
 
 const (
-	ErrorCodeUSBCDCNilHandler tinygotypes.ErrorCode = tinygotypes.ErrorCode(iota + internal.ErrorCodeUSBCDCStartNumber)
-	ErrorCodeUSBCDCNilOutgoingMessage
-	ErrorCodeUSBCDCNilIncomingMessage
-	ErrorCodeUSBCDCConfirmationMessageTimeout
-	ErrorCodeUSBCDCUnknownChallengeType
-	ErrorCodeUSBCDCFailedReadingFromSerial
+	// ErrorCodeUSBCDCStartNumber is the starting number for USB CDC-related error codes.
+	ErrorCodeUSBCDCStartNumber uint16 = 50
+)
+
+const (
+	ErrorCodeUSBCDCNilHandler tinygotypes.ErrorCode = tinygotypes.ErrorCode(iota + ErrorCodeUSBCDCStartNumber)
 	ErrorCodeUSBCDCNilOutgoingCategory
+	ErrorCodeUSBCDCUnknownOutgoingCategory
+	ErrorCodeUSBCDCNilIncomingCategory
+	ErrorCodeUSBCDCUnknownIncomingCategory
+	ErrorCodeUSBCDCInvalidMaxMessageDataSize
+	ErrorCodeUSBCDCFailedToSendStartCharacter
+	ErrorCodeBNO08XFailedToSendOutgoingCategory
+	ErrorCodeUSBCDCOutgoingMessageDataTooLarge
+	ErrorCodeUSBCDCFailedToSendControlCharacter
+	ErrorCodeUSBCDCFailedToSendMessageContent
+	ErrorCodeUSBCDCFailedToSendEndCharacter
+	ErrorCodeBNO08XBufferTooShortForRawFloat64
+	ErrorCodeBNO08XUnknownQuaternionIndex
+	ErrorCodeBNO08XUnknownEulerDegreesIndex
+	ErrorCodeUSBCDCUnknownIncomingStatus
+	ErrorCodeUSBCDCUnknownOutgoingStatus
+	ErrorCodeUSBCDCUnknownChallenge
+	ErrorCodeBNO08XBufferTooShortForRawUint16
+	ErrorCodeBNO08XBufferTooShortForRawUint8
+	ErrorCodeUSBCDCConfirmationMessageTimeout
+
+	
+	ErrorCodeUSBCDCFailedReadingFromSerial
 	ErrorCodeUSBCDCFailedToSendChunkMessage
 	ErrorCodeUSBCDCFailedToSendMessage
-	ErrorCodeUSBCDCFailedToSendEndCharacter
 	ErrorCodeUSBCDCFailedToConfigureUSBCDC
-	ErrorCodeUSBCDCInvalidIncomingCategoryUint8
-	ErrorCodeUSBCDCInvalidOutgoingCategoryString
-	ErrorCodeUSBCDCInvalidOutgoingCategoryUint8
-	ErrorCodeUSBCDCInvalidIncomingStatusUint8
-	ErrorCodeUSBCDCInvalidOutgoingStatusUint8
-	ErrorCodeUSBCDCInvalidDebugUint8
 	ErrorCodeUSBCDCIncomingMessageEmptyContent
-	ErrorCodeUSBCDCEmptyIncomingMessageBuffer
 	ErrorCodeUSBCDCInvalidIncomingMessageContentUint16
 	ErrorCodeUSBCDCInvalidIncomingMessageMissingEndCharacter
-	ErrorCodeUSBCDCNilQuaternion
-	ErrorCodeUSBCDCNilIncomingMessageBuffer
 	ErrorCodeUSBCDCFailedToSendInitializationMessage
 )

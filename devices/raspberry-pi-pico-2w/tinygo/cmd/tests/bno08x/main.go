@@ -1,11 +1,13 @@
 package main
 
 import (
+	"os"
 	"time"
 
 	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal"
 	internalbno08x "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/bno08x"
 	tinygobno08x "github.com/ralvarezdev/tinygo-bno08x"
+	tinygologger "github.com/ralvarezdev/tinygo-logger"
 )
 
 const (
@@ -14,6 +16,9 @@ const (
 )
 
 var (
+	// noBNO08XStructInitializedMessage is the message printed when no BNO08X struct is initialized
+	noBNO08XStructInitializedMessage = []byte("No BNO08X struct initialized")
+
 	// quaternionHeader is the header for the quaternion values in the debug output
 	quaternionHeader = []byte("QUATERNION VALUES")
 
@@ -45,7 +50,8 @@ var (
 func main() {
 	// Check if both BNO08x interfaces are not initialized
 	if internalbno08x.UART == nil && internalbno08x.UARTRVC == nil {
-		return
+		internal.Logger.ErrorMessage(noBNO08XStructInitializedMessage)
+		os.Exit(1)
 	}
 
 	for {
@@ -93,6 +99,6 @@ func main() {
 		time.Sleep(IntervalDuration)
 
 		// Print memory stats
-		internal.PrintMemory()
+		tinygologger.DebugMemory(internal.Logger)
 	}
 }

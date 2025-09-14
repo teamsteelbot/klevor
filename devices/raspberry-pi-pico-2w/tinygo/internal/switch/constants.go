@@ -1,13 +1,14 @@
 package _switch
 
 import (
+	"os"
 	"time"
 
 	"machine"
 
-	internalpullup "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/pullup"
-	tinygotypes "github.com/ralvarezdev/tinygo-types"
 	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal"
+	tinygopullup "github.com/ralvarezdev/tinygo-pullup"
+	tinygotypes "github.com/ralvarezdev/tinygo-types"
 )
 
 var (
@@ -15,13 +16,13 @@ var (
 	DefaultInterval = 10 * time.Millisecond
 
 	// PullUpHandler is the handler for the pull-up for the switch ON signal.
-	PullUpHandler internalpullup.Handler = internalpullup.NewDefaultHandler(machine.GPIO27)
+	PullUpHandler = tinygopullup.NewDefaultHandler(machine.GPIO27)
 
 	// SwitchHandler is the default switch handler that uses the pull-up handler.
 	SwitchHandler Handler
 
 	// failedToInitializeSwitchMessage is the message printed when switch initialization fails
-	failedToInitializeSwitchMessage = []byte("Failed to initialize switch handler:")
+	failedToInitializeSwitchMessage = []byte("Failed to initialize Switch Handler:")
 )
 
 func init() {
@@ -31,7 +32,7 @@ func init() {
 	)
 	if err != tinygotypes.ErrorCodeNil {
 		internal.Logger.ErrorMessageWithErrorCode(failedToInitializeSwitchMessage, err)
-		return
+		os.Exit(1)
 	}
 	SwitchHandler = switchHandler
 

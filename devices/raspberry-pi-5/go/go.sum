@@ -14,6 +14,10 @@ github.com/ralvarezdev/go-hailo-clip-handler v0.1.2 h1:kIrnUbvVoop7JlwXi6hbO2KTu
 github.com/ralvarezdev/go-hailo-clip-handler v0.1.2/go.mod h1:IaiK0/f7wIPZWzO/owHrduXSAxPo8jx/0autD7eONsk=
 github.com/ralvarezdev/go-rplidar-sdk-handler v0.1.2 h1:ap/J3bwfUBB0WLq4KvlLy+53sAv4RnGSBwY/Tkzc6t0=
 github.com/ralvarezdev/go-rplidar-sdk-handler v0.1.2/go.mod h1:6Raz4FpHXQufyqRXi2o5/UDK+quwDUwtWYrmVsW1uHA=
+github.com/ralvarezdev/go-rplidar-sdk-handler v0.1.3-0.20250913230344-2a4d66cd74bc h1:nUL+0a+AWOxlpV8UhvZcu6IWCJXDYZqPHhskPSz2Yfg=
+github.com/ralvarezdev/go-rplidar-sdk-handler v0.1.3-0.20250913230344-2a4d66cd74bc/go.mod h1:UWle/kF9lGftDpOEVWeGWcCgtcTvAYar48Q/DN4sUyg=
+github.com/ralvarezdev/go-rplidar-sdk-handler v0.1.3 h1:8qo9I/n1m35eexShCOD4O4vYvsi4wlqLX2wsKBUKQts=
+github.com/ralvarezdev/go-rplidar-sdk-handler v0.1.3/go.mod h1:UWle/kF9lGftDpOEVWeGWcCgtcTvAYar48Q/DN4sUyg=
 github.com/ralvarezdev/go-strings v0.1.12 h1:AtOPDJ4lVO+33p7O4uECdD4C4D037h256zWz9uQ5eIQ=
 github.com/ralvarezdev/go-strings v0.1.12/go.mod h1:8sFOqmPJpqzS7bTjf91EzUCITnwpmkfifwY80GxV5r8=
 github.com/ralvarezdev/tinygo-types v0.0.2 h1:gCQyzvk6kgPJ0HQuEsYw/rAGXBJAu1au9piVhlAsIXM=

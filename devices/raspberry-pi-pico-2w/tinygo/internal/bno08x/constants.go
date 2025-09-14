@@ -1,6 +1,7 @@
 package bno08x
 
 import (
+	"os"
 	"time"
 
 	"machine"
@@ -29,7 +30,7 @@ var (
 
 func init() {
 	// Some delay to be able to debug the BNO08x initial packets
-	time.Sleep(5 * time.Second)
+	// time.Sleep(5 * time.Second)
 
 	/*
 	// ----- UART Instance -----
@@ -64,13 +65,11 @@ func init() {
 		machine.GPIO2,
 		machine.GPIO3,
 		machine.GPIO4,
-		tinygobno08x.NewUARTRVCOptions(
-			internal.Logger,
-		),
+		internal.Logger,
 	)
 	if err != tinygotypes.ErrorCodeNil {
 		internal.Logger.WarningMessageWithErrorCode(failedToInitializeBNO08xErrorMessage, err, true)
-		return
+		os.Exit(1)
 	}
 	UARTRVC = uartRVC
 }
