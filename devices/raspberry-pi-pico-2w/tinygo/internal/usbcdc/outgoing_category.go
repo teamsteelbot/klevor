@@ -25,17 +25,13 @@ const (
 	OutgoingCategoryEulerDegreesRoll
 )
 
-// OutgoingCategoryDataLength returns the size in bytes of the data for a given OutgoingCategory
-//
-// Parameters:
-//
-// category: The OutgoingCategory to get the data size for
+// DataLength returns the size in bytes of the data for a given OutgoingCategory
 //
 // Returns:
 //
 // The size in bytes of the data for the given category, or an error if the category is invalid
-func OutgoingCategoryDataLength(category OutgoingCategory) (int, tinygotypes.ErrorCode) {
-	switch category {
+func (o OutgoingCategory) DataLength() (int, tinygotypes.ErrorCode) {
+	switch o {
 	case OutgoingCategoryNil:
 		return 0, ErrorCodeUSBCDCNilOutgoingCategory
 	case OutgoingCategoryStatus, OutgoingCategoryChallenge:

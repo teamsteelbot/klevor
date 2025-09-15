@@ -167,7 +167,7 @@ func (d *DefaultHandler) ReadMessage(timeout time.Duration) (IncomingMessage, ti
 		}
 
 		// Compare the data length with the expected length for the category
-		expectedDataLength, err := IncomingCategoryDataLength(category)
+		expectedDataLength, err := category.DataLength()
 		if err != tinygotypes.ErrorCodeNil {
 			return IncomingMessage{}, err
 		}
@@ -182,13 +182,13 @@ func (d *DefaultHandler) ReadMessage(timeout time.Duration) (IncomingMessage, ti
 			if err != tinygotypes.ErrorCodeNil {
 				return IncomingMessage{}, err
 			}
-			if c == ControlChar {
-				// Read the next byte and XOR it with 0x20
+			if c == ControlByte {
+				// Read the next byte and XOR it with XORByte
 				c, err = d.readByte(timeout - time.Since(startTime))
 				if err != tinygotypes.ErrorCodeNil {
 					return IncomingMessage{}, err
 				}
-				c ^= 0x20
+				c ^= XORByte
 			}
 			data[i] = c
 		}
@@ -214,13 +214,13 @@ func (d *DefaultHandler) ReadMessage(timeout time.Duration) (IncomingMessage, ti
 // An error if it fails to send the message
 func (d *DefaultHandler) SendMessage(message OutgoingMessage) tinygotypes.ErrorCode {
 	// Write the start character
-	if err := d.serialer.WriteByte(StartAndEndChar); err != nil {
-		return ErrorCodeUSBCDCFailedToSendStartCharacter
+	if err := d.serialer.WriteByte(StartAndEndByte); err != nil {
+		return ErrorCodeUSBCDCFailedToSendStartByte
 	}
 
 	// Send the message category byte
 	if err := d.serialer.WriteByte(uint8(message.Category)); err != nil {
-		return ErrorCodeBNO08XFailedToSendOutgoingCategory
+		return ErrorCodeUSBCDCFailedToSendOutgoingCategory
 	}
 
 	// Send data length byte
@@ -230,7 +230,7 @@ func (d *DefaultHandler) SendMessage(message OutgoingMessage) tinygotypes.ErrorC
 	}
 
 	// Compare the data length with the expected length for the category
-	expectedDataLength, err := OutgoingCategoryDataLength(OutgoingCategory(message.Category))
+	expectedDataLength, err := message.Category.DataLength()
 	if err != tinygotypes.ErrorCodeNil {
 		return err
 	}
@@ -240,7 +240,7 @@ func (d *DefaultHandler) SendMessage(message OutgoingMessage) tinygotypes.ErrorC
 
 	// Write the data length byte
 	if err := d.serialer.WriteByte(uint8(dataLength)); err != nil {
-		return ErrorCodeUSBCDCFailedToSendControlCharacter
+		return ErrorCodeUSBCDCFailedToSendControlByte
 	}
 
 	// Send the message data bytes
@@ -248,9 +248,9 @@ func (d *DefaultHandler) SendMessage(message OutgoingMessage) tinygotypes.ErrorC
 		// If the byte is a special character, send the control character first
 		if b == StartAndEndChar || b == ControlChar {
 			if err := d.serialer.WriteByte(ControlChar); err != nil {
-				return ErrorCodeUSBCDCFailedToSendControlCharacter
+				return ErrorCodeUSBCDCFailedToSendControlByte
 			}
-			b ^= 0x20 // XOR the byte with 0x20
+			b ^= XORChar // XOR the byte with XORChar
 		}
 		if err := d.serialer.WriteByte(b); err != nil {
 			return ErrorCodeUSBCDCFailedToSendMessageContent
@@ -259,7 +259,7 @@ func (d *DefaultHandler) SendMessage(message OutgoingMessage) tinygotypes.ErrorC
 
 	// Send the end character
 	if err := d.serialer.WriteByte(StartAndEndChar); err != nil {
-		return ErrorCodeUSBCDCFailedToSendEndCharacter
+		return ErrorCodeUSBCDCFailedToSendEndByte
 	}
 	return tinygotypes.ErrorCodeNil
 }
@@ -299,7 +299,7 @@ func (d *DefaultHandler) SendBNO08XQuaternionMessages(quaternion [4]float64) tin
 		case tinygobno08x.QuaternionWIndex:
 			category = OutgoingCategoryQuaternionW
 		default:
-			return ErrorCodeBNO08XUnknownQuaternionIndex
+			return ErrorCodeUSBCDCUnknownQuaternionIndex
 		}
 
 		// Create the message for the current quaternion component
@@ -340,7 +340,7 @@ func (d *DefaultHandler) SendBNO08XEulerDegreesMessages(eulerDegrees [3]float64)
 		case tinygobno08x.EulerDegreesYawIndex:
 			category = OutgoingCategoryEulerDegreesYaw
 		default:
-			return ErrorCodeBNO08XUnknownEulerDegreesIndex
+			return ErrorCodeUSBCDCUnknownEulerDegreesIndex
 		}
 
 		// Create the message for the current Euler angle

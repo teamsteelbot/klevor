@@ -4,18 +4,106 @@ import (
 	"time"
 
 	"github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal"
-	internalusbcdcenums "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/usbcdc/enums"
+	tinygotypes "github.com/ralvarezdev/tinygo-types"
 )
 
 const (
-	// EndChar is the message end character
-	EndChar byte = 0x04
+	// ConfirmationMessageTimeout is the timeout duration for confirmation messages
+	ConfirmationMessageTimeout = time.Second * 5
 
-	// InitializationMessage is the initialization message sent by the Raspberry Pi Pico 2W
-	InitializationMessage = EndChar
+	// StartAndEndByte is the message start and end character
+	StartAndEndByte uint8 = 0x7E
+
+	// ControlByte is the control character
+	ControlByte uint8 = 0x7D
+
+	// XORByte is the XOR character
+	XORByte uint8 = 0x20
+
+	// ErrorCodeChallengeStartNumber is the starting number for challenge-related error codes.
+	ErrorCodeChallengeStartNumber uint16 = 1
+
+	// ErrorCodeCyw43439StartNumber is the starting number for CYW43439-related error codes.
+	ErrorCodeCyw43439StartNumber uint16 = 10
+
+	// ErrorCodeLEDStartNumber is the starting number for LED-related error codes.
+	ErrorCodeLEDStartNumber uint16 = 20
+
+	// ErrorCodeMovementStartNumber is the starting number for movement-related error codes.
+	ErrorCodeMovementStartNumber uint16 = 30
+
+	// ErrorCodeSwitchStartNumber is the starting number for switch-related error codes.
+	ErrorCodeSwitchStartNumber uint16 = 40
+
+	// ErrorCodeUSBCDCStartNumber is the starting number for USB CDC-related error codes.
+	ErrorCodeUSBCDCStartNumber uint16 = 50
+)
+
+
+const (
+	ErrorCodeChallengeNilHandler tinygotypes.ErrorCode = tinygotypes.ErrorCode(iota + ErrorCodeChallengeStartNumber)
+	ErrorCodeChallengeNilObstaclesPullUpHandler
+	ErrorCodeChallengeNilParkingPullUpHandler
+	ErrorCodeChallengeInvalidChallengeUint8
+)
+
+const (
+	ErrorCodeCyw43439NilDevice tinygotypes.ErrorCode = tinygotypes.ErrorCode(iota + ErrorCodeCyw43439StartNumber)
+	ErrorCodeCyw43439FailedToInitialize
+)
+
+const (
+	ErrorCodeLEDNilHandler tinygotypes.ErrorCode = tinygotypes.ErrorCode(iota + ErrorCodeLEDStartNumber)
+	ErrorCodeLEDNegativeBlinkCount
+	ErrorCodeLEDNegativeDelayDuration
+)
+
+const (
+	ErrorCodeMovementNilHandler tinygotypes.ErrorCode = tinygotypes.ErrorCode(iota + ErrorCodeMovementStartNumber)
+)
+
+const (
+	ErrorCodeSwitchNilOnEventFunction tinygotypes.ErrorCode = tinygotypes.ErrorCode(iota + ErrorCodeSwitchStartNumber)
+)
+
+const (
+	ErrorCodeUSBCDCNilHandler tinygotypes.ErrorCode = tinygotypes.ErrorCode(iota + ErrorCodeUSBCDCStartNumber)
+	ErrorCodeUSBCDCNilOutgoingCategory
+	ErrorCodeUSBCDCUnknownOutgoingCategory
+	ErrorCodeUSBCDCNilIncomingCategory
+	ErrorCodeUSBCDCUnknownIncomingCategory
+	ErrorCodeUSBCDCInvalidMaxMessageDataLength
+	ErrorCodeUSBCDCFailedToSendStartByte
+	ErrorCodeUSBCDCFailedToSendOutgoingCategory
+	ErrorCodeUSBCDCFailedToSendControlByte
+	ErrorCodeUSBCDCFailedToSendMessageContent
+	ErrorCodeUSBCDCFailedToSendEndByte
+	ErrorCodeUSBCDCBufferTooShortForRawFloat64
+	ErrorCodeUSBCDCUnknownQuaternionIndex
+	ErrorCodeUSBCDCUnknownEulerDegreesIndex
+	ErrorCodeUSBCDCUnknownIncomingStatus
+	ErrorCodeUSBCDCUnknownOutgoingStatus
+	ErrorCodeUSBCDCUnknownChallenge
+	ErrorCodeUSBCDCBufferTooShortForRawUint16
+	ErrorCodeUSBCDCBufferTooShortForRawUint8
+	ErrorCodeUSBCDCConfirmationMessageTimeout
+	ErrorCodeUSBCDCReadByteTimeout
+	ErrorCodeUSBCDCFailedReadingFromSerial
+	ErrorCodeUSBCDCFailedToConfigureUSBCDC
+	ErrorCodeUSBCDCFailedToSendInitializationMessage
+	ErrorCodeUSBCDCInvalidIncomingMessageDataLength
+	ErrorCodeUSBCDCInvalidOutgoingMessageDataLength
+	ErrorCodeUSBCDCReadMessageTimeout
+	ErrorCodeUSBCDCReceivedUnexpectedConfirmationMessage
 )
 
 var (
+	// StartAndEndBytes is the byte slice for the start and end character
+	StartAndEndBytes = []byte{StartAndEndByte}
+
+	// ControlByteBytes is the byte slice for the control character
+	ControlByteBytes = []byte{ControlByte}
+
 	// ReadTimeout is the timeout duration for reading from the USB-CDC port
 	ReadTimeout = time.Second * 2
 
@@ -44,43 +132,43 @@ var (
 	OutgoingMessagesChannelBufferSize = 100
 
 	// OutgoingStopMessage is the outgoing stop message for USB-CDC communication
-	OutgoingStopMessage = NewOutgoingStatusMessage(internalusbcdcenums.OutgoingStatusStop)
+	OutgoingStopMessage = NewOutgoingStatusMessage(OutgoingStatusStop)
 
 	// OutgoingOKMessage is the outgoing OK message for USB-CDC communication
-	OutgoingOKMessage = NewOutgoingStatusMessage(internalusbcdcenums.OutgoingStatusOK)
+	OutgoingOKMessage = NewOutgoingStatusMessage(OutgoingStatusOK)
 
 	// OutgoingHeartbeatMessage is the outgoing heartbeat message for USB-CDC communication
-	OutgoingHeartbeatMessage = NewOutgoingStatusMessage(internalusbcdcenums.OutgoingStatusHeartbeat)
+	OutgoingHeartbeatMessage = NewOutgoingStatusMessage(OutgoingStatusHeartbeat)
 
 	// OutgoingMotorSpeedStopMessage is the outgoing motor speed stop message for USB-CDC communication
 	OutgoingMotorSpeedStopMessage = NewOutgoingMessage(
-		internalusbcdcenums.OutgoingCategoryMotorSpeedStop,
+		OutgoingCategoryMotorSpeedStop,
 		"",
 	)
 
 	// OutgoingServoDirectionCenterMessage is the outgoing servo direction center message for USB-CDC communication
 	OutgoingServoDirectionCenterMessage = NewOutgoingMessage(
-		internalusbcdcenums.OutgoingCategoryServoDirectionCenter,
+		OutgoingCategoryServoDirectionCenter,
 		"",
 	)
 
 	// OutgoingGetMaxMotorSpeedValueMessage is the outgoing message to request the maximum motor speed value
 	OutgoingGetMaxMotorSpeedValueMessage = NewOutgoingMessage(
-		internalusbcdcenums.OutgoingCategoryGetMaxMotorSpeedValue,
+		OutgoingCategoryGetMaxMotorSpeedValue,
 		"",
 	)
 
 	// OutgoingGetMaxServoDirectionValueMessage is the outgoing message to request the maximum servo direction value
 	OutgoingGetMaxServoDirectionValueMessage = NewOutgoingMessage(
-		internalusbcdcenums.OutgoingCategoryGetMaxServoDirectionValue,
+		OutgoingCategoryGetMaxServoDirectionValue,
 		"",
 	)
 
 	// IncomingStartMessage is the incoming start message for USB-CDC communication
-	IncomingStartMessage = NewIncomingStatusMessage(internalusbcdcenums.IncomingStatusStart)
+	IncomingStartMessage = NewIncomingStatusMessage(IncomingStatusStart)
 
 	// IncomingOKMessage is the incoming OK message for USB-CDC communication
-	IncomingOKMessage = NewIncomingStatusMessage(internalusbcdcenums.IncomingStatusOK)
+	IncomingOKMessage = NewIncomingStatusMessage(IncomingStatusOK)
 
 	// IncomingChallengeWithObstaclesMessage is the incoming challenge message with obstacles
 	IncomingChallengeWithObstaclesMessage = NewIncomingChallengeMessage(internal.ChallengeWithObstacles)
@@ -90,4 +178,58 @@ var (
 
 	// IncomingChallengeWithoutObstaclesMessage is the incoming challenge message without obstacles
 	IncomingChallengeWithoutObstaclesMessage = NewIncomingChallengeMessage(internal.ChallengeWithoutObstacles)
+
+	// ErrorCodeMessages maps error codes to their corresponding error messages.
+	ErrorCodeMessages = map[tinygotypes.ErrorCode]string{
+		// Challenge errors
+		ErrorCodeChallengeNilHandler:                "challenge handler cannot be nil",
+		ErrorCodeChallengeNilObstaclesPullUpHandler: "challenge obstacles pull-up handler cannot be nil",
+		ErrorCodeChallengeNilParkingPullUpHandler:   "challenge parking pull-up handler cannot be nil",
+		ErrorCodeChallengeInvalidChallengeUint8:     "invalid challenge uint8",
+
+		// Cyw43439 errors
+		ErrorCodeCyw43439NilDevice:          "cyw43439 device cannot be nil",
+		ErrorCodeCyw43439FailedToInitialize: "cyw43439 failed to initialize",
+
+		// LED errors
+		ErrorCodeLEDNilHandler:            "led handler cannot be nil",
+		ErrorCodeLEDNegativeBlinkCount:    "led blink count cannot be negative",
+		ErrorCodeLEDNegativeDelayDuration: "led delay duration cannot be negative",
+
+		// Movement errors
+		ErrorCodeMovementNilHandler: "movement handler cannot be nil",
+
+		// Switch errors
+		ErrorCodeSwitchNilOnEventFunction: "switch onevent function cannot be nil",
+
+		// USB CDC errors
+		ErrorCodeUSBCDCNilHandler:                            "usb-cdc handler cannot be nil",
+		ErrorCodeUSBCDCNilOutgoingCategory:                   "usb-cdc outgoing category cannot be nil",
+		ErrorCodeUSBCDCUnknownOutgoingCategory:               "usb-cdc unknown outgoing category",
+		ErrorCodeUSBCDCNilIncomingCategory:                   "usb-cdc incoming category cannot be nil",
+		ErrorCodeUSBCDCUnknownIncomingCategory:               "usb-cdc unknown incoming category",
+		ErrorCodeUSBCDCInvalidMaxMessageDataLength:           "usb-cdc invalid max message data length",
+		ErrorCodeUSBCDCFailedToSendStartByte:            "usb-cdc failed to send start byte",
+		ErrorCodeUSBCDCFailedToSendOutgoingCategory:          "usb-cdc failed to send outgoing category",
+		ErrorCodeUSBCDCFailedToSendControlByte:          "usb-cdc failed to send control byte",
+		ErrorCodeUSBCDCFailedToSendMessageContent:            "usb-cdc failed to send message content",
+		ErrorCodeUSBCDCFailedToSendEndByte:              "usb-cdc failed to send end byte",
+		ErrorCodeUSBCDCBufferTooShortForRawFloat64:           "usb-cdc buffer too short for raw float64",
+		ErrorCodeUSBCDCUnknownQuaternionIndex:                "usb-cdc unknown quaternion index",
+		ErrorCodeUSBCDCUnknownEulerDegreesIndex:              "usb-cdc unknown euler degrees index",
+		ErrorCodeUSBCDCUnknownIncomingStatus:                 "usb-cdc unknown incoming status",
+		ErrorCodeUSBCDCUnknownOutgoingStatus:                 "usb-cdc unknown outgoing status",
+		ErrorCodeUSBCDCUnknownChallenge:                      "usb-cdc unknown challenge",
+		ErrorCodeUSBCDCBufferTooShortForRawUint16:            "usb-cdc buffer too short for raw uint16",
+		ErrorCodeUSBCDCBufferTooShortForRawUint8:             "usb-cdc buffer too short for raw uint8",
+		ErrorCodeUSBCDCConfirmationMessageTimeout:            "usb-cdc confirmation message timeout",
+		ErrorCodeUSBCDCReadByteTimeout:                       "usb-cdc read byte timeout",
+		ErrorCodeUSBCDCFailedReadingFromSerial:               "usb-cdc failed reading from serial",
+		ErrorCodeUSBCDCFailedToConfigureUSBCDC:               "usb-cdc failed to configure",
+		ErrorCodeUSBCDCFailedToSendInitializationMessage:     "usb-cdc failed to send initialization message",
+		ErrorCodeUSBCDCInvalidIncomingMessageDataLength:      "usb-cdc invalid incoming message data length",
+		ErrorCodeUSBCDCInvalidOutgoingMessageDataLength:      "usb-cdc invalid outgoing message data length",
+		ErrorCodeUSBCDCReadMessageTimeout:                    "usb-cdc read message timeout",
+		ErrorCodeUSBCDCReceivedUnexpectedConfirmationMessage: "usb-cdc received unexpected confirmation message",
+	}
 )

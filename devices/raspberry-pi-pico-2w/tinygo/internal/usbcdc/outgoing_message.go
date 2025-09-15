@@ -52,7 +52,7 @@ func NewOutgoingMessageFromUint8Data(
 ) (OutgoingMessage, tinygotypes.ErrorCode) {
 	// Check if the buffer is nil or too small
 	if buffer == nil || len(buffer) < Uint8BufferSize {
-		return OutgoingMessage{}, ErrorCodeBNO08XBufferTooShortForRawUint8
+		return OutgoingMessage{}, ErrorCodeUSBCDCBufferTooShortForRawUint8
 	}
 
 	// Convert the uint8 to raw bytes
@@ -124,7 +124,7 @@ func NewOutgoingMessageFromUint16Data(
 ) (OutgoingMessage, tinygotypes.ErrorCode) {
 	// Check if the buffer is nil or too small
 	if buffer == nil || len(buffer) < Uint16BufferSize {
-		return OutgoingMessage{}, ErrorCodeBNO08XBufferTooShortForRawUint16
+		return OutgoingMessage{}, ErrorCodeUSBCDCBufferTooShortForRawUint16
 	}
 
 	// Convert the uint16 to raw bytes
@@ -175,7 +175,7 @@ func NewOutgoingMessageFromFloat64Data(
 ) (OutgoingMessage, tinygotypes.ErrorCode) {
 	// Check if the buffer is nil or too small
 	if buffer == nil || len(buffer) < Float64BufferSize {
-		return OutgoingMessage{}, ErrorCodeBNO08XBufferTooShortForRawFloat64
+		return OutgoingMessage{}, ErrorCodeUSBCDCBufferTooShortForRawFloat64
 	}
 
 	// Convert the float64 to raw bytes

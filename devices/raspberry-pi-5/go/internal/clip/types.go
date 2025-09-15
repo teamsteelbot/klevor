@@ -13,7 +13,6 @@ func NewDefaultHandler(
 	negativeLabels []NegativeLabel,
 	logger goconcurrentlogger.Logger,
 ) (*gohailocliphandler.DefaultHandler, error) {
-	// Convert 
 	return gohailocliphandler.NewDefaultHandler(
 		generateClipEmbeddingsPath,
 		EmbeddingsJSONPath,

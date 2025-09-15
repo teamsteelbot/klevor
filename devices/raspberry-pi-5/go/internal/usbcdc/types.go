@@ -7,16 +7,23 @@ import (
 	"sync/atomic"
 	"time"
 
-	ralvarezdevgostringsconvert "github.com/ralvarezdev/go-strings/convert"
+	goconcurrentlogger "github.com/ralvarezdev/go-concurrent-logger"
+	gorplidarsdkhandler "github.com/ralvarezdev/go-rplidar-sdk-handler"
+	gostringsconvert "github.com/ralvarezdev/go-strings/convert"
 	"github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal"
-	internallog "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/log"
-	internalrplidar "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/rplidar"
-	internalusbcdcenums "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/usbcdc/enums"
 	"go.bug.st/serial"
 	"golang.org/x/sync/errgroup"
 )
 
 type (
+	// CalculatedTurns is the structure that holds the calculated turns information.
+	CalculatedTurns struct {
+		initialYawDegrees, lastYawDegrees, lastRelativeYawDegrees float64
+		lastSegmentCount                                          int
+		accumulatedYawDegrees                                     float64
+		accumulatedYaw90DegreesTurns                              int
+	}
+
 	// DefaultSender is the default implementation of the Sender interface
 	DefaultSender struct {
 		sendFn  func(*OutgoingMessage)
@@ -28,10 +35,10 @@ type (
 	// DefaultHandler is the default implementation of the Handler interface
 	DefaultHandler struct {
 		outgoingMessagesCh               chan *OutgoingMessage
-		logger                           internallog.Logger
-		handlerLoggerProducer                   internallog.LoggerProducer
-		incomingMessagesLoggerProducer           internallog.LoggerProducer
-		outgoingMessagesLoggerProducer          internallog.LoggerProducer
+		logger                           goconcurrentlogger.Logger
+		handlerLoggerProducer            goconcurrentlogger.LoggerProducer
+		incomingMessagesLoggerProducer   goconcurrentlogger.LoggerProducer
+		outgoingMessagesLoggerProducer   goconcurrentlogger.LoggerProducer
 		isRunning                        atomic.Bool
 		closed                           atomic.Bool
 		mutex                            sync.Mutex
@@ -44,8 +51,14 @@ type (
 		receivedChallenge                internal.Challenge
 		receivedMaxMotorSpeedValue       uint16
 		receivedMaxServoDirectionValue   uint16
-		receivedBNO08XTurns              int
+		receivedBNO08XQuaternionX		float64
+		receivedBNO08XQuaternionY		float64
+		receivedBNO08XQuaternionZ		float64
+		receivedBNO08XQuaternionW		float64
 		receivedBNO08XYawDegrees         float64
+		receivedBNO08XPitchDegrees       float64
+		receivedBNO08XRollDegrees        float64
+		calculatedTurns					*CalculatedTurns
 		challengeReady                   chan struct{}
 		notifyChallengeOnce              sync.Once
 		maxMotorSpeedValueReady          chan struct{}
@@ -54,6 +67,107 @@ type (
 		notifyMaxServoDirectionValueOnce sync.Once
 	}
 )
+
+// NewCalculatedTurns creates a new CalculatedTurns instance.
+//
+// Parameters:
+//
+// initialYawDegrees: The initial yaw in degrees.
+//
+// Returns:
+//
+// A pointer to a CalculatedTurns instance.
+func NewCalculatedTurns(initialYawDegrees float64) *CalculatedTurns {
+	return &CalculatedTurns{
+		initialYawDegrees:            initialYawDegrees,
+		lastYawDegrees:               initialYawDegrees,
+		lastRelativeYawDegrees:       0,
+		lastSegmentCount:             0,
+		accumulatedYawDegrees:        0,
+		accumulatedYaw90DegreesTurns: 0,
+	}
+}
+
+// GetInitialYawDegrees returns the initial yaw degrees value.
+//
+// Returns:
+//
+// The initial yaw degrees value.
+func (c *CalculatedTurns) GetInitialYawDegrees() float64 {
+	return c.initialYawDegrees
+}
+
+// SetLastYawDegrees sets the last yaw degrees value.
+//
+// Parameters:
+//
+// yawDegrees: The new yaw degrees value.
+func (c *CalculatedTurns) SetLastYawDegrees(yawDegrees float64) {
+	c.lastYawDegrees = yawDegrees
+}
+
+// GetLastRelativeYawDegrees returns the last relative yaw degrees value.
+//
+// Returns:
+//
+// The last relative yaw degrees value.
+func (c *CalculatedTurns) GetLastRelativeYawDegrees() float64 {
+	return c.lastRelativeYawDegrees
+}
+
+// SetLastRelativeYawDegrees sets the last relative yaw degrees value.
+//
+// Parameters:
+//
+// relativeYawDegrees: The new relative yaw degrees value.
+func (c *CalculatedTurns) SetLastRelativeYawDegrees(relativeYawDegrees float64) {
+	c.lastRelativeYawDegrees = relativeYawDegrees
+}
+
+// SetLastSegmentCount sets the last segment count value.
+//
+// Parameters:
+//
+// segmentCount: The new segment count value.
+func (c *CalculatedTurns) SetLastSegmentCount(segmentCount int) {
+	c.lastSegmentCount = segmentCount
+}
+
+// GetLastSegmentCount returns the last segment count value.
+//
+// Returns:
+//
+// The last segment count value.
+func (c *CalculatedTurns) GetLastSegmentCount() int {
+	return c.lastSegmentCount
+}
+
+// UpdateAccumulatedYawDegrees updates the accumulated yaw degrees value.
+//
+// Parameters:
+//
+// deltaYawDegrees: The change in yaw degrees to add to the accumulated value.
+func (c *CalculatedTurns) UpdateAccumulatedYawDegrees(deltaYawDegrees float64) {
+	c.accumulatedYawDegrees += deltaYawDegrees
+}
+
+// GetAccumulatedYawDegrees returns the accumulated yaw degrees value.
+//
+// Returns:
+//
+// The accumulated yaw degrees value.
+func (c *CalculatedTurns) GetAccumulatedYawDegrees() float64 {
+	return c.accumulatedYawDegrees
+}
+
+// UpdateAccumulatedYaw90DegreesTurns updates the accumulated yaw 90 degrees turns value.
+//
+// Parameters:
+//
+// deltaTurns: The change in 90 degrees turns to add to the accumulated value.
+func (c *CalculatedTurns) UpdateAccumulatedYaw90DegreesTurns(deltaTurns int) {
+	c.accumulatedYaw90DegreesTurns += deltaTurns
+}
 
 // NewDefaultSender creates a new DefaultSender instance.
 //
@@ -153,12 +267,12 @@ func (s *DefaultSender) IsClosed() bool {
 // Returns:
 //
 // A pointer to a DefaultHandler instance
-func NewDefaultHandler(baudRate int, logger internallog.Logger) (*DefaultHandler, error) {
+func NewDefaultHandler(baudRate int, logger goconcurrentlogger.Logger) (*DefaultHandler, error) {
 	// Check if the logger is nil
 	if logger == nil {
-		return nil, internallog.ErrNilLogger
+		return nil, goconcurrentlogger.ErrNilLogger
 	}
-	
+
 	// Create a buffer for reading data
 	buffer := make([]byte, BufferSize)
 
@@ -169,7 +283,7 @@ func NewDefaultHandler(baudRate int, logger internallog.Logger) (*DefaultHandler
 		baudRate:          baudRate,
 		buffer:            buffer,
 		accumulatedBuffer: accumulatedBuffer,
-		logger:           logger,
+		logger:            logger,
 	}, nil
 }
 
@@ -224,7 +338,7 @@ func (h *DefaultHandler) runToWrap(ctx context.Context, stopFn func()) error {
 	// Get the only port that is different from the RPLiDAR port
 	var portName string
 	for _, p := range ports {
-		if p != internalrplidar.SlamtecC1Port {
+		if p != gorplidarsdkhandler.LinuxSlamtecC1Port {
 			portName = p
 			break
 		}
@@ -259,26 +373,26 @@ func (h *DefaultHandler) runToWrap(ctx context.Context, stopFn func()) error {
 
 	// Call the incoming messages handler
 	g.Go(
-		internallog.StopContextAndLogOnError(
+		goconcurrentlogger.StopContextAndLogOnError(
 			ctx,
-			stopFn, 
+			stopFn,
 			func(ctx context.Context) error {
-					return h.incomingMessagesHandler(ctx, port)
-				},
+				return h.incomingMessagesHandler(ctx, port)
+			},
 			h.incomingMessagesLoggerProducer,
-		),	
+		),
 	)
 
 	// Call the outgoing messages handler
 	g.Go(
-		internallog.StopContextAndLogOnError(
+		goconcurrentlogger.StopContextAndLogOnError(
 			ctx,
-			stopFn, 
+			stopFn,
 			func(ctx context.Context) error {
-					return h.outgoingMessagesHandler(ctx, port)
-				},
+				return h.outgoingMessagesHandler(ctx, port)
+			},
 			h.outgoingMessagesLoggerProducer,
-		),	
+		),
 	)
 
 	// Wait for both handlers to finish and return any error
@@ -324,7 +438,7 @@ func (h *DefaultHandler) incomingMessagesHandler(
 
 			// Process the data read
 			for _, c := range h.accumulatedBuffer {
-				if c == InitializationMessage {
+				if c == StartAndEndByte {
 					h.receivedInitializationMessage = true
 					h.incomingMessagesLoggerProducer.Info("Received initialization message")
 					break
@@ -353,18 +467,18 @@ func (h *DefaultHandler) incomingMessagesHandler(
 				}
 
 				switch message.Category {
-				case internalusbcdcenums.IncomingCategoryError:
-					err := fmt.Errorf("received error message: %s", message.Content)
+				case IncomingCategoryError:
+					err := fmt.Errorf("received error message: %s", message.Data)
 					h.incomingMessagesLoggerProducer.Error(err)
 					return err
-				case internalusbcdcenums.IncomingCategoryStatus:
+				case IncomingCategoryStatus:
 					// Check if it's a start message
-					status, err := internalusbcdcenums.IncomingStatusFromString(message.Content)
+					status, err := IncomingStatusFromBytes(message.Data)
 					if err != nil {
-						return fmt.Errorf("failed to parse status message content: %w", err)
+						return fmt.Errorf("failed to parse status message data: %w", err)
 					}
 
-					if status == internalusbcdcenums.IncomingStatusStart {
+					if status == IncomingStatusStart {
 						h.receivedStartMessage = true
 						h.incomingMessagesLoggerProducer.Info("Received start message")
 
@@ -376,7 +490,7 @@ func (h *DefaultHandler) incomingMessagesHandler(
 						break
 					}
 					fallthrough
-					
+
 				default:
 					// Log any other received message
 					h.incomingMessagesLoggerProducer.Info(
@@ -384,7 +498,7 @@ func (h *DefaultHandler) incomingMessagesHandler(
 							"Received message while waiting for start message: %s",
 							message.StringToPrint(),
 						),
-					)		
+					)
 				}
 			}
 		}
@@ -410,20 +524,20 @@ func (h *DefaultHandler) incomingMessagesHandler(
 				}
 
 				switch message.Category {
-				case internalusbcdcenums.IncomingCategoryError:
-					err := fmt.Errorf("received error message: %s", message.Content)
+				case IncomingCategoryError:
+					err := fmt.Errorf("received error message: %s", message.Data)
 					h.incomingMessagesLoggerProducer.Error(err)
 					return err
-				case internalusbcdcenums.IncomingCategoryChallenge:
-					challenge, err := internal.ChallengeFromString(message.Content)
+				case IncomingCategoryChallenge:
+					challenge, err := internal.ChallengeFromBytes(message.Data)
 					if err != nil {
-						return fmt.Errorf("failed to parse challenge message content: %w", err)
+						return fmt.Errorf("failed to parse challenge message data: %w", err)
 					}
 					h.receivedChallenge = challenge
 					h.incomingMessagesLoggerProducer.Info(
 						fmt.Sprintf(
 							"Received challenge: %s",
-							challenge.Name(),
+							challenge.String(),
 						),
 					)
 
@@ -466,29 +580,18 @@ func (h *DefaultHandler) incomingMessagesHandler(
 			// Send each message to the incoming messages channel
 			for _, message := range messages {
 				switch message.Category {
-				case internalusbcdcenums.IncomingCategoryError:	
-					err := fmt.Errorf("received error message: %s", message.Content)
+				case IncomingCategoryError:
+					err := fmt.Errorf("received error message: %s", message.Data)
 					h.incomingMessagesLoggerProducer.Error(err)
 					return err
-				case internalusbcdcenums.IncomingCategoryDebug:
-					debug, err := internalusbcdcenums.DebugFromString(message.Content)
-					if err != nil {
-						return fmt.Errorf("failed to parse debug message content: %w", err)
-					}
-					h.incomingMessagesLoggerProducer.Info(
-						fmt.Sprintf(
-							"Received debug: %s",
-							debug.Name(),
-						),
-					)
-				case internalusbcdcenums.IncomingCategoryBNO08XYawDegrees:
+				case IncomingCategoryBNO08XYawDegrees:
 					// Parse the BNO08X yaw degrees value
-					if err := ralvarezdevgostringsconvert.ToFloat64(
-						message.Content,
+					if err := gostringsconvert.ToFloat64(
+						message.Data,
 						&h.receivedBNO08XYawDegrees,
 					); err != nil {
 						return fmt.Errorf(
-							"failed to parse BNO08X yaw degrees message content: %w",
+							"failed to parse BNO08X yaw degrees message data: %w",
 							err,
 						)
 					}
@@ -500,14 +603,14 @@ func (h *DefaultHandler) incomingMessagesHandler(
 							h.receivedBNO08XYawDegrees,
 						),
 					)
-				case internalusbcdcenums.IncomingCategoryBNO08XYawTurns:
+				case IncomingCategoryBNO08XYawTurns:
 					// Parse the BNO08X turns value
-					if err := ralvarezdevgostringsconvert.ToInt(
-						message.Content,
+					if err := gostringsconvert.ToInt(
+						message.Data,
 						&h.receivedBNO08XTurns,
 					); err != nil {
 						return fmt.Errorf(
-							"failed to parse BNO08X turns message content: %w",
+							"failed to parse BNO08X turns message data: %w",
 							err,
 						)
 					}
@@ -519,14 +622,14 @@ func (h *DefaultHandler) incomingMessagesHandler(
 							h.receivedBNO08XTurns,
 						),
 					)
-				case internalusbcdcenums.IncomingCategoryMaxMotorSpeedValue:
+				case IncomingCategoryMaxMotorSpeedValue:
 					// Parse the max motor speed value
-					if err := ralvarezdevgostringsconvert.ToUint16(
-						message.Content,
+					if err := gostringsconvert.ToUint16(
+						message.Data,
 						&h.receivedMaxMotorSpeedValue,
 					); err != nil {
 						return fmt.Errorf(
-							"failed to parse max motor speed value message content: %w",
+							"failed to parse max motor speed value message data: %w",
 							err,
 						)
 					}
@@ -541,14 +644,14 @@ func (h *DefaultHandler) incomingMessagesHandler(
 
 					// Notify listeners exactly once
 					h.notifyMaxMotorSpeedValueOnce.Do(func() { close(h.maxMotorSpeedValueReady) })
-				case internalusbcdcenums.IncomingCategoryMaxServoDirectionValue:
+				case IncomingCategoryMaxServoDirectionValue:
 					// Parse the max servo direction value
-					if err := ralvarezdevgostringsconvert.ToUint16(
-						message.Content,
+					if err := gostringsconvert.ToUint16(
+						message.Data,
 						&h.receivedMaxServoDirectionValue,
 					); err != nil {
 						return fmt.Errorf(
-							"failed to parse max servo direction value message content: %w",
+							"failed to parse max servo direction value message data: %w",
 							err,
 						)
 					}
@@ -582,7 +685,7 @@ func (h *DefaultHandler) incomingMessagesHandler(
 // Parameters:
 //
 // port: The serial port to read data from.
-// 
+//
 // Returns:
 //
 // An error if any issue occurs during reading.
@@ -721,9 +824,54 @@ func (h *DefaultHandler) sendMessage(
 		return nil
 	}
 
-	// Send the message to the port
-	if _, err := port.Write([]byte(message.String())); err != nil {
-		return fmt.Errorf(ErrFailedToSendMessage, err)
+	// Send start byte
+	if _, err := port.Write(StartAndEndBytes); err != nil {
+		return fmt.Errorf(ErrFailedToSendStartByte, err)
+	}
+
+	// Send category byte
+	if _, err := port.Write(message.Category.Bytes()); err != nil {
+		return fmt.Errorf(ErrFailedToSendCategoryByte, err)
+	}
+
+	// Get the data length
+	dataLength := len(message.Data)
+
+	// Verify data length corresponds for the given message category
+	expectedDataLength, err := message.Category.DataLength()
+	if err != nil {
+		return fmt.Errorf("failed to get expected data length: %w", err)
+	}
+	if dataLength != expectedDataLength {
+		return fmt.Errorf(
+			ErrDataLengthMismatch,
+			dataLength,
+			expectedDataLength,
+		)
+	}
+
+	// Send data length byte
+	if _, err := port.Write([]byte{uint8(dataLength)}); err != nil {
+		return fmt.Errorf(ErrFailedToSendDataLengthByte, err)
+	}
+
+	// Escape and send data bytes
+	escapedData := []byte{}
+	for _, b := range message.Data {
+		if b == StartAndEndByte || b == ControlByte {
+			escapedData = append(escapedData, ControlByte)
+			b ^= XORByte
+		} else {
+			escapedData = append(escapedData, b)
+		}
+	}
+	if _, err := port.Write(escapedData); err != nil {
+		return fmt.Errorf(ErrFailedToSendDataBytes, err)
+	}
+
+	// Send end byte
+	if _, err := port.Write(StartAndEndBytes); err != nil {
+		return fmt.Errorf(ErrFailedToSendEndByte, err)
 	}
 
 	// Log the message sent
@@ -815,7 +963,7 @@ func (h *DefaultHandler) Run(ctx context.Context, stopFn func()) error {
 	h.handlerLoggerProducer = handlerLoggerProducer
 	defer h.handlerLoggerProducer.Close()
 
-	return internallog.LogOnError(
+	return goconcurrentlogger.LogOnError(
 		func() error {
 			return h.runToWrap(ctx, stopFn)
 		},

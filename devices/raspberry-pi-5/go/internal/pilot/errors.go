@@ -12,5 +12,4 @@ var (
 	ErrHandlerAlreadyRunning        = errors.New("handler is already running")
 	ErrMaxMotorSpeedValueNotSet     = errors.New("max motor speed value not set")
 	ErrMaxServoDirectionValueNotSet = errors.New("max servo direction value not set")
-	ErrNilQuaternion                = errors.New("nil quaternion provided")
 )

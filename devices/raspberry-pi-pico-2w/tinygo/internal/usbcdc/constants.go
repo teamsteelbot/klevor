@@ -17,11 +17,14 @@ const (
 	// ConfirmationMessageTimeout is the timeout duration for confirmation messages
 	ConfirmationMessageTimeout = time.Second * 5
 
-	// StartAndEndChar is the message start and end character
-	StartAndEndChar uint8 = 0x7E
+	// StartAndEndByte is the message start and end character
+	StartAndEndByte uint8 = 0x7E
 
-	// ControlChar is the control character
-	ControlChar uint8 = 0x7D
+	// ControlByte is the control character
+	ControlByte uint8 = 0x7D
+
+	// XORByte is the XOR character
+	XORByte uint8 = 0x20
 
 	// Uint8BufferSize is the size of the buffer to hold a uint8 value in bytes
 	Uint8BufferSize = 1

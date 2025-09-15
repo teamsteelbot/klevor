@@ -20,8 +20,12 @@ github.com/ralvarezdev/go-rplidar-sdk-handler v0.1.3 h1:8qo9I/n1m35eexShCOD4O4vY
 github.com/ralvarezdev/go-rplidar-sdk-handler v0.1.3/go.mod h1:UWle/kF9lGftDpOEVWeGWcCgtcTvAYar48Q/DN4sUyg=
 github.com/ralvarezdev/go-strings v0.1.12 h1:AtOPDJ4lVO+33p7O4uECdD4C4D037h256zWz9uQ5eIQ=
 github.com/ralvarezdev/go-strings v0.1.12/go.mod h1:8sFOqmPJpqzS7bTjf91EzUCITnwpmkfifwY80GxV5r8=
+github.com/ralvarezdev/go-tinygo-errors v0.1.0 h1:9scKMqj0/eNh36HcxKhGqjuDQCGBxxk7sRoDORtIGpU=
+github.com/ralvarezdev/go-tinygo-errors v0.1.0/go.mod h1:pcbtDolW5uyOdCeBVTR7Ias7npFPHUIdorGBiuapLIQ=
 github.com/ralvarezdev/tinygo-types v0.0.2 h1:gCQyzvk6kgPJ0HQuEsYw/rAGXBJAu1au9piVhlAsIXM=
 github.com/ralvarezdev/tinygo-types v0.0.2/go.mod h1:oqYL6BcwQmVa8/AswTJkcmjezOAg86IYYaxfaVKMOOI=
+github.com/ralvarezdev/tinygo-types v0.0.3 h1:h8ogOD2lOVxR+w5i6o+v/8qTROFA2KBjVXBM7NT3SMc=
+github.com/ralvarezdev/tinygo-types v0.0.3/go.mod h1:2u3ApwAtIqGZ6wDsmUYt44bIk1DEn06INNjtfWndCr4=
 github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcUk=
 github.com/stretchr/testify v1.8.4/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
 go.bug.st/serial v1.6.4 h1:7FmqNPgVp3pu2Jz5PoPtbZ9jJO5gnEnZIvnI1lzve8A=

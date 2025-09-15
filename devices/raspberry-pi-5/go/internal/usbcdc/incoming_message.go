@@ -1,19 +1,21 @@
 package usbcdc
 
 import (
+	"bytes"
+	"encoding/binary"
 	"fmt"
-	"strconv"
-	"strings"
+	"math"
 
+	gotinygoerrors "github.com/ralvarezdev/go-tinygo-errors"
 	"github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal"
-	internalusbcdcenums "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/usbcdc/enums"
+	tinygotypes "github.com/ralvarezdev/tinygo-types"
 )
 
 type (
 	// IncomingMessage is the struct to handle the messages received to the Raspberry Pi 5
 	IncomingMessage struct {
-		Category internalusbcdcenums.IncomingCategory
-		Content  string
+		Category IncomingCategory
+		Data     []byte
 	}
 )
 
@@ -22,55 +24,55 @@ type (
 // Parameters:
 //
 // category: The category of the message
-// content: The content of the message
+// data: The data of the message
 //
 // Returns:
 //
 // An instance of IncomingMessage
 func NewIncomingMessage(
-	category internalusbcdcenums.IncomingCategory,
-	content string,
+	category IncomingCategory,
+	data []byte,
 ) *IncomingMessage {
 	return &IncomingMessage{
 		Category: category,
-		Content:  strings.TrimSpace(content),
+		Data:     data,
 	}
 }
 
-// NewIncomingMessageFromUint8Content creates a new instance of IncomingMessage with uint8 content
+// NewIncomingMessageFromUint8Data creates a new instance of IncomingMessage with uint8 data
 //
 // Parameters:
 //
 // category: The category of the message
-// content: The uint8 content of the message
+// data: The uint8 data of the message
 //
 // Returns:
 //
 // An instance of IncomingMessage
-func NewIncomingMessageFromUint8Content(
-	category internalusbcdcenums.IncomingCategory,
-	content uint8,
+func NewIncomingMessageFromUint8Data(
+	category IncomingCategory,
+	data uint8,
 ) *IncomingMessage {
-	return &IncomingMessage{
-		Category: category,
-		Content:  fmt.Sprintf("%d", content),
-	}
+	return NewIncomingMessage(
+		category,
+		[]byte{data},
+	)
 }
 
-// NewIncomingStatusMessage creates a new instance of IncomingMessage with status content
+// NewIncomingStatusMessage creates a new instance of IncomingMessage with status data
 //
 // Parameters:
 //
-// status: The status content of the message
+// status: The status data of the message
 //
 // Returns:
 //
 // An instance of IncomingMessage
 func NewIncomingStatusMessage(
-	status internalusbcdcenums.IncomingStatus,
+	status IncomingStatus,
 ) *IncomingMessage {
-	return NewIncomingMessageFromUint8Content(
-		internalusbcdcenums.IncomingCategoryStatus,
+	return NewIncomingMessageFromUint8Data(
+		IncomingCategoryStatus,
 		uint8(status),
 	)
 }
@@ -87,41 +89,10 @@ func NewIncomingStatusMessage(
 func NewIncomingChallengeMessage(
 	challenge internal.Challenge,
 ) *IncomingMessage {
-	return NewIncomingMessageFromUint8Content(
-		internalusbcdcenums.IncomingCategoryChallenge,
+	return NewIncomingMessageFromUint8Data(
+		IncomingCategoryChallenge,
 		uint8(challenge),
 	)
-}
-
-// NewIncomingDebugMessage creates a new instance of IncomingMessage with debug content
-//
-// Parameters:
-//
-// debugInfo: The debug information content of the message
-//
-// Returns:
-//
-// An instance of IncomingMessage
-func NewIncomingDebugMessage(
-	debugInfo internalusbcdcenums.Debug,
-) *IncomingMessage {
-	return NewIncomingMessageFromUint8Content(
-		internalusbcdcenums.IncomingCategoryDebug,
-		uint8(debugInfo),
-	)
-}
-
-// String returns a string representation of the IncomingMessage
-//
-// Returns:
-//
-// A string that represents the IncomingMessage
-func (msg *IncomingMessage) String() string {
-	var sb strings.Builder
-	sb.WriteByte(msg.Category.Uint8())
-	sb.WriteString(msg.Content)
-	sb.WriteByte(EndChar)
-	return sb.String()
 }
 
 // StringToPrint returns a human-readable string representation of the IncomingMessage
@@ -131,41 +102,128 @@ func (msg *IncomingMessage) String() string {
 // A human-readable string that represents the IncomingMessage
 func (msg *IncomingMessage) StringToPrint() string {
 	switch msg.Category {
-	case internalusbcdcenums.IncomingCategoryChallenge:
-		challenge, _ := internal.ChallengeFromString(msg.Content)
+	case IncomingCategoryEulerDegreesPitch,
+		IncomingCategoryEulerDegreesRoll,
+		IncomingCategoryEulerDegreesYaw,
+		IncomingCategoryQuaternionW,
+		IncomingCategoryQuaternionX,
+		IncomingCategoryQuaternionY,
+		IncomingCategoryQuaternionZ:
+		// Check if the data length is valid for a float64 value
+		if len(msg.Data) != 8 {
+			return fmt.Sprintf(
+				"IncomingMessage{Category: %s, Data: %q (invalid length: %d, expected: 8)}",
+				msg.Category.String(),
+				msg.Data,
+				len(msg.Data),
+			)
+		}
+
+		// Extract the float64 value from the message data
+		bits := binary.BigEndian.Uint64(msg.Data[:])
+		value := math.Float64frombits(bits)
+		return fmt.Sprintf(
+			"IncomingMessage{Category: %s, Data: %q (%f)}",
+			msg.Category.String(),
+			msg.Data,
+			value,
+		)
+	case IncomingCategoryMaxMotorSpeedValue,
+		IncomingCategoryMaxServoDirectionValue:
+		// Check if the data length is valid for an uint16 value
+		if len(msg.Data) != 2 {
+			return fmt.Sprintf(
+				"IncomingMessage{Category: %s, Data: %q (invalid length: %d, expected: 2)}",
+				msg.Category.String(),
+				msg.Data,
+				len(msg.Data),
+			)
+		}
+
+		// Extract the uint16 value from the message data
+		value := binary.BigEndian.Uint16(msg.Data[:])
+		return fmt.Sprintf(
+			"IncomingMessage{Category: %s, Data: %q (%d)}",
+			msg.Category.String(),
+			msg.Data,
+			value,
+		)
+	case IncomingCategoryError:
+		// Check if the data length is valid for an uint16 value
+		if len(msg.Data) != 2 {
+			return fmt.Sprintf(
+				"IncomingMessage{Category: %s, Data: %q (invalid length: %d, expected: 2)}",
+				msg.Category.String(),
+				msg.Data,
+				len(msg.Data),
+			)
+		}
+
+		// Extract the uint16 value from the message data
+		value := binary.BigEndian.Uint16(msg.Data[:])
+
+		// Get the error message from the common error codes package. If not found, try to get it from the local error codes
+		var errorCodeMessage string
+		if errorMessage, ok := gotinygoerrors.ErrorCodeMessages[tinygotypes.ErrorCode(value)]; ok {
+			errorCodeMessage = errorMessage
+		} else if internalErrorMessage, ok := ErrorCodeMessages[tinygotypes.ErrorCode(value)]; ok {
+			errorCodeMessage = internalErrorMessage
+		}
+
+		// If no error message was found, set a default message
+		if errorCodeMessage == "" {
+			errorCodeMessage = "unknown error code"
+		}	
+
+		return fmt.Sprintf(
+			"IncomingMessage{Category: %s, Data: %q (%s)}",
+			msg.Category.String(),
+			msg.Data,
+			errorCodeMessage,
+		)
+	case IncomingCategoryChallenge:
+		challenge, err := internal.ChallengeFromBytes(msg.Data)
+		if err != nil {
+			return fmt.Sprintf(
+				"IncomingMessage{Category: %s, Data: %q (invalid challenge: %v)}",
+				msg.Category.String(),
+				msg.Data,
+				err,
+			)
+		}
 		if challenge != internal.ChallengeNil {
 			return fmt.Sprintf(
-				"IncomingMessage{Category: %s, Content: %s}",
-				msg.Category.Name(),
-				challenge.Name(),
+				"IncomingMessage{Category: %s, Data: %q (%s)}",
+				msg.Category.String(),
+				msg.Data,
+				challenge.String(),
 			)
 		}
 		fallthrough
-	case internalusbcdcenums.IncomingCategoryStatus:
-		incomingStatus, _ := internalusbcdcenums.IncomingStatusFromString(msg.Content)
-		if incomingStatus != internalusbcdcenums.IncomingStatusNil {
+	case IncomingCategoryStatus:
+		incomingStatus, err := IncomingStatusFromBytes(msg.Data)
+		if err != nil {
 			return fmt.Sprintf(
-				"IncomingMessage{Category: %s, Content: %s}",
-				msg.Category.Name(),
-				incomingStatus.Name(),
+				"IncomingMessage{Category: %s, Data: %q (invalid status: %v)}",
+				msg.Category.String(),
+				msg.Data,
+				err,
 			)
 		}
-		fallthrough
-	case internalusbcdcenums.IncomingCategoryDebug:
-		debug, _ := internalusbcdcenums.DebugFromString(msg.Content)
-		if debug != internalusbcdcenums.DebugNil {
+		if incomingStatus != IncomingStatusNil {
 			return fmt.Sprintf(
-				"IncomingMessage{Category: %s, Content: %s}",
-				msg.Category.Name(),
-				debug.Name(),
+				"IncomingMessage{Category: %s, Data: %q (%s)}",
+				msg.Category.String(),
+				msg.Data,
+				incomingStatus.String(),
 			)
 		}
 		fallthrough
 	default:
 		return fmt.Sprintf(
-			"IncomingMessage{Category: %s, Content: %q}",
-			msg.Category.Name(),
-			msg.Content,
+			"IncomingMessage{Category: %s, Data: %q}",
+			msg.Category.String(),
+			msg.Data,
 		)
 	}
 }
@@ -184,92 +242,9 @@ func (msg *IncomingMessage) IsEqual(other *IncomingMessage) bool {
 	if other == nil {
 		return false
 	}
-	return msg.Category == other.Category && msg.Content == other.Content
-}
 
-// NewIncomingMessageFromString creates an instance of IncomingMessage from a given string
-//
-// Parameters:
-//
-// message: The string representation of the message
-//
-// Returns:
-//
-// An instance of IncomingMessage, or an error if the string is invalid
-func NewIncomingMessageFromString(message string) (*IncomingMessage, error) {
-	// Remove the end character if present
-	if len(message) > 0 && message[len(message)-1] == EndChar {
-		message = message[:len(message)-1]
-	}
-
-	// Convert the category string to a Category enum value
-	category, err := internalusbcdcenums.IncomingCategoryFromUint8(message[0])
-	if err != nil {
-		return nil, err
-	}
-
-	// Check if the message has content
-	if len(message) < 2 {
-		return nil, ErrIncomingMessageWithoutContent
-	}
-
-	// Create and return the IncomingMessage object
-	return NewIncomingMessage(category, message[1:]), nil
-}
-
-// NewIncomingMessagesFromBuffer creates multiple instances of IncomingMessage from a given bytes buffer
-//
-// Parameters:
-//
-// buffer: The bytes buffer containing multiple messages
-//
-// Returns:
-//
-// A slice of IncomingMessage instances, or an error if the buffer is invalid
-func NewIncomingMessagesFromBuffer(buffer []byte) ([]*IncomingMessage, error) {
-	// Check if the buffer is nil
-	if buffer == nil {
-		return nil, ErrNilBuffer
-	}
-
-	// Parse the buffer to extract messages
-	var messages []*IncomingMessage
-	var currentMessage []byte
-	var lastIndex int
-	for i, b := range buffer {
-		if b == EndChar {
-			if len(currentMessage) > 0 {
-				msg, err := NewIncomingMessageFromString(string(currentMessage))
-				if err != nil {
-					return nil, err
-				}
-				messages = append(messages, msg)
-				currentMessage = nil
-				lastIndex = i + 1
-			}
-		} else {
-			currentMessage = append(currentMessage, b)
-		}
-	}
-
-	// Update the buffer to remove processed messages
-	buffer = buffer[lastIndex:]
-
-	return messages, nil
-}
-
-// FormatToSendAsAnErrorMessage formats the message to send as an error message.
-//
-// Returns:
-//
-// The formatted error message string.
-func (msg *IncomingMessage) FormatToSendAsAnErrorMessage() string {
-	// Format the message as an error message
-	return fmt.Sprintf(
-		"%d%s",
-		msg.Category,
-		msg.Content,
-	)
+	// Compare the categories fields
+	return msg.Category == other.Category && bytes.Equal(msg.Data, other.Data)
 }
 
 // IsAChallengeMessage checks if the IncomingMessage is a challenge message
@@ -278,7 +253,7 @@ func (msg *IncomingMessage) FormatToSendAsAnErrorMessage() string {
 //
 // True if the message is a challenge message, otherwise False
 func (msg *IncomingMessage) IsAChallengeMessage() bool {
-	return msg.Category == internalusbcdcenums.IncomingCategoryChallenge
+	return msg.Category == IncomingCategoryChallenge
 }
 
 // IsAnErrorMessage checks if the IncomingMessage is an error message
@@ -287,19 +262,28 @@ func (msg *IncomingMessage) IsAChallengeMessage() bool {
 //
 // True if the message is an error message, otherwise False
 func (msg *IncomingMessage) IsAnErrorMessage() bool {
-	return msg.Category == internalusbcdcenums.IncomingCategoryError
+	return msg.Category == IncomingCategoryError
 }
 
-// GetContentAsUint16 converts the Content of the IncomingMessage to a uint16 value
+// IsAQuaternionMessage checks if the IncomingMessage is a quaternion-related message
 //
 // Returns:
 //
-// The uint16 representation of the Content, or an error if the conversion fails
-func (msg *IncomingMessage) GetContentAsUint16() (uint16, error) {
-	// Convert the content to uint16
-	u, err := strconv.ParseUint(msg.Content, 10, 16)
-	if err != nil {
-		return 0, fmt.Errorf("invalid uint16 value %q: %w", msg.Content, err)
-	}
-	return uint16(u), nil
+// True if the message is related to quaternion operations, otherwise False
+func (msg *IncomingMessage) IsAQuaternionMessage() bool {
+	return msg.Category == IncomingCategoryQuaternionW ||
+		msg.Category == IncomingCategoryQuaternionX ||
+		msg.Category == IncomingCategoryQuaternionY ||
+		msg.Category == IncomingCategoryQuaternionZ
+}
+
+// IsAEulerDegreesMessage checks if the IncomingMessage is an euler-degrees-related message
+//
+// Returns:
+//
+// True if the message is related to euler degrees operations, otherwise False
+func (msg *IncomingMessage) IsAEulerDegreesMessage() bool {
+	return msg.Category == IncomingCategoryEulerDegreesPitch ||
+		msg.Category == IncomingCategoryEulerDegreesRoll ||
+		msg.Category == IncomingCategoryEulerDegreesYaw
 }

@@ -1,17 +1,15 @@
 package usbcdc
 
 import (
+	"bytes"
 	"fmt"
-	"strings"
-
-	internalusbcdcenums "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/usbcdc/enums"
 )
 
 type (
 	// OutgoingMessage is the struct to handle the messages sent to the Raspberry Pi 5
 	OutgoingMessage struct {
-		Category internalusbcdcenums.OutgoingCategory
-		Content  string
+		Category OutgoingCategory
+		Data     []byte
 	}
 )
 
@@ -20,130 +18,77 @@ type (
 // Parameters:
 //
 // category: The category of the message
-// content: The content of the message
+// data: The data of the message
 //
 // Returns:
 //
 // An instance of OutgoingMessage
 func NewOutgoingMessage(
-	category internalusbcdcenums.OutgoingCategory,
-	content string,
+	category OutgoingCategory,
+	data []byte,
 ) *OutgoingMessage {
 	return &OutgoingMessage{
 		Category: category,
-		Content:  strings.TrimSpace(content),
+		Data:     data,
 	}
 }
 
-// NewOutgoingMessageFromUint8Content creates a new instance of OutgoingMessage with uint8 content
+// NewOutgoingMessageFromUint8Data creates a new instance of OutgoingMessage with uint8 data
 //
 // Parameters:
 //
 // category: The category of the message
-// content: The uint8 content of the message
+// data: The uint8 data of the message
 //
 // Returns:
 //
 // An instance of OutgoingMessage
-func NewOutgoingMessageFromUint8Content(
-	category internalusbcdcenums.OutgoingCategory,
-	content uint8,
+func NewOutgoingMessageFromUint8Data(
+	category OutgoingCategory,
+	data uint8,
 ) *OutgoingMessage {
 	return &OutgoingMessage{
 		Category: category,
-		Content:  fmt.Sprintf("%d", content),
+		Data:     []byte{data},
 	}
 }
 
-// NewOutgoingStatusMessage creates a new instance of OutgoingMessage with status content
+// NewOutgoingStatusMessage creates a new instance of OutgoingMessage with status data
 //
 // Parameters:
 //
-// status: The status content of the message
+// status: The status data of the message
 //
 // Returns:
 //
 // An instance of OutgoingMessage
 func NewOutgoingStatusMessage(
-	status internalusbcdcenums.OutgoingStatus,
+	status OutgoingStatus,
 ) *OutgoingMessage {
-	return NewOutgoingMessageFromUint8Content(
-		internalusbcdcenums.OutgoingCategoryStatus,
+	return NewOutgoingMessageFromUint8Data(
+		OutgoingCategoryStatus,
 		uint8(status),
 	)
 }
 
-// NewOutgoingMessageFromUint16Content creates a new instance of OutgoingMessage with uint16 content
+// NewOutgoingMessageFromUint16Data creates a new instance of OutgoingMessage with uint16 data
 //
 // Parameters:
 //
 // category: The category of the message
-// content: The uint16 content of the message
+// data: The uint16 data of the message
 //
 // Returns:
 //
 // An instance of OutgoingMessage
-func NewOutgoingMessageFromUint16Content(
-	category internalusbcdcenums.OutgoingCategory,
-	content uint16,
+func NewOutgoingMessageFromUint16Data(
+	category OutgoingCategory,
+	data uint16,
 ) *OutgoingMessage {
 	return &OutgoingMessage{
 		Category: category,
-		Content:  fmt.Sprintf("%d", content),
+		Data:     []byte{uint8(data >> 8), uint8(data & 0xFF)},
 	}
-}
-
-// NewOutgoingMessageFromFloat64Content creates a new instance of OutgoingMessage with float64 content
-//
-// Parameters:
-//
-// category: The category of the message
-// content: The float64 content of the message
-//
-// Returns:
-//
-// An instance of OutgoingMessage
-func NewOutgoingMessageFromFloat64Content(
-	category internalusbcdcenums.OutgoingCategory,
-	content float64,
-) *OutgoingMessage {
-	return &OutgoingMessage{
-		Category: category,
-		Content:  fmt.Sprintf("%f", content),
-	}
-}
-
-// NewOutgoingMessageFromIntContent creates a new instance of OutgoingMessage with int content
-//
-// Parameters:
-//
-// category: The category of the message
-// content: The int content of the message
-//
-// Returns:
-//
-// An instance of OutgoingMessage
-func NewOutgoingMessageFromIntContent(
-	category internalusbcdcenums.OutgoingCategory,
-	content int,
-) *OutgoingMessage {
-	return &OutgoingMessage{
-		Category: category,
-		Content:  fmt.Sprintf("%d", content),
-	}
-}
-
-// String returns a string representation of the OutgoingMessage
-//
-// Returns:
-//
-// A string that represents the OutgoingMessage
-func (msg *OutgoingMessage) String() string {
-	var sb strings.Builder
-	sb.WriteByte(msg.Category.Uint8())
-	sb.WriteString(msg.Content)
-	sb.WriteByte(EndChar)
-	return sb.String()
 }
 
 // StringToPrint returns a human-readable string representation of the OutgoingMessage
@@ -153,29 +98,59 @@ func (msg *OutgoingMessage) String() string {
 // A human-readable string that represents the OutgoingMessage
 func (msg *OutgoingMessage) StringToPrint() string {
 	switch msg.Category {
-	case internalusbcdcenums.OutgoingCategoryMotorSpeedStop,
-		internalusbcdcenums.OutgoingCategoryServoDirectionCenter,
-		internalusbcdcenums.OutgoingCategoryGetMaxMotorSpeedValue,
-		internalusbcdcenums.OutgoingCategoryGetMaxServoDirectionValue:
+	case OutgoingCategoryMotorSpeedStop,
+		OutgoingCategoryServoDirectionCenter,
+		OutgoingCategoryGetMaxMotorSpeedValue,
+		OutgoingCategoryGetMaxServoDirectionValue:
 		return fmt.Sprintf(
-			"OutgoingMessage{Category: %s, Content: <no content>}",
-			msg.Category.Name(),
+			"OutgoingMessage{Category: %s, Data: <no content>}",
+			msg.Category.String(),
 		)
-	case internalusbcdcenums.OutgoingCategoryStatus:
-		status, _ := internalusbcdcenums.OutgoingStatusFromString(msg.Content)
-		if status != internalusbcdcenums.OutgoingStatusNil {
+	case OutgoingCategoryMotorSpeedForward,
+		OutgoingCategoryMotorSpeedBackward,
+		OutgoingCategoryServoDirectionToLeft,
+		OutgoingCategoryServoDirectionToRight:
+		if len(msg.Data) != 2 {
 			return fmt.Sprintf(
-				"OutgoingMessage{Category: %s, Content: %s}",
-				msg.Category.Name(),
-				status.Name(),
+				"OutgoingMessage{Category: %s, Data: %q (invalid length: %d, expected 2)}",
+				msg.Category.String(),
+				msg.Data,
+				len(msg.Data),
+			)
+		}
+
+		// Combine the two bytes into a uint16 value
+		value := (uint16(msg.Data[0]) << 8) | uint16(msg.Data[1])
+		return fmt.Sprintf(
+			"OutgoingMessage{Category: %s, Data: %q (%d)}",
+			msg.Category.String(),
+			msg.Data,
+			value,
+		)
+	case OutgoingCategoryStatus:
+		outgoingStatus, err := OutgoingStatusFromBytes(msg.Data)
+		if err != nil {
+			return fmt.Sprintf(
+				"OutgoingMessage{Category: %s, Data: %q (invalid status: %v)}",
+				msg.Category.String(),
+				msg.Data,
+				err,
+			)
+		}
+		if outgoingStatus != OutgoingStatusNil {
+			return fmt.Sprintf(
+				"OutgoingMessage{Category: %s, Data: %q (%s)}",
+				msg.Category.String(),
+				msg.Data,
+				outgoingStatus.String(),
 			)
 		}
 		fallthrough
 	default:
 		return fmt.Sprintf(
-			"OutgoingMessage{Category: %s, Content: %q}",
-			msg.Category.Name(),
-			msg.Content,
+			"OutgoingMessage{Category: %s, Data: %q}",
+			msg.Category.String(),
+			msg.Data,
 		)
 	}
 }
@@ -194,48 +169,7 @@ func (msg *OutgoingMessage) IsEqual(other *OutgoingMessage) bool {
 	if other == nil {
 		return false
 	}
-	return msg.Category == other.Category && msg.Content == other.Content
-}
-
-// NewOutgoingMessageFromString creates an instance of OutgoingMessage from a given string
-//
-// Parameters:
-//
-// message: The string representation of the message
-//
-// Returns:
-//
-// An instance of OutgoingMessage, or an error if the string is invalid
-func NewOutgoingMessageFromString(message string) (*OutgoingMessage, error) {
-	// Remove the end character if present
-	if len(message) > 0 && message[len(message)-1] == EndChar {
-		message = message[:len(message)-1]
-	}
-
-	// Convert the category string to a Category enum value
-	category, err := internalusbcdcenums.OutgoingCategoryFromUint8(message[0])
-	if err != nil {
-		return nil, err
-	}
-
-	// Check if based on the incoming category the message content can be empty or not
-	if category == internalusbcdcenums.OutgoingCategoryMotorSpeedStop ||
-		category == internalusbcdcenums.OutgoingCategoryServoDirectionCenter ||
-		category == internalusbcdcenums.OutgoingCategoryGetMaxMotorSpeedValue ||
-		category == internalusbcdcenums.OutgoingCategoryGetMaxServoDirectionValue {
-		return NewOutgoingMessage(category, ""), nil
-	}
-
-	// Check if the message has content
-	if len(message) < 2 {
-		return nil, fmt.Errorf(
-			"message content cannot be empty for category %s",
-			category.Name(),
-		)
-	}
-
-	// Create and return the OutgoingMessage object
-	return NewOutgoingMessage(category, message[1:]), nil
+	return msg.Category == other.Category && bytes.Equal(msg.Data, other.Data)
 }
 
 // IsAServoMessage checks if the OutgoingMessage is a servo-related message
@@ -254,18 +188,4 @@ func (msg *OutgoingMessage) IsAServoMessage() bool {
 // True if the message is related to motor operations, otherwise False
 func (msg *OutgoingMessage) IsAMotorMessage() bool {
 	return msg.Category.IsAMotorCategory()
-}
-
-// FormatToSendAsAnErrorMessage formats the message to send as an error message.
-//
-// Returns:
-//
-// The formatted error message string.
-func (msg *OutgoingMessage) FormatToSendAsAnErrorMessage() string {
-	// Format the message as an error message
-	return fmt.Sprintf(
-		"%d%s",
-		msg.Category,
-		msg.Content,
-	)
 }

@@ -1,7 +1,13 @@
 package internal
 
+import (
+	"fmt"
+)
+
 const (
-	ErrInvalidChallengeName = "invalid challenge name: %s"
-	ErrInvalidChallengeUint8 = "invalid challenge uint8: %d"
-	ErrInvalidChallengeString = "invalid challenge string: %s"
+	ErrUnknownChallenge          = "unknown challenge with uint8 value: %#02X"
+)
+
+var (
+	ErrNilChallenge = fmt.Errorf("challenge cannot be nil")
 )
