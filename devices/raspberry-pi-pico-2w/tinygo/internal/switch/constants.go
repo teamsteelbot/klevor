@@ -8,7 +8,7 @@ import (
 
 	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal"
 	tinygopullup "github.com/ralvarezdev/tinygo-pullup"
-	tinygotypes "github.com/ralvarezdev/tinygo-types"
+	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
 )
 
 var (
@@ -30,7 +30,7 @@ func init() {
 		PullUpHandler,
 		DefaultInterval,
 	)
-	if err != tinygotypes.ErrorCodeNil {
+	if err != tinygoerrors.ErrorCodeNil {
 		internal.Logger.ErrorMessageWithErrorCode(failedToInitializeSwitchMessage, err, true)
 		os.Exit(1)
 	}

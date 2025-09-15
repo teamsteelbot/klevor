@@ -9,7 +9,7 @@ import (
 	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal"
 	internalmovement "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/movement"
 	tinygoescmotor "github.com/ralvarezdev/tinygo-escmotor"
-	tinygotypes "github.com/ralvarezdev/tinygo-types"
+	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
 )
 
 const (
@@ -58,7 +58,7 @@ func init() {
 		MaxSpeed,
 		nil, // internal.Logger
 	)
-	if err != tinygotypes.ErrorCodeNil {
+	if err != tinygoerrors.ErrorCodeNil {
 		internal.Logger.ErrorMessageWithErrorCode(failedToInitializeEscMotorMessage, err, true)
 		os.Exit(1)
 	}

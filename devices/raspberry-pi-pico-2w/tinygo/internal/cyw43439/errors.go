@@ -1,7 +1,7 @@
 package cyw43439
 
 import (
-	tinygotypes "github.com/ralvarezdev/tinygo-types"
+	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
 )
 
 const (
@@ -10,6 +10,6 @@ const (
 )
 
 const (
-	ErrorCodeCyw43439NilDevice tinygotypes.ErrorCode = tinygotypes.ErrorCode(iota + ErrorCodeCyw43439StartNumber)
+	ErrorCodeCyw43439NilDevice tinygoerrors.ErrorCode = tinygoerrors.ErrorCode(iota + ErrorCodeCyw43439StartNumber)
 	ErrorCodeCyw43439FailedToInitialize
 )

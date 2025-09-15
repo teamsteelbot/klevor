@@ -2,7 +2,7 @@ package usbcdc
 
 import (
 	internalchallenge "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/challenge"
-	tinygotypes "github.com/ralvarezdev/tinygo-types"
+	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
 	tinygobuffers "github.com/ralvarezdev/tinygo-buffers"
 )
 
@@ -49,7 +49,7 @@ func NewOutgoingMessageFromUint8Data(
 	category OutgoingCategory,
 	data uint8,
 	buffer []byte,
-) (OutgoingMessage, tinygotypes.ErrorCode) {
+) (OutgoingMessage, tinygoerrors.ErrorCode) {
 	// Check if the buffer is nil or too small
 	if buffer == nil || len(buffer) < Uint8BufferSize {
 		return OutgoingMessage{}, ErrorCodeUSBCDCBufferTooShortForRawUint8
@@ -61,7 +61,7 @@ func NewOutgoingMessageFromUint8Data(
 	return NewOutgoingMessage(
 		category,
 		buffer[:Uint8BufferSize],
-	), tinygotypes.ErrorCodeNil
+	), tinygoerrors.ErrorCodeNil
 }
 
 // NewOutgoingStatusMessage creates a new instance of OutgoingMessage with status content
@@ -77,7 +77,7 @@ func NewOutgoingMessageFromUint8Data(
 func NewOutgoingStatusMessage(
 	status OutgoingStatus,
 	buffer []byte,
-) (OutgoingMessage, tinygotypes.ErrorCode) {
+) (OutgoingMessage, tinygoerrors.ErrorCode) {
 	return NewOutgoingMessageFromUint8Data(
 		OutgoingCategoryStatus,
 		uint8(status),
@@ -98,7 +98,7 @@ func NewOutgoingStatusMessage(
 func NewOutgoingChallengeMessage(
 	challenge internalchallenge.Challenge,
 	buffer []byte,
-) (OutgoingMessage, tinygotypes.ErrorCode) {
+) (OutgoingMessage, tinygoerrors.ErrorCode) {
 	return NewOutgoingMessageFromUint8Data(
 		OutgoingCategoryChallenge,
 		uint8(challenge),
@@ -121,7 +121,7 @@ func NewOutgoingMessageFromUint16Data(
 	category OutgoingCategory,
 	data uint16,
 	buffer []byte,
-) (OutgoingMessage, tinygotypes.ErrorCode) {
+) (OutgoingMessage, tinygoerrors.ErrorCode) {
 	// Check if the buffer is nil or too small
 	if buffer == nil || len(buffer) < Uint16BufferSize {
 		return OutgoingMessage{}, ErrorCodeUSBCDCBufferTooShortForRawUint16
@@ -133,7 +133,7 @@ func NewOutgoingMessageFromUint16Data(
 	return NewOutgoingMessage(
 		category,
 		buffer[:Uint16BufferSize],
-	), tinygotypes.ErrorCodeNil
+	), tinygoerrors.ErrorCodeNil
 }
 
 // NewOutgoingErrorMessage creates a new instance of OutgoingMessage with error content
@@ -147,9 +147,9 @@ func NewOutgoingMessageFromUint16Data(
 //
 // An instance of OutgoingMessage, or an error if the buffer is nil or too small
 func NewOutgoingErrorMessage(
-	err tinygotypes.ErrorCode,
+	err tinygoerrors.ErrorCode,
 	buffer []byte,
-) (OutgoingMessage, tinygotypes.ErrorCode) {
+) (OutgoingMessage, tinygoerrors.ErrorCode) {
 	return NewOutgoingMessageFromUint16Data(
 		OutgoingCategoryError,
 		uint16(err),
@@ -172,7 +172,7 @@ func NewOutgoingMessageFromFloat64Data(
 	category OutgoingCategory,
 	value float64,
 	buffer []byte,
-) (OutgoingMessage, tinygotypes.ErrorCode) {
+) (OutgoingMessage, tinygoerrors.ErrorCode) {
 	// Check if the buffer is nil or too small
 	if buffer == nil || len(buffer) < Float64BufferSize {
 		return OutgoingMessage{}, ErrorCodeUSBCDCBufferTooShortForRawFloat64
@@ -184,5 +184,5 @@ func NewOutgoingMessageFromFloat64Data(
 	return NewOutgoingMessage(
 		category,
 		buffer[:Float64BufferSize],
-	), tinygotypes.ErrorCodeNil
+	), tinygoerrors.ErrorCodeNil
 }

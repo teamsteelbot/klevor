@@ -8,7 +8,7 @@ import (
 
 	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal"
 	tinygobno08x "github.com/ralvarezdev/tinygo-bno08x"
-	tinygotypes "github.com/ralvarezdev/tinygo-types"
+	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
 )
 
 var (
@@ -54,7 +54,7 @@ func init() {
 		tinygobno08x.NewUARTOptions(internal.Logger, false),
 		// tinygobno08x.NewUARTOptions(nil, false),
 	)
-	if err != tinygotypes.ErrorCodeNil {
+	if err != tinygoerrors.ErrorCodeNil {
 		internal.Logger.WarningMessageWithErrorCode(failedToInitializeBNO08xErrorMessage, err, true)
 		return
 	}
@@ -73,7 +73,7 @@ func init() {
 		machine.GPIO4,
 		internal.Logger,
 	)
-	if err != tinygotypes.ErrorCodeNil {
+	if err != tinygoerrors.ErrorCodeNil {
 		internal.Logger.WarningMessageWithErrorCode(failedToInitializeBNO08xErrorMessage, err, true)
 		os.Exit(1)
 	}

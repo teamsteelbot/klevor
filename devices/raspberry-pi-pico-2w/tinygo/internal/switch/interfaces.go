@@ -2,13 +2,13 @@ package _switch
 
 import (
 	tinygopullup "github.com/ralvarezdev/tinygo-pullup"
-	tinygotypes "github.com/ralvarezdev/tinygo-types"
+	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
 )
 
 type (
 	// Handler is the interface to manage the switch state.
 	Handler interface {
 		tinygopullup.Handler
-		Wait(onEvent func() tinygotypes.ErrorCode) tinygotypes.ErrorCode
+		Wait(onEvent func() tinygoerrors.ErrorCode) tinygoerrors.ErrorCode
 	}
 )

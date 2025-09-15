@@ -6,7 +6,7 @@ import (
 	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal"
 	internalledonboard "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/led/onboard"
 	internalservo "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/servo"
-	tinygotypes "github.com/ralvarezdev/tinygo-types"
+	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
 )
 
 var (
@@ -36,7 +36,7 @@ func main() {
 		for angle = 0; angle <= 90; angle += 1 {
 			if err := internalservo.ServoHandler.SetAngleToRight(
 				angle,
-			); err != tinygotypes.ErrorCodeNil {
+			); err != tinygoerrors.ErrorCodeNil {
 				internal.Logger.ErrorMessageWithErrorCode(failedToServoAngleToRightMessage, err, true)
 				return
 			}
@@ -44,7 +44,7 @@ func main() {
 		}
 
 		// Center the servo for a while
-		if err := internalservo.ServoHandler.SetAngleToCenter(); err != tinygotypes.ErrorCodeNil {
+		if err := internalservo.ServoHandler.SetAngleToCenter(); err != tinygoerrors.ErrorCodeNil {
 			internal.Logger.ErrorMessageWithErrorCode(failedToServoAngleToCenterMessage, err, true)
 			return
 		}
@@ -54,7 +54,7 @@ func main() {
 		for angle = 0; angle <= 90; angle += 1 {
 			if err := internalservo.ServoHandler.SetAngleToLeft(
 				angle,
-			); err != tinygotypes.ErrorCodeNil {
+			); err != tinygoerrors.ErrorCodeNil {
 				internal.Logger.ErrorMessageWithErrorCode(failedToServoAngleToLeftMessage, err, true)
 				return
 			}
@@ -62,7 +62,7 @@ func main() {
 		}
 
 		// Center the servo
-		if err := internalservo.ServoHandler.SetAngleToCenter(); err != tinygotypes.ErrorCodeNil {
+		if err := internalservo.ServoHandler.SetAngleToCenter(); err != tinygoerrors.ErrorCodeNil {
 			internal.Logger.ErrorMessageWithErrorCode(failedToServoAngleToCenterMessage, err, true)
 			return
 		}
@@ -70,7 +70,7 @@ func main() {
 
 		// Test servo full range
 		for angle = 0; angle <= 180; angle += 1 {
-			if err := internalservo.ServoHandler.SetAngle(angle); err != tinygotypes.ErrorCodeNil {
+			if err := internalservo.ServoHandler.SetAngle(angle); err != tinygoerrors.ErrorCodeNil {
 				internal.Logger.ErrorMessageWithErrorCode(failedToSetServoAngleMessage, err, true)
 				return
 			}
@@ -78,7 +78,7 @@ func main() {
 		}
 
 		// Center the servo
-		if err := internalservo.ServoHandler.SetAngleToCenter(); err != tinygotypes.ErrorCodeNil {
+		if err := internalservo.ServoHandler.SetAngleToCenter(); err != tinygoerrors.ErrorCodeNil {
 			internal.Logger.ErrorMessageWithErrorCode(failedToServoAngleToCenterMessage, err, true)
 			return
 		}

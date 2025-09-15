@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal"
-	tinygotypes "github.com/ralvarezdev/tinygo-types"
+	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
 )
 
 const (
@@ -41,33 +41,33 @@ const (
 
 
 const (
-	ErrorCodeChallengeNilHandler tinygotypes.ErrorCode = tinygotypes.ErrorCode(iota + ErrorCodeChallengeStartNumber)
+	ErrorCodeChallengeNilHandler tinygoerrors.ErrorCode = tinygoerrors.ErrorCode(iota + ErrorCodeChallengeStartNumber)
 	ErrorCodeChallengeNilObstaclesPullUpHandler
 	ErrorCodeChallengeNilParkingPullUpHandler
 	ErrorCodeChallengeInvalidChallengeUint8
 )
 
 const (
-	ErrorCodeCyw43439NilDevice tinygotypes.ErrorCode = tinygotypes.ErrorCode(iota + ErrorCodeCyw43439StartNumber)
+	ErrorCodeCyw43439NilDevice tinygoerrors.ErrorCode = tinygoerrors.ErrorCode(iota + ErrorCodeCyw43439StartNumber)
 	ErrorCodeCyw43439FailedToInitialize
 )
 
 const (
-	ErrorCodeLEDNilHandler tinygotypes.ErrorCode = tinygotypes.ErrorCode(iota + ErrorCodeLEDStartNumber)
+	ErrorCodeLEDNilHandler tinygoerrors.ErrorCode = tinygoerrors.ErrorCode(iota + ErrorCodeLEDStartNumber)
 	ErrorCodeLEDNegativeBlinkCount
 	ErrorCodeLEDNegativeDelayDuration
 )
 
 const (
-	ErrorCodeMovementNilHandler tinygotypes.ErrorCode = tinygotypes.ErrorCode(iota + ErrorCodeMovementStartNumber)
+	ErrorCodeMovementNilHandler tinygoerrors.ErrorCode = tinygoerrors.ErrorCode(iota + ErrorCodeMovementStartNumber)
 )
 
 const (
-	ErrorCodeSwitchNilOnEventFunction tinygotypes.ErrorCode = tinygotypes.ErrorCode(iota + ErrorCodeSwitchStartNumber)
+	ErrorCodeSwitchNilOnEventFunction tinygoerrors.ErrorCode = tinygoerrors.ErrorCode(iota + ErrorCodeSwitchStartNumber)
 )
 
 const (
-	ErrorCodeUSBCDCNilHandler tinygotypes.ErrorCode = tinygotypes.ErrorCode(iota + ErrorCodeUSBCDCStartNumber)
+	ErrorCodeUSBCDCNilHandler tinygoerrors.ErrorCode = tinygoerrors.ErrorCode(iota + ErrorCodeUSBCDCStartNumber)
 	ErrorCodeUSBCDCNilOutgoingCategory
 	ErrorCodeUSBCDCUnknownOutgoingCategory
 	ErrorCodeUSBCDCNilIncomingCategory
@@ -180,7 +180,7 @@ var (
 	IncomingChallengeWithoutObstaclesMessage = NewIncomingChallengeMessage(internal.ChallengeWithoutObstacles)
 
 	// ErrorCodeMessages maps error codes to their corresponding error messages.
-	ErrorCodeMessages = map[tinygotypes.ErrorCode]string{
+	ErrorCodeMessages = map[tinygoerrors.ErrorCode]string{
 		// Challenge errors
 		ErrorCodeChallengeNilHandler:                "challenge handler cannot be nil",
 		ErrorCodeChallengeNilObstaclesPullUpHandler: "challenge obstacles pull-up handler cannot be nil",

@@ -4,7 +4,7 @@ import (
 	"time"
 
 	tinygopullup "github.com/ralvarezdev/tinygo-pullup"
-	tinygotypes "github.com/ralvarezdev/tinygo-types"
+	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
 )
 
 type (
@@ -28,7 +28,7 @@ type (
 func NewDefaultHandler(
 	pullUpHandler tinygopullup.Handler,
 	interval time.Duration,
-) (*DefaultHandler, tinygotypes.ErrorCode) {
+) (*DefaultHandler, tinygoerrors.ErrorCode) {
 	// Validate parameters
 	if pullUpHandler == nil {
 		return nil, tinygopullup.ErrorCodePullUpResistorNilHandler
@@ -37,7 +37,7 @@ func NewDefaultHandler(
 	return &DefaultHandler{
 		pullUpHandler,
 		interval,
-	}, tinygotypes.ErrorCodeNil
+	}, tinygoerrors.ErrorCodeNil
 }
 
 // Wait waits for the switch to be pressed
@@ -49,7 +49,7 @@ func NewDefaultHandler(
 // Returns:
 //
 // An error if the wait fails
-func (d *DefaultHandler) Wait(onEvent func() tinygotypes.ErrorCode) tinygotypes.ErrorCode {
+func (d *DefaultHandler) Wait(onEvent func() tinygoerrors.ErrorCode) tinygoerrors.ErrorCode {
 	if onEvent == nil {
 		return ErrorCodeSwitchNilOnEventFunction
 	}

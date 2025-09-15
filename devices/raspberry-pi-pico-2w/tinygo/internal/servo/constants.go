@@ -7,7 +7,7 @@ import (
 	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal"
 	internalmovement "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/movement"
 	tinygoservo "github.com/ralvarezdev/tinygo-servo"
-	tinygotypes "github.com/ralvarezdev/tinygo-types"
+	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
 )
 
 const (
@@ -52,7 +52,7 @@ func init() {
 		IsDirectionInverted,
 		nil, // internal.Logger
 	)
-	if err != tinygotypes.ErrorCodeNil {
+	if err != tinygoerrors.ErrorCodeNil {
 		internal.Logger.ErrorMessageWithErrorCode(failedToInitializeServoMessage, err, true)
 		os.Exit(1)
 	}

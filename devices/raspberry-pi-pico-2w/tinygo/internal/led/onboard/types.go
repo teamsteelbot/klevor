@@ -6,7 +6,7 @@ import (
 	internalcyw43439 "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/cyw43439"
 	internalled "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/led"
 	soypatcyw43439 "github.com/soypat/cyw43439"
-	tinygotypes "github.com/ralvarezdev/tinygo-types"
+	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
 )
 
 type (
@@ -26,7 +26,7 @@ type (
 // Returns:
 //
 // An instance of DefaultHandler, or an error if the device is nil.
-func NewDefaultHandler(device *soypatcyw43439.Device) (*DefaultHandler, tinygotypes.ErrorCode) {
+func NewDefaultHandler(device *soypatcyw43439.Device) (*DefaultHandler, tinygoerrors.ErrorCode) {
 	if device == nil {
 		return nil, internalcyw43439.ErrorCodeCyw43439NilDevice
 	}
@@ -34,7 +34,7 @@ func NewDefaultHandler(device *soypatcyw43439.Device) (*DefaultHandler, tinygoty
 	return &DefaultHandler{
 		device,
 		false,
-	}, tinygotypes.ErrorCodeNil
+	}, tinygoerrors.ErrorCodeNil
 }
 
 // Setup initializes the onboard LED pin.
@@ -89,10 +89,10 @@ func (h *DefaultHandler) Toggle() {
 // Returns:
 //
 // An error if the blink operation fails, otherwise nil.
-func (h *DefaultHandler) Blink(times int, delay time.Duration) tinygotypes.ErrorCode {
+func (h *DefaultHandler) Blink(times int, delay time.Duration) tinygoerrors.ErrorCode {
 	// Validate the number of times to blink
 	if times == 0 {
-		return tinygotypes.ErrorCodeNil // No blinking needed
+		return tinygoerrors.ErrorCodeNil // No blinking needed
 	}
 	if times < 0 {
 		return internalled.ErrorCodeLEDNegativeBlinkCount
@@ -109,5 +109,5 @@ func (h *DefaultHandler) Blink(times int, delay time.Duration) tinygotypes.Error
 		h.SetOff()
 		time.Sleep(delay)
 	}
-	return tinygotypes.ErrorCodeNil
+	return tinygoerrors.ErrorCodeNil
 }

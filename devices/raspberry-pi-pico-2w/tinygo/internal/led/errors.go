@@ -1,7 +1,7 @@
 package led
 
 import (
-	tinygotypes "github.com/ralvarezdev/tinygo-types"
+	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
 )
 
 const (
@@ -10,7 +10,7 @@ const (
 )
 
 const (
-	ErrorCodeLEDNilHandler tinygotypes.ErrorCode = tinygotypes.ErrorCode(iota + ErrorCodeLEDStartNumber)
+	ErrorCodeLEDNilHandler tinygoerrors.ErrorCode = tinygoerrors.ErrorCode(iota + ErrorCodeLEDStartNumber)
 	ErrorCodeLEDNegativeBlinkCount
 	ErrorCodeLEDNegativeDelayDuration
 )

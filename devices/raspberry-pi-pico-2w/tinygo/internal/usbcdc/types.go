@@ -7,7 +7,7 @@ import (
 
 	internalchallenge "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/challenge"
 	internalled "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/led"
-	tinygotypes "github.com/ralvarezdev/tinygo-types"
+	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
 	tinygobno08x "github.com/ralvarezdev/tinygo-bno08x"
 )
 
@@ -35,7 +35,7 @@ type (
 func NewDefaultHandler(
 	challengeHandler internalchallenge.Handler,
 	ledHandler internalled.Handler,
-) (*DefaultHandler, tinygotypes.ErrorCode) {
+) (*DefaultHandler, tinygoerrors.ErrorCode) {
 	// Check if the challengeHandler is nil
 	if challengeHandler == nil {
 		return nil, internalchallenge.ErrorCodeChallengeNilHandler
@@ -67,7 +67,7 @@ func NewDefaultHandler(
 		serialer:         machine.USBCDC,
 		incomingMessageBuffer: make([]byte, MaxIncomingMessageDataLength),
 		outgoingMessageBuffer: make([]byte, MaxOutgoingMessageDataLength),
-	}, tinygotypes.ErrorCodeNil
+	}, tinygoerrors.ErrorCodeNil
 }
 
 // IsAvailableToRead checks if there are messages available to read from the USB CDC.
@@ -88,7 +88,7 @@ func (d *DefaultHandler) IsAvailableToRead() bool {
 // Returns:
 //
 // The byte read and an error if it fails to read the byte
-func (d *DefaultHandler) readByte(timeout time.Duration) (byte, tinygotypes.ErrorCode) {
+func (d *DefaultHandler) readByte(timeout time.Duration) (byte, tinygoerrors.ErrorCode) {
 	startTime := time.Now()
 	for time.Since(startTime) < timeout {
 		if d.serialer.Buffered() > 0 {
@@ -96,7 +96,7 @@ func (d *DefaultHandler) readByte(timeout time.Duration) (byte, tinygotypes.Erro
 			if err != nil {
 				return 0, ErrorCodeUSBCDCFailedReadingFromSerial
 			}
-			return c, tinygotypes.ErrorCodeNil
+			return c, tinygoerrors.ErrorCodeNil
 		}
 	}
 	return 0, ErrorCodeUSBCDCReadByteTimeout
@@ -111,7 +111,7 @@ func (d *DefaultHandler) readByte(timeout time.Duration) (byte, tinygotypes.Erro
 // Returns:
 //
 // The incoming message and an error if it fails to read the message
-func (d *DefaultHandler) ReadMessage(timeout time.Duration) (IncomingMessage, tinygotypes.ErrorCode) {
+func (d *DefaultHandler) ReadMessage(timeout time.Duration) (IncomingMessage, tinygoerrors.ErrorCode) {
 	// If no messages are received, turn off the LED
 	if d.serialer.Buffered() == 0 && d.ledHandler.IsOn() {
 		d.ledHandler.SetOff()
@@ -127,36 +127,36 @@ func (d *DefaultHandler) ReadMessage(timeout time.Duration) (IncomingMessage, ti
 		// Read a byte from the serial port until the start character is found
 		for {
 			c, err := d.readByte(timeout - time.Since(startTime))
-			if err != tinygotypes.ErrorCodeNil {
+			if err != tinygoerrors.ErrorCodeNil {
 				return IncomingMessage{}, err
 			}
-			if c == StartAndEndChar {
+			if c == StartAndEndByte {
 				break
 			}
 		}
 
 		// Get the next byte as the category, omit if it's another start character
 		c, err := d.readByte(timeout - time.Since(startTime))
-		if err != tinygotypes.ErrorCodeNil {
+		if err != tinygoerrors.ErrorCodeNil {
 			return IncomingMessage{}, err
 		}
-		if c == StartAndEndChar {
+		if c == StartAndEndByte {
 			// Read the next byte as the category
 			c, err = d.readByte(timeout - time.Since(startTime))
-			if err != tinygotypes.ErrorCodeNil {
+			if err != tinygoerrors.ErrorCodeNil {
 				return IncomingMessage{}, err
 			}
 		}
 		
 		// Convert the byte to IncomingCategory
 		category, err := IncomingCategoryFromUint8(c)
-		if err != tinygotypes.ErrorCodeNil {
+		if err != tinygoerrors.ErrorCodeNil {
 			return IncomingMessage{}, err
 		}
 
 		// Get the next byte as the data length
 		dataLengthByte, err := d.readByte(timeout - time.Since(startTime))
-		if err != tinygotypes.ErrorCodeNil {
+		if err != tinygoerrors.ErrorCodeNil {
 			return IncomingMessage{}, err
 		}
 		dataLength := int(dataLengthByte)
@@ -168,7 +168,7 @@ func (d *DefaultHandler) ReadMessage(timeout time.Duration) (IncomingMessage, ti
 
 		// Compare the data length with the expected length for the category
 		expectedDataLength, err := category.DataLength()
-		if err != tinygotypes.ErrorCodeNil {
+		if err != tinygoerrors.ErrorCodeNil {
 			return IncomingMessage{}, err
 		}
 		if dataLength != expectedDataLength {
@@ -179,13 +179,13 @@ func (d *DefaultHandler) ReadMessage(timeout time.Duration) (IncomingMessage, ti
 		data := d.incomingMessageBuffer[:dataLength]
 		for i := 0; i < dataLength; i++ {
 			c, err := d.readByte(timeout - time.Since(startTime))
-			if err != tinygotypes.ErrorCodeNil {
+			if err != tinygoerrors.ErrorCodeNil {
 				return IncomingMessage{}, err
 			}
 			if c == ControlByte {
 				// Read the next byte and XOR it with XORByte
 				c, err = d.readByte(timeout - time.Since(startTime))
-				if err != tinygotypes.ErrorCodeNil {
+				if err != tinygoerrors.ErrorCodeNil {
 					return IncomingMessage{}, err
 				}
 				c ^= XORByte
@@ -198,7 +198,7 @@ func (d *DefaultHandler) ReadMessage(timeout time.Duration) (IncomingMessage, ti
 			Category: category,
 			Data:     data,
 		}
-		return message, tinygotypes.ErrorCodeNil
+		return message, tinygoerrors.ErrorCodeNil
 	}
 	return IncomingMessage{}, ErrorCodeUSBCDCReadMessageTimeout
 }
@@ -212,7 +212,7 @@ func (d *DefaultHandler) ReadMessage(timeout time.Duration) (IncomingMessage, ti
 // Returns:
 //
 // An error if it fails to send the message
-func (d *DefaultHandler) SendMessage(message OutgoingMessage) tinygotypes.ErrorCode {
+func (d *DefaultHandler) SendMessage(message OutgoingMessage) tinygoerrors.ErrorCode {
 	// Write the start character
 	if err := d.serialer.WriteByte(StartAndEndByte); err != nil {
 		return ErrorCodeUSBCDCFailedToSendStartByte
@@ -231,7 +231,7 @@ func (d *DefaultHandler) SendMessage(message OutgoingMessage) tinygotypes.ErrorC
 
 	// Compare the data length with the expected length for the category
 	expectedDataLength, err := message.Category.DataLength()
-	if err != tinygotypes.ErrorCodeNil {
+	if err != tinygoerrors.ErrorCodeNil {
 		return err
 	}
 	if dataLength != expectedDataLength {
@@ -246,11 +246,11 @@ func (d *DefaultHandler) SendMessage(message OutgoingMessage) tinygotypes.ErrorC
 	// Send the message data bytes
 	for _, b := range message.Data {
 		// If the byte is a special character, send the control character first
-		if b == StartAndEndChar || b == ControlChar {
-			if err := d.serialer.WriteByte(ControlChar); err != nil {
+		if b == StartAndEndByte || b == ControlByte {
+			if err := d.serialer.WriteByte(ControlByte); err != nil {
 				return ErrorCodeUSBCDCFailedToSendControlByte
 			}
-			b ^= XORChar // XOR the byte with XORChar
+			b ^= XORByte // XOR the byte with XORByte
 		}
 		if err := d.serialer.WriteByte(b); err != nil {
 			return ErrorCodeUSBCDCFailedToSendMessageContent
@@ -258,10 +258,10 @@ func (d *DefaultHandler) SendMessage(message OutgoingMessage) tinygotypes.ErrorC
 	}
 
 	// Send the end character
-	if err := d.serialer.WriteByte(StartAndEndChar); err != nil {
+	if err := d.serialer.WriteByte(StartAndEndByte); err != nil {
 		return ErrorCodeUSBCDCFailedToSendEndByte
 	}
-	return tinygotypes.ErrorCodeNil
+	return tinygoerrors.ErrorCodeNil
 }
 
 // SendInitializationMessage sends an initialization message to the USB CDC.
@@ -269,12 +269,12 @@ func (d *DefaultHandler) SendMessage(message OutgoingMessage) tinygotypes.ErrorC
 // Returns:
 //
 // An error if it fails to send the initialization message
-func (d *DefaultHandler) SendInitializationMessage() tinygotypes.ErrorCode {
+func (d *DefaultHandler) SendInitializationMessage() tinygoerrors.ErrorCode {
 	// Send the start character message to indicate initialization
-	if err := d.serialer.WriteByte(StartAndEndChar); err != nil {
+	if err := d.serialer.WriteByte(StartAndEndByte); err != nil {
 		return ErrorCodeUSBCDCFailedToSendInitializationMessage
 	}
-	return tinygotypes.ErrorCodeNil
+	return tinygoerrors.ErrorCodeNil
 }
 
 // SendBNO08XQuaternionMessages sends BNO08X quaternion messages to the USB CDC.
@@ -286,7 +286,7 @@ func (d *DefaultHandler) SendInitializationMessage() tinygotypes.ErrorCode {
 // Returns:
 //
 // An error if it fails to send any of the quaternion messages.
-func (d *DefaultHandler) SendBNO08XQuaternionMessages(quaternion [4]float64) tinygotypes.ErrorCode {
+func (d *DefaultHandler) SendBNO08XQuaternionMessages(quaternion [4]float64) tinygoerrors.ErrorCode {
 	for i, value := range quaternion {
 		var category OutgoingCategory
 		switch i {
@@ -308,16 +308,16 @@ func (d *DefaultHandler) SendBNO08XQuaternionMessages(quaternion [4]float64) tin
 			value,
 			d.outgoingMessageBuffer[:Float64BufferSize],
 		)
-		if err != tinygotypes.ErrorCodeNil {
+		if err != tinygoerrors.ErrorCodeNil {
 			return err
 		}
 
 		// Send the quaternion components as separate messages
-		if err = d.SendMessage(message); err != tinygotypes.ErrorCodeNil {
+		if err = d.SendMessage(message); err != tinygoerrors.ErrorCodeNil {
 			return err
 		}
 	}
-	return tinygotypes.ErrorCodeNil
+	return tinygoerrors.ErrorCodeNil
 }
 
 // SendBNO08XEulerDegreesMessages sends BNO08X Euler degrees messages to the USB CDC.
@@ -329,7 +329,7 @@ func (d *DefaultHandler) SendBNO08XQuaternionMessages(quaternion [4]float64) tin
 // Returns:
 //
 // An error if it fails to send any of the Euler degrees messages.
-func (d *DefaultHandler) SendBNO08XEulerDegreesMessages(eulerDegrees [3]float64) tinygotypes.ErrorCode {
+func (d *DefaultHandler) SendBNO08XEulerDegreesMessages(eulerDegrees [3]float64) tinygoerrors.ErrorCode {
 	for i, value := range eulerDegrees {
 		var category OutgoingCategory
 		switch i {
@@ -349,16 +349,16 @@ func (d *DefaultHandler) SendBNO08XEulerDegreesMessages(eulerDegrees [3]float64)
 			value,
 			d.outgoingMessageBuffer[:Float64BufferSize],
 		)
-		if err != tinygotypes.ErrorCodeNil {
+		if err != tinygoerrors.ErrorCodeNil {
 			return err
 		}
 
 		// Send the Euler angles as separate messages
-		if err = d.SendMessage(message); err != tinygotypes.ErrorCodeNil {
+		if err = d.SendMessage(message); err != tinygoerrors.ErrorCodeNil {
 			return err
 		}
 	}
-	return tinygotypes.ErrorCodeNil
+	return tinygoerrors.ErrorCodeNil
 }
 
 // SendChallengeMessage sends a challenge message to the USB CDC.
@@ -366,7 +366,7 @@ func (d *DefaultHandler) SendBNO08XEulerDegreesMessages(eulerDegrees [3]float64)
 // Returns:
 //
 // An error if it fails to send the challenge message or if confirmation is not received
-func (d *DefaultHandler) SendChallengeMessage() tinygotypes.ErrorCode {
+func (d *DefaultHandler) SendChallengeMessage() tinygoerrors.ErrorCode {
 	// Get the challenge type from the challenge handler
 	challenge := d.challengeHandler.GetChallenge()
 
@@ -375,12 +375,12 @@ func (d *DefaultHandler) SendChallengeMessage() tinygotypes.ErrorCode {
 		challenge,
 		d.outgoingMessageBuffer[:Uint8BufferSize],
 	)
-	if err != tinygotypes.ErrorCodeNil {
+	if err != tinygoerrors.ErrorCodeNil {
 		return err
 	}
 
 	// Send the challenge message
-	if err := d.SendMessage(challengeMessage); err != tinygotypes.ErrorCodeNil {
+	if err := d.SendMessage(challengeMessage); err != tinygoerrors.ErrorCodeNil {
 		return err
 	}
 
@@ -399,13 +399,13 @@ func (d *DefaultHandler) SendChallengeMessage() tinygotypes.ErrorCode {
 // Returns:
 //
 // An error if it fails to send the error message
-func (d *DefaultHandler) SendErrorMessage(errorCode tinygotypes.ErrorCode) tinygotypes.ErrorCode {
+func (d *DefaultHandler) SendErrorMessage(errorCode tinygoerrors.ErrorCode) tinygoerrors.ErrorCode {
 	// Create the error message
 	errorMessage, err := NewOutgoingErrorMessage(
 		errorCode,
 		d.outgoingMessageBuffer[:Uint16BufferSize],
 	)
-	if err != tinygotypes.ErrorCodeNil {
+	if err != tinygoerrors.ErrorCodeNil {
 		return err
 	}
 	return d.SendMessage(errorMessage)
@@ -416,18 +416,18 @@ func (d *DefaultHandler) SendErrorMessage(errorCode tinygotypes.ErrorCode) tinyg
 // Returns:
 //
 // An error if it fails to send the start message
-func (d *DefaultHandler) SendStartMessage() tinygotypes.ErrorCode {
+func (d *DefaultHandler) SendStartMessage() tinygoerrors.ErrorCode {
 	// Create the start message
 	startMessage, err := NewOutgoingStatusMessage(
 		OutgoingStatusStart,
 		d.outgoingMessageBuffer[:Uint8BufferSize],
 	)
-	if err != tinygotypes.ErrorCodeNil {
+	if err != tinygoerrors.ErrorCodeNil {
 		return err
 	}
 
 	// Send the start message
-	if err := d.SendMessage(startMessage); err != tinygotypes.ErrorCodeNil {
+	if err := d.SendMessage(startMessage); err != tinygoerrors.ErrorCodeNil {
 		return err
 	}
 
@@ -442,13 +442,13 @@ func (d *DefaultHandler) SendStartMessage() tinygotypes.ErrorCode {
 // Returns:
 //
 // An error if it fails to send the confirmation message
-func (d *DefaultHandler) SendConfirmationMessage() tinygotypes.ErrorCode {
+func (d *DefaultHandler) SendConfirmationMessage() tinygoerrors.ErrorCode {
 	// Create the confirmation message
 	confirmationMessage, err := NewOutgoingStatusMessage(
 		OutgoingStatusOK,
 		d.outgoingMessageBuffer[:Uint8BufferSize],
 	)
-	if err != tinygotypes.ErrorCodeNil {
+	if err != tinygoerrors.ErrorCodeNil {
 		return err
 	}
 	return d.SendMessage(confirmationMessage)
@@ -463,14 +463,14 @@ func (d *DefaultHandler) SendConfirmationMessage() tinygotypes.ErrorCode {
 // Returns:
 //
 // An error if it fails to send the maximum motor speed value message
-func (d *DefaultHandler) SendMaxMotorSpeedValueMessage(maxMotorSpeed uint16) tinygotypes.ErrorCode {
+func (d *DefaultHandler) SendMaxMotorSpeedValueMessage(maxMotorSpeed uint16) tinygoerrors.ErrorCode {
 	// Create the max motor speed value message
 	maxMotorSpeedMessage, err := NewOutgoingMessageFromUint16Data(
 		OutgoingCategoryMaxMotorSpeedValue,
 		maxMotorSpeed,
 		d.outgoingMessageBuffer[:Uint16BufferSize],
 	)
-	if err != tinygotypes.ErrorCodeNil {
+	if err != tinygoerrors.ErrorCodeNil {
 		return err
 	}
 	return d.SendMessage(maxMotorSpeedMessage)
@@ -485,14 +485,14 @@ func (d *DefaultHandler) SendMaxMotorSpeedValueMessage(maxMotorSpeed uint16) tin
 // Returns:
 //
 // An error if it fails to send the maximum servo direction value message
-func (d *DefaultHandler) SendMaxServoDirectionValueMessage(maxServoDirection uint16) tinygotypes.ErrorCode {
+func (d *DefaultHandler) SendMaxServoDirectionValueMessage(maxServoDirection uint16) tinygoerrors.ErrorCode {
 	// Create the max servo direction value message
 	maxServoDirectionMessage, err := NewOutgoingMessageFromUint16Data(
 		OutgoingCategoryMaxServoDirectionValue,
 		maxServoDirection,
 		d.outgoingMessageBuffer[:Uint16BufferSize],
 	)
-	if err != tinygotypes.ErrorCodeNil {
+	if err != tinygoerrors.ErrorCodeNil {
 		return err
 	}
 	return d.SendMessage(maxServoDirectionMessage)
@@ -509,19 +509,19 @@ func (d *DefaultHandler) SendMaxServoDirectionValueMessage(maxServoDirection uin
 // An error if it fails to receive the confirmation message within the timeout
 func (d *DefaultHandler) WaitForConfirmationMessage(
 	timeout time.Duration,
-) tinygotypes.ErrorCode {
+) tinygoerrors.ErrorCode {
 	startTime := time.Now()
 	for time.Since(startTime) < timeout {
 		// Read message with the remaining timeout duration
 		message, err := d.ReadMessage(timeout - time.Since(startTime))
-		if err != tinygotypes.ErrorCodeNil {
+		if err != tinygoerrors.ErrorCodeNil {
 			return err
 		}
 
 		// Check if any of the received messages is the confirmation message
 		if message.Category == IncomingCategoryStatus && len(message.Data) == 1 {
 			if message.Data[0] == byte(OutgoingStatusOK) {
-				return tinygotypes.ErrorCodeNil
+				return tinygoerrors.ErrorCodeNil
 			}
 		}
 	}

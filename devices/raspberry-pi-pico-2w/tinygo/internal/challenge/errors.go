@@ -1,7 +1,7 @@
 package challenge
 
 import (
-	tinygotypes "github.com/ralvarezdev/tinygo-types"
+	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
 )
 
 const (
@@ -10,7 +10,7 @@ const (
 )
 
 const (
-	ErrorCodeChallengeNilHandler tinygotypes.ErrorCode = tinygotypes.ErrorCode(iota + ErrorCodeChallengeStartNumber)
+	ErrorCodeChallengeNilHandler tinygoerrors.ErrorCode = tinygoerrors.ErrorCode(iota + ErrorCodeChallengeStartNumber)
 	ErrorCodeChallengeNilObstaclesPullUpHandler
 	ErrorCodeChallengeNilParkingPullUpHandler
 	ErrorCodeChallengeInvalidChallengeUint8

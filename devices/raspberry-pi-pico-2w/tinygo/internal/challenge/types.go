@@ -2,7 +2,7 @@ package challenge
 
 import (
 	tinygopullup "github.com/ralvarezdev/tinygo-pullup"
-	tinygotypes "github.com/ralvarezdev/tinygo-types"
+	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
 )
 
 type (
@@ -25,7 +25,7 @@ type (
 func NewDefaultHandler(
 	obstaclesPullUpHandler tinygopullup.Handler,
 	parkingPullUpHandler tinygopullup.Handler,
-) (*DefaultHandler, tinygotypes.ErrorCode) {
+) (*DefaultHandler, tinygoerrors.ErrorCode) {
 	// Check if one of the pull-up handlers is nil
 	if obstaclesPullUpHandler == nil {
 		return nil, ErrorCodeChallengeNilObstaclesPullUpHandler
@@ -37,7 +37,7 @@ func NewDefaultHandler(
 	return &DefaultHandler{
 		obstaclesPullUpHandler,
 		parkingPullUpHandler,
-	}, tinygotypes.ErrorCodeNil
+	}, tinygoerrors.ErrorCodeNil
 }
 
 // IsWithObstacles checks if the challenge is with obstacles but not parking.

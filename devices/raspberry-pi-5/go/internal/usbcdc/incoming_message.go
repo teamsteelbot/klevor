@@ -8,7 +8,7 @@ import (
 
 	gotinygoerrors "github.com/ralvarezdev/go-tinygo-errors"
 	"github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal"
-	tinygotypes "github.com/ralvarezdev/tinygo-types"
+	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
 )
 
 type (
@@ -164,9 +164,9 @@ func (msg *IncomingMessage) StringToPrint() string {
 
 		// Get the error message from the common error codes package. If not found, try to get it from the local error codes
 		var errorCodeMessage string
-		if errorMessage, ok := gotinygoerrors.ErrorCodeMessages[tinygotypes.ErrorCode(value)]; ok {
+		if errorMessage, ok := gotinygoerrors.ErrorCodeMessages[tinygoerrors.ErrorCode(value)]; ok {
 			errorCodeMessage = errorMessage
-		} else if internalErrorMessage, ok := ErrorCodeMessages[tinygotypes.ErrorCode(value)]; ok {
+		} else if internalErrorMessage, ok := ErrorCodeMessages[tinygoerrors.ErrorCode(value)]; ok {
 			errorCodeMessage = internalErrorMessage
 		}
 

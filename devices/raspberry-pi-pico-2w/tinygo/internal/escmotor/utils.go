@@ -2,7 +2,7 @@ package escmotor
 
 import (
 	internalusbcdc "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc"
-	tinygotypes "github.com/ralvarezdev/tinygo-types"
+	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
 	tinygobuffers "github.com/ralvarezdev/tinygo-buffers"
 )
 
@@ -16,13 +16,13 @@ import (
 // Returns:
 //
 // An error if the motor speed could not be set, otherwise nil
-func SetSpeedBasedOnReceivedMessage(message internalusbcdc.IncomingMessage) tinygotypes.ErrorCode {
+func SetSpeedBasedOnReceivedMessage(message internalusbcdc.IncomingMessage) tinygoerrors.ErrorCode {
 	// Check if the motor speed should be retrieved from the message
 	var motorSpeed uint16
 	if message.Category != internalusbcdc.IncomingCategoryMotorSpeedStop {
 		// Get int16 speed from message content
 		speed, err := tinygobuffers.BytesToUint16(message.Data)
-		if err != tinygotypes.ErrorCodeNil {
+		if err != tinygoerrors.ErrorCodeNil {
 			return err
 		}
 		motorSpeed = speed

@@ -1,7 +1,7 @@
 package usbcdc
 
 import (
-	tinygotypes "github.com/ralvarezdev/tinygo-types"
+	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
 )
 
 type (
@@ -27,16 +27,16 @@ const (
 // Returns:
 //
 // The size in bytes of the data for the given category, or an error if the category is invalid
-func (i IncomingCategory) DataLength() (int, tinygotypes.ErrorCode) {
+func (i IncomingCategory) DataLength() (int, tinygoerrors.ErrorCode) {
 	switch i {
 	case IncomingCategoryNil:
 		return 0, ErrorCodeUSBCDCNilIncomingCategory
 	case IncomingCategoryMotorSpeedStop, IncomingCategoryServoDirectionCenter, IncomingCategoryGetMaxMotorSpeedValue, IncomingCategoryGetMaxServoDirectionValue:
-		return 0, tinygotypes.ErrorCodeNil
+		return 0, tinygoerrors.ErrorCodeNil
 	case IncomingCategoryStatus:
-		return 1, tinygotypes.ErrorCodeNil
+		return 1, tinygoerrors.ErrorCodeNil
 	case IncomingCategoryMotorSpeedForward, IncomingCategoryMotorSpeedBackward, IncomingCategoryServoDirectionToLeft, IncomingCategoryServoDirectionToRight:
-		return 2, tinygotypes.ErrorCodeNil
+		return 2, tinygoerrors.ErrorCodeNil
 	default:
 		return 0, ErrorCodeUSBCDCUnknownIncomingCategory
 	}
@@ -73,28 +73,28 @@ func (i IncomingCategory) IsAMotorCategory() bool {
 // Returns:
 //
 // The IncomingCategory enum value, or an error if the key wasn't found for the given value
-func IncomingCategoryFromUint8(value uint8) (IncomingCategory, tinygotypes.ErrorCode) {
+func IncomingCategoryFromUint8(value uint8) (IncomingCategory, tinygoerrors.ErrorCode) {
 	switch IncomingCategory(value) {
 	case IncomingCategoryNil:
-		return IncomingCategoryNil, tinygotypes.ErrorCodeNil
+		return IncomingCategoryNil, tinygoerrors.ErrorCodeNil
 	case IncomingCategoryStatus:
-		return IncomingCategoryStatus, tinygotypes.ErrorCodeNil
+		return IncomingCategoryStatus, tinygoerrors.ErrorCodeNil
 	case IncomingCategoryMotorSpeedStop:
-		return IncomingCategoryMotorSpeedStop, tinygotypes.ErrorCodeNil
+		return IncomingCategoryMotorSpeedStop, tinygoerrors.ErrorCodeNil
 	case IncomingCategoryMotorSpeedForward:
-		return IncomingCategoryMotorSpeedForward, tinygotypes.ErrorCodeNil
+		return IncomingCategoryMotorSpeedForward, tinygoerrors.ErrorCodeNil
 	case IncomingCategoryMotorSpeedBackward:
-		return IncomingCategoryMotorSpeedBackward, tinygotypes.ErrorCodeNil
+		return IncomingCategoryMotorSpeedBackward, tinygoerrors.ErrorCodeNil
 	case IncomingCategoryGetMaxMotorSpeedValue:
-		return IncomingCategoryGetMaxMotorSpeedValue, tinygotypes.ErrorCodeNil
+		return IncomingCategoryGetMaxMotorSpeedValue, tinygoerrors.ErrorCodeNil
 	case IncomingCategoryServoDirectionCenter:
-		return IncomingCategoryServoDirectionCenter, tinygotypes.ErrorCodeNil
+		return IncomingCategoryServoDirectionCenter, tinygoerrors.ErrorCodeNil
 	case IncomingCategoryServoDirectionToLeft:
-		return IncomingCategoryServoDirectionToLeft, tinygotypes.ErrorCodeNil
+		return IncomingCategoryServoDirectionToLeft, tinygoerrors.ErrorCodeNil
 	case IncomingCategoryServoDirectionToRight:
-		return IncomingCategoryServoDirectionToRight, tinygotypes.ErrorCodeNil
+		return IncomingCategoryServoDirectionToRight, tinygoerrors.ErrorCodeNil
 	case IncomingCategoryGetMaxServoDirectionValue:
-		return IncomingCategoryGetMaxServoDirectionValue, tinygotypes.ErrorCodeNil
+		return IncomingCategoryGetMaxServoDirectionValue, tinygoerrors.ErrorCodeNil
 	default:
 		return IncomingCategoryNil, ErrorCodeUSBCDCUnknownIncomingCategory
 	}

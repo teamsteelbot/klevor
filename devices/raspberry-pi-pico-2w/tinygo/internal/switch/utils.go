@@ -3,7 +3,7 @@ package _switch
 import (
 	internalled "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/led"
 	internalusbcdc "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc"
-	tinygotypes "github.com/ralvarezdev/tinygo-types"
+	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
 )
 
 // SwitchOnEventGenerator returns a function that initializes USB CDC communication and provides visual feedback via an LED when the switch is pressed.
@@ -19,20 +19,20 @@ import (
 func SwitchOnEventGenerator(
 	usbCDChandler internalusbcdc.Handler,
 	ledHandler internalled.Handler,
-) func() tinygotypes.ErrorCode {
-	return func() tinygotypes.ErrorCode {
+) func() tinygoerrors.ErrorCode {
+	return func() tinygoerrors.ErrorCode {
 		// Send initialization message
-		if err := usbCDChandler.SendInitializationMessage(); err != tinygotypes.ErrorCodeNil {
+		if err := usbCDChandler.SendInitializationMessage(); err != tinygoerrors.ErrorCodeNil {
 			return err
 		}
 
 		// Send start message
-		if err := usbCDChandler.SendStartMessage(); err != tinygotypes.ErrorCodeNil {
+		if err := usbCDChandler.SendStartMessage(); err != tinygoerrors.ErrorCodeNil {
 			return err
 		}
 
 		// Send challenge message
-		if err := usbCDChandler.SendChallengeMessage(); err != tinygotypes.ErrorCodeNil {
+		if err := usbCDChandler.SendChallengeMessage(); err != tinygoerrors.ErrorCodeNil {
 			return err
 		}
 
@@ -41,10 +41,10 @@ func SwitchOnEventGenerator(
 			if err := ledHandler.Blink(
 				internalled.DefaultBlinkTimes,
 				internalled.DefaultBlinkDelay,
-			); err != tinygotypes.ErrorCodeNil {
+			); err != tinygoerrors.ErrorCodeNil {
 				return err
 			}
 		}
-		return tinygotypes.ErrorCodeNil
+		return tinygoerrors.ErrorCodeNil
 	}
 }

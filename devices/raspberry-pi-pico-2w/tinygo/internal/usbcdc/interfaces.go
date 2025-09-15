@@ -3,27 +3,27 @@ package usbcdc
 import (
 	"time"
 
-	tinygotypes "github.com/ralvarezdev/tinygo-types"
+	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
 )
 
 type (
 	// Handler is the interface to manage the USB CDC connection.
 	Handler interface {
 		IsAvailableToRead() bool
-		ReadMessage(timeout time.Duration) (IncomingMessage, tinygotypes.ErrorCode)
-		SendMessage(message OutgoingMessage) tinygotypes.ErrorCode
-		SendBNO08XQuaternionMessages(quaternion [4]float64) tinygotypes.ErrorCode
-		SendBNO08XEulerDegreesMessages(eulerDegrees [3]float64) tinygotypes.ErrorCode
-		SendInitializationMessage() tinygotypes.ErrorCode
-		SendChallengeMessage() tinygotypes.ErrorCode
-		SendErrorMessage(err tinygotypes.ErrorCode) tinygotypes.ErrorCode
-		SendStartMessage() tinygotypes.ErrorCode
-		SendConfirmationMessage() tinygotypes.ErrorCode
-		SendMaxMotorSpeedValueMessage(maxMotorSpeed uint16) tinygotypes.ErrorCode
-		SendMaxServoDirectionValueMessage(maxServoDirection uint16) tinygotypes.ErrorCode
+		ReadMessage(timeout time.Duration) (IncomingMessage, tinygoerrors.ErrorCode)
+		SendMessage(message OutgoingMessage) tinygoerrors.ErrorCode
+		SendBNO08XQuaternionMessages(quaternion [4]float64) tinygoerrors.ErrorCode
+		SendBNO08XEulerDegreesMessages(eulerDegrees [3]float64) tinygoerrors.ErrorCode
+		SendInitializationMessage() tinygoerrors.ErrorCode
+		SendChallengeMessage() tinygoerrors.ErrorCode
+		SendErrorMessage(err tinygoerrors.ErrorCode) tinygoerrors.ErrorCode
+		SendStartMessage() tinygoerrors.ErrorCode
+		SendConfirmationMessage() tinygoerrors.ErrorCode
+		SendMaxMotorSpeedValueMessage(maxMotorSpeed uint16) tinygoerrors.ErrorCode
+		SendMaxServoDirectionValueMessage(maxServoDirection uint16) tinygoerrors.ErrorCode
 		WaitForConfirmationMessage(
 			timeout time.Duration,
-		) tinygotypes.ErrorCode
+		) tinygoerrors.ErrorCode
 		Stop()
 	}
 )

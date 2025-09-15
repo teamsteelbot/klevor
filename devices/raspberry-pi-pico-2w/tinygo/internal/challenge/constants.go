@@ -6,7 +6,7 @@ import (
 	"machine"
 
 	tinygopullup "github.com/ralvarezdev/tinygo-pullup"
-	tinygotypes "github.com/ralvarezdev/tinygo-types"
+	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
 	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal"
 )
 
@@ -34,7 +34,7 @@ func init() {
 		ObstaclesPullUpHandler,
 		ParkingPullUpHandler,
 	)
-	if err != tinygotypes.ErrorCodeNil {
+	if err != tinygoerrors.ErrorCodeNil {
 		internal.Logger.ErrorMessageWithErrorCode(failedToInitializeChallengeMessage, err, true)
 		os.Exit(1)
 	}

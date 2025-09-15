@@ -6,7 +6,7 @@ import (
 	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal"
 	internalescmotor "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/escmotor"
 	internalledonboard "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/led/onboard"
-	tinygotypes "github.com/ralvarezdev/tinygo-types"
+	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
 )
 
 var (
@@ -36,7 +36,7 @@ func main() {
 		for speed = 0; speed <= 100; speed += 1 {
 			if err := internalescmotor.ESCMotorHandler.SetSpeedForward(
 				speed,
-			); err != tinygotypes.ErrorCodeNil {
+			); err != tinygoerrors.ErrorCodeNil {
 				internal.Logger.ErrorMessageWithErrorCode(failedToSetMotorSpeedForwardMessage, err, true)
 				return
 			}
@@ -44,7 +44,7 @@ func main() {
 		}
 
 		// Stop the motor for a while
-		if err := internalescmotor.ESCMotorHandler.Stop(); err != tinygotypes.ErrorCodeNil {
+		if err := internalescmotor.ESCMotorHandler.Stop(); err != tinygoerrors.ErrorCodeNil {
 			internal.Logger.ErrorMessageWithErrorCode(failedToStopMotorMessage, err, true)
 			return
 		}
@@ -54,7 +54,7 @@ func main() {
 		for speed = 0; speed <= 100; speed += 1 {
 			if err := internalescmotor.ESCMotorHandler.SetSpeedBackward(
 				speed,
-			); err != tinygotypes.ErrorCodeNil {
+			); err != tinygoerrors.ErrorCodeNil {
 				internal.Logger.ErrorMessageWithErrorCode(failedToSetMotorSpeedBackwardMessage, err, true)
 				return
 			}
@@ -62,7 +62,7 @@ func main() {
 		}
 
 		// Stop the motor
-		if err := internalescmotor.ESCMotorHandler.Stop(); err != tinygotypes.ErrorCodeNil {
+		if err := internalescmotor.ESCMotorHandler.Stop(); err != tinygoerrors.ErrorCodeNil {
 			internal.Logger.ErrorMessageWithErrorCode(failedToStopMotorMessage, err, true)
 			return
 		}

@@ -6,7 +6,7 @@ import (
 	"machine"
 
 	internalled "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/led"
-	tinygotypes "github.com/ralvarezdev/tinygo-types"
+	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
 )
 
 type (
@@ -84,10 +84,10 @@ func (h *DefaultHandler) Toggle() {
 // Returns:
 //
 // An error if the blink operation fails, otherwise nil.
-func (h *DefaultHandler) Blink(times int, delay time.Duration) tinygotypes.ErrorCode {
+func (h *DefaultHandler) Blink(times int, delay time.Duration) tinygoerrors.ErrorCode {
 	// Validate the number of times to blink
 	if times == 0 {
-		return tinygotypes.ErrorCodeNil // No blinking needed
+		return tinygoerrors.ErrorCodeNil // No blinking needed
 	}
 	if times < 0 {
 		return internalled.ErrorCodeLEDNegativeBlinkCount
@@ -104,5 +104,5 @@ func (h *DefaultHandler) Blink(times int, delay time.Duration) tinygotypes.Error
 		h.SetOff()
 		time.Sleep(delay)
 	}
-	return tinygotypes.ErrorCodeNil
+	return tinygoerrors.ErrorCodeNil
 }

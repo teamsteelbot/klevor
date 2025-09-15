@@ -1,7 +1,7 @@
 package _switch
 
 import (
-	tinygotypes "github.com/ralvarezdev/tinygo-types"
+	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
 )
 
 const (
@@ -10,5 +10,5 @@ const (
 )
 
 const (
-	ErrorCodeSwitchNilOnEventFunction tinygotypes.ErrorCode = tinygotypes.ErrorCode(iota + ErrorCodeSwitchStartNumber)
+	ErrorCodeSwitchNilOnEventFunction tinygoerrors.ErrorCode = tinygoerrors.ErrorCode(iota + ErrorCodeSwitchStartNumber)
 )

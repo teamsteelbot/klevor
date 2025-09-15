@@ -1,7 +1,7 @@
 package movement
 
 import (
-	tinygotypes "github.com/ralvarezdev/tinygo-types"
+	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
 )
 
 const (
@@ -10,5 +10,5 @@ const (
 )
 
 const (
-	ErrorCodeMovementNilHandler tinygotypes.ErrorCode = tinygotypes.ErrorCode(iota + ErrorCodeMovementStartNumber)
+	ErrorCodeMovementNilHandler tinygoerrors.ErrorCode = tinygoerrors.ErrorCode(iota + ErrorCodeMovementStartNumber)
 )

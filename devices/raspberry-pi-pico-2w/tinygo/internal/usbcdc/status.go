@@ -1,7 +1,7 @@
 package usbcdc
 
 import (
-	tinygotypes "github.com/ralvarezdev/tinygo-types"
+	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
 )
 
 type (
@@ -35,16 +35,16 @@ const (
 // Returns:
 //
 // The OutgoingStatus enum value, or an error if the key wasn't found for the given value
-func OutgoingStatusFromUint8(value uint8) (OutgoingStatus, tinygotypes.ErrorCode) {
+func OutgoingStatusFromUint8(value uint8) (OutgoingStatus, tinygoerrors.ErrorCode) {
 	switch OutgoingStatus(value) {
 	case OutgoingStatusNil:
-		return OutgoingStatusNil, tinygotypes.ErrorCodeNil
+		return OutgoingStatusNil, tinygoerrors.ErrorCodeNil
 	case OutgoingStatusHeartbeat:
-		return OutgoingStatusHeartbeat, tinygotypes.ErrorCodeNil
+		return OutgoingStatusHeartbeat, tinygoerrors.ErrorCodeNil
 	case OutgoingStatusOK:
-		return OutgoingStatusOK, tinygotypes.ErrorCodeNil
+		return OutgoingStatusOK, tinygoerrors.ErrorCodeNil
 	case OutgoingStatusStart:
-		return OutgoingStatusStart, tinygotypes.ErrorCodeNil
+		return OutgoingStatusStart, tinygoerrors.ErrorCodeNil
 	default:
 		return OutgoingStatusNil, ErrorCodeUSBCDCUnknownOutgoingStatus
 	}
@@ -59,16 +59,16 @@ func OutgoingStatusFromUint8(value uint8) (OutgoingStatus, tinygotypes.ErrorCode
 // Returns:
 //
 // The IncomingStatus enum value, or an error if the key wasn't found for the given value
-func IncomingStatusFromUint8(value uint8) (IncomingStatus, tinygotypes.ErrorCode) {
+func IncomingStatusFromUint8(value uint8) (IncomingStatus, tinygoerrors.ErrorCode) {
 	switch IncomingStatus(value) {
 	case IncomingStatusNil:
-		return IncomingStatusNil, tinygotypes.ErrorCodeNil
+		return IncomingStatusNil, tinygoerrors.ErrorCodeNil
 	case IncomingStatusHeartbeat:
-		return IncomingStatusHeartbeat, tinygotypes.ErrorCodeNil
+		return IncomingStatusHeartbeat, tinygoerrors.ErrorCodeNil
 	case IncomingStatusOK:
-		return IncomingStatusOK, tinygotypes.ErrorCodeNil
+		return IncomingStatusOK, tinygoerrors.ErrorCodeNil
 	case IncomingStatusStop:
-		return IncomingStatusStop, tinygotypes.ErrorCodeNil
+		return IncomingStatusStop, tinygoerrors.ErrorCodeNil
 	default:
 		return IncomingStatusNil, ErrorCodeUSBCDCUnknownIncomingStatus
 	}
