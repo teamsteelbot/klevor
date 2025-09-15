@@ -2,6 +2,9 @@ package usbcdc
 
 import (
 	"math"
+
+	gotinygoerrors "github.com/ralvarezdev/go-tinygo-errors"
+	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
 )
 
 // QuaternionToEulerDegrees converts the quaternion representation of orientation to Euler angles (roll, pitch, yaw) in degrees.
@@ -15,10 +18,10 @@ import (
 // A tuple of three float64 values representing the roll, pitch, and yaw angles in degrees
 func QuaternionToEulerDegrees(quaternion [4]float64) [3]float64 {
 	// Get the quaternion components
-	x := quaternion[0]
-	y := quaternion[1]
-	z := quaternion[2]
-	w := quaternion[3]
+	x := quaternion[QuaternionXIndex]
+	y := quaternion[QuaternionYIndex]
+	z := quaternion[QuaternionZIndex]
+	w := quaternion[QuaternionWIndex]
 
 	// Roll (X axis)
 	sinRollCosPitch := 2 * (w*x + y*z)
@@ -41,58 +44,29 @@ func QuaternionToEulerDegrees(quaternion [4]float64) [3]float64 {
 	cosYawCosPitch := 1 - 2*(y*y+z*z)
 	yaw := math.Atan2(sinYawCosPitch, cosYawCosPitch)
 
-	return [3]float64{
-		roll * 180 / math.Pi,
-		pitch * 180 / math.Pi,
-		yaw * 180 / math.Pi,
-	}
+	// Create the euler degrees array and convert radians to degrees
+	var eulerDegrees [3]float64
+	eulerDegrees[EulerDegreesRollIndex] = roll * 180 / math.Pi
+	eulerDegrees[EulerDegreesPitchIndex] = pitch * 180 / math.Pi
+	eulerDegrees[EulerDegreesYawIndex] = yaw * 180 / math.Pi
+
+	return eulerDegrees
 }
 
-// UpdateTurnsFromYawDegrees updates the calculated number of 90-degree turns based on the current yaw angle in degrees
+// GetErrorCodeMessage retrieves the error message corresponding to a given error code
 //
 // Parameters:
 //
-// yawDegrees: The current yaw angle in degrees
-// calculatedTurns: Pointer to the current number of 90-degree turns made (can be positive or negative)
+// errorCode: The error code to look up
 //
 // Returns:
 //
-// An error if calculatedTurns is nil, otherwise nil
-func UpdateTurnsFromYawDegrees(yawDegrees float64, calculatedTurns *CalculatedTurns) error {
-	// Check if calculatedTurns is nil
-	if calculatedTurns == nil {
-		return ErrNilCalculatedTurns
+// The corresponding error message if found, otherwise an empty string, and a boolean indicating if the message was found
+func GetErrorCodeMessage(errorCode tinygoerrors.ErrorCode) (string, bool) {
+	if errorMessage, ok := gotinygoerrors.ErrorCodeMessages[errorCode]; ok {
+		return errorMessage, true
+	} else if internalErrorMessage, ok := tinygoerrors.ErrorCodeMessages[errorCode]; ok {
+		return internalErrorMessage, true
 	}
-
-	// Update internal yaw state
-	relativeYawDegrees := yawDegrees - calculatedTurns.GetInitialYawDegrees()
-	if relativeYawDegrees > 180 {
-		relativeYawDegrees -= 360
-	} else if relativeYawDegrees < -180 {
-		relativeYawDegrees += 360
-	}
-
-	// Calculate the change in yaw degrees since the last update
-	deltaRawYawDegrees := relativeYawDegrees - calculatedTurns.GetLastRelativeYawDegrees()
-	if deltaRawYawDegrees > 180 {
-		deltaRawYawDegrees -= 360
-	} else if deltaRawYawDegrees < -180 {
-		deltaRawYawDegrees += 360
-	}
-
-	// Update accumulated yaw and segment count
-	calculatedTurns.UpdateAccumulatedYawDegrees(deltaRawYawDegrees)
-	currentSegmentCount := int(calculatedTurns.GetAccumulatedYawDegrees() / 90)
-
-	// Update the last segment count and accumulated turns if the segment count has changed
-	lastSegmentCount := calculatedTurns.GetLastSegmentCount()
-	if currentSegmentCount != lastSegmentCount {
-		calculatedTurns.UpdateAccumulatedYaw90DegreesTurns(currentSegmentCount - lastSegmentCount)
-		calculatedTurns.SetLastSegmentCount(currentSegmentCount)
-	}
-
-	// Update the last yaw degrees and last relative yaw degrees
-	calculatedTurns.SetLastYawDegrees(yawDegrees)
-	calculatedTurns.SetLastRelativeYawDegrees(relativeYawDegrees)
-	return nil
+	return "", false
 }

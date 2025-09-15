@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"math"
 
-	gotinygoerrors "github.com/ralvarezdev/go-tinygo-errors"
 	"github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal"
 	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
 )
@@ -95,6 +94,122 @@ func NewIncomingChallengeMessage(
 	)
 }
 
+// NewIncomingMessagesFromBuffer creates multiple instances of IncomingMessage from a given bytes buffer
+//
+// Parameters:
+//
+// buffer: The bytes buffer containing multiple messages
+//
+// Returns:
+//
+// A slice of IncomingMessage instances, or an error if the buffer is invalid
+func NewIncomingMessagesFromBuffer(buffer []byte) ([]*IncomingMessage, error) {
+	// Check if the buffer is nil
+	if buffer == nil {
+		return nil, ErrNilBuffer
+	}
+
+	// Parse the buffer to extract messages
+	var messages []*IncomingMessage
+	for {
+		// If no start byte is found, return an empty slice
+		foundStartIndex := -1
+		for i, b := range buffer {
+			if b == StartAndEndByte {
+				foundStartIndex = i
+				break
+			}
+		}
+
+		// If no start byte is found, exit the loop
+		if foundStartIndex == -1 {
+			break
+		}
+
+		// Remove any bytes before the start byte
+		buffer = buffer[foundStartIndex:]
+
+		// If the buffer length is less than the minimum message length, wait for more data
+		if len(buffer) < 3 {
+			break
+		}
+
+		// Get the category of the message
+		category, err := IncomingCategoryFromUint8(buffer[1])
+		if err != nil {
+			return messages, err
+		}
+
+		// Get the data length of the message
+		dataLength := int(buffer[2])
+
+		// Get the expected length of the data for the category
+		expectedDataLength, err := category.DataLength()
+		if err != nil {
+			return messages, err
+		}
+
+		// Get the data length of the message
+		if dataLength != expectedDataLength {
+			return messages, fmt.Errorf(ErrDataLengthMismatchForIncomingMessage, dataLength, expectedDataLength)
+		}
+
+		// Find the end byte
+		data := []byte{}
+		foundEndByteIndex := -1
+		for i := foundStartIndex + 3; i < len(buffer); i++ {
+			// Get the current byte
+			b := buffer[i]
+
+			// Check if it's control byte
+			if b == ControlByte {
+				// Check if there's a next byte
+				if i+1 >= len(buffer) {
+					break
+				}
+
+				// XOR the next byte with the XOR byte
+				data = append(data, buffer[i+1]^XORByte)
+
+				// Skip the next byte
+				i++
+				continue
+			}
+
+			// Check if it's the end byte
+			if b != StartAndEndByte {
+				data = append(data, b)
+				continue
+			}
+
+			// Set the found end byte flag
+			foundEndByteIndex = i
+		}
+
+		// Check if the end byte was found
+		if foundEndByteIndex == -1 {
+			break
+		}
+
+		// Check if the data length is valid
+		if len(data) != dataLength {
+			return messages, fmt.Errorf(ErrDataLengthMismatchForIncomingMessage, dataLength, len(data))
+		}
+
+		// Create a new IncomingMessage instance
+		messages = append(messages, NewIncomingMessage(category, data))
+
+		// Update the buffer to remove processed messages
+		if len(buffer) == foundEndByteIndex + 1 {
+			buffer = buffer[:0]
+		} else {
+			buffer = buffer[foundEndByteIndex+1:]
+		}
+	}
+
+	return messages, nil
+}
+
 // StringToPrint returns a human-readable string representation of the IncomingMessage
 //
 // Returns:
@@ -163,17 +278,10 @@ func (msg *IncomingMessage) StringToPrint() string {
 		value := binary.BigEndian.Uint16(msg.Data[:])
 
 		// Get the error message from the common error codes package. If not found, try to get it from the local error codes
-		var errorCodeMessage string
-		if errorMessage, ok := gotinygoerrors.ErrorCodeMessages[tinygoerrors.ErrorCode(value)]; ok {
-			errorCodeMessage = errorMessage
-		} else if internalErrorMessage, ok := ErrorCodeMessages[tinygoerrors.ErrorCode(value)]; ok {
-			errorCodeMessage = internalErrorMessage
-		}
-
-		// If no error message was found, set a default message
-		if errorCodeMessage == "" {
+		errorCodeMessage, ok := GetErrorCodeMessage(tinygoerrors.ErrorCode(value))
+		if !ok {
 			errorCodeMessage = "unknown error code"
-		}	
+		}
 
 		return fmt.Sprintf(
 			"IncomingMessage{Category: %s, Data: %q (%s)}",
@@ -287,3 +395,4 @@ func (msg *IncomingMessage) IsAEulerDegreesMessage() bool {
 		msg.Category == IncomingCategoryEulerDegreesRoll ||
 		msg.Category == IncomingCategoryEulerDegreesYaw
 }
+

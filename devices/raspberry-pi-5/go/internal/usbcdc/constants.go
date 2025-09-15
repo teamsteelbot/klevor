@@ -140,6 +140,27 @@ var (
 	// OutgoingHeartbeatMessage is the outgoing heartbeat message for USB-CDC communication
 	OutgoingHeartbeatMessage = NewOutgoingStatusMessage(OutgoingStatusHeartbeat)
 
+	// QuaternionXIndex is the index for the quaternion X component
+	QuaternionXIndex = 0
+	
+	// QuaternionYIndex is the index for the quaternion Y component
+	QuaternionYIndex = 1
+	
+	// QuaternionZIndex is the index for the quaternion Z component
+	QuaternionZIndex = 2
+
+	// QuaternionWIndex is the index for the quaternion W component
+	QuaternionWIndex = 3
+
+	// EulerDegreesRollIndex is the index for the Euler degrees roll component
+	EulerDegreesRollIndex = 0
+
+	// EulerDegreesPitchIndex is the index for the Euler degrees pitch component
+	EulerDegreesPitchIndex = 1
+
+	// EulerDegreesYawIndex is the index for the Euler degrees yaw component
+	EulerDegreesYawIndex = 2
+
 	// OutgoingMotorSpeedStopMessage is the outgoing motor speed stop message for USB-CDC communication
 	OutgoingMotorSpeedStopMessage = NewOutgoingMessage(
 		OutgoingCategoryMotorSpeedStop,

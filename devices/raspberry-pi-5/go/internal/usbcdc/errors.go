@@ -5,16 +5,17 @@ import (
 )
 
 const (
-	ErrUnknownOutgoingCategory 			 = "unknown outgoing category: %#02x"
-	ErrUnknownIncomingCategory 			 = "unknown incoming category: %#02x"
-	ErrUnknownIncomingStatus 			 = "unknown incoming status: %#02x"
-	ErrUnknownOutgoingStatus 			 = "unknown outgoing status: %#02x"
-		ErrFailedToSendStartByte					 = "failed to send start byte: %w"
-		ErrFailedToSendCategoryByte				 = "failed to send category byte: %w"
-		ErrFailedToSendEndByte					 = "failed to send end byte: %w"
-		ErrFailedToSendDataBytes					 = "failed to send data bytes: %w"
-		ErrDataLengthMismatch					 = "data length mismatch: expected %d, got %d"
-		ErrFailedToSendDataLengthByte			 = "failed to send data length bytes: %w"	
+	ErrUnknownOutgoingCategory              = "unknown outgoing category: %#02x"
+	ErrUnknownIncomingCategory              = "unknown incoming category: %#02x"
+	ErrUnknownIncomingStatus                = "unknown incoming status: %#02x"
+	ErrUnknownOutgoingStatus                = "unknown outgoing status: %#02x"
+	ErrFailedToSendStartByte                = "failed to send start byte: %w"
+	ErrFailedToSendCategoryByte             = "failed to send category byte: %w"
+	ErrFailedToSendEndByte                  = "failed to send end byte: %w"
+	ErrFailedToSendDataBytes                = "failed to send data bytes: %w"
+	ErrDataLengthMismatchForIncomingMessage = "data length mismatch for incoming message: expected %d, got %d"
+	ErrDataLengthMismatchForOutgoingMessage = "data length mismatch for outgoing message: expected %d, got %d"
+	ErrFailedToSendDataLengthByte           = "failed to send data length bytes: %w"
 )
 
 var (
@@ -32,7 +33,7 @@ var (
 	ErrIncomingMessageWithoutContent            = errors.New("incoming message without content")
 	ErrNilOutgoingCategory                      = errors.New("outgoing category cannot be nil")
 	ErrNilIncomingCategory                      = errors.New("incoming category cannot be nil")
-	ErrNilOutgoingStatus						= errors.New("outgoing status cannot be nil")
-	ErrNilIncomingStatus						= errors.New("incoming status cannot be nil")
-	ErrNilCalculatedTurns 					 = errors.New("calculated turns cannot be nil")
+	ErrNilOutgoingStatus                        = errors.New("outgoing status cannot be nil")
+	ErrNilIncomingStatus                        = errors.New("incoming status cannot be nil")
+	ErrNilCalculatedTurns                       = errors.New("calculated turns cannot be nil")
 )

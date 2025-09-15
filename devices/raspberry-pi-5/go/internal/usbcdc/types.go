@@ -2,15 +2,17 @@ package usbcdc
 
 import (
 	"context"
+	"encoding/binary"
 	"fmt"
+	"math"
 	"sync"
 	"sync/atomic"
 	"time"
 
 	goconcurrentlogger "github.com/ralvarezdev/go-concurrent-logger"
 	gorplidarsdkhandler "github.com/ralvarezdev/go-rplidar-sdk-handler"
-	gostringsconvert "github.com/ralvarezdev/go-strings/convert"
 	"github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal"
+	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
 	"go.bug.st/serial"
 	"golang.org/x/sync/errgroup"
 )
@@ -51,14 +53,14 @@ type (
 		receivedChallenge                internal.Challenge
 		receivedMaxMotorSpeedValue       uint16
 		receivedMaxServoDirectionValue   uint16
-		receivedBNO08XQuaternionX		float64
-		receivedBNO08XQuaternionY		float64
-		receivedBNO08XQuaternionZ		float64
-		receivedBNO08XQuaternionW		float64
+		receivedBNO08XQuaternionX        float64
+		receivedBNO08XQuaternionY        float64
+		receivedBNO08XQuaternionZ        float64
+		receivedBNO08XQuaternionW        float64
 		receivedBNO08XYawDegrees         float64
 		receivedBNO08XPitchDegrees       float64
 		receivedBNO08XRollDegrees        float64
-		calculatedTurns					*CalculatedTurns
+		calculatedTurns                  *CalculatedTurns
 		challengeReady                   chan struct{}
 		notifyChallengeOnce              sync.Once
 		maxMotorSpeedValueReady          chan struct{}
@@ -88,85 +90,56 @@ func NewCalculatedTurns(initialYawDegrees float64) *CalculatedTurns {
 	}
 }
 
-// GetInitialYawDegrees returns the initial yaw degrees value.
-//
-// Returns:
-//
-// The initial yaw degrees value.
-func (c *CalculatedTurns) GetInitialYawDegrees() float64 {
-	return c.initialYawDegrees
-}
-
-// SetLastYawDegrees sets the last yaw degrees value.
+// UpdateTurnsFromYawDegrees updates the calculated number of 90-degree turns based on the current yaw angle in degrees
 //
 // Parameters:
 //
-// yawDegrees: The new yaw degrees value.
-func (c *CalculatedTurns) SetLastYawDegrees(yawDegrees float64) {
+// yawDegrees: The current yaw angle in degrees
+//
+// Returns:
+//
+// An error if calculatedTurns is nil, otherwise nil
+func (c *CalculatedTurns) UpdateTurnsFromYawDegrees(yawDegrees float64) error {
+	// Update internal yaw state
+	relativeYawDegrees := yawDegrees - c.initialYawDegrees
+	if relativeYawDegrees > 180 {
+		relativeYawDegrees -= 360
+	} else if relativeYawDegrees < -180 {
+		relativeYawDegrees += 360
+	}
+
+	// Calculate the change in yaw degrees since the last update
+	deltaRawYawDegrees := relativeYawDegrees - c.lastRelativeYawDegrees
+	if deltaRawYawDegrees > 180 {
+		deltaRawYawDegrees -= 360
+	} else if deltaRawYawDegrees < -180 {
+		deltaRawYawDegrees += 360
+	}
+
+	// Update accumulated yaw and segment count
+	c.accumulatedYawDegrees += deltaRawYawDegrees
+	currentSegmentCount := int(c.accumulatedYawDegrees / 90)
+
+	// Update the last segment count and accumulated turns if the segment count has changed
+	lastSegmentCount := c.lastSegmentCount
+	if currentSegmentCount != lastSegmentCount {
+		c.accumulatedYaw90DegreesTurns += currentSegmentCount - lastSegmentCount
+		c.lastSegmentCount = currentSegmentCount
+	}
+
+	// Update the last yaw degrees and last relative yaw degrees
 	c.lastYawDegrees = yawDegrees
-}
-
-// GetLastRelativeYawDegrees returns the last relative yaw degrees value.
-//
-// Returns:
-//
-// The last relative yaw degrees value.
-func (c *CalculatedTurns) GetLastRelativeYawDegrees() float64 {
-	return c.lastRelativeYawDegrees
-}
-
-// SetLastRelativeYawDegrees sets the last relative yaw degrees value.
-//
-// Parameters:
-//
-// relativeYawDegrees: The new relative yaw degrees value.
-func (c *CalculatedTurns) SetLastRelativeYawDegrees(relativeYawDegrees float64) {
 	c.lastRelativeYawDegrees = relativeYawDegrees
+	return nil
 }
 
-// SetLastSegmentCount sets the last segment count value.
-//
-// Parameters:
-//
-// segmentCount: The new segment count value.
-func (c *CalculatedTurns) SetLastSegmentCount(segmentCount int) {
-	c.lastSegmentCount = segmentCount
-}
-
-// GetLastSegmentCount returns the last segment count value.
+// GetTurns returns the total number of 90-degree turns made.
 //
 // Returns:
 //
-// The last segment count value.
-func (c *CalculatedTurns) GetLastSegmentCount() int {
-	return c.lastSegmentCount
-}
-
-// UpdateAccumulatedYawDegrees updates the accumulated yaw degrees value.
-//
-// Parameters:
-//
-// deltaYawDegrees: The change in yaw degrees to add to the accumulated value.
-func (c *CalculatedTurns) UpdateAccumulatedYawDegrees(deltaYawDegrees float64) {
-	c.accumulatedYawDegrees += deltaYawDegrees
-}
-
-// GetAccumulatedYawDegrees returns the accumulated yaw degrees value.
-//
-// Returns:
-//
-// The accumulated yaw degrees value.
-func (c *CalculatedTurns) GetAccumulatedYawDegrees() float64 {
-	return c.accumulatedYawDegrees
-}
-
-// UpdateAccumulatedYaw90DegreesTurns updates the accumulated yaw 90 degrees turns value.
-//
-// Parameters:
-//
-// deltaTurns: The change in 90 degrees turns to add to the accumulated value.
-func (c *CalculatedTurns) UpdateAccumulatedYaw90DegreesTurns(deltaTurns int) {
-	c.accumulatedYaw90DegreesTurns += deltaTurns
+// The total number of 90-degree turns made.
+func (c *CalculatedTurns) GetTurns() int {
+	return c.accumulatedYaw90DegreesTurns
 }
 
 // NewDefaultSender creates a new DefaultSender instance.
@@ -581,58 +554,22 @@ func (h *DefaultHandler) incomingMessagesHandler(
 			for _, message := range messages {
 				switch message.Category {
 				case IncomingCategoryError:
-					err := fmt.Errorf("received error message: %s", message.Data)
-					h.incomingMessagesLoggerProducer.Error(err)
-					return err
-				case IncomingCategoryBNO08XYawDegrees:
-					// Parse the BNO08X yaw degrees value
-					if err := gostringsconvert.ToFloat64(
-						message.Data,
-						&h.receivedBNO08XYawDegrees,
-					); err != nil {
-						return fmt.Errorf(
-							"failed to parse BNO08X yaw degrees message data: %w",
-							err,
-						)
+					// Get the error code as a uint16
+					errorCode := binary.BigEndian.Uint16(message.Data[:2])
+
+					// Get the error code message
+					errorCodeMessage, ok := GetErrorCodeMessage(tinygoerrors.ErrorCode(errorCode))
+					if !ok {
+						errorCodeMessage = "unknown error code"
 					}
 
-					// Log the received message
-					h.incomingMessagesLoggerProducer.Info(
-						fmt.Sprintf(
-							"Received BNO08X yaw degrees: %f",
-							h.receivedBNO08XYawDegrees,
-						),
-					)
-				case IncomingCategoryBNO08XYawTurns:
-					// Parse the BNO08X turns value
-					if err := gostringsconvert.ToInt(
-						message.Data,
-						&h.receivedBNO08XTurns,
-					); err != nil {
-						return fmt.Errorf(
-							"failed to parse BNO08X turns message data: %w",
-							err,
-						)
-					}
-
-					// Log the received message
-					h.incomingMessagesLoggerProducer.Info(
-						fmt.Sprintf(
-							"Received BNO08X turns: %d",
-							h.receivedBNO08XTurns,
-						),
-					)
+					// Log the error message
+					err := fmt.Errorf("received error message: %s", errorCodeMessage)
+					h.incomingMessagesLoggerProducer.Warning(err.Error())
 				case IncomingCategoryMaxMotorSpeedValue:
 					// Parse the max motor speed value
-					if err := gostringsconvert.ToUint16(
-						message.Data,
-						&h.receivedMaxMotorSpeedValue,
-					); err != nil {
-						return fmt.Errorf(
-							"failed to parse max motor speed value message data: %w",
-							err,
-						)
-					}
+					maxMotorSpeed := binary.BigEndian.Uint16(message.Data[:2])
+					h.receivedMaxMotorSpeedValue = maxMotorSpeed
 
 					// Log the received message
 					h.incomingMessagesLoggerProducer.Info(
@@ -646,15 +583,8 @@ func (h *DefaultHandler) incomingMessagesHandler(
 					h.notifyMaxMotorSpeedValueOnce.Do(func() { close(h.maxMotorSpeedValueReady) })
 				case IncomingCategoryMaxServoDirectionValue:
 					// Parse the max servo direction value
-					if err := gostringsconvert.ToUint16(
-						message.Data,
-						&h.receivedMaxServoDirectionValue,
-					); err != nil {
-						return fmt.Errorf(
-							"failed to parse max servo direction value message data: %w",
-							err,
-						)
-					}
+					maxServoDirection := binary.BigEndian.Uint16(message.Data[:2])
+					h.receivedMaxServoDirectionValue = maxServoDirection
 
 					// Log the received message
 					h.incomingMessagesLoggerProducer.Info(
@@ -666,6 +596,112 @@ func (h *DefaultHandler) incomingMessagesHandler(
 
 					// Notify listeners exactly once
 					h.notifyMaxServoDirectionValueOnce.Do(func() { close(h.maxServoDirectionValueReady) })
+				case IncomingCategoryEulerDegreesPitch:
+					// Parse the BNO08X pitch degrees value
+					degreesUint64 := binary.BigEndian.Uint64(message.Data[:8])
+					h.receivedBNO08XPitchDegrees = math.Float64frombits(degreesUint64)
+
+					// Log the received message
+					h.incomingMessagesLoggerProducer.Info(
+						fmt.Sprintf(
+							"Received BNO08X pitch degrees: %f",
+							h.receivedBNO08XPitchDegrees,
+						),
+					)
+				case IncomingCategoryEulerDegreesRoll:
+					// Parse the BNO08X roll degrees value
+					degreesUint64 := binary.BigEndian.Uint64(message.Data[:8])
+					h.receivedBNO08XRollDegrees = math.Float64frombits(degreesUint64)
+
+					// Log the received message
+					h.incomingMessagesLoggerProducer.Info(
+						fmt.Sprintf(
+							"Received BNO08X roll degrees: %f",
+							h.receivedBNO08XRollDegrees,
+						),
+					)
+				case IncomingCategoryEulerDegreesYaw:
+					// Parse the BNO08X yaw degrees value
+					degreesUint64 := binary.BigEndian.Uint64(message.Data[:8])
+					h.receivedBNO08XYawDegrees = math.Float64frombits(degreesUint64)
+
+					// Log the received message
+					h.incomingMessagesLoggerProducer.Info(
+						fmt.Sprintf(
+							"Received BNO08X yaw degrees: %f",
+							h.receivedBNO08XYawDegrees,
+						),
+					)
+
+					// Update the calculated turns
+					h.updateCalculatedTurns()
+				case IncomingCategoryQuaternionX:
+					// Parse the BNO08X quaternion X value
+					quaternionXUint64 := binary.BigEndian.Uint64(message.Data[:8])
+					h.receivedBNO08XQuaternionX = math.Float64frombits(quaternionXUint64)
+
+					// Log the received message
+					h.incomingMessagesLoggerProducer.Info(
+						fmt.Sprintf(
+							"Received BNO08X quaternion X: %f",
+							h.receivedBNO08XQuaternionX,
+						),
+					)
+				case IncomingCategoryQuaternionY:
+					// Parse the BNO08X quaternion Y value
+					quaternionYUint64 := binary.BigEndian.Uint64(message.Data[:8])
+					h.receivedBNO08XQuaternionY = math.Float64frombits(quaternionYUint64)
+
+					// Log the received message
+					h.incomingMessagesLoggerProducer.Info(
+						fmt.Sprintf(
+							"Received BNO08X quaternion Y: %f",
+							h.receivedBNO08XQuaternionY,
+						),
+					)
+				case IncomingCategoryQuaternionZ:
+					// Parse the BNO08X quaternion Z value
+					quaternionZUint64 := binary.BigEndian.Uint64(message.Data[:8])
+					h.receivedBNO08XQuaternionZ = math.Float64frombits(quaternionZUint64)
+
+					// Log the received message
+					h.incomingMessagesLoggerProducer.Info(
+						fmt.Sprintf(
+							"Received BNO08X quaternion Z: %f",
+							h.receivedBNO08XQuaternionZ,
+						),
+					)
+				case IncomingCategoryQuaternionW:
+					// Parse the BNO08X quaternion W value
+					quaternionWUint64 := binary.BigEndian.Uint64(message.Data[:8])
+					h.receivedBNO08XQuaternionW = math.Float64frombits(quaternionWUint64)
+
+					// Log the received message
+					h.incomingMessagesLoggerProducer.Info(
+						fmt.Sprintf(
+							"Received BNO08X quaternion W: %f",
+							h.receivedBNO08XQuaternionW,
+						),
+					)
+
+					// Convert the quaternion to Euler angles in degrees
+					var quaternion [4]float64
+					quaternion[QuaternionWIndex] = h.receivedBNO08XQuaternionW
+					quaternion[QuaternionXIndex] = h.receivedBNO08XQuaternionX
+					quaternion[QuaternionYIndex] = h.receivedBNO08XQuaternionY
+					quaternion[QuaternionZIndex] = h.receivedBNO08XQuaternionZ
+
+					eulerDegrees := QuaternionToEulerDegrees(
+						quaternion,
+					)
+
+					// Update the received Euler angles
+					h.receivedBNO08XYawDegrees = eulerDegrees[EulerDegreesYawIndex]
+					h.receivedBNO08XPitchDegrees = eulerDegrees[EulerDegreesPitchIndex]
+					h.receivedBNO08XRollDegrees = eulerDegrees[EulerDegreesRollIndex]
+
+					// Calculate the turns based on the received yaw degrees
+					h.updateCalculatedTurns()
 				default:
 					// Log any other received message
 					h.incomingMessagesLoggerProducer.Info(
@@ -678,6 +714,36 @@ func (h *DefaultHandler) incomingMessagesHandler(
 			}
 		}
 	}
+}
+
+// updateCalculatedTurns updates the calculated turns based on the received yaw degrees.
+func (h *DefaultHandler) updateCalculatedTurns() {
+	if h.calculatedTurns == nil {
+		h.calculatedTurns = NewCalculatedTurns(h.receivedBNO08XYawDegrees)
+		h.incomingMessagesLoggerProducer.Info(
+			fmt.Sprintf(
+				"Initialized calculated turns with initial yaw degrees: %f",
+				h.receivedBNO08XYawDegrees,
+			),
+		)
+		return
+	}
+
+	if err := h.calculatedTurns.UpdateTurnsFromYawDegrees(h.receivedBNO08XYawDegrees); err != nil {
+		h.incomingMessagesLoggerProducer.Warning(
+			fmt.Sprintf(
+				"An error occurred while updating calculated turns: %v",
+				err,
+			),
+		)
+	}
+
+	h.incomingMessagesLoggerProducer.Info(
+		fmt.Sprintf(
+			"Updated calculated turns: %d",
+			h.calculatedTurns.GetTurns(),
+		),
+	)
 }
 
 // readFromPort reads data from the serial port.
@@ -728,7 +794,7 @@ func (h *DefaultHandler) readIncomingMessages(
 	}
 
 	// Extract messages from the accumulated buffer
-	messages, err := NewIncomingMessagesFromBuffer(&h.accumulatedBuffer)
+	messages, err := NewIncomingMessagesFromBuffer(h.accumulatedBuffer)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse incoming messages: %w", err)
 	}
@@ -844,7 +910,7 @@ func (h *DefaultHandler) sendMessage(
 	}
 	if dataLength != expectedDataLength {
 		return fmt.Errorf(
-			ErrDataLengthMismatch,
+			ErrDataLengthMismatchForOutgoingMessage,
 			dataLength,
 			expectedDataLength,
 		)
@@ -945,11 +1011,22 @@ func (h *DefaultHandler) Run(ctx context.Context, stopFn func()) error {
 	h.maxServoDirectionValueReady = make(chan struct{})
 	h.notifyMaxServoDirectionValueOnce = sync.Once{}
 
-	// Reset received BNO08X turns
-	h.receivedBNO08XTurns = 0
+	// Reset received BNO08X calculated turns
+	h.calculatedTurns = nil
 
-	// Reset received BNO08X yaw degrees
+	// Reset received BNO08X quaternion values
+	h.receivedBNO08XQuaternionX = 0.0
+	h.receivedBNO08XQuaternionY = 0.0
+	h.receivedBNO08XQuaternionZ = 0.0
+	h.receivedBNO08XQuaternionW = 0.0
+
+	// Reset received BNO08X yaw, pitch and roll degrees
 	h.receivedBNO08XYawDegrees = 0.0
+	h.receivedBNO08XPitchDegrees = 0.0
+	h.receivedBNO08XRollDegrees = 0.0
+
+	// Clear the accumulated buffer
+	h.accumulatedBuffer = h.accumulatedBuffer[:0]
 
 	h.mutex.Unlock()
 
@@ -1095,15 +1172,18 @@ func (h *DefaultHandler) ReceivedMaxServoDirectionValue() uint16 {
 	return h.receivedMaxServoDirectionValue
 }
 
-// ReceivedBNO08XTurns returns the received BNO08X turns.
+// GetTurns returns the calculated turns segment count.
 //
 // Returns:
 //
-// The received BNO08X turns.
-func (h *DefaultHandler) ReceivedBNO08XTurns() int {
+// The calculated turns segment count.
+func (h *DefaultHandler) GetTurns() int {
 	h.mutex.Lock()
 	defer h.mutex.Unlock()
-	return h.receivedBNO08XTurns
+	if h.calculatedTurns == nil {
+		return 0
+	}
+	return h.calculatedTurns.GetTurns()
 }
 
 // ReceivedBNO08XYawDegrees returns the received BNO08X yaw degrees.

@@ -18,8 +18,14 @@ type (
 		ReceivedChallenge() internal.Challenge
 		ReceivedMaxMotorSpeedValue() uint16
 		ReceivedMaxServoDirectionValue() uint16
-		GetCalculatedBNO08XTurns() int
+		GetTurns() int
 		ReceivedBNO08XYawDegrees() float64
+		ReceivedBNO08XPitchDegrees() float64
+		ReceivedBNO08XRollDegrees() float64
+		ReceivedBNO08XQuaternionX() float64
+		ReceivedBNO08XQuaternionY() float64
+		ReceivedBNO08XQuaternionZ() float64
+		ReceivedBNO08XQuaternionW() float64	
 		WaitForChallenge(ctx context.Context) (internal.Challenge, error)
 		WaitForMaxMotorSpeedValue(ctx context.Context) (uint16, error)
 		WaitForMaxServoDirectionValue(ctx context.Context) (uint16, error)
