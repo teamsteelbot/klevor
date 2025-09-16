@@ -1197,6 +1197,72 @@ func (h *DefaultHandler) ReceivedBNO08XYawDegrees() float64 {
 	return h.receivedBNO08XYawDegrees
 }
 
+// ReceivedBNO08XPitchDegrees returns the received BNO08X pitch degrees.
+//
+// Returns:
+//
+// The received BNO08X pitch degrees.
+func (h *DefaultHandler) ReceivedBNO08XPitchDegrees() float64 {
+	h.mutex.Lock()
+	defer h.mutex.Unlock()
+	return h.receivedBNO08XPitchDegrees
+}
+
+// ReceivedBNO08XRollDegrees returns the received BNO08X roll degrees.
+//
+// Returns:
+//
+// The received BNO08X roll degrees.
+func (h *DefaultHandler) ReceivedBNO08XRollDegrees() float64 {
+	h.mutex.Lock()
+	defer h.mutex.Unlock()
+	return h.receivedBNO08XRollDegrees
+}
+
+// ReceivedBNO08XQuaternionX returns the received BNO08X quaternion X value.
+//
+// Returns:
+//
+// The received BNO08X quaternion X value.
+func (h *DefaultHandler) ReceivedBNO08XQuaternionX() float64 {
+	h.mutex.Lock()
+	defer h.mutex.Unlock()
+	return h.receivedBNO08XQuaternionX
+}
+
+// ReceivedBNO08XQuaternionY returns the received BNO08X quaternion Y value.
+//
+// Returns:
+//
+// The received BNO08X quaternion Y value.
+func (h *DefaultHandler) ReceivedBNO08XQuaternionY() float64 {
+	h.mutex.Lock()
+	defer h.mutex.Unlock()
+	return h.receivedBNO08XQuaternionY
+}
+
+// ReceivedBNO08XQuaternionZ returns the received BNO08X quaternion Z value.
+//
+// Returns:
+//
+// The received BNO08X quaternion Z value.
+func (h *DefaultHandler) ReceivedBNO08XQuaternionZ() float64 {
+	h.mutex.Lock()
+	defer h.mutex.Unlock()
+	return h.receivedBNO08XQuaternionZ
+}
+
+// ReceivedBNO08XQuaternionW returns the received BNO08X quaternion W value.
+//
+// Returns:
+//
+// The received BNO08X quaternion W value.
+func (h *DefaultHandler) ReceivedBNO08XQuaternionW() float64 {
+	h.mutex.Lock()
+	defer h.mutex.Unlock()
+	return h.receivedBNO08XQuaternionW
+}
+
 // WaitForChallenge waits until a challenge message is received or the context is done.
 //
 // Parameters:

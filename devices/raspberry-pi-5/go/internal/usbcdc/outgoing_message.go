@@ -54,6 +54,28 @@ func NewOutgoingMessageFromUint8Data(
 	}
 }
 
+// NewOutgoingMessageFromUint16Content creates a new instance of OutgoingMessage with uint16 content
+//
+// Parameters:
+//
+// category: The category of the message
+// content: The uint16 content of the message
+//
+// Returns:
+//
+// An instance of OutgoingMessage
+func NewOutgoingMessageFromUint16Content(
+	category OutgoingCategory,
+	content uint16,
+) *OutgoingMessage {
+	data := make([]byte, 2)
+	binary.BigEndian.PutUint16(data, content)
+	return &OutgoingMessage{
+		Category: category,
+		Data:     data,
+	}
+}
+
 // NewOutgoingStatusMessage creates a new instance of OutgoingMessage with status data
 //
 // Parameters:

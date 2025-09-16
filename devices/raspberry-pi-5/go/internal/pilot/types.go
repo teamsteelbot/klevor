@@ -14,20 +14,20 @@ import (
 
 	gorplidarsdkhandler "github.com/ralvarezdev/go-rplidar-sdk-handler"
 	"github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal"
-	internalclip "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/clip"
-	internallog "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/log"
+	goconcurrentlogger "github.com/ralvarezdev/go-concurrent-logger"
+	gohailocliphandler "github.com/ralvarezdev/go-hailo-clip-handler"
 	internalusbcdc "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/usbcdc"
-	internalusbcdcenums "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/usbcdc/enums"
+	gocontext "github.com/ralvarezdev/go-context"
 )
 
 type (
 	// DefaultHandler is the default implementation of the Handler interface
 	DefaultHandler struct {
 		mutex                   sync.Mutex
-		handlerLoggerProducer   internallog.LoggerProducer
-		logger                  internallog.Logger
+		handlerLoggerProducer   goconcurrentlogger.LoggerProducer
+		logger                  goconcurrentlogger.Logger
 		rplidarHandler          gorplidarsdkhandler.Handler
-		clipHandler             internalclip.Handler
+		clipHandler             gohailocliphandler.Handler
 		usbCDCHandler           internalusbcdc.Handler
 		usbCDCSender            internalusbcdc.Sender
 		isRunning               atomic.Bool
@@ -35,9 +35,9 @@ type (
 		servoAngle              uint16
 		motorDirection          MotorDirection
 		motorSpeed              uint16
-		rplidarMeasures         *[360]*internal.Measure
-		rplidarAverageDistances map[CardinalDirection]float64
-		clipClassification      *internal.Classification
+		rplidarMeasures         *[360]*gorplidarsdkhandler.Measure
+		rplidarAverageDistances map[gorplidarsdkhandler.CardinalDirection]float64
+		clipClassification      *gohailocliphandler.Classification
 		latestUpdateTime        time.Time
 		bno08xLastTurns         int
 		rplidarTurnsCounter     int
@@ -59,24 +59,24 @@ type (
 //
 // A pointer to the newly created DefaultHandler instance, or an error if the handler could not be created.
 func NewDefaultHandler(
-	logger internallog.Logger,
-	rplidarHandler internalrplidar.Handler,
-	clipHandler internalclip.Handler,
+	logger goconcurrentlogger.Logger,
+	rplidarHandler gorplidarsdkhandler.Handler,
+	clipHandler gohailocliphandler.Handler,
 	usbCDCHandler internalusbcdc.Handler,
 ) (*DefaultHandler, error) {
 	// Check if the logger is nil
 	if logger == nil {
-		return nil, internallog.ErrNilLogger
+		return nil, goconcurrentlogger.ErrNilLogger
 	}
 
 	// Check if the RPLiDAR handler is nil
 	if rplidarHandler == nil {
-		return nil, internalrplidar.ErrNilHandler
+		return nil, gorplidarsdkhandler.ErrNilHandler
 	}
 
 	// Check if the CLIP handler is nil
 	if clipHandler == nil {
-		return nil, internalclip.ErrNilHandler
+		return nil, gohailocliphandler.ErrNilHandler
 	}
 
 	// Check if the USB-CDC handler is nil
@@ -136,8 +136,8 @@ func (h *DefaultHandler) setMotorSpeed(
 			),
 		)
 		return h.usbCDCSender.SendMessage(
-			internalusbcdc.NewOutgoingMessageFromUint16Content(
-				internalusbcdcenums.OutgoingCategoryMotorSpeedForward,
+			internalusbcdc.NewOutgoingMessageFromUint16Data(
+				internalusbcdc.OutgoingCategoryMotorSpeedForward,
 				speed,
 			),
 		)
@@ -150,8 +150,8 @@ func (h *DefaultHandler) setMotorSpeed(
 			),
 		)
 		return h.usbCDCSender.SendMessage(
-			internalusbcdc.NewOutgoingMessageFromUint16Content(
-				internalusbcdcenums.OutgoingCategoryMotorSpeedBackward,
+			internalusbcdc.NewOutgoingMessageFromUint16Data(
+				internalusbcdc.OutgoingCategoryMotorSpeedBackward,
 				speed,
 			),
 		)
@@ -262,9 +262,11 @@ func (h *DefaultHandler) setServoDirection(
 		h.handlerLoggerProducer.Info(
 			fmt.Sprintf("Setting servo direction to left with angle %d", angle),
 		)
+
+		// Send the message
 		return h.usbCDCSender.SendMessage(
-			internalusbcdc.NewOutgoingMessageFromUint16Content(
-				internalusbcdcenums.OutgoingCategoryServoDirectionToLeft,
+			internalusbcdc.NewOutgoingMessageFromUint16Data(
+				internalusbcdc.OutgoingCategoryServoDirectionToLeft,
 				angle,
 			),
 		)
@@ -277,8 +279,8 @@ func (h *DefaultHandler) setServoDirection(
 			),
 		)
 		return h.usbCDCSender.SendMessage(
-			internalusbcdc.NewOutgoingMessageFromUint16Content(
-				internalusbcdcenums.OutgoingCategoryServoDirectionToRight,
+			internalusbcdc.NewOutgoingMessageFromUint16Data(
+				internalusbcdc.OutgoingCategoryServoDirectionToRight,
 				angle,
 			),
 		)
@@ -396,16 +398,17 @@ func (h *DefaultHandler) setServoToOppositeDirection(servoAngle uint16) error {
 //
 // Returns:
 //
-// A pointer to the classification string, or an error if the classification could not be retrieved
+// An error if the classification could not be retrieved
 func (h *DefaultHandler) updateCLIPClassification() (
-	*internal.Classification,
 	error,
 ) {
 	// Update the CLIP classification
-	h.clipClassification = h.clipHandler.GetClassification()
-
-	// Get the classification from the CLIP handler
-	return h.clipClassification, nil
+	clipClassification, err := h.clipHandler.GetClassification()
+	if err != nil {
+		return fmt.Errorf("failed to get CLIP classification: %w", err)
+	}
+	h.clipClassification = clipClassification
+	return nil
 }
 
 // updateRPLiDARAverageDistances updates the average distances from the RPLiDAR measures
@@ -438,7 +441,7 @@ func (h *DefaultHandler) updateRPLiDARAverageDistances() error {
 //
 // The average distance for the specified direction, or 0.0 if the direction is not found
 func (h *DefaultHandler) getAverageDirectionDistance(
-	direction CardinalDirection,
+	direction gorplidarsdkhandler.CardinalDirection,
 ) float64 {
 	if h.rplidarAverageDistances == nil {
 		return 0.0
@@ -502,25 +505,22 @@ func (h *DefaultHandler) challengeWithObstaclesAndParkingHandler(ctx context.Con
 //
 // An error if the challenge could not be handled, nil otherwise
 func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) error {
-	// Get the rotation completed channel
-	rotationCompletedCh := h.rplidarHandler.GetRotationCompletedChannel()
-
 	var completed bool
 	var westAverageDistance, eastAverageDistance, northAverageDistance, northNortheastAverageDistance, northNorthwestAverageDistance float64
 	for !completed {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
-		case <-rotationCompletedCh:
+		default:
 			// Update the RPLiDAR average distances
 			if err := h.updateRPLiDARAverageDistances(); err != nil {
 				return fmt.Errorf("failed to update RPLiDAR average distances: %w", err)
 			}
-			westAverageDistance = h.getAverageDirectionDistance(CardinalDirectionWest)
-			eastAverageDistance = h.getAverageDirectionDistance(CardinalDirectionEast)
-			northAverageDistance = h.getAverageDirectionDistance(CardinalDirectionNorth)
-			northNortheastAverageDistance = h.getAverageDirectionDistance(CardinalDirectionNorthNortheast)
-			northNorthwestAverageDistance = h.getAverageDirectionDistance(CardinalDirectionNorthNorthwest)
+			westAverageDistance = h.getAverageDirectionDistance(gorplidarsdkhandler.CardinalDirectionWest)
+			eastAverageDistance = h.getAverageDirectionDistance(gorplidarsdkhandler.CardinalDirectionEast)
+			northAverageDistance = h.getAverageDirectionDistance(gorplidarsdkhandler.CardinalDirectionNorth)
+			northNortheastAverageDistance = h.getAverageDirectionDistance(gorplidarsdkhandler.CardinalDirectionNorthNortheast)
+			northNorthwestAverageDistance = h.getAverageDirectionDistance(gorplidarsdkhandler.CardinalDirectionNorthNorthwest)
 
 			// Log the average distances
 			h.handlerLoggerProducer.Debug(
@@ -573,14 +573,14 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 					select {
 					case <-ctx.Done():
 						return ctx.Err()
-					case <-rotationCompletedCh:
+					default:
 						// Update the RPLiDAR average distances
 						if err := h.updateRPLiDARAverageDistances(); err != nil {
 							return fmt.Errorf("failed to update RPLiDAR average distances: %w", err)
 						}
-						northAverageDistance = h.getAverageDirectionDistance(CardinalDirectionNorth)
-						northNortheastAverageDistance = h.getAverageDirectionDistance(CardinalDirectionNorthNortheast)
-						northNorthwestAverageDistance = h.getAverageDirectionDistance(CardinalDirectionNorthNorthwest)
+						northAverageDistance = h.getAverageDirectionDistance(gorplidarsdkhandler.CardinalDirectionNorth)
+						northNortheastAverageDistance = h.getAverageDirectionDistance(gorplidarsdkhandler.CardinalDirectionNorthNortheast)
+						northNorthwestAverageDistance = h.getAverageDirectionDistance(gorplidarsdkhandler.CardinalDirectionNorthNorthwest)
 
 						if northAverageDistance >= SafetyFrontDistanceStopThreshold || northNortheastAverageDistance >= SafetyFrontDistanceStopThreshold || northNorthwestAverageDistance >= SafetyFrontDistanceStopThreshold {
 							h.handlerLoggerProducer.Info("Safety front distance threshold reached.")
@@ -628,7 +628,7 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 			// Check for the current turn and center the servo if necessary
 			if h.servoDirection != ServoDirectionStraight {
 				// Get the latest BNO08x turns value
-				turns := h.usbCDCHandler.ReceivedBNO08XTurns()
+				turns := h.usbCDCHandler.GetTurns()
 				if turns > h.bno08xLastTurns {
 					h.handlerLoggerProducer.Info(
 						fmt.Sprintf(
@@ -688,12 +688,12 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 					select {
 					case <-ctx.Done():
 						return ctx.Err()
-					case <-rotationCompletedCh:
+					default:
 						// Update the RPLiDAR average distances
 						if err := h.updateRPLiDARAverageDistances(); err != nil {
 							return fmt.Errorf("failed to update RPLiDAR average distances: %w", err)
 						}
-						northAverageDistance = h.getAverageDirectionDistance(CardinalDirectionNorth)
+						northAverageDistance = h.getAverageDirectionDistance(gorplidarsdkhandler.CardinalDirectionNorth)
 
 						if northAverageDistance <= StopDistanceThreshold {
 							completed = true
@@ -869,7 +869,7 @@ func (h *DefaultHandler) runToWrap(ctx context.Context, stopFn func()) error {
 	if handlerFn == nil {
 		return fmt.Errorf("unknown challenge: %s", challenge.String())
 	}
-	return internal.StopContextOnError(
+	return gocontext.StopContextOnError(
 		ctx,
 		stopFn,
 		func(ctx context.Context) error {
@@ -971,7 +971,7 @@ func (h *DefaultHandler) Run() error {
 	// Initialize the run to wrap goroutine
 	g.Go(
 		func() error {
-			return internallog.LogOnError(
+			return goconcurrentlogger.LogOnError(
 				func() error {
 					return h.runToWrap(ctx, stop)
 				},
