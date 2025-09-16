@@ -24,11 +24,8 @@ var (
 	// UARTRVC is the UART-RVC instance for the BNO08x sensor.
 	UARTRVC *tinygobno08x.UARTRVC
 
-	// Frequency is the frequency to read the sensor data.
-	Frequency = 100 // Hz
-
 	// Interval is the interval to read the sensor data.
-	Interval = time.Second / time.Duration(Frequency) // ms
+	Interval = 50 * time.Millisecond // Can be as low as 10ms
 
 	// failedToInitializeBNO08xErrorMessage is the error message for failed BNO08x initialization.
 	failedToInitializeBNO08xErrorMessage = []byte("Failed to initialize BNO08x sensor")
@@ -71,7 +68,7 @@ func init() {
 		machine.GPIO2,
 		machine.GPIO3,
 		machine.GPIO4,
-		internal.Logger,
+		nil, // internal.Logger
 	)
 	if err != tinygoerrors.ErrorCodeNil {
 		internal.Logger.WarningMessageWithErrorCode(failedToInitializeBNO08xErrorMessage, err, true)

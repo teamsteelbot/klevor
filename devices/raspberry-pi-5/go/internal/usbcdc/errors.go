@@ -5,16 +5,16 @@ import (
 )
 
 const (
-	ErrUnknownOutgoingCategory              = "unknown outgoing category: %#02x"
-	ErrUnknownIncomingCategory              = "unknown incoming category: %#02x"
-	ErrUnknownIncomingStatus                = "unknown incoming status: %#02x"
-	ErrUnknownOutgoingStatus                = "unknown outgoing status: %#02x"
+	ErrUnknownOutgoingCategory              = "unknown outgoing category: 0x%02X"
+	ErrUnknownIncomingCategory              = "unknown incoming category: 0x%02X"
+	ErrUnknownIncomingStatus                = "unknown incoming status: 0x%02X"
+	ErrUnknownOutgoingStatus                = "unknown outgoing status: 0x%02X"
 	ErrFailedToSendStartByte                = "failed to send start byte: %w"
 	ErrFailedToSendCategoryByte             = "failed to send category byte: %w"
 	ErrFailedToSendEndByte                  = "failed to send end byte: %w"
 	ErrFailedToSendDataBytes                = "failed to send data bytes: %w"
-	ErrDataLengthMismatchForIncomingMessage = "data length mismatch for incoming message: expected %d, got %d"
-	ErrDataLengthMismatchForOutgoingMessage = "data length mismatch for outgoing message: expected %d, got %d"
+	ErrDataLengthByteMismatchForIncomingMessage = "data length byte mismatch for incoming message of category 0x%02X: expected %d, got %d"
+	ErrDataLengthMismatchForOutgoingMessage = "data length mismatch for outgoing message of category 0x%02X: expected %d, got %d"
 	ErrFailedToSendDataLengthByte           = "failed to send data length bytes: %w"
 )
 

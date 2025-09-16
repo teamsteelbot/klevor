@@ -64,4 +64,7 @@ var (
 
 	// AverageAngleWidth is the width of the angle for average calculations
 	AverageAngleWidth = 5
+
+	// CommandDelay between sending commands to the ESC motor and servo
+	CommandDelay = 50 * time.Millisecond
 )

@@ -101,9 +101,6 @@ var (
 	// StartAndEndBytes is the byte slice for the start and end character
 	StartAndEndBytes = []byte{StartAndEndByte}
 
-	// ControlByteBytes is the byte slice for the control character
-	ControlByteBytes = []byte{ControlByte}
-
 	// ReadTimeout is the timeout duration for reading from the USB-CDC port
 	ReadTimeout = time.Second * 2
 

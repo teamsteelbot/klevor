@@ -483,6 +483,9 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 	var completed bool
 	var westAverageDistance, eastAverageDistance, northAverageDistance, northNortheastAverageDistance, northNorthwestAverageDistance float64
 	for !completed {
+		// Wait for the command delay
+		time.Sleep(CommandDelay)
+
 		select {
 		case <-ctx.Done():
 			return ctx.Err()

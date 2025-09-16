@@ -98,12 +98,12 @@ func NewIncomingChallengeMessage(
 //
 // Parameters:
 //
-// buffer: The bytes buffer containing multiple messages
+// buffer: The buffer to parse for incoming messages
 //
 // Returns:
 //
 // A slice of IncomingMessage instances, or an error if the buffer is invalid
-func NewIncomingMessagesFromBuffer(buffer []byte) ([]*IncomingMessage, error) {
+func NewIncomingMessagesFromBuffer(buffer *[]byte) ([]*IncomingMessage, error) {
 	// Check if the buffer is nil
 	if buffer == nil {
 		return nil, ErrNilBuffer
@@ -111,37 +111,32 @@ func NewIncomingMessagesFromBuffer(buffer []byte) ([]*IncomingMessage, error) {
 
 	// Parse the buffer to extract messages
 	var messages []*IncomingMessage
-	for {
+	for len(*buffer) > 0{
 		// If no start byte is found, return an empty slice
-		foundStartIndex := -1
-		for i, b := range buffer {
-			if b == StartAndEndByte {
-				foundStartIndex = i
-				break
-			}
-		}
+		nextStart := bytes.IndexByte(*buffer, StartAndEndByte)
 
 		// If no start byte is found, exit the loop
-		if foundStartIndex == -1 {
+		if nextStart == -1 {
 			break
 		}
 
 		// Remove any bytes before the start byte
-		buffer = buffer[foundStartIndex:]
+		*buffer = (*buffer)[nextStart:]
 
 		// If the buffer length is less than the minimum message length, wait for more data
-		if len(buffer) < 3 {
+		if len(*buffer) < 3 {
 			break
 		}
 
 		// Get the category of the message
-		category, err := IncomingCategoryFromUint8(buffer[1])
+		categoryUint8 := (*buffer)[1]
+		category, err := IncomingCategoryFromUint8(categoryUint8)
 		if err != nil {
 			return messages, err
 		}
 
 		// Get the data length of the message
-		dataLength := int(buffer[2])
+		dataLength := uint8((*buffer)[2])
 
 		// Get the expected length of the data for the category
 		expectedDataLength, err := category.DataLength()
@@ -150,26 +145,26 @@ func NewIncomingMessagesFromBuffer(buffer []byte) ([]*IncomingMessage, error) {
 		}
 
 		// Get the data length of the message
-		if dataLength != expectedDataLength {
-			return messages, fmt.Errorf(ErrDataLengthMismatchForIncomingMessage, dataLength, expectedDataLength)
+		if dataLength != uint8(expectedDataLength) {
+			return messages, fmt.Errorf(ErrDataLengthByteMismatchForIncomingMessage, categoryUint8, dataLength, expectedDataLength)
 		}
 
 		// Find the end byte
-		data := []byte{}
+		data := make([]byte, 0, dataLength)
 		foundEndByteIndex := -1
-		for i := foundStartIndex + 3; i < len(buffer); i++ {
+		for i := 3; i < len(*buffer); i++ {
 			// Get the current byte
-			b := buffer[i]
+			b := (*buffer)[i]
 
 			// Check if it's control byte
 			if b == ControlByte {
 				// Check if there's a next byte
-				if i+1 >= len(buffer) {
+				if i+1 >= len(*buffer) {
 					break
 				}
 
 				// XOR the next byte with the XOR byte
-				data = append(data, buffer[i+1]^XORByte)
+				data = append(data, (*buffer)[i+1]^XORByte)
 
 				// Skip the next byte
 				i++
@@ -191,19 +186,25 @@ func NewIncomingMessagesFromBuffer(buffer []byte) ([]*IncomingMessage, error) {
 			break
 		}
 
-		// Check if the data length is valid
-		if len(data) != dataLength {
-			return messages, fmt.Errorf(ErrDataLengthMismatchForIncomingMessage, dataLength, len(data))
+		if dataLength != uint8(len(data)) {
+			// Skip to next start byte instead of returning
+			nextStart := bytes.IndexByte((*buffer)[foundEndByteIndex+1:], StartAndEndByte)
+			if nextStart == -1 {
+				*buffer = (*buffer)[:0]
+				break
+			}
+			*buffer = (*buffer)[:nextStart+1]
+			continue
 		}
 
 		// Create a new IncomingMessage instance
 		messages = append(messages, NewIncomingMessage(category, data))
 
 		// Update the buffer to remove processed messages
-		if len(buffer) == foundEndByteIndex + 1 {
-			buffer = buffer[:0]
+		if len(*buffer) == foundEndByteIndex + 1 {
+			*buffer = (*buffer)[:0]
 		} else {
-			buffer = buffer[foundEndByteIndex+1:]
+			*buffer = (*buffer)[foundEndByteIndex+1:]
 		}
 	}
 

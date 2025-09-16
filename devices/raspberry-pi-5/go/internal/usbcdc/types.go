@@ -37,7 +37,7 @@ type (
 	// DefaultHandler is the default implementation of the Handler interface
 	DefaultHandler struct {
 		outgoingMessagesCh               chan *OutgoingMessage
-		readyCh                        chan struct{}
+		readyCh                          chan struct{}
 		logger                           goconcurrentlogger.Logger
 		handlerLoggerProducer            goconcurrentlogger.LoggerProducer
 		incomingMessagesLoggerProducer   goconcurrentlogger.LoggerProducer
@@ -258,7 +258,7 @@ func NewDefaultHandler(baudRate int, logger goconcurrentlogger.Logger) (*Default
 		buffer:            buffer,
 		accumulatedBuffer: accumulatedBuffer,
 		logger:            logger,
-		readyCh: make(chan struct{}),
+		readyCh:           make(chan struct{}),
 	}, nil
 }
 
@@ -412,13 +412,17 @@ func (h *DefaultHandler) incomingMessagesHandler(
 			}
 
 			// Process the data read
-			for _, c := range h.accumulatedBuffer {
-				if c == StartAndEndByte {
+			for i, b := range h.accumulatedBuffer {
+				if b == StartAndEndByte {
 					h.receivedInitializationMessage = true
 					h.incomingMessagesLoggerProducer.Info("Received initialization message")
-					
+
 					// Clear the accumulated buffer
-					h.accumulatedBuffer = h.accumulatedBuffer[:0]
+					if len(h.accumulatedBuffer) > i+1 {
+						h.accumulatedBuffer = h.accumulatedBuffer[i+1:]
+					} else {
+						h.accumulatedBuffer = h.accumulatedBuffer[:0]
+					}
 					break
 				}
 			}
@@ -798,8 +802,20 @@ func (h *DefaultHandler) readIncomingMessages(
 		return nil, fmt.Errorf("failed to read from port: %w", err)
 	}
 
+	if len(h.accumulatedBuffer) == 0 {
+		return nil, nil
+	}
+
+	// Log the accumulated buffer data
+	h.incomingMessagesLoggerProducer.Info(
+		fmt.Sprintf(
+			"Accumulated buffer data: %s",
+			ConvertBytesSliceToHexString(h.accumulatedBuffer),
+		),
+	)
+
 	// Extract messages from the accumulated buffer
-	messages, err := NewIncomingMessagesFromBuffer(h.accumulatedBuffer)
+	messages, err := NewIncomingMessagesFromBuffer(&h.accumulatedBuffer)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse incoming messages: %w", err)
 	}
@@ -916,6 +932,7 @@ func (h *DefaultHandler) sendMessage(
 	if dataLength != expectedDataLength {
 		return fmt.Errorf(
 			ErrDataLengthMismatchForOutgoingMessage,
+			message.Category,
 			dataLength,
 			expectedDataLength,
 		)

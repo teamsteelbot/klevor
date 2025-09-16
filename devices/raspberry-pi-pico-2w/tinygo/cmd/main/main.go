@@ -48,7 +48,6 @@ var (
 func sendErrorMessage(err tinygoerrors.ErrorCode) {
 	err = internalusbcdc.USBCDCHandler.SendErrorMessage(err)
 	if err != tinygoerrors.ErrorCodeNil {
-		internal.Logger.ErrorMessageWithErrorCode(failedToSendErrorMessage, err, true)
 		os.Exit(1)
 	}
 }
@@ -106,6 +105,9 @@ func main() {
 
 		// Last time the BNO08X was updated
 		lastBNO08XUpdateTime := time.Now()
+
+		// Reset the last message received time
+		lastMessageReceivedTime = time.Now()
 
 		// Set the exit condition to False
 		toExit := false
