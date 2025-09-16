@@ -36,4 +36,5 @@ var (
 	ErrNilOutgoingStatus                        = errors.New("outgoing status cannot be nil")
 	ErrNilIncomingStatus                        = errors.New("incoming status cannot be nil")
 	ErrNilCalculatedTurns                       = errors.New("calculated turns cannot be nil")
+	ErrHandlerNotRunning                        = errors.New("handler is not running")
 )

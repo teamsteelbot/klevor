@@ -29,6 +29,7 @@ type (
 		WaitForChallenge(ctx context.Context) (internal.Challenge, error)
 		WaitForMaxMotorSpeedValue(ctx context.Context) (uint16, error)
 		WaitForMaxServoDirectionValue(ctx context.Context) (uint16, error)
+		WaitUntilReady(ctx context.Context) error
 	}
 
 	// Sender is the interface to send messages through USB CDC.

@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"log"
+	"fmt"
 
 	internalclip "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/clip"
 	internallog "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/log"
@@ -77,6 +78,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to initialize pilot handler: %v", err)
 	}
+
+	// Print a startup message
+	fmt.Println("Klevor Raspberry Pi 5 device is up and running")
 
 	// Run the pilot handler
 	if err = pilotHandler.Run(); err != nil {

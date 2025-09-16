@@ -37,6 +37,7 @@ type (
 	// DefaultHandler is the default implementation of the Handler interface
 	DefaultHandler struct {
 		outgoingMessagesCh               chan *OutgoingMessage
+		readyCh                        chan struct{}
 		logger                           goconcurrentlogger.Logger
 		handlerLoggerProducer            goconcurrentlogger.LoggerProducer
 		incomingMessagesLoggerProducer   goconcurrentlogger.LoggerProducer
@@ -257,6 +258,7 @@ func NewDefaultHandler(baudRate int, logger goconcurrentlogger.Logger) (*Default
 		buffer:            buffer,
 		accumulatedBuffer: accumulatedBuffer,
 		logger:            logger,
+		readyCh: make(chan struct{}),
 	}, nil
 }
 
@@ -414,6 +416,9 @@ func (h *DefaultHandler) incomingMessagesHandler(
 				if c == StartAndEndByte {
 					h.receivedInitializationMessage = true
 					h.incomingMessagesLoggerProducer.Info("Received initialization message")
+					
+					// Clear the accumulated buffer
+					h.accumulatedBuffer = h.accumulatedBuffer[:0]
 					break
 				}
 			}
@@ -988,6 +993,7 @@ func (h *DefaultHandler) Run(ctx context.Context, stopFn func()) error {
 		chan *OutgoingMessage,
 		OutgoingMessagesChannelBufferSize,
 	)
+	close(h.readyCh)
 	defer h.close()
 
 	// Reset received initialization message state
@@ -1059,15 +1065,20 @@ func (h *DefaultHandler) Run(ctx context.Context, stopFn func()) error {
 // A pointer to a Sender instance or an error if the parameters are invalid.
 func (h *DefaultHandler) NewSender() (Sender, error) {
 	h.mutex.Lock()
+	defer h.mutex.Unlock()
 
 	// Check if the handler is already closed
 	if h.IsClosed() {
 		return nil, ErrHandlerClosed
 	}
 
+	// Check if the outgoing messages channel is initialized
+	if h.outgoingMessagesCh == nil {
+		return nil, ErrHandlerNotRunning
+	}
+
 	// Increment the producer wait group counter
 	h.wgSenders.Add(1)
-	h.mutex.Unlock()
 
 	// Create and return a new DefaultSender instance
 	handlerLoggerProducer, err := NewDefaultSender(
@@ -1103,9 +1114,31 @@ func (h *DefaultHandler) close() {
 
 	// Close the outgoing messages channel to signal no more messages will be sent.
 	close(h.outgoingMessagesCh)
+	h.outgoingMessagesCh = nil
+
+	// Initialize the ready channel for the next run
+	h.readyCh = make(chan struct{})
 
 	// Reset the producer wait group
 	h.wgSenders = sync.WaitGroup{}
+}
+
+// WaitUntilReady waits until the handler is ready to accept senders or the context is done.
+//
+// Parameters:
+//
+// ctx: The context to control cancellation and timeouts.
+//
+// Returns:
+//
+// An error if the context is done before the handler is ready.
+func (h *DefaultHandler) WaitUntilReady(ctx context.Context) error {
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-h.readyCh:
+		return nil
+	}
 }
 
 // IsClosed returns true if the outgoing messages channel has been closed.

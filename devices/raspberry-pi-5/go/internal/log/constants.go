@@ -18,7 +18,7 @@ const (
 
 var (
 	// GracefulShutdownTimeout is the timeout for graceful shutdown
-	GracefulShutdownTimeout = 5 * time.Second
+	GracefulShutdownTimeout = 10 * time.Second
 
 	// ChannelBufferSize is the size of the message channel buffer
 	ChannelBufferSize = 1024

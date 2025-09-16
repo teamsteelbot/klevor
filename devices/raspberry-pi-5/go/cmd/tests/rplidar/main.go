@@ -17,9 +17,6 @@ import (
 )
 
 const (
-	// GracefulShutdownTimeout is the timeout for graceful shutdown
-	GracefulShutdownTimeout = 5 * time.Second
-
 	// RPLiDARPrintInterval is the interval between printing the RPLiDAR measures
 	RPLiDARPrintInterval = 100 * time.Millisecond
 )
@@ -33,12 +30,6 @@ func main() {
 	logger, err := internallog.NewDefaultLogger(*logDebug)
 	if err != nil {
 		log.Fatalf("failed to create logger: %v\n", err)
-	}
-
-	// Initialize the Slamtec C1 handler
-	rplidarHandler, err := internalrplidar.NewSlamtecC1Handler(logger)
-	if err != nil {
-		log.Fatalf("failed to initialize rplidar handler: %v", err)
 	}
 
 	// Context canceled on SIGINT/SIGTERM.
@@ -57,6 +48,19 @@ func main() {
 			return logger.Run(ctx, stop)
 		},
 	)
+
+	// Wait a moment to ensure the logger is ready
+	fmt.Println("Waiting for logger to be ready...")
+	if err := logger.WaitUntilReady(ctx); err != nil {
+		log.Fatalf("failed to wait for logger readiness: %v", err)
+	}
+	fmt.Println("Logger is ready")
+
+	// Initialize the Slamtec C1 handler
+	rplidarHandler, err := internalrplidar.NewSlamtecC1Handler(logger)
+	if err != nil {
+		log.Fatalf("failed to initialize rplidar handler: %v", err)
+	}
 
 	// Initialize the RPLiDAR goroutine
 	g.Go(
@@ -92,11 +96,5 @@ func main() {
 		if err != nil {
 			return
 		}
-	}
-
-	// Optional graceful wait
-	select {
-	case <-ctx.Done():
-	case <-time.After(GracefulShutdownTimeout):
 	}
 }

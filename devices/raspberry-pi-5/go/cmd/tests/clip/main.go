@@ -17,9 +17,6 @@ import (
 )
 
 const (
-	// GracefulShutdownTimeout is the timeout for graceful shutdown
-	GracefulShutdownTimeout = 5 * time.Second
-
 	// ClassificationInterval is the interval between printing the classification
 	ClassificationInterval = 100 * time.Millisecond
 )
@@ -40,6 +37,9 @@ func main() {
 	flag.Parse()
 
 	// Enforce required flags
+	if *generateClipEmbeddingsPath == "" {
+		log.Fatal("missing required flag: --generate-clip-embeddings-path")
+	}
 	if *runClipPath == "" {
 		log.Fatal("missing required flag: --run-clip-path")
 	}
@@ -48,18 +48,6 @@ func main() {
 	logger, err := internallog.NewDefaultLogger(*logDebug)
 	if err != nil {
 		log.Fatalf("failed to create logger: %v\n", err)
-	}
-
-	// Initialize the CLIP handler
-	clipHandler, err := internalclip.NewDefaultHandler(
-		*generateClipEmbeddingsPath,
-		*runClipPath,
-		internalclip.PositiveLabels,
-		internalclip.NegativeLabels,
-		logger,
-	)
-	if err != nil {
-		log.Fatalf("failed to initialize clip handler: %v", err)
 	}
 
 	// Context canceled on SIGINT/SIGTERM.
@@ -79,22 +67,39 @@ func main() {
 		},
 	)
 
-	// Generate the CLIP embeddings
-	if *generateClipEmbeddingsPath == "" {
-		fmt.Println("Skipping CLIP embeddings generation")
-	} else {
-		fmt.Println("Generating CLIP embeddings")
-		if err = clipHandler.GenerateEmbeddings(); err != nil {
-			// Wait for the writer goroutine to finish
-			fmt.Println("Error generating CLIP embeddings:", err)
-			stop()
-			if err = g.Wait(); err != nil {
-				_, _ = fmt.Fprintf(os.Stderr, "error: %v\n", err)
-			}
-			return
-		}
-		fmt.Println("CLIP embeddings generated successfully")
+	// Wait a moment to ensure the logger is ready
+	fmt.Println("Waiting for logger to be ready...")
+	if err := logger.WaitUntilReady(ctx); err != nil {
+		log.Fatalf("failed to wait for logger readiness: %v", err)
 	}
+	fmt.Println("Logger is ready")
+
+	// Initialize the CLIP handler
+	clipHandler, err := internalclip.NewDefaultHandler(
+		*generateClipEmbeddingsPath,
+		*runClipPath,
+		internalclip.PositiveLabels,
+		internalclip.NegativeLabels,
+		logger,
+	)
+	if err != nil {
+		log.Fatalf("failed to initialize clip handler: %v", err)
+	}
+
+	// Generate the CLIP embeddings
+	fmt.Println("Generating CLIP embeddings")
+	if err = clipHandler.GenerateEmbeddings(ctx); err != nil {
+		stop()
+		fmt.Printf("Failed to generate CLIP embeddings: %v\n", err)
+		fmt.Println("Stopping all goroutines...")
+		
+		// Wait for the logger goroutine to finish
+		if err = g.Wait(); err != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		}
+		return
+	}
+	fmt.Println("CLIP embeddings generated successfully")
 	defer stop()
 
 	// Initialize the CLIP goroutine
@@ -140,11 +145,4 @@ func main() {
 			return
 		}
 	}
-
-	// Optional graceful wait
-	select {
-	case <-ctx.Done():
-	case <-time.After(GracefulShutdownTimeout):
-	}
-
 }

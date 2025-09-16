@@ -9,16 +9,10 @@ import (
 	"log"
 	"os/signal"
 	"syscall"
-	"time"
 
 	internallog "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/log"
 	internalusbcdc "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/usbcdc"
 	"golang.org/x/sync/errgroup"
-)
-
-const (
-	// GracefulShutdownTimeout is the timeout for graceful shutdown
-	GracefulShutdownTimeout = 5 * time.Second
 )
 
 func main() {
@@ -30,15 +24,6 @@ func main() {
 	logger, err := internallog.NewDefaultLogger(*logDebug)
 	if err != nil {
 		log.Fatalf("failed to create logger: %v\n", err)
-	}
-
-	// Initialize the USB-CDC handler
-	usbCDCHandler, err := internalusbcdc.NewDefaultHandler(
-		internalusbcdc.BaudRate,
-		logger,
-	)
-	if err != nil {
-		log.Fatalf("failed to initialize usb-cdc handler: %v", err)
 	}
 
 	// Context canceled on SIGINT/SIGTERM.
@@ -58,6 +43,22 @@ func main() {
 		},
 	)
 
+	// Wait a moment to ensure the logger is ready
+	fmt.Println("Waiting for logger to be ready...")
+	if err := logger.WaitUntilReady(ctx); err != nil {
+		log.Fatalf("failed to wait for logger readiness: %v", err)
+	}
+	fmt.Println("Logger is ready")
+
+	// Initialize the USB-CDC handler
+	usbCDCHandler, err := internalusbcdc.NewDefaultHandler(
+		internalusbcdc.BaudRate,
+		logger,
+	)
+	if err != nil {
+		log.Fatalf("failed to initialize usb-cdc handler: %v", err)
+	}
+
 	// Initialize the USB-CDC goroutine
 	g.Go(
 		func() error {
@@ -71,11 +72,5 @@ func main() {
 		if err != nil {
 			return
 		}
-	}
-
-	// Optional graceful wait
-	select {
-	case <-ctx.Done():
-	case <-time.After(GracefulShutdownTimeout):
 	}
 }

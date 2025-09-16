@@ -9,7 +9,8 @@ import (
 	"sync/atomic"
 	"syscall"
 	"time"
-	
+	"log"
+
 	"golang.org/x/sync/errgroup"
 
 	gorplidarsdkhandler "github.com/ralvarezdev/go-rplidar-sdk-handler"
@@ -17,7 +18,6 @@ import (
 	goconcurrentlogger "github.com/ralvarezdev/go-concurrent-logger"
 	gohailocliphandler "github.com/ralvarezdev/go-hailo-clip-handler"
 	internalusbcdc "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/usbcdc"
-	gocontext "github.com/ralvarezdev/go-context"
 )
 
 type (
@@ -181,19 +181,6 @@ func (h *DefaultHandler) setMotorStop() error {
 	return h.setMotorSpeed(0, MotorDirectionStop)
 }
 
-// setMotorForward sets the motor speed to forward
-//
-// Parameters:
-//
-// speed: The speed to set the motor
-//
-// Returns:
-//
-// An error if the speed could not be set, nil otherwise
-func (h *DefaultHandler) setMotorForward(speed uint16) error {
-	return h.setMotorSpeed(speed, MotorDirectionForward)
-}
-
 // setMotorForwardByPercentage sets the motor speed to forward by percentage of the maximum motor speed value
 //
 // Parameters:
@@ -205,19 +192,6 @@ func (h *DefaultHandler) setMotorForward(speed uint16) error {
 // An error if the speed could not be set, nil otherwise
 func (h *DefaultHandler) setMotorForwardByPercentage(percentage float64) error {
 	return h.setMotorSpeedByPercentage(percentage, MotorDirectionForward)
-}
-
-// setMotorBackward sets the motor speed to backward
-//
-// Parameters:
-//
-// speed: The speed to set the motor
-//
-// Returns:
-//
-// An error if the speed could not be set, nil otherwise
-func (h *DefaultHandler) setMotorBackward(speed uint16) error {
-	return h.setMotorSpeed(speed, MotorDirectionBackward)
 }
 
 // setMotorBackwardByPercentage sets the motor speed to backward by percentage of the maximum motor speed value
@@ -386,9 +360,10 @@ func (h *DefaultHandler) setServoToOppositeDirection(servoAngle uint16) error {
 	}
 
 	// Set the servo to the opposite direction
-	if h.servoDirection == ServoDirectionRight {
+	switch h.servoDirection {
+	case ServoDirectionRight:
 		return h.setServoToLeft(servoAngle)
-	} else if h.servoDirection == ServoDirectionLeft {
+	case ServoDirectionLeft:
 		return h.setServoToRight(servoAngle)
 	}
 	return nil
@@ -590,21 +565,22 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 				}
 
 				// Set previous servo angle and motor speed back to normal
-				if h.servoDirection == ServoDirectionLeft {
+				switch h.servoDirection {
+				case ServoDirectionLeft:
 					if err := h.setServoToLeft(previousServoAngle); err != nil {
 						return fmt.Errorf(
 							"failed to set servo to previous left angle: %w",
 							err,
 						)
 					}
-				} else if h.servoDirection == ServoDirectionRight {
+				case ServoDirectionRight:
 					if err := h.setServoToRight(previousServoAngle); err != nil {
 						return fmt.Errorf(
 							"failed to set servo to previous right angle: %w",
 							err,
 						)
 					}
-				} else {
+				case ServoDirectionStraight:
 					if err := h.setServoToOppositeDirection(previousServoAngle); err != nil {
 						return fmt.Errorf(
 							"failed to set servo to center: %w",
@@ -795,12 +771,13 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 // Parameters:
 //
 // ctx: Context for managing cancellation and timeouts.
-// stopFn: Function to call to stop the pilot handler
 //
 // Returns:
 //
 // An error if the pilot could not be run, nil otherwise
-func (h *DefaultHandler) runToWrap(ctx context.Context, stopFn func()) error {
+func (h *DefaultHandler) runToWrap(ctx context.Context) error {
+	defer h.handlerLoggerProducer.Close()
+
 	// Initialize BNO08x last turns to 0 and RPLiDAR turns counter to 0
 	h.bno08xLastTurns = 0
 	h.rplidarTurnsCounter = 0
@@ -817,18 +794,23 @@ func (h *DefaultHandler) runToWrap(ctx context.Context, stopFn func()) error {
 	h.handlerLoggerProducer.Info("Waiting for challenge message...")
 	challenge, err := h.usbCDCHandler.WaitForChallenge(ctx)
 	if err != nil {
-		stopFn()
-		return fmt.Errorf("failed to wait for challenge message: %w", err)
+		h.handlerLoggerProducer.Error(
+			fmt.Errorf("failed to wait for challenge message: %w", err),
+		)
+		return err
 	}
 	h.handlerLoggerProducer.Info(
 		fmt.Sprintf("Challenge message received: %s", challenge.String()),
 	)
 
 	// Wait for max motor speed value to be set
+	h.handlerLoggerProducer.Info("Waiting for max motor speed value...")
 	maxMotorSpeed, err := h.usbCDCHandler.WaitForMaxMotorSpeedValue(ctx)
 	if err != nil {
-		stopFn()
-		return fmt.Errorf("failed to wait for max motor speed value: %w", err)
+		h.handlerLoggerProducer.Error(
+			fmt.Errorf("failed to wait for max motor speed value: %w", err),
+		)
+		return err
 	}
 	h.handlerLoggerProducer.Info(
 		fmt.Sprintf("Max motor speed value received: %d", maxMotorSpeed),
@@ -836,13 +818,13 @@ func (h *DefaultHandler) runToWrap(ctx context.Context, stopFn func()) error {
 	h.maxMotorSpeedValue = maxMotorSpeed
 
 	// Wait for max servo direction value to be set
+	h.handlerLoggerProducer.Info("Waiting for max servo direction value...")
 	maxServoDirection, err := h.usbCDCHandler.WaitForMaxServoDirectionValue(ctx)
 	if err != nil {
-		stopFn()
-		return fmt.Errorf(
-			"failed to wait for max servo direction value: %w",
-			err,
+		h.handlerLoggerProducer.Error(
+			fmt.Errorf("failed to wait for max servo direction value: %w", err),
 		)
+		return err
 	}
 	h.handlerLoggerProducer.Info(
 		fmt.Sprintf(
@@ -869,13 +851,7 @@ func (h *DefaultHandler) runToWrap(ctx context.Context, stopFn func()) error {
 	if handlerFn == nil {
 		return fmt.Errorf("unknown challenge: %s", challenge.String())
 	}
-	return gocontext.StopContextOnError(
-		ctx,
-		stopFn,
-		func(ctx context.Context) error {
-			return handlerFn(ctx)
-		},
-	)()
+	return handlerFn(ctx)
 }
 
 // Run runs the pilot handler
@@ -905,16 +881,6 @@ func (h *DefaultHandler) Run() error {
 
 	h.mutex.Unlock()
 
-	// Create a logger producer
-	handlerLoggerProducer, err := h.logger.NewProducer(
-		HandlerLoggerProducerTag,
-	)
-	if err != nil {
-		return fmt.Errorf("failed to create handler logger producer: %w", err)
-	}
-	h.handlerLoggerProducer = handlerLoggerProducer
-	defer h.handlerLoggerProducer.Close()
-
 	// Set servo direction and motor direction to initial values
 	h.servoDirection = ServoDirectionStraight
 	h.motorDirection = MotorDirectionStop
@@ -932,24 +898,45 @@ func (h *DefaultHandler) Run() error {
 	// Initialize the logger goroutine
 	g.Go(
 		func() error {
+			defer fmt.Println("Logger goroutine exited")
 			return h.logger.Run(ctx, stop)
 		},
 	)
 
-	// Generate the CLIP embeddings
-	if err = h.clipHandler.GenerateEmbeddings(); err != nil {
-		// Wait for the writer goroutine to finish
-		stop()
-		if err = g.Wait(); err != nil {
-			_, _ = fmt.Fprintf(os.Stderr, "error: %v\n", err)
-		}
-		return err
+	// Wait a moment to ensure the logger is ready
+	fmt.Println("Waiting for logger to be ready...")
+	if err := h.logger.WaitUntilReady(ctx); err != nil {
+		log.Fatalf("failed to wait for logger readiness: %v", err)
 	}
+	fmt.Println("Logger is ready")
+
+	// Create a logger producer
+	handlerLoggerProducer, err := h.logger.NewProducer(
+		HandlerLoggerProducerTag,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to create handler logger producer: %w", err)
+	}
+	h.handlerLoggerProducer = handlerLoggerProducer
+
+	// Generate the CLIP embeddings
+	h.handlerLoggerProducer.Info("Generating CLIP embeddings")
+	if err = h.clipHandler.GenerateEmbeddings(ctx); err != nil {
+		stop()
+		h.handlerLoggerProducer.Error(
+			fmt.Errorf("failed to generate CLIP embeddings: %w", err),
+		)
+		h.handlerLoggerProducer.Info("Stopping all goroutines...")
+		h.handlerLoggerProducer.Close()
+		return g.Wait()
+	}
+	h.handlerLoggerProducer.Info("CLIP embeddings generated successfully")
 	defer stop()
 
 	// Initialize the CLIP goroutine
 	g.Go(
 		func() error {
+			defer fmt.Println("CLIP goroutine exited")
 			return h.clipHandler.Run(ctx, stop)
 		},
 	)
@@ -957,6 +944,7 @@ func (h *DefaultHandler) Run() error {
 	// Initialize the RPLiDAR goroutine
 	g.Go(
 		func() error {
+			defer fmt.Println("RPLiDAR goroutine exited")
 			return h.rplidarHandler.Run(ctx, stop)
 		},
 	)
@@ -964,19 +952,39 @@ func (h *DefaultHandler) Run() error {
 	// Initialize the USB-CDC goroutine
 	g.Go(
 		func() error {
+			defer fmt.Println("USB-CDC goroutine exited")
 			return h.usbCDCHandler.Run(ctx, stop)
 		},
 	)
 
+	// Wait USB-CDC to be ready
+	h.handlerLoggerProducer.Info("Waiting for USB-CDC handler to be ready...")
+	if err := h.usbCDCHandler.WaitUntilReady(ctx); err != nil {
+		stop()
+		h.handlerLoggerProducer.Error(
+			fmt.Errorf(
+				"failed to wait for USB-CDC handler readiness: %w",
+				err,
+			),
+		)
+		h.handlerLoggerProducer.Info("Stopping all goroutines...")
+		h.handlerLoggerProducer.Close()
+		return g.Wait()
+	}
+	h.handlerLoggerProducer.Info("USB-CDC handler is ready")
+
 	// Initialize the run to wrap goroutine
 	g.Go(
 		func() error {
-			return goconcurrentlogger.LogOnError(
-				func() error {
-					return h.runToWrap(ctx, stop)
+			defer fmt.Println("Pilot goroutine exited")
+			return goconcurrentlogger.StopContextAndLogOnError(
+				ctx,
+				stop,
+				func(ctx context.Context) error {
+					return h.runToWrap(ctx)
 				},
 				h.handlerLoggerProducer,
-			)
+			)()
 		},
 	)
 
