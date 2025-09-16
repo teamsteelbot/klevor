@@ -609,41 +609,17 @@ func (h *DefaultHandler) incomingMessagesHandler(
 					// Parse the BNO08X pitch degrees value
 					degreesUint64 := binary.BigEndian.Uint64(message.Data[:8])
 					h.receivedBNO08XPitchDegrees = math.Float64frombits(degreesUint64)
-
-					// Log the received message
-					h.incomingMessagesLoggerProducer.Info(
-						fmt.Sprintf(
-							"Received BNO08X pitch degrees: %f",
-							h.receivedBNO08XPitchDegrees,
-						),
-					)
+					h.updateBNO08XPitchDegrees(h.receivedBNO08XPitchDegrees)
 				case IncomingCategoryEulerDegreesRoll:
 					// Parse the BNO08X roll degrees value
 					degreesUint64 := binary.BigEndian.Uint64(message.Data[:8])
 					h.receivedBNO08XRollDegrees = math.Float64frombits(degreesUint64)
-
-					// Log the received message
-					h.incomingMessagesLoggerProducer.Info(
-						fmt.Sprintf(
-							"Received BNO08X roll degrees: %f",
-							h.receivedBNO08XRollDegrees,
-						),
-					)
+					h.updateBNO08XRollDegrees(h.receivedBNO08XRollDegrees)
 				case IncomingCategoryEulerDegreesYaw:
 					// Parse the BNO08X yaw degrees value
 					degreesUint64 := binary.BigEndian.Uint64(message.Data[:8])
 					h.receivedBNO08XYawDegrees = math.Float64frombits(degreesUint64)
-
-					// Log the received message
-					h.incomingMessagesLoggerProducer.Info(
-						fmt.Sprintf(
-							"Received BNO08X yaw degrees: %f",
-							h.receivedBNO08XYawDegrees,
-						),
-					)
-
-					// Update the calculated turns
-					h.updateCalculatedTurns()
+					h.updateBNO08XYawDegrees(h.receivedBNO08XYawDegrees)
 				case IncomingCategoryQuaternionX:
 					// Parse the BNO08X quaternion X value
 					quaternionXUint64 := binary.BigEndian.Uint64(message.Data[:8])
@@ -699,18 +675,14 @@ func (h *DefaultHandler) incomingMessagesHandler(
 					quaternion[QuaternionXIndex] = h.receivedBNO08XQuaternionX
 					quaternion[QuaternionYIndex] = h.receivedBNO08XQuaternionY
 					quaternion[QuaternionZIndex] = h.receivedBNO08XQuaternionZ
-
 					eulerDegrees := QuaternionToEulerDegrees(
 						quaternion,
 					)
 
 					// Update the received Euler angles
-					h.receivedBNO08XYawDegrees = eulerDegrees[EulerDegreesYawIndex]
-					h.receivedBNO08XPitchDegrees = eulerDegrees[EulerDegreesPitchIndex]
-					h.receivedBNO08XRollDegrees = eulerDegrees[EulerDegreesRollIndex]
-
-					// Calculate the turns based on the received yaw degrees
-					h.updateCalculatedTurns()
+					h.updateBNO08XYawDegrees(eulerDegrees[EulerDegreesYawIndex])
+					h.updateBNO08XPitchDegrees(eulerDegrees[EulerDegreesPitchIndex])
+					h.updateBNO08XRollDegrees(eulerDegrees[EulerDegreesRollIndex])
 				default:
 					// Log any other received message
 					h.incomingMessagesLoggerProducer.Info(
@@ -751,6 +723,96 @@ func (h *DefaultHandler) updateCalculatedTurns() {
 		fmt.Sprintf(
 			"Updated calculated turns: %d",
 			h.calculatedTurns.GetTurns(),
+		),
+	)
+}
+
+// updateBNO08XYawDegrees updates the BNO08X yaw degrees and recalculates the turns.
+//
+// Parameters:
+//
+// yawDegrees: The new yaw degrees to set.
+func (h *DefaultHandler) updateBNO08XYawDegrees(yawDegrees float64) {
+	// Validate the yaw degrees
+	if yawDegrees < EulerDegreesYawMinValue || yawDegrees > EulerDegreesYawMaxValue {
+		h.incomingMessagesLoggerProducer.Warning(
+			fmt.Sprintf(
+				"Invalid yaw degrees value: %f. Must be between %f and %f.",
+				yawDegrees,
+				EulerDegreesYawMinValue,
+				EulerDegreesYawMaxValue,
+			),
+		)
+		return
+	}
+
+	// Update the received yaw degrees
+	h.receivedBNO08XYawDegrees = yawDegrees
+	h.incomingMessagesLoggerProducer.Info(
+		fmt.Sprintf(
+			"Updated BNO08X yaw degrees: %f",
+			h.receivedBNO08XYawDegrees,
+		),
+	)
+
+	// Update the calculated turns
+	h.updateCalculatedTurns()
+}
+
+// updateBNO08XPitchDegrees updates the BNO08X pitch degrees.
+//
+// Parameters:
+//
+// pitchDegrees: The new pitch degrees to set.
+func (h *DefaultHandler) updateBNO08XPitchDegrees(pitchDegrees float64) {
+	// Validate the pitch degrees
+	if pitchDegrees < EulerDegreesPitchMinValue || pitchDegrees > EulerDegreesPitchMaxValue {
+		h.incomingMessagesLoggerProducer.Warning(
+			fmt.Sprintf(
+				"Invalid pitch degrees value: %f. Must be between %f and %f.",
+				pitchDegrees,
+				EulerDegreesPitchMinValue,
+				EulerDegreesPitchMaxValue,
+			),
+		)
+		return
+	}
+
+	// Update the received pitch degrees
+	h.receivedBNO08XPitchDegrees = pitchDegrees
+	h.incomingMessagesLoggerProducer.Info(
+		fmt.Sprintf(
+			"Updated BNO08X pitch degrees: %f",
+			h.receivedBNO08XPitchDegrees,
+		),
+	)
+}
+
+// updateBNO08XRollDegrees updates the BNO08X roll degrees.
+//
+// Parameters:
+//
+// rollDegrees: The new roll degrees to set.
+func (h *DefaultHandler) updateBNO08XRollDegrees(rollDegrees float64) {
+	// Validate the roll degrees
+	if rollDegrees < EulerDegreesRollMinValue || rollDegrees > EulerDegreesRollMaxValue {
+		h.incomingMessagesLoggerProducer.Warning(
+			fmt.Sprintf(
+				"Invalid roll degrees value: %f. Must be between %f and %f.",
+				rollDegrees,
+				EulerDegreesRollMinValue,
+				EulerDegreesRollMaxValue,
+			),
+		)
+		return
+	}
+
+	// Update the received roll degrees
+	h.receivedBNO08XRollDegrees = rollDegrees
+	h.incomingMessagesLoggerProducer.Info(
+		fmt.Sprintf(
+			"Updated BNO08X roll degrees: %f",
+			h.receivedBNO08XRollDegrees,
 		),
 	)
 }
@@ -815,9 +877,9 @@ func (h *DefaultHandler) readIncomingMessages(
 	)
 
 	// Extract messages from the accumulated buffer
-	messages, err := NewIncomingMessagesFromBuffer(&h.accumulatedBuffer)
+	messages, err := NewIncomingMessagesFromBuffer(&h.accumulatedBuffer, h.incomingMessagesLoggerProducer)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse incoming messages: %w", err)
+		return nil, fmt.Errorf("failed to extract incoming messages from buffer: %w", err)
 	}
 
 	return messages, nil

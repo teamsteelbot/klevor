@@ -16,8 +16,8 @@ github.com/ralvarezdev/go-rplidar-sdk-handler v0.1.5 h1:qqkvKutBCBt2xKXFXD0+MBU8
 github.com/ralvarezdev/go-rplidar-sdk-handler v0.1.5/go.mod h1:UWle/kF9lGftDpOEVWeGWcCgtcTvAYar48Q/DN4sUyg=
 github.com/ralvarezdev/go-strings v0.1.12 h1:AtOPDJ4lVO+33p7O4uECdD4C4D037h256zWz9uQ5eIQ=
 github.com/ralvarezdev/go-strings v0.1.12/go.mod h1:8sFOqmPJpqzS7bTjf91EzUCITnwpmkfifwY80GxV5r8=
-github.com/ralvarezdev/go-tinygo-errors v0.1.2 h1:SYG25DKaabb/Zan2RI3MRrqf0kJFmUwhLmFh8+HX1Iw=
-github.com/ralvarezdev/go-tinygo-errors v0.1.2/go.mod h1:1BmoP8we6T94Lg1b6Vbe4jjWfMFEuMbyE6WnY7cbFvs=
+github.com/ralvarezdev/go-tinygo-errors v0.1.3 h1:V3DtLB+/KyaVaVYxum2pxEZm+Ql71BTem2k7EFgF9iI=
+github.com/ralvarezdev/go-tinygo-errors v0.1.3/go.mod h1:1BmoP8we6T94Lg1b6Vbe4jjWfMFEuMbyE6WnY7cbFvs=
 github.com/ralvarezdev/tinygo-errors v0.0.4 h1:nuqApi7tEzPSSf2/3Uqxxizwftvoxczaec9BA95Hcj4=
 github.com/ralvarezdev/tinygo-errors v0.0.4/go.mod h1:PlkyrG60saZetwFX1mPhve+9l2pneVH7c8q5w4sxe8M=
 github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcUk=

@@ -13,7 +13,6 @@ const (
 	ErrFailedToSendCategoryByte             = "failed to send category byte: %w"
 	ErrFailedToSendEndByte                  = "failed to send end byte: %w"
 	ErrFailedToSendDataBytes                = "failed to send data bytes: %w"
-	ErrDataLengthByteMismatchForIncomingMessage = "data length byte mismatch for incoming message of category 0x%02X: expected %d, got %d"
 	ErrDataLengthMismatchForOutgoingMessage = "data length mismatch for outgoing message of category 0x%02X: expected %d, got %d"
 	ErrFailedToSendDataLengthByte           = "failed to send data length bytes: %w"
 )

@@ -3,7 +3,7 @@ module github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo
 go 1.25.0
 
 require (
-	github.com/ralvarezdev/tinygo-bno08x v0.5.9
+	github.com/ralvarezdev/tinygo-bno08x v0.5.10
 	github.com/ralvarezdev/tinygo-buffers v0.1.3
 	github.com/ralvarezdev/tinygo-errors v0.0.4
 	github.com/ralvarezdev/tinygo-escmotor v0.0.7

@@ -152,11 +152,29 @@ var (
 	// EulerDegreesRollIndex is the index for the Euler degrees roll component
 	EulerDegreesRollIndex = 0
 
+	// EulerDegreesRollMinValue is the minimum value for the Euler degrees roll component
+	EulerDegreesRollMinValue = -180.0
+	
+	// EulerDegreesRollMaxValue is the maximum value for the Euler degrees roll component
+	EulerDegreesRollMaxValue = 180.0
+
 	// EulerDegreesPitchIndex is the index for the Euler degrees pitch component
 	EulerDegreesPitchIndex = 1
 
+	// EulerDegreesPitchMinValue is the minimum value for the Euler degrees pitch component
+	EulerDegreesPitchMinValue = -90.0
+
+	// EulerDegreesPitchMaxValue is the maximum value for the Euler degrees pitch component
+	EulerDegreesPitchMaxValue = 90.0
+
 	// EulerDegreesYawIndex is the index for the Euler degrees yaw component
 	EulerDegreesYawIndex = 2
+
+	// EulerDegreesYawMinValue is the minimum value for the Euler degrees yaw component
+	EulerDegreesYawMinValue = -180.0
+
+	// EulerDegreesYawMaxValue is the maximum value for the Euler degrees yaw component
+	EulerDegreesYawMaxValue = 180.0
 
 	// OutgoingMotorSpeedStopMessage is the outgoing motor speed stop message for USB-CDC communication
 	OutgoingMotorSpeedStopMessage = NewOutgoingMessage(

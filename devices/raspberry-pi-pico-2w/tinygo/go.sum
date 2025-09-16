@@ -1,5 +1,5 @@
-github.com/ralvarezdev/tinygo-bno08x v0.5.9 h1:O08TWZXXHMOM5bqsgOO/Gy88HbX9yooSnSU7c4PRLP4=
-github.com/ralvarezdev/tinygo-bno08x v0.5.9/go.mod h1:xdWKW6b3R5ooBPrI5aFjuQkk4hSSaQq7fc9uimK67RM=
+github.com/ralvarezdev/tinygo-bno08x v0.5.10 h1:z2L87Po2OhkAPsOv1WzsU6JvEdJx4wXU1LFqPjmH8cY=
+github.com/ralvarezdev/tinygo-bno08x v0.5.10/go.mod h1:xdWKW6b3R5ooBPrI5aFjuQkk4hSSaQq7fc9uimK67RM=
 github.com/ralvarezdev/tinygo-buffers v0.1.3 h1:JUuNgQVEAwQ3tp889go63jgTySouquKJJCsPFzk2MOg=
 github.com/ralvarezdev/tinygo-buffers v0.1.3/go.mod h1:Rc0yxPm8saRZ++pRNrY0J/8R7bQ9cU4KSHX8+1BMbJY=
 github.com/ralvarezdev/tinygo-errors v0.0.4 h1:nuqApi7tEzPSSf2/3Uqxxizwftvoxczaec9BA95Hcj4=

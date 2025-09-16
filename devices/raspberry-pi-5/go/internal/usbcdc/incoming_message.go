@@ -8,6 +8,7 @@ import (
 
 	"github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal"
 	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
+	goconcurrentlogger "github.com/ralvarezdev/go-concurrent-logger"
 )
 
 type (
@@ -99,11 +100,12 @@ func NewIncomingChallengeMessage(
 // Parameters:
 //
 // buffer: The buffer to parse for incoming messages
+// logger: The logger to use for logging
 //
 // Returns:
 //
 // A slice of IncomingMessage instances, or an error if the buffer is invalid
-func NewIncomingMessagesFromBuffer(buffer *[]byte) ([]*IncomingMessage, error) {
+func NewIncomingMessagesFromBuffer(buffer *[]byte, logger goconcurrentlogger.LoggerProducer) ([]*IncomingMessage, error) {
 	// Check if the buffer is nil
 	if buffer == nil {
 		return nil, ErrNilBuffer
@@ -111,12 +113,12 @@ func NewIncomingMessagesFromBuffer(buffer *[]byte) ([]*IncomingMessage, error) {
 
 	// Parse the buffer to extract messages
 	var messages []*IncomingMessage
-	for len(*buffer) > 0{
+	for len(*buffer) > 0 {
 		// If no start byte is found, return an empty slice
 		nextStart := bytes.IndexByte(*buffer, StartAndEndByte)
 
 		// If no start byte is found, exit the loop
-		if nextStart == -1 {
+		if nextStart == -1 {				
 			break
 		}
 
@@ -128,11 +130,27 @@ func NewIncomingMessagesFromBuffer(buffer *[]byte) ([]*IncomingMessage, error) {
 			break
 		}
 
+		// Check if the next bytes are start and bytes, if so omit them
+		for len(*buffer) > 1 && (*buffer)[1] == StartAndEndByte {
+			// Remove the start byte
+			*buffer = (*buffer)[1:]
+		}
+
+
 		// Get the category of the message
 		categoryUint8 := (*buffer)[1]
 		category, err := IncomingCategoryFromUint8(categoryUint8)
 		if err != nil {
-			return messages, err
+			// Log the error and continue to the next potential message
+			if logger != nil {
+				logger.Warning(
+					fmt.Sprintf("An error occurred while parsing incoming messages: %v", err),
+				)
+			}	 
+			
+			// Skip to next start byte
+			*buffer = (*buffer)[1:]
+			continue
 		}
 
 		// Get the data length of the message
@@ -141,12 +159,35 @@ func NewIncomingMessagesFromBuffer(buffer *[]byte) ([]*IncomingMessage, error) {
 		// Get the expected length of the data for the category
 		expectedDataLength, err := category.DataLength()
 		if err != nil {
-			return messages, err
+			// Log the error and continue to the next potential message
+			if logger != nil {
+				logger.Warning(
+					fmt.Sprintf("An error occurred while parsing incoming messages: %v", err),
+				)
+			}
+			
+			// Skip to next start byte
+			*buffer = (*buffer)[1:]
+			continue 
 		}
 
 		// Get the data length of the message
 		if dataLength != uint8(expectedDataLength) {
-			return messages, fmt.Errorf(ErrDataLengthByteMismatchForIncomingMessage, categoryUint8, dataLength, expectedDataLength)
+			// Log the error and continue to the next potential message
+			if logger != nil {
+				logger.Warning(
+					fmt.Sprintf(
+						"Data length byte mismatch for incoming message of category 0x%02X: expected %d, got %d",
+						categoryUint8,
+						expectedDataLength,
+						dataLength,
+					),
+				)
+			}
+			
+			// Skip to next start byte
+			*buffer = (*buffer)[1:]
+			continue
 		}
 
 		// Find the end byte
@@ -179,6 +220,7 @@ func NewIncomingMessagesFromBuffer(buffer *[]byte) ([]*IncomingMessage, error) {
 
 			// Set the found end byte flag
 			foundEndByteIndex = i
+			break
 		}
 
 		// Check if the end byte was found
@@ -193,7 +235,9 @@ func NewIncomingMessagesFromBuffer(buffer *[]byte) ([]*IncomingMessage, error) {
 				*buffer = (*buffer)[:0]
 				break
 			}
-			*buffer = (*buffer)[:nextStart+1]
+
+			// Skip to the next start byte after the current end byte
+			*buffer = (*buffer)[nextStart:]
 			continue
 		}
 
