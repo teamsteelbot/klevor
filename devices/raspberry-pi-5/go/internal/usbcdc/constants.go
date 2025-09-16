@@ -164,25 +164,25 @@ var (
 	// OutgoingMotorSpeedStopMessage is the outgoing motor speed stop message for USB-CDC communication
 	OutgoingMotorSpeedStopMessage = NewOutgoingMessage(
 		OutgoingCategoryMotorSpeedStop,
-		"",
+		[]byte{},
 	)
 
 	// OutgoingServoDirectionCenterMessage is the outgoing servo direction center message for USB-CDC communication
 	OutgoingServoDirectionCenterMessage = NewOutgoingMessage(
 		OutgoingCategoryServoDirectionCenter,
-		"",
+		[]byte{},
 	)
 
 	// OutgoingGetMaxMotorSpeedValueMessage is the outgoing message to request the maximum motor speed value
 	OutgoingGetMaxMotorSpeedValueMessage = NewOutgoingMessage(
 		OutgoingCategoryGetMaxMotorSpeedValue,
-		"",
+		[]byte{},
 	)
 
 	// OutgoingGetMaxServoDirectionValueMessage is the outgoing message to request the maximum servo direction value
 	OutgoingGetMaxServoDirectionValueMessage = NewOutgoingMessage(
 		OutgoingCategoryGetMaxServoDirectionValue,
-		"",
+		[]byte{},
 	)
 
 	// IncomingStartMessage is the incoming start message for USB-CDC communication

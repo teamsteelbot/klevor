@@ -216,6 +216,8 @@ func NewIncomingMessagesFromBuffer(buffer []byte) ([]*IncomingMessage, error) {
 //
 // A human-readable string that represents the IncomingMessage
 func (msg *IncomingMessage) StringToPrint() string {
+	var dataDetails string
+
 	switch msg.Category {
 	case IncomingCategoryEulerDegreesPitch,
 		IncomingCategoryEulerDegreesRoll,
@@ -226,52 +228,39 @@ func (msg *IncomingMessage) StringToPrint() string {
 		IncomingCategoryQuaternionZ:
 		// Check if the data length is valid for a float64 value
 		if len(msg.Data) != 8 {
-			return fmt.Sprintf(
-				"IncomingMessage{Category: %s, Data: %q (invalid length: %d, expected: 8)}",
-				msg.Category.String(),
-				msg.Data,
+			dataDetails = fmt.Sprintf(
+				"invalid length: %d, expected: 8",
 				len(msg.Data),
 			)
+			break
 		}
 
 		// Extract the float64 value from the message data
 		bits := binary.BigEndian.Uint64(msg.Data[:])
 		value := math.Float64frombits(bits)
-		return fmt.Sprintf(
-			"IncomingMessage{Category: %s, Data: %q (%f)}",
-			msg.Category.String(),
-			msg.Data,
-			value,
-		)
+		dataDetails = fmt.Sprintf("%f", value)
 	case IncomingCategoryMaxMotorSpeedValue,
 		IncomingCategoryMaxServoDirectionValue:
 		// Check if the data length is valid for an uint16 value
 		if len(msg.Data) != 2 {
-			return fmt.Sprintf(
-				"IncomingMessage{Category: %s, Data: %q (invalid length: %d, expected: 2)}",
-				msg.Category.String(),
-				msg.Data,
+			dataDetails = fmt.Sprintf(
+				"invalid length: %d, expected: 2",
 				len(msg.Data),
 			)
+			break
 		}
 
 		// Extract the uint16 value from the message data
 		value := binary.BigEndian.Uint16(msg.Data[:])
-		return fmt.Sprintf(
-			"IncomingMessage{Category: %s, Data: %q (%d)}",
-			msg.Category.String(),
-			msg.Data,
-			value,
-		)
+		dataDetails = fmt.Sprintf("%d", value)
 	case IncomingCategoryError:
 		// Check if the data length is valid for an uint16 value
 		if len(msg.Data) != 2 {
-			return fmt.Sprintf(
-				"IncomingMessage{Category: %s, Data: %q (invalid length: %d, expected: 2)}",
-				msg.Category.String(),
-				msg.Data,
+			dataDetails = fmt.Sprintf(
+				"invalid length: %d, expected: 2",
 				len(msg.Data),
 			)
+			break
 		}
 
 		// Extract the uint16 value from the message data
@@ -282,58 +271,49 @@ func (msg *IncomingMessage) StringToPrint() string {
 		if !ok {
 			errorCodeMessage = "unknown error code"
 		}
-
-		return fmt.Sprintf(
-			"IncomingMessage{Category: %s, Data: %q (%s)}",
-			msg.Category.String(),
-			msg.Data,
-			errorCodeMessage,
-		)
+		dataDetails = errorCodeMessage
 	case IncomingCategoryChallenge:
 		challenge, err := internal.ChallengeFromBytes(msg.Data)
 		if err != nil {
-			return fmt.Sprintf(
-				"IncomingMessage{Category: %s, Data: %q (invalid challenge: %v)}",
-				msg.Category.String(),
-				msg.Data,
-				err,
-			)
+			dataDetails = fmt.Sprintf("invalid challenge: %v", err)
+			break
 		}
 		if challenge != internal.ChallengeNil {
-			return fmt.Sprintf(
-				"IncomingMessage{Category: %s, Data: %q (%s)}",
-				msg.Category.String(),
-				msg.Data,
-				challenge.String(),
-			)
+			dataDetails = challenge.String()
+			break
 		}
-		fallthrough
+		dataDetails = "nil challenge"
 	case IncomingCategoryStatus:
 		incomingStatus, err := IncomingStatusFromBytes(msg.Data)
 		if err != nil {
-			return fmt.Sprintf(
-				"IncomingMessage{Category: %s, Data: %q (invalid status: %v)}",
-				msg.Category.String(),
-				msg.Data,
-				err,
-			)
+			dataDetails = fmt.Sprintf("invalid status: %v", err)
+			break
 		}
 		if incomingStatus != IncomingStatusNil {
-			return fmt.Sprintf(
-				"IncomingMessage{Category: %s, Data: %q (%s)}",
-				msg.Category.String(),
-				msg.Data,
-				incomingStatus.String(),
-			)
+			dataDetails = incomingStatus.String()
+			break
 		}
-		fallthrough
-	default:
+		dataDetails = "nil status"
+	}
+
+	// Check if there are no details for the data
+	if dataDetails == "" {
 		return fmt.Sprintf(
-			"IncomingMessage{Category: %s, Data: %q}",
+			"IncomingMessage{Category: [0x%02X] (%s), Data: [%s]}",
+			uint8(msg.Category),
 			msg.Category.String(),
-			msg.Data,
+			ConvertBytesSliceToHexString(msg.Data),
 		)
 	}
+	
+	// Return the formatted string with details
+	return fmt.Sprintf(
+		"IncomingMessage{Category: [0x%02X] (%s), Data: [%s] (%s)}",
+		uint8(msg.Category),
+		msg.Category.String(),
+		ConvertBytesSliceToHexString(msg.Data),
+		dataDetails,
+	)
 }
 
 // IsEqual compares the given instance of IncomingMessage with the current one

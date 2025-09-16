@@ -22,6 +22,10 @@ github.com/ralvarezdev/go-strings v0.1.12 h1:AtOPDJ4lVO+33p7O4uECdD4C4D037h256zW
 github.com/ralvarezdev/go-strings v0.1.12/go.mod h1:8sFOqmPJpqzS7bTjf91EzUCITnwpmkfifwY80GxV5r8=
 github.com/ralvarezdev/go-tinygo-errors v0.1.0 h1:9scKMqj0/eNh36HcxKhGqjuDQCGBxxk7sRoDORtIGpU=
 github.com/ralvarezdev/go-tinygo-errors v0.1.0/go.mod h1:pcbtDolW5uyOdCeBVTR7Ias7npFPHUIdorGBiuapLIQ=
+github.com/ralvarezdev/go-tinygo-errors v0.1.2 h1:SYG25DKaabb/Zan2RI3MRrqf0kJFmUwhLmFh8+HX1Iw=
+github.com/ralvarezdev/go-tinygo-errors v0.1.2/go.mod h1:1BmoP8we6T94Lg1b6Vbe4jjWfMFEuMbyE6WnY7cbFvs=
+github.com/ralvarezdev/tinygo-errors v0.0.4 h1:nuqApi7tEzPSSf2/3Uqxxizwftvoxczaec9BA95Hcj4=
+github.com/ralvarezdev/tinygo-errors v0.0.4/go.mod h1:PlkyrG60saZetwFX1mPhve+9l2pneVH7c8q5w4sxe8M=
 github.com/ralvarezdev/tinygo-types v0.0.2 h1:gCQyzvk6kgPJ0HQuEsYw/rAGXBJAu1au9piVhlAsIXM=
 github.com/ralvarezdev/tinygo-types v0.0.2/go.mod h1:oqYL6BcwQmVa8/AswTJkcmjezOAg86IYYaxfaVKMOOI=
 github.com/ralvarezdev/tinygo-types v0.0.3 h1:h8ogOD2lOVxR+w5i6o+v/8qTROFA2KBjVXBM7NT3SMc=

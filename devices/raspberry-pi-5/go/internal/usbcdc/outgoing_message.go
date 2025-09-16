@@ -3,6 +3,7 @@ package usbcdc
 import (
 	"bytes"
 	"fmt"
+	"encoding/binary"
 )
 
 type (
@@ -97,62 +98,57 @@ func NewOutgoingMessageFromUint16Data(
 //
 // A human-readable string that represents the OutgoingMessage
 func (msg *OutgoingMessage) StringToPrint() string {
+	var dataDetails string
+
 	switch msg.Category {
 	case OutgoingCategoryMotorSpeedStop,
 		OutgoingCategoryServoDirectionCenter,
 		OutgoingCategoryGetMaxMotorSpeedValue,
 		OutgoingCategoryGetMaxServoDirectionValue:
-		return fmt.Sprintf(
-			"OutgoingMessage{Category: %s, Data: <no content>}",
-			msg.Category.String(),
-		)
+		dataDetails = "<no content>"
 	case OutgoingCategoryMotorSpeedForward,
 		OutgoingCategoryMotorSpeedBackward,
 		OutgoingCategoryServoDirectionToLeft,
 		OutgoingCategoryServoDirectionToRight:
 		if len(msg.Data) != 2 {
-			return fmt.Sprintf(
-				"OutgoingMessage{Category: %s, Data: %q (invalid length: %d, expected 2)}",
-				msg.Category.String(),
-				msg.Data,
-				len(msg.Data),
-			)
+			dataDetails = fmt.Sprintf("invalid length: %d, expected: 2", len(msg.Data))
+			break
 		}
 
 		// Combine the two bytes into a uint16 value
-		value := (uint16(msg.Data[0]) << 8) | uint16(msg.Data[1])
-		return fmt.Sprintf(
-			"OutgoingMessage{Category: %s, Data: %q (%d)}",
-			msg.Category.String(),
-			msg.Data,
-			value,
-		)
+		value := binary.BigEndian.Uint16(msg.Data[:])
+		dataDetails = fmt.Sprintf("%d", value)
 	case OutgoingCategoryStatus:
 		outgoingStatus, err := OutgoingStatusFromBytes(msg.Data)
 		if err != nil {
-			return fmt.Sprintf(
-				"OutgoingMessage{Category: %s, Data: %q (invalid status: %v)}",
-				msg.Category.String(),
-				msg.Data,
-				err,
-			)
+			dataDetails = fmt.Sprintf("invalid status: %v", err)
+			break
 		}
 		if outgoingStatus != OutgoingStatusNil {
-			return fmt.Sprintf(
-				"OutgoingMessage{Category: %s, Data: %q (%s)}",
-				msg.Category.String(),
-				msg.Data,
-				outgoingStatus.String(),
-			)
+			dataDetails = outgoingStatus.String()
+			break
 		}
-		fallthrough
-	default:
+		dataDetails = "nil status"
+	}
+
+	// Check if there are no details for the data
+	if dataDetails == "" {
 		return fmt.Sprintf(
-			"OutgoingMessage{Category: %s, Data: %q}",
+			"OutgoingMessage{Category: [0x%02X] (%s), Data: [%s]}",
+			uint8(msg.Category),
 			msg.Category.String(),
-			msg.Data,
+			ConvertBytesSliceToHexString(msg.Data),
 		)
 	}
+
+	// Return the formatted string with details
+	return fmt.Sprintf(
+		"OutgoingMessage{Category: [0x%02X] (%s), Data: [%s] (%s)}",
+		uint8(msg.Category),
+		msg.Category.String(),
+		ConvertBytesSliceToHexString(msg.Data),
+		dataDetails,
+	)
 }
 
 // IsEqual compares the given instance of OutgoingMessage with the current one

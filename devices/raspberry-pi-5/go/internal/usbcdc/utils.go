@@ -1,7 +1,9 @@
 package usbcdc
 
 import (
+	"fmt"
 	"math"
+	"strings"
 
 	gotinygoerrors "github.com/ralvarezdev/go-tinygo-errors"
 	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
@@ -65,8 +67,28 @@ func QuaternionToEulerDegrees(quaternion [4]float64) [3]float64 {
 func GetErrorCodeMessage(errorCode tinygoerrors.ErrorCode) (string, bool) {
 	if errorMessage, ok := gotinygoerrors.ErrorCodeMessages[errorCode]; ok {
 		return errorMessage, true
-	} else if internalErrorMessage, ok := tinygoerrors.ErrorCodeMessages[errorCode]; ok {
+	} else if internalErrorMessage, ok := ErrorCodeMessages[errorCode]; ok {
 		return internalErrorMessage, true
 	}
 	return "", false
+}
+
+// ConvertBytesSliceToHexString converts a slice of bytes to a formatted hexadecimal string
+//
+// Parameters:
+//
+// data: The slice of bytes to convert
+//
+// Returns:
+//
+// A string representing the hexadecimal values of the bytes in the slice
+func ConvertBytesSliceToHexString(data []byte) string {
+	var builder strings.Builder
+	for i, b := range data {
+		if i > 0 {
+			builder.WriteString(" ")
+		}
+		builder.WriteString(fmt.Sprintf("0x%02X", b))
+	}
+	return builder.String()
 }
