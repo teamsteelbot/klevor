@@ -92,3 +92,21 @@ func ConvertBytesSliceToHexString(data []byte) string {
 	}
 	return builder.String()
 }
+
+// CalculateChecksum calculates the checksum for a category and data byte slice content
+//
+// Parameters:
+//
+// category: The category byte
+// data: The slice of data bytes
+//
+// Returns:
+//
+// The calculated checksum byte
+func CalculateChecksum(category byte, data []byte) byte {
+	checksum := category
+	for _, b := range data {
+		checksum += b
+	}
+	return checksum
+}

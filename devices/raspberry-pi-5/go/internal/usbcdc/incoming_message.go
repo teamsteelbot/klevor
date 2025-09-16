@@ -167,7 +167,7 @@ func NewIncomingMessagesFromBuffer(buffer *[]byte, logger goconcurrentlogger.Log
 			}
 			
 			// Skip to next start byte
-			*buffer = (*buffer)[1:]
+			*buffer = (*buffer)[2:]
 			continue 
 		}
 
@@ -186,14 +186,19 @@ func NewIncomingMessagesFromBuffer(buffer *[]byte, logger goconcurrentlogger.Log
 			}
 			
 			// Skip to next start byte
-			*buffer = (*buffer)[1:]
+			*buffer = (*buffer)[2:]
 			continue
 		}
 
 		// Find the end byte
 		data := make([]byte, 0, dataLength)
-		foundEndByteIndex := -1
-		for i := 3; i < len(*buffer); i++ {
+		maxIndex := int(dataLength) + 3
+		for i := 3; i < maxIndex; i++ {
+			// Check if we've reached the end of the buffer
+			if i >= len(*buffer) {
+				break
+			}
+
 			// Get the current byte
 			b := (*buffer)[i]
 
@@ -209,35 +214,38 @@ func NewIncomingMessagesFromBuffer(buffer *[]byte, logger goconcurrentlogger.Log
 
 				// Skip the next byte
 				i++
+				maxIndex++
 				continue
 			}
-
-			// Check if it's the end byte
-			if b != StartAndEndByte {
-				data = append(data, b)
-				continue
-			}
-
-			// Set the found end byte flag
-			foundEndByteIndex = i
-			break
 		}
 
-		// Check if the end byte was found
-		if foundEndByteIndex == -1 {
-			break
-		}
-
+		// Check if the message is complete
 		if dataLength != uint8(len(data)) {
-			// Skip to next start byte instead of returning
-			nextStart := bytes.IndexByte((*buffer)[foundEndByteIndex+1:], StartAndEndByte)
-			if nextStart == -1 {
-				*buffer = (*buffer)[:0]
-				break
-			}
+			break
+		}
 
-			// Skip to the next start byte after the current end byte
-			*buffer = (*buffer)[nextStart:]
+		// Check if it contains the checksum byte and the end byte
+		if len(*buffer) < maxIndex + 1 {
+			break
+		}
+
+		// Get the checksum byte
+		checksum := (*buffer)[maxIndex]
+		if checksum != CalculateChecksum(byte(category), data) {
+			// Log the error and continue to the next potential message
+			if logger != nil {
+				logger.Warning(
+					fmt.Sprintf(
+						"Checksum byte mismatch for incoming message of category 0x%02X: expected 0x%02X, got 0x%02X",
+						categoryUint8,
+						CalculateChecksum(byte(category), data),
+						checksum,
+					),
+				)
+			}
+			
+			// Skip to next start byte
+			*buffer = (*buffer)[maxIndex+1:]
 			continue
 		}
 
@@ -245,10 +253,10 @@ func NewIncomingMessagesFromBuffer(buffer *[]byte, logger goconcurrentlogger.Log
 		messages = append(messages, NewIncomingMessage(category, data))
 
 		// Update the buffer to remove processed messages
-		if len(*buffer) == foundEndByteIndex + 1 {
+		if len(*buffer) == maxIndex + 1 {
 			*buffer = (*buffer)[:0]
 		} else {
-			*buffer = (*buffer)[foundEndByteIndex+1:]
+			*buffer = (*buffer)[maxIndex+1:]
 		}
 	}
 

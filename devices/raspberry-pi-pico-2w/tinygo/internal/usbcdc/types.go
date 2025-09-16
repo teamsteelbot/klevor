@@ -193,6 +193,20 @@ func (d *DefaultHandler) ReadMessage(timeout time.Duration) (IncomingMessage, ti
 			data[i] = c
 		}
 
+		// Read the checksum byte
+		receivedChecksum, err := d.readByte(timeout - time.Since(startTime))
+		if err != tinygoerrors.ErrorCodeNil {
+			return IncomingMessage{}, err
+		}
+
+		// Calculate the checksum
+		calculatedChecksum := CalculateChecksum(byte(category), data)
+
+		// Compare the received checksum with the calculated checksum
+		if receivedChecksum != calculatedChecksum {
+			return IncomingMessage{}, ErrorCodeUSBCDCInvalidChecksum	
+		}
+
 		// Create the IncomingMessage
 		message := IncomingMessage{
 			Category: category,
@@ -255,6 +269,14 @@ func (d *DefaultHandler) SendMessage(message OutgoingMessage) tinygoerrors.Error
 		if err := d.serialer.WriteByte(b); err != nil {
 			return ErrorCodeUSBCDCFailedToSendMessageContent
 		}
+	}
+
+	// Calculate the checksum
+	checksum := CalculateChecksum(byte(message.Category), message.Data)
+
+	// Send the checksum byte
+	if err := d.serialer.WriteByte(checksum); err != nil {	
+		return ErrorCodeUSBCDCFailedToSendChecksumByte
 	}
 
 	// Send the end character

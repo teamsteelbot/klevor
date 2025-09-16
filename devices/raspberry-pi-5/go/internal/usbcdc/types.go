@@ -1019,6 +1019,12 @@ func (h *DefaultHandler) sendMessage(
 		return fmt.Errorf(ErrFailedToSendDataBytes, err)
 	}
 
+	// Calculate and send checksum byte
+	checksum := CalculateChecksum(byte(message.Category), message.Data)
+	if _, err := port.Write([]byte{checksum}); err != nil {
+		return fmt.Errorf(ErrFailedToSendChecksumByte, err)
+	}
+
 	// Send end byte
 	if _, err := port.Write(StartAndEndBytes); err != nil {
 		return fmt.Errorf(ErrFailedToSendEndByte, err)

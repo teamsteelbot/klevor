@@ -38,4 +38,6 @@ const (
 	ErrorCodeUSBCDCInvalidOutgoingMessageDataLength
 	ErrorCodeUSBCDCReadMessageTimeout	
 	ErrorCodeUSBCDCReceivedUnexpectedConfirmationMessage
+	ErrorCodeUSBCDCFailedToSendChecksumByte
+	ErrorCodeUSBCDCInvalidChecksum
 )

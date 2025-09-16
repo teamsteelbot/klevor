@@ -95,6 +95,8 @@ const (
 	ErrorCodeUSBCDCInvalidOutgoingMessageDataLength
 	ErrorCodeUSBCDCReadMessageTimeout
 	ErrorCodeUSBCDCReceivedUnexpectedConfirmationMessage
+	ErrorCodeUSBCDCFailedToSendChecksumByte
+	ErrorCodeUSBCDCInvalidChecksum
 )
 
 var (
@@ -267,5 +269,7 @@ var (
 		ErrorCodeUSBCDCInvalidOutgoingMessageDataLength:      "usb-cdc invalid outgoing message data length",
 		ErrorCodeUSBCDCReadMessageTimeout:                    "usb-cdc read message timeout",
 		ErrorCodeUSBCDCReceivedUnexpectedConfirmationMessage: "usb-cdc received unexpected confirmation message",
+		ErrorCodeUSBCDCFailedToSendChecksumByte:              "usb-cdc failed to send checksum byte",
+		ErrorCodeUSBCDCInvalidChecksum:                        "usb-cdc invalid checksum",
 	}
 )
