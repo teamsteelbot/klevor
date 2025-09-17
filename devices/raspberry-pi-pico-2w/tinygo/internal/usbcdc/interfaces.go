@@ -21,6 +21,7 @@ type (
 		SendConfirmationMessage() tinygoerrors.ErrorCode
 		SendMaxMotorSpeedValueMessage(maxMotorSpeed uint16) tinygoerrors.ErrorCode
 		SendMaxServoDirectionValueMessage(maxServoDirection uint16) tinygoerrors.ErrorCode
+		SendHeartbeatMessage() tinygoerrors.ErrorCode
 		WaitForConfirmationMessage(
 			timeout time.Duration,
 		) tinygoerrors.ErrorCode

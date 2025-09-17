@@ -1,9 +1,9 @@
 package main
 
 import (
+	"os"
 	"runtime"
 	"time"
-	"os"
 
 	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal"
 	internalbno08x "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/bno08x"
@@ -19,6 +19,15 @@ import (
 const (
 	// receivingMessageTimeout defines the maximum time to wait for receiving messages.
 	receivingMessageTimeout = 5 * time.Second
+
+	// sendBNO08XDataInterval defines the interval to send BNO08X data.
+	sendBNO08XDataInterval = 100 * time.Millisecond
+
+	// noMessageReceivedDelay is the time to sleep if no message is received.
+	noMessageReceivedDelay = 20 * time.Millisecond
+
+	// readMessageTimeout defines the timeout duration for reading messages.
+	readMessageTimeout = 5 * time.Second
 )
 
 var (
@@ -33,12 +42,6 @@ var (
 
 	// lastMessageReceivedTime holds the timestamp of the last received message.
 	lastMessageReceivedTime time.Time
-
-	// hasNewMessageArrived indicates if a new message has arrived.
-	hasNewMessageArrived bool
-
-	// readMessageTimeout defines the timeout duration for reading messages.
-	readMessageTimeout = 1 * time.Second
 
 	// newMessage is the newly received message.
 	newMessage internalusbcdc.IncomingMessage
@@ -57,18 +60,30 @@ func stopAndCenter() {
 
 // bno08xUpdateLoop continuously updates the BNO08X sensor data and sends it via USB CDC.
 func bno08xUpdateLoop() {
+	// Last sent time for BNO08X data
+	lastSentTime := time.Now()
+
+	// Loop to update and send BNO08X data
 	for {
 		// Update the BNO08X sensor data
+		/*
 		if err := internalbno08x.UARTRVC.Update(); err != tinygoerrors.ErrorCodeNil {
 			internalusbcdc.USBCDCHandler.SendErrorMessage(err)
 		}
+		*/
+		internalbno08x.UARTRVC.Update()
 
-		// Get the Euler degrees from the BNO08X sensor
-		eulerDegrees := internalbno08x.UARTRVC.GetEulerDegrees()
+		if time.Since(lastSentTime) >= sendBNO08XDataInterval {
+			// Get the Euler degrees from the BNO08X sensor
+			eulerDegrees := internalbno08x.UARTRVC.GetEulerDegrees()
 
-		// Send the Euler degrees messages via USB CDC
-		if err := internalusbcdc.USBCDCHandler.SendBNO08XEulerDegreesMessages(eulerDegrees); err != tinygoerrors.ErrorCodeNil {
-			internalusbcdc.USBCDCHandler.SendErrorMessage(err)
+			// Send the Euler degrees messages via USB CDC
+			if err := internalusbcdc.USBCDCHandler.SendBNO08XEulerDegreesMessages(eulerDegrees); err != tinygoerrors.ErrorCodeNil {
+				internalusbcdc.USBCDCHandler.SendErrorMessage(err)
+			}
+
+			// Update the last sent time
+			lastSentTime = time.Now()
 		}
 
 		time.Sleep(internalbno08x.Interval)
@@ -90,11 +105,10 @@ func main() {
 		stopAndCenter()
 
 		// Wait for switch press
-				if err := internalswitch.SwitchHandler.Wait(switchOnEvent); err != tinygoerrors.ErrorCodeNil {
-					internal.Logger.ErrorMessageWithErrorCode(failedToWaitForSwitchPressMessage, err, true)
-					os.Exit(1)
-				}
-
+		if err := internalswitch.SwitchHandler.Wait(switchOnEvent); err != tinygoerrors.ErrorCodeNil {
+			internal.Logger.ErrorMessageWithErrorCode(failedToWaitForSwitchPressMessage, err, true)
+			os.Exit(1)
+		}
 
 		// Add goroutine forsending the BNO08X updates
 		go bno08xUpdateLoop()
@@ -118,6 +132,14 @@ func main() {
 				// Stop the motor and center the servo
 				stopAndCenter()
 				break
+			}
+
+			// Check if a new message has arrived
+			hasNewMessageArrived := internalusbcdc.USBCDCHandler.IsAvailableToRead()
+			if !hasNewMessageArrived {
+				time.Sleep(noMessageReceivedDelay)
+				runtime.Gosched()
+				continue
 			}
 
 			// Read a message with a timeout
@@ -173,7 +195,9 @@ func main() {
 
 				switch status {
 				case internalusbcdc.IncomingStatusHeartbeat:
-					break
+					if err := internalusbcdc.USBCDCHandler.SendHeartbeatMessage(); err != tinygoerrors.ErrorCodeNil {
+						internalusbcdc.USBCDCHandler.SendErrorMessage(err)
+					}
 				case internalusbcdc.IncomingStatusOK:
 					internalusbcdc.USBCDCHandler.SendErrorMessage(internalusbcdc.ErrorCodeUSBCDCReceivedUnexpectedConfirmationMessage)
 					continue

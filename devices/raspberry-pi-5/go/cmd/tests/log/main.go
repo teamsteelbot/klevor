@@ -33,7 +33,7 @@ func main() {
 	flag.Parse()
 
 	// Initialize the logger
-	logger, err := internallog.NewDefaultLogger(*logDebug)
+	logger, err := internallog.NewDefaultLogger()
 	if err != nil {
 		log.Fatalf("failed to create logger: %v\n", err)
 	}
@@ -63,7 +63,7 @@ func main() {
 	fmt.Println("Logger is ready")
 
 	// Create a new logger producer
-	loggerProducer, err := logger.NewProducer("TEST_PRODUCER")
+	loggerProducer, err := logger.NewProducer("TEST_PRODUCER", *logDebug)
 	if err != nil {
 		log.Fatalf("failed to create logger producer: %v\n", err)
 	}

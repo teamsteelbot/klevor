@@ -9,13 +9,8 @@ const (
 	ErrUnknownIncomingCategory              = "unknown incoming category: 0x%02X"
 	ErrUnknownIncomingStatus                = "unknown incoming status: 0x%02X"
 	ErrUnknownOutgoingStatus                = "unknown outgoing status: 0x%02X"
-	ErrFailedToSendStartByte                = "failed to send start byte: %w"
-	ErrFailedToSendCategoryByte             = "failed to send category byte: %w"
-	ErrFailedToSendEndByte                  = "failed to send end byte: %w"
-	ErrFailedToSendDataBytes                = "failed to send data bytes: %w"
 	ErrDataLengthMismatchForOutgoingMessage = "data length mismatch for outgoing message of category 0x%02X: expected %d, got %d"
-	ErrFailedToSendDataLengthByte           = "failed to send data length bytes: %w"
-	ErrFailedToSendChecksumByte			  = "failed to send checksum byte: %w"
+	ErrFailedToSendMessage                   = "failed to send message of category 0x%02X: %v"
 )
 
 var (

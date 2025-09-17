@@ -25,7 +25,7 @@ var (
 	UARTRVC *tinygobno08x.UARTRVC
 
 	// Interval is the interval to read the sensor data.
-	Interval = 50 * time.Millisecond // Can be as low as 10ms
+	Interval = 10 * time.Millisecond // Can be as low as 10ms
 
 	// failedToInitializeBNO08xErrorMessage is the error message for failed BNO08x initialization.
 	failedToInitializeBNO08xErrorMessage = []byte("Failed to initialize BNO08x sensor")

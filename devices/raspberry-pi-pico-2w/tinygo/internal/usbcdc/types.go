@@ -520,6 +520,23 @@ func (d *DefaultHandler) SendMaxServoDirectionValueMessage(maxServoDirection uin
 	return d.SendMessage(maxServoDirectionMessage)
 }
 
+// SendHeartbeatMessage sends a heartbeat message to the USB CDC.
+//
+// Returns:
+//
+// An error if it fails to send the heartbeat message
+func (d *DefaultHandler) SendHeartbeatMessage() tinygoerrors.ErrorCode {
+	// Create the heartbeat message
+	heartbeatMessage, err := NewOutgoingStatusMessage(
+		OutgoingStatusHeartbeat,
+		d.outgoingMessageBuffer[:Uint8BufferSize],
+	)
+	if err != tinygoerrors.ErrorCodeNil {
+		return err
+	}
+	return d.SendMessage(heartbeatMessage)
+}
+
 // WaitForConfirmationMessage waits for a confirmation message from the USB CDC.
 //
 // Parameters:

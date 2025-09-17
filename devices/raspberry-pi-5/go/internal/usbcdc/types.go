@@ -999,16 +999,7 @@ func (h *DefaultHandler) sendMessage(
 		h.outgoingMessagesLoggerProducer.Warning("Attempted to send a nil outgoing message")
 		return nil
 	}
-
-	// Send start byte
-	if _, err := port.Write(StartAndEndBytes); err != nil {
-		return fmt.Errorf(ErrFailedToSendStartByte, err)
-	}
-
-	// Send category byte
-	if _, err := port.Write(message.Category.Bytes()); err != nil {
-		return fmt.Errorf(ErrFailedToSendCategoryByte, err)
-	}
+	messageBytes := []byte{StartAndEndByte, byte(message.Category)}
 
 	// Get the data length
 	dataLength := len(message.Data)
@@ -1027,33 +1018,38 @@ func (h *DefaultHandler) sendMessage(
 		)
 	}
 
-	// Send data length byte
-	if _, err := port.Write([]byte{uint8(dataLength)}); err != nil {
-		return fmt.Errorf(ErrFailedToSendDataLengthByte, err)
-	}
+	// Add data length byte
+	messageBytes = append(messageBytes, uint8(dataLength))
 
-	// Escape and send data bytes
-	escapedData := []byte{}
+	// Escape and add data bytes
 	for _, b := range message.Data {
 		if b == StartAndEndByte || b == ControlByte {
-			escapedData = append(escapedData, ControlByte)
+			messageBytes = append(messageBytes, ControlByte)
 			b ^= XORByte
 		}
-		escapedData = append(escapedData, b)
-	}
-	if _, err := port.Write(escapedData); err != nil {
-		return fmt.Errorf(ErrFailedToSendDataBytes, err)
+		messageBytes = append(messageBytes, b)
 	}
 
-	// Calculate and send checksum byte
+	// Calculate and add checksum byte
 	checksum := CalculateChecksum(byte(message.Category), message.Data)
-	if _, err := port.Write([]byte{checksum}); err != nil {
-		return fmt.Errorf(ErrFailedToSendChecksumByte, err)
-	}
+	messageBytes = append(messageBytes, checksum)
 
-	// Send end byte
-	if _, err := port.Write(StartAndEndBytes); err != nil {
-		return fmt.Errorf(ErrFailedToSendEndByte, err)
+	// Add end byte
+	messageBytes = append(messageBytes, StartAndEndByte)
+
+	// Log the message to be sent
+	if h.outgoingMessagesLoggerProducer.IsDebug() {
+		h.outgoingMessagesLoggerProducer.Debug(
+			fmt.Sprintf(
+				"Sending message bytes: %s",
+				ConvertBytesSliceToHexString(messageBytes),
+			),
+		)
+	}
+	
+	// Write the message bytes to the port
+	if _, err = port.Write(messageBytes); err != nil {
+		return fmt.Errorf("failed to write message to port: %w", err)
 	}
 
 	// Log the message sent
@@ -1152,6 +1148,7 @@ func (h *DefaultHandler) Run(ctx context.Context, stopFn func()) error {
 	// Create a logger producer
 	handlerLoggerProducer, err := h.logger.NewProducer(
 		HandlerLoggerProducerTag,
+		h.debug,
 	)
 	if err != nil {
 		return fmt.Errorf("failed to create logger producer: %w", err)
