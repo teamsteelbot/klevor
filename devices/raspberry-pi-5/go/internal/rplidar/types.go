@@ -10,11 +10,12 @@ import (
 // Parameters:
 //
 // logger: The logger instance to use
+// debug: A boolean indicating if debug logging is enabled
 //
 // Returns:
 //
 // A pointer to the Slamtec C1 handler and an error if any
-func NewSlamtecC1Handler(logger goconcurrentlogger.Logger) (*gorplidarsdkhandler.DefaultHandler, error) {
+func NewSlamtecC1Handler(logger goconcurrentlogger.Logger, debug bool) (*gorplidarsdkhandler.DefaultHandler, error) {
 	return gorplidarsdkhandler.NewSlamtecC1Handler(
 		gorplidarsdkhandler.LinuxSlamtecC1Port,
 		IsUpsideDown,
@@ -22,5 +23,6 @@ func NewSlamtecC1Handler(logger goconcurrentlogger.Logger) (*gorplidarsdkhandler
 		logger,
 		UltraSimplePath,
 		MaxDistanceLimit,
+		debug,
 	)
 }

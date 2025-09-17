@@ -23,7 +23,7 @@ const (
 
 func main() {
 	// Define flags
-	logDebug := flag.Bool("debug", false, "Enable debug logging")
+	clipDebug := flag.Bool("clip-debug", false, "Enable Hailo CLIP debug")
 	generateClipEmbeddingsPath := flag.String(
 		"generate-clip-embeddings-path",
 		"",
@@ -45,7 +45,7 @@ func main() {
 	}
 
 	// Initialize the logger
-	logger, err := internallog.NewDefaultLogger(*logDebug)
+	logger, err := internallog.NewDefaultLogger()
 	if err != nil {
 		log.Fatalf("failed to create logger: %v\n", err)
 	}
@@ -81,6 +81,7 @@ func main() {
 		internalclip.PositiveLabels,
 		internalclip.NegativeLabels,
 		logger,
+		*clipDebug,
 	)
 	if err != nil {
 		log.Fatalf("failed to initialize clip handler: %v", err)

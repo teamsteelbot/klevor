@@ -2,8 +2,8 @@ package main
 
 import (
 	"flag"
-	"log"
 	"fmt"
+	"log"
 
 	internalclip "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/clip"
 	internallog "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/log"
@@ -13,8 +13,12 @@ import (
 )
 
 func main() {
-	// Define flags
-	logDebug := flag.Bool("debug", false, "Enable debug logging")
+	// Define optional flags
+	clipDebug := flag.Bool("clip-debug", false, "Enable CLIP debug logging")
+	rplidarDebug := flag.Bool("rplidar-debug", false, "Enable RPLiDAR debug logging")
+	usbCDCDebug := flag.Bool("usb-cdc-debug", false, "Enable USB-CDC debug logging")
+
+	// Define required flags
 	generateClipEmbeddingsPath := flag.String(
 		"generate-clip-embeddings-path",
 		"",
@@ -25,6 +29,8 @@ func main() {
 		"",
 		"Path to the .sh file that runs CLIP",
 	)
+
+	// Parse flags
 	flag.Parse()
 
 	// Enforce required flags
@@ -36,7 +42,7 @@ func main() {
 	}
 
 	// Initialize the logger
-	logger, err := internallog.NewDefaultLogger(*logDebug)
+	logger, err := internallog.NewDefaultLogger()
 	if err != nil {
 		log.Fatalf("failed to create logger: %v\n", err)
 	}
@@ -48,6 +54,7 @@ func main() {
 		internalclip.PositiveLabels,
 		internalclip.NegativeLabels,
 		logger,
+		*clipDebug,
 	)
 	if err != nil {
 		log.Fatalf("failed to initialize clip handler: %v", err)
@@ -57,13 +64,14 @@ func main() {
 	usbCDCHandler, err := internalusbcdc.NewDefaultHandler(
 		internalusbcdc.BaudRate,
 		logger,
+		*usbCDCDebug,
 	)
 	if err != nil {
 		log.Fatalf("failed to initialize usb-cdc handler: %v", err)
 	}
 
 	// Initialize the Slamtec C1 handler
-	rplidarHandler, err := internalrplidar.NewSlamtecC1Handler(logger) 
+	rplidarHandler, err := internalrplidar.NewSlamtecC1Handler(logger, *rplidarDebug)
 	if err != nil {
 		log.Fatalf("failed to initialize rplidar handler: %v", err)
 	}

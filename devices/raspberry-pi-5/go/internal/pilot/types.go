@@ -486,6 +486,9 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 		// Wait for the command delay
 		time.Sleep(CommandDelay)
 
+		// Log the current yaw degrees
+		
+
 		select {
 		case <-ctx.Done():
 			return ctx.Err()

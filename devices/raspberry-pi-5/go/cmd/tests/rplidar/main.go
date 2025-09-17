@@ -23,11 +23,11 @@ const (
 
 func main() {
 	// Define flags
-	logDebug := flag.Bool("debug", false, "Enable debug logging")
+	rplidarDebug := flag.Bool("rplidar-debug", false, "Enable RPLiDAR debug logging")
 	flag.Parse()
 
 	// Initialize the logger
-	logger, err := internallog.NewDefaultLogger(*logDebug)
+	logger, err := internallog.NewDefaultLogger()
 	if err != nil {
 		log.Fatalf("failed to create logger: %v\n", err)
 	}
@@ -57,7 +57,7 @@ func main() {
 	fmt.Println("Logger is ready")
 
 	// Initialize the Slamtec C1 handler
-	rplidarHandler, err := internalrplidar.NewSlamtecC1Handler(logger)
+	rplidarHandler, err := internalrplidar.NewSlamtecC1Handler(logger, *rplidarDebug)
 	if err != nil {
 		log.Fatalf("failed to initialize rplidar handler: %v", err)
 	}

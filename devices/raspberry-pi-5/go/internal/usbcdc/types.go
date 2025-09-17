@@ -68,6 +68,7 @@ type (
 		notifyMaxMotorSpeedValueOnce     sync.Once
 		maxServoDirectionValueReady      chan struct{}
 		notifyMaxServoDirectionValueOnce sync.Once
+		debug                            bool
 	}
 )
 
@@ -237,11 +238,12 @@ func (s *DefaultSender) IsClosed() bool {
 //
 // baudRate: Baud rate for the serial communication.
 // logger: Logger instance for logging messages.
+// debug: A boolean indicating if debug logging is enabled
 //
 // Returns:
 //
 // A pointer to a DefaultHandler instance
-func NewDefaultHandler(baudRate int, logger goconcurrentlogger.Logger) (*DefaultHandler, error) {
+func NewDefaultHandler(baudRate int, logger goconcurrentlogger.Logger, debug bool) (*DefaultHandler, error) {
 	// Check if the logger is nil
 	if logger == nil {
 		return nil, goconcurrentlogger.ErrNilLogger
@@ -259,6 +261,7 @@ func NewDefaultHandler(baudRate int, logger goconcurrentlogger.Logger) (*Default
 		accumulatedBuffer: accumulatedBuffer,
 		logger:            logger,
 		readyCh:           make(chan struct{}),
+		debug:             debug,
 	}, nil
 }
 
@@ -285,6 +288,7 @@ func (h *DefaultHandler) runToWrap(ctx context.Context, stopFn func()) error {
 	// Create a logger producers
 	incomingMessagesLoggerProducer, err := h.logger.NewProducer(
 		IncomingMessagesLoggerProducerTag,
+		h.debug,
 	)
 	if err != nil {
 		return fmt.Errorf("failed to create incoming messages logger producer: %w", err)
@@ -294,6 +298,7 @@ func (h *DefaultHandler) runToWrap(ctx context.Context, stopFn func()) error {
 
 	outgoingMessagesLoggerProducer, err := h.logger.NewProducer(
 		OutgoingMessagesLoggerProducerTag,
+		h.debug,
 	)
 	if err != nil {
 		return fmt.Errorf("failed to create outgoing messages logger producer: %w", err)
@@ -371,7 +376,7 @@ func (h *DefaultHandler) runToWrap(ctx context.Context, stopFn func()) error {
 	)
 
 	// Wait for both handlers to finish and return any error
-	err = g.Wait()	
+	err = g.Wait()
 
 	// Close the port
 	if closeErr := port.Close(); closeErr != nil {
@@ -626,56 +631,56 @@ func (h *DefaultHandler) incomingMessagesHandler(
 					h.receivedBNO08XQuaternionX = math.Float64frombits(quaternionXUint64)
 
 					// Log the received message
-					/*
-					h.incomingMessagesLoggerProducer.Info(
-						fmt.Sprintf(
-							"Received BNO08X quaternion X: %f",
-							h.receivedBNO08XQuaternionX,
-						),
-					)
-						*/
+					if h.incomingMessagesLoggerProducer.IsDebug() {
+						h.incomingMessagesLoggerProducer.Debug(
+							fmt.Sprintf(
+								"Received BNO08X quaternion X: %f",
+								h.receivedBNO08XQuaternionX,
+							),
+						)
+					}
 				case IncomingCategoryQuaternionY:
 					// Parse the BNO08X quaternion Y value
 					quaternionYUint64 := binary.BigEndian.Uint64(message.Data[:8])
 					h.receivedBNO08XQuaternionY = math.Float64frombits(quaternionYUint64)
 
 					// Log the received message
-					/*
-					h.incomingMessagesLoggerProducer.Info(
-						fmt.Sprintf(
-							"Received BNO08X quaternion Y: %f",
-							h.receivedBNO08XQuaternionY,
-						),
-					)
-						*/
+					if h.incomingMessagesLoggerProducer.IsDebug() {
+						h.incomingMessagesLoggerProducer.Debug(
+							fmt.Sprintf(
+								"Received BNO08X quaternion Y: %f",
+								h.receivedBNO08XQuaternionY,
+							),
+						)
+					}
 				case IncomingCategoryQuaternionZ:
 					// Parse the BNO08X quaternion Z value
 					quaternionZUint64 := binary.BigEndian.Uint64(message.Data[:8])
 					h.receivedBNO08XQuaternionZ = math.Float64frombits(quaternionZUint64)
 
 					// Log the received message
-					/*
-					h.incomingMessagesLoggerProducer.Info(
-						fmt.Sprintf(
-							"Received BNO08X quaternion Z: %f",
-							h.receivedBNO08XQuaternionZ,
-						),
-					)
-						*/
+					if h.incomingMessagesLoggerProducer.IsDebug() {
+						h.incomingMessagesLoggerProducer.Debug(
+							fmt.Sprintf(
+								"Received BNO08X quaternion Z: %f",
+								h.receivedBNO08XQuaternionZ,
+							),
+						)
+					}
 				case IncomingCategoryQuaternionW:
 					// Parse the BNO08X quaternion W value
 					quaternionWUint64 := binary.BigEndian.Uint64(message.Data[:8])
 					h.receivedBNO08XQuaternionW = math.Float64frombits(quaternionWUint64)
 
 					// Log the received message
-					/*
-					h.incomingMessagesLoggerProducer.Info(
-						fmt.Sprintf(
-							"Received BNO08X quaternion W: %f",
-							h.receivedBNO08XQuaternionW,
-						),
-					)
-						*/
+					if h.incomingMessagesLoggerProducer.IsDebug() {
+						h.incomingMessagesLoggerProducer.Debug(
+							fmt.Sprintf(
+								"Received BNO08X quaternion W: %f",
+								h.receivedBNO08XQuaternionW,
+							),
+						)
+					}
 
 					// Convert the quaternion to Euler angles in degrees
 					var quaternion [4]float64
@@ -727,12 +732,14 @@ func (h *DefaultHandler) updateCalculatedTurns() {
 		)
 	}
 
-	h.incomingMessagesLoggerProducer.Info(
-		fmt.Sprintf(
-			"Updated calculated turns: %d",
-			h.calculatedTurns.GetTurns(),
-		),
-	)
+	if h.incomingMessagesLoggerProducer.IsDebug() {
+		h.incomingMessagesLoggerProducer.Debug(
+			fmt.Sprintf(
+				"Updated calculated turns: %d",
+				h.calculatedTurns.GetTurns(),
+			),
+		)
+	}
 }
 
 // updateBNO08XYawDegrees updates the BNO08X yaw degrees and recalculates the turns.
@@ -756,12 +763,14 @@ func (h *DefaultHandler) updateBNO08XYawDegrees(yawDegrees float64) {
 
 	// Update the received yaw degrees
 	h.receivedBNO08XYawDegrees = yawDegrees
-	h.incomingMessagesLoggerProducer.Info(
-		fmt.Sprintf(
-			"Updated BNO08X yaw degrees: %f",
-			h.receivedBNO08XYawDegrees,
-		),
-	)
+	if h.incomingMessagesLoggerProducer.IsDebug() {
+		h.incomingMessagesLoggerProducer.Debug(
+			fmt.Sprintf(
+				"Updated BNO08X yaw degrees: %f",
+				h.receivedBNO08XYawDegrees,
+			),
+		)
+	}
 
 	// Update the calculated turns
 	h.updateCalculatedTurns()
@@ -788,14 +797,14 @@ func (h *DefaultHandler) updateBNO08XPitchDegrees(pitchDegrees float64) {
 
 	// Update the received pitch degrees
 	h.receivedBNO08XPitchDegrees = pitchDegrees
-	/*
-	h.incomingMessagesLoggerProducer.Info(
-		fmt.Sprintf(
-			"Updated BNO08X pitch degrees: %f",
-			h.receivedBNO08XPitchDegrees,
-		),
-	)
-		*/
+	if h.incomingMessagesLoggerProducer.IsDebug() {
+		h.incomingMessagesLoggerProducer.Debug(
+			fmt.Sprintf(
+				"Updated BNO08X pitch degrees: %f",
+				h.receivedBNO08XPitchDegrees,
+			),
+		)
+	}
 }
 
 // updateBNO08XRollDegrees updates the BNO08X roll degrees.
@@ -819,14 +828,14 @@ func (h *DefaultHandler) updateBNO08XRollDegrees(rollDegrees float64) {
 
 	// Update the received roll degrees
 	h.receivedBNO08XRollDegrees = rollDegrees
-	/*
-	h.incomingMessagesLoggerProducer.Info(
-		fmt.Sprintf(
-			"Updated BNO08X roll degrees: %f",
-			h.receivedBNO08XRollDegrees,
-		),
-	)
-		*/
+	if h.incomingMessagesLoggerProducer.IsDebug() {
+		h.incomingMessagesLoggerProducer.Debug(
+			fmt.Sprintf(
+				"Updated BNO08X roll degrees: %f",
+				h.receivedBNO08XRollDegrees,
+			),
+		)
+	}
 }
 
 // readFromPort reads data from the serial port.
@@ -881,14 +890,14 @@ func (h *DefaultHandler) readIncomingMessages(
 	}
 
 	// Log the accumulated buffer data
-	/*
-	h.incomingMessagesLoggerProducer.Info(
-		fmt.Sprintf(
-			"Accumulated buffer data: %s",
-			ConvertBytesSliceToHexString(h.accumulatedBuffer),
-		),
-	)
-		*/
+	if h.incomingMessagesLoggerProducer.IsDebug() {
+		h.incomingMessagesLoggerProducer.Debug(
+			fmt.Sprintf(
+				"Accumulated buffer data: %s",
+				ConvertBytesSliceToHexString(h.accumulatedBuffer),
+			),
+		)
+	}
 
 	// Extract messages from the accumulated buffer
 	messages, err := NewIncomingMessagesFromBuffer(&h.accumulatedBuffer, h.incomingMessagesLoggerProducer)
@@ -954,7 +963,6 @@ func (h *DefaultHandler) outgoingMessagesHandler(
 		default:
 			if time.Since(lastHeartbeatTime) >= HeartbeatInterval {
 				// Send a heartbeat message if the interval has passed
-				h.outgoingMessagesLoggerProducer.Info("Sending heartbeat message")
 				if err := h.sendMessage(
 					port,
 					OutgoingHeartbeatMessage,
@@ -962,6 +970,11 @@ func (h *DefaultHandler) outgoingMessagesHandler(
 					return err
 				}
 				lastHeartbeatTime = time.Now()
+
+				// Log the heartbeat message sent
+				if h.outgoingMessagesLoggerProducer.IsDebug() {
+					h.outgoingMessagesLoggerProducer.Debug("Sent heartbeat message")
+				}
 			}
 		}
 	}
@@ -1044,14 +1057,14 @@ func (h *DefaultHandler) sendMessage(
 	}
 
 	// Log the message sent
-	/*
-	h.outgoingMessagesLoggerProducer.Info(
-		fmt.Sprintf(
-			"Sent message: %s",
-			message.StringToPrint(),
-		),
-	)
-	*/
+	if h.outgoingMessagesLoggerProducer.IsDebug() {
+		h.outgoingMessagesLoggerProducer.Info(
+			fmt.Sprintf(
+				"Sent message: %s",
+				message.StringToPrint(),
+			),
+		)
+	}
 	return nil
 }
 

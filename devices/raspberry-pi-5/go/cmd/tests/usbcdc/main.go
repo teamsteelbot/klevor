@@ -17,11 +17,11 @@ import (
 
 func main() {
 	// Define flags
-	logDebug := flag.Bool("debug", false, "Enable debug logging")
+	usbCDCDebug := flag.Bool("debug", false, "Enable USB-CDC debug logging")
 	flag.Parse()
 
 	// Initialize the logger
-	logger, err := internallog.NewDefaultLogger(*logDebug)
+	logger, err := internallog.NewDefaultLogger()
 	if err != nil {
 		log.Fatalf("failed to create logger: %v\n", err)
 	}
@@ -54,6 +54,7 @@ func main() {
 	usbCDCHandler, err := internalusbcdc.NewDefaultHandler(
 		internalusbcdc.BaudRate,
 		logger,
+		*usbCDCDebug,
 	)
 	if err != nil {
 		log.Fatalf("failed to initialize usb-cdc handler: %v", err)
