@@ -1011,9 +1011,8 @@ func (h *DefaultHandler) sendMessage(
 		if b == StartAndEndByte || b == ControlByte {
 			escapedData = append(escapedData, ControlByte)
 			b ^= XORByte
-		} else {
-			escapedData = append(escapedData, b)
 		}
+		escapedData = append(escapedData, b)
 	}
 	if _, err := port.Write(escapedData); err != nil {
 		return fmt.Errorf(ErrFailedToSendDataBytes, err)

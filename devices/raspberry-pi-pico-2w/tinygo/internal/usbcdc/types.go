@@ -162,7 +162,7 @@ func (d *DefaultHandler) ReadMessage(timeout time.Duration) (IncomingMessage, ti
 		dataLength := int(dataLengthByte)
 
 		// Check if the data length is valid
-		if dataLength < 0 || dataLength > MaxIncomingMessageDataLength {
+		if dataLength > MaxIncomingMessageDataLength {
 			return IncomingMessage{}, ErrorCodeUSBCDCInvalidIncomingMessageDataLength
 		}
 

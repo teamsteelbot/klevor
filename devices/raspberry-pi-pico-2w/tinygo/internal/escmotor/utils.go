@@ -33,9 +33,9 @@ func SetSpeedBasedOnReceivedMessage(message internalusbcdc.IncomingMessage) tiny
 	case internalusbcdc.IncomingCategoryMotorSpeedStop:
 		return ESCMotorHandler.Stop()
 	case internalusbcdc.IncomingCategoryMotorSpeedForward:
-		return ESCMotorHandler.SetSpeedForward(motorSpeed)
+		return ESCMotorHandler.SafeSetSpeedForward(motorSpeed)
 	case internalusbcdc.IncomingCategoryMotorSpeedBackward:
-		return ESCMotorHandler.SetSpeedBackward(motorSpeed)
+		return ESCMotorHandler.SafeSetSpeedBackward(motorSpeed)
 	default:
 		return internalusbcdc.ErrorCodeUSBCDCUnknownIncomingCategory
 	}

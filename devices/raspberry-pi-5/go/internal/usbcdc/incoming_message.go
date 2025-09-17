@@ -126,7 +126,7 @@ func NewIncomingMessagesFromBuffer(buffer *[]byte, logger goconcurrentlogger.Log
 		*buffer = (*buffer)[nextStart:]
 
 		// If the buffer length is less than the minimum message length, wait for more data
-		if len(*buffer) < 3 {
+		if len(*buffer) < 4 {
 			break
 		}
 
@@ -217,6 +217,9 @@ func NewIncomingMessagesFromBuffer(buffer *[]byte, logger goconcurrentlogger.Log
 				maxIndex++
 				continue
 			}
+
+			// Append the byte to the data
+			data = append(data, b)
 		}
 
 		// Check if the message is complete

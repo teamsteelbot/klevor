@@ -30,11 +30,11 @@ func SetDirectionBasedOnReceivedMessage(message internalusbcdc.IncomingMessage) 
 	// Check the servo angle category
 	switch message.Category {
 	case internalusbcdc.IncomingCategoryServoDirectionCenter:
-		return ServoHandler.SetDirectionToCenter()
+		return ServoHandler.SetAngleToCenter()
 	case internalusbcdc.IncomingCategoryServoDirectionToLeft:
-		return ServoHandler.SetDirectionToLeft(servoDirectionAngle)
+		return ServoHandler.SafeSetAngleToLeft(servoDirectionAngle)
 	case internalusbcdc.IncomingCategoryServoDirectionToRight:
-		return ServoHandler.SetDirectionToRight(servoDirectionAngle)
+		return ServoHandler.SafeSetAngleToRight(servoDirectionAngle)
 	default:
 		return internalusbcdc.ErrorCodeUSBCDCUnknownIncomingCategory
 	}

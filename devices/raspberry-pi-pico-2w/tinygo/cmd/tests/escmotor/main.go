@@ -10,18 +10,27 @@ import (
 )
 
 var (
-	// failedToSetMotorSpeedForwardMessage is the message printed when setting the motor speed forward fails
-	failedToSetMotorSpeedForwardMessage = []byte("Failed to set motor speed forward:")
-
-	// failedToSetMotorSpeedBackwardMessage is the message printed when setting the motor speed backward fails
-	failedToSetMotorSpeedBackwardMessage = []byte("Failed to set motor speed backward:")
-
 	// failedToStopMotorMessage is the message printed when stopping the motor fails
 	failedToStopMotorMessage = []byte("Failed to stop motor:")
 
 	// failedToSetMotorSpeedMessage is the message printed when setting the motor speed fails
 	failedToSetMotorSpeedMessage = []byte("Failed to set motor speed:")
 )
+
+// stopOnError stops the motor and exits the program if there is an error.
+//
+// Parameters:
+//
+// err: The error to be checked.
+func stopOnError(err tinygoerrors.ErrorCode) {
+	if err != tinygoerrors.ErrorCodeNil {
+		if stopErr := internalescmotor.ESCMotorHandler.Stop(); stopErr != tinygoerrors.ErrorCodeNil {
+			internal.Logger.ErrorMessageWithErrorCode(failedToStopMotorMessage, stopErr, true)
+		}
+		internal.Logger.ErrorMessageWithErrorCode(failedToSetMotorSpeedMessage, err, true)
+		return
+	}
+}
 
 func main() {
 	for {
@@ -33,39 +42,28 @@ func main() {
 
 		// Start testing the motor forward
 		var speed uint16
-		for speed = 0; speed <= 100; speed += 1 {
-			if err := internalescmotor.ESCMotorHandler.SetSpeedForward(
-				speed,
-			); err != tinygoerrors.ErrorCodeNil {
-				internal.Logger.ErrorMessageWithErrorCode(failedToSetMotorSpeedForwardMessage, err, true)
-				return
-			}
-			time.Sleep(20 * time.Millisecond)
+		for speed = 0; speed <= 11; speed += 1 {
+			stopOnError(internalescmotor.ESCMotorHandler.SafeSetSpeedForward(
+				speed * 10,
+			))
+			time.Sleep(1 * time.Second)
 		}
 
 		// Stop the motor for a while
-		if err := internalescmotor.ESCMotorHandler.Stop(); err != tinygoerrors.ErrorCodeNil {
-			internal.Logger.ErrorMessageWithErrorCode(failedToStopMotorMessage, err, true)
-			return
-		}
-		time.Sleep(2 * time.Second)
+		stopOnError(internalescmotor.ESCMotorHandler.Stop())
+		time.Sleep(1 * time.Second)
 
 		// Start testing the motor backward
-		for speed = 0; speed <= 100; speed += 1 {
-			if err := internalescmotor.ESCMotorHandler.SetSpeedBackward(
-				speed,
-			); err != tinygoerrors.ErrorCodeNil {
-				internal.Logger.ErrorMessageWithErrorCode(failedToSetMotorSpeedBackwardMessage, err, true)
-				return
-			}
-			time.Sleep(20 * time.Millisecond)
+		for speed = 0; speed <= 11; speed += 1 {
+			stopOnError(internalescmotor.ESCMotorHandler.SafeSetSpeedBackward(
+				speed * 10,
+			))
+			time.Sleep(1 * time.Second)
 		}
 
 		// Stop the motor
-		if err := internalescmotor.ESCMotorHandler.Stop(); err != tinygoerrors.ErrorCodeNil {
-			internal.Logger.ErrorMessageWithErrorCode(failedToStopMotorMessage, err, true)
-			return
-		}
+		stopOnError(internalescmotor.ESCMotorHandler.Stop())
+		time.Sleep(1 * time.Second)
 
 		// Turn off the LED
 		internalledonboard.OnBoardHandler.SetOff()

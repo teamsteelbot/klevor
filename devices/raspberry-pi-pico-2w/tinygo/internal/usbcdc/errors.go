@@ -40,4 +40,5 @@ const (
 	ErrorCodeUSBCDCReceivedUnexpectedConfirmationMessage
 	ErrorCodeUSBCDCFailedToSendChecksumByte
 	ErrorCodeUSBCDCInvalidChecksum
+	ErrorCodeUSBCDCReceivingMessageTimeoutReached
 )

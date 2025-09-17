@@ -26,13 +26,13 @@ const (
 	MaxPulseWidth uint16 = 2000
 
 	// MaxSpeed is the maximum speed to run the ESC motor
-	MaxSpeed uint16 = 500
+	MaxSpeed uint16 = 100
 
 	// ChangeInterval is the interval to change the speed of the ESC motor
-	ChangeInterval = 20
+	ChangeInterval = 5
 
 	// ChangeInternalDelay is the internal delay to change the speed of the ESC motor
-	ChangeInternalDelay = 2 * time.Millisecond
+	ChangeInternalDelay = 8 * time.Millisecond
 )
 
 var (

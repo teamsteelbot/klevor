@@ -12,10 +12,10 @@ import (
 
 const (
 	// CenterAngle is the angle that represents the center position of the servo motors.
-	CenterAngle uint16 = 90
+	CenterAngle uint16 = 95 // 90
 
 	// MaxAngle is the maximum angle for the servo motors.
-	MaxAngle uint16 = 15
+	MaxAngle uint16 = 35
 
 	// IsDirectionInverted indicates if the servo direction is inverted.
 	IsDirectionInverted bool = true
@@ -34,7 +34,7 @@ var (
 	// ServoHandler is the default servo handler using the Raspberry Pi Pico 2W's PWM1 and GPIO2.
 	ServoHandler tinygoservo.Handler
 
-	// failedToInitializeServoMessage is the message printed when servo initialization fails
+	 // failedToInitializeServoMessage is the message printed when servo initialization fails
 	failedToInitializeServoMessage = []byte("Failed to initialize Servo Handler:")
 )
 

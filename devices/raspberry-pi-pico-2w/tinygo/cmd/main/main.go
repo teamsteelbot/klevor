@@ -46,10 +46,15 @@ var (
 //
 // err: The error to be sent.
 func sendErrorMessage(err tinygoerrors.ErrorCode) {
+	/*
 	err = internalusbcdc.USBCDCHandler.SendErrorMessage(err)
 	if err != tinygoerrors.ErrorCodeNil {
+		stopAndCenter()
+		internal.Logger.ErrorMessageWithErrorCode(failedToSendErrorMessage, err, true)
 		os.Exit(1)
 	}
+	*/
+	internalusbcdc.USBCDCHandler.SendErrorMessage(err)
 }
 
 // sendErrorMessageOnError sends an error message via USB CDC if there is an error to be sent.
@@ -78,7 +83,7 @@ func stopAndCenter() {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		sendErrorMessageOnError(internalservo.ServoHandler.SetDirectionToCenter)
+		sendErrorMessageOnError(internalservo.ServoHandler.SetAngleToCenter)
 	}()
 
 	wg.Wait()
@@ -112,14 +117,19 @@ func main() {
 		// Set the exit condition to False
 		toExit := false
 		for !toExit {
+			/*
 			// Check if the last message received time exceeds the timeout
 			if time.Since(lastMessageReceivedTime) >= receivingMessageTimeout {
 				toExit = true
+
+				// Send a timeout error message
+				sendErrorMessage(internalusbcdc.ErrorCodeUSBCDCReceivingMessageTimeoutReached)
 
 				// Stop the motor and center the servo
 				stopAndCenter()
 				break
 			}
+			*/
 
 			// Create a wait group to handle concurrent tasks
 			var wg sync.WaitGroup
@@ -193,7 +203,7 @@ func main() {
 			case internalusbcdc.IncomingCategoryMotorSpeedStop:
 				sendErrorMessageOnError(internalescmotor.ESCMotorHandler.Stop)
 			case internalusbcdc.IncomingCategoryServoDirectionCenter:
-				sendErrorMessageOnError(internalservo.ServoHandler.SetDirectionToCenter)
+				sendErrorMessageOnError(internalservo.ServoHandler.SetAngleToCenter)
 			case internalusbcdc.IncomingCategoryServoDirectionToLeft, internalusbcdc.IncomingCategoryServoDirectionToRight:
 				sendErrorMessageOnError(
 					func() tinygoerrors.ErrorCode {
