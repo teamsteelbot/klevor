@@ -1,8 +1,7 @@
 package main
 
 import (
-	"os"
-	"sync"
+	"runtime"
 	"time"
 
 	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal"
@@ -13,6 +12,7 @@ import (
 	internalswitch "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/switch"
 	internalusbcdc "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc"
 	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
+	tinygologger "github.com/ralvarezdev/tinygo-logger"
 )
 
 const (
@@ -36,57 +36,43 @@ var (
 	// hasNewMessageArrived indicates if a new message has arrived.
 	hasNewMessageArrived bool
 
+	// readMessageTimeout defines the timeout duration for reading messages.
+	readMessageTimeout = 1 * time.Second
+
 	// newMessage is the newly received message.
 	newMessage internalusbcdc.IncomingMessage
 )
 
-// sendErrorMessage sends an error message via USB CDC if there is an error to be sent.
-//
-// Parameters:
-//
-// err: The error to be sent.
-func sendErrorMessage(err tinygoerrors.ErrorCode) {
-	/*
-	err = internalusbcdc.USBCDCHandler.SendErrorMessage(err)
-	if err != tinygoerrors.ErrorCodeNil {
-		stopAndCenter()
-		internal.Logger.ErrorMessageWithErrorCode(failedToSendErrorMessage, err, true)
-		os.Exit(1)
-	}
-	*/
-	internalusbcdc.USBCDCHandler.SendErrorMessage(err)
-}
-
-// sendErrorMessageOnError sends an error message via USB CDC if there is an error to be sent.
-//
-// Parameters:
-//
-// fn: A function that returns a tinygoerrors.ErrorCode to be checked.
-func sendErrorMessageOnError(fn func() tinygoerrors.ErrorCode) {
-	if err := fn(); err != tinygoerrors.ErrorCodeNil {
-		sendErrorMessage(err)
-	}
-}
-
-// stopAndCenter stops the ESC motor and centers the servo concurrently.
+// stopAndCenter stops the ESC motor and centers the servo.
 func stopAndCenter() {
-	var wg sync.WaitGroup
+	if err := internalescmotor.ESCMotorHandler.Stop(); err != tinygoerrors.ErrorCodeNil {
+		internalusbcdc.USBCDCHandler.SendErrorMessage(err)
+	}
 
-	// ESC motor stop
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		sendErrorMessageOnError(internalescmotor.ESCMotorHandler.Stop)
-	}()
+	if err := internalservo.ServoHandler.SetAngleToCenter(); err != tinygoerrors.ErrorCodeNil {
+		internalusbcdc.USBCDCHandler.SendErrorMessage(err)
+	}
+}
 
-	// Servo center
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		sendErrorMessageOnError(internalservo.ServoHandler.SetAngleToCenter)
-	}()
+// bno08xUpdateLoop continuously updates the BNO08X sensor data and sends it via USB CDC.
+func bno08xUpdateLoop() {
+	for {
+		// Update the BNO08X sensor data
+		if err := internalbno08x.UARTRVC.Update(); err != tinygoerrors.ErrorCodeNil {
+			internalusbcdc.USBCDCHandler.SendErrorMessage(err)
+		}
 
-	wg.Wait()
+		// Get the Euler degrees from the BNO08X sensor
+		eulerDegrees := internalbno08x.UARTRVC.GetEulerDegrees()
+
+		// Send the Euler degrees messages via USB CDC
+		if err := internalusbcdc.USBCDCHandler.SendBNO08XEulerDegreesMessages(eulerDegrees); err != tinygoerrors.ErrorCodeNil {
+			internalusbcdc.USBCDCHandler.SendErrorMessage(err)
+		}
+
+		time.Sleep(internalbno08x.Interval)
+		runtime.Gosched()
+	}
 }
 
 func init() {
@@ -103,13 +89,15 @@ func main() {
 		stopAndCenter()
 
 		// Wait for switch press
-		if err := internalswitch.SwitchHandler.Wait(switchOnEvent); err != tinygoerrors.ErrorCodeNil {
-			internal.Logger.ErrorMessageWithErrorCode(failedToWaitForSwitchPressMessage, err, true)
-			os.Exit(1)
-		}
+		/*
+			if err := internalswitch.SwitchHandler.Wait(switchOnEvent); err != tinygoerrors.ErrorCodeNil {
+				internal.Logger.ErrorMessageWithErrorCode(failedToWaitForSwitchPressMessage, err, true)
+				os.Exit(1)
+			}
+		*/
 
-		// Last time the BNO08X was updated
-		lastBNO08XUpdateTime := time.Now()
+		// Add goroutine forsending the BNO08X updates
+		go bno08xUpdateLoop()
 
 		// Reset the last message received time
 		lastMessageReceivedTime = time.Now()
@@ -117,6 +105,9 @@ func main() {
 		// Set the exit condition to False
 		toExit := false
 		for !toExit {
+			// Log memory status
+			tinygologger.DebugMemory(internal.Logger)
+
 			/*
 			// Check if the last message received time exceeds the timeout
 			if time.Since(lastMessageReceivedTime) >= receivingMessageTimeout {
@@ -131,57 +122,13 @@ func main() {
 			}
 			*/
 
-			// Create a wait group to handle concurrent tasks
-			var wg sync.WaitGroup
-
-			// Check if the BNO08X needs to be updated
-			if time.Since(lastBNO08XUpdateTime) >= internalbno08x.Interval {
-				internalbno08x.UARTRVC.Update()
-				lastBNO08XUpdateTime = time.Now()
-
-				wg.Add(1)
-				go func() {
-					defer wg.Done()
-
-					// Update the BNO08X sensor data
-					sendErrorMessageOnError(
-						internalbno08x.UARTRVC.Update,
-					)
-
-					// Get the Euler degrees from the BNO08X sensor
-					eulerDegrees := internalbno08x.UARTRVC.GetEulerDegrees()
-
-					// Send the Euler degrees messages via USB CDC
-					sendErrorMessageOnError(
-						func() tinygoerrors.ErrorCode {
-							return internalusbcdc.USBCDCHandler.SendBNO08XEulerDegreesMessages(eulerDegrees)
-						},
-					)
-				}()
-			}
-
-			// Receive USB CDC messages
-			wg.Add(1)
-			go func() {
-				defer wg.Done()
-
-				// Read a message with a timeout
-				hasNewMessageArrived = false
-				message, err := internalusbcdc.USBCDCHandler.ReadMessage(internalbno08x.Interval)
-				if err != tinygoerrors.ErrorCodeNil {
-					sendErrorMessage(err)
-				}
-				newMessage = message
-				hasNewMessageArrived = true
-			}()
-
-			// Wait for both to finish
-			wg.Wait()
-
-			// Check if a new message has arrived
-			if !hasNewMessageArrived {
+			// Read a message with a timeout
+			message, err := internalusbcdc.USBCDCHandler.ReadMessage(readMessageTimeout)
+			if err != tinygoerrors.ErrorCodeNil {
+				internalusbcdc.USBCDCHandler.SendErrorMessage(err)
 				continue
 			}
+			newMessage = message
 
 			// Reset the last message received time if messages are received
 			lastMessageReceivedTime = time.Now()
@@ -189,44 +136,40 @@ func main() {
 			// Handle specific message categories
 			switch newMessage.Category {
 			case internalusbcdc.IncomingCategoryGetMaxMotorSpeedValue:
-				sendErrorMessageOnError(
-					func() tinygoerrors.ErrorCode {
-						return internalusbcdc.USBCDCHandler.SendMaxMotorSpeedValueMessage(internalescmotor.MaxSpeed)
-					},
-				)
+				if err := internalusbcdc.USBCDCHandler.SendMaxMotorSpeedValueMessage(internalescmotor.MaxSpeed); err != tinygoerrors.ErrorCodeNil {
+					internalusbcdc.USBCDCHandler.SendErrorMessage(err)
+				}
 			case internalusbcdc.IncomingCategoryGetMaxServoDirectionValue:
-				sendErrorMessageOnError(
-					func() tinygoerrors.ErrorCode {
-						return internalusbcdc.USBCDCHandler.SendMaxServoDirectionValueMessage(internalservo.MaxAngle)
-					},
-				)
+				if err := internalusbcdc.USBCDCHandler.SendMaxServoDirectionValueMessage(internalservo.MaxAngle); err != tinygoerrors.ErrorCodeNil {
+					internalusbcdc.USBCDCHandler.SendErrorMessage(err)
+				}
 			case internalusbcdc.IncomingCategoryMotorSpeedStop:
-				sendErrorMessageOnError(internalescmotor.ESCMotorHandler.Stop)
+				if err := internalescmotor.ESCMotorHandler.Stop(); err != tinygoerrors.ErrorCodeNil {
+					internalusbcdc.USBCDCHandler.SendErrorMessage(err)
+				}
 			case internalusbcdc.IncomingCategoryServoDirectionCenter:
-				sendErrorMessageOnError(internalservo.ServoHandler.SetAngleToCenter)
+				if err := internalservo.ServoHandler.SetAngleToCenter(); err != tinygoerrors.ErrorCodeNil {
+					internalusbcdc.USBCDCHandler.SendErrorMessage(err)
+				}
 			case internalusbcdc.IncomingCategoryServoDirectionToLeft, internalusbcdc.IncomingCategoryServoDirectionToRight:
-				sendErrorMessageOnError(
-					func() tinygoerrors.ErrorCode {
-						return internalservo.SetDirectionBasedOnReceivedMessage(newMessage)
-					},
-				)
+				if err := internalservo.SetDirectionBasedOnReceivedMessage(newMessage); err != tinygoerrors.ErrorCodeNil {
+					internalusbcdc.USBCDCHandler.SendErrorMessage(err)
+				}
 			case internalusbcdc.IncomingCategoryMotorSpeedForward, internalusbcdc.IncomingCategoryMotorSpeedBackward:
-				sendErrorMessageOnError(
-					func() tinygoerrors.ErrorCode {
-						return internalescmotor.SetSpeedBasedOnReceivedMessage(newMessage)
-					},
-				)
+				if err := internalescmotor.SetSpeedBasedOnReceivedMessage(newMessage); err != tinygoerrors.ErrorCodeNil {
+					internalusbcdc.USBCDCHandler.SendErrorMessage(err)
+				}
 			case internalusbcdc.IncomingCategoryStatus:
 				// Get the first byte of the message content
 				if len(newMessage.Data) < 1 {
-					sendErrorMessage(internalusbcdc.ErrorCodeUSBCDCInvalidIncomingMessageDataLength)
+					internalusbcdc.USBCDCHandler.SendErrorMessage(internalusbcdc.ErrorCodeUSBCDCInvalidIncomingMessageDataLength)
 					continue
 				}
 
 				// Get the status from the message content
 				status, err := internalusbcdc.IncomingStatusFromUint8(newMessage.Data[0])
 				if err != tinygoerrors.ErrorCodeNil {
-					sendErrorMessage(err)
+					internalusbcdc.USBCDCHandler.SendErrorMessage(err)
 					continue
 				}
 
@@ -234,7 +177,7 @@ func main() {
 				case internalusbcdc.IncomingStatusHeartbeat:
 					break
 				case internalusbcdc.IncomingStatusOK:
-					sendErrorMessage(internalusbcdc.ErrorCodeUSBCDCReceivedUnexpectedConfirmationMessage)
+					internalusbcdc.USBCDCHandler.SendErrorMessage(internalusbcdc.ErrorCodeUSBCDCReceivedUnexpectedConfirmationMessage)
 					continue
 				case internalusbcdc.IncomingStatusStop:
 					// Set the exit condition to True
@@ -244,18 +187,11 @@ func main() {
 					stopAndCenter()
 
 					// Send a confirmation message to the serial communication
-					sendErrorMessageOnError(
-						func() tinygoerrors.ErrorCode {
-							return internalusbcdc.USBCDCHandler.SendConfirmationMessage()
-						},
-					)
+					if err := internalusbcdc.USBCDCHandler.SendConfirmationMessage(); err != tinygoerrors.ErrorCodeNil {
+						internalusbcdc.USBCDCHandler.SendErrorMessage(err)
+					}
 				}
 			}
-		}
-
-		// Break the loop if the exit flag is set
-		if toExit {
-			break
 		}
 	}
 }
