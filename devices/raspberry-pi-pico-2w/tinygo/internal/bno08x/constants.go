@@ -25,7 +25,7 @@ var (
 	UARTRVC *tinygobno08x.UARTRVC
 
 	// Interval is the interval to read the sensor data.
-	Interval = 50 * time.Millisecond // Can be as low as 10ms
+	Interval = 10 * time.Millisecond // Can be as low as 10ms
 
 	// failedToInitializeBNO08xErrorMessage is the error message for failed BNO08x initialization.
 	failedToInitializeBNO08xErrorMessage = []byte("Failed to initialize BNO08x sensor")
@@ -33,7 +33,7 @@ var (
 
 func init() {
 	// Some delay to be able to debug the BNO08x initial packets
-	// time.Sleep(5 * time.Second)
+	time.Sleep(5 * time.Second)
 
 	/*
 	// ----- UART Instance -----
@@ -48,12 +48,12 @@ func init() {
 		machine.GPIO4,
 		PacketBuffer,
 		afterReset,
-		tinygobno08x.NewUARTOptions(internal.Logger, false),
-		// tinygobno08x.NewUARTOptions(nil, false),
+		internal.Logger,
+		true,
 	)
 	if err != tinygoerrors.ErrorCodeNil {
 		internal.Logger.WarningMessageWithErrorCode(failedToInitializeBNO08xErrorMessage, err, true)
-		return
+		os.Exit(1)
 	}
 	UART = uart
 	*/

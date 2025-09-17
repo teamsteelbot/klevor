@@ -8,16 +8,23 @@ import (
 	internalbno08x "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/bno08x"
 	tinygobno08x "github.com/ralvarezdev/tinygo-bno08x"
 	tinygologger "github.com/ralvarezdev/tinygo-logger"
+	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
 )
 
 const (
 	// IntervalDuration is the duration of the main loop interval
 	IntervalDuration = 100 * time.Millisecond
+
+	// Float64Precision defines the precision for float64 values
+	Float64Precision = 3
 )
 
 var (
 	// noBNO08XStructInitializedMessage is the message printed when no BNO08X struct is initialized
 	noBNO08XStructInitializedMessage = []byte("No BNO08X struct initialized")
+
+	// failedToUpdateBNO08XMessage is the message printed when updating the BNO08X sensor fails
+	failedToUpdateBNO08XMessage = []byte("Failed to update BNO08X sensor")
 
 	// quaternionHeader is the header for the quaternion values in the debug output
 	quaternionHeader = []byte("QUATERNION VALUES")
@@ -45,6 +52,9 @@ var (
 
 	// rollDegreesPrefix is the prefix for the roll degrees value in the debug output
 	rollDegreesPrefix = []byte("\tRoll Degrees:")
+
+	// printNegativeNumber is a message to test printing negative numbers
+	printNegativeNumber = []byte("Printing a negative number:")
 )
 
 func main() {
@@ -79,7 +89,9 @@ func main() {
 
 		if internalbno08x.UARTRVC != nil {
 			// Update euler degrees
-			internalbno08x.UARTRVC.Update()
+			if err := internalbno08x.UARTRVC.Update(); err != tinygoerrors.ErrorCodeNil {
+				internal.Logger.WarningMessageWithErrorCode(failedToUpdateBNO08XMessage, err, true)
+			}
 
 			// Get the euler degrees
 			e := internalbno08x.UARTRVC.GetEulerDegrees()
@@ -89,14 +101,11 @@ func main() {
 
 			// Log the euler degrees values
 			internal.Logger.AddMessage(eulerHeader, true)
-			internal.Logger.AddMessageWithFloat64(yawDegreesPrefix, yaw, true, true)
-			internal.Logger.AddMessageWithFloat64(pitchDegreesPrefix, pitch, true, true)
-			internal.Logger.AddMessageWithFloat64(rollDegreesPrefix, roll, true, true)
+			internal.Logger.AddMessageWithFloat64(yawDegreesPrefix, yaw, Float64Precision, true, true)
+			internal.Logger.AddMessageWithFloat64(pitchDegreesPrefix, pitch, Float64Precision, true, true)
+			internal.Logger.AddMessageWithFloat64(rollDegreesPrefix, roll, Float64Precision, true, true)
 			internal.Logger.Debug()
 		}
-
-		// Sleep for the interval duration
-		time.Sleep(IntervalDuration)
 
 		// Print memory stats
 		tinygologger.DebugMemory(internal.Logger)

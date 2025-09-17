@@ -7,7 +7,7 @@ require (
 	github.com/ralvarezdev/go-hailo-clip-handler v0.1.4
 	github.com/ralvarezdev/go-rplidar-sdk-handler v0.1.5
 	github.com/ralvarezdev/go-strings v0.1.12 // indirect
-	github.com/ralvarezdev/go-tinygo-errors v0.1.3
+	github.com/ralvarezdev/go-tinygo-errors v0.1.5
 	github.com/ralvarezdev/tinygo-errors v0.0.4
 	go.bug.st/serial v1.6.4
 	golang.org/x/sync v0.17.0

@@ -3,6 +3,7 @@ package main
 import (
 	"runtime"
 	"time"
+	"os"
 
 	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal"
 	internalbno08x "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/bno08x"
@@ -12,7 +13,7 @@ import (
 	internalswitch "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/switch"
 	internalusbcdc "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc"
 	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
-	tinygologger "github.com/ralvarezdev/tinygo-logger"
+	// tinygologger "github.com/ralvarezdev/tinygo-logger"
 )
 
 const (
@@ -89,12 +90,11 @@ func main() {
 		stopAndCenter()
 
 		// Wait for switch press
-		/*
-			if err := internalswitch.SwitchHandler.Wait(switchOnEvent); err != tinygoerrors.ErrorCodeNil {
-				internal.Logger.ErrorMessageWithErrorCode(failedToWaitForSwitchPressMessage, err, true)
-				os.Exit(1)
-			}
-		*/
+				if err := internalswitch.SwitchHandler.Wait(switchOnEvent); err != tinygoerrors.ErrorCodeNil {
+					internal.Logger.ErrorMessageWithErrorCode(failedToWaitForSwitchPressMessage, err, true)
+					os.Exit(1)
+				}
+
 
 		// Add goroutine forsending the BNO08X updates
 		go bno08xUpdateLoop()
@@ -106,21 +106,19 @@ func main() {
 		toExit := false
 		for !toExit {
 			// Log memory status
-			tinygologger.DebugMemory(internal.Logger)
+			// tinygologger.DebugMemory(internal.Logger)
 
-			/*
 			// Check if the last message received time exceeds the timeout
 			if time.Since(lastMessageReceivedTime) >= receivingMessageTimeout {
 				toExit = true
 
 				// Send a timeout error message
-				sendErrorMessage(internalusbcdc.ErrorCodeUSBCDCReceivingMessageTimeoutReached)
+				internalusbcdc.USBCDCHandler.SendErrorMessage(internalusbcdc.ErrorCodeUSBCDCReceivingMessageTimeoutReached)
 
 				// Stop the motor and center the servo
 				stopAndCenter()
 				break
 			}
-			*/
 
 			// Read a message with a timeout
 			message, err := internalusbcdc.USBCDCHandler.ReadMessage(readMessageTimeout)

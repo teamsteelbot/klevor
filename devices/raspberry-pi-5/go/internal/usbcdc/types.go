@@ -371,7 +371,7 @@ func (h *DefaultHandler) runToWrap(ctx context.Context, stopFn func()) error {
 	)
 
 	// Wait for both handlers to finish and return any error
-	err = g.Wait()
+	err = g.Wait()	
 
 	// Close the port
 	if closeErr := port.Close(); closeErr != nil {
@@ -508,7 +508,7 @@ func (h *DefaultHandler) incomingMessagesHandler(
 				switch message.Category {
 				case IncomingCategoryError:
 					err := fmt.Errorf("received error message: %s", message.Data)
-					h.incomingMessagesLoggerProducer.Error(err)
+					h.incomingMessagesLoggerProducer.Error(fmt.Errorf("Received error message: %w", err))
 					return err
 				case IncomingCategoryChallenge:
 					challenge, err := internal.ChallengeFromBytes(message.Data)
@@ -626,48 +626,56 @@ func (h *DefaultHandler) incomingMessagesHandler(
 					h.receivedBNO08XQuaternionX = math.Float64frombits(quaternionXUint64)
 
 					// Log the received message
+					/*
 					h.incomingMessagesLoggerProducer.Info(
 						fmt.Sprintf(
 							"Received BNO08X quaternion X: %f",
 							h.receivedBNO08XQuaternionX,
 						),
 					)
+						*/
 				case IncomingCategoryQuaternionY:
 					// Parse the BNO08X quaternion Y value
 					quaternionYUint64 := binary.BigEndian.Uint64(message.Data[:8])
 					h.receivedBNO08XQuaternionY = math.Float64frombits(quaternionYUint64)
 
 					// Log the received message
+					/*
 					h.incomingMessagesLoggerProducer.Info(
 						fmt.Sprintf(
 							"Received BNO08X quaternion Y: %f",
 							h.receivedBNO08XQuaternionY,
 						),
 					)
+						*/
 				case IncomingCategoryQuaternionZ:
 					// Parse the BNO08X quaternion Z value
 					quaternionZUint64 := binary.BigEndian.Uint64(message.Data[:8])
 					h.receivedBNO08XQuaternionZ = math.Float64frombits(quaternionZUint64)
 
 					// Log the received message
+					/*
 					h.incomingMessagesLoggerProducer.Info(
 						fmt.Sprintf(
 							"Received BNO08X quaternion Z: %f",
 							h.receivedBNO08XQuaternionZ,
 						),
 					)
+						*/
 				case IncomingCategoryQuaternionW:
 					// Parse the BNO08X quaternion W value
 					quaternionWUint64 := binary.BigEndian.Uint64(message.Data[:8])
 					h.receivedBNO08XQuaternionW = math.Float64frombits(quaternionWUint64)
 
 					// Log the received message
+					/*
 					h.incomingMessagesLoggerProducer.Info(
 						fmt.Sprintf(
 							"Received BNO08X quaternion W: %f",
 							h.receivedBNO08XQuaternionW,
 						),
 					)
+						*/
 
 					// Convert the quaternion to Euler angles in degrees
 					var quaternion [4]float64
@@ -780,12 +788,14 @@ func (h *DefaultHandler) updateBNO08XPitchDegrees(pitchDegrees float64) {
 
 	// Update the received pitch degrees
 	h.receivedBNO08XPitchDegrees = pitchDegrees
+	/*
 	h.incomingMessagesLoggerProducer.Info(
 		fmt.Sprintf(
 			"Updated BNO08X pitch degrees: %f",
 			h.receivedBNO08XPitchDegrees,
 		),
 	)
+		*/
 }
 
 // updateBNO08XRollDegrees updates the BNO08X roll degrees.
@@ -809,12 +819,14 @@ func (h *DefaultHandler) updateBNO08XRollDegrees(rollDegrees float64) {
 
 	// Update the received roll degrees
 	h.receivedBNO08XRollDegrees = rollDegrees
+	/*
 	h.incomingMessagesLoggerProducer.Info(
 		fmt.Sprintf(
 			"Updated BNO08X roll degrees: %f",
 			h.receivedBNO08XRollDegrees,
 		),
 	)
+		*/
 }
 
 // readFromPort reads data from the serial port.
@@ -869,12 +881,14 @@ func (h *DefaultHandler) readIncomingMessages(
 	}
 
 	// Log the accumulated buffer data
+	/*
 	h.incomingMessagesLoggerProducer.Info(
 		fmt.Sprintf(
 			"Accumulated buffer data: %s",
 			ConvertBytesSliceToHexString(h.accumulatedBuffer),
 		),
 	)
+		*/
 
 	// Extract messages from the accumulated buffer
 	messages, err := NewIncomingMessagesFromBuffer(&h.accumulatedBuffer, h.incomingMessagesLoggerProducer)
@@ -1030,12 +1044,14 @@ func (h *DefaultHandler) sendMessage(
 	}
 
 	// Log the message sent
+	/*
 	h.outgoingMessagesLoggerProducer.Info(
 		fmt.Sprintf(
 			"Sent message: %s",
 			message.StringToPrint(),
 		),
 	)
+	*/
 	return nil
 }
 

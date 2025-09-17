@@ -63,7 +63,7 @@ func main() {
 	}
 
 	// Initialize the Slamtec C1 handler
-	rplidarHandler, err := internalrplidar.NewSlamtecC1Handler(logger)
+	rplidarHandler, err := internalrplidar.NewSlamtecC1Handler(logger) 
 	if err != nil {
 		log.Fatalf("failed to initialize rplidar handler: %v", err)
 	}
