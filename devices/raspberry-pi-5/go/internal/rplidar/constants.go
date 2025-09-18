@@ -11,7 +11,7 @@ const (
 	IsUpsideDown = true
 
 	// AngleAdjustment is the angle adjustment in degrees
-	AngleAdjustment = 0.0
+	AngleAdjustment = 0
 
 	// MaxDistanceLimit is the maximum distance limit
 	MaxDistanceLimit = 3000

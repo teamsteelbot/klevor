@@ -12,12 +12,12 @@ github.com/ralvarezdev/go-crypto v0.6.4 h1:eX257KaSWGa4zU+COX7Ja0yzbkAPdwRAtPlDa
 github.com/ralvarezdev/go-crypto v0.6.4/go.mod h1:jY/KGELdLAiBZSbn7x5jRGCDifEGF4X5GvhgAFZJnSM=
 github.com/ralvarezdev/go-hailo-clip-handler v0.1.6 h1:rnT/qfOq+4xFbrVC314azIGiNBbzHebAJI7XQyCIBlQ=
 github.com/ralvarezdev/go-hailo-clip-handler v0.1.6/go.mod h1:SD6S7JHpdvTwauQVIOVUaBjEXmFH0hiC5rt8FUYdGbU=
-github.com/ralvarezdev/go-rplidar-sdk-handler v0.1.7 h1:5B2yq1X6TSoTsLjUtIvBc9YE3EtM3dXzlK6eXGZJAw8=
-github.com/ralvarezdev/go-rplidar-sdk-handler v0.1.7/go.mod h1:PRLJWnbhnBDjMi/GjP6IRhSRfpG/QqanPix4+rm5QJI=
+github.com/ralvarezdev/go-rplidar-sdk-handler v0.1.8 h1:7PkVGj4RQ/JyYjKNOC1HysM6zMFohksSGNHP2/Ta29g=
+github.com/ralvarezdev/go-rplidar-sdk-handler v0.1.8/go.mod h1:PRLJWnbhnBDjMi/GjP6IRhSRfpG/QqanPix4+rm5QJI=
 github.com/ralvarezdev/go-strings v0.1.12 h1:AtOPDJ4lVO+33p7O4uECdD4C4D037h256zWz9uQ5eIQ=
 github.com/ralvarezdev/go-strings v0.1.12/go.mod h1:8sFOqmPJpqzS7bTjf91EzUCITnwpmkfifwY80GxV5r8=
-github.com/ralvarezdev/go-tinygo-errors v0.1.5 h1:cu5SVC2DPaP1fe5Ug91O0AmITc4q6WHI25w1xNM+Iys=
-github.com/ralvarezdev/go-tinygo-errors v0.1.5/go.mod h1:1BmoP8we6T94Lg1b6Vbe4jjWfMFEuMbyE6WnY7cbFvs=
+github.com/ralvarezdev/go-tinygo-errors v0.1.6 h1:YlX7a60+iFdvymdUkwfdw52WRVXlDLpFs/xupVlyYOs=
+github.com/ralvarezdev/go-tinygo-errors v0.1.6/go.mod h1:1BmoP8we6T94Lg1b6Vbe4jjWfMFEuMbyE6WnY7cbFvs=
 github.com/ralvarezdev/tinygo-errors v0.0.4 h1:nuqApi7tEzPSSf2/3Uqxxizwftvoxczaec9BA95Hcj4=
 github.com/ralvarezdev/tinygo-errors v0.0.4/go.mod h1:PlkyrG60saZetwFX1mPhve+9l2pneVH7c8q5w4sxe8M=
 github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcUk=

@@ -46,24 +46,20 @@ func main() {
 			stopOnError(internalescmotor.ESCMotorHandler.SafeSetSpeedForward(
 				speed * 10,
 			))
-			time.Sleep(1 * time.Second)
 		}
 
 		// Stop the motor for a while
 		stopOnError(internalescmotor.ESCMotorHandler.Stop())
-		time.Sleep(1 * time.Second)
 
 		// Start testing the motor backward
 		for speed = 0; speed <= 11; speed += 1 {
 			stopOnError(internalescmotor.ESCMotorHandler.SafeSetSpeedBackward(
 				speed * 10,
 			))
-			time.Sleep(1 * time.Second)
 		}
 
 		// Stop the motor
 		stopOnError(internalescmotor.ESCMotorHandler.Stop())
-		time.Sleep(1 * time.Second)
 
 		// Turn off the LED
 		internalledonboard.OnBoardHandler.SetOff()

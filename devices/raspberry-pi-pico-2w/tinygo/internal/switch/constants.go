@@ -11,6 +11,11 @@ import (
 	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
 )
 
+const (
+	// InitializationAttempts is the number of attempts to initialize the switch handler
+	InitializationAttempts = 3
+)
+
 var (
 	// DefaultInterval is the default interval for the switch ON signal.
 	DefaultInterval = 10 * time.Millisecond

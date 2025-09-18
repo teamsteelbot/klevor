@@ -33,7 +33,7 @@ var (
 
 func init() {
 	// Some delay to be able to debug the BNO08x initial packets
-	time.Sleep(5 * time.Second)
+	// time.Sleep(5 * time.Second)
 
 	/*
 	// ----- UART Instance -----

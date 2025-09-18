@@ -21,30 +21,34 @@ func SwitchOnEventGenerator(
 	ledHandler internalled.Handler,
 ) func() tinygoerrors.ErrorCode {
 	return func() tinygoerrors.ErrorCode {
-		// Send initialization message
-		if err := usbCDChandler.SendInitializationMessage(); err != tinygoerrors.ErrorCodeNil {
-			return err
-		}
-
-		// Send start message
-		if err := usbCDChandler.SendStartMessage(); err != tinygoerrors.ErrorCodeNil {
-			return err
-		}
-
-		// Send challenge message
-		if err := usbCDChandler.SendChallengeMessage(); err != tinygoerrors.ErrorCodeNil {
-			return err
-		}
-
-		// Blink the LED if provided
-		if ledHandler != nil {
-			if err := ledHandler.Blink(
-				internalled.DefaultBlinkTimes,
-				internalled.DefaultBlinkDelay,
-			); err != tinygoerrors.ErrorCodeNil {
-				return err
+		var err tinygoerrors.ErrorCode
+		for _ = range InitializationAttempts {
+			// Send initialization message
+			if err = usbCDChandler.SendInitializationMessage(); err != tinygoerrors.ErrorCodeNil {
+				continue
 			}
+
+			// Send start message
+			if err = usbCDChandler.SendStartMessage(); err != tinygoerrors.ErrorCodeNil {
+				continue
+			}
+
+			// Send challenge message
+			if err = usbCDChandler.SendChallengeMessage(); err != tinygoerrors.ErrorCodeNil {
+				continue
+			}
+
+			// Blink the LED if provided
+			if ledHandler != nil {
+				if err = ledHandler.Blink(
+					internalled.DefaultBlinkTimes,
+					internalled.DefaultBlinkDelay,
+				); err != tinygoerrors.ErrorCodeNil {
+					continue
+				}
+			}
+			return tinygoerrors.ErrorCodeNil
 		}
-		return tinygoerrors.ErrorCodeNil
+		return err
 	}
 }

@@ -2,7 +2,6 @@ package escmotor
 
 import (
 	"os"
-	"time"
 
 	"machine"
 
@@ -22,17 +21,17 @@ const (
 	// MinPulseWidth is the minimum pulse width in microseconds
 	MinPulseWidth uint16 = 1000
 
+	// NeutralPulseWidth is the neutral pulse width in microseconds
+	NeutralPulseWidth uint16 = 1500
+
 	// MaxPulseWidth is the maximum pulse width in microseconds
 	MaxPulseWidth uint16 = 2000
 
 	// MaxSpeed is the maximum speed to run the ESC motor
 	MaxSpeed uint16 = 100
 
-	// ChangeInterval is the interval to change the speed of the ESC motor
-	ChangeInterval = 5
-
-	// ChangeInternalDelay is the internal delay to change the speed of the ESC motor
-	ChangeInternalDelay = 8 * time.Millisecond
+	// ChangeSteps is the interval to change the speed of the ESC motor
+	ChangeSteps = 10
 )
 
 var (
@@ -51,12 +50,12 @@ func init() {
 		internalmovement.Handler.IsEnabled,
 		PWMFrequency,
 		MinPulseWidth,
+		NeutralPulseWidth,
 		MaxPulseWidth,
-		ChangeInterval,
-		ChangeInternalDelay,
+		ChangeSteps,
 		IsPolarityInverted,
 		MaxSpeed,
-		nil, // internal.Logger
+		nil, // internal.Logger,
 	)
 	if err != tinygoerrors.ErrorCodeNil {
 		internal.Logger.ErrorMessageWithErrorCode(failedToInitializeEscMotorMessage, err, true)

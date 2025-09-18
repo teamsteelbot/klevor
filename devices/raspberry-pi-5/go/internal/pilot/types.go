@@ -561,12 +561,12 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 			if h.handlerLoggerProducer.IsDebug() {
 				h.handlerLoggerProducer.Debug(
 					fmt.Sprintf(
-						"West: %f, North-Northwest: %f, North: %f, North-Northeast: %f, East: %f",
-						northAverageDistance,
+						"W: %f, N-NW: %f, N: %f, N-NE: %f, E: %f",
 						westAverageDistance,
-						eastAverageDistance,
-						northNortheastAverageDistance,
 						northNorthwestAverageDistance,
+						northAverageDistance,
+						northNortheastAverageDistance,
+						eastAverageDistance,
 					),
 				)
 			}
