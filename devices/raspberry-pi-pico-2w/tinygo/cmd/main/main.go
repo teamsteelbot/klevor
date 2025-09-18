@@ -172,11 +172,11 @@ func main() {
 					internalusbcdc.USBCDCHandler.SendErrorMessage(err)
 				}
 			case internalusbcdc.IncomingCategoryServoDirectionToLeft, internalusbcdc.IncomingCategoryServoDirectionToRight:
-				if err := internalservo.SetDirectionBasedOnReceivedMessage(newMessage); err != tinygoerrors.ErrorCodeNil {
+				if err := internalservo.SetDirectionBasedOnReceivedMessage(internalusbcdc.USBCDCHandler, newMessage); err != tinygoerrors.ErrorCodeNil {
 					internalusbcdc.USBCDCHandler.SendErrorMessage(err)
 				}
 			case internalusbcdc.IncomingCategoryMotorSpeedForward, internalusbcdc.IncomingCategoryMotorSpeedBackward:
-				if err := internalescmotor.SetSpeedBasedOnReceivedMessage(newMessage); err != tinygoerrors.ErrorCodeNil {
+				if err := internalescmotor.SetSpeedBasedOnReceivedMessage(internalusbcdc.USBCDCHandler, newMessage); err != tinygoerrors.ErrorCodeNil {
 					internalusbcdc.USBCDCHandler.SendErrorMessage(err)
 				}
 			case internalusbcdc.IncomingCategoryStatus:

@@ -10,12 +10,13 @@ import (
 //
 // Parameters:
 //
+// handler: The USB CDC handler to send error messages if needed
 // message: The incoming message containing the servo direction command
 //
 // Returns:
 //
 // An error if the servo direction could not be set
-func SetDirectionBasedOnReceivedMessage(message internalusbcdc.IncomingMessage) tinygoerrors.ErrorCode {
+func SetDirectionBasedOnReceivedMessage(handler internalusbcdc.Handler, message internalusbcdc.IncomingMessage) tinygoerrors.ErrorCode {
 	// Check if the servo angle should be retrieved from the message
 	var servoDirectionAngle uint16
 	if message.Category != internalusbcdc.IncomingCategoryServoDirectionCenter {
@@ -30,10 +31,28 @@ func SetDirectionBasedOnReceivedMessage(message internalusbcdc.IncomingMessage) 
 	// Check the servo angle category
 	switch message.Category {
 	case internalusbcdc.IncomingCategoryServoDirectionCenter:
+		// Send feedback message
+		if handler != nil {
+			handler.SendSetServoDirectionCenterMessage()
+		}
+
+		// Center the servo
 		return ServoHandler.SetAngleToCenter()
 	case internalusbcdc.IncomingCategoryServoDirectionToLeft:
+		// Send feedback message
+		if handler != nil {
+			handler.SendSetServoDirectionToLeftMessage(servoDirectionAngle)
+		}
+		
+		// Set the servo direction to left
 		return ServoHandler.SafeSetAngleToLeft(servoDirectionAngle)
 	case internalusbcdc.IncomingCategoryServoDirectionToRight:
+		// Send feedback message
+		if handler != nil {
+			handler.SendSetServoDirectionToRightMessage(servoDirectionAngle)
+		}
+
+		// Set the servo direction to right
 		return ServoHandler.SafeSetAngleToRight(servoDirectionAngle)
 	default:
 		return internalusbcdc.ErrorCodeUSBCDCUnknownIncomingCategory

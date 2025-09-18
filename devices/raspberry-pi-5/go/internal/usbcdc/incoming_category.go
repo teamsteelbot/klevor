@@ -23,6 +23,12 @@ const (
 	IncomingCategoryEulerDegreesYaw
 	IncomingCategoryEulerDegreesPitch
 	IncomingCategoryEulerDegreesRoll
+	IncomingCategorySetMotorSpeedStop
+	IncomingCategorySetMotorSpeedForward
+	IncomingCategorySetMotorSpeedBackward
+	IncomingCategorySetServoDirectionCenter
+	IncomingCategorySetServoDirectionToLeft
+	IncomingCategorySetServoDirectionToRight
 		
 )
 
@@ -41,6 +47,12 @@ var (
 		IncomingCategoryEulerDegreesYaw:       "euler_degrees_yaw",
 		IncomingCategoryEulerDegreesPitch:     "euler_degrees_pitch",
 		IncomingCategoryEulerDegreesRoll:      "euler_degrees_roll",
+		IncomingCategorySetMotorSpeedStop:     "set_motor_speed_stop",
+		IncomingCategorySetMotorSpeedForward:  "set_motor_speed_forward",
+		IncomingCategorySetMotorSpeedBackward: "set_motor_speed_backward",
+		IncomingCategorySetServoDirectionCenter: "set_servo_direction_center",
+		IncomingCategorySetServoDirectionToLeft: "set_servo_direction_to_left",
+		IncomingCategorySetServoDirectionToRight: "set_servo_direction_to_right",
 	}
 
 	// IncomingCategories maps a given uint8 value to its IncomingCategory enum
@@ -58,6 +70,12 @@ var (
 		uint8(IncomingCategoryEulerDegreesYaw):      IncomingCategoryEulerDegreesYaw,
 		uint8(IncomingCategoryEulerDegreesPitch):    IncomingCategoryEulerDegreesPitch,
 		uint8(IncomingCategoryEulerDegreesRoll):     IncomingCategoryEulerDegreesRoll,
+		uint8(IncomingCategorySetMotorSpeedStop):    IncomingCategorySetMotorSpeedStop,	
+		uint8(IncomingCategorySetMotorSpeedForward): IncomingCategorySetMotorSpeedForward,
+		uint8(IncomingCategorySetMotorSpeedBackward):IncomingCategorySetMotorSpeedBackward,
+		uint8(IncomingCategorySetServoDirectionCenter): IncomingCategorySetServoDirectionCenter,
+		uint8(IncomingCategorySetServoDirectionToLeft): IncomingCategorySetServoDirectionToLeft,
+		uint8(IncomingCategorySetServoDirectionToRight): IncomingCategorySetServoDirectionToRight,
 	}
 
 	// IncomingCategoryDataLengths maps a given IncomingCategory to its data length in bytes
@@ -75,6 +93,12 @@ var (
 		IncomingCategoryEulerDegreesYaw:       8,
 		IncomingCategoryEulerDegreesPitch:     8,
 		IncomingCategoryEulerDegreesRoll:      8,
+		IncomingCategorySetMotorSpeedStop:     0,
+		IncomingCategorySetMotorSpeedForward:  2,
+		IncomingCategorySetMotorSpeedBackward: 2,
+		IncomingCategorySetServoDirectionCenter: 0,
+		IncomingCategorySetServoDirectionToLeft: 2,
+		IncomingCategorySetServoDirectionToRight: 2,
 	}
 )
 

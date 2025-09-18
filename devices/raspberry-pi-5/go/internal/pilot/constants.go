@@ -21,13 +21,13 @@ var (
 	HandlerLoggerProducerTag = "PILOT_HANDLER"
 
 	// MotorFastPercentage is the percentage of the maximum speed for fast motor speed
-	MotorFastPercentage float64 = 0.7
+	MotorFastPercentage float64 = 0.75
 
 	// MotorNormalPercentage is the percentage of the maximum speed for normal motor speed
-	MotorNormalPercentage float64 = 0.5
+	MotorNormalPercentage float64 = 0.625
 
 	// MotorSlowPercentage is the percentage of the maximum speed for slow motor speed
-	MotorSlowPercentage float64 = 0.3
+	MotorSlowPercentage float64 = 0.5
 
 	// ServoBigTurnAnglePercentage is the percentage of the maximum angle for big turns
 	ServoBigTurnAnglePercentage float64 = 1

@@ -3,21 +3,32 @@ package pilot
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"sync"
 	"sync/atomic"
 	"syscall"
 	"time"
-	"log"
 
 	"golang.org/x/sync/errgroup"
 
-	gorplidarsdkhandler "github.com/ralvarezdev/go-rplidar-sdk-handler"
-	"github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal"
 	goconcurrentlogger "github.com/ralvarezdev/go-concurrent-logger"
 	gohailocliphandler "github.com/ralvarezdev/go-hailo-clip-handler"
+	gorplidarsdkhandler "github.com/ralvarezdev/go-rplidar-sdk-handler"
+	"github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal"
 	internalusbcdc "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/usbcdc"
+)
+
+const (
+	// SameUpdateServoInterval is the interval to update the servo even if the direction and angle are the same
+	SameUpdateServoInterval = 1 * time.Second
+
+	// SameUpdateMotorInterval is the interval to update the motor even if the speed and direction are the same
+	SameUpdateMotorInterval = 1 * time.Second
+
+	// ChangeMotorDirectionDelay is the delay to wait before changing the motor direction
+	ChangeMotorDirectionDelay = 1 * time.Second
 )
 
 type (
@@ -35,6 +46,8 @@ type (
 		servoAngle              uint16
 		motorDirection          MotorDirection
 		motorSpeed              uint16
+		lastMotorSpeedUpdate    time.Time
+		lastServoAngleUpdate time.Time
 		rplidarMeasures         *[360]*gorplidarsdkhandler.Measure
 		rplidarAverageDistances map[gorplidarsdkhandler.CardinalDirection]float64
 		clipClassification      *gohailocliphandler.Classification
@@ -43,6 +56,7 @@ type (
 		rplidarTurnsCounter     int
 		maxMotorSpeedValue      uint16
 		maxServoDirectionValue  uint16
+		debug                   bool
 	}
 )
 
@@ -54,6 +68,7 @@ type (
 // rplidarHandler: The RPLidar handler to use for getting distance measurements.
 // clipHandler: The CLIP handler to use for controlling the robot's movement.
 // usbCDCHandler: The USB-CDC handler to use for communication with the robot.
+// debug: A boolean indicating if debug logging is enabled.
 //
 // Returns:
 //
@@ -63,6 +78,7 @@ func NewDefaultHandler(
 	rplidarHandler gorplidarsdkhandler.Handler,
 	clipHandler gohailocliphandler.Handler,
 	usbCDCHandler internalusbcdc.Handler,
+	debug bool,
 ) (*DefaultHandler, error) {
 	// Check if the logger is nil
 	if logger == nil {
@@ -89,6 +105,7 @@ func NewDefaultHandler(
 		rplidarHandler: rplidarHandler,
 		clipHandler:    clipHandler,
 		usbCDCHandler:  usbCDCHandler,
+		debug:          debug,
 	}, nil
 }
 
@@ -116,9 +133,22 @@ func (h *DefaultHandler) setMotorSpeed(
 	direction MotorDirection,
 ) error {
 	// Update the motor direction and speed
+	previousMotorDirection := h.motorDirection
 	h.motorDirection = direction
 	h.motorSpeed = speed
 
+	// Check if the speed or direction is the same as the current one
+	if h.motorDirection == direction && h.motorSpeed == speed {
+		// Check the time that has passed since the last update, this ensures that the motor is updated at least every SameUpdateMotorInterval
+		if time.Since(h.lastMotorSpeedUpdate) < SameUpdateMotorInterval {
+			// No need to update the motor
+			return nil
+		}
+	}
+
+	// Update the last update time
+	h.lastMotorSpeedUpdate = time.Now()
+	
 	// Send the outgoing message to set the motor speed
 	if direction == MotorDirectionStop || speed == 0 {
 		h.handlerLoggerProducer.Info(
@@ -128,6 +158,23 @@ func (h *DefaultHandler) setMotorSpeed(
 			internalusbcdc.OutgoingMotorSpeedStopMessage,
 		)
 	}
+
+	// If the direction changed, send a stop message first
+	if previousMotorDirection != direction {
+		h.handlerLoggerProducer.Info(
+			"Motor direction changed, stopping the motor first",
+		)
+		if err := h.usbCDCSender.SendMessage(	
+			internalusbcdc.OutgoingMotorSpeedStopMessage,
+		); err != nil {
+			return fmt.Errorf("failed to stop motor before changing direction: %w", err)
+		}
+
+		// Wait a short moment to ensure the motor stops before changing direction
+		time.Sleep(ChangeMotorDirectionDelay)
+	}
+
+	// Log the motor speed and direction
 	if direction == MotorDirectionForward {
 		h.handlerLoggerProducer.Info(
 			fmt.Sprintf(
@@ -224,6 +271,18 @@ func (h *DefaultHandler) setServoDirection(
 	// Update the servo direction and angle
 	h.servoDirection = direction
 	h.servoAngle = angle
+
+	// Check if the speed or direction is the same as the current one
+	if h.servoDirection == direction && h.servoAngle == angle {
+		// Check the time that has passed since the last update, this ensures that the servo is updated at least every SameUpdateServoInterval
+		if time.Since(h.lastServoAngleUpdate) < SameUpdateServoInterval {
+			// No need to update the servo
+			return nil
+		}
+	}
+
+	// Update the last update time
+	h.lastServoAngleUpdate = time.Now()
 
 	// Send the outgoing message to set the angle speed
 	if direction == ServoDirectionStraight || angle == 90 {
@@ -374,9 +433,7 @@ func (h *DefaultHandler) setServoToOppositeDirection(servoAngle uint16) error {
 // Returns:
 //
 // An error if the classification could not be retrieved
-func (h *DefaultHandler) updateCLIPClassification() (
-	error,
-) {
+func (h *DefaultHandler) updateCLIPClassification() error {
 	// Update the CLIP classification
 	clipClassification, err := h.clipHandler.GetClassification()
 	if err != nil {
@@ -486,9 +543,6 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 		// Wait for the command delay
 		time.Sleep(CommandDelay)
 
-		// Log the current yaw degrees
-		
-
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
@@ -504,16 +558,18 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 			northNorthwestAverageDistance = h.getAverageDirectionDistance(gorplidarsdkhandler.CardinalDirectionNorthNorthwest)
 
 			// Log the average distances
-			h.handlerLoggerProducer.Debug(
-				fmt.Sprintf(
-					"West: %f, North-Northwest: %f, North: %f, North-Northeast: %f, East: %f",
-					northAverageDistance,
-					westAverageDistance,
-					eastAverageDistance,
-					northNortheastAverageDistance,
-					northNorthwestAverageDistance,
-				),
-			)
+			if h.handlerLoggerProducer.IsDebug() {
+				h.handlerLoggerProducer.Debug(
+					fmt.Sprintf(
+						"West: %f, North-Northwest: %f, North: %f, North-Northeast: %f, East: %f",
+						northAverageDistance,
+						westAverageDistance,
+						eastAverageDistance,
+						northNortheastAverageDistance,
+						northNorthwestAverageDistance,
+					),
+				)
+			}
 
 			// Check if one of them is 0
 			if westAverageDistance == 0 || eastAverageDistance == 0 || northAverageDistance == 0 || northNortheastAverageDistance == 0 || northNorthwestAverageDistance == 0 {
@@ -542,7 +598,7 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 					return fmt.Errorf("failed to set servo to center: %w", err)
 				}
 
-				if err := h.setMotorBackwardByPercentage(MotorNormalPercentage); err != nil {
+				if err := h.setMotorBackwardByPercentage(MotorSlowPercentage); err != nil {
 					return fmt.Errorf(
 						"failed to set motor to backward: %w",
 						err,
@@ -551,6 +607,9 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 
 				var safe bool
 				for !safe {
+					// Wait for the command delay
+					time.Sleep(CommandDelay)
+
 					select {
 					case <-ctx.Done():
 						return ctx.Err()
@@ -667,6 +726,9 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 				}
 
 				for !completed {
+					// Wait for the command delay
+					time.Sleep(CommandDelay)
+
 					select {
 					case <-ctx.Done():
 						return ctx.Err()
@@ -919,6 +981,7 @@ func (h *DefaultHandler) Run() error {
 	// Create a logger producer
 	handlerLoggerProducer, err := h.logger.NewProducer(
 		HandlerLoggerProducerTag,
+		h.debug,
 	)
 	if err != nil {
 		return fmt.Errorf("failed to create handler logger producer: %w", err)
@@ -928,13 +991,19 @@ func (h *DefaultHandler) Run() error {
 	// Generate the CLIP embeddings
 	h.handlerLoggerProducer.Info("Generating CLIP embeddings")
 	if err = h.clipHandler.GenerateEmbeddings(ctx); err != nil {
-		stop()
-		h.handlerLoggerProducer.Error(
-			fmt.Errorf("failed to generate CLIP embeddings: %w", err),
-		)
-		h.handlerLoggerProducer.Info("Stopping all goroutines...")
-		h.handlerLoggerProducer.Close()
-		return g.Wait()
+		if err == gohailocliphandler.ErrEmptyGenerateEmbeddingsPath {
+			h.handlerLoggerProducer.Warning(
+				fmt.Sprintf("CLIP embeddings path is empty: %v", err),
+			)
+		} else {
+			stop()
+			h.handlerLoggerProducer.Error(
+				fmt.Errorf("failed to generate CLIP embeddings: %w", err),
+			)
+			h.handlerLoggerProducer.Info("Stopping all goroutines...")
+			h.handlerLoggerProducer.Close()
+			return g.Wait()
+		}
 	}
 	h.handlerLoggerProducer.Info("CLIP embeddings generated successfully")
 	defer stop()

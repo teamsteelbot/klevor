@@ -696,6 +696,48 @@ func (h *DefaultHandler) incomingMessagesHandler(
 					h.updateBNO08XYawDegrees(eulerDegrees[EulerDegreesYawIndex])
 					h.updateBNO08XPitchDegrees(eulerDegrees[EulerDegreesPitchIndex])
 					h.updateBNO08XRollDegrees(eulerDegrees[EulerDegreesRollIndex])
+				case IncomingCategorySetMotorSpeedStop:
+					// Log the received message
+					h.incomingMessagesLoggerProducer.Info(
+						"Received motor speed stop confirmation",
+					)
+				case IncomingCategorySetServoDirectionCenter:
+					// Log the received message
+					h.incomingMessagesLoggerProducer.Info(
+						"Received servo direction center confirmation",
+					)
+				case IncomingCategorySetMotorSpeedForward:
+					// Log the received message
+					h.incomingMessagesLoggerProducer.Info(
+						fmt.Sprintf(
+							"Received motor speed forward confirmation at value: %d",
+							binary.BigEndian.Uint16(message.Data[:2]),
+						),
+					)
+				case IncomingCategorySetMotorSpeedBackward:
+					// Log the received message
+					h.incomingMessagesLoggerProducer.Info(
+						fmt.Sprintf(
+							"Received motor speed backward confirmation at value: %d",
+							binary.BigEndian.Uint16(message.Data[:2]),
+						),
+					)
+				case IncomingCategorySetServoDirectionToLeft:
+					// Log the received message
+					h.incomingMessagesLoggerProducer.Info(
+						fmt.Sprintf(
+							"Received servo direction to left confirmation at value: %d",
+							binary.BigEndian.Uint16(message.Data[:2]),
+						),
+					)
+				case IncomingCategorySetServoDirectionToRight:
+					// Log the received message
+					h.incomingMessagesLoggerProducer.Info(
+						fmt.Sprintf(
+							"Received servo direction to right confirmation at value: %d",
+							binary.BigEndian.Uint16(message.Data[:2]),
+						),
+					)
 				default:
 					// Log any other received message
 					h.incomingMessagesLoggerProducer.Info(
@@ -1046,7 +1088,7 @@ func (h *DefaultHandler) sendMessage(
 			),
 		)
 	}
-	
+
 	// Write the message bytes to the port
 	if _, err = port.Write(messageBytes); err != nil {
 		return fmt.Errorf("failed to write message to port: %w", err)

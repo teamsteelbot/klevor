@@ -12,11 +12,12 @@ import (
 // Parameters:
 //
 // message: The incoming message containing the motor speed command
+// handler: The USB CDC handler to send error messages if needed
 //
 // Returns:
 //
 // An error if the motor speed could not be set, otherwise nil
-func SetSpeedBasedOnReceivedMessage(message internalusbcdc.IncomingMessage) tinygoerrors.ErrorCode {
+func SetSpeedBasedOnReceivedMessage(handler internalusbcdc.Handler, message internalusbcdc.IncomingMessage) tinygoerrors.ErrorCode {
 	// Check if the motor speed should be retrieved from the message
 	var motorSpeed uint16
 	if message.Category != internalusbcdc.IncomingCategoryMotorSpeedStop {
@@ -31,10 +32,28 @@ func SetSpeedBasedOnReceivedMessage(message internalusbcdc.IncomingMessage) tiny
 	// Check the motor speed category
 	switch message.Category {
 	case internalusbcdc.IncomingCategoryMotorSpeedStop:
+		// Send feedback message
+		if handler != nil {
+			handler.SendSetMotorSpeedStopMessage()
+		}
+
+		// Stop the motor
 		return ESCMotorHandler.Stop()
 	case internalusbcdc.IncomingCategoryMotorSpeedForward:
+		// Send feedback message
+		if handler != nil {
+			handler.SendSetMotorSpeedForwardMessage(motorSpeed)
+		}
+
+		// Set the motor speed
 		return ESCMotorHandler.SafeSetSpeedForward(motorSpeed)
 	case internalusbcdc.IncomingCategoryMotorSpeedBackward:
+		// Send feedback message
+		if handler != nil {
+			handler.SendSetMotorSpeedBackwardMessage(motorSpeed)
+		}
+
+		// Set the motor speed
 		return ESCMotorHandler.SafeSetSpeedBackward(motorSpeed)
 	default:
 		return internalusbcdc.ErrorCodeUSBCDCUnknownIncomingCategory

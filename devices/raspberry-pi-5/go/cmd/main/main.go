@@ -17,6 +17,7 @@ func main() {
 	clipDebug := flag.Bool("clip-debug", false, "Enable CLIP debug logging")
 	rplidarDebug := flag.Bool("rplidar-debug", false, "Enable RPLiDAR debug logging")
 	usbCDCDebug := flag.Bool("usb-cdc-debug", false, "Enable USB-CDC debug logging")
+	pilotDebug := flag.Bool("pilot-debug", false, "Enable Pilot debug logging")
 
 	// Define required flags
 	generateClipEmbeddingsPath := flag.String(
@@ -34,9 +35,11 @@ func main() {
 	flag.Parse()
 
 	// Enforce required flags
+	/*
 	if *generateClipEmbeddingsPath == "" {
 		log.Fatal("missing required flag: --generate-clip-embeddings-path")
 	}
+	*/
 	if *runClipPath == "" {
 		log.Fatal("missing required flag: --run-clip-path")
 	}
@@ -82,6 +85,7 @@ func main() {
 		rplidarHandler,
 		clipHandler,
 		usbCDCHandler,
+		*pilotDebug,
 	)
 	if err != nil {
 		log.Fatalf("failed to initialize pilot handler: %v", err)

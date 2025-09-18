@@ -22,6 +22,12 @@ type (
 		SendMaxMotorSpeedValueMessage(maxMotorSpeed uint16) tinygoerrors.ErrorCode
 		SendMaxServoDirectionValueMessage(maxServoDirection uint16) tinygoerrors.ErrorCode
 		SendHeartbeatMessage() tinygoerrors.ErrorCode
+		SendSetMotorSpeedStopMessage() tinygoerrors.ErrorCode
+		SendSetMotorSpeedForwardMessage(speed uint16) tinygoerrors.ErrorCode
+		SendSetMotorSpeedBackwardMessage(speed uint16) tinygoerrors.ErrorCode
+		SendSetServoDirectionCenterMessage() tinygoerrors.ErrorCode
+		SendSetServoDirectionToLeftMessage(angle uint16) tinygoerrors.ErrorCode
+		SendSetServoDirectionToRightMessage(angle uint16) tinygoerrors.ErrorCode
 		WaitForConfirmationMessage(
 			timeout time.Duration,
 		) tinygoerrors.ErrorCode
