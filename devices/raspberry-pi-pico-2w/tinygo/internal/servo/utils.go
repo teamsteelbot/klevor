@@ -51,14 +51,14 @@ func SetDirectionBasedOnReceivedMessage(
 			return err
 		}
 		// Send feedback message
-		return handler.SendSetServoDirectionToLeftMessage(servoDirectionAngle)
+		return handler.SendSetServoDirectionToLeftMessage()
 	case internalusbcdc.IncomingCategoryServoDirectionToRight:
 		// Set the servo direction to right
 		if err := ServoHandler.SafeSetAngleToRight(servoDirectionAngle); err != tinygoerrors.ErrorCodeNil {
 			return err
 		}
 		// Send feedback message
-		return handler.SendSetServoDirectionToRightMessage(servoDirectionAngle)
+		return handler.SendSetServoDirectionToRightMessage()
 	default:
 		return internalusbcdc.ErrorCodeUSBCDCUnknownIncomingCategory
 	}

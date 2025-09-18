@@ -564,45 +564,29 @@ func (d *DefaultHandler) SendSetMotorSpeedStopMessage() tinygoerrors.ErrorCode {
 
 // SendSetMotorSpeedForwardMessage sends a set motor speed forward message to the USB CDC.
 //
-// Parameters:
-//
-// speed: The motor speed value to set (0 to max motor speed)
-//
 // Returns:
 //
 // An error if it fails to send the set motor speed forward message
-func (d *DefaultHandler) SendSetMotorSpeedForwardMessage(speed uint16) tinygoerrors.ErrorCode {
+func (d *DefaultHandler) SendSetMotorSpeedForwardMessage() tinygoerrors.ErrorCode {
 	// Create the set motor speed forward message
-	setMotorSpeedForwardMessage, err := NewOutgoingMessageFromUint16Data(
+	setMotorSpeedForwardMessage := NewOutgoingMessage(
 		OutgoingCategorySetMotorSpeedForward,
-		speed,
-		d.outgoingMessageBuffer[:Uint16BufferSize],
+		nil,
 	)
-	if err != tinygoerrors.ErrorCodeNil {
-		return err
-	}
 	return d.SendMessage(setMotorSpeedForwardMessage)
 }
 
 // SendSetMotorSpeedBackwardMessage sends a set motor speed backward message to the USB CDC.
 //
-// Parameters:
-//
-// speed: The motor speed value to set (0 to max motor speed)
-//
 // Returns:
 //
 // An error if it fails to send the set motor speed backward message
-func (d *DefaultHandler) SendSetMotorSpeedBackwardMessage(speed uint16) tinygoerrors.ErrorCode {
+func (d *DefaultHandler) SendSetMotorSpeedBackwardMessage() tinygoerrors.ErrorCode {
 	// Create the set motor speed backward message
-	setMotorSpeedBackwardMessage, err := NewOutgoingMessageFromUint16Data(
+	setMotorSpeedBackwardMessage := NewOutgoingMessage(
 		OutgoingCategorySetMotorSpeedBackward,
-		speed,
-		d.outgoingMessageBuffer[:Uint16BufferSize],
+		nil,
 	)
-	if err != tinygoerrors.ErrorCodeNil {
-		return err
-	}
 	return d.SendMessage(setMotorSpeedBackwardMessage)
 }
 
@@ -622,45 +606,29 @@ func (d *DefaultHandler) SendSetServoDirectionCenterMessage() tinygoerrors.Error
 
 // SendSetServoDirectionToLeftMessage sends a set servo direction to left message to the USB CDC.
 //
-// Parameters:
-//
-// angle: The servo direction angle to set (0 to max servo direction)
-//
 // Returns:
 //
 // An error if it fails to send the set servo direction to left message
-func (d *DefaultHandler) SendSetServoDirectionToLeftMessage(angle uint16) tinygoerrors.ErrorCode {
+func (d *DefaultHandler) SendSetServoDirectionToLeftMessage() tinygoerrors.ErrorCode {
 	// Create the set servo direction to left message
-	setServoDirectionToLeftMessage, err := NewOutgoingMessageFromUint16Data(
+	setServoDirectionToLeftMessage := NewOutgoingMessage(
 		OutgoingCategorySetServoDirectionToLeft,
-		angle,
-		d.outgoingMessageBuffer[:Uint16BufferSize],
+		nil,
 	)
-	if err != tinygoerrors.ErrorCodeNil {
-		return err
-	}
 	return d.SendMessage(setServoDirectionToLeftMessage)
 }
 
 // SendSetServoDirectionToRightMessage sends a set servo direction to right message to the USB CDC.
 //
-// Parameters:
-//
-// angle: The servo direction angle to set (0 to max servo direction)
-//
 // Returns:
 //
 // An error if it fails to send the set servo direction to right message
-func (d *DefaultHandler) SendSetServoDirectionToRightMessage(angle uint16) tinygoerrors.ErrorCode {
+func (d *DefaultHandler) SendSetServoDirectionToRightMessage() tinygoerrors.ErrorCode {
 	// Create the set servo direction to right message
-	setServoDirectionToRightMessage, err := NewOutgoingMessageFromUint16Data(
+	setServoDirectionToRightMessage := NewOutgoingMessage(
 		OutgoingCategorySetServoDirectionToRight,
-		angle,
-		d.outgoingMessageBuffer[:Uint16BufferSize],
+		nil,
 	)
-	if err != tinygoerrors.ErrorCodeNil {
-		return err
-	}
 	return d.SendMessage(setServoDirectionToRightMessage)
 }
 

@@ -51,14 +51,14 @@ func SetSpeedBasedOnReceivedMessage(
 			return err
 		}
 		// Send feedback message
-		return handler.SendSetMotorSpeedForwardMessage(motorSpeed)
+		return handler.SendSetMotorSpeedForwardMessage()
 	case internalusbcdc.IncomingCategoryMotorSpeedBackward:
 		// Set the motor speed
 		if err := ESCMotorHandler.SafeSetSpeedBackward(motorSpeed); err != tinygoerrors.ErrorCodeNil {
 			return err
 		}
 		// Send feedback message
-		return handler.SendSetMotorSpeedBackwardMessage(motorSpeed)
+		return handler.SendSetMotorSpeedBackwardMessage()
 	default:
 		return internalusbcdc.ErrorCodeUSBCDCUnknownIncomingCategory
 	}

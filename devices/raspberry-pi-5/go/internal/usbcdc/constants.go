@@ -39,7 +39,6 @@ const (
 	ErrorCodeUSBCDCStartNumber uint16 = 50
 )
 
-
 const (
 	ErrorCodeChallengeNilHandler tinygoerrors.ErrorCode = tinygoerrors.ErrorCode(iota + ErrorCodeChallengeStartNumber)
 	ErrorCodeChallengeNilObstaclesPullUpHandler
@@ -131,6 +130,12 @@ var (
 	// OutgoingMessagesChannelBufferSize is the size of the outgoing messages channel buffer
 	OutgoingMessagesChannelBufferSize = 100
 
+	// ConfirmationESCMotorMessagesBufferSize is the size of the confirmation ESC motor messages buffer
+	ConfirmationESCMotorMessagesBufferSize = 20
+
+	// ConfirmationServoMessagesBufferSize is the size of the confirmation servo messages buffer
+	ConfirmationServoMessagesBufferSize = 20
+
 	// OutgoingStopMessage is the outgoing stop message for USB-CDC communication
 	OutgoingStopMessage = NewOutgoingStatusMessage(OutgoingStatusStop)
 
@@ -142,10 +147,10 @@ var (
 
 	// QuaternionXIndex is the index for the quaternion X component
 	QuaternionXIndex = 0
-	
+
 	// QuaternionYIndex is the index for the quaternion Y component
 	QuaternionYIndex = 1
-	
+
 	// QuaternionZIndex is the index for the quaternion Z component
 	QuaternionZIndex = 2
 
@@ -157,7 +162,7 @@ var (
 
 	// EulerDegreesRollMinValue is the minimum value for the Euler degrees roll component
 	EulerDegreesRollMinValue = -180.0
-	
+
 	// EulerDegreesRollMaxValue is the maximum value for the Euler degrees roll component
 	EulerDegreesRollMaxValue = 180.0
 
@@ -248,11 +253,11 @@ var (
 		ErrorCodeUSBCDCNilIncomingCategory:                   "usb-cdc incoming category cannot be nil",
 		ErrorCodeUSBCDCUnknownIncomingCategory:               "usb-cdc unknown incoming category",
 		ErrorCodeUSBCDCInvalidMaxMessageDataLength:           "usb-cdc invalid max message data length",
-		ErrorCodeUSBCDCFailedToSendStartByte:            "usb-cdc failed to send start byte",
+		ErrorCodeUSBCDCFailedToSendStartByte:                 "usb-cdc failed to send start byte",
 		ErrorCodeUSBCDCFailedToSendOutgoingCategory:          "usb-cdc failed to send outgoing category",
-		ErrorCodeUSBCDCFailedToSendControlByte:          "usb-cdc failed to send control byte",
+		ErrorCodeUSBCDCFailedToSendControlByte:               "usb-cdc failed to send control byte",
 		ErrorCodeUSBCDCFailedToSendMessageContent:            "usb-cdc failed to send message content",
-		ErrorCodeUSBCDCFailedToSendEndByte:              "usb-cdc failed to send end byte",
+		ErrorCodeUSBCDCFailedToSendEndByte:                   "usb-cdc failed to send end byte",
 		ErrorCodeUSBCDCBufferTooShortForRawFloat64:           "usb-cdc buffer too short for raw float64",
 		ErrorCodeUSBCDCUnknownQuaternionIndex:                "usb-cdc unknown quaternion index",
 		ErrorCodeUSBCDCUnknownEulerDegreesIndex:              "usb-cdc unknown euler degrees index",
@@ -271,7 +276,7 @@ var (
 		ErrorCodeUSBCDCReadMessageTimeout:                    "usb-cdc read message timeout",
 		ErrorCodeUSBCDCReceivedUnexpectedConfirmationMessage: "usb-cdc received unexpected confirmation message",
 		ErrorCodeUSBCDCFailedToSendChecksumByte:              "usb-cdc failed to send checksum byte",
-		ErrorCodeUSBCDCInvalidChecksum:                        "usb-cdc invalid checksum",
+		ErrorCodeUSBCDCInvalidChecksum:                       "usb-cdc invalid checksum",
 		ErrorCodeUSBCDCReceivingMessageTimeoutReached:        "usb-cdc receiving message timeout reached",
 	}
 )
