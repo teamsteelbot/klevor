@@ -7,8 +7,8 @@ import (
 	"machine"
 
 	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal"
-	tinygopullup "github.com/ralvarezdev/tinygo-pullup"
 	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
+	tinygopullup "github.com/ralvarezdev/tinygo-pullup"
 )
 
 const (
@@ -36,7 +36,11 @@ func init() {
 		DefaultInterval,
 	)
 	if err != tinygoerrors.ErrorCodeNil {
-		internal.Logger.ErrorMessageWithErrorCode(failedToInitializeSwitchMessage, err, true)
+		internal.Logger.ErrorMessageWithErrorCode(
+			failedToInitializeSwitchMessage,
+			err,
+			true,
+		)
 		os.Exit(1)
 	}
 	SwitchHandler = switchHandler

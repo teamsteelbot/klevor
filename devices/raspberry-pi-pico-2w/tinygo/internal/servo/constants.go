@@ -1,13 +1,14 @@
 package servo
 
 import (
-	"machine"
 	"os"
+
+	"machine"
 
 	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal"
 	internalmovement "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/movement"
-	tinygoservo "github.com/ralvarezdev/tinygo-servo"
 	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
+	tinygoservo "github.com/ralvarezdev/tinygo-servo"
 )
 
 const (
@@ -34,7 +35,7 @@ var (
 	// ServoHandler is the default servo handler using the Raspberry Pi Pico 2W's PWM1 and GPIO2.
 	ServoHandler tinygoservo.Handler
 
-	 // failedToInitializeServoMessage is the message printed when servo initialization fails
+	// failedToInitializeServoMessage is the message printed when servo initialization fails
 	failedToInitializeServoMessage = []byte("Failed to initialize Servo Handler:")
 )
 
@@ -53,7 +54,11 @@ func init() {
 		nil, // internal.Logger
 	)
 	if err != tinygoerrors.ErrorCodeNil {
-		internal.Logger.ErrorMessageWithErrorCode(failedToInitializeServoMessage, err, true)
+		internal.Logger.ErrorMessageWithErrorCode(
+			failedToInitializeServoMessage,
+			err,
+			true,
+		)
 		os.Exit(1)
 	}
 	ServoHandler = servoHandler

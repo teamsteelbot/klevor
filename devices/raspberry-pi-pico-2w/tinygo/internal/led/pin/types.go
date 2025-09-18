@@ -84,7 +84,10 @@ func (h *DefaultHandler) Toggle() {
 // Returns:
 //
 // An error if the blink operation fails, otherwise nil.
-func (h *DefaultHandler) Blink(times int, delay time.Duration) tinygoerrors.ErrorCode {
+func (h *DefaultHandler) Blink(
+	times int,
+	delay time.Duration,
+) tinygoerrors.ErrorCode {
 	// Validate the number of times to blink
 	if times == 0 {
 		return tinygoerrors.ErrorCodeNil // No blinking needed

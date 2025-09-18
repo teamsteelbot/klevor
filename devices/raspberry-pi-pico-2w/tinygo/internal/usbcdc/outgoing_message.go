@@ -2,15 +2,15 @@ package usbcdc
 
 import (
 	internalchallenge "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/challenge"
-	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
 	tinygobuffers "github.com/ralvarezdev/tinygo-buffers"
+	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
 )
 
 type (
 	// OutgoingMessage is the struct to handle the messages sent to the Raspberry Pi 5
 	OutgoingMessage struct {
 		Category OutgoingCategory
-		Data []byte
+		Data     []byte
 	}
 )
 

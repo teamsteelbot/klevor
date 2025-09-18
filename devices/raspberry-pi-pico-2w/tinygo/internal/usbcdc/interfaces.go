@@ -10,7 +10,10 @@ type (
 	// Handler is the interface to manage the USB CDC connection.
 	Handler interface {
 		IsAvailableToRead() bool
-		ReadMessage(timeout time.Duration) (IncomingMessage, tinygoerrors.ErrorCode)
+		ReadMessage(timeout time.Duration) (
+			IncomingMessage,
+			tinygoerrors.ErrorCode,
+		)
 		SendMessage(message OutgoingMessage) tinygoerrors.ErrorCode
 		SendBNO08XQuaternionMessages(quaternion [4]float64) tinygoerrors.ErrorCode
 		SendBNO08XEulerDegreesMessages(eulerDegrees [3]float64) tinygoerrors.ErrorCode

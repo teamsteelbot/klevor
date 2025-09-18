@@ -73,7 +73,10 @@ func (i IncomingCategory) IsAMotorCategory() bool {
 // Returns:
 //
 // The IncomingCategory enum value, or an error if the key wasn't found for the given value
-func IncomingCategoryFromUint8(value uint8) (IncomingCategory, tinygoerrors.ErrorCode) {
+func IncomingCategoryFromUint8(value uint8) (
+	IncomingCategory,
+	tinygoerrors.ErrorCode,
+) {
 	switch IncomingCategory(value) {
 	case IncomingCategoryNil:
 		return IncomingCategoryNil, tinygoerrors.ErrorCodeNil

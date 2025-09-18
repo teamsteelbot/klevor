@@ -36,26 +36,26 @@ func init() {
 	// time.Sleep(5 * time.Second)
 
 	/*
-	// ----- UART Instance -----
+		// ----- UART Instance -----
 
-	// Initialize the BNO08x UART instance with default settings.
-	uart, err := tinygobno08x.NewUART(
-		machine.UART1,
-		machine.GPIO8,
-		machine.GPIO9,
-		machine.GPIO2,
-		machine.GPIO3,
-		machine.GPIO4,
-		PacketBuffer,
-		afterReset,
-		internal.Logger,
-		true,
-	)
-	if err != tinygoerrors.ErrorCodeNil {
-		internal.Logger.WarningMessageWithErrorCode(failedToInitializeBNO08xErrorMessage, err, true)
-		os.Exit(1)
-	}
-	UART = uart
+		// Initialize the BNO08x UART instance with default settings.
+		uart, err := tinygobno08x.NewUART(
+			machine.UART1,
+			machine.GPIO8,
+			machine.GPIO9,
+			machine.GPIO2,
+			machine.GPIO3,
+			machine.GPIO4,
+			PacketBuffer,
+			afterReset,
+			internal.Logger,
+			true,
+		)
+		if err != tinygoerrors.ErrorCodeNil {
+			internal.Logger.WarningMessageWithErrorCode(failedToInitializeBNO08xErrorMessage, err, true)
+			os.Exit(1)
+		}
+		UART = uart
 	*/
 
 	// ----- UART-RVC Instance -----
@@ -71,7 +71,11 @@ func init() {
 		nil, // internal.Logger
 	)
 	if err != tinygoerrors.ErrorCodeNil {
-		internal.Logger.WarningMessageWithErrorCode(failedToInitializeBNO08xErrorMessage, err, true)
+		internal.Logger.WarningMessageWithErrorCode(
+			failedToInitializeBNO08xErrorMessage,
+			err,
+			true,
+		)
 		os.Exit(1)
 	}
 	UARTRVC = uartRVC

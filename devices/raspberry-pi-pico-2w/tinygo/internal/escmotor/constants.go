@@ -7,8 +7,8 @@ import (
 
 	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal"
 	internalmovement "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/movement"
-	tinygoescmotor "github.com/ralvarezdev/tinygo-escmotor"
 	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
+	tinygoescmotor "github.com/ralvarezdev/tinygo-escmotor"
 )
 
 const (
@@ -58,7 +58,11 @@ func init() {
 		nil, // internal.Logger,
 	)
 	if err != tinygoerrors.ErrorCodeNil {
-		internal.Logger.ErrorMessageWithErrorCode(failedToInitializeEscMotorMessage, err, true)
+		internal.Logger.ErrorMessageWithErrorCode(
+			failedToInitializeEscMotorMessage,
+			err,
+			true,
+		)
 		os.Exit(1)
 	}
 	ESCMotorHandler = escMotorHandler

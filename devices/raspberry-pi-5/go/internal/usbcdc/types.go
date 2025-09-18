@@ -243,7 +243,11 @@ func (s *DefaultSender) IsClosed() bool {
 // Returns:
 //
 // A pointer to a DefaultHandler instance
-func NewDefaultHandler(baudRate int, logger goconcurrentlogger.Logger, debug bool) (*DefaultHandler, error) {
+func NewDefaultHandler(
+	baudRate int,
+	logger goconcurrentlogger.Logger,
+	debug bool,
+) (*DefaultHandler, error) {
 	// Check if the logger is nil
 	if logger == nil {
 		return nil, goconcurrentlogger.ErrNilLogger
@@ -291,7 +295,10 @@ func (h *DefaultHandler) runToWrap(ctx context.Context, stopFn func()) error {
 		h.debug,
 	)
 	if err != nil {
-		return fmt.Errorf("failed to create incoming messages logger producer: %w", err)
+		return fmt.Errorf(
+			"failed to create incoming messages logger producer: %w",
+			err,
+		)
 	}
 	h.incomingMessagesLoggerProducer = incomingMessagesLoggerProducer
 	defer h.incomingMessagesLoggerProducer.Close()
@@ -301,7 +308,10 @@ func (h *DefaultHandler) runToWrap(ctx context.Context, stopFn func()) error {
 		h.debug,
 	)
 	if err != nil {
-		return fmt.Errorf("failed to create outgoing messages logger producer: %w", err)
+		return fmt.Errorf(
+			"failed to create outgoing messages logger producer: %w",
+			err,
+		)
 	}
 	h.outgoingMessagesLoggerProducer = outgoingMessagesLoggerProducer
 	defer h.outgoingMessagesLoggerProducer.Close()
@@ -455,14 +465,20 @@ func (h *DefaultHandler) incomingMessagesHandler(
 
 				switch message.Category {
 				case IncomingCategoryError:
-					err := fmt.Errorf("received error message: %s", message.Data)
+					err := fmt.Errorf(
+						"received error message: %s",
+						message.Data,
+					)
 					h.incomingMessagesLoggerProducer.Error(err)
 					return err
 				case IncomingCategoryStatus:
 					// Check if it's a start message
 					status, err := IncomingStatusFromBytes(message.Data)
 					if err != nil {
-						return fmt.Errorf("failed to parse status message data: %w", err)
+						return fmt.Errorf(
+							"failed to parse status message data: %w",
+							err,
+						)
 					}
 
 					if status == IncomingStatusStart {
@@ -512,13 +528,24 @@ func (h *DefaultHandler) incomingMessagesHandler(
 
 				switch message.Category {
 				case IncomingCategoryError:
-					err := fmt.Errorf("received error message: %s", message.Data)
-					h.incomingMessagesLoggerProducer.Error(fmt.Errorf("Received error message: %w", err))
+					err := fmt.Errorf(
+						"received error message: %s",
+						message.Data,
+					)
+					h.incomingMessagesLoggerProducer.Error(
+						fmt.Errorf(
+							"Received error message: %w",
+							err,
+						),
+					)
 					return err
 				case IncomingCategoryChallenge:
 					challenge, err := internal.ChallengeFromBytes(message.Data)
 					if err != nil {
-						return fmt.Errorf("failed to parse challenge message data: %w", err)
+						return fmt.Errorf(
+							"failed to parse challenge message data: %w",
+							err,
+						)
 					}
 					h.receivedChallenge = challenge
 					h.incomingMessagesLoggerProducer.Info(
@@ -578,7 +605,10 @@ func (h *DefaultHandler) incomingMessagesHandler(
 					}
 
 					// Log the error message
-					err := fmt.Errorf("received error message: %s", errorCodeMessage)
+					err := fmt.Errorf(
+						"received error message: %s",
+						errorCodeMessage,
+					)
 					h.incomingMessagesLoggerProducer.Warning(err.Error())
 				case IncomingCategoryMaxMotorSpeedValue:
 					// Parse the max motor speed value
@@ -942,9 +972,15 @@ func (h *DefaultHandler) readIncomingMessages(
 	}
 
 	// Extract messages from the accumulated buffer
-	messages, err := NewIncomingMessagesFromBuffer(&h.accumulatedBuffer, h.incomingMessagesLoggerProducer)
+	messages, err := NewIncomingMessagesFromBuffer(
+		&h.accumulatedBuffer,
+		h.incomingMessagesLoggerProducer,
+	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to extract incoming messages from buffer: %w", err)
+		return nil, fmt.Errorf(
+			"failed to extract incoming messages from buffer: %w",
+			err,
+		)
 	}
 
 	return messages, nil
@@ -1312,6 +1348,8 @@ func (h *DefaultHandler) ReceivedInitializationMessage() bool {
 	defer h.mutex.Unlock()
 	return h.receivedInitializationMessage
 }
+
+// WaitFor
 
 // ReceivedStartMessage returns true if the start message has been received.
 //

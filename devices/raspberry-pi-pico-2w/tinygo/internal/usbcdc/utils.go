@@ -1,4 +1,4 @@
-package usbcdc 
+package usbcdc
 
 // CalculateChecksum calculates the checksum for a message based on its category and data bytes.
 //

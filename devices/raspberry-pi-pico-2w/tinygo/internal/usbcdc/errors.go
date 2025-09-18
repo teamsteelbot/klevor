@@ -36,7 +36,7 @@ const (
 	ErrorCodeUSBCDCFailedToSendInitializationMessage
 	ErrorCodeUSBCDCInvalidIncomingMessageDataLength
 	ErrorCodeUSBCDCInvalidOutgoingMessageDataLength
-	ErrorCodeUSBCDCReadMessageTimeout	
+	ErrorCodeUSBCDCReadMessageTimeout
 	ErrorCodeUSBCDCReceivedUnexpectedConfirmationMessage
 	ErrorCodeUSBCDCFailedToSendChecksumByte
 	ErrorCodeUSBCDCInvalidChecksum

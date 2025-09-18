@@ -7,16 +7,16 @@ import (
 
 	internalchallenge "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/challenge"
 	internalled "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/led"
-	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
 	tinygobno08x "github.com/ralvarezdev/tinygo-bno08x"
+	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
 )
 
 type (
 	// DefaultHandler is the default implementation of the Handler interface.
 	DefaultHandler struct {
-		challengeHandler internalchallenge.Handler
-		ledHandler       internalled.Handler
-		serialer         machine.Serialer
+		challengeHandler      internalchallenge.Handler
+		ledHandler            internalled.Handler
+		serialer              machine.Serialer
 		incomingMessageBuffer []byte
 		outgoingMessageBuffer []byte
 	}
@@ -62,9 +62,9 @@ func NewDefaultHandler(
 
 	// Return the new DefaultHandler instance
 	return &DefaultHandler{
-		challengeHandler: challengeHandler,
-		ledHandler:       ledHandler,
-		serialer:         machine.USBCDC,
+		challengeHandler:      challengeHandler,
+		ledHandler:            ledHandler,
+		serialer:              machine.USBCDC,
 		incomingMessageBuffer: make([]byte, MaxIncomingMessageDataLength),
 		outgoingMessageBuffer: make([]byte, MaxOutgoingMessageDataLength),
 	}, tinygoerrors.ErrorCodeNil
@@ -88,7 +88,10 @@ func (d *DefaultHandler) IsAvailableToRead() bool {
 // Returns:
 //
 // The byte read and an error if it fails to read the byte
-func (d *DefaultHandler) readByte(timeout time.Duration) (byte, tinygoerrors.ErrorCode) {
+func (d *DefaultHandler) readByte(timeout time.Duration) (
+	byte,
+	tinygoerrors.ErrorCode,
+) {
 	startTime := time.Now()
 	for time.Since(startTime) < timeout {
 		if d.serialer.Buffered() > 0 {
@@ -111,12 +114,15 @@ func (d *DefaultHandler) readByte(timeout time.Duration) (byte, tinygoerrors.Err
 // Returns:
 //
 // The incoming message and an error if it fails to read the message
-func (d *DefaultHandler) ReadMessage(timeout time.Duration) (IncomingMessage, tinygoerrors.ErrorCode) {
+func (d *DefaultHandler) ReadMessage(timeout time.Duration) (
+	IncomingMessage,
+	tinygoerrors.ErrorCode,
+) {
 	// If no messages are received, turn off the LED
 	if d.serialer.Buffered() == 0 && d.ledHandler.IsOn() {
 		d.ledHandler.SetOff()
 	}
-	
+
 	startTime := time.Now()
 	for time.Since(startTime) < timeout {
 		// If there are no bytes available, continue waiting
@@ -147,7 +153,7 @@ func (d *DefaultHandler) ReadMessage(timeout time.Duration) (IncomingMessage, ti
 				return IncomingMessage{}, err
 			}
 		}
-		
+
 		// Convert the byte to IncomingCategory
 		category, err := IncomingCategoryFromUint8(c)
 		if err != tinygoerrors.ErrorCodeNil {
@@ -204,7 +210,7 @@ func (d *DefaultHandler) ReadMessage(timeout time.Duration) (IncomingMessage, ti
 
 		// Compare the received checksum with the calculated checksum
 		if receivedChecksum != calculatedChecksum {
-			return IncomingMessage{}, ErrorCodeUSBCDCInvalidChecksum	
+			return IncomingMessage{}, ErrorCodeUSBCDCInvalidChecksum
 		}
 
 		// Create the IncomingMessage
@@ -242,7 +248,7 @@ func (d *DefaultHandler) SendMessage(message OutgoingMessage) tinygoerrors.Error
 	if message.Data == nil {
 		dataLength = 0
 	} else {
-			dataLength = len(message.Data)
+		dataLength = len(message.Data)
 		if dataLength > MaxOutgoingMessageDataLength {
 			return ErrorCodeUSBCDCInvalidOutgoingMessageDataLength
 		}
@@ -280,7 +286,7 @@ func (d *DefaultHandler) SendMessage(message OutgoingMessage) tinygoerrors.Error
 	checksum := CalculateChecksum(byte(message.Category), message.Data)
 
 	// Send the checksum byte
-	if err := d.serialer.WriteByte(checksum); err != nil {	
+	if err := d.serialer.WriteByte(checksum); err != nil {
 		return ErrorCodeUSBCDCFailedToSendChecksumByte
 	}
 

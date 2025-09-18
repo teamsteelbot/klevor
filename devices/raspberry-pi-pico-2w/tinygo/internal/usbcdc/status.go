@@ -35,7 +35,10 @@ const (
 // Returns:
 //
 // The OutgoingStatus enum value, or an error if the key wasn't found for the given value
-func OutgoingStatusFromUint8(value uint8) (OutgoingStatus, tinygoerrors.ErrorCode) {
+func OutgoingStatusFromUint8(value uint8) (
+	OutgoingStatus,
+	tinygoerrors.ErrorCode,
+) {
 	switch OutgoingStatus(value) {
 	case OutgoingStatusNil:
 		return OutgoingStatusNil, tinygoerrors.ErrorCodeNil
@@ -59,7 +62,10 @@ func OutgoingStatusFromUint8(value uint8) (OutgoingStatus, tinygoerrors.ErrorCod
 // Returns:
 //
 // The IncomingStatus enum value, or an error if the key wasn't found for the given value
-func IncomingStatusFromUint8(value uint8) (IncomingStatus, tinygoerrors.ErrorCode) {
+func IncomingStatusFromUint8(value uint8) (
+	IncomingStatus,
+	tinygoerrors.ErrorCode,
+) {
 	switch IncomingStatus(value) {
 	case IncomingStatusNil:
 		return IncomingStatusNil, tinygoerrors.ErrorCodeNil

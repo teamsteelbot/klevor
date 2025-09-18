@@ -25,9 +25,17 @@ var (
 func centerOnError(err tinygoerrors.ErrorCode) {
 	if err != tinygoerrors.ErrorCodeNil {
 		if centerErr := internalservo.ServoHandler.SetAngleToCenter(); centerErr != tinygoerrors.ErrorCodeNil {
-			internal.Logger.ErrorMessageWithErrorCode(failedToServoAngleToCenterMessage, centerErr, true)
+			internal.Logger.ErrorMessageWithErrorCode(
+				failedToServoAngleToCenterMessage,
+				centerErr,
+				true,
+			)
 		}
-		internal.Logger.ErrorMessageWithErrorCode(failedToSetServoAngleMessage, err, true)
+		internal.Logger.ErrorMessageWithErrorCode(
+			failedToSetServoAngleMessage,
+			err,
+			true,
+		)
 		return
 	}
 }
@@ -41,9 +49,11 @@ func main() {
 		internalledonboard.OnBoardHandler.SetOn()
 
 		// Start testing the servo to the right
-		centerOnError(internalservo.ServoHandler.SafeSetAngleToRight(
-			internalservo.MaxAngle,
-		))
+		centerOnError(
+			internalservo.ServoHandler.SafeSetAngleToRight(
+				internalservo.MaxAngle,
+			),
+		)
 		time.Sleep(1 * time.Second)
 
 		// Center the servo for a while
@@ -51,9 +61,11 @@ func main() {
 		time.Sleep(1 * time.Second)
 
 		// Start testing the servo to the left
-		centerOnError(internalservo.ServoHandler.SafeSetAngleToLeft(
-			internalservo.MaxAngle,
-		))
+		centerOnError(
+			internalservo.ServoHandler.SafeSetAngleToLeft(
+				internalservo.MaxAngle,
+			),
+		)
 		time.Sleep(1 * time.Second)
 
 		// Center the servo

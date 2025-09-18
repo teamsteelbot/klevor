@@ -67,9 +67,9 @@ func bno08xUpdateLoop() {
 	for {
 		// Update the BNO08X sensor data
 		/*
-		if err := internalbno08x.UARTRVC.Update(); err != tinygoerrors.ErrorCodeNil {
-			internalusbcdc.USBCDCHandler.SendErrorMessage(err)
-		}
+			if err := internalbno08x.UARTRVC.Update(); err != tinygoerrors.ErrorCodeNil {
+				internalusbcdc.USBCDCHandler.SendErrorMessage(err)
+			}
 		*/
 		internalbno08x.UARTRVC.Update()
 
@@ -106,7 +106,11 @@ func main() {
 
 		// Wait for switch press
 		if err := internalswitch.SwitchHandler.Wait(switchOnEvent); err != tinygoerrors.ErrorCodeNil {
-			internal.Logger.ErrorMessageWithErrorCode(failedToWaitForSwitchPressMessage, err, true)
+			internal.Logger.ErrorMessageWithErrorCode(
+				failedToWaitForSwitchPressMessage,
+				err,
+				true,
+			)
 			os.Exit(1)
 		}
 
@@ -172,11 +176,17 @@ func main() {
 					internalusbcdc.USBCDCHandler.SendErrorMessage(err)
 				}
 			case internalusbcdc.IncomingCategoryServoDirectionToLeft, internalusbcdc.IncomingCategoryServoDirectionToRight:
-				if err := internalservo.SetDirectionBasedOnReceivedMessage(internalusbcdc.USBCDCHandler, newMessage); err != tinygoerrors.ErrorCodeNil {
+				if err := internalservo.SetDirectionBasedOnReceivedMessage(
+					internalusbcdc.USBCDCHandler,
+					newMessage,
+				); err != tinygoerrors.ErrorCodeNil {
 					internalusbcdc.USBCDCHandler.SendErrorMessage(err)
 				}
 			case internalusbcdc.IncomingCategoryMotorSpeedForward, internalusbcdc.IncomingCategoryMotorSpeedBackward:
-				if err := internalescmotor.SetSpeedBasedOnReceivedMessage(internalusbcdc.USBCDCHandler, newMessage); err != tinygoerrors.ErrorCodeNil {
+				if err := internalescmotor.SetSpeedBasedOnReceivedMessage(
+					internalusbcdc.USBCDCHandler,
+					newMessage,
+				); err != tinygoerrors.ErrorCodeNil {
 					internalusbcdc.USBCDCHandler.SendErrorMessage(err)
 				}
 			case internalusbcdc.IncomingCategoryStatus:

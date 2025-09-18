@@ -40,7 +40,7 @@ func (o OutgoingCategory) DataLength() (int, tinygoerrors.ErrorCode) {
 	switch o {
 	case OutgoingCategoryNil:
 		return 0, ErrorCodeUSBCDCNilOutgoingCategory
-		case OutgoingCategorySetMotorSpeedStop, OutgoingCategorySetServoDirectionCenter:
+	case OutgoingCategorySetMotorSpeedStop, OutgoingCategorySetServoDirectionCenter:
 		return 0, tinygoerrors.ErrorCodeNil
 	case OutgoingCategoryStatus, OutgoingCategoryChallenge:
 		return 1, tinygoerrors.ErrorCodeNil
@@ -62,7 +62,10 @@ func (o OutgoingCategory) DataLength() (int, tinygoerrors.ErrorCode) {
 // Returns:
 //
 // The OutgoingCategory enum value, or an error if the key wasn't found for the given value
-func OutgoingCategoryFromUint8(value uint8) (OutgoingCategory, tinygoerrors.ErrorCode) {
+func OutgoingCategoryFromUint8(value uint8) (
+	OutgoingCategory,
+	tinygoerrors.ErrorCode,
+) {
 	switch OutgoingCategory(value) {
 	case OutgoingCategoryNil:
 		return OutgoingCategoryNil, tinygoerrors.ErrorCodeNil
@@ -101,8 +104,8 @@ func OutgoingCategoryFromUint8(value uint8) (OutgoingCategory, tinygoerrors.Erro
 	case OutgoingCategorySetServoDirectionToLeft:
 		return OutgoingCategorySetServoDirectionToLeft, tinygoerrors.ErrorCodeNil
 	case OutgoingCategorySetServoDirectionToRight:
-		return OutgoingCategorySetServoDirectionToRight, tinygoerrors.ErrorCodeNil	
+		return OutgoingCategorySetServoDirectionToRight, tinygoerrors.ErrorCodeNil
 	default:
 		return OutgoingCategoryNil, ErrorCodeUSBCDCUnknownOutgoingCategory
-	}		
+	}
 }

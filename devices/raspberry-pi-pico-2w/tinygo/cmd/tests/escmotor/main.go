@@ -25,9 +25,17 @@ var (
 func stopOnError(err tinygoerrors.ErrorCode) {
 	if err != tinygoerrors.ErrorCodeNil {
 		if stopErr := internalescmotor.ESCMotorHandler.Stop(); stopErr != tinygoerrors.ErrorCodeNil {
-			internal.Logger.ErrorMessageWithErrorCode(failedToStopMotorMessage, stopErr, true)
+			internal.Logger.ErrorMessageWithErrorCode(
+				failedToStopMotorMessage,
+				stopErr,
+				true,
+			)
 		}
-		internal.Logger.ErrorMessageWithErrorCode(failedToSetMotorSpeedMessage, err, true)
+		internal.Logger.ErrorMessageWithErrorCode(
+			failedToSetMotorSpeedMessage,
+			err,
+			true,
+		)
 		return
 	}
 }
@@ -43,9 +51,11 @@ func main() {
 		// Start testing the motor forward
 		var speed uint16
 		for speed = 0; speed <= 11; speed += 1 {
-			stopOnError(internalescmotor.ESCMotorHandler.SafeSetSpeedForward(
-				speed * 10,
-			))
+			stopOnError(
+				internalescmotor.ESCMotorHandler.SafeSetSpeedForward(
+					speed * 10,
+				),
+			)
 		}
 
 		// Stop the motor for a while
@@ -53,9 +63,11 @@ func main() {
 
 		// Start testing the motor backward
 		for speed = 0; speed <= 11; speed += 1 {
-			stopOnError(internalescmotor.ESCMotorHandler.SafeSetSpeedBackward(
-				speed * 10,
-			))
+			stopOnError(
+				internalescmotor.ESCMotorHandler.SafeSetSpeedBackward(
+					speed * 10,
+				),
+			)
 		}
 
 		// Stop the motor

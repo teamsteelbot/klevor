@@ -7,8 +7,8 @@ import (
 	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal"
 	internalbno08x "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/bno08x"
 	tinygobno08x "github.com/ralvarezdev/tinygo-bno08x"
-	tinygologger "github.com/ralvarezdev/tinygo-logger"
 	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
+	tinygologger "github.com/ralvarezdev/tinygo-logger"
 )
 
 const (
@@ -66,31 +66,35 @@ func main() {
 
 	for {
 		/*
-		if internalbno08x.UART != nil {
-			// Update quaternion
-			internalbno08x.UART.Update()
+			if internalbno08x.UART != nil {
+				// Update quaternion
+				internalbno08x.UART.Update()
 
-			// Get the quaternion
-			q := internalbno08x.UART.GetQuaternion()
-			x := q[tinygobno08x.QuaternionXIndex]
-			y := q[tinygobno08x.QuaternionYIndex]
-			z := q[tinygobno08x.QuaternionZIndex]
-			w := q[tinygobno08x.QuaternionWIndex]
+				// Get the quaternion
+				q := internalbno08x.UART.GetQuaternion()
+				x := q[tinygobno08x.QuaternionXIndex]
+				y := q[tinygobno08x.QuaternionYIndex]
+				z := q[tinygobno08x.QuaternionZIndex]
+				w := q[tinygobno08x.QuaternionWIndex]
 
-			// Log the quaternion values
-			internal.Logger.AddMessage(quaternionHeader, true)
-			internal.Logger.AddMessageWithFloat64(quaternionXPrefix, x, true, true)
-			internal.Logger.AddMessageWithFloat64(quaternionYPrefix, y, true, true)
-			internal.Logger.AddMessageWithFloat64(quaternionZPrefix, z, true, true)
-			internal.Logger.AddMessageWithFloat64(quaternionWPrefix, w, true, true)
-			internal.Logger.Debug()
-		}
+				// Log the quaternion values
+				internal.Logger.AddMessage(quaternionHeader, true)
+				internal.Logger.AddMessageWithFloat64(quaternionXPrefix, x, true, true)
+				internal.Logger.AddMessageWithFloat64(quaternionYPrefix, y, true, true)
+				internal.Logger.AddMessageWithFloat64(quaternionZPrefix, z, true, true)
+				internal.Logger.AddMessageWithFloat64(quaternionWPrefix, w, true, true)
+				internal.Logger.Debug()
+			}
 		*/
 
 		if internalbno08x.UARTRVC != nil {
 			// Update euler degrees
 			if err := internalbno08x.UARTRVC.Update(); err != tinygoerrors.ErrorCodeNil {
-				internal.Logger.WarningMessageWithErrorCode(failedToUpdateBNO08XMessage, err, true)
+				internal.Logger.WarningMessageWithErrorCode(
+					failedToUpdateBNO08XMessage,
+					err,
+					true,
+				)
 			}
 
 			// Get the euler degrees
@@ -101,9 +105,27 @@ func main() {
 
 			// Log the euler degrees values
 			internal.Logger.AddMessage(eulerHeader, true)
-			internal.Logger.AddMessageWithFloat64(yawDegreesPrefix, yaw, Float64Precision, true, true)
-			internal.Logger.AddMessageWithFloat64(pitchDegreesPrefix, pitch, Float64Precision, true, true)
-			internal.Logger.AddMessageWithFloat64(rollDegreesPrefix, roll, Float64Precision, true, true)
+			internal.Logger.AddMessageWithFloat64(
+				yawDegreesPrefix,
+				yaw,
+				Float64Precision,
+				true,
+				true,
+			)
+			internal.Logger.AddMessageWithFloat64(
+				pitchDegreesPrefix,
+				pitch,
+				Float64Precision,
+				true,
+				true,
+			)
+			internal.Logger.AddMessageWithFloat64(
+				rollDegreesPrefix,
+				roll,
+				Float64Precision,
+				true,
+				true,
+			)
 			internal.Logger.Debug()
 		}
 

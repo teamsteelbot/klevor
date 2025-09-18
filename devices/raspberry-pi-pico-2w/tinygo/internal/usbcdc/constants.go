@@ -57,7 +57,11 @@ func init() {
 		internalledonboard.OnBoardHandler,
 	)
 	if err != tinygoerrors.ErrorCodeNil {
-		internal.Logger.ErrorMessageWithErrorCode(failedToInitializeUSBMessage, err, true)
+		internal.Logger.ErrorMessageWithErrorCode(
+			failedToInitializeUSBMessage,
+			err,
+			true,
+		)
 		os.Exit(1)
 	}
 	USBCDCHandler = usbCDCHandler

@@ -1,8 +1,8 @@
 package _switch
 
 import (
-	tinygopullup "github.com/ralvarezdev/tinygo-pullup"
 	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
+	tinygopullup "github.com/ralvarezdev/tinygo-pullup"
 )
 
 type (
