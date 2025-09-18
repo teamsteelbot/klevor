@@ -2,10 +2,9 @@ package escmotor
 
 import (
 	internalusbcdc "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc"
-	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
 	tinygobuffers "github.com/ralvarezdev/tinygo-buffers"
+	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
 )
-
 
 // SetSpeedBasedOnReceivedMessage sets the motor speed based on the received message
 //
@@ -17,7 +16,15 @@ import (
 // Returns:
 //
 // An error if the motor speed could not be set, otherwise nil
-func SetSpeedBasedOnReceivedMessage(handler internalusbcdc.Handler, message internalusbcdc.IncomingMessage) tinygoerrors.ErrorCode {
+func SetSpeedBasedOnReceivedMessage(
+	handler internalusbcdc.Handler,
+	message internalusbcdc.IncomingMessage,
+) tinygoerrors.ErrorCode {
+	// Check if the USB-CDC handler is nil
+	if handler == nil {
+		return internalusbcdc.ErrorCodeUSBCDCNilHandler
+	}
+
 	// Check if the motor speed should be retrieved from the message
 	var motorSpeed uint16
 	if message.Category != internalusbcdc.IncomingCategoryMotorSpeedStop {
@@ -32,29 +39,26 @@ func SetSpeedBasedOnReceivedMessage(handler internalusbcdc.Handler, message inte
 	// Check the motor speed category
 	switch message.Category {
 	case internalusbcdc.IncomingCategoryMotorSpeedStop:
-		// Send feedback message
-		if handler != nil {
-			handler.SendSetMotorSpeedStopMessage()
-		}
-
 		// Stop the motor
-		return ESCMotorHandler.Stop()
+		if err := ESCMotorHandler.Stop(); err != tinygoerrors.ErrorCodeNil {
+			return err
+		}
+		// Send feedback message
+		return handler.SendSetMotorSpeedStopMessage()
 	case internalusbcdc.IncomingCategoryMotorSpeedForward:
-		// Send feedback message
-		if handler != nil {
-			handler.SendSetMotorSpeedForwardMessage(motorSpeed)
-		}
-
 		// Set the motor speed
-		return ESCMotorHandler.SafeSetSpeedForward(motorSpeed)
+		if err := ESCMotorHandler.SafeSetSpeedForward(motorSpeed); err != tinygoerrors.ErrorCodeNil {
+			return err
+		}
+		// Send feedback message
+		return handler.SendSetMotorSpeedForwardMessage(motorSpeed)
 	case internalusbcdc.IncomingCategoryMotorSpeedBackward:
-		// Send feedback message
-		if handler != nil {
-			handler.SendSetMotorSpeedBackwardMessage(motorSpeed)
-		}
-
 		// Set the motor speed
-		return ESCMotorHandler.SafeSetSpeedBackward(motorSpeed)
+		if err := ESCMotorHandler.SafeSetSpeedBackward(motorSpeed); err != tinygoerrors.ErrorCodeNil {
+			return err
+		}
+		// Send feedback message
+		return handler.SendSetMotorSpeedBackwardMessage(motorSpeed)
 	default:
 		return internalusbcdc.ErrorCodeUSBCDCUnknownIncomingCategory
 	}
