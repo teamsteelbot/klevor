@@ -43,18 +43,18 @@ var (
 
 	// OutgoingStatuses maps a given uint8 value to its OutgoingStatus enum
 	OutgoingStatuses = map[uint8]OutgoingStatus{
-		uint8(OutgoingStatusNil): OutgoingStatusNil,
-		uint8(OutgoingStatusOK):  OutgoingStatusOK,
+		uint8(OutgoingStatusNil):       OutgoingStatusNil,
+		uint8(OutgoingStatusOK):        OutgoingStatusOK,
 		uint8(OutgoingStatusHeartbeat): OutgoingStatusHeartbeat,
-		uint8(OutgoingStatusStop):    OutgoingStatusStop,
+		uint8(OutgoingStatusStop):      OutgoingStatusStop,
 	}
 
 	// IncomingStatuses maps a given uint8 value to its IncomingStatus enum
 	IncomingStatuses = map[uint8]IncomingStatus{
-		uint8(IncomingStatusNil):      IncomingStatusNil,
+		uint8(IncomingStatusNil):       IncomingStatusNil,
 		uint8(IncomingStatusHeartbeat): IncomingStatusHeartbeat,
-		uint8(IncomingStatusOK):       IncomingStatusOK,
-		uint8(IncomingStatusStart):    IncomingStatusStart,
+		uint8(IncomingStatusOK):        IncomingStatusOK,
+		uint8(IncomingStatusStart):     IncomingStatusStart,
 	}
 )
 

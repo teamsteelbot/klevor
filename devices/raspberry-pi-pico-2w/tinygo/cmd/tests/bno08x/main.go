@@ -2,7 +2,6 @@ package main
 
 import (
 	"os"
-	"time"
 
 	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal"
 	internalbno08x "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/bno08x"
@@ -12,9 +11,6 @@ import (
 )
 
 const (
-	// IntervalDuration is the duration of the main loop interval
-	IntervalDuration = 100 * time.Millisecond
-
 	// Float64Precision defines the precision for float64 values
 	Float64Precision = 3
 )
@@ -52,9 +48,6 @@ var (
 
 	// rollDegreesPrefix is the prefix for the roll degrees value in the debug output
 	rollDegreesPrefix = []byte("\tRoll Degrees:")
-
-	// printNegativeNumber is a message to test printing negative numbers
-	printNegativeNumber = []byte("Printing a negative number:")
 )
 
 func main() {

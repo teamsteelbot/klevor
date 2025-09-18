@@ -29,75 +29,74 @@ const (
 	IncomingCategorySetServoDirectionCenter
 	IncomingCategorySetServoDirectionToLeft
 	IncomingCategorySetServoDirectionToRight
-		
 )
 
 var (
 	// IncomingCategoryNames maps a given IncomingCategory to its string name
 	IncomingCategoryNames = map[IncomingCategory]string{
-		IncomingCategoryChallenge:              "challenge",
-		IncomingCategoryStatus:                 "status",
-		IncomingCategoryError:                  "error",
-		IncomingCategoryMaxMotorSpeedValue:     "max_motor_speed_value",
-		IncomingCategoryMaxServoDirectionValue: "max_servo_direction_value",
-		IncomingCategoryQuaternionX:            "quaternion_x",
-		IncomingCategoryQuaternionY:            "quaternion_y",
-		IncomingCategoryQuaternionZ:            "quaternion_z",
-		IncomingCategoryQuaternionW:            "quaternion_w",
-		IncomingCategoryEulerDegreesYaw:       "euler_degrees_yaw",
-		IncomingCategoryEulerDegreesPitch:     "euler_degrees_pitch",
-		IncomingCategoryEulerDegreesRoll:      "euler_degrees_roll",
-		IncomingCategorySetMotorSpeedStop:     "set_motor_speed_stop",
-		IncomingCategorySetMotorSpeedForward:  "set_motor_speed_forward",
-		IncomingCategorySetMotorSpeedBackward: "set_motor_speed_backward",
-		IncomingCategorySetServoDirectionCenter: "set_servo_direction_center",
-		IncomingCategorySetServoDirectionToLeft: "set_servo_direction_to_left",
+		IncomingCategoryChallenge:                "challenge",
+		IncomingCategoryStatus:                   "status",
+		IncomingCategoryError:                    "error",
+		IncomingCategoryMaxMotorSpeedValue:       "max_motor_speed_value",
+		IncomingCategoryMaxServoDirectionValue:   "max_servo_direction_value",
+		IncomingCategoryQuaternionX:              "quaternion_x",
+		IncomingCategoryQuaternionY:              "quaternion_y",
+		IncomingCategoryQuaternionZ:              "quaternion_z",
+		IncomingCategoryQuaternionW:              "quaternion_w",
+		IncomingCategoryEulerDegreesYaw:          "euler_degrees_yaw",
+		IncomingCategoryEulerDegreesPitch:        "euler_degrees_pitch",
+		IncomingCategoryEulerDegreesRoll:         "euler_degrees_roll",
+		IncomingCategorySetMotorSpeedStop:        "set_motor_speed_stop",
+		IncomingCategorySetMotorSpeedForward:     "set_motor_speed_forward",
+		IncomingCategorySetMotorSpeedBackward:    "set_motor_speed_backward",
+		IncomingCategorySetServoDirectionCenter:  "set_servo_direction_center",
+		IncomingCategorySetServoDirectionToLeft:  "set_servo_direction_to_left",
 		IncomingCategorySetServoDirectionToRight: "set_servo_direction_to_right",
 	}
 
 	// IncomingCategories maps a given uint8 value to its IncomingCategory enum
 	IncomingCategories = map[uint8]IncomingCategory{
-		uint8(IncomingCategoryNil):           IncomingCategoryNil,
-		uint8(IncomingCategoryChallenge):     IncomingCategoryChallenge,
-		uint8(IncomingCategoryStatus):        IncomingCategoryStatus,
-		uint8(IncomingCategoryError):         IncomingCategoryError,
-		uint8(IncomingCategoryMaxMotorSpeedValue):    IncomingCategoryMaxMotorSpeedValue,
-		uint8(IncomingCategoryMaxServoDirectionValue): IncomingCategoryMaxServoDirectionValue,
-		uint8(IncomingCategoryQuaternionX):   IncomingCategoryQuaternionX,
-		uint8(IncomingCategoryQuaternionY):   IncomingCategoryQuaternionY,
-		uint8(IncomingCategoryQuaternionZ):   IncomingCategoryQuaternionZ,
-		uint8(IncomingCategoryQuaternionW):   IncomingCategoryQuaternionW,
-		uint8(IncomingCategoryEulerDegreesYaw):      IncomingCategoryEulerDegreesYaw,
-		uint8(IncomingCategoryEulerDegreesPitch):    IncomingCategoryEulerDegreesPitch,
-		uint8(IncomingCategoryEulerDegreesRoll):     IncomingCategoryEulerDegreesRoll,
-		uint8(IncomingCategorySetMotorSpeedStop):    IncomingCategorySetMotorSpeedStop,	
-		uint8(IncomingCategorySetMotorSpeedForward): IncomingCategorySetMotorSpeedForward,
-		uint8(IncomingCategorySetMotorSpeedBackward):IncomingCategorySetMotorSpeedBackward,
-		uint8(IncomingCategorySetServoDirectionCenter): IncomingCategorySetServoDirectionCenter,
-		uint8(IncomingCategorySetServoDirectionToLeft): IncomingCategorySetServoDirectionToLeft,
+		uint8(IncomingCategoryNil):                      IncomingCategoryNil,
+		uint8(IncomingCategoryChallenge):                IncomingCategoryChallenge,
+		uint8(IncomingCategoryStatus):                   IncomingCategoryStatus,
+		uint8(IncomingCategoryError):                    IncomingCategoryError,
+		uint8(IncomingCategoryMaxMotorSpeedValue):       IncomingCategoryMaxMotorSpeedValue,
+		uint8(IncomingCategoryMaxServoDirectionValue):   IncomingCategoryMaxServoDirectionValue,
+		uint8(IncomingCategoryQuaternionX):              IncomingCategoryQuaternionX,
+		uint8(IncomingCategoryQuaternionY):              IncomingCategoryQuaternionY,
+		uint8(IncomingCategoryQuaternionZ):              IncomingCategoryQuaternionZ,
+		uint8(IncomingCategoryQuaternionW):              IncomingCategoryQuaternionW,
+		uint8(IncomingCategoryEulerDegreesYaw):          IncomingCategoryEulerDegreesYaw,
+		uint8(IncomingCategoryEulerDegreesPitch):        IncomingCategoryEulerDegreesPitch,
+		uint8(IncomingCategoryEulerDegreesRoll):         IncomingCategoryEulerDegreesRoll,
+		uint8(IncomingCategorySetMotorSpeedStop):        IncomingCategorySetMotorSpeedStop,
+		uint8(IncomingCategorySetMotorSpeedForward):     IncomingCategorySetMotorSpeedForward,
+		uint8(IncomingCategorySetMotorSpeedBackward):    IncomingCategorySetMotorSpeedBackward,
+		uint8(IncomingCategorySetServoDirectionCenter):  IncomingCategorySetServoDirectionCenter,
+		uint8(IncomingCategorySetServoDirectionToLeft):  IncomingCategorySetServoDirectionToLeft,
 		uint8(IncomingCategorySetServoDirectionToRight): IncomingCategorySetServoDirectionToRight,
 	}
 
 	// IncomingCategoryDataLengths maps a given IncomingCategory to its data length in bytes
 	IncomingCategoryDataLengths = map[IncomingCategory]int{
-		IncomingCategoryNil:                    0,
-		IncomingCategoryChallenge:              1,
-		IncomingCategoryStatus:                 1,
-		IncomingCategoryError:                  2,
-		IncomingCategoryMaxMotorSpeedValue:     2,
-		IncomingCategoryMaxServoDirectionValue: 2,
-		IncomingCategoryQuaternionX:            8,
-		IncomingCategoryQuaternionY:            8,
-		IncomingCategoryQuaternionZ:            8,
-		IncomingCategoryQuaternionW:            8,
-		IncomingCategoryEulerDegreesYaw:       8,
-		IncomingCategoryEulerDegreesPitch:     8,
-		IncomingCategoryEulerDegreesRoll:      8,
-		IncomingCategorySetMotorSpeedStop:     0,
-		IncomingCategorySetMotorSpeedForward:  2,
-		IncomingCategorySetMotorSpeedBackward: 2,
-		IncomingCategorySetServoDirectionCenter: 0,
-		IncomingCategorySetServoDirectionToLeft: 2,
+		IncomingCategoryNil:                      0,
+		IncomingCategoryChallenge:                1,
+		IncomingCategoryStatus:                   1,
+		IncomingCategoryError:                    2,
+		IncomingCategoryMaxMotorSpeedValue:       2,
+		IncomingCategoryMaxServoDirectionValue:   2,
+		IncomingCategoryQuaternionX:              8,
+		IncomingCategoryQuaternionY:              8,
+		IncomingCategoryQuaternionZ:              8,
+		IncomingCategoryQuaternionW:              8,
+		IncomingCategoryEulerDegreesYaw:          8,
+		IncomingCategoryEulerDegreesPitch:        8,
+		IncomingCategoryEulerDegreesRoll:         8,
+		IncomingCategorySetMotorSpeedStop:        0,
+		IncomingCategorySetMotorSpeedForward:     2,
+		IncomingCategorySetMotorSpeedBackward:    2,
+		IncomingCategorySetServoDirectionCenter:  0,
+		IncomingCategorySetServoDirectionToLeft:  2,
 		IncomingCategorySetServoDirectionToRight: 2,
 	}
 )
@@ -145,7 +144,10 @@ func (i IncomingCategory) DataLength() (int, error) {
 func IncomingCategoryFromUint8(value uint8) (IncomingCategory, error) {
 	category, ok := IncomingCategories[value]
 	if !ok {
-		return IncomingCategoryNil, fmt.Errorf(ErrUnknownIncomingCategory, value)
+		return IncomingCategoryNil, fmt.Errorf(
+			ErrUnknownIncomingCategory,
+			value,
+		)
 	}
 	return category, nil
 }

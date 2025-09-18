@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"math"
 
+	goconcurrentlogger "github.com/ralvarezdev/go-concurrent-logger"
 	"github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal"
 	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
-	goconcurrentlogger "github.com/ralvarezdev/go-concurrent-logger"
 )
 
 type (
@@ -105,7 +105,10 @@ func NewIncomingChallengeMessage(
 // Returns:
 //
 // A slice of IncomingMessage instances, or an error if the buffer is invalid
-func NewIncomingMessagesFromBuffer(buffer *[]byte, logger goconcurrentlogger.LoggerProducer) ([]*IncomingMessage, error) {
+func NewIncomingMessagesFromBuffer(
+	buffer *[]byte,
+	logger goconcurrentlogger.LoggerProducer,
+) ([]*IncomingMessage, error) {
 	// Check if the buffer is nil
 	if buffer == nil {
 		return nil, ErrNilBuffer
@@ -118,7 +121,7 @@ func NewIncomingMessagesFromBuffer(buffer *[]byte, logger goconcurrentlogger.Log
 		nextStart := bytes.IndexByte(*buffer, StartAndEndByte)
 
 		// If no start byte is found, exit the loop
-		if nextStart == -1 {				
+		if nextStart == -1 {
 			break
 		}
 
@@ -136,7 +139,6 @@ func NewIncomingMessagesFromBuffer(buffer *[]byte, logger goconcurrentlogger.Log
 			*buffer = (*buffer)[1:]
 		}
 
-
 		// Get the category of the message
 		categoryUint8 := (*buffer)[1]
 		category, err := IncomingCategoryFromUint8(categoryUint8)
@@ -144,10 +146,13 @@ func NewIncomingMessagesFromBuffer(buffer *[]byte, logger goconcurrentlogger.Log
 			// Log the error and continue to the next potential message
 			if logger != nil {
 				logger.Warning(
-					fmt.Sprintf("An error occurred while parsing incoming messages: %v", err),
+					fmt.Sprintf(
+						"An error occurred while parsing incoming messages: %v",
+						err,
+					),
 				)
-			}	 
-			
+			}
+
 			// Skip to next start byte
 			*buffer = (*buffer)[1:]
 			continue
@@ -162,13 +167,16 @@ func NewIncomingMessagesFromBuffer(buffer *[]byte, logger goconcurrentlogger.Log
 			// Log the error and continue to the next potential message
 			if logger != nil {
 				logger.Warning(
-					fmt.Sprintf("An error occurred while parsing incoming messages: %v", err),
+					fmt.Sprintf(
+						"An error occurred while parsing incoming messages: %v",
+						err,
+					),
 				)
 			}
-			
+
 			// Skip to next start byte
 			*buffer = (*buffer)[2:]
-			continue 
+			continue
 		}
 
 		// Get the data length of the message
@@ -184,7 +192,7 @@ func NewIncomingMessagesFromBuffer(buffer *[]byte, logger goconcurrentlogger.Log
 					),
 				)
 			}
-			
+
 			// Skip to next start byte
 			*buffer = (*buffer)[2:]
 			continue
@@ -228,7 +236,7 @@ func NewIncomingMessagesFromBuffer(buffer *[]byte, logger goconcurrentlogger.Log
 		}
 
 		// Check if it contains the checksum byte and the end byte
-		if len(*buffer) < maxIndex + 1 {
+		if len(*buffer) < maxIndex+1 {
 			break
 		}
 
@@ -246,7 +254,7 @@ func NewIncomingMessagesFromBuffer(buffer *[]byte, logger goconcurrentlogger.Log
 					),
 				)
 			}
-			
+
 			// Skip to next start byte
 			*buffer = (*buffer)[maxIndex+1:]
 			continue
@@ -256,7 +264,7 @@ func NewIncomingMessagesFromBuffer(buffer *[]byte, logger goconcurrentlogger.Log
 		messages = append(messages, NewIncomingMessage(category, data))
 
 		// Update the buffer to remove processed messages
-		if len(*buffer) == maxIndex + 1 {
+		if len(*buffer) == maxIndex+1 {
 			*buffer = (*buffer)[:0]
 		} else {
 			*buffer = (*buffer)[maxIndex+1:]
@@ -361,7 +369,7 @@ func (msg *IncomingMessage) StringToPrint() string {
 			ConvertBytesSliceToHexString(msg.Data),
 		)
 	}
-	
+
 	// Return the formatted string with details
 	return fmt.Sprintf(
 		"IncomingMessage{Category: [0x%02X] (%s), Data: [%s] (%s)}",
@@ -431,4 +439,3 @@ func (msg *IncomingMessage) IsAEulerDegreesMessage() bool {
 		msg.Category == IncomingCategoryEulerDegreesRoll ||
 		msg.Category == IncomingCategoryEulerDegreesYaw
 }
-

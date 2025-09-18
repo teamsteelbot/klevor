@@ -15,8 +15,16 @@ import (
 func main() {
 	// Define optional flags
 	clipDebug := flag.Bool("clip-debug", false, "Enable CLIP debug logging")
-	rplidarDebug := flag.Bool("rplidar-debug", false, "Enable RPLiDAR debug logging")
-	usbCDCDebug := flag.Bool("usb-cdc-debug", false, "Enable USB-CDC debug logging")
+	rplidarDebug := flag.Bool(
+		"rplidar-debug",
+		false,
+		"Enable RPLiDAR debug logging",
+	)
+	usbCDCDebug := flag.Bool(
+		"usb-cdc-debug",
+		false,
+		"Enable USB-CDC debug logging",
+	)
 	pilotDebug := flag.Bool("pilot-debug", false, "Enable Pilot debug logging")
 
 	// Define required flags
@@ -36,9 +44,9 @@ func main() {
 
 	// Enforce required flags
 	/*
-	if *generateClipEmbeddingsPath == "" {
-		log.Fatal("missing required flag: --generate-clip-embeddings-path")
-	}
+		if *generateClipEmbeddingsPath == "" {
+			log.Fatal("missing required flag: --generate-clip-embeddings-path")
+		}
 	*/
 	if *runClipPath == "" {
 		log.Fatal("missing required flag: --run-clip-path")
@@ -74,7 +82,10 @@ func main() {
 	}
 
 	// Initialize the Slamtec C1 handler
-	rplidarHandler, err := internalrplidar.NewSlamtecC1Handler(logger, *rplidarDebug)
+	rplidarHandler, err := internalrplidar.NewSlamtecC1Handler(
+		logger,
+		*rplidarDebug,
+	)
 	if err != nil {
 		log.Fatalf("failed to initialize rplidar handler: %v", err)
 	}

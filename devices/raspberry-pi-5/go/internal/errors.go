@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	ErrUnknownChallenge          = "unknown challenge with uint8 value: %#02X"
+	ErrUnknownChallenge = "unknown challenge with uint8 value: %#02X"
 )
 
 var (

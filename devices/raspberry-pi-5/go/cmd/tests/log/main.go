@@ -5,11 +5,11 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
-	"log"
 
 	"golang.org/x/sync/errgroup"
 

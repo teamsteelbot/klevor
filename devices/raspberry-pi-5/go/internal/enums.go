@@ -26,9 +26,9 @@ var (
 
 	// Challenges maps a given uint8 value to its Challenge enum
 	Challenges = map[uint8]Challenge{
-		uint8(ChallengeNil):                 ChallengeNil,
-		uint8(ChallengeWithObstacles):       ChallengeWithObstacles,
-		uint8(ChallengeWithoutObstacles):    ChallengeWithoutObstacles,
+		uint8(ChallengeNil):                     ChallengeNil,
+		uint8(ChallengeWithObstacles):           ChallengeWithObstacles,
+		uint8(ChallengeWithoutObstacles):        ChallengeWithoutObstacles,
 		uint8(ChallengeWithObstaclesAndParking): ChallengeWithObstaclesAndParking,
 	}
 )
@@ -79,7 +79,7 @@ func ChallengeFromUint8(value uint8) (Challenge, error) {
 // The Challenge enum value, or an error if the key wasn't found for the given value
 func ChallengeFromBytes(data []byte) (Challenge, error) {
 	if len(data) == 0 {
-		return ChallengeNil, ErrNilChallenge 
+		return ChallengeNil, ErrNilChallenge
 	}
 	return ChallengeFromUint8(data[0])
 }

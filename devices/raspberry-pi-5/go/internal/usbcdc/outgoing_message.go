@@ -2,8 +2,8 @@ package usbcdc
 
 import (
 	"bytes"
-	"fmt"
 	"encoding/binary"
+	"fmt"
 )
 
 type (
@@ -133,7 +133,10 @@ func (msg *OutgoingMessage) StringToPrint() string {
 		OutgoingCategoryServoDirectionToLeft,
 		OutgoingCategoryServoDirectionToRight:
 		if len(msg.Data) != 2 {
-			dataDetails = fmt.Sprintf("invalid length: %d, expected: 2", len(msg.Data))
+			dataDetails = fmt.Sprintf(
+				"invalid length: %d, expected: 2",
+				len(msg.Data),
+			)
 			break
 		}
 

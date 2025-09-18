@@ -5,8 +5,8 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"os"
 	"log"
+	"os"
 	"os/signal"
 	"syscall"
 
@@ -17,7 +17,11 @@ import (
 
 func main() {
 	// Define flags
-	usbCDCDebug := flag.Bool("usbcdc-debug", false, "Enable USB-CDC debug logging")
+	usbCDCDebug := flag.Bool(
+		"usbcdc-debug",
+		false,
+		"Enable USB-CDC debug logging",
+	)
 	flag.Parse()
 
 	// Initialize the logger

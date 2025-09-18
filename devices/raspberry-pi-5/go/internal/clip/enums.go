@@ -1,4 +1,4 @@
-package clip 
+package clip
 
 import (
 	"fmt"
@@ -40,7 +40,6 @@ var (
 		NegativeLabelBlackBlock: "black block",
 	}
 )
-
 
 // String returns the string representation of the PositiveLabel
 //

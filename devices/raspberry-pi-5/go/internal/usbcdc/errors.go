@@ -10,7 +10,7 @@ const (
 	ErrUnknownIncomingStatus                = "unknown incoming status: 0x%02X"
 	ErrUnknownOutgoingStatus                = "unknown outgoing status: 0x%02X"
 	ErrDataLengthMismatchForOutgoingMessage = "data length mismatch for outgoing message of category 0x%02X: expected %d, got %d"
-	ErrFailedToSendMessage                   = "failed to send message of category 0x%02X: %v"
+	ErrFailedToSendMessage                  = "failed to send message of category 0x%02X: %v"
 )
 
 var (

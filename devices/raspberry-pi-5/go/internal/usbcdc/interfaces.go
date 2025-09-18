@@ -25,7 +25,7 @@ type (
 		ReceivedBNO08XQuaternionX() float64
 		ReceivedBNO08XQuaternionY() float64
 		ReceivedBNO08XQuaternionZ() float64
-		ReceivedBNO08XQuaternionW() float64	
+		ReceivedBNO08XQuaternionW() float64
 		WaitForChallenge(ctx context.Context) (internal.Challenge, error)
 		WaitForMaxMotorSpeedValue(ctx context.Context) (uint16, error)
 		WaitForMaxServoDirectionValue(ctx context.Context) (uint16, error)

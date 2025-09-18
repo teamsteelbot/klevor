@@ -93,7 +93,7 @@ func main() {
 		stop()
 		fmt.Printf("Failed to generate CLIP embeddings: %v\n", err)
 		fmt.Println("Stopping all goroutines...")
-		
+
 		// Wait for the logger goroutine to finish
 		if err = g.Wait(); err != nil {
 			_, _ = fmt.Fprintf(os.Stderr, "error: %v\n", err)

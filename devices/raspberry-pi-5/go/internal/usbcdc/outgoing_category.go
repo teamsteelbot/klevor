@@ -35,32 +35,32 @@ var (
 		OutgoingCategoryServoDirectionToRight:     "servo_direction_to_right",
 		OutgoingCategoryGetMaxServoDirectionValue: "get_max_servo_direction_value",
 	}
-	
+
 	// OutgoingCategories maps a given uint8 value to its OutgoingCategory enum
 	OutgoingCategories = map[uint8]OutgoingCategory{
-		uint8(OutgoingCategoryNil):  OutgoingCategoryNil,
-		uint8(OutgoingCategoryStatus):  OutgoingCategoryStatus,
-		uint8(OutgoingCategoryMotorSpeedStop):  OutgoingCategoryMotorSpeedStop,
-		uint8(OutgoingCategoryMotorSpeedForward):  OutgoingCategoryMotorSpeedForward,
-		uint8(OutgoingCategoryMotorSpeedBackward):  OutgoingCategoryMotorSpeedBackward,
-		uint8(OutgoingCategoryGetMaxMotorSpeedValue):  OutgoingCategoryGetMaxMotorSpeedValue,
-		uint8(OutgoingCategoryServoDirectionCenter):  OutgoingCategoryServoDirectionCenter,
-		uint8(OutgoingCategoryServoDirectionToLeft):  OutgoingCategoryServoDirectionToLeft,
-		uint8(OutgoingCategoryServoDirectionToRight):  OutgoingCategoryServoDirectionToRight,
-		uint8(OutgoingCategoryGetMaxServoDirectionValue):  OutgoingCategoryGetMaxServoDirectionValue,
+		uint8(OutgoingCategoryNil):                       OutgoingCategoryNil,
+		uint8(OutgoingCategoryStatus):                    OutgoingCategoryStatus,
+		uint8(OutgoingCategoryMotorSpeedStop):            OutgoingCategoryMotorSpeedStop,
+		uint8(OutgoingCategoryMotorSpeedForward):         OutgoingCategoryMotorSpeedForward,
+		uint8(OutgoingCategoryMotorSpeedBackward):        OutgoingCategoryMotorSpeedBackward,
+		uint8(OutgoingCategoryGetMaxMotorSpeedValue):     OutgoingCategoryGetMaxMotorSpeedValue,
+		uint8(OutgoingCategoryServoDirectionCenter):      OutgoingCategoryServoDirectionCenter,
+		uint8(OutgoingCategoryServoDirectionToLeft):      OutgoingCategoryServoDirectionToLeft,
+		uint8(OutgoingCategoryServoDirectionToRight):     OutgoingCategoryServoDirectionToRight,
+		uint8(OutgoingCategoryGetMaxServoDirectionValue): OutgoingCategoryGetMaxServoDirectionValue,
 	}
 
 	// OutgoingCategoryDataLengths maps a given OutgoingCategory to its data length in bytes
 	OutgoingCategoryDataLengths = map[OutgoingCategory]int{
-		OutgoingCategoryNil:                    0,
-		OutgoingCategoryStatus:                 1,
-		OutgoingCategoryMotorSpeedStop:        0,
-		OutgoingCategoryMotorSpeedForward:     2,
-		OutgoingCategoryMotorSpeedBackward:    2,
-		OutgoingCategoryGetMaxMotorSpeedValue: 0,
-		OutgoingCategoryServoDirectionCenter:  0,
-		OutgoingCategoryServoDirectionToLeft:  2,
-		OutgoingCategoryServoDirectionToRight: 2,
+		OutgoingCategoryNil:                       0,
+		OutgoingCategoryStatus:                    1,
+		OutgoingCategoryMotorSpeedStop:            0,
+		OutgoingCategoryMotorSpeedForward:         2,
+		OutgoingCategoryMotorSpeedBackward:        2,
+		OutgoingCategoryGetMaxMotorSpeedValue:     0,
+		OutgoingCategoryServoDirectionCenter:      0,
+		OutgoingCategoryServoDirectionToLeft:      2,
+		OutgoingCategoryServoDirectionToRight:     2,
 		OutgoingCategoryGetMaxServoDirectionValue: 0,
 	}
 )
@@ -130,7 +130,10 @@ func (o OutgoingCategory) IsAMotorCategory() bool {
 func OutgoingCategoryFromUint8(value uint8) (OutgoingCategory, error) {
 	category, ok := OutgoingCategories[value]
 	if !ok {
-		return OutgoingCategoryNil, fmt.Errorf(ErrUnknownOutgoingCategory, value)
+		return OutgoingCategoryNil, fmt.Errorf(
+			ErrUnknownOutgoingCategory,
+			value,
+		)
 	}
 	return category, nil
 }

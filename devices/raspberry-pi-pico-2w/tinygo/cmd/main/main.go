@@ -21,19 +21,16 @@ const (
 	receivingMessageTimeout = 5 * time.Second
 
 	// sendBNO08XDataInterval defines the interval to send BNO08X data.
-	sendBNO08XDataInterval = 100 * time.Millisecond
+	sendBNO08XDataInterval = 50 * time.Millisecond
 
 	// noMessageReceivedDelay is the time to sleep if no message is received.
-	noMessageReceivedDelay = 20 * time.Millisecond
+	noMessageReceivedDelay = 10 * time.Millisecond
 
 	// readMessageTimeout defines the timeout duration for reading messages.
 	readMessageTimeout = 5 * time.Second
 )
 
 var (
-	// failedToSendErrorMessage is the message printed when sending an error message fails.
-	failedToSendErrorMessage = []byte("Failed to send error message via USB-CDC:")
-
 	// failedToWaitForSwitchPressMessage is the message printed when waiting for switch press fails.
 	failedToWaitForSwitchPressMessage = []byte("Failed to wait for switch press:")
 
@@ -114,7 +111,7 @@ func main() {
 			os.Exit(1)
 		}
 
-		// Add goroutine forsending the BNO08X updates
+		// Add goroutine for sending the BNO08X updates
 		go bno08xUpdateLoop()
 
 		// Reset the last message received time

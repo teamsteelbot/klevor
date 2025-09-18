@@ -47,7 +47,7 @@ type (
 		motorDirection          MotorDirection
 		motorSpeed              uint16
 		lastMotorSpeedUpdate    time.Time
-		lastServoAngleUpdate time.Time
+		lastServoAngleUpdate    time.Time
 		rplidarMeasures         *[360]*gorplidarsdkhandler.Measure
 		rplidarAverageDistances map[gorplidarsdkhandler.CardinalDirection]float64
 		clipClassification      *gohailocliphandler.Classification
@@ -56,6 +56,7 @@ type (
 		rplidarTurnsCounter     int
 		maxMotorSpeedValue      uint16
 		maxServoDirectionValue  uint16
+		cycleWg                 errgroup.Group
 		debug                   bool
 	}
 )
@@ -148,7 +149,7 @@ func (h *DefaultHandler) setMotorSpeed(
 
 	// Update the last update time
 	h.lastMotorSpeedUpdate = time.Now()
-	
+
 	// Send the outgoing message to set the motor speed
 	if direction == MotorDirectionStop || speed == 0 {
 		h.handlerLoggerProducer.Info(
@@ -164,10 +165,13 @@ func (h *DefaultHandler) setMotorSpeed(
 		h.handlerLoggerProducer.Info(
 			"Motor direction changed, stopping the motor first",
 		)
-		if err := h.usbCDCSender.SendMessage(	
+		if err := h.usbCDCSender.SendMessage(
 			internalusbcdc.OutgoingMotorSpeedStopMessage,
 		); err != nil {
-			return fmt.Errorf("failed to stop motor before changing direction: %w", err)
+			return fmt.Errorf(
+				"failed to stop motor before changing direction: %w",
+				err,
+			)
 		}
 
 		// Wait a short moment to ensure the motor stops before changing direction
@@ -549,7 +553,10 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 		default:
 			// Update the RPLiDAR average distances
 			if err := h.updateRPLiDARAverageDistances(); err != nil {
-				return fmt.Errorf("failed to update RPLiDAR average distances: %w", err)
+				return fmt.Errorf(
+					"failed to update RPLiDAR average distances: %w",
+					err,
+				)
 			}
 			westAverageDistance = h.getAverageDirectionDistance(gorplidarsdkhandler.CardinalDirectionWest)
 			eastAverageDistance = h.getAverageDirectionDistance(gorplidarsdkhandler.CardinalDirectionEast)
@@ -616,7 +623,10 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 					default:
 						// Update the RPLiDAR average distances
 						if err := h.updateRPLiDARAverageDistances(); err != nil {
-							return fmt.Errorf("failed to update RPLiDAR average distances: %w", err)
+							return fmt.Errorf(
+								"failed to update RPLiDAR average distances: %w",
+								err,
+							)
 						}
 						northAverageDistance = h.getAverageDirectionDistance(gorplidarsdkhandler.CardinalDirectionNorth)
 						northNortheastAverageDistance = h.getAverageDirectionDistance(gorplidarsdkhandler.CardinalDirectionNorthNortheast)
@@ -735,7 +745,10 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 					default:
 						// Update the RPLiDAR average distances
 						if err := h.updateRPLiDARAverageDistances(); err != nil {
-							return fmt.Errorf("failed to update RPLiDAR average distances: %w", err)
+							return fmt.Errorf(
+								"failed to update RPLiDAR average distances: %w",
+								err,
+							)
 						}
 						northAverageDistance = h.getAverageDirectionDistance(gorplidarsdkhandler.CardinalDirectionNorth)
 
