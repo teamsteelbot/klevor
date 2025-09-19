@@ -418,36 +418,6 @@ func (h *DefaultHandler) incomingMessagesHandler(
 	ctx context.Context,
 	port serial.Port,
 ) error {
-	// Received initialization message
-	h.incomingMessagesLoggerProducer.Info("Waiting for initialization message...")
-	for !h.receivedInitializationMessage {
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		default:
-			// Read data from the port
-			if err := h.readFromPort(port); err != nil {
-				return err
-			}
-
-			// Process the data read
-			for i, b := range h.accumulatedBuffer {
-				if b == StartAndEndByte {
-					h.receivedInitializationMessage = true
-					h.incomingMessagesLoggerProducer.Info("Received initialization message")
-
-					// Clear the accumulated buffer
-					if len(h.accumulatedBuffer) > i+1 {
-						h.accumulatedBuffer = h.accumulatedBuffer[i+1:]
-					} else {
-						h.accumulatedBuffer = h.accumulatedBuffer[:0]
-					}
-					break
-				}
-			}
-		}
-	}
-
 	// Waiting for start message
 	h.incomingMessagesLoggerProducer.Info("Waiting for start message...")
 	for !h.receivedStartMessage {
@@ -477,15 +447,7 @@ func (h *DefaultHandler) incomingMessagesHandler(
 					return err
 				case IncomingCategoryStatus:
 					// Check if it's a start message
-					status, err := IncomingStatusFromBytes(message.Data)
-					if err != nil {
-						return fmt.Errorf(
-							"failed to parse status message data: %w",
-							err,
-						)
-					}
-
-					if status == IncomingStatusStart {
+					if message.IsStatusStartMessage() {
 						h.receivedStartMessage = true
 						h.incomingMessagesLoggerProducer.Info("Received start message")
 
@@ -543,6 +505,15 @@ func (h *DefaultHandler) incomingMessagesHandler(
 						),
 					)
 					return err
+				case IncomingCategoryStatus:
+					// Check if it's a start message
+					if message.IsStatusStartMessage() {
+						// Resend a confirmation message
+						h.outgoingMessagesCh <- OutgoingOKMessage
+
+						// Log the confirmation message sent
+						h.outgoingMessagesLoggerProducer.Info("Sent start confirmation message again")
+					}
 				case IncomingCategoryChallenge:
 					challenge, err := internal.ChallengeFromBytes(message.Data)
 					if err != nil {
@@ -614,6 +585,12 @@ func (h *DefaultHandler) incomingMessagesHandler(
 						errorCodeMessage,
 					)
 					h.incomingMessagesLoggerProducer.Warning(err.Error())
+				case IncomingCategoryChallenge:
+					// Resend a confirmation message
+					h.outgoingMessagesCh <- OutgoingOKMessage
+
+					// Log the confirmation message sent
+					h.outgoingMessagesLoggerProducer.Info("Sent challenge confirmation message again")
 				case IncomingCategoryMaxMotorSpeedValue:
 					// Parse the max motor speed value
 					maxMotorSpeed := binary.BigEndian.Uint16(message.Data[:2])
@@ -733,50 +710,50 @@ func (h *DefaultHandler) incomingMessagesHandler(
 				case IncomingCategoryMotorSpeedStart:
 					// Log the received message
 					/*
-					if h.incomingMessagesLoggerProducer.IsDebug() {
-						h.incomingMessagesLoggerProducer.Debug(
-							"Received motor speed start message",
-						)
-					}
+						if h.incomingMessagesLoggerProducer.IsDebug() {
+							h.incomingMessagesLoggerProducer.Debug(
+								"Received motor speed start message",
+							)
+						}
 					*/
 					h.incomingMessagesLoggerProducer.Info(
-							"Received motor speed start message",
-						)
+						"Received motor speed start message",
+					)
 					h.motorSpeedStartMessagesCh <- struct{}{}
 				case IncomingCategoryMotorSpeedEnd:
 					// Log the received message
 					/*
-					if h.incomingMessagesLoggerProducer.IsDebug() {
-						h.incomingMessagesLoggerProducer.Debug(
-							"Received motor speed end message",
-						)
-					}
+						if h.incomingMessagesLoggerProducer.IsDebug() {
+							h.incomingMessagesLoggerProducer.Debug(
+								"Received motor speed end message",
+							)
+						}
 					*/
 					h.incomingMessagesLoggerProducer.Info(
-							"Received motor speed end message",
-						)
+						"Received motor speed end message",
+					)
 					h.motorSpeedEndMessagesCh <- struct{}{}
 				case IncomingCategoryServoAngleStart:
 					// Log the received message
 					/*
-					if h.incomingMessagesLoggerProducer.IsDebug() {
-						h.incomingMessagesLoggerProducer.Debug(
-							"Received servo angle start message",
-						)
-					}
-						*/
+						if h.incomingMessagesLoggerProducer.IsDebug() {
+							h.incomingMessagesLoggerProducer.Debug(
+								"Received servo angle start message",
+							)
+						}
+					*/
 					h.incomingMessagesLoggerProducer.Info(
-							"Received servo angle start message",
-						)
+						"Received servo angle start message",
+					)
 					h.servoAngleStartMessagesCh <- struct{}{}
 				case IncomingCategoryServoAngleEnd:
 					// Log the received message
 					/*
-					if h.incomingMessagesLoggerProducer.IsDebug() {
-						h.incomingMessagesLoggerProducer.Debug(
-							"Received servo angle end message",
-						)
-					}
+						if h.incomingMessagesLoggerProducer.IsDebug() {
+							h.incomingMessagesLoggerProducer.Debug(
+								"Received servo angle end message",
+							)
+						}
 					*/
 					h.incomingMessagesLoggerProducer.Info(
 						"Received servo angle end message",

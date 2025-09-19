@@ -89,7 +89,6 @@ const (
 	ErrorCodeUSBCDCReadByteTimeout
 	ErrorCodeUSBCDCFailedReadingFromSerial
 	ErrorCodeUSBCDCFailedToConfigureUSBCDC
-	ErrorCodeUSBCDCFailedToSendInitializationMessage
 	ErrorCodeUSBCDCInvalidIncomingMessageDataLength
 	ErrorCodeUSBCDCInvalidOutgoingMessageDataLength
 	ErrorCodeUSBCDCReadMessageTimeout
@@ -261,7 +260,6 @@ var (
 		ErrorCodeUSBCDCReadByteTimeout:                       "usb-cdc read byte timeout",
 		ErrorCodeUSBCDCFailedReadingFromSerial:               "usb-cdc failed reading from serial",
 		ErrorCodeUSBCDCFailedToConfigureUSBCDC:               "usb-cdc failed to configure",
-		ErrorCodeUSBCDCFailedToSendInitializationMessage:     "usb-cdc failed to send initialization message",
 		ErrorCodeUSBCDCInvalidIncomingMessageDataLength:      "usb-cdc invalid incoming message data length",
 		ErrorCodeUSBCDCInvalidOutgoingMessageDataLength:      "usb-cdc invalid outgoing message data length",
 		ErrorCodeUSBCDCReadMessageTimeout:                    "usb-cdc read message timeout",

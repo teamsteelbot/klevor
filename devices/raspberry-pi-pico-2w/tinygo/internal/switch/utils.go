@@ -22,33 +22,35 @@ func SwitchOnEventGenerator(
 ) func() tinygoerrors.ErrorCode {
 	return func() tinygoerrors.ErrorCode {
 		var err tinygoerrors.ErrorCode
-		for _ = range InitializationAttempts {
-			// Send initialization message
-			if err = usbCDChandler.SendInitializationMessage(); err != tinygoerrors.ErrorCodeNil {
-				continue
-			}
 
+		// Send start messages multiple times to ensure the host receives it
+		for _ = range InitializationAttempts {
 			// Send start message
 			if err = usbCDChandler.SendStartMessage(); err != tinygoerrors.ErrorCodeNil {
 				continue
 			}
+		}
+		if err != tinygoerrors.ErrorCodeNil {
+			return err
+		}
 
-			// Send challenge message
+		// Send challenge messages multiple times to ensure the host receives it
+		for _ = range InitializationAttempts {
 			if err = usbCDChandler.SendChallengeMessage(); err != tinygoerrors.ErrorCodeNil {
 				continue
 			}
-
-			// Blink the LED if provided
-			if ledHandler != nil {
-				if err = ledHandler.Blink(
-					internalled.DefaultBlinkTimes,
-					internalled.DefaultBlinkDelay,
-				); err != tinygoerrors.ErrorCodeNil {
-					continue
-				}
-			}
-			return tinygoerrors.ErrorCodeNil
 		}
-		return err
+		if err != tinygoerrors.ErrorCodeNil {
+			return err
+		}
+
+		// Blink the LED if provided
+		if ledHandler != nil {
+			ledHandler.Blink(
+				internalled.DefaultBlinkTimes,
+				internalled.DefaultBlinkDelay,
+			)
+		}
+		return tinygoerrors.ErrorCodeNil
 	}
 }

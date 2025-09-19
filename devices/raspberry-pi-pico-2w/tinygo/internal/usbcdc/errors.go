@@ -33,7 +33,6 @@ const (
 	ErrorCodeUSBCDCReadByteTimeout
 	ErrorCodeUSBCDCFailedReadingFromSerial
 	ErrorCodeUSBCDCFailedToConfigureUSBCDC
-	ErrorCodeUSBCDCFailedToSendInitializationMessage
 	ErrorCodeUSBCDCInvalidIncomingMessageDataLength
 	ErrorCodeUSBCDCInvalidOutgoingMessageDataLength
 	ErrorCodeUSBCDCReadMessageTimeout

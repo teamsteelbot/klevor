@@ -662,6 +662,7 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 			northNorthwestAverageDistance = h.getAverageDirectionDistance(gorplidarsdkhandler.CardinalDirectionNorthNorthwest)
 
 			// Log the average distances
+			/*
 			if h.handlerLoggerProducer.IsDebug() {
 				h.handlerLoggerProducer.Debug(
 					fmt.Sprintf(
@@ -674,6 +675,17 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 					),
 				)
 			}
+			*/
+			h.handlerLoggerProducer.Info(
+					fmt.Sprintf(
+						"W: %f, N-NW: %f, N: %f, N-NE: %f, E: %f",
+						westAverageDistance,
+						northNorthwestAverageDistance,
+						northAverageDistance,
+						northNortheastAverageDistance,
+						eastAverageDistance,
+					),
+				)
 
 			// Check if one of them is below the minimum valid distance
 			if westAverageDistance < MinimumValidDistance || eastAverageDistance < MinimumValidDistance || northAverageDistance < MinimumValidDistance || northNortheastAverageDistance < MinimumValidDistance || northNorthwestAverageDistance < MinimumValidDistance {

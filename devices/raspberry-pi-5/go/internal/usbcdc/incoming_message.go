@@ -439,3 +439,12 @@ func (msg *IncomingMessage) IsAEulerDegreesMessage() bool {
 		msg.Category == IncomingCategoryEulerDegreesRoll ||
 		msg.Category == IncomingCategoryEulerDegreesYaw
 }
+
+// IsStatusStartMessage checks if the IncomingMessage is a status start message
+//
+// Returns:
+//
+// True if the message is a status start message, otherwise False
+func (msg *IncomingMessage) IsStatusStartMessage() bool {
+	return msg.Category == IncomingCategoryStatus && len(msg.Data) == 1 && msg.Data[0] == uint8(IncomingStatusStart)
+}

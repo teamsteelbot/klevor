@@ -301,19 +301,6 @@ func (d *DefaultHandler) SendMessage(message OutgoingMessage) tinygoerrors.Error
 	return tinygoerrors.ErrorCodeNil
 }
 
-// SendInitializationMessage sends an initialization message to the USB CDC.
-//
-// Returns:
-//
-// An error if it fails to send the initialization message
-func (d *DefaultHandler) SendInitializationMessage() tinygoerrors.ErrorCode {
-	// Send the start character message to indicate initialization
-	if err := d.serialer.WriteByte(StartAndEndByte); err != nil {
-		return ErrorCodeUSBCDCFailedToSendInitializationMessage
-	}
-	return tinygoerrors.ErrorCodeNil
-}
-
 // SendBNO08XQuaternionMessages sends BNO08X quaternion messages to the USB CDC.
 //
 // Parameters:

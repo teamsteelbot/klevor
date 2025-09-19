@@ -17,7 +17,6 @@ type (
 		SendMessage(message OutgoingMessage) tinygoerrors.ErrorCode
 		SendBNO08XQuaternionMessages(quaternion [4]float64) tinygoerrors.ErrorCode
 		SendBNO08XEulerDegreesMessages(eulerDegrees [3]float64) tinygoerrors.ErrorCode
-		SendInitializationMessage() tinygoerrors.ErrorCode
 		SendChallengeMessage() tinygoerrors.ErrorCode
 		SendErrorMessage(err tinygoerrors.ErrorCode) tinygoerrors.ErrorCode
 		SendStartMessage() tinygoerrors.ErrorCode
