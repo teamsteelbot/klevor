@@ -2,6 +2,7 @@ package escmotor
 
 import (
 	"os"
+	"time"
 
 	"machine"
 
@@ -13,7 +14,7 @@ import (
 
 const (
 	// IsPolarityInverted indicates whether the ESC motor's polarity is inverted
-	IsPolarityInverted = true
+	IsPolarityInverted = false
 
 	// PWMFrequency is the frequency for the PWM signal in Hertz
 	PWMFrequency = 50
@@ -30,8 +31,14 @@ const (
 	// MaxSpeed is the maximum speed to run the ESC motor
 	MaxSpeed uint16 = 100
 
+	// BackwardToForwardDelay is the delay when changing from backward to forward to be in neutral first
+	BackwardToForwardDelay = 1000 * time.Millisecond
+
+	// ForwardToBackwardDelay is the delay when changing from forward to backward to be in neutral first
+	ForwardToBackwardDelay = 1000 * time.Millisecond
+
 	// ChangeSteps is the interval to change the speed of the ESC motor
-	ChangeSteps = 10
+	ChangeSteps = 20
 )
 
 var (
@@ -55,7 +62,10 @@ func init() {
 		ChangeSteps,
 		IsPolarityInverted,
 		MaxSpeed,
-		nil, // internal.Logger,
+		BackwardToForwardDelay,
+		ForwardToBackwardDelay,
+		nil,
+		// internal.Logger,
 	)
 	if err != tinygoerrors.ErrorCodeNil {
 		internal.Logger.ErrorMessageWithErrorCode(

@@ -2,6 +2,7 @@ package pilot
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -55,8 +56,6 @@ type (
 		maxMotorSpeedValue             uint16
 		maxServoAngleValue             uint16
 		debug                          bool
-		waitingForMotorSpeedEndMessage *time.Time
-		waitingForServoAngleEndMessage *time.Time
 	}
 )
 
@@ -204,6 +203,7 @@ func (h *DefaultHandler) setMotorSpeed(
 		// Set the flag to true and break the loop
 		receivedStartMessage = true
 		cancel()
+		break
 	}
 
 	// Check if the start message was received
@@ -211,9 +211,14 @@ func (h *DefaultHandler) setMotorSpeed(
 		return ErrDidNotReceiveMotorSpeedStartMessage
 	}
 
-	// Set the waiting for motor speed end message flag to true
-	h.waitingForMotorSpeedEndMessage = new(time.Time)
-	*h.waitingForMotorSpeedEndMessage = time.Now()
+	// Create the context with timeout
+	ctx, stop := context.WithTimeout(ctx, MotorSpeedEndMessageTimeout)
+	defer stop()
+
+	// Wait for the motor speed end message
+	if err := h.usbCDCHandler.WaitMotorSpeedEndMessage(ctx); err !=nil && !errors.Is(err, context.DeadlineExceeded) {
+		return err
+	}
 	return nil
 }
 
@@ -371,6 +376,7 @@ func (h *DefaultHandler) setServoAngle(
 		// Set the flag to true and break the loop
 		receivedStartMessage = true
 		cancel()
+		break
 	}
 
 	// Check if the start message was received
@@ -378,9 +384,14 @@ func (h *DefaultHandler) setServoAngle(
 		return ErrDidNotReceiveServoAngleStartMessage
 	}
 
-	// Set the waiting for servo angle end message flag to true
-	h.waitingForServoAngleEndMessage = new(time.Time)
-	*h.waitingForServoAngleEndMessage = time.Now()
+	// Create the context with timeout
+	ctx, stop := context.WithTimeout(ctx, MotorSpeedEndMessageTimeout)
+	defer stop()
+
+	// Wait for the servo angle end message
+	if err := h.usbCDCHandler.WaitServoAngleEndMessage(ctx); err !=nil && !errors.Is(err, context.DeadlineExceeded) {
+		return err
+	}
 	return nil
 }
 
@@ -515,92 +526,6 @@ func (h *DefaultHandler) setServoToOppositeDirection(
 	}
 }
 
-// waitForMotorSpeedEndMessage waits for the motor speed end message
-//
-// Parameters:
-//
-// ctx: The context to use for waiting
-//
-// Returns:
-//
-// An error if the wait failed, nil otherwise
-func (h *DefaultHandler) waitForMotorSpeedEndMessage(ctx context.Context) error {
-	if h.waitingForMotorSpeedEndMessage == nil {
-		return nil
-	}
-
-	// Create the context with timeout
-	ctx, stop := context.WithTimeout(ctx, MotorSpeedEndMessageTimeout)
-	defer stop()
-
-	// Wait for the motor speed end message
-	return h.usbCDCHandler.WaitMotorSpeedEndMessage(ctx)
-}
-
-// waitForServoAngleEndMessage waits for the servo angle end message
-//
-// Parameters:
-//
-// ctx: The context to use for waiting
-//
-// Returns:
-//
-// An error if the wait failed, nil otherwise
-func (h *DefaultHandler) waitForServoAngleEndMessage(ctx context.Context) error {
-	if h.waitingForServoAngleEndMessage == nil {
-		return nil
-	}
-
-	// Create the context with timeout
-	ctx, stop := context.WithTimeout(ctx, ServoAngleEndMessageTimeout)
-	defer stop()
-
-	// Wait for the servo angle end message
-	return h.usbCDCHandler.WaitServoAngleEndMessage(ctx)
-}
-
-// waitForEndMessages waits for the motor speed and servo angle end messages
-//
-// Parameters:
-//
-// ctx: The context to use for waiting
-//
-// Returns:
-//
-// An error if the wait failed, nil otherwise
-func (h *DefaultHandler) waitForEndMessages(ctx context.Context) error {
-	// Check if there is any end message to wait for
-	if h.waitingForMotorSpeedEndMessage == nil && h.waitingForServoAngleEndMessage == nil {
-		return nil
-	}
-
-	// Check if there's only one end message to wait for
-	if h.waitingForMotorSpeedEndMessage != nil && h.waitingForServoAngleEndMessage == nil {
-		return h.waitForMotorSpeedEndMessage(ctx)
-	} else if h.waitingForMotorSpeedEndMessage == nil && h.waitingForServoAngleEndMessage != nil {
-		return h.waitForServoAngleEndMessage(ctx)
-	}
-
-	// Create an errgroup to wait for both end messages
-	g, gCtx := errgroup.WithContext(ctx)
-
-	// Wait for the motor speed end message
-	g.Go(
-		func() error {
-			return h.waitForMotorSpeedEndMessage(gCtx)
-		},
-	)
-
-	// Wait for the servo angle end message
-	g.Go(
-		func() error {
-			return h.waitForServoAngleEndMessage(gCtx)
-		},
-	)
-
-	return g.Wait()
-}
-
 // updateCLIPClassification retrieves the latest CLIP classification
 //
 // Returns:
@@ -716,13 +641,8 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 	var completed bool
 	var westAverageDistance, eastAverageDistance, northAverageDistance, northNortheastAverageDistance, northNorthwestAverageDistance float64
 	for !completed {
-		// Wait for the end messages
-		if err := h.waitForEndMessages(ctx); err != nil {
-			return fmt.Errorf(
-				"failed to wait for end messages: %w",
-				err,
-			)
-		}
+		// Sleep the RPLiDAR delay to wait for new measures
+		time.Sleep(RPLiDARDelay - time.Since(h.rplidarLastMeasuresUpdateTime))
 
 		select {
 		case <-ctx.Done():
@@ -787,18 +707,10 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 
 				if err := h.setMotorBackwardByPercentage(
 					ctx,
-					MotorSlowPercentage,
+					MotorBackwardSlowPercentage,
 				); err != nil {
 					return fmt.Errorf(
 						"failed to set motor to backward: %w",
-						err,
-					)
-				}
-
-				// Wait for the end messages
-				if err := h.waitForEndMessages(ctx); err != nil {
-					return fmt.Errorf(
-						"failed to wait for end messages: %w",
 						err,
 					)
 				}
@@ -932,18 +844,10 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 				}
 				if err := h.setMotorForwardByPercentage(
 					ctx,
-					MotorSlowPercentage,
+					MotorForwardSlowPercentage,
 				); err != nil {
 					return fmt.Errorf(
 						"failed to set motor to slow speed: %w",
-						err,
-					)
-				}
-
-				// Wait for the end messages
-				if err := h.waitForEndMessages(ctx); err != nil {
-					return fmt.Errorf(
-						"failed to wait for end messages: %w",
 						err,
 					)
 				}
@@ -979,9 +883,9 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 			if northAverageDistance >= FrontStartTurnDistanceThreshold {
 				var motorSpeedPercentage float64
 				if northNortheastAverageDistance >= FrontStartTurnDistanceThreshold && northNorthwestAverageDistance >= FrontStartTurnDistanceThreshold {
-					motorSpeedPercentage = MotorFastPercentage
+					motorSpeedPercentage = MotorForwardFastPercentage
 				} else {
-					motorSpeedPercentage = MotorNormalPercentage
+					motorSpeedPercentage = MotorForwardNormalPercentage
 				}
 
 				// Move forward
@@ -1029,7 +933,7 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 
 			if err := h.setMotorForwardByPercentage(
 				ctx,
-				MotorNormalPercentage,
+				MotorForwardNormalPercentage,
 			); err != nil {
 				return fmt.Errorf(
 					"failed to set motor to normal speed: %w",
@@ -1089,8 +993,6 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 //
 // An error if the pilot could not be run, nil otherwise
 func (h *DefaultHandler) runToWrap(ctx context.Context) error {
-	defer h.handlerLoggerProducer.Close()
-
 	// Initialize BNO08x last turns to 0 and RPLiDAR turns counter to 0
 	h.bno08xLastTurns = 0
 	h.rplidarTurnsCounter = 0
@@ -1295,6 +1197,7 @@ func (h *DefaultHandler) Run() error {
 	g.Go(
 		func() error {
 			defer fmt.Println("Pilot goroutine exited")
+			defer h.handlerLoggerProducer.Close()
 			return goconcurrentlogger.StopContextAndLogOnError(
 				ctx,
 				stop,

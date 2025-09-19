@@ -41,37 +41,33 @@ func stopOnError(err tinygoerrors.ErrorCode) {
 }
 
 func main() {
-	for {
-		// Wait 5 seconds before starting the test
-		time.Sleep(5 * time.Second)
+	// Wait 5 seconds before starting the test
+	time.Sleep(5 * time.Second)
 
+		
+	for {
 		// Turn on the LED
 		internalledonboard.OnBoardHandler.SetOn()
 
 		// Start testing the motor forward
-		var speed uint16
-		for speed = 0; speed <= 11; speed += 1 {
-			stopOnError(
-				internalescmotor.ESCMotorHandler.SafeSetSpeedForward(
-					speed * 10,
-				),
-			)
-		}
+		stopOnError(
+			internalescmotor.ESCMotorHandler.SafeSetSpeedForward(
+				internalescmotor.MaxSpeed,
+			),
+		)
 
 		// Stop the motor for a while
-		stopOnError(internalescmotor.ESCMotorHandler.Stop())
+		// stopOnError(internalescmotor.ESCMotorHandler.Stop())
 
 		// Start testing the motor backward
-		for speed = 0; speed <= 11; speed += 1 {
-			stopOnError(
-				internalescmotor.ESCMotorHandler.SafeSetSpeedBackward(
-					speed * 10,
-				),
-			)
-		}
+		stopOnError(
+			internalescmotor.ESCMotorHandler.SafeSetSpeedBackward(
+				internalescmotor.MaxSpeed,
+			),
+		)
 
 		// Stop the motor
-		stopOnError(internalescmotor.ESCMotorHandler.Stop())
+		// stopOnError(internalescmotor.ESCMotorHandler.Stop())
 
 		// Turn off the LED
 		internalledonboard.OnBoardHandler.SetOff()

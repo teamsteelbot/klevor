@@ -732,35 +732,55 @@ func (h *DefaultHandler) incomingMessagesHandler(
 					h.updateBNO08XRollDegrees(eulerDegrees[EulerDegreesRollIndex])
 				case IncomingCategoryMotorSpeedStart:
 					// Log the received message
+					/*
 					if h.incomingMessagesLoggerProducer.IsDebug() {
 						h.incomingMessagesLoggerProducer.Debug(
 							"Received motor speed start message",
 						)
 					}
+					*/
+					h.incomingMessagesLoggerProducer.Info(
+							"Received motor speed start message",
+						)
 					h.motorSpeedStartMessagesCh <- struct{}{}
 				case IncomingCategoryMotorSpeedEnd:
 					// Log the received message
+					/*
 					if h.incomingMessagesLoggerProducer.IsDebug() {
 						h.incomingMessagesLoggerProducer.Debug(
 							"Received motor speed end message",
 						)
 					}
+					*/
+					h.incomingMessagesLoggerProducer.Info(
+							"Received motor speed end message",
+						)
 					h.motorSpeedEndMessagesCh <- struct{}{}
 				case IncomingCategoryServoAngleStart:
 					// Log the received message
+					/*
 					if h.incomingMessagesLoggerProducer.IsDebug() {
 						h.incomingMessagesLoggerProducer.Debug(
 							"Received servo angle start message",
 						)
 					}
+						*/
+					h.incomingMessagesLoggerProducer.Info(
+							"Received servo angle start message",
+						)
 					h.servoAngleStartMessagesCh <- struct{}{}
 				case IncomingCategoryServoAngleEnd:
 					// Log the received message
+					/*
 					if h.incomingMessagesLoggerProducer.IsDebug() {
 						h.incomingMessagesLoggerProducer.Debug(
 							"Received servo angle end message",
 						)
 					}
+					*/
+					h.incomingMessagesLoggerProducer.Info(
+						"Received servo angle end message",
+					)
 					h.servoAngleEndMessagesCh <- struct{}{}
 				default:
 					// Log any other received message

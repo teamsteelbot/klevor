@@ -15,10 +15,10 @@ var (
 	SetMotorSpeedAttempts = 3
 
 	// MotorSpeedStartMessageTimeout is the timeout for the motor speed start message
-	MotorSpeedStartMessageTimeout = 100 * time.Millisecond
+	MotorSpeedStartMessageTimeout = 200 * time.Millisecond
 
 	// ServoAngleStartMessageTimeout is the timeout for the servo angle start message
-	ServoAngleStartMessageTimeout = 100 * time.Millisecond
+	ServoAngleStartMessageTimeout = 200 *time.Millisecond
 
 	// MotorSpeedEndMessageTimeout is the timeout for the motor speed end message
 	MotorSpeedEndMessageTimeout = 1500 * time.Millisecond
@@ -32,14 +32,23 @@ var (
 	// HandlerLoggerProducerTag is the tag for the logger producer
 	HandlerLoggerProducerTag = "PILOT_HANDLER"
 
-	// MotorFastPercentage is the percentage of the maximum speed for fast motor speed
-	MotorFastPercentage float64 = 0.75
+	// MotorBackwardFastPercentage is the percentage of the maximum speed for fast backward motor speed
+	MotorBackwardFastPercentage float64 = 0.5
+	
+	// MotorBackwardNormalPercentage is the percentage of the maximum speed for normal backward motor speed
+	MotorBackwardNormalPercentage float64 = 0.375
 
-	// MotorNormalPercentage is the percentage of the maximum speed for normal motor speed
-	MotorNormalPercentage float64 = 0.625
+	// MotorBackwardSlowPercentage is the percentage of the maximum speed for slow backward motor speed
+	MotorBackwardSlowPercentage float64 = 0.25
 
-	// MotorSlowPercentage is the percentage of the maximum speed for slow motor speed
-	MotorSlowPercentage float64 = 0.5
+	// MotorForwardFastPercentage is the percentage of the maximum speed for fast forward motor speed
+	MotorForwardFastPercentage float64 = 1.0
+
+	// MotorForwardNormalPercentage is the percentage of the maximum speed for normal forward motor speed
+	MotorForwardNormalPercentage float64 = 0.9
+
+	// MotorForwardSlowPercentage is the percentage of the maximum speed for slow forward motor speed
+	MotorForwardSlowPercentage float64 = 0.8
 
 	// ServoBigTurnAnglePercentage is the percentage of the maximum angle for big turns
 	ServoBigTurnAnglePercentage float64 = 1
