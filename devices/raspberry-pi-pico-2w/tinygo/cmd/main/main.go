@@ -55,34 +55,11 @@ func stopAndCenter() {
 	}
 }
 
-// bno08xUpdateLoop continuously updates the BNO08X sensor data and sends it via USB CDC.
+// bno08xUpdateLoop continuously updates the BNO08X sensor data.
 func bno08xUpdateLoop() {
-	// Last sent time for BNO08X data
-	lastSentTime := time.Now()
-
-	// Loop to update and send BNO08X data
 	for {
 		// Update the BNO08X sensor data
-		/*
-			if err := internalbno08x.UARTRVC.Update(); err != tinygoerrors.ErrorCodeNil {
-				internalusbcdc.USBCDCHandler.SendErrorMessage(err)
-			}
-		*/
 		internalbno08x.UARTRVC.Update()
-
-		if time.Since(lastSentTime) >= sendBNO08XDataInterval {
-			// Get the Euler degrees from the BNO08X sensor
-			eulerDegrees := internalbno08x.UARTRVC.GetEulerDegrees()
-
-			// Send the Euler degrees messages via USB CDC
-			if err := internalusbcdc.USBCDCHandler.SendBNO08XEulerDegreesMessages(eulerDegrees); err != tinygoerrors.ErrorCodeNil {
-				internalusbcdc.USBCDCHandler.SendErrorMessage(err)
-			}
-
-			// Update the last sent time
-			lastSentTime = time.Now()
-		}
-
 		time.Sleep(internalbno08x.Interval)
 		runtime.Gosched()
 	}
@@ -117,11 +94,27 @@ func main() {
 		// Reset the last message received time
 		lastMessageReceivedTime = time.Now()
 
+		// Last sent time for BNO08X data
+		lastBNO08XSentTime := time.Now()
+
 		// Set the exit condition to False
 		toExit := false
 		for !toExit {
 			// Log memory status
 			// tinygologger.DebugMemory(internal.Logger)
+
+			if time.Since(lastBNO08XSentTime) >= sendBNO08XDataInterval {
+				// Get the Euler degrees from the BNO08X sensor
+				eulerDegrees := internalbno08x.UARTRVC.GetEulerDegrees()
+
+				// Send the Euler degrees messages via USB CDC
+				if err := internalusbcdc.USBCDCHandler.SendBNO08XEulerDegreesMessages(eulerDegrees); err != tinygoerrors.ErrorCodeNil {
+					internalusbcdc.USBCDCHandler.SendErrorMessage(err)
+				}
+
+				// Update the last sent time
+				lastBNO08XSentTime = time.Now()
+			}
 
 			// Check if the last message received time exceeds the timeout
 			if time.Since(lastMessageReceivedTime) >= receivingMessageTimeout {
