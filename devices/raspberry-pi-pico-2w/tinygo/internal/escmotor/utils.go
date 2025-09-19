@@ -25,6 +25,13 @@ func SetSpeedBasedOnReceivedMessage(
 		return internalusbcdc.ErrorCodeUSBCDCNilHandler
 	}
 
+	// Check if the message category is valid
+	if message.Category != internalusbcdc.IncomingCategoryMotorSpeedStop &&
+		message.Category != internalusbcdc.IncomingCategoryMotorSpeedForward &&
+		message.Category != internalusbcdc.IncomingCategoryMotorSpeedBackward {
+		return internalusbcdc.ErrorCodeUSBCDCUnknownIncomingCategory
+	}
+
 	// Check if the motor speed should be retrieved from the message
 	var motorSpeed uint16
 	if message.Category != internalusbcdc.IncomingCategoryMotorSpeedStop {
@@ -36,6 +43,11 @@ func SetSpeedBasedOnReceivedMessage(
 		motorSpeed = speed
 	}
 
+	// Send start feedback message
+	if err := handler.SendMotorSpeedStartMessage(); err != tinygoerrors.ErrorCodeNil {
+		return err
+	}
+
 	// Check the motor speed category
 	switch message.Category {
 	case internalusbcdc.IncomingCategoryMotorSpeedStop:
@@ -43,23 +55,18 @@ func SetSpeedBasedOnReceivedMessage(
 		if err := ESCMotorHandler.Stop(); err != tinygoerrors.ErrorCodeNil {
 			return err
 		}
-		// Send feedback message
-		return handler.SendSetMotorSpeedStopMessage()
 	case internalusbcdc.IncomingCategoryMotorSpeedForward:
 		// Set the motor speed
 		if err := ESCMotorHandler.SafeSetSpeedForward(motorSpeed); err != tinygoerrors.ErrorCodeNil {
 			return err
 		}
-		// Send feedback message
-		return handler.SendSetMotorSpeedForwardMessage()
 	case internalusbcdc.IncomingCategoryMotorSpeedBackward:
 		// Set the motor speed
 		if err := ESCMotorHandler.SafeSetSpeedBackward(motorSpeed); err != tinygoerrors.ErrorCodeNil {
 			return err
 		}
-		// Send feedback message
-		return handler.SendSetMotorSpeedBackwardMessage()
-	default:
-		return internalusbcdc.ErrorCodeUSBCDCUnknownIncomingCategory
 	}
+
+	// Send feedback message
+	return handler.SendMotorSpeedEndMessage()
 }

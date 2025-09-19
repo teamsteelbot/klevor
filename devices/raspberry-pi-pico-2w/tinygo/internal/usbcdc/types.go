@@ -28,6 +28,8 @@ type (
 //
 // challengeHandler: The challenge handler to use to get the challenge mode
 // ledHandler: The LED handler to use to toggle the LED when data is received
+// maxIncomingMessageDataLength: The maximum length of incoming message data
+// maxOutgoingMessageDataLength: The maximum length of outgoing message data
 //
 // Returns:
 //
@@ -35,6 +37,8 @@ type (
 func NewDefaultHandler(
 	challengeHandler internalchallenge.Handler,
 	ledHandler internalled.Handler,
+	maxIncomingMessageDataLength int,
+	maxOutgoingMessageDataLength int,
 ) (*DefaultHandler, tinygoerrors.ErrorCode) {
 	// Check if the challengeHandler is nil
 	if challengeHandler == nil {
@@ -55,8 +59,8 @@ func NewDefaultHandler(
 		return nil, ErrorCodeUSBCDCFailedToConfigureUSBCDC
 	}
 
-	// Check if the MaxIncomingMessageDataLength and MaxOutgoingMessageDataLength are valid
-	if MaxIncomingMessageDataLength < 0 || MaxOutgoingMessageDataLength < 0 {
+	// Check if the maxIncomingMessageDataLength and maxOutgoingMessageDataLength are valid
+	if maxIncomingMessageDataLength < 0 || maxOutgoingMessageDataLength < 0 {
 		return nil, ErrorCodeUSBCDCInvalidMaxMessageDataLength
 	}
 
@@ -65,8 +69,8 @@ func NewDefaultHandler(
 		challengeHandler:      challengeHandler,
 		ledHandler:            ledHandler,
 		serialer:              machine.USBCDC,
-		incomingMessageBuffer: make([]byte, MaxIncomingMessageDataLength),
-		outgoingMessageBuffer: make([]byte, MaxOutgoingMessageDataLength),
+		incomingMessageBuffer: make([]byte, maxIncomingMessageDataLength),
+		outgoingMessageBuffer: make([]byte, maxOutgoingMessageDataLength),
 	}, tinygoerrors.ErrorCodeNil
 }
 
@@ -168,7 +172,7 @@ func (d *DefaultHandler) ReadMessage(timeout time.Duration) (
 		dataLength := int(dataLengthByte)
 
 		// Check if the data length is valid
-		if dataLength > MaxIncomingMessageDataLength {
+		if dataLength > len(d.incomingMessageBuffer) {
 			return IncomingMessage{}, ErrorCodeUSBCDCInvalidIncomingMessageDataLength
 		}
 
@@ -249,7 +253,7 @@ func (d *DefaultHandler) SendMessage(message OutgoingMessage) tinygoerrors.Error
 		dataLength = 0
 	} else {
 		dataLength = len(message.Data)
-		if dataLength > MaxOutgoingMessageDataLength {
+		if dataLength > len(d.outgoingMessageBuffer) {
 			return ErrorCodeUSBCDCInvalidOutgoingMessageDataLength
 		}
 	}
@@ -509,26 +513,26 @@ func (d *DefaultHandler) SendMaxMotorSpeedValueMessage(maxMotorSpeed uint16) tin
 	return d.SendMessage(maxMotorSpeedMessage)
 }
 
-// SendMaxServoDirectionValueMessage sends the maximum servo direction value message to the USB CDC.
+// SendMaxServoAngleValueMessage sends the maximum servo angle value message to the USB CDC.
 //
 // Parameters:
 //
-// maxServoDirection: The maximum servo direction value to send
+// maxServoAngle: The maximum servo angle value to send
 //
 // Returns:
 //
-// An error if it fails to send the maximum servo direction value message
-func (d *DefaultHandler) SendMaxServoDirectionValueMessage(maxServoDirection uint16) tinygoerrors.ErrorCode {
-	// Create the max servo direction value message
-	maxServoDirectionMessage, err := NewOutgoingMessageFromUint16Data(
-		OutgoingCategoryMaxServoDirectionValue,
-		maxServoDirection,
+// An error if it fails to send the maximum servo angle value message
+func (d *DefaultHandler) SendMaxServoAngleValueMessage(maxServoAngle uint16) tinygoerrors.ErrorCode {
+	// Create the max servo angle value message
+	maxServoAngleMessage, err := NewOutgoingMessageFromUint16Data(
+		OutgoingCategoryMaxServoAngleValue,
+		maxServoAngle,
 		d.outgoingMessageBuffer[:Uint16BufferSize],
 	)
 	if err != tinygoerrors.ErrorCodeNil {
 		return err
 	}
-	return d.SendMessage(maxServoDirectionMessage)
+	return d.SendMessage(maxServoAngleMessage)
 }
 
 // SendHeartbeatMessage sends a heartbeat message to the USB CDC.
@@ -548,88 +552,60 @@ func (d *DefaultHandler) SendHeartbeatMessage() tinygoerrors.ErrorCode {
 	return d.SendMessage(heartbeatMessage)
 }
 
-// SendSetMotorSpeedStopMessage sends a set motor speed stop message to the USB CDC.
+// SendMotorSpeedStartMessage sends a motor speed start message to the USB CDC.
 //
 // Returns:
 //
-// An error if it fails to send the set motor speed stop message
-func (d *DefaultHandler) SendSetMotorSpeedStopMessage() tinygoerrors.ErrorCode {
-	// Create the set motor speed stop message
-	setMotorSpeedStopMessage := NewOutgoingMessage(
-		OutgoingCategorySetMotorSpeedStop,
-		nil,
+// An error if it fails to send the motor speed start message
+func (d *DefaultHandler) SendMotorSpeedStartMessage() tinygoerrors.ErrorCode {
+	return d.SendMessage(
+		NewOutgoingMessage(
+			OutgoingCategoryMotorSpeedStart,
+			nil,
+		),
 	)
-	return d.SendMessage(setMotorSpeedStopMessage)
 }
 
-// SendSetMotorSpeedForwardMessage sends a set motor speed forward message to the USB CDC.
+// SendMotorSpeedEndMessage sends a motor speed end message to the USB CDC.
 //
 // Returns:
 //
-// An error if it fails to send the set motor speed forward message
-func (d *DefaultHandler) SendSetMotorSpeedForwardMessage() tinygoerrors.ErrorCode {
-	// Create the set motor speed forward message
-	setMotorSpeedForwardMessage := NewOutgoingMessage(
-		OutgoingCategorySetMotorSpeedForward,
-		nil,
+// An error if it fails to send the motor speed end message
+func (d *DefaultHandler) SendMotorSpeedEndMessage() tinygoerrors.ErrorCode {
+	return d.SendMessage(
+		NewOutgoingMessage(
+			OutgoingCategoryMotorSpeedEnd,
+			nil,
+		),
 	)
-	return d.SendMessage(setMotorSpeedForwardMessage)
 }
 
-// SendSetMotorSpeedBackwardMessage sends a set motor speed backward message to the USB CDC.
+// SendServoAngleStartMessage sends a servo angle start message to the USB CDC.
 //
 // Returns:
 //
-// An error if it fails to send the set motor speed backward message
-func (d *DefaultHandler) SendSetMotorSpeedBackwardMessage() tinygoerrors.ErrorCode {
-	// Create the set motor speed backward message
-	setMotorSpeedBackwardMessage := NewOutgoingMessage(
-		OutgoingCategorySetMotorSpeedBackward,
-		nil,
+// An error if it fails to send the servo angle start message
+func (d *DefaultHandler) SendServoAngleStartMessage() tinygoerrors.ErrorCode {
+	return d.SendMessage(
+		NewOutgoingMessage(
+			OutgoingCategoryServoAngleStart,
+			nil,
+		),
 	)
-	return d.SendMessage(setMotorSpeedBackwardMessage)
 }
 
-// SendSetServoDirectionCenterMessage sends a set servo direction center message to the USB CDC.
+// SendServoAngleEndMessage sends a servo angle end message to the USB CDC.
 //
 // Returns:
 //
-// An error if it fails to send the set servo direction center message
-func (d *DefaultHandler) SendSetServoDirectionCenterMessage() tinygoerrors.ErrorCode {
-	// Create the set servo direction center message
-	setServoDirectionCenterMessage := NewOutgoingMessage(
-		OutgoingCategorySetServoDirectionCenter,
-		nil,
+// An error if it fails to send the servo angle end message
+func (d *DefaultHandler) SendServoAngleEndMessage() tinygoerrors.ErrorCode {
+	return d.SendMessage(
+		NewOutgoingMessage(
+			OutgoingCategoryServoAngleEnd,
+			nil,
+		),
 	)
-	return d.SendMessage(setServoDirectionCenterMessage)
-}
-
-// SendSetServoDirectionToLeftMessage sends a set servo direction to left message to the USB CDC.
-//
-// Returns:
-//
-// An error if it fails to send the set servo direction to left message
-func (d *DefaultHandler) SendSetServoDirectionToLeftMessage() tinygoerrors.ErrorCode {
-	// Create the set servo direction to left message
-	setServoDirectionToLeftMessage := NewOutgoingMessage(
-		OutgoingCategorySetServoDirectionToLeft,
-		nil,
-	)
-	return d.SendMessage(setServoDirectionToLeftMessage)
-}
-
-// SendSetServoDirectionToRightMessage sends a set servo direction to right message to the USB CDC.
-//
-// Returns:
-//
-// An error if it fails to send the set servo direction to right message
-func (d *DefaultHandler) SendSetServoDirectionToRightMessage() tinygoerrors.ErrorCode {
-	// Create the set servo direction to right message
-	setServoDirectionToRightMessage := NewOutgoingMessage(
-		OutgoingCategorySetServoDirectionToRight,
-		nil,
-	)
-	return d.SendMessage(setServoDirectionToRightMessage)
 }
 
 // WaitForConfirmationMessage waits for a confirmation message from the USB CDC.

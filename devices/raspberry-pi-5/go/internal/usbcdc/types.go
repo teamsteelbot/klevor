@@ -36,41 +36,43 @@ type (
 
 	// DefaultHandler is the default implementation of the Handler interface
 	DefaultHandler struct {
-		outgoingMessagesCh               chan *OutgoingMessage
-		readyCh                          chan struct{}
-		logger                           goconcurrentlogger.Logger
-		handlerLoggerProducer            goconcurrentlogger.LoggerProducer
-		incomingMessagesLoggerProducer   goconcurrentlogger.LoggerProducer
-		outgoingMessagesLoggerProducer   goconcurrentlogger.LoggerProducer
-		isRunning                        atomic.Bool
-		closed                           atomic.Bool
-		mutex                            sync.Mutex
-		wgSenders                        sync.WaitGroup
-		baudRate                         int
-		buffer                           []byte
-		accumulatedBuffer                []byte
-		receivedInitializationMessage    bool
-		receivedStartMessage             bool
-		receivedChallenge                internal.Challenge
-		receivedMaxMotorSpeedValue       uint16
-		receivedMaxServoDirectionValue   uint16
-		receivedBNO08XQuaternionX        float64
-		receivedBNO08XQuaternionY        float64
-		receivedBNO08XQuaternionZ        float64
-		receivedBNO08XQuaternionW        float64
-		receivedBNO08XYawDegrees         float64
-		receivedBNO08XPitchDegrees       float64
-		receivedBNO08XRollDegrees        float64
-		calculatedTurns                  *CalculatedTurns
-		challengeReadyCh                 chan struct{}
-		notifyChallengeOnce              sync.Once
-		maxMotorSpeedValueReadyCh        chan struct{}
-		notifyMaxMotorSpeedValueOnce     sync.Once
-		maxServoDirectionValueReadyCh    chan struct{}
-		confirmationESCMotorMessagesCh   chan *IncomingMessage
-		confirmationServoMessagesCh      chan *IncomingMessage
-		notifyMaxServoDirectionValueOnce sync.Once
-		debug                            bool
+		outgoingMessagesCh             chan *OutgoingMessage
+		readyCh                        chan struct{}
+		logger                         goconcurrentlogger.Logger
+		handlerLoggerProducer          goconcurrentlogger.LoggerProducer
+		incomingMessagesLoggerProducer goconcurrentlogger.LoggerProducer
+		outgoingMessagesLoggerProducer goconcurrentlogger.LoggerProducer
+		isRunning                      atomic.Bool
+		closed                         atomic.Bool
+		mutex                          sync.Mutex
+		wgSenders                      sync.WaitGroup
+		baudRate                       int
+		buffer                         []byte
+		accumulatedBuffer              []byte
+		receivedInitializationMessage  bool
+		receivedStartMessage           bool
+		receivedChallenge              internal.Challenge
+		receivedMaxMotorSpeedValue     uint16
+		receivedMaxServoAngleValue     uint16
+		receivedBNO08XQuaternionX      float64
+		receivedBNO08XQuaternionY      float64
+		receivedBNO08XQuaternionZ      float64
+		receivedBNO08XQuaternionW      float64
+		receivedBNO08XYawDegrees       float64
+		receivedBNO08XPitchDegrees     float64
+		receivedBNO08XRollDegrees      float64
+		calculatedTurns                *CalculatedTurns
+		challengeReadyCh               chan struct{}
+		notifyChallengeOnce            sync.Once
+		maxMotorSpeedValueReadyCh      chan struct{}
+		notifyMaxMotorSpeedValueOnce   sync.Once
+		maxServoAngleValueReadyCh      chan struct{}
+		motorSpeedStartMessagesCh      chan struct{}
+		motorSpeedEndMessagesCh        chan struct{}
+		servoAngleStartMessagesCh      chan struct{}
+		servoAngleEndMessagesCh        chan struct{}
+		notifyMaxServoAngleValueOnce   sync.Once
+		debug                          bool
 	}
 )
 
@@ -580,7 +582,7 @@ func (h *DefaultHandler) incomingMessagesHandler(
 
 	// Send the message to get the max motor speed value and max servo direction value
 	h.outgoingMessagesCh <- OutgoingGetMaxMotorSpeedValueMessage
-	h.outgoingMessagesCh <- OutgoingGetMaxServoDirectionValueMessage
+	h.outgoingMessagesCh <- OutgoingGetMaxServoAngleValueMessage
 
 	for {
 		select {
@@ -627,21 +629,21 @@ func (h *DefaultHandler) incomingMessagesHandler(
 
 					// Notify listeners exactly once
 					h.notifyMaxMotorSpeedValueOnce.Do(func() { close(h.maxMotorSpeedValueReadyCh) })
-				case IncomingCategoryMaxServoDirectionValue:
+				case IncomingCategoryMaxServoAngleValue:
 					// Parse the max servo direction value
-					maxServoDirection := binary.BigEndian.Uint16(message.Data[:2])
-					h.receivedMaxServoDirectionValue = maxServoDirection
+					maxServoAngle := binary.BigEndian.Uint16(message.Data[:2])
+					h.receivedMaxServoAngleValue = maxServoAngle
 
 					// Log the received message
 					h.incomingMessagesLoggerProducer.Info(
 						fmt.Sprintf(
 							"Received max servo direction value: %d",
-							h.receivedMaxServoDirectionValue,
+							h.receivedMaxServoAngleValue,
 						),
 					)
 
 					// Notify listeners exactly once
-					h.notifyMaxServoDirectionValueOnce.Do(func() { close(h.maxServoDirectionValueReadyCh) })
+					h.notifyMaxServoAngleValueOnce.Do(func() { close(h.maxServoAngleValueReadyCh) })
 				case IncomingCategoryEulerDegreesPitch:
 					// Parse the BNO08X pitch degrees value
 					degreesUint64 := binary.BigEndian.Uint64(message.Data[:8])
@@ -728,54 +730,38 @@ func (h *DefaultHandler) incomingMessagesHandler(
 					h.updateBNO08XYawDegrees(eulerDegrees[EulerDegreesYawIndex])
 					h.updateBNO08XPitchDegrees(eulerDegrees[EulerDegreesPitchIndex])
 					h.updateBNO08XRollDegrees(eulerDegrees[EulerDegreesRollIndex])
-				case IncomingCategorySetMotorSpeedStop:
+				case IncomingCategoryMotorSpeedStart:
 					// Log the received message
 					if h.incomingMessagesLoggerProducer.IsDebug() {
 						h.incomingMessagesLoggerProducer.Debug(
-							"Received motor speed stop confirmation",
+							"Received motor speed start message",
 						)
 					}
-					h.confirmationESCMotorMessagesCh <- message
-				case IncomingCategorySetServoDirectionCenter:
+					h.motorSpeedStartMessagesCh <- struct{}{}
+				case IncomingCategoryMotorSpeedEnd:
 					// Log the received message
 					if h.incomingMessagesLoggerProducer.IsDebug() {
 						h.incomingMessagesLoggerProducer.Debug(
-							"Received servo direction center confirmation",
+							"Received motor speed end message",
 						)
 					}
-					h.confirmationServoMessagesCh <- message
-				case IncomingCategorySetMotorSpeedForward:
+					h.motorSpeedEndMessagesCh <- struct{}{}
+				case IncomingCategoryServoAngleStart:
 					// Log the received message
 					if h.incomingMessagesLoggerProducer.IsDebug() {
 						h.incomingMessagesLoggerProducer.Debug(
-							"Received motor speed forward confirmation",
+							"Received servo angle start message",
 						)
 					}
-					h.confirmationESCMotorMessagesCh <- message
-				case IncomingCategorySetMotorSpeedBackward:
+					h.servoAngleStartMessagesCh <- struct{}{}
+				case IncomingCategoryServoAngleEnd:
 					// Log the received message
 					if h.incomingMessagesLoggerProducer.IsDebug() {
 						h.incomingMessagesLoggerProducer.Debug(
-							"Received motor speed backward confirmation",
+							"Received servo angle end message",
 						)
 					}
-					h.confirmationESCMotorMessagesCh <- message
-				case IncomingCategorySetServoDirectionToLeft:
-					// Log the received message
-					if h.incomingMessagesLoggerProducer.IsDebug() {
-						h.incomingMessagesLoggerProducer.Debug(
-							"Received servo direction left confirmation",
-						)
-					}
-					h.confirmationServoMessagesCh <- message
-				case IncomingCategorySetServoDirectionToRight:
-					// Log the received message
-					if h.incomingMessagesLoggerProducer.IsDebug() {
-						h.incomingMessagesLoggerProducer.Debug(
-							"Received servo direction right confirmation",
-						)
-					}
-					h.confirmationServoMessagesCh <- message
+					h.servoAngleEndMessagesCh <- struct{}{}
 				default:
 					// Log any other received message
 					h.incomingMessagesLoggerProducer.Info(
@@ -1191,16 +1177,20 @@ func (h *DefaultHandler) Run(ctx context.Context, stopFn func()) error {
 	close(h.readyCh)
 	defer h.close()
 
-	// Initialize confirmation ESC motor messages channel
-	h.confirmationESCMotorMessagesCh = make(
-		chan *IncomingMessage,
-		ConfirmationESCMotorMessagesBufferSize,
+	// Initialize motor speed messages channel
+	h.motorSpeedStartMessagesCh = make(
+		chan struct{},
+	)
+	h.motorSpeedEndMessagesCh = make(
+		chan struct{},
 	)
 
-	// Initialize confirmation servo messages channel
-	h.confirmationServoMessagesCh = make(
-		chan *IncomingMessage,
-		ConfirmationServoMessagesBufferSize,
+	// Initialize servo angle messages channel
+	h.servoAngleStartMessagesCh = make(
+		chan struct{},
+	)
+	h.servoAngleEndMessagesCh = make(
+		chan struct{},
 	)
 
 	// Reset received initialization message state
@@ -1220,9 +1210,9 @@ func (h *DefaultHandler) Run(ctx context.Context, stopFn func()) error {
 	h.notifyMaxMotorSpeedValueOnce = sync.Once{}
 
 	// Reset received max servo direction value
-	h.receivedMaxServoDirectionValue = 0
-	h.maxServoDirectionValueReadyCh = make(chan struct{})
-	h.notifyMaxServoDirectionValueOnce = sync.Once{}
+	h.receivedMaxServoAngleValue = 0
+	h.maxServoAngleValueReadyCh = make(chan struct{})
+	h.notifyMaxServoAngleValueOnce = sync.Once{}
 
 	// Reset received BNO08X calculated turns
 	h.calculatedTurns = nil
@@ -1324,13 +1314,17 @@ func (h *DefaultHandler) close() {
 	close(h.outgoingMessagesCh)
 	h.outgoingMessagesCh = nil
 
-	// Close the confirmation ESC Motor messages channel
-	close(h.confirmationESCMotorMessagesCh)
-	h.confirmationESCMotorMessagesCh = nil
+	// Close the motor speed messages channel
+	close(h.motorSpeedStartMessagesCh)
+	h.motorSpeedStartMessagesCh = nil
+	close(h.motorSpeedEndMessagesCh)
+	h.motorSpeedEndMessagesCh = nil
 
-	// Close the confirmation servo messages channel
-	close(h.confirmationServoMessagesCh)
-	h.confirmationServoMessagesCh = nil
+	// Close the servo angle messages channel
+	close(h.servoAngleStartMessagesCh)
+	h.servoAngleStartMessagesCh = nil
+	close(h.servoAngleEndMessagesCh)
+	h.servoAngleEndMessagesCh = nil
 
 	// Initialize the ready channel for the next run
 	h.readyCh = make(chan struct{})
@@ -1357,97 +1351,111 @@ func (h *DefaultHandler) WaitUntilReady(ctx context.Context) error {
 	}
 }
 
-// WaitESCMotorConfirmationMessage waits for an ESC motor confirmation message or the context is done.
+// WaitMotorSpeedStartMessage waits for a motor speed start message or the context is done.
 //
 // Parameters:
 //
 // ctx: The context to control cancellation and timeouts.
-// category: The expected category of the confirmation message.
 //
 // Returns:
 //
-// An error if the context is done before receiving the expected confirmation message.
-func (h *DefaultHandler) WaitESCMotorConfirmationMessage(
-	ctx context.Context,
-	category IncomingCategory,
-) error {
+// An error if the context is done before receiving the motor speed start message.
+func (h *DefaultHandler) WaitMotorSpeedStartMessage(ctx context.Context) error {
 	// Check if the handler is running
-	if h.confirmationESCMotorMessagesCh == nil {
+	if h.motorSpeedStartMessagesCh == nil {
 		return ErrHandlerNotRunning
 	}
 
-	// Check if the incoming category is valid for this method
-	if category != IncomingCategorySetMotorSpeedStop &&
-		category != IncomingCategorySetMotorSpeedBackward &&
-		category != IncomingCategorySetMotorSpeedForward {
-		return fmt.Errorf(
-			"invalid category for ESC motor confirmation: %s",
-			category.String(),
-		)
-	}
-
-	for {
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		case message, ok := <-h.confirmationESCMotorMessagesCh:
-			// Check if the handler has been closed
-			if !ok {
-				return ErrHandlerClosed
-			}
-
-			// Check if the category matches
-			if message.Category == category {
-				return nil
-			}
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case _, ok := <-h.motorSpeedStartMessagesCh:
+		// Check if the handler has been closed
+		if !ok {
+			return ErrHandlerClosed
 		}
+		return nil
 	}
 }
 
-// WaitServoConfirmationMessage waits for a servo confirmation message or the context is done.
+// WaitMotorSpeedEndMessage waits for a motor speed end message or the context is done.
 //
 // Parameters:
 //
 // ctx: The context to control cancellation and timeouts.
-// category: The expected category of the confirmation message.
 //
 // Returns:
 //
-// An error if the context is done before receiving the expected confirmation message.
-func (h *DefaultHandler) WaitServoConfirmationMessage(
-	ctx context.Context,
-	category IncomingCategory,
-) error {
+// An error if the context is done before receiving the motor speed end message.
+func (h *DefaultHandler) WaitMotorSpeedEndMessage(ctx context.Context) error {
 	// Check if the handler is running
-	if h.confirmationServoMessagesCh == nil {
+	if h.motorSpeedEndMessagesCh == nil {
 		return ErrHandlerNotRunning
 	}
 
-	// Check if the incoming category is valid for this method
-	if category != IncomingCategorySetServoDirectionCenter &&
-		category != IncomingCategorySetServoDirectionToLeft &&
-		category != IncomingCategorySetServoDirectionToRight {
-		return fmt.Errorf(
-			"invalid category for servo confirmation: %s",
-			category.String(),
-		)
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case _, ok := <-h.motorSpeedEndMessagesCh:
+		// Check if the handler has been closed
+		if !ok {
+			return ErrHandlerClosed
+		}
+		return nil
+	}
+}
+
+// WaitServoAngleStartMessage waits for a servo angle start message or the context is done.
+//
+// Parameters:
+//
+// ctx: The context to control cancellation and timeouts.
+//
+// Returns:
+//
+// An error if the context is done before receiving the servo angle start message.
+func (h *DefaultHandler) WaitServoAngleStartMessage(ctx context.Context) error {
+	// Check if the handler is running
+	if h.servoAngleStartMessagesCh == nil {
+		return ErrHandlerNotRunning
 	}
 
-	for {
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		case message, ok := <-h.confirmationServoMessagesCh:
-			// Check if the handler has been closed
-			if !ok {
-				return ErrHandlerClosed
-			}
-
-			// Check if the category matches
-			if message.Category == category {
-				return nil
-			}
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case _, ok := <-h.servoAngleStartMessagesCh:
+		// Check if the handler has been closed
+		if !ok {
+			return ErrHandlerClosed
 		}
+		return nil
+	}
+}
+
+// WaitServoAngleEndMessage waits for a servo angle end message or the context is done.
+//
+// Parameters:
+//
+// ctx: The context to control cancellation and timeouts.
+//
+// Returns:
+//
+// An error if the context is done before receiving the servo angle end message.
+func (h *DefaultHandler) WaitServoAngleEndMessage(ctx context.Context) error {
+	// Check if the handler is running
+	if h.servoAngleEndMessagesCh == nil {
+		return ErrHandlerNotRunning
+	}
+
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case _, ok := <-h.servoAngleEndMessagesCh:
+		// Check if the handler has been closed
+		if !ok {
+			return ErrHandlerClosed
+		}
+		return nil
 	}
 }
 
@@ -1506,15 +1514,15 @@ func (h *DefaultHandler) ReceivedMaxMotorSpeedValue() uint16 {
 	return h.receivedMaxMotorSpeedValue
 }
 
-// ReceivedMaxServoDirectionValue returns the received maximum servo direction value.
+// ReceivedMaxServoAngleValue returns the received maximum servo direction value.
 //
 // Returns:
 //
 // The received maximum servo direction value.
-func (h *DefaultHandler) ReceivedMaxServoDirectionValue() uint16 {
+func (h *DefaultHandler) ReceivedMaxServoAngleValue() uint16 {
 	h.mutex.Lock()
 	defer h.mutex.Unlock()
-	return h.receivedMaxServoDirectionValue
+	return h.receivedMaxServoAngleValue
 }
 
 // GetTurns returns the calculated turns segment count.
@@ -1656,7 +1664,7 @@ func (h *DefaultHandler) WaitForMaxMotorSpeedValue(ctx context.Context) (
 	}
 }
 
-// WaitForMaxServoDirectionValue waits until a max servo direction value message is received or the context is done.
+// WaitForMaxServoAngleValue waits until a max servo direction value message is received or the context is done.
 //
 // Parameters:
 //
@@ -1665,17 +1673,17 @@ func (h *DefaultHandler) WaitForMaxMotorSpeedValue(ctx context.Context) (
 // Returns:
 //
 // The received max servo direction value or an error if the context is done before receiving it.
-func (h *DefaultHandler) WaitForMaxServoDirectionValue(ctx context.Context) (
+func (h *DefaultHandler) WaitForMaxServoAngleValue(ctx context.Context) (
 	uint16,
 	error,
 ) {
-	if v := h.ReceivedMaxServoDirectionValue(); v != 0 {
+	if v := h.ReceivedMaxServoAngleValue(); v != 0 {
 		return v, nil
 	}
 	select {
 	case <-ctx.Done():
 		return 0, ctx.Err()
-	case <-h.maxServoDirectionValueReadyCh:
-		return h.ReceivedMaxServoDirectionValue(), nil
+	case <-h.maxServoAngleValueReadyCh:
+		return h.ReceivedMaxServoAngleValue(), nil
 	}
 }

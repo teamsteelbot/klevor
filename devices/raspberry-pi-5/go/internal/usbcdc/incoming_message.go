@@ -304,7 +304,7 @@ func (msg *IncomingMessage) StringToPrint() string {
 		value := math.Float64frombits(bits)
 		dataDetails = fmt.Sprintf("%f", value)
 	case IncomingCategoryMaxMotorSpeedValue,
-		IncomingCategoryMaxServoDirectionValue:
+		IncomingCategoryMaxServoAngleValue:
 		// Check if the data length is valid for an uint16 value
 		if len(msg.Data) != 2 {
 			dataDetails = fmt.Sprintf(

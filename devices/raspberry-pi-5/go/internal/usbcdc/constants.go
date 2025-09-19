@@ -100,9 +100,6 @@ const (
 )
 
 var (
-	// StartAndEndBytes is the byte slice for the start and end character
-	StartAndEndBytes = []byte{StartAndEndByte}
-
 	// ReadTimeout is the timeout duration for reading from the USB-CDC port
 	ReadTimeout = time.Second * 2
 
@@ -129,12 +126,6 @@ var (
 
 	// OutgoingMessagesChannelBufferSize is the size of the outgoing messages channel buffer
 	OutgoingMessagesChannelBufferSize = 100
-
-	// ConfirmationESCMotorMessagesBufferSize is the size of the confirmation ESC motor messages buffer
-	ConfirmationESCMotorMessagesBufferSize = 20
-
-	// ConfirmationServoMessagesBufferSize is the size of the confirmation servo messages buffer
-	ConfirmationServoMessagesBufferSize = 20
 
 	// OutgoingStopMessage is the outgoing stop message for USB-CDC communication
 	OutgoingStopMessage = NewOutgoingStatusMessage(OutgoingStatusStop)
@@ -190,9 +181,9 @@ var (
 		[]byte{},
 	)
 
-	// OutgoingServoDirectionCenterMessage is the outgoing servo direction center message for USB-CDC communication
-	OutgoingServoDirectionCenterMessage = NewOutgoingMessage(
-		OutgoingCategoryServoDirectionCenter,
+	// OutgoingServoAngleCenterMessage is the outgoing servo direction center message for USB-CDC communication
+	OutgoingServoAngleCenterMessage = NewOutgoingMessage(
+		OutgoingCategoryServoAngleCenter,
 		[]byte{},
 	)
 
@@ -202,9 +193,9 @@ var (
 		[]byte{},
 	)
 
-	// OutgoingGetMaxServoDirectionValueMessage is the outgoing message to request the maximum servo direction value
-	OutgoingGetMaxServoDirectionValueMessage = NewOutgoingMessage(
-		OutgoingCategoryGetMaxServoDirectionValue,
+	// OutgoingGetMaxServoAngleValueMessage is the outgoing message to request the maximum servo direction value
+	OutgoingGetMaxServoAngleValueMessage = NewOutgoingMessage(
+		OutgoingCategoryGetMaxServoAngleValue,
 		[]byte{},
 	)
 

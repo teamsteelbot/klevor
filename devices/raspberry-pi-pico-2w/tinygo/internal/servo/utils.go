@@ -25,9 +25,16 @@ func SetDirectionBasedOnReceivedMessage(
 		return internalusbcdc.ErrorCodeUSBCDCNilHandler
 	}
 
+	// Check if the message category is valid
+	if message.Category != internalusbcdc.IncomingCategoryServoAngleCenter &&
+		message.Category != internalusbcdc.IncomingCategoryServoAngleToLeft &&
+		message.Category != internalusbcdc.IncomingCategoryServoAngleToRight {
+		return internalusbcdc.ErrorCodeUSBCDCUnknownIncomingCategory
+	}
+
 	// Check if the servo angle should be retrieved from the message
 	var servoDirectionAngle uint16
-	if message.Category != internalusbcdc.IncomingCategoryServoDirectionCenter {
+	if message.Category != internalusbcdc.IncomingCategoryServoAngleCenter {
 		// Get uint16 angle from message content
 		angle, err := tinygobuffers.BytesToUint16(message.Data)
 		if err != tinygoerrors.ErrorCodeNil {
@@ -36,30 +43,30 @@ func SetDirectionBasedOnReceivedMessage(
 		servoDirectionAngle = angle
 	}
 
+	// Send start feedback message
+	if err := handler.SendServoAngleStartMessage(); err != tinygoerrors.ErrorCodeNil {
+		return err
+	}
+
 	// Check the servo angle category
 	switch message.Category {
-	case internalusbcdc.IncomingCategoryServoDirectionCenter:
+	case internalusbcdc.IncomingCategoryServoAngleCenter:
 		// Center the servo
 		if err := ServoHandler.SetAngleToCenter(); err != tinygoerrors.ErrorCodeNil {
 			return err
 		}
-		// Send feedback message
-		return handler.SendSetServoDirectionCenterMessage()
-	case internalusbcdc.IncomingCategoryServoDirectionToLeft:
+	case internalusbcdc.IncomingCategoryServoAngleToLeft:
 		// Set the servo direction to left
 		if err := ServoHandler.SafeSetAngleToLeft(servoDirectionAngle); err != tinygoerrors.ErrorCodeNil {
 			return err
 		}
-		// Send feedback message
-		return handler.SendSetServoDirectionToLeftMessage()
-	case internalusbcdc.IncomingCategoryServoDirectionToRight:
+	case internalusbcdc.IncomingCategoryServoAngleToRight:
 		// Set the servo direction to right
 		if err := ServoHandler.SafeSetAngleToRight(servoDirectionAngle); err != tinygoerrors.ErrorCodeNil {
 			return err
 		}
-		// Send feedback message
-		return handler.SendSetServoDirectionToRightMessage()
-	default:
-		return internalusbcdc.ErrorCodeUSBCDCUnknownIncomingCategory
 	}
+
+	// Send end feedback message
+	return handler.SendServoAngleEndMessage()
 }

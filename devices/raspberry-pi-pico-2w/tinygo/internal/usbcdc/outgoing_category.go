@@ -15,7 +15,7 @@ const (
 	OutgoingCategoryStatus
 	OutgoingCategoryError
 	OutgoingCategoryMaxMotorSpeedValue
-	OutgoingCategoryMaxServoDirectionValue
+	OutgoingCategoryMaxServoAngleValue
 	OutgoingCategoryQuaternionX
 	OutgoingCategoryQuaternionY
 	OutgoingCategoryQuaternionZ
@@ -23,12 +23,10 @@ const (
 	OutgoingCategoryEulerDegreesYaw
 	OutgoingCategoryEulerDegreesPitch
 	OutgoingCategoryEulerDegreesRoll
-	OutgoingCategorySetMotorSpeedStop
-	OutgoingCategorySetMotorSpeedForward
-	OutgoingCategorySetMotorSpeedBackward
-	OutgoingCategorySetServoDirectionCenter
-	OutgoingCategorySetServoDirectionToLeft
-	OutgoingCategorySetServoDirectionToRight
+	OutgoingCategoryMotorSpeedStart
+	OutgoingCategoryMotorSpeedEnd
+	OutgoingCategoryServoAngleStart
+	OutgoingCategoryServoAngleEnd
 )
 
 // DataLength returns the size in bytes of the data for a given OutgoingCategory
@@ -40,11 +38,11 @@ func (o OutgoingCategory) DataLength() (int, tinygoerrors.ErrorCode) {
 	switch o {
 	case OutgoingCategoryNil:
 		return 0, ErrorCodeUSBCDCNilOutgoingCategory
-	case OutgoingCategorySetMotorSpeedStop, OutgoingCategorySetServoDirectionCenter:
+	case OutgoingCategoryMotorSpeedStart, OutgoingCategoryServoAngleStart, OutgoingCategoryMotorSpeedEnd, OutgoingCategoryServoAngleEnd:
 		return 0, tinygoerrors.ErrorCodeNil
 	case OutgoingCategoryStatus, OutgoingCategoryChallenge:
 		return 1, tinygoerrors.ErrorCodeNil
-	case OutgoingCategoryError, OutgoingCategoryMaxMotorSpeedValue, OutgoingCategoryMaxServoDirectionValue, OutgoingCategorySetMotorSpeedForward, OutgoingCategorySetMotorSpeedBackward, OutgoingCategorySetServoDirectionToLeft, OutgoingCategorySetServoDirectionToRight:
+	case OutgoingCategoryError, OutgoingCategoryMaxMotorSpeedValue, OutgoingCategoryMaxServoAngleValue:
 		return 2, tinygoerrors.ErrorCodeNil
 	case OutgoingCategoryQuaternionX, OutgoingCategoryQuaternionY, OutgoingCategoryQuaternionZ, OutgoingCategoryQuaternionW, OutgoingCategoryEulerDegreesYaw, OutgoingCategoryEulerDegreesPitch, OutgoingCategoryEulerDegreesRoll:
 		return 8, tinygoerrors.ErrorCodeNil
@@ -77,8 +75,8 @@ func OutgoingCategoryFromUint8(value uint8) (
 		return OutgoingCategoryError, tinygoerrors.ErrorCodeNil
 	case OutgoingCategoryMaxMotorSpeedValue:
 		return OutgoingCategoryMaxMotorSpeedValue, tinygoerrors.ErrorCodeNil
-	case OutgoingCategoryMaxServoDirectionValue:
-		return OutgoingCategoryMaxServoDirectionValue, tinygoerrors.ErrorCodeNil
+	case OutgoingCategoryMaxServoAngleValue:
+		return OutgoingCategoryMaxServoAngleValue, tinygoerrors.ErrorCodeNil
 	case OutgoingCategoryQuaternionX:
 		return OutgoingCategoryQuaternionX, tinygoerrors.ErrorCodeNil
 	case OutgoingCategoryQuaternionY:
@@ -93,18 +91,14 @@ func OutgoingCategoryFromUint8(value uint8) (
 		return OutgoingCategoryEulerDegreesPitch, tinygoerrors.ErrorCodeNil
 	case OutgoingCategoryEulerDegreesRoll:
 		return OutgoingCategoryEulerDegreesRoll, tinygoerrors.ErrorCodeNil
-	case OutgoingCategorySetMotorSpeedStop:
-		return OutgoingCategorySetMotorSpeedStop, tinygoerrors.ErrorCodeNil
-	case OutgoingCategorySetMotorSpeedForward:
-		return OutgoingCategorySetMotorSpeedForward, tinygoerrors.ErrorCodeNil
-	case OutgoingCategorySetMotorSpeedBackward:
-		return OutgoingCategorySetMotorSpeedBackward, tinygoerrors.ErrorCodeNil
-	case OutgoingCategorySetServoDirectionCenter:
-		return OutgoingCategorySetServoDirectionCenter, tinygoerrors.ErrorCodeNil
-	case OutgoingCategorySetServoDirectionToLeft:
-		return OutgoingCategorySetServoDirectionToLeft, tinygoerrors.ErrorCodeNil
-	case OutgoingCategorySetServoDirectionToRight:
-		return OutgoingCategorySetServoDirectionToRight, tinygoerrors.ErrorCodeNil
+	case OutgoingCategoryMotorSpeedStart:
+		return OutgoingCategoryMotorSpeedStart, tinygoerrors.ErrorCodeNil
+	case OutgoingCategoryMotorSpeedEnd:
+		return OutgoingCategoryMotorSpeedEnd, tinygoerrors.ErrorCodeNil
+	case OutgoingCategoryServoAngleStart:
+		return OutgoingCategoryServoAngleStart, tinygoerrors.ErrorCodeNil
+	case OutgoingCategoryServoAngleEnd:
+		return OutgoingCategoryServoAngleEnd, tinygoerrors.ErrorCodeNil
 	default:
 		return OutgoingCategoryNil, ErrorCodeUSBCDCUnknownOutgoingCategory
 	}

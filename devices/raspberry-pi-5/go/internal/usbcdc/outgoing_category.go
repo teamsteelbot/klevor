@@ -16,52 +16,52 @@ const (
 	OutgoingCategoryMotorSpeedForward
 	OutgoingCategoryMotorSpeedBackward
 	OutgoingCategoryGetMaxMotorSpeedValue
-	OutgoingCategoryServoDirectionCenter
-	OutgoingCategoryServoDirectionToLeft
-	OutgoingCategoryServoDirectionToRight
-	OutgoingCategoryGetMaxServoDirectionValue
+	OutgoingCategoryServoAngleCenter
+	OutgoingCategoryServoAngleToLeft
+	OutgoingCategoryServoAngleToRight
+	OutgoingCategoryGetMaxServoAngleValue
 )
 
 var (
 	// OutgoingCategoryNames maps a given OutgoingCategory to its string name
 	OutgoingCategoryNames = map[OutgoingCategory]string{
-		OutgoingCategoryStatus:                    "status",
-		OutgoingCategoryMotorSpeedStop:            "motor_speed_stop",
-		OutgoingCategoryMotorSpeedForward:         "motor_speed_forward",
-		OutgoingCategoryMotorSpeedBackward:        "motor_speed_backward",
-		OutgoingCategoryGetMaxMotorSpeedValue:     "get_max_motor_speed_value",
-		OutgoingCategoryServoDirectionCenter:      "servo_direction_center",
-		OutgoingCategoryServoDirectionToLeft:      "servo_direction_to_left",
-		OutgoingCategoryServoDirectionToRight:     "servo_direction_to_right",
-		OutgoingCategoryGetMaxServoDirectionValue: "get_max_servo_direction_value",
+		OutgoingCategoryStatus:                "status",
+		OutgoingCategoryMotorSpeedStop:        "motor_speed_stop",
+		OutgoingCategoryMotorSpeedForward:     "motor_speed_forward",
+		OutgoingCategoryMotorSpeedBackward:    "motor_speed_backward",
+		OutgoingCategoryGetMaxMotorSpeedValue: "get_max_motor_speed_value",
+		OutgoingCategoryServoAngleCenter:      "servo_angle_center",
+		OutgoingCategoryServoAngleToLeft:      "servo_angle_to_left",
+		OutgoingCategoryServoAngleToRight:     "servo_angle_to_right",
+		OutgoingCategoryGetMaxServoAngleValue: "get_max_servo_angle_value",
 	}
 
 	// OutgoingCategories maps a given uint8 value to its OutgoingCategory enum
 	OutgoingCategories = map[uint8]OutgoingCategory{
-		uint8(OutgoingCategoryNil):                       OutgoingCategoryNil,
-		uint8(OutgoingCategoryStatus):                    OutgoingCategoryStatus,
-		uint8(OutgoingCategoryMotorSpeedStop):            OutgoingCategoryMotorSpeedStop,
-		uint8(OutgoingCategoryMotorSpeedForward):         OutgoingCategoryMotorSpeedForward,
-		uint8(OutgoingCategoryMotorSpeedBackward):        OutgoingCategoryMotorSpeedBackward,
-		uint8(OutgoingCategoryGetMaxMotorSpeedValue):     OutgoingCategoryGetMaxMotorSpeedValue,
-		uint8(OutgoingCategoryServoDirectionCenter):      OutgoingCategoryServoDirectionCenter,
-		uint8(OutgoingCategoryServoDirectionToLeft):      OutgoingCategoryServoDirectionToLeft,
-		uint8(OutgoingCategoryServoDirectionToRight):     OutgoingCategoryServoDirectionToRight,
-		uint8(OutgoingCategoryGetMaxServoDirectionValue): OutgoingCategoryGetMaxServoDirectionValue,
+		uint8(OutgoingCategoryNil):                   OutgoingCategoryNil,
+		uint8(OutgoingCategoryStatus):                OutgoingCategoryStatus,
+		uint8(OutgoingCategoryMotorSpeedStop):        OutgoingCategoryMotorSpeedStop,
+		uint8(OutgoingCategoryMotorSpeedForward):     OutgoingCategoryMotorSpeedForward,
+		uint8(OutgoingCategoryMotorSpeedBackward):    OutgoingCategoryMotorSpeedBackward,
+		uint8(OutgoingCategoryGetMaxMotorSpeedValue): OutgoingCategoryGetMaxMotorSpeedValue,
+		uint8(OutgoingCategoryServoAngleCenter):      OutgoingCategoryServoAngleCenter,
+		uint8(OutgoingCategoryServoAngleToLeft):      OutgoingCategoryServoAngleToLeft,
+		uint8(OutgoingCategoryServoAngleToRight):     OutgoingCategoryServoAngleToRight,
+		uint8(OutgoingCategoryGetMaxServoAngleValue): OutgoingCategoryGetMaxServoAngleValue,
 	}
 
 	// OutgoingCategoryDataLengths maps a given OutgoingCategory to its data length in bytes
 	OutgoingCategoryDataLengths = map[OutgoingCategory]int{
-		OutgoingCategoryNil:                       0,
-		OutgoingCategoryStatus:                    1,
-		OutgoingCategoryMotorSpeedStop:            0,
-		OutgoingCategoryMotorSpeedForward:         2,
-		OutgoingCategoryMotorSpeedBackward:        2,
-		OutgoingCategoryGetMaxMotorSpeedValue:     0,
-		OutgoingCategoryServoDirectionCenter:      0,
-		OutgoingCategoryServoDirectionToLeft:      2,
-		OutgoingCategoryServoDirectionToRight:     2,
-		OutgoingCategoryGetMaxServoDirectionValue: 0,
+		OutgoingCategoryNil:                   0,
+		OutgoingCategoryStatus:                1,
+		OutgoingCategoryMotorSpeedStop:        0,
+		OutgoingCategoryMotorSpeedForward:     2,
+		OutgoingCategoryMotorSpeedBackward:    2,
+		OutgoingCategoryGetMaxMotorSpeedValue: 0,
+		OutgoingCategoryServoAngleCenter:      0,
+		OutgoingCategoryServoAngleToLeft:      2,
+		OutgoingCategoryServoAngleToRight:     2,
+		OutgoingCategoryGetMaxServoAngleValue: 0,
 	}
 )
 
@@ -102,9 +102,9 @@ func (o OutgoingCategory) DataLength() (int, error) {
 //
 // True if the category is a servo category, otherwise False
 func (o OutgoingCategory) IsAServoCategory() bool {
-	return o == OutgoingCategoryServoDirectionCenter ||
-		o == OutgoingCategoryServoDirectionToLeft ||
-		o == OutgoingCategoryServoDirectionToRight
+	return o == OutgoingCategoryServoAngleCenter ||
+		o == OutgoingCategoryServoAngleToLeft ||
+		o == OutgoingCategoryServoAngleToRight
 }
 
 // IsAMotorCategory checks if the given OutgoingCategory is a motor category

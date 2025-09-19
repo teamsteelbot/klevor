@@ -16,10 +16,10 @@ const (
 	IncomingCategoryMotorSpeedForward
 	IncomingCategoryMotorSpeedBackward
 	IncomingCategoryGetMaxMotorSpeedValue
-	IncomingCategoryServoDirectionCenter
-	IncomingCategoryServoDirectionToLeft
-	IncomingCategoryServoDirectionToRight
-	IncomingCategoryGetMaxServoDirectionValue
+	IncomingCategoryServoAngleCenter
+	IncomingCategoryServoAngleToLeft
+	IncomingCategoryServoAngleToRight
+	IncomingCategoryGetMaxServoAngleValue
 )
 
 // DataLength returns the size in bytes of the data for a given IncomingCategory
@@ -31,11 +31,11 @@ func (i IncomingCategory) DataLength() (int, tinygoerrors.ErrorCode) {
 	switch i {
 	case IncomingCategoryNil:
 		return 0, ErrorCodeUSBCDCNilIncomingCategory
-	case IncomingCategoryMotorSpeedStop, IncomingCategoryServoDirectionCenter, IncomingCategoryGetMaxMotorSpeedValue, IncomingCategoryGetMaxServoDirectionValue:
+	case IncomingCategoryMotorSpeedStop, IncomingCategoryServoAngleCenter, IncomingCategoryGetMaxMotorSpeedValue, IncomingCategoryGetMaxServoAngleValue:
 		return 0, tinygoerrors.ErrorCodeNil
 	case IncomingCategoryStatus:
 		return 1, tinygoerrors.ErrorCodeNil
-	case IncomingCategoryMotorSpeedForward, IncomingCategoryMotorSpeedBackward, IncomingCategoryServoDirectionToLeft, IncomingCategoryServoDirectionToRight:
+	case IncomingCategoryMotorSpeedForward, IncomingCategoryMotorSpeedBackward, IncomingCategoryServoAngleToLeft, IncomingCategoryServoAngleToRight:
 		return 2, tinygoerrors.ErrorCodeNil
 	default:
 		return 0, ErrorCodeUSBCDCUnknownIncomingCategory
@@ -48,9 +48,9 @@ func (i IncomingCategory) DataLength() (int, tinygoerrors.ErrorCode) {
 //
 // True if the category is a servo category, otherwise False
 func (i IncomingCategory) IsAServoCategory() bool {
-	return i == IncomingCategoryServoDirectionCenter ||
-		i == IncomingCategoryServoDirectionToLeft ||
-		i == IncomingCategoryServoDirectionToRight
+	return i == IncomingCategoryServoAngleCenter ||
+		i == IncomingCategoryServoAngleToLeft ||
+		i == IncomingCategoryServoAngleToRight
 }
 
 // IsAMotorCategory checks if the given IncomingCategory is a motor category
@@ -90,14 +90,14 @@ func IncomingCategoryFromUint8(value uint8) (
 		return IncomingCategoryMotorSpeedBackward, tinygoerrors.ErrorCodeNil
 	case IncomingCategoryGetMaxMotorSpeedValue:
 		return IncomingCategoryGetMaxMotorSpeedValue, tinygoerrors.ErrorCodeNil
-	case IncomingCategoryServoDirectionCenter:
-		return IncomingCategoryServoDirectionCenter, tinygoerrors.ErrorCodeNil
-	case IncomingCategoryServoDirectionToLeft:
-		return IncomingCategoryServoDirectionToLeft, tinygoerrors.ErrorCodeNil
-	case IncomingCategoryServoDirectionToRight:
-		return IncomingCategoryServoDirectionToRight, tinygoerrors.ErrorCodeNil
-	case IncomingCategoryGetMaxServoDirectionValue:
-		return IncomingCategoryGetMaxServoDirectionValue, tinygoerrors.ErrorCodeNil
+	case IncomingCategoryServoAngleCenter:
+		return IncomingCategoryServoAngleCenter, tinygoerrors.ErrorCodeNil
+	case IncomingCategoryServoAngleToLeft:
+		return IncomingCategoryServoAngleToLeft, tinygoerrors.ErrorCodeNil
+	case IncomingCategoryServoAngleToRight:
+		return IncomingCategoryServoAngleToRight, tinygoerrors.ErrorCodeNil
+	case IncomingCategoryGetMaxServoAngleValue:
+		return IncomingCategoryGetMaxServoAngleValue, tinygoerrors.ErrorCodeNil
 	default:
 		return IncomingCategoryNil, ErrorCodeUSBCDCUnknownIncomingCategory
 	}

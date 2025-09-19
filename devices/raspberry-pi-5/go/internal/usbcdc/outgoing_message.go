@@ -124,14 +124,14 @@ func (msg *OutgoingMessage) StringToPrint() string {
 
 	switch msg.Category {
 	case OutgoingCategoryMotorSpeedStop,
-		OutgoingCategoryServoDirectionCenter,
+		OutgoingCategoryServoAngleCenter,
 		OutgoingCategoryGetMaxMotorSpeedValue,
-		OutgoingCategoryGetMaxServoDirectionValue:
+		OutgoingCategoryGetMaxServoAngleValue:
 		dataDetails = "<no content>"
 	case OutgoingCategoryMotorSpeedForward,
 		OutgoingCategoryMotorSpeedBackward,
-		OutgoingCategoryServoDirectionToLeft,
-		OutgoingCategoryServoDirectionToRight:
+		OutgoingCategoryServoAngleToLeft,
+		OutgoingCategoryServoAngleToRight:
 		if len(msg.Data) != 2 {
 			dataDetails = fmt.Sprintf(
 				"invalid length: %d, expected: 2",

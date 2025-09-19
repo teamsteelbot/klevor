@@ -5,17 +5,29 @@ import (
 )
 
 var (
-	// IncomingDelay is the delay between incoming message checks
-	IncomingDelay = 10 * time.Millisecond
+	// MinimumValidDistance is the minimum valid distance for the sensors
+	MinimumValidDistance = 45.0
 
-	// ConfirmationTimeout is the timeout duration for confirmation messages
-	ConfirmationTimeout = 5 * time.Second
+	// SetServoAngleAttempts is the number of attempts to set the servo angle
+	SetServoAngleAttempts = 3
 
-	// ConfirmationMessageTimeout is the timeout duration for confirmation messages
-	ConfirmationMessageTimeout = time.Second * 5
+	// SetMotorSpeedAttempts is the number of attempts to set the motor speed
+	SetMotorSpeedAttempts = 3
 
-	// ConfirmationAttempts is the number of attempts to confirm a message
-	ConfirmationAttempts = ConfirmationTimeout / IncomingDelay
+	// MotorSpeedStartMessageTimeout is the timeout for the motor speed start message
+	MotorSpeedStartMessageTimeout = 100 * time.Millisecond
+
+	// ServoAngleStartMessageTimeout is the timeout for the servo angle start message
+	ServoAngleStartMessageTimeout = 100 * time.Millisecond
+
+	// MotorSpeedEndMessageTimeout is the timeout for the motor speed end message
+	MotorSpeedEndMessageTimeout = 1500 * time.Millisecond
+
+	// ServoAngleEndMessageTimeout is the timeout for the servo angle end message
+	ServoAngleEndMessageTimeout = 500 * time.Millisecond
+
+	// RPLiDARDelay is the delay between RPLiDAR scans
+	RPLiDARDelay = 100 * time.Millisecond
 
 	// HandlerLoggerProducerTag is the tag for the logger producer
 	HandlerLoggerProducerTag = "PILOT_HANDLER"
@@ -64,7 +76,4 @@ var (
 
 	// AverageAngleWidth is the width of the angle for average calculations
 	AverageAngleWidth = 5
-
-	// CommandDelay between sending commands to the ESC motor and servo
-	CommandDelay = 50 * time.Millisecond
 )

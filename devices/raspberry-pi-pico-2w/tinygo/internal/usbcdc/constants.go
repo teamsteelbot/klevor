@@ -55,6 +55,8 @@ func init() {
 	usbCDCHandler, err := NewDefaultHandler(
 		internalchallenge.ChallengeHandler,
 		internalledonboard.OnBoardHandler,
+		MaxIncomingMessageDataLength,
+		MaxOutgoingMessageDataLength,
 	)
 	if err != tinygoerrors.ErrorCodeNil {
 		internal.Logger.ErrorMessageWithErrorCode(
