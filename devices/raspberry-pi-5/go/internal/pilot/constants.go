@@ -12,10 +12,10 @@ var (
 	SetMotorSpeedAttempts = 3
 
 	// MotorSpeedStartMessageTimeout is the timeout for the motor speed start message
-	MotorSpeedStartMessageTimeout = 200 * time.Millisecond
+	MotorSpeedStartMessageTimeout = 500 * time.Millisecond
 
 	// ServoAngleStartMessageTimeout is the timeout for the servo angle start message
-	ServoAngleStartMessageTimeout = 200 * time.Millisecond
+	ServoAngleStartMessageTimeout = 500 * time.Millisecond
 
 	// MotorSpeedEndMessageTimeout is the timeout for the motor speed end message
 	MotorSpeedEndMessageTimeout = 2000 * time.Millisecond // 1500 ms
