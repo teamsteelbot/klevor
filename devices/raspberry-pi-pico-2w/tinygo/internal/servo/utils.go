@@ -6,17 +6,17 @@ import (
 	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
 )
 
-// SetDirectionBasedOnReceivedMessage sets the servo direction based on the received message
+// SetAngleBasedOnReceivedMessage sets the servo angle based on the received message
 //
 // Parameters:
 //
 // handler: The USB CDC handler to send error messages if needed
-// message: The incoming message containing the servo direction command
+// message: The incoming message containing the servo angle command
 //
 // Returns:
 //
-// An error if the servo direction could not be set
-func SetDirectionBasedOnReceivedMessage(
+// An error if the servo angle could not be set
+func SetAngleBasedOnReceivedMessage(
 	handler internalusbcdc.Handler,
 	message internalusbcdc.IncomingMessage,
 ) tinygoerrors.ErrorCode {
@@ -56,12 +56,12 @@ func SetDirectionBasedOnReceivedMessage(
 			return err
 		}
 	case internalusbcdc.IncomingCategoryServoAngleToLeft:
-		// Set the servo direction to left
+		// Set the servo angle to left
 		if err := ServoHandler.SafeSetAngleToLeft(servoDirectionAngle); err != tinygoerrors.ErrorCodeNil {
 			return err
 		}
 	case internalusbcdc.IncomingCategoryServoAngleToRight:
-		// Set the servo direction to right
+		// Set the servo angle to right
 		if err := ServoHandler.SafeSetAngleToRight(servoDirectionAngle); err != tinygoerrors.ErrorCodeNil {
 			return err
 		}

@@ -99,8 +99,11 @@ const (
 )
 
 var (
+	// BNO08XInterval is the interval for BNO08X messages
+	BNO08XInterval = 25 * time.Millisecond
+
 	// ReadTimeout is the timeout duration for reading from the USB-CDC port
-	ReadTimeout = time.Second * 2
+	ReadTimeout = 2 * BNO08XInterval
 
 	// StopTimeout is the timeout duration for stopping the USB-CDC communication
 	StopTimeout = 3 * time.Second
@@ -112,7 +115,7 @@ var (
 	BufferSize uint8 = 64
 
 	// BaudRate is the baud rate for USB-CDC communication
-	BaudRate = 921600
+	BaudRate = 921_600
 
 	// HandlerLoggerProducerTag is the logger producer tag for USB-CDC handler
 	HandlerLoggerProducerTag = "USB_CDC_HANDLER"

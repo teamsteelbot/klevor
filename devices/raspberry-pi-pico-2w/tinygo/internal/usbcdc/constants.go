@@ -14,6 +14,9 @@ const (
 	// BaudRate is the baud rate for USB-CDC communication
 	BaudRate = 921_600
 
+	// MinimumBufferedMessages is the minimum number of buffered bytes to read from the USB-CDC
+	MinimumBufferedMessages = 2
+
 	// ConfirmationMessageTimeout is the timeout duration for confirmation messages
 	ConfirmationMessageTimeout = time.Second * 5
 

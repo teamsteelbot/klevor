@@ -73,6 +73,7 @@ type (
 		servoAngleEndMessagesCh        chan struct{}
 		notifyMaxServoAngleValueOnce   sync.Once
 		debug                          bool
+		hasStarted atomic.Bool
 	}
 )
 
@@ -551,6 +552,9 @@ func (h *DefaultHandler) incomingMessagesHandler(
 		}
 	}
 
+	// Mark the handler as started
+	h.hasStarted.Store(true)
+
 	// Send the message to get the max motor speed value and max servo direction value
 	h.outgoingMessagesCh <- OutgoingGetMaxMotorSpeedValueMessage
 	h.outgoingMessagesCh <- OutgoingGetMaxServoAngleValueMessage
@@ -640,58 +644,18 @@ func (h *DefaultHandler) incomingMessagesHandler(
 					// Parse the BNO08X quaternion X value
 					quaternionXUint64 := binary.BigEndian.Uint64(message.Data[:8])
 					h.receivedBNO08XQuaternionX = math.Float64frombits(quaternionXUint64)
-
-					// Log the received message
-					if h.incomingMessagesLoggerProducer.IsDebug() {
-						h.incomingMessagesLoggerProducer.Debug(
-							fmt.Sprintf(
-								"Received BNO08X quaternion X: %f",
-								h.receivedBNO08XQuaternionX,
-							),
-						)
-					}
 				case IncomingCategoryQuaternionY:
 					// Parse the BNO08X quaternion Y value
 					quaternionYUint64 := binary.BigEndian.Uint64(message.Data[:8])
 					h.receivedBNO08XQuaternionY = math.Float64frombits(quaternionYUint64)
-
-					// Log the received message
-					if h.incomingMessagesLoggerProducer.IsDebug() {
-						h.incomingMessagesLoggerProducer.Debug(
-							fmt.Sprintf(
-								"Received BNO08X quaternion Y: %f",
-								h.receivedBNO08XQuaternionY,
-							),
-						)
-					}
 				case IncomingCategoryQuaternionZ:
 					// Parse the BNO08X quaternion Z value
 					quaternionZUint64 := binary.BigEndian.Uint64(message.Data[:8])
 					h.receivedBNO08XQuaternionZ = math.Float64frombits(quaternionZUint64)
-
-					// Log the received message
-					if h.incomingMessagesLoggerProducer.IsDebug() {
-						h.incomingMessagesLoggerProducer.Debug(
-							fmt.Sprintf(
-								"Received BNO08X quaternion Z: %f",
-								h.receivedBNO08XQuaternionZ,
-							),
-						)
-					}
 				case IncomingCategoryQuaternionW:
 					// Parse the BNO08X quaternion W value
 					quaternionWUint64 := binary.BigEndian.Uint64(message.Data[:8])
 					h.receivedBNO08XQuaternionW = math.Float64frombits(quaternionWUint64)
-
-					// Log the received message
-					if h.incomingMessagesLoggerProducer.IsDebug() {
-						h.incomingMessagesLoggerProducer.Debug(
-							fmt.Sprintf(
-								"Received BNO08X quaternion W: %f",
-								h.receivedBNO08XQuaternionW,
-							),
-						)
-					}
 
 					// Convert the quaternion to Euler angles in degrees
 					var quaternion [4]float64
@@ -708,53 +672,21 @@ func (h *DefaultHandler) incomingMessagesHandler(
 					h.updateBNO08XPitchDegrees(eulerDegrees[EulerDegreesPitchIndex])
 					h.updateBNO08XRollDegrees(eulerDegrees[EulerDegreesRollIndex])
 				case IncomingCategoryMotorSpeedStart:
-					// Log the received message
-					/*
-						if h.incomingMessagesLoggerProducer.IsDebug() {
-							h.incomingMessagesLoggerProducer.Debug(
-								"Received motor speed start message",
-							)
-						}
-					*/
 					h.incomingMessagesLoggerProducer.Info(
 						"Received motor speed start message",
 					)
 					h.motorSpeedStartMessagesCh <- struct{}{}
 				case IncomingCategoryMotorSpeedEnd:
-					// Log the received message
-					/*
-						if h.incomingMessagesLoggerProducer.IsDebug() {
-							h.incomingMessagesLoggerProducer.Debug(
-								"Received motor speed end message",
-							)
-						}
-					*/
 					h.incomingMessagesLoggerProducer.Info(
 						"Received motor speed end message",
 					)
 					h.motorSpeedEndMessagesCh <- struct{}{}
 				case IncomingCategoryServoAngleStart:
-					// Log the received message
-					/*
-						if h.incomingMessagesLoggerProducer.IsDebug() {
-							h.incomingMessagesLoggerProducer.Debug(
-								"Received servo angle start message",
-							)
-						}
-					*/
 					h.incomingMessagesLoggerProducer.Info(
 						"Received servo angle start message",
 					)
 					h.servoAngleStartMessagesCh <- struct{}{}
 				case IncomingCategoryServoAngleEnd:
-					// Log the received message
-					/*
-						if h.incomingMessagesLoggerProducer.IsDebug() {
-							h.incomingMessagesLoggerProducer.Debug(
-								"Received servo angle end message",
-							)
-						}
-					*/
 					h.incomingMessagesLoggerProducer.Info(
 						"Received servo angle end message",
 					)
@@ -1030,7 +962,8 @@ func (h *DefaultHandler) outgoingMessagesHandler(
 				return err
 			}
 		default:
-			if time.Since(lastHeartbeatTime) >= HeartbeatInterval {
+			// Check if it's time to send a heartbeat message and the handler has started
+			if h.hasStarted.Load() && time.Since(lastHeartbeatTime) >= HeartbeatInterval {
 				// Send a heartbeat message if the interval has passed
 				if err := h.sendMessage(
 					port,
@@ -1166,6 +1099,9 @@ func (h *DefaultHandler) Run(ctx context.Context, stopFn func()) error {
 	// Reset the closed state
 	h.closed.Store(false)
 
+	// Reset the hasStarted state
+	h.hasStarted.Store(false)
+	
 	// Initialize the outgoing messages channel
 	h.outgoingMessagesCh = make(
 		chan *OutgoingMessage,
@@ -1241,12 +1177,14 @@ func (h *DefaultHandler) Run(ctx context.Context, stopFn func()) error {
 	h.handlerLoggerProducer = handlerLoggerProducer
 	defer h.handlerLoggerProducer.Close()
 
-	return goconcurrentlogger.LogOnError(
-		func() error {
+	return goconcurrentlogger.StopContextAndLogOnError(
+		ctx,
+		stopFn,
+		func(ctx context.Context) error {
 			return h.runToWrap(ctx, stopFn)
 		},
 		h.handlerLoggerProducer,
-	)
+	)()
 }
 
 // NewSender returns a new sE instance associated with this DefaultHandler.

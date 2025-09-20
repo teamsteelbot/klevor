@@ -26,8 +26,8 @@ func SwitchOnEventGenerator(
 		// Send start messages multiple times to ensure the host receives it
 		for _ = range InitializationAttempts {
 			// Send start message
-			if err = usbCDChandler.SendStartMessage(); err != tinygoerrors.ErrorCodeNil {
-				continue
+			if err = usbCDChandler.SendStartMessage(); err == tinygoerrors.ErrorCodeNil {
+				break
 			}
 		}
 		if err != tinygoerrors.ErrorCodeNil {
@@ -36,8 +36,8 @@ func SwitchOnEventGenerator(
 
 		// Send challenge messages multiple times to ensure the host receives it
 		for _ = range InitializationAttempts {
-			if err = usbCDChandler.SendChallengeMessage(); err != tinygoerrors.ErrorCodeNil {
-				continue
+			if err = usbCDChandler.SendChallengeMessage(); err == tinygoerrors.ErrorCodeNil {
+				break
 			}
 		}
 		if err != tinygoerrors.ErrorCodeNil {

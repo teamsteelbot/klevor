@@ -21,7 +21,7 @@ const (
 	receivingMessageTimeout = 5 * time.Second
 
 	// sendBNO08XDataInterval defines the interval to send BNO08X data.
-	sendBNO08XDataInterval = 50 * time.Millisecond
+	sendBNO08XDataInterval = 25 * time.Millisecond
 
 	// noMessageReceivedDelay is the time to sleep if no message is received.
 	noMessageReceivedDelay = 10 * time.Millisecond
@@ -112,6 +112,9 @@ func main() {
 					internalusbcdc.USBCDCHandler.SendErrorMessage(err)
 				}
 
+				// Log the euler degrees values
+				// internal.PrintEulerDegrees(eulerDegrees)
+
 				// Update the last sent time
 				lastBNO08XSentTime = time.Now()
 			}
@@ -166,7 +169,7 @@ func main() {
 					internalusbcdc.USBCDCHandler.SendErrorMessage(err)
 				}
 			case internalusbcdc.IncomingCategoryServoAngleToLeft, internalusbcdc.IncomingCategoryServoAngleToRight:
-				if err := internalservo.SetDirectionBasedOnReceivedMessage(
+				if err := internalservo.SetAngleBasedOnReceivedMessage(
 					internalusbcdc.USBCDCHandler,
 					newMessage,
 				); err != tinygoerrors.ErrorCodeNil {

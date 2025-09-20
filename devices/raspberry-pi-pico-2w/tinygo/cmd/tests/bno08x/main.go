@@ -10,44 +10,12 @@ import (
 	tinygologger "github.com/ralvarezdev/tinygo-logger"
 )
 
-const (
-	// Float64Precision defines the precision for float64 values
-	Float64Precision = 3
-)
-
 var (
 	// noBNO08XStructInitializedMessage is the message printed when no BNO08X struct is initialized
 	noBNO08XStructInitializedMessage = []byte("No BNO08X struct initialized")
 
 	// failedToUpdateBNO08XMessage is the message printed when updating the BNO08X sensor fails
 	failedToUpdateBNO08XMessage = []byte("Failed to update BNO08X sensor")
-
-	// quaternionHeader is the header for the quaternion values in the debug output
-	quaternionHeader = []byte("QUATERNION VALUES")
-
-	// quaternionXPrefix is the prefix for the quaternion X value in the debug output
-	quaternionXPrefix = []byte("\tQuaternion X:")
-
-	// quaternionYPrefix is the prefix for the quaternion Y value in the debug output
-	quaternionYPrefix = []byte("\tQuaternion Y:")
-
-	// quaternionZPrefix is the prefix for the quaternion Z value in the debug output
-	quaternionZPrefix = []byte("\tQuaternion Z:")
-
-	// quaternionWPrefix is the prefix for the quaternion W value in the debug output
-	quaternionWPrefix = []byte("\tQuaternion W:")
-
-	// eulerHeader is the header for the euler angles values in the debug output
-	eulerHeader = []byte("EULER ANGLES")
-
-	// yawDegreesPrefix is the prefix for the yaw degrees value in the debug output
-	yawDegreesPrefix = []byte("\tYaw Degrees:")
-
-	// pitchDegreesPrefix is the prefix for the pitch degrees value in the debug output
-	pitchDegreesPrefix = []byte("\tPitch Degrees:")
-
-	// rollDegreesPrefix is the prefix for the roll degrees value in the debug output
-	rollDegreesPrefix = []byte("\tRoll Degrees:")
 )
 
 func main() {
@@ -65,18 +33,8 @@ func main() {
 
 				// Get the quaternion
 				q := internalbno08x.UART.GetQuaternion()
-				x := q[tinygobno08x.QuaternionXIndex]
-				y := q[tinygobno08x.QuaternionYIndex]
-				z := q[tinygobno08x.QuaternionZIndex]
-				w := q[tinygobno08x.QuaternionWIndex]
-
 				// Log the quaternion values
-				internal.Logger.AddMessage(quaternionHeader, true)
-				internal.Logger.AddMessageWithFloat64(quaternionXPrefix, x, true, true)
-				internal.Logger.AddMessageWithFloat64(quaternionYPrefix, y, true, true)
-				internal.Logger.AddMessageWithFloat64(quaternionZPrefix, z, true, true)
-				internal.Logger.AddMessageWithFloat64(quaternionWPrefix, w, true, true)
-				internal.Logger.Debug()
+				internal.PrintQuaternion(q)
 			}
 		*/
 
@@ -92,34 +50,9 @@ func main() {
 
 			// Get the euler degrees
 			e := internalbno08x.UARTRVC.GetEulerDegrees()
-			yaw := e[tinygobno08x.EulerDegreesYawIndex]
-			pitch := e[tinygobno08x.EulerDegreesPitchIndex]
-			roll := e[tinygobno08x.EulerDegreesRollIndex]
 
 			// Log the euler degrees values
-			internal.Logger.AddMessage(eulerHeader, true)
-			internal.Logger.AddMessageWithFloat64(
-				yawDegreesPrefix,
-				yaw,
-				Float64Precision,
-				true,
-				true,
-			)
-			internal.Logger.AddMessageWithFloat64(
-				pitchDegreesPrefix,
-				pitch,
-				Float64Precision,
-				true,
-				true,
-			)
-			internal.Logger.AddMessageWithFloat64(
-				rollDegreesPrefix,
-				roll,
-				Float64Precision,
-				true,
-				true,
-			)
-			internal.Logger.Debug()
+			internal.PrintEulerDegrees(e)
 		}
 
 		// Print memory stats

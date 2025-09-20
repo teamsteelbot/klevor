@@ -21,7 +21,7 @@ func main() {
 		"Enable RPLiDAR debug logging",
 	)
 	usbCDCDebug := flag.Bool(
-		"usb-cdc-debug",
+		"usbcdc-debug",
 		false,
 		"Enable USB-CDC debug logging",
 	)

@@ -21,17 +21,6 @@ import (
 	internalusbcdc "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/usbcdc"
 )
 
-const (
-	// SameUpdateServoInterval is the interval to update the servo even if the direction and angle are the same
-	SameUpdateServoInterval = 1 * time.Second
-
-	// SameUpdateMotorInterval is the interval to update the motor even if the speed and direction are the same
-	SameUpdateMotorInterval = 1 * time.Second
-
-	// ChangeMotorDirectionDelay is the delay to wait before changing the motor direction
-	ChangeMotorDirectionDelay = 1 * time.Second
-)
-
 type (
 	// DefaultHandler is the default implementation of the Handler interface
 	DefaultHandler struct {

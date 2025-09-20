@@ -15,9 +15,6 @@ var (
 	// PacketBuffer is the default packet buffer for the BNO08x sensor.
 	PacketBuffer = tinygobno08x.NewDefaultPacketBuffer()
 
-	// YawDegreesDifference is the difference in degrees to consider a yaw change.
-	YawDegreesDifference = 1.0
-
 	// UART is the UART instance for the BNO08x sensor.
 	UART *tinygobno08x.UART
 

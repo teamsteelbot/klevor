@@ -80,7 +80,7 @@ func NewDefaultHandler(
 //
 // true if there are messages available to read, false otherwise
 func (d *DefaultHandler) IsAvailableToRead() bool {
-	return d.serialer.Buffered() > 0
+	return d.serialer.Buffered() >= MinimumBufferedMessages
 }
 
 // readByte reads a single byte from the USB CDC.

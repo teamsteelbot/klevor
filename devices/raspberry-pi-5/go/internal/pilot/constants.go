@@ -6,7 +6,7 @@ import (
 
 var (
 	// MinimumValidDistance is the minimum valid distance for the sensors
-	MinimumValidDistance = 45.0
+	MinimumValidDistance = 10.0
 
 	// SetServoAngleAttempts is the number of attempts to set the servo angle
 	SetServoAngleAttempts = 3
