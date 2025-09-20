@@ -232,8 +232,6 @@ func (s *DefaultSender) Close() {
 //
 // True if the sender is closed, false otherwise.
 func (s *DefaultSender) IsClosed() bool {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
 	return s.closed.Load()
 }
 

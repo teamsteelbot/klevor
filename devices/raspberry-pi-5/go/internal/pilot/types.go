@@ -1240,16 +1240,22 @@ func (h *DefaultHandler) runToWrap(ctx context.Context) error {
 		return fmt.Errorf("failed to create USB-CDC sender: %w", err)
 	}
 	h.usbCDCSender = usbCDCSender
-	defer h.usbCDCSender.Close()
+	defer func() {
+		// Log the closure
+		h.handlerLoggerProducer.Info("Closing USB-CDC sender...")
+
+		// Close the sender
+		h.usbCDCSender.Close()
+
+		// Log the closure
+		h.handlerLoggerProducer.Info("USB-CDC sender closed")
+	}()
 
 	// Wait for the challenge message to be set
 	h.handlerLoggerProducer.Info("Waiting for challenge message...")
 	challenge, err := h.usbCDCHandler.WaitForChallenge(ctx)
 	if err != nil {
-		h.handlerLoggerProducer.Error(
-			fmt.Errorf("failed to wait for challenge message: %w", err),
-		)
-		return err
+		return fmt.Errorf("failed to wait for challenge message: %w", err)
 	}
 	h.handlerLoggerProducer.Info(
 		fmt.Sprintf("Challenge message received: %s", challenge.String()),
@@ -1259,10 +1265,7 @@ func (h *DefaultHandler) runToWrap(ctx context.Context) error {
 	h.handlerLoggerProducer.Info("Waiting for max motor speed value...")
 	maxMotorSpeed, err := h.usbCDCHandler.WaitForMaxMotorSpeedValue(ctx)
 	if err != nil {
-		h.handlerLoggerProducer.Error(
-			fmt.Errorf("failed to wait for max motor speed value: %w", err),
-		)
-		return err
+		return fmt.Errorf("failed to wait for max motor speed value: %w", err)
 	}
 	h.handlerLoggerProducer.Info(
 		fmt.Sprintf("Max motor speed value received: %d", maxMotorSpeed),
@@ -1273,10 +1276,7 @@ func (h *DefaultHandler) runToWrap(ctx context.Context) error {
 	h.handlerLoggerProducer.Info("Waiting for max servo direction value...")
 	maxServoAngle, err := h.usbCDCHandler.WaitForMaxServoAngleValue(ctx)
 	if err != nil {
-		h.handlerLoggerProducer.Error(
-			fmt.Errorf("failed to wait for max servo direction value: %w", err),
-		)
-		return err
+		return fmt.Errorf("failed to wait for max servo direction value: %w", err)
 	}
 	h.handlerLoggerProducer.Info(
 		fmt.Sprintf(
@@ -1433,9 +1433,16 @@ func (h *DefaultHandler) Run() error {
 	// Initialize the run to wrap goroutine
 	g.Go(
 		func() error {
-			defer fmt.Println("Pilot goroutine exited")
-			defer h.handlerLoggerProducer.Close()
-			defer stop()
+			defer func() {
+				if r := recover(); r != nil {
+					h.handlerLoggerProducer.Error(
+						fmt.Errorf("panic recovered: %v", r),
+					)
+				}
+				h.handlerLoggerProducer.Close()
+				stop()
+			}()
+			
 			return goconcurrentlogger.StopContextAndLogOnError(
 				ctx,
 				stop,
