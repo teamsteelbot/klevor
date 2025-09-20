@@ -5,11 +5,11 @@ SERVICE_NAME="klevor.service"
 
 # Check if the service exists
 if systemctl list-units --all | grep -Fq "$SERVICE_NAME"; then
-  echo "Service '$SERVICE_NAME' exists. Stopping now"
+  echo "Service '$SERVICE_NAME' exists. Clearing logs now"
 
-  # Stop the service
-  sudo systemctl stop "$SERVICE_NAME"
-  echo "Service '$SERVICE_NAME' stopped."
+  # Clear the logs
+  sudo journalctl --rotate
+  sudo journalctl --unit=$SERVICE_NAME --vacuum-time=1s
 else
   echo "Service '$SERVICE_NAME' does not exist or is not loaded. Skipping..."
   exit 0

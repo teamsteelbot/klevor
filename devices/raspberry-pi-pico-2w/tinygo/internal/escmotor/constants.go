@@ -32,10 +32,10 @@ const (
 	MaxSpeed uint16 = 100
 
 	// BackwardToForwardDelay is the delay when changing from backward to forward to be in neutral first
-	BackwardToForwardDelay = 1000 * time.Millisecond
+	BackwardToForwardDelay = 500 * time.Millisecond // 1000 ms
 
 	// ForwardToBackwardDelay is the delay when changing from forward to backward to be in neutral first
-	ForwardToBackwardDelay = 1000 * time.Millisecond
+	ForwardToBackwardDelay = 500 * time.Millisecond // 1000 ms
 
 	// ChangeSteps is the interval to change the speed of the ESC motor
 	ChangeSteps = 20

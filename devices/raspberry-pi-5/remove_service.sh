@@ -7,7 +7,7 @@ SCRIPT_DIR=$(cd "$(dirname "$0")" || exit 1; pwd)
 SERVICE_NAME="klevor.service"
 SERVICE_PATH="/etc/systemd/system/$SERVICE_NAME"
 
-# Remove the service if it exists
+# Check if the service exists
 if systemctl list-units --all | grep -Fq "$SERVICE_NAME"; then
   echo "Service '$SERVICE_NAME' exists. Stopping now"
 
@@ -29,4 +29,5 @@ if systemctl list-units --all | grep -Fq "$SERVICE_NAME"; then
   echo "Service '$SERVICE_NAME' has been removed."
 else
   echo "Service '$SERVICE_NAME' does not exist or is not loaded. Skipping..."
+  exit 0
 fi
