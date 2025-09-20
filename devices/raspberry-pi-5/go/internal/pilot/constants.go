@@ -33,13 +33,13 @@ var (
 	HandlerLoggerProducerTag = "PILOT_HANDLER"
 
 	// MotorBackwardFastPercentage is the percentage of the maximum speed for fast backward motor speed
-	MotorBackwardFastPercentage float64 = 0.5
+	MotorBackwardFastPercentage float64 = 0.7
 	
 	// MotorBackwardNormalPercentage is the percentage of the maximum speed for normal backward motor speed
-	MotorBackwardNormalPercentage float64 = 0.375
+	MotorBackwardNormalPercentage float64 = 0.6
 
 	// MotorBackwardSlowPercentage is the percentage of the maximum speed for slow backward motor speed
-	MotorBackwardSlowPercentage float64 = 0.25
+	MotorBackwardSlowPercentage float64 = 0.5
 
 	// MotorForwardFastPercentage is the percentage of the maximum speed for fast forward motor speed
 	MotorForwardFastPercentage float64 = 1.0

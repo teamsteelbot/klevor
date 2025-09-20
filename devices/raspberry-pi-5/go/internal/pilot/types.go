@@ -651,20 +651,6 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 			northNorthwestAverageDistance = h.getAverageDirectionDistance(gorplidarsdkhandler.CardinalDirectionNorthNorthwest)
 
 			// Log the average distances
-			/*
-			if h.handlerLoggerProducer.IsDebug() {
-				h.handlerLoggerProducer.Debug(
-					fmt.Sprintf(
-						"W: %f, N-NW: %f, N: %f, N-NE: %f, E: %f",
-						westAverageDistance,
-						northNorthwestAverageDistance,
-						northAverageDistance,
-						northNortheastAverageDistance,
-						eastAverageDistance,
-					),
-				)
-			}
-			*/
 			h.handlerLoggerProducer.Info(
 					fmt.Sprintf(
 						"W: %f, N-NW: %f, N: %f, N-NE: %f, E: %f",
@@ -781,7 +767,7 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 				if err := h.setMotorSpeed(
 					ctx,
 					previousMotorSpeed,
-					h.motorDirection,
+					MotorDirectionForward,
 				); err != nil {
 					return fmt.Errorf(
 						"failed to set motor to previous speed: %w",

@@ -14,7 +14,7 @@ import (
 
 const (
 	// IsPolarityInverted indicates whether the ESC motor's polarity is inverted
-	IsPolarityInverted = false
+	IsPolarityInverted = true
 
 	// PWMFrequency is the frequency for the PWM signal in Hertz
 	PWMFrequency = 50
