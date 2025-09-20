@@ -5,9 +5,6 @@ import (
 )
 
 var (
-	// MinimumValidDistance is the minimum valid distance for the sensors
-	MinimumValidDistance = 10.0
-
 	// SetServoAngleAttempts is the number of attempts to set the servo angle
 	SetServoAngleAttempts = 3
 
@@ -18,7 +15,7 @@ var (
 	MotorSpeedStartMessageTimeout = 200 * time.Millisecond
 
 	// ServoAngleStartMessageTimeout is the timeout for the servo angle start message
-	ServoAngleStartMessageTimeout = 200 *time.Millisecond
+	ServoAngleStartMessageTimeout = 200 * time.Millisecond
 
 	// MotorSpeedEndMessageTimeout is the timeout for the motor speed end message
 	MotorSpeedEndMessageTimeout = 1500 * time.Millisecond
@@ -34,7 +31,7 @@ var (
 
 	// MotorBackwardFastPercentage is the percentage of the maximum speed for fast backward motor speed
 	MotorBackwardFastPercentage float64 = 0.7
-	
+
 	// MotorBackwardNormalPercentage is the percentage of the maximum speed for normal backward motor speed
 	MotorBackwardNormalPercentage float64 = 0.6
 

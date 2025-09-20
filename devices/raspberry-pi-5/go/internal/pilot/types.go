@@ -24,27 +24,25 @@ import (
 type (
 	// DefaultHandler is the default implementation of the Handler interface
 	DefaultHandler struct {
-		mutex                          sync.Mutex
-		handlerLoggerProducer          goconcurrentlogger.LoggerProducer
-		logger                         goconcurrentlogger.Logger
-		rplidarHandler                 gorplidarsdkhandler.Handler
-		clipHandler                    gohailocliphandler.Handler
-		usbCDCHandler                  internalusbcdc.Handler
-		usbCDCSender                   internalusbcdc.Sender
-		isRunning                      atomic.Bool
-		servoDirection                 ServoDirection
-		servoAngle                     uint16
-		motorDirection                 MotorDirection
-		motorSpeed                     uint16
-		rplidarMeasures                *[360]*gorplidarsdkhandler.Measure
-		rplidarAverageDistances        map[gorplidarsdkhandler.CardinalDirection]float64
-		rplidarLastMeasuresUpdateTime  time.Time
-		clipClassification             *gohailocliphandler.Classification
-		bno08xLastTurns                int
-		rplidarTurnsCounter            int
-		maxMotorSpeedValue             uint16
-		maxServoAngleValue             uint16
-		debug                          bool
+		mutex                         sync.Mutex
+		handlerLoggerProducer         goconcurrentlogger.LoggerProducer
+		logger                        goconcurrentlogger.Logger
+		rplidarHandler                gorplidarsdkhandler.Handler
+		clipHandler                   gohailocliphandler.Handler
+		usbCDCHandler                 internalusbcdc.Handler
+		usbCDCSender                  internalusbcdc.Sender
+		isRunning                     atomic.Bool
+		servoDirection                ServoDirection
+		servoAngle                    uint16
+		motorDirection                MotorDirection
+		motorSpeed                    uint16
+		rplidarMeasures               *[360]*gorplidarsdkhandler.Measure
+		rplidarAverageDistances       map[gorplidarsdkhandler.CardinalDirection]float64
+		rplidarLastMeasuresUpdateTime time.Time
+		clipClassification            *gohailocliphandler.Classification
+		maxMotorSpeedValue            uint16
+		maxServoAngleValue            uint16
+		debug                         bool
 	}
 )
 
@@ -182,7 +180,7 @@ func (h *DefaultHandler) setMotorSpeed(
 		// Wait for the start message with a timeout
 		ctx, cancel := context.WithTimeout(
 			ctx,
-			ServoAngleStartMessageTimeout,
+			MotorSpeedStartMessageTimeout,
 		)
 		if err := h.usbCDCHandler.WaitMotorSpeedStartMessage(ctx); err != nil {
 			cancel()
@@ -205,7 +203,10 @@ func (h *DefaultHandler) setMotorSpeed(
 	defer stop()
 
 	// Wait for the motor speed end message
-	if err := h.usbCDCHandler.WaitMotorSpeedEndMessage(ctx); err !=nil && !errors.Is(err, context.DeadlineExceeded) {
+	if err := h.usbCDCHandler.WaitMotorSpeedEndMessage(ctx); err != nil && !errors.Is(
+		err,
+		context.DeadlineExceeded,
+	) {
 		return err
 	}
 	return nil
@@ -374,11 +375,14 @@ func (h *DefaultHandler) setServoAngle(
 	}
 
 	// Create the context with timeout
-	ctx, stop := context.WithTimeout(ctx, MotorSpeedEndMessageTimeout)
+	ctx, stop := context.WithTimeout(ctx, ServoAngleEndMessageTimeout)
 	defer stop()
 
 	// Wait for the servo angle end message
-	if err := h.usbCDCHandler.WaitServoAngleEndMessage(ctx); err !=nil && !errors.Is(err, context.DeadlineExceeded) {
+	if err := h.usbCDCHandler.WaitServoAngleEndMessage(ctx); err != nil && !errors.Is(
+		err,
+		context.DeadlineExceeded,
+	) {
 		return err
 	}
 	return nil
@@ -627,9 +631,10 @@ func (h *DefaultHandler) challengeWithObstaclesAndParkingHandler(ctx context.Con
 //
 // An error if the challenge could not be handled, nil otherwise
 func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) error {
-	var completed bool
+	var isTurning bool
+	var bno08xLastTurns int
 	var westAverageDistance, eastAverageDistance, northAverageDistance, northNortheastAverageDistance, northNorthwestAverageDistance float64
-	for !completed {
+	for h.usbCDCHandler.GetTurns() < AlgorithmTurns {
 		// Sleep the RPLiDAR delay to wait for new measures
 		time.Sleep(RPLiDARDelay - time.Since(h.rplidarLastMeasuresUpdateTime))
 
@@ -652,31 +657,20 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 
 			// Log the average distances
 			h.handlerLoggerProducer.Info(
-					fmt.Sprintf(
-						"W: %f, N-NW: %f, N: %f, N-NE: %f, E: %f",
-						westAverageDistance,
-						northNorthwestAverageDistance,
-						northAverageDistance,
-						northNortheastAverageDistance,
-						eastAverageDistance,
-					),
-				)
-
-			// Check if one of them is below the minimum valid distance
-			if westAverageDistance < MinimumValidDistance || eastAverageDistance < MinimumValidDistance || northAverageDistance < MinimumValidDistance || northNortheastAverageDistance < MinimumValidDistance || northNorthwestAverageDistance < MinimumValidDistance {
-				h.handlerLoggerProducer.Warning(
-					fmt.Sprintf(
-						"One of the average distances is below the minimum valid distance %f. This may cause unexpected behavior. Waiting for new measures...",
-						MinimumValidDistance,
-					),
-				)
-				continue
-			}
+				fmt.Sprintf(
+					"W: %f, N-NW: %f, N: %f, N-NE: %f, E: %f",
+					westAverageDistance,
+					northNorthwestAverageDistance,
+					northAverageDistance,
+					northNortheastAverageDistance,
+					eastAverageDistance,
+				),
+			)
 
 			// Check if the front distance is below the safety threshold
 			if northAverageDistance < SafetyFrontDistanceStartThreshold || northNortheastAverageDistance < SafetyFrontDistanceStartThreshold || northNorthwestAverageDistance < SafetyFrontDistanceStartThreshold {
-				// Store the current servo angle and motor speed
 				previousServoAngle := h.servoAngle
+				previousServoDirection := h.servoDirection
 				previousMotorSpeed := h.motorSpeed
 
 				// Log the warning
@@ -722,7 +716,7 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 						northNortheastAverageDistance = h.getAverageDirectionDistance(gorplidarsdkhandler.CardinalDirectionNorthNortheast)
 						northNorthwestAverageDistance = h.getAverageDirectionDistance(gorplidarsdkhandler.CardinalDirectionNorthNorthwest)
 
-						if northAverageDistance >= SafetyFrontDistanceStopThreshold || northNortheastAverageDistance >= SafetyFrontDistanceStopThreshold || northNorthwestAverageDistance >= SafetyFrontDistanceStopThreshold {
+						if northAverageDistance >= SafetyFrontDistanceStopThreshold && northNortheastAverageDistance >= SafetyFrontDistanceStopThreshold && northNorthwestAverageDistance >= SafetyFrontDistanceStopThreshold {
 							h.handlerLoggerProducer.Info("Safety front distance threshold reached.")
 							safe = true
 						}
@@ -730,39 +724,27 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 				}
 
 				// Set previous servo angle and motor speed back to normal
-				switch h.servoDirection {
-				case ServoDirectionLeft:
-					if err := h.setServoToLeft(
+				if isTurning {
+					if err := h.setServoAngle(
 						ctx,
 						previousServoAngle,
+						previousServoDirection,
 					); err != nil {
 						return fmt.Errorf(
-							"failed to set servo to previous left angle: %w",
+							"failed to set servo to previous angle and direction: %w",
 							err,
 						)
 					}
-				case ServoDirectionRight:
-					if err := h.setServoToRight(
-						ctx,
-						previousServoAngle,
-					); err != nil {
-						return fmt.Errorf(
-							"failed to set servo to previous right angle: %w",
-							err,
-						)
-					}
-				case ServoDirectionStraight:
+				} else {
 					if err := h.setServoToOppositeDirection(
 						ctx,
 						previousServoAngle,
 					); err != nil {
 						return fmt.Errorf(
-							"failed to set servo to center: %w",
+							"failed to set servo to opposite direction: %w",
 							err,
 						)
 					}
-				default:
-					return ErrInvalidServoDirection
 				}
 				if err := h.setMotorSpeed(
 					ctx,
@@ -778,15 +760,15 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 			}
 
 			// Check for the current turn and center the servo if necessary
-			if h.servoDirection != ServoDirectionStraight {
+			if isTurning {
 				// Get the latest BNO08x turns value
 				turns := h.usbCDCHandler.GetTurns()
-				if turns > h.bno08xLastTurns {
+				if turns > bno08xLastTurns {
 					h.handlerLoggerProducer.Info(
 						fmt.Sprintf(
 							"Detected a turn. Current turns: %d, Last turns: %d",
 							turns,
-							h.bno08xLastTurns,
+							bno08xLastTurns,
 						),
 					)
 
@@ -799,69 +781,8 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 					}
 
 					// Update for the next check
-					h.bno08xLastTurns = turns
-
-					// Update the servo direction to straight
-					h.servoDirection = ServoDirectionStraight
-				} else if northAverageDistance >= FrontStopTurnDistanceThreshold {
-					h.handlerLoggerProducer.Info("Front distance is safe. Stopping the turning state.")
-
-					// Center the servo
-					if err := h.setServoToCenter(ctx); err != nil {
-						return fmt.Errorf(
-							"failed to set servo to center: %w",
-							err,
-						)
-					}
-
-					// Update the servo direction to straight
-					h.servoDirection = ServoDirectionStraight
-				}
-
-				continue
-			}
-
-			// Check if it's almost time to stop
-			if h.bno08xLastTurns >= AlgorithmTurns || h.rplidarTurnsCounter >= AlgorithmTurns {
-				h.handlerLoggerProducer.Info("Almost time to stop. Monitoring front distance...")
-
-				// Set the servo to center and the motor to slow speed
-				if err := h.setServoToCenter(ctx); err != nil {
-					return fmt.Errorf("failed to set servo to center: %w", err)
-				}
-				if err := h.setMotorForwardByPercentage(
-					ctx,
-					MotorForwardSlowPercentage,
-				); err != nil {
-					return fmt.Errorf(
-						"failed to set motor to slow speed: %w",
-						err,
-					)
-				}
-
-				// Wait until the front distance is below the stop distance threshold
-				for !completed {
-					// Wait for the RPLiDAR to update
-					time.Sleep(RPLiDARDelay - time.Since(h.rplidarLastMeasuresUpdateTime))
-
-					select {
-					case <-ctx.Done():
-						return ctx.Err()
-					default:
-						// Update the RPLiDAR average distances
-						if err := h.updateRPLiDARAverageDistances(); err != nil {
-							return fmt.Errorf(
-								"failed to update RPLiDAR average distances: %w",
-								err,
-							)
-						}
-						northAverageDistance = h.getAverageDirectionDistance(gorplidarsdkhandler.CardinalDirectionNorth)
-
-						if northAverageDistance <= StopDistanceThreshold {
-							completed = true
-							h.handlerLoggerProducer.Info("Challenge completed successfully. Stopping the robot.")
-						}
-					}
+					bno08xLastTurns = turns
+					isTurning = false
 				}
 				continue
 			}
@@ -939,6 +860,7 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 						err,
 					)
 				}
+				isTurning = true
 				h.servoDirection = ServoDirectionRight
 			} else if westAverageDistance >= SideDistanceThreshold {
 				if err := h.setServoToLeftByPercentage(
@@ -950,22 +872,53 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 						err,
 					)
 				}
+				isTurning = true
 				h.servoDirection = ServoDirectionLeft
-			}
-
-			// If the robot is turning, increment the RPLiDAR turns counter
-			if h.servoDirection != ServoDirectionStraight {
-				h.rplidarTurnsCounter++
 			}
 		}
 	}
 
-	// Center the servo and stop the motor
+	// Log that is almost time to stop
+	h.handlerLoggerProducer.Info("Almost time to stop. Monitoring front distance...")
+
+	// Set the servo to center and the motor to slow speed
 	if err := h.setServoToCenter(ctx); err != nil {
 		return fmt.Errorf("failed to set servo to center: %w", err)
 	}
-	if err := h.setMotorStop(ctx); err != nil {
-		return fmt.Errorf("failed to stop the motor: %w", err)
+	if err := h.setMotorForwardByPercentage(
+		ctx,
+		MotorForwardSlowPercentage,
+	); err != nil {
+		return fmt.Errorf(
+			"failed to set motor to slow speed: %w",
+			err,
+		)
+	}
+
+	// Wait until the front distance is below the stop distance threshold
+	var completed bool
+	for !completed {
+		// Wait for the RPLiDAR to update
+		time.Sleep(RPLiDARDelay - time.Since(h.rplidarLastMeasuresUpdateTime))
+
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+			// Update the RPLiDAR average distances
+			if err := h.updateRPLiDARAverageDistances(); err != nil {
+				return fmt.Errorf(
+					"failed to update RPLiDAR average distances: %w",
+					err,
+				)
+			}
+			northAverageDistance = h.getAverageDirectionDistance(gorplidarsdkhandler.CardinalDirectionNorth)
+
+			if northAverageDistance <= StopDistanceThreshold {
+				completed = true
+				h.handlerLoggerProducer.Info("Challenge completed successfully. Stopping the robot.")
+			}
+		}
 	}
 	return nil
 }
