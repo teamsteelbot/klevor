@@ -49,7 +49,6 @@ type (
 		baudRate                       int
 		buffer                         []byte
 		accumulatedBuffer              []byte
-		receivedInitializationMessage  bool
 		receivedStartMessage           bool
 		receivedChallenge              internal.Challenge
 		receivedMaxMotorSpeedValue     uint16
@@ -73,7 +72,7 @@ type (
 		servoAngleEndMessagesCh        chan struct{}
 		notifyMaxServoAngleValueOnce   sync.Once
 		debug                          bool
-		hasStarted atomic.Bool
+		hasStarted                     atomic.Bool
 	}
 )
 
@@ -582,7 +581,7 @@ func (h *DefaultHandler) incomingMessagesHandler(
 					}
 
 					// Log the error message
-					err := fmt.Errorf(
+					err = fmt.Errorf(
 						"received error message: %s",
 						errorCodeMessage,
 					)
@@ -1099,7 +1098,7 @@ func (h *DefaultHandler) Run(ctx context.Context, stopFn func()) error {
 
 	// Reset the hasStarted state
 	h.hasStarted.Store(false)
-	
+
 	// Initialize the outgoing messages channel
 	h.outgoingMessagesCh = make(
 		chan *OutgoingMessage,
@@ -1123,9 +1122,6 @@ func (h *DefaultHandler) Run(ctx context.Context, stopFn func()) error {
 	h.servoAngleEndMessagesCh = make(
 		chan struct{},
 	)
-
-	// Reset received initialization message state
-	h.receivedInitializationMessage = false
 
 	// Reset received start message state
 	h.receivedStartMessage = false
@@ -1284,6 +1280,23 @@ func (h *DefaultHandler) WaitUntilReady(ctx context.Context) error {
 	}
 }
 
+// ClearMotorSpeedStartMessagesCh clears any pending motor speed start messages.
+func (h *DefaultHandler) ClearMotorSpeedStartMessagesCh() {
+	// Check if the handler is running
+	if h.motorSpeedStartMessagesCh == nil {
+		return
+	}
+
+	// Clear any pending messages
+	for {
+		select {
+		case <-h.motorSpeedStartMessagesCh:
+		default:
+			return
+		}
+	}
+}
+
 // WaitMotorSpeedStartMessage waits for a motor speed start message or the context is done.
 //
 // Parameters:
@@ -1308,6 +1321,23 @@ func (h *DefaultHandler) WaitMotorSpeedStartMessage(ctx context.Context) error {
 			return ErrHandlerClosed
 		}
 		return nil
+	}
+}
+
+// ClearMotorSpeedEndMessagesCh clears any pending motor speed end messages.
+func (h *DefaultHandler) ClearMotorSpeedEndMessagesCh() {
+	// Check if the handler is running
+	if h.motorSpeedEndMessagesCh == nil {
+		return
+	}
+
+	// Clear any pending messages
+	for {
+		select {
+		case <-h.motorSpeedEndMessagesCh:
+		default:
+			return
+		}
 	}
 }
 
@@ -1338,6 +1368,29 @@ func (h *DefaultHandler) WaitMotorSpeedEndMessage(ctx context.Context) error {
 	}
 }
 
+// ClearMotorSpeedStartAndEndMessagesCh clears any pending motor speed start and end messages.
+func (h *DefaultHandler) ClearMotorSpeedStartAndEndMessagesCh() {
+	h.ClearMotorSpeedStartMessagesCh()
+	h.ClearMotorSpeedEndMessagesCh()
+}
+
+// ClearServoAngleStartMessagesCh clears any pending servo angle start messages.
+func (h *DefaultHandler) ClearServoAngleStartMessagesCh() {
+	// Check if the handler is running
+	if h.servoAngleStartMessagesCh == nil {
+		return
+	}
+
+	// Clear any pending messages
+	for {
+		select {
+		case <-h.servoAngleStartMessagesCh:
+		default:
+			return
+		}
+	}
+}
+
 // WaitServoAngleStartMessage waits for a servo angle start message or the context is done.
 //
 // Parameters:
@@ -1362,6 +1415,23 @@ func (h *DefaultHandler) WaitServoAngleStartMessage(ctx context.Context) error {
 			return ErrHandlerClosed
 		}
 		return nil
+	}
+}
+
+// ClearServoAngleEndMessagesCh clears any pending servo angle end messages.
+func (h *DefaultHandler) ClearServoAngleEndMessagesCh() {
+	// Check if the handler is running
+	if h.servoAngleEndMessagesCh == nil {
+		return
+	}
+
+	// Clear any pending messages
+	for {
+		select {
+		case <-h.servoAngleEndMessagesCh:
+		default:
+			return
+		}
 	}
 }
 
@@ -1392,6 +1462,12 @@ func (h *DefaultHandler) WaitServoAngleEndMessage(ctx context.Context) error {
 	}
 }
 
+// ClearServoAngleStartAndEndMessagesCh clears any pending servo angle start and end messages.
+func (h *DefaultHandler) ClearServoAngleStartAndEndMessagesCh() {
+	h.ClearServoAngleStartMessagesCh()
+	h.ClearServoAngleEndMessagesCh()
+}
+
 // IsClosed returns true if the outgoing messages channel has been closed.
 //
 // Returns:
@@ -1400,19 +1476,6 @@ func (h *DefaultHandler) WaitServoAngleEndMessage(ctx context.Context) error {
 func (h *DefaultHandler) IsClosed() bool {
 	return h.closed.Load()
 }
-
-// ReceivedInitializationMessage returns true if the initialization message has been received.
-//
-// Returns:
-//
-// True if the initialization message has been received, otherwise false.
-func (h *DefaultHandler) ReceivedInitializationMessage() bool {
-	h.mutex.Lock()
-	defer h.mutex.Unlock()
-	return h.receivedInitializationMessage
-}
-
-// WaitFor
 
 // ReceivedStartMessage returns true if the start message has been received.
 //

@@ -125,6 +125,9 @@ func (h *DefaultHandler) setMotorSpeed(
 		return nil
 	}
 
+	// Clear motor speed start and end messages channel
+	h.usbCDCHandler.ClearMotorSpeedStartAndEndMessagesCh()
+
 	// Update the motor direction and speed
 	h.motorDirection = direction
 	h.motorSpeed = speed
@@ -303,6 +306,9 @@ func (h *DefaultHandler) setServoAngle(
 	if h.servoDirection == direction && h.servoAngle == angle {
 		return nil
 	}
+
+	// Clear servo angle start and end messages channel
+	h.usbCDCHandler.ClearServoAngleStartAndEndMessagesCh()
 
 	// Update the servo direction and angle
 	h.servoDirection = direction

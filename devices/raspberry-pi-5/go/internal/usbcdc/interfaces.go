@@ -31,8 +31,10 @@ type (
 		WaitForMaxServoAngleValue(ctx context.Context) (uint16, error)
 		WaitMotorSpeedStartMessage(ctx context.Context) error
 		WaitMotorSpeedEndMessage(ctx context.Context) error
+		ClearMotorSpeedStartAndEndMessagesCh()
 		WaitServoAngleStartMessage(ctx context.Context) error
 		WaitServoAngleEndMessage(ctx context.Context) error
+		ClearServoAngleStartAndEndMessagesCh()
 		WaitUntilReady(ctx context.Context) error
 	}
 
