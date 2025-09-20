@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+set -e
+
+# Absolute path to this script's directory
+SCRIPT_DIR=$(cd "$(dirname "$0")" || exit 1; pwd)
+
+# Path to script to compile main program
+COMPILE_PATH="$SCRIPT_DIR/go/compile_main.sh"
+
+# Path to main binary and Hailo clip script
+MAIN_BIN_PATH="$SCRIPT_DIR/go/output/bin/main/main"
+RUN_HAILO_CLIP_PATH="$SCRIPT_DIR/run_hailo_clip.sh"
+
+# Ensure script to compile main program exists
+if [ ! -f "COMPILE_PATH" ]; then
+    echo "Script to compile main program not found: COMPILE_PATH"
+    exit 1
+fi
+
+echo "Compiling main program..."
+
+# Compile main program
+sudo bash "$COMPILE_PATH"
+
+echo "Compiled main program."
+
+# Run the main program
+echo "Running main program..."
+
+sudo "$MAIN_BIN_PATH" -run-clip-path "$RUN_HAILO_CLIP_PATH"

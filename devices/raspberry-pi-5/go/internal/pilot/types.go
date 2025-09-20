@@ -933,10 +933,6 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 //
 // An error if the pilot could not be run, nil otherwise
 func (h *DefaultHandler) runToWrap(ctx context.Context) error {
-	// Initialize BNO08x last turns to 0 and RPLiDAR turns counter to 0
-	h.bno08xLastTurns = 0
-	h.rplidarTurnsCounter = 0
-
 	// Initialize the USB-CDC sender
 	usbCDCSender, err := h.usbCDCHandler.NewSender()
 	if err != nil {
@@ -1076,7 +1072,7 @@ func (h *DefaultHandler) Run() error {
 	// Generate the CLIP embeddings
 	h.handlerLoggerProducer.Info("Generating CLIP embeddings")
 	if err = h.clipHandler.GenerateEmbeddings(ctx); err != nil {
-		if err == gohailocliphandler.ErrEmptyGenerateEmbeddingsPath {
+		if errors.Is(err, gohailocliphandler.ErrEmptyGenerateEmbeddingsPath) {
 			h.handlerLoggerProducer.Warning(
 				fmt.Sprintf("CLIP embeddings path is empty: %v", err),
 			)
@@ -1138,6 +1134,7 @@ func (h *DefaultHandler) Run() error {
 		func() error {
 			defer fmt.Println("Pilot goroutine exited")
 			defer h.handlerLoggerProducer.Close()
+			defer stop()
 			return goconcurrentlogger.StopContextAndLogOnError(
 				ctx,
 				stop,
