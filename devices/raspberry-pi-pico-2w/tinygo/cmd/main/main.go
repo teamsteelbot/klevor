@@ -160,22 +160,14 @@ func main() {
 				if err := internalusbcdc.USBCDCHandler.SendMaxServoAngleValueMessage(internalservo.MaxAngle); err != tinygoerrors.ErrorCodeNil {
 					internalusbcdc.USBCDCHandler.SendErrorMessage(err)
 				}
-			case internalusbcdc.IncomingCategoryMotorSpeedStop:
-				if err := internalescmotor.ESCMotorHandler.Stop(); err != tinygoerrors.ErrorCodeNil {
-					internalusbcdc.USBCDCHandler.SendErrorMessage(err)
-				}
-			case internalusbcdc.IncomingCategoryServoAngleCenter:
-				if err := internalservo.ServoHandler.SetAngleToCenter(); err != tinygoerrors.ErrorCodeNil {
-					internalusbcdc.USBCDCHandler.SendErrorMessage(err)
-				}
-			case internalusbcdc.IncomingCategoryServoAngleToLeft, internalusbcdc.IncomingCategoryServoAngleToRight:
+			case internalusbcdc.IncomingCategoryServoAngleCenter, internalusbcdc.IncomingCategoryServoAngleToLeft, internalusbcdc.IncomingCategoryServoAngleToRight:
 				if err := internalservo.SetAngleBasedOnReceivedMessage(
 					internalusbcdc.USBCDCHandler,
 					newMessage,
 				); err != tinygoerrors.ErrorCodeNil {
 					internalusbcdc.USBCDCHandler.SendErrorMessage(err)
 				}
-			case internalusbcdc.IncomingCategoryMotorSpeedForward, internalusbcdc.IncomingCategoryMotorSpeedBackward:
+			case internalusbcdc.IncomingCategoryMotorSpeedStop, internalusbcdc.IncomingCategoryMotorSpeedForward, internalusbcdc.IncomingCategoryMotorSpeedBackward:
 				if err := internalescmotor.SetSpeedBasedOnReceivedMessage(
 					internalusbcdc.USBCDCHandler,
 					newMessage,

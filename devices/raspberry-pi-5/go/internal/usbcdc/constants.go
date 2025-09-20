@@ -103,7 +103,7 @@ var (
 	BNO08XInterval = 25 * time.Millisecond
 
 	// ReadTimeout is the timeout duration for reading from the USB-CDC port
-	ReadTimeout = 2 * BNO08XInterval
+	ReadTimeout = 4 * BNO08XInterval
 
 	// StopTimeout is the timeout duration for stopping the USB-CDC communication
 	StopTimeout = 3 * time.Second
