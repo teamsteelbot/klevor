@@ -18,10 +18,10 @@ var (
 	ServoAngleStartMessageTimeout = 200 * time.Millisecond
 
 	// MotorSpeedEndMessageTimeout is the timeout for the motor speed end message
-	MotorSpeedEndMessageTimeout = 1200 * time.Millisecond // 1500 ms
+	MotorSpeedEndMessageTimeout = 2000 * time.Millisecond // 1500 ms
 
 	// ServoAngleEndMessageTimeout is the timeout for the servo angle end message
-	ServoAngleEndMessageTimeout = 200 * time.Millisecond // 200 ms
+	ServoAngleEndMessageTimeout = 500 * time.Millisecond // 200 ms
 
 	// RPLiDARDelay is the delay between RPLiDAR scans
 	RPLiDARDelay = 100 * time.Millisecond
