@@ -88,4 +88,7 @@ var (
 
 	// FrontCloseupThreshold is used to move the robot closely to the wall (only used in the closed challenge)
 	FrontCloseupThreshold = 20
+
+	// CameraRangeThreshold is used to determine if an object is capable of being detected by the camera
+	CameraRangeThreshold = 25
 )

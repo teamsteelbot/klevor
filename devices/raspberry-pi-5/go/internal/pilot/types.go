@@ -833,6 +833,7 @@ func (h *DefaultHandler) challengeWithObstaclesHandler(ctx context.Context) erro
 					h.servoDirection = ServoDirectionCenter
 					if northAverageDistance <= float64(FrontCloseupThreshold)
 						h.servoDirection = ServoDirectionLeft
+						h.motorSpeed = MotorBackwardSlowPercentage
 						h.motorSpeed = uint16(MotorForwardNormalPercentage)
 				)
 				} 
@@ -853,6 +854,7 @@ func (h *DefaultHandler) challengeWithObstaclesHandler(ctx context.Context) erro
 					h.servoDirection = ServoDirectionCenter
 					)
 					if northAverageDistance <= float64(FrontCloseupThreshold) {
+						h.motorSpeed = MotorBackwardSlowPercentage
 						h.servoDirection = ServoDirectionRight
 						h.motorSpeed = uint16(MotorForwardNormalPercentage)
 					}
@@ -860,6 +862,37 @@ func (h *DefaultHandler) challengeWithObstaclesHandler(ctx context.Context) erro
 			}
 
 			// After each turn, the robot starts looking for the objects (it should be roughly centered, and it could gather the objects position, (left, center or right) with the rplidar)
+			if !isTurning {
+			h.motorSpeed = uint16(MotorForwardNormalPercentage)
+				for i := 180; i < 360; i++ {
+					if h.rplidarHandler.GetMeasures(i) <= CameraRangeThreshold {
+						h.clipHandler.GetClassification()
+						if h.clipClassification == red_block {
+							h.servoDirection = ServoDirectionRight
+							h.motorSpeed = uint16(MotorForwardNormalPercentage)
+							if westAverageDistance <= float64(CameraRangeThreshold) and eastAverageDistance <= float64(CameraRangeThreshold)
+								while (robot not aligned)
+								h.servoDirection = ServoDirectionLeft
+							else if northAverageDistance <= float64(FrontCloseupThreshold)
+								h.servoDirection = ServoDirectionCenter
+								h.motorSpeed = uint16(MotorBackwardNormalPercentage)
+								continue
+						}
+						else if h.clipClassification == green_block {
+							h.servoDirection = ServoDirectionLeft
+							h.motorSpeed = uint16(MotorForwardNormalPercentage)
+							if westAverageDistance <= float64(CameraRangeThreshold) and eastAverageDistance <= float64(CameraRangeThreshold)
+								while (robot not aligned)
+								h.servoDirection = ServoDirectionRight
+							else if northAverageDistance <= float64(FrontCloseupThreshold)
+								h.servoDirection = ServoDirectionCenter
+								h.motorSpeed = uint16(MotorBackwardNormalPercentage)
+								continue
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 
