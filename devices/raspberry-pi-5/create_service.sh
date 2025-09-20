@@ -9,6 +9,7 @@ SERVICE_NAME="klevor.service"
 SERVICE_PATH="/etc/systemd/system/$SERVICE_NAME"
 REMOVE_SERVICE_PATH="$SCRIPT_DIR/remove_service.sh"
 EXEC_PATH="$SCRIPT_DIR/run_service.sh"
+TIMEOUT=15
 
 # Remove existing service if it exists
 sudo "$REMOVE_SERVICE_PATH"
@@ -25,6 +26,7 @@ ExecStart=$EXEC_PATH
 Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin:/usr/bin/git"
 Environment="DISPLAY=:0"
 Environment="XAUTHORITY=/home/ralva/.Xauthority"
+TimeoutStopSec=${TIMEOUT}s
 WorkingDirectory=$SCRIPT_DIR
 Restart=on-failure
 

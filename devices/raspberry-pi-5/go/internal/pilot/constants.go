@@ -18,7 +18,7 @@ var (
 	ServoAngleStartMessageTimeout = 200 * time.Millisecond
 
 	// MotorSpeedEndMessageTimeout is the timeout for the motor speed end message
-	MotorSpeedEndMessageTimeout = 700 * time.Millisecond // 1500 ms
+	MotorSpeedEndMessageTimeout = 1200 * time.Millisecond // 1500 ms
 
 	// ServoAngleEndMessageTimeout is the timeout for the servo angle end message
 	ServoAngleEndMessageTimeout = 200 * time.Millisecond // 200 ms
