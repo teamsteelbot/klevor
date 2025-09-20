@@ -82,4 +82,10 @@ var (
 
 	// AverageAngleWidth is the width of the angle for average calculations
 	AverageAngleWidth = 5
+
+	// LaneIdentifierThreshold is used to determine which lane is the robot placed (only used in the closed challenge)
+	LaneIdentifierThreshold = 60
+
+	// FrontCloseupThreshold is used to move the robot closely to the wall (only used in the closed challenge)
+	FrontCloseupThreshold = 20
 )
