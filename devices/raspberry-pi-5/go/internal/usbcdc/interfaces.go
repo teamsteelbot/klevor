@@ -13,7 +13,6 @@ type (
 		IsRunning() bool
 		IsClosed() bool
 		NewSender() (Sender, error)
-		ReceivedInitializationMessage() bool
 		ReceivedStartMessage() bool
 		ReceivedChallenge() internal.Challenge
 		ReceivedMaxMotorSpeedValue() uint16

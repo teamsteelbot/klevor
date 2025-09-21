@@ -29,7 +29,7 @@ const (
 	MaxPulseWidth uint16 = 2000
 
 	// MaxSpeed is the maximum speed to run the ESC motor
-	MaxSpeed uint16 = 100
+	MaxSpeed uint16 = 120
 
 	// BackwardToForwardDelay is the delay when changing from backward to forward to be in neutral first
 	BackwardToForwardDelay = 1000 * time.Millisecond // 1000 ms
