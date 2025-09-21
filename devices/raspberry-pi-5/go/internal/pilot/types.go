@@ -1575,10 +1575,12 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 			}
 
 			// Check if the robot should turn left or right based on the side distances
-			if !math.IsNaN(h.eastAverageDistance) && h.eastAverageDistance >= SideDistanceThreshold {
+			if (!math.IsNaN(h.eastAverageDistance) && h.eastAverageDistance >= SideDistanceThreshold) ||
+				(!math.IsNaN(h.northeastAverageDistance) && h.northeastAverageDistance >= SideDistanceThreshold) {
 				isTurning = true
 				h.servoDirection = ServoDirectionRight
-			} else if !math.IsNaN(h.westAverageDistance) && h.westAverageDistance >= SideDistanceThreshold {
+			} else if (!math.IsNaN(h.westAverageDistance) && h.westAverageDistance >= SideDistanceThreshold) ||
+				(!math.IsNaN(h.northwestAverageDistance) && h.northwestAverageDistance >= SideDistanceThreshold) {
 				isTurning = true
 				h.servoDirection = ServoDirectionLeft
 			}
