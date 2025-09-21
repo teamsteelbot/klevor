@@ -597,6 +597,7 @@ func (h *DefaultHandler) getAverageDirectionDistance(
 //
 // An error if the challenge could not be handled, nil otherwise
 func (h *DefaultHandler) challengeWithObstaclesHandler(ctx context.Context) error {
+	var WallCloseUp bool
 	var isTurning bool
 	var bno08xLastTurns int
 	var westAverageDistance, eastAverageDistance, northAverageDistance, northNortheastAverageDistance, northNorthwestAverageDistance float64
@@ -828,14 +829,16 @@ func (h *DefaultHandler) challengeWithObstaclesHandler(ctx context.Context) erro
 				}
 				isTurning = true
 				if westAverageDistance >= float64(LaneIdentifierThreshold) {
-					while northAverageDistance >= FrontCloseupThreshold (
-					h.motorSpeed = MotorForwardSlowPercentage
-					h.servoDirection = ServoDirectionCenter
-					if northAverageDistance <= float64(FrontCloseupThreshold)
+					if northAverageDistance >= FrontCloseupThreshold {
+						h.motorSpeed = MotorForwardSlowPercentage
+						h.servoDirection = ServoDirectionCenter
+						WallCloseUp = true
+					}
+					if northAverageDistance <= float64(FrontCloseupThreshold) && WallCloseUp == true {
 						h.servoDirection = ServoDirectionLeft
 						h.motorSpeed = MotorBackwardSlowPercentage
 						h.motorSpeed = uint16(MotorForwardNormalPercentage)
-				)
+					}
 				} 
 			} else if westAverageDistance >= SideDistanceThreshold {
 				if err := h.setServoToLeftByPercentage(
@@ -849,35 +852,36 @@ func (h *DefaultHandler) challengeWithObstaclesHandler(ctx context.Context) erro
 				}
 				isTurning = true
 				if eastAverageDistance >= float64(LaneIdentifierThreshold) {
-					while northAverageDistance >= FrontCloseupThreshold (
-					h.motorSpeed = MotorForwardSlowPercentage
-					h.servoDirection = ServoDirectionCenter
-					)
-					if northAverageDistance <= float64(FrontCloseupThreshold) {
-						h.motorSpeed = MotorBackwardSlowPercentage
+					if northAverageDistance >= FrontCloseupThreshold {
+						h.motorSpeed = MotorForwardSlowPercentage
+						h.servoDirection = ServoDirectionCenter
+						WallCloseUp = true
+					}
+					if northAverageDistance <= float64(FrontCloseupThreshold) && WallCloseUp == true {
 						h.servoDirection = ServoDirectionRight
+						h.motorSpeed = MotorBackwardSlowPercentage
 						h.motorSpeed = uint16(MotorForwardNormalPercentage)
 					}
-				}
+				} 
 			}
 
 			// After each turn, the robot starts looking for the objects (it should be roughly centered, and it could gather the objects position, (left, center or right) with the rplidar)
+
 			if !isTurning {
-			h.motorSpeed = uint16(MotorForwardNormalPercentage)
 				for i := 180; i < 360; i++ {
 					if h.rplidarHandler.GetMeasures(i) <= CameraRangeThreshold {
 						h.clipHandler.GetClassification()
 						if h.clipClassification == red_block {
 							h.servoDirection = ServoDirectionRight
 							h.motorSpeed = uint16(MotorForwardNormalPercentage)
-							if westAverageDistance <= float64(CameraRangeThreshold) and eastAverageDistance <= float64(CameraRangeThreshold)
-								while (robot not aligned)
-								h.servoDirection = ServoDirectionLeft
-							else if northAverageDistance <= float64(FrontCloseupThreshold)
+							if westAverageDistance <= float64(CameraRangeThreshold) && eastAverageDistance <= float64(CameraRangeThreshold {
+								h.servoDirection == ServoDirectionLeft
+							}
+							else if northAverageDistance <= float64(FrontCloseupThreshold) {
 								h.servoDirection = ServoDirectionCenter
 								h.motorSpeed = uint16(MotorBackwardNormalPercentage)
 								continue
-						}
+							}
 						else if h.clipClassification == green_block {
 							h.servoDirection = ServoDirectionLeft
 							h.motorSpeed = uint16(MotorForwardNormalPercentage)

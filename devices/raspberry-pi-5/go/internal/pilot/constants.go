@@ -84,11 +84,11 @@ var (
 	AverageAngleWidth = 5
 
 	// LaneIdentifierThreshold is used to determine which lane is the robot placed (only used in the closed challenge)
-	LaneIdentifierThreshold = 60
+	LaneIdentifierThreshold = 400
 
 	// FrontCloseupThreshold is used to move the robot closely to the wall (only used in the closed challenge)
-	FrontCloseupThreshold = 20
+	FrontCloseupThreshold = 210
 
 	// CameraRangeThreshold is used to determine if an object is capable of being detected by the camera
-	CameraRangeThreshold = 25
+	CameraRangeThreshold = 250
 )
