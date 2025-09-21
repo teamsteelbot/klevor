@@ -29,6 +29,9 @@ var (
 	// CLIPDelay is the delay between CLIP classifications
 	CLIPDelay = 40 * time.Millisecond
 
+	// CycleDelay is the delay between each cycle of the pilot
+	CycleDelay = 35 * time.Millisecond
+
 	// HandlerLoggerProducerTag is the tag for the logger producer
 	HandlerLoggerProducerTag = "PILOT_HANDLER"
 

@@ -625,18 +625,18 @@ func (h *DefaultHandler) incomingMessagesHandler(
 				case IncomingCategoryEulerDegreesPitch:
 					// Parse the BNO08X pitch degrees value
 					degreesUint64 := binary.BigEndian.Uint64(message.Data[:8])
-					h.receivedBNO08XPitchDegrees = math.Float64frombits(degreesUint64)
-					h.updateBNO08XPitchDegrees(h.receivedBNO08XPitchDegrees)
+					degrees := math.Float64frombits(degreesUint64)
+					h.updateBNO08XPitchDegrees(degrees)
 				case IncomingCategoryEulerDegreesRoll:
 					// Parse the BNO08X roll degrees value
 					degreesUint64 := binary.BigEndian.Uint64(message.Data[:8])
-					h.receivedBNO08XRollDegrees = math.Float64frombits(degreesUint64)
-					h.updateBNO08XRollDegrees(h.receivedBNO08XRollDegrees)
+					degrees := math.Float64frombits(degreesUint64)
+					h.updateBNO08XRollDegrees(degrees)
 				case IncomingCategoryEulerDegreesYaw:
 					// Parse the BNO08X yaw degrees value
 					degreesUint64 := binary.BigEndian.Uint64(message.Data[:8])
-					h.receivedBNO08XYawDegrees = math.Float64frombits(degreesUint64)
-					h.updateBNO08XYawDegrees(h.receivedBNO08XYawDegrees)
+					degrees := math.Float64frombits(degreesUint64)
+					h.updateBNO08XYawDegrees(degrees)
 				case IncomingCategoryQuaternionX:
 					// Parse the BNO08X quaternion X value
 					quaternionXUint64 := binary.BigEndian.Uint64(message.Data[:8])

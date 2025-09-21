@@ -23,6 +23,7 @@ func NewSlamtecC1Handler(
 		gorplidarsdkhandler.LinuxSlamtecC1Port,
 		IsUpsideDown,
 		AngleAdjustment,
+		MinimumQuality,
 		logger,
 		UltraSimplePath,
 		MaxDistanceLimit,

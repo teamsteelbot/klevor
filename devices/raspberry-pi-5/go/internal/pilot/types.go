@@ -590,13 +590,15 @@ func (h *DefaultHandler) updateCLIPClassification(ctx context.Context) error {
 			h.clipHandlerMutex.Unlock()
 
 			// Log the classification if it has changed
-			if lastCLIPClassification == nil && clipClassification != nil {
+			if lastCLIPClassification == nil && clipClassification == nil {
+				// Do nothing, both are nil
+			} else if lastCLIPClassification == nil && clipClassification != nil {
 				h.handlerLoggerProducer.Info(
 					fmt.Sprintf("CLIP classification changed: %v", clipClassification),
 				)
 			} else if lastCLIPClassification != nil && clipClassification == nil {
 				h.handlerLoggerProducer.Info("CLIP classification changed: nil")
-			} else if *lastCLIPClassification != *clipClassification {
+			} else if lastCLIPClassification.GetLabel() != clipClassification.GetLabel() {
 				h.handlerLoggerProducer.Info(
 					fmt.Sprintf("CLIP classification changed: %s", clipClassification.GetLabel()),
 				)
@@ -1477,6 +1479,9 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 	var isTurning bool
 	var bno08xLastTurns int
 	for bno08xLastTurns < AlgorithmTurns {
+		// Sleep between each cycle
+		time.Sleep(CycleDelay)
+		
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
@@ -1721,7 +1726,14 @@ func (h *DefaultHandler) runToWrap(ctx context.Context) error {
 	// Initialize the RPLiDAR measures update goroutine
 	g.Go(
 		func() error {
-			defer fmt.Println("RPLiDAR average distances update goroutine exited")
+			defer func() {
+				if r := recover(); r != nil {
+					h.handlerLoggerProducer.Error(
+						fmt.Errorf("panic recovered: %v", r),
+					)
+				}
+				fmt.Println("RPLiDAR average distances update goroutine exited")
+			}()
 			return h.updateRPLiDARAverageDistances(ctx)
 		},
 	)
@@ -1729,7 +1741,14 @@ func (h *DefaultHandler) runToWrap(ctx context.Context) error {
 	// Initialize the CLIP classification update goroutine
 	g.Go(
 		func() error {
-			defer fmt.Println("CLIP classification update goroutine exited")
+			defer func() {
+				if r := recover(); r != nil {
+					h.handlerLoggerProducer.Error(
+						fmt.Errorf("panic recovered: %v", r),
+					)
+				}
+				fmt.Println("CLIP classification update goroutine exited")
+			}()
 			return h.updateCLIPClassification(ctx)
 		},
 	)
@@ -1745,7 +1764,14 @@ func (h *DefaultHandler) runToWrap(ctx context.Context) error {
 	// Start the pilot
 	g.Go(
 		func() error {
-			defer fmt.Println("Pilot challenge handler goroutine exited")
+			defer func() {
+				if r := recover(); r != nil {
+					h.handlerLoggerProducer.Error(
+						fmt.Errorf("panic recovered: %v", r),
+					)
+				}
+				fmt.Println("Pilot challenge handler goroutine exited")
+			}()
 			return handler(ctx)
 		},
 	)

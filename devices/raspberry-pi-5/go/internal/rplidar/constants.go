@@ -13,6 +13,9 @@ const (
 	// AngleAdjustment is the angle adjustment in degrees
 	AngleAdjustment = 0
 
+	// MinimumQuality is the minimum quality of the scan
+	MinimumQuality = 40
+
 	// MaxDistanceLimit is the maximum distance limit
 	MaxDistanceLimit = 3000
 
