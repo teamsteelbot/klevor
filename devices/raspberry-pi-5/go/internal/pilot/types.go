@@ -249,7 +249,10 @@ func (h *DefaultHandler) setMotorSpeedByPercentage(
 //
 // An error if the motor could not be stopped, nil otherwise
 func (h *DefaultHandler) setMotorStop(ctx context.Context) error {
-	return h.setMotorSpeed(ctx, 0, MotorDirectionStop)
+	if err := h.setMotorSpeed(ctx, 0, MotorDirectionStop); err != nil {
+		return fmt.Errorf("failed to stop motor: %w", err)
+	}
+	return nil
 }
 
 // setMotorForwardByPercentage sets the motor speed to forward by percentage of the maximum motor speed value
@@ -266,7 +269,10 @@ func (h *DefaultHandler) setMotorForwardByPercentage(
 	ctx context.Context,
 	percentage float64,
 ) error {
-	return h.setMotorSpeedByPercentage(ctx, percentage, MotorDirectionForward)
+	if err := h.setMotorSpeedByPercentage(ctx, percentage, MotorDirectionForward); err != nil {
+		return fmt.Errorf("failed to set motor to forward: %w", err)
+	}
+	return nil
 }
 
 // setMotorBackwardByPercentage sets the motor speed to backward by percentage of the maximum motor speed value
@@ -283,7 +289,10 @@ func (h *DefaultHandler) setMotorBackwardByPercentage(
 	ctx context.Context,
 	percentage float64,
 ) error {
-	return h.setMotorSpeedByPercentage(ctx, percentage, MotorDirectionBackward)
+	if err := h.setMotorSpeedByPercentage(ctx, percentage, MotorDirectionBackward); err != nil {
+		return fmt.Errorf("failed to set motor to backward: %w", err)
+	}
+	return nil
 }
 
 // setServoAngle sets the servo direction
@@ -428,7 +437,10 @@ func (h *DefaultHandler) setServoAngleByPercentage(
 //
 // An error if the servo could not be set to center, nil otherwise
 func (h *DefaultHandler) setServoToCenter(ctx context.Context) error {
-	return h.setServoAngle(ctx, 90, ServoDirectionStraight)
+	if err := h.setServoAngle(ctx, 90, ServoDirectionStraight); err != nil {
+		return fmt.Errorf("failed to set servo to center: %w", err)
+	}
+	return nil
 }
 
 // setServoToLeft sets the servo to the left direction
@@ -445,7 +457,9 @@ func (h *DefaultHandler) setServoToLeft(
 	ctx context.Context,
 	angle uint16,
 ) error {
-	return h.setServoAngle(ctx, angle, ServoDirectionLeft)
+	if err := h.setServoAngle(ctx, angle, ServoDirectionLeft); err != nil {
+		return fmt.Errorf("failed to set servo to left: %w", err)
+	}
 }
 
 // setServoToLeftByPercentage sets the servo to the left direction by percentage of the maximum servo direction value
@@ -462,7 +476,10 @@ func (h *DefaultHandler) setServoToLeftByPercentage(
 	ctx context.Context,
 	percentage float64,
 ) error {
-	return h.setServoAngleByPercentage(ctx, percentage, ServoDirectionLeft)
+	if err := h.setServoAngleByPercentage(ctx, percentage, ServoDirectionLeft); err != nil {
+		return fmt.Errorf("failed to set servo to left: %w", err)
+	}
+	return nil
 }
 
 // setServoToRight sets the servo to the right direction
@@ -479,7 +496,10 @@ func (h *DefaultHandler) setServoToRight(
 	ctx context.Context,
 	angle uint16,
 ) error {
-	return h.setServoAngle(ctx, angle, ServoDirectionRight)
+	if err := h.setServoAngle(ctx, angle, ServoDirectionRight); err != nil {
+		return fmt.Errorf("failed to set servo to right: %w", err)
+	}
+	return nil
 }
 
 // setServoToRightByPercentage sets the servo to the right direction by percentage of the maximum servo direction value
@@ -496,7 +516,10 @@ func (h *DefaultHandler) setServoToRightByPercentage(
 	ctx context.Context,
 	percentage float64,
 ) error {
-	return h.setServoAngleByPercentage(ctx, percentage, ServoDirectionRight)
+	if err := h.setServoAngleByPercentage(ctx, percentage, ServoDirectionRight); err != nil {
+		return fmt.Errorf("failed to set servo to right: %w", err)
+	}
+	return nil
 }
 
 // setServoToOppositeDirection sets the servo to the opposite direction
@@ -945,6 +968,79 @@ func (h *DefaultHandler) challengeWithObstaclesHandler(ctx context.Context) erro
 	return nil
 }
 
+// leaveParkingHandler handles leaving the parking
+//
+// Parameters:
+//
+// ctx: The context to use for leaving the parking
+//
+// Returns:
+//
+// An error if the parking could not be left, nil otherwise
+func (h *DefaultHandler) leaveParkingHandler(ctx context.Context) error {
+	// Sleep the RPLiDAR delay to wait for new measures
+	time.Sleep(RPLiDARDelay)
+
+	// Update the RPLiDAR average distances
+	if err := h.updateRPLiDARAverageDistances(); err != nil {
+		return err
+	}
+
+	// Get west and east average distances
+	westAverageDistance := h.getAverageDirectionDistance(gorplidarsdkhandler.CardinalDirectionWest)
+	eastAverageDistance := h.getAverageDirectionDistance(gorplidarsdkhandler.CardinalDirectionEast)
+
+	// Check which side has the space to leave the parking
+	parkingLeaveSide := ServoDirectionNil
+	if westAverageDistance >= ParkingLeaveSideDistanceThreshold {
+		parkingLeaveSide = ServoDirectionLeft
+	} else if eastAverageDistance >= ParkingLeaveSideDistanceThreshold {
+		parkingLeaveSide = ServoDirectionRight
+	} else {
+		return ErrNoSpaceToLeaveParking
+	}
+
+	// Center the servo
+	if err := h.setServoToCenter(ctx); err != nil {
+		return err
+	}
+	// Set the motor to backward and the servo to the parking leave side
+
+
+	for {
+		// Sleep the RPLiDAR delay to wait for new measures
+		time.Sleep(RPLiDARDelay - time.Since(h.rplidarLastMeasuresUpdateTime))
+
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+
+		}
+	}
+}
+
+// enterParkingHandler handles entering the parking
+//
+// Parameters:
+//
+// ctx: The context to use for entering the parking
+//
+// Returns:
+//
+// An error if the parking could not be entered, nil otherwise
+func (h *DefaultHandler) enterParkingHandler(ctx context.Context) error {
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+			return ErrNotImplemented
+		}
+	}
+}
+
+
 // challengeWithObstaclesAndParkingHandler handles the challenge with obstacles and parking
 //
 // Parameters:
@@ -955,14 +1051,21 @@ func (h *DefaultHandler) challengeWithObstaclesHandler(ctx context.Context) erro
 //
 // An error if the challenge could not be handled, nil otherwise
 func (h *DefaultHandler) challengeWithObstaclesAndParkingHandler(ctx context.Context) error {
-	for {
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		default:
-			return ErrNotImplemented
-		}
+	// Leave the parking
+	if err := h.leaveParkingHandler(ctx); err != nil {
+		return fmt.Errorf("failed to leave parking: %w", err)
 	}
+
+	// Handle the challenge with obstacles
+	if err := h.challengeWithObstaclesHandler(ctx); err != nil {
+		return fmt.Errorf("failed to handle challenge with obstacles: %w", err)
+	}
+
+	// Enter the parking
+	if err := h.enterParkingHandler(ctx); err != nil {
+		return fmt.Errorf("failed to enter parking: %w", err)
+	}
+	return nil
 }
 
 // challengeWithoutObstaclesHandler handles the challenge without obstacles
@@ -977,10 +1080,14 @@ func (h *DefaultHandler) challengeWithObstaclesAndParkingHandler(ctx context.Con
 func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) error {
 	var isTurning bool
 	var bno08xLastTurns int
-	var westAverageDistance, eastAverageDistance, northAverageDistance, northNortheastAverageDistance, northNorthwestAverageDistance float64
+	var westAverageDistance, eastAverageDistance, northAverageDistance, northNortheastAverageDistance, northNorthwestAverageDistance,northeastAverageDistance, northwestAverageDistance float64
 	for h.usbCDCHandler.GetTurns() < AlgorithmTurns {
 		// Sleep the RPLiDAR delay to wait for new measures
-		time.Sleep(RPLiDARDelay - time.Since(h.rplidarLastMeasuresUpdateTime))
+		if !h.rplidarLastMeasuresUpdateTime.IsZero() {
+			time.Sleep(RPLiDARDelay - time.Since(h.rplidarLastMeasuresUpdateTime))
+		} else {
+			time.Sleep(RPLiDARDelay)
+		}
 
 		select {
 		case <-ctx.Done():
@@ -988,31 +1095,48 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 		default:
 			// Update the RPLiDAR average distances
 			if err := h.updateRPLiDARAverageDistances(); err != nil {
-				return fmt.Errorf(
-					"failed to update RPLiDAR average distances: %w",
-					err,
-				)
+				return err
 			}
 			westAverageDistance = h.getAverageDirectionDistance(gorplidarsdkhandler.CardinalDirectionWest)
 			eastAverageDistance = h.getAverageDirectionDistance(gorplidarsdkhandler.CardinalDirectionEast)
 			northAverageDistance = h.getAverageDirectionDistance(gorplidarsdkhandler.CardinalDirectionNorth)
 			northNortheastAverageDistance = h.getAverageDirectionDistance(gorplidarsdkhandler.CardinalDirectionNorthNortheast)
 			northNorthwestAverageDistance = h.getAverageDirectionDistance(gorplidarsdkhandler.CardinalDirectionNorthNorthwest)
+			northeastAverageDistance = h.getAverageDirectionDistance(gorplidarsdkhandler.CardinalDirectionNortheast)
+			northwestAverageDistance = h.getAverageDirectionDistance(gorplidarsdkhandler.CardinalDirectionNorthwest)
 
 			// Log the average distances
 			h.handlerLoggerProducer.Info(
 				fmt.Sprintf(
-					"W: %f, N-NW: %f, N: %f, N-NE: %f, E: %f",
+					"W: %f, NW: %f, N-NW: %f, N: %f, N-NE: %f, NE: %f, E: %f",
 					westAverageDistance,
+					northwestAverageDistance,
 					northNorthwestAverageDistance,
 					northAverageDistance,
 					northNortheastAverageDistance,
+					northeastAverageDistance,
 					eastAverageDistance,
 				),
 			)
 
 			// Check if the front distance is below the safety threshold
-			if northAverageDistance < SafetyFrontDistanceStartThreshold || northNortheastAverageDistance < SafetyFrontDistanceStartThreshold || northNorthwestAverageDistance < SafetyFrontDistanceStartThreshold {
+			frontDistances := []float64{
+				northwestAverageDistance,
+				northNorthwestAverageDistance,
+				northAverageDistance,
+				northNortheastAverageDistance,
+				northeastAverageDistance,
+			}
+			safetyFrontDistanceThresholdReached := false
+			for _, distance := range frontDistances {
+				if distance >= SafetyFrontDistanceStartThreshold {
+					continue
+				}
+
+				// Set the flag to true
+				safetyFrontDistanceThresholdReached = true
+
+				// Save previous servo angle, direction and motor speed
 				previousServoAngle := h.servoAngle
 				previousServoDirection := h.servoDirection
 				previousMotorSpeed := h.motorSpeed
@@ -1027,17 +1151,14 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 
 				// Set the servo to center and the motor to backward
 				if err := h.setServoToCenter(ctx); err != nil {
-					return fmt.Errorf("failed to set servo to center: %w", err)
+					return err
 				}
 
 				if err := h.setMotorBackwardByPercentage(
 					ctx,
-					MotorBackwardSlowPercentage,
+					MotorBackwardFastPercentage,
 				); err != nil {
-					return fmt.Errorf(
-						"failed to set motor to backward: %w",
-						err,
-					)
+					return err
 				}
 
 				var safe bool
@@ -1051,10 +1172,7 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 					default:
 						// Update the RPLiDAR average distances
 						if err := h.updateRPLiDARAverageDistances(); err != nil {
-							return fmt.Errorf(
-								"failed to update RPLiDAR average distances: %w",
-								err,
-							)
+							return err
 						}
 						northAverageDistance = h.getAverageDirectionDistance(gorplidarsdkhandler.CardinalDirectionNorth)
 						northNortheastAverageDistance = h.getAverageDirectionDistance(gorplidarsdkhandler.CardinalDirectionNorthNortheast)
@@ -1074,20 +1192,14 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 						previousServoAngle,
 						previousServoDirection,
 					); err != nil {
-						return fmt.Errorf(
-							"failed to set servo to previous angle and direction: %w",
-							err,
-						)
+						return err
 					}
 				} else {
 					if err := h.setServoToOppositeDirection(
 						ctx,
 						previousServoAngle,
 					); err != nil {
-						return fmt.Errorf(
-							"failed to set servo to opposite direction: %w",
-							err,
-						)
+						return err
 					}
 				}
 				if err := h.setMotorSpeed(
@@ -1095,11 +1207,11 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 					previousMotorSpeed,
 					MotorDirectionForward,
 				); err != nil {
-					return fmt.Errorf(
-						"failed to set motor to previous speed: %w",
-						err,
-					)
+					return err
 				}
+				break
+			}
+			if safetyFrontDistanceThresholdReached {
 				continue
 			}
 
@@ -1118,10 +1230,7 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 
 					// Center the servo
 					if err := h.setServoToCenter(ctx); err != nil {
-						return fmt.Errorf(
-							"failed to set servo to center: %w",
-							err,
-						)
+						return err
 					}
 
 					// Update for the next check
@@ -1145,10 +1254,7 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 					ctx,
 					motorSpeedPercentage,
 				); err != nil {
-					return fmt.Errorf(
-						"failed to set motor to forward speed: %w",
-						err,
-					)
+					return err
 				}
 
 				// Check if the servo should make a little turn to the left or right in order to center the robot
@@ -1157,27 +1263,18 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 						ctx,
 						ServoSmallTurnAnglePercentage,
 					); err != nil {
-						return fmt.Errorf(
-							"failed to set servo to small right turn: %w",
-							err,
-						)
+						return err
 					}
 				} else if westAverageDistance >= eastAverageDistance*(1+SideDistanceDifferencePercentage) {
 					if err := h.setServoToLeftByPercentage(
 						ctx,
 						ServoSmallTurnAnglePercentage,
 					); err != nil {
-						return fmt.Errorf(
-							"failed to set servo to small left turn: %w",
-							err,
-						)
+						return err
 					}
 				} else {
 					if err := h.setServoToCenter(ctx); err != nil {
-						return fmt.Errorf(
-							"failed to set servo to center: %w",
-							err,
-						)
+						return err
 					}
 				}
 				continue
@@ -1187,10 +1284,7 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 				ctx,
 				MotorForwardNormalPercentage,
 			); err != nil {
-				return fmt.Errorf(
-					"failed to set motor to normal speed: %w",
-					err,
-				)
+				return err
 			}
 
 			// Check if the robot should turn left or right based on the side distances
@@ -1199,10 +1293,7 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 					ctx,
 					ServoBigTurnAnglePercentage,
 				); err != nil {
-					return fmt.Errorf(
-						"failed to set servo to big right turn: %w",
-						err,
-					)
+					return err
 				}
 				isTurning = true
 				h.servoDirection = ServoDirectionRight
@@ -1211,10 +1302,7 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 					ctx,
 					ServoBigTurnAnglePercentage,
 				); err != nil {
-					return fmt.Errorf(
-						"failed to set servo to big left turn: %w",
-						err,
-					)
+					return err
 				}
 				isTurning = true
 				h.servoDirection = ServoDirectionLeft
@@ -1227,16 +1315,13 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 
 	// Set the servo to center and the motor to slow speed
 	if err := h.setServoToCenter(ctx); err != nil {
-		return fmt.Errorf("failed to set servo to center: %w", err)
+		return err
 	}
 	if err := h.setMotorForwardByPercentage(
 		ctx,
 		MotorForwardSlowPercentage,
 	); err != nil {
-		return fmt.Errorf(
-			"failed to set motor to slow speed: %w",
-			err,
-		)
+		return err
 	}
 
 	// Wait until the front distance is below the stop distance threshold
@@ -1251,10 +1336,7 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 		default:
 			// Update the RPLiDAR average distances
 			if err := h.updateRPLiDARAverageDistances(); err != nil {
-				return fmt.Errorf(
-					"failed to update RPLiDAR average distances: %w",
-					err,
-				)
+				return err
 			}
 			northAverageDistance = h.getAverageDirectionDistance(gorplidarsdkhandler.CardinalDirectionNorth)
 
@@ -1330,21 +1412,19 @@ func (h *DefaultHandler) runToWrap(ctx context.Context) error {
 	h.maxServoAngleValue = maxServoAngle
 
 	// Start the pilot
-	var handlerFn func(context.Context) error
 	switch challenge {
 	case internal.ChallengeWithObstacles:
 		h.handlerLoggerProducer.Info("Starting challenge with obstacles handler")
-		handlerFn = h.challengeWithObstaclesHandler
+		return h.challengeWithObstaclesHandler(ctx)
 	case internal.ChallengeWithObstaclesAndParking:
 		h.handlerLoggerProducer.Info("Starting challenge with obstacles and parking handler")
-		handlerFn = h.challengeWithObstaclesAndParkingHandler
+		return h.challengeWithObstaclesAndParkingHandler(ctx)
 	case internal.ChallengeWithoutObstacles:
 		h.handlerLoggerProducer.Info("Starting challenge without obstacles handler")
-		handlerFn = h.challengeWithoutObstaclesHandler
+		return h.challengeWithoutObstaclesHandler(ctx)
 	default:
 		return fmt.Errorf("unknown challenge: %s", challenge.String())
 	}
-	return handlerFn(ctx)
 }
 
 // Run runs the pilot handler

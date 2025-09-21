@@ -14,4 +14,5 @@ var (
 	ErrMaxServoAngleValueNotSet            = errors.New("max servo value value not set")
 	ErrDidNotReceiveServoAngleStartMessage = errors.New("did not receive servo angle start message")
 	ErrDidNotReceiveMotorSpeedStartMessage = errors.New("did not receive motor speed start message")
+	ErrNoSpaceToLeaveParking               = errors.New("no space to leave parking")
 )

@@ -91,4 +91,7 @@ var (
 
 	// CameraRangeThreshold is used to determine if an object is capable of being detected by the camera
 	CameraRangeThreshold = 250.0
+
+	// ParkingLeaveSideDistanceThreshold is the distance threshold to leave the parking (only used in the closed challenge)
+	ParkingLeaveSideDistanceThreshold = 500.0
 )
