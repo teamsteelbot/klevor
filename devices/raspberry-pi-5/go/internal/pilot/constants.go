@@ -94,4 +94,13 @@ var (
 
 	// ParkingLeaveSideDistanceThreshold is the distance threshold to leave the parking (only used in the closed challenge)
 	ParkingLeaveSideDistanceThreshold = 500.0
+
+	// StopBackwardDirectionOnParkingFrontDistanceThreshold is the distance threshold to stop the backward direction when leaving parking (only used in the closed challenge)
+	StopBackwardDirectionOnParkingFrontDistanceThreshold = 140.0
+
+	// StopForwardDirectionOnParkingFrontDistanceThreshold is the distance threshold to go forward for the first time when leaving parking (only used in the closed challenge)
+	StopForwardDirectionOnParkingFrontDistanceThreshold = 95.0
+
+	// LeftParkingSideDistanceThreshold is the distance threshold for the left side sensor when leaving parking (only used in the closed challenge)
+	LeftParkingSideDistanceThreshold = 450.0
 )
