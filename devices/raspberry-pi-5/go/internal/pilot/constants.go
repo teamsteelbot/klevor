@@ -90,9 +90,9 @@ var (
 	LaneIdentifierThreshold = 400.0
 
 	// FrontCloseupThreshold is used to move the robot closely to the wall (only used in the closed challenge)
-	FrontCloseupThreshold = 210.0
+	FrontCloseupThreshold = 100.0
 
-	// CameraRangeThreshold is used to determine if an object is capable of being detected by the camera
+	// CameraRangeThreshold is used to determine if an object is capable of being detected by the camera (only used in the closed challenge)
 	CameraRangeThreshold = 250.0
 
 	// ParkingLeaveSideDistanceThreshold is the distance threshold to leave the parking (only used in the closed challenge)
