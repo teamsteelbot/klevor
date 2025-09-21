@@ -12,16 +12,16 @@ var (
 	SetMotorSpeedAttempts = 3
 
 	// MotorSpeedStartMessageTimeout is the timeout for the motor speed start message
-	MotorSpeedStartMessageTimeout = 500 * time.Millisecond
+	MotorSpeedStartMessageTimeout = 1 * time.Second // 200ms, 500ms
 
 	// ServoAngleStartMessageTimeout is the timeout for the servo angle start message
-	ServoAngleStartMessageTimeout = 500 * time.Millisecond
+	ServoAngleStartMessageTimeout = 1 * time.Second
 
 	// MotorSpeedEndMessageTimeout is the timeout for the motor speed end message
-	MotorSpeedEndMessageTimeout = 2000 * time.Millisecond // 1500 ms
+	MotorSpeedEndMessageTimeout = 3 * time.Second // 1500 ms, 2000ms
 
 	// ServoAngleEndMessageTimeout is the timeout for the servo angle end message
-	ServoAngleEndMessageTimeout = 500 * time.Millisecond // 200 ms
+	ServoAngleEndMessageTimeout = 1 * time.Second // 200 ms, 500ms
 
 	// RPLiDARDelay is the delay between RPLiDAR scans
 	RPLiDARDelay = 100 * time.Millisecond
@@ -84,11 +84,11 @@ var (
 	AverageAngleWidth = 5
 
 	// LaneIdentifierThreshold is used to determine which lane is the robot placed (only used in the closed challenge)
-	LaneIdentifierThreshold = 400
+	LaneIdentifierThreshold = 400.0
 
 	// FrontCloseupThreshold is used to move the robot closely to the wall (only used in the closed challenge)
-	FrontCloseupThreshold = 210
+	FrontCloseupThreshold = 210.0
 
 	// CameraRangeThreshold is used to determine if an object is capable of being detected by the camera
-	CameraRangeThreshold = 250
+	CameraRangeThreshold = 250.0
 )
