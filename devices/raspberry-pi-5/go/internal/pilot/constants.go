@@ -63,7 +63,7 @@ var (
 	AlgorithmTurns = 12
 
 	// SafetyFrontDistanceStartThreshold is the distance threshold to start safety mode
-	SafetyFrontDistanceStartThreshold = 250.0
+	SafetyFrontDistanceStartThreshold = 175.0
 
 	// SafetyFrontDistanceStopThreshold is the distance threshold to stop safety mode
 	SafetyFrontDistanceStopThreshold = 350.0

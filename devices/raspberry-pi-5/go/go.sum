@@ -12,8 +12,8 @@ github.com/ralvarezdev/go-crypto v0.6.4 h1:eX257KaSWGa4zU+COX7Ja0yzbkAPdwRAtPlDa
 github.com/ralvarezdev/go-crypto v0.6.4/go.mod h1:jY/KGELdLAiBZSbn7x5jRGCDifEGF4X5GvhgAFZJnSM=
 github.com/ralvarezdev/go-hailo-clip-handler v0.1.8 h1:WiIQWDC9+EEFUvbOVmdn7ul1HvULdAl5f+ofuBQrMUE=
 github.com/ralvarezdev/go-hailo-clip-handler v0.1.8/go.mod h1:MRhGHEYWPmd86ONJxMSSFH/1ZFw7VmUOheg9g9szwDY=
-github.com/ralvarezdev/go-rplidar-sdk-handler v0.1.10 h1:1Dj3/nfsGaa8VXyayR49v/Iz15IJitq2BI+29zKRZaA=
-github.com/ralvarezdev/go-rplidar-sdk-handler v0.1.10/go.mod h1:qTJR9NM8wQi5ja5aQIIwAZ19vTR9tHTQKmSPLsHjhas=
+github.com/ralvarezdev/go-rplidar-sdk-handler v0.1.11 h1:ASed8zKggqbXx6lrFCDR2ojB2TZFzYcVUO9cNZVJO3g=
+github.com/ralvarezdev/go-rplidar-sdk-handler v0.1.11/go.mod h1:qTJR9NM8wQi5ja5aQIIwAZ19vTR9tHTQKmSPLsHjhas=
 github.com/ralvarezdev/go-strings v0.1.12 h1:AtOPDJ4lVO+33p7O4uECdD4C4D037h256zWz9uQ5eIQ=
 github.com/ralvarezdev/go-strings v0.1.12/go.mod h1:8sFOqmPJpqzS7bTjf91EzUCITnwpmkfifwY80GxV5r8=
 github.com/ralvarezdev/go-tinygo-errors v0.1.8 h1:KloTTolDbrVw5FEE4lIbApduP5Yh2jKgR1/odwYWnhY=
