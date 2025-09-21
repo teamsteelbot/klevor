@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"math"
 	"os"
 	"os/signal"
 	"sync"
@@ -1092,6 +1093,12 @@ func (h *DefaultHandler) goBackwardSlowlyOnParking(ctx context.Context) error {
 				h.northAverageDistance,
 			}
 			for _, distance := range frontDistances {
+				// Check if the distance is NaN
+				if math.IsNaN(distance) {
+					continue
+				}
+
+				// Check if the distance is above the threshold
 				if distance >= StopBackwardDirectionOnParkingFrontDistanceThreshold {
 					stopBackwardMovement = true
 					break
@@ -1170,7 +1177,26 @@ func (h *DefaultHandler) goForwardSlowlyOnParking(ctx context.Context, parkingLe
 			default:
 				return false, fmt.Errorf("invalid parking leave side: %w", ErrInvalidServoDirection)
 			}
-			oppositeDistance := h.getRPLiDARAverageDistance(oppositeCardinalDirection)
+
+			// Wait until the opposite distance is not NaN
+			oppositeDistance := math.NaN()
+			for {
+				select {
+				case <-ctx.Done():
+					return false, ctx.Err()
+				default:
+					// Get the opposite distance
+					oppositeDistance = h.getRPLiDARAverageDistance(oppositeCardinalDirection)
+				}
+
+				// Break the loop if the opposite distance is not NaN
+				if !math.IsNaN(oppositeDistance) {
+					break
+				}
+
+				// Sleep a bit before checking again
+				time.Sleep(RPLiDARDelay)
+			}
 			if oppositeDistance >= LeftParkingSideDistanceThreshold {
 				h.handlerLoggerProducer.Info("Opposite side distance threshold on parking reached.")
 				return true, nil
@@ -1181,7 +1207,7 @@ func (h *DefaultHandler) goForwardSlowlyOnParking(ctx context.Context, parkingLe
 				distance := h.getRPLiDARAverageDistance(cardinalDirection)
 
 				// Check if any of the front distances is below the threshold
-				if distance <= StopForwardDirectionOnParkingFrontDistanceThreshold {
+				if !math.IsNaN(distance) && distance <= StopForwardDirectionOnParkingFrontDistanceThreshold {
 					frontDistanceThresholdReached = true
 					h.handlerLoggerProducer.Info("Front distance threshold on parking reached.")
 					break
@@ -1204,12 +1230,20 @@ func (h *DefaultHandler) goForwardSlowlyOnParking(ctx context.Context, parkingLe
 func (h *DefaultHandler) leaveParkingHandler(ctx context.Context) error {
 	// Check which side has the space to leave the parking
 	parkingLeaveSide := ServoDirectionNil
-	if h.westAverageDistance >= ParkingLeaveSideDistanceThreshold {
-		parkingLeaveSide = ServoDirectionLeft
-	} else if h.eastAverageDistance >= ParkingLeaveSideDistanceThreshold {
-		parkingLeaveSide = ServoDirectionRight
-	} else {
-		return ErrNoSpaceToLeaveParking
+	for parkingLeaveSide == ServoDirectionNil {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+			if !math.IsNaN(h.westAverageDistance) && h.westAverageDistance >= ParkingLeaveSideDistanceThreshold {
+				parkingLeaveSide = ServoDirectionLeft
+			} else if !math.IsNaN(h.eastAverageDistance) && h.eastAverageDistance >= ParkingLeaveSideDistanceThreshold {
+				parkingLeaveSide = ServoDirectionRight
+			}
+		}
+
+		// Sleep a bit before checking again
+		time.Sleep(RPLiDARDelay)
 	}
 
 	// Iterate to leave the parking
@@ -1339,7 +1373,7 @@ func (h *DefaultHandler) safetyFrontDistanceOnChallengeWithObstaclesHandler(ctx 
 		distance := h.getRPLiDARAverageDistance(cardinalDirection)
 
 		// If the distance is above or equal to the threshold, continue to the next direction
-		if distance >= SafetyFrontDistanceStartThreshold {
+		if math.IsNaN(distance) || distance >= SafetyFrontDistanceStartThreshold {
 			continue
 		}
 
@@ -1389,7 +1423,7 @@ func (h *DefaultHandler) safetyFrontDistanceOnChallengeWithObstaclesHandler(ctx 
 				distance := h.getRPLiDARAverageDistance(cardinalDirection)
 
 				// If the distance is below the stop threshold, set the flag to false and break the loop
-				if distance < SafetyFrontDistanceStopThreshold {
+				if !math.IsNaN(distance) && distance < SafetyFrontDistanceStopThreshold {
 					frontDistanceThresholdReached = false
 					break
 				}
@@ -1448,11 +1482,11 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 			reached, err := h.safetyFrontDistanceOnChallengeWithObstaclesHandler(
 				ctx,
 				isTurning,
-				gorplidarsdkhandler.CardinalDirectionNortheast,
+				gorplidarsdkhandler.CardinalDirectionNorthwest,
 				gorplidarsdkhandler.CardinalDirectionNorthNorthwest,
 				gorplidarsdkhandler.CardinalDirectionNorth,
 				gorplidarsdkhandler.CardinalDirectionNorthNortheast,
-				gorplidarsdkhandler.CardinalDirectionNorthNorthwest,
+				gorplidarsdkhandler.CardinalDirectionNortheast,
 			)
 			if err != nil {
 				return err
@@ -1498,16 +1532,21 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 			}
 
 			// Check if the robot should move forward or turn
-			if h.northAverageDistance >= FrontStartTurnDistanceThreshold {
+			if !math.IsNaN(h.northAverageDistance) && h.northAverageDistance >= FrontStartTurnDistanceThreshold {
 				var motorSpeedPercentage float64
-				if h.northNortheastAverageDistance >= FrontStartTurnDistanceThreshold && h.northNorthwestAverageDistance >= FrontStartTurnDistanceThreshold {
+				if (!math.IsNaN(h.northNortheastAverageDistance) && h.northNortheastAverageDistance >= FrontStartTurnDistanceThreshold) &&
+					(!math.IsNaN(h.northNorthwestAverageDistance) && h.northNorthwestAverageDistance >= FrontStartTurnDistanceThreshold) {
 					motorSpeedPercentage = MotorForwardFastPercentage
 				} else {
 					motorSpeedPercentage = MotorForwardNormalPercentage
 				}
 
 				// Check if the servo should make a little turn to the left or right in order to center the robot
-				if h.eastAverageDistance >= h.westAverageDistance*(1+SideDistanceDifferencePercentage) {
+				if math.IsNaN(h.eastAverageDistance) || math.IsNaN(h.westAverageDistance) {
+					if err = h.setServoToCenter(ctx); err != nil {
+						return err
+					}
+				} else if h.eastAverageDistance >= h.westAverageDistance*(1+SideDistanceDifferencePercentage) {
 					if err = h.setServoToRightByPercentage(
 						ctx,
 						ServoSmallTurnAnglePercentage,
@@ -1536,10 +1575,10 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 			}
 
 			// Check if the robot should turn left or right based on the side distances
-			if h.eastAverageDistance >= SideDistanceThreshold {
+			if !math.IsNaN(h.eastAverageDistance) && h.eastAverageDistance >= SideDistanceThreshold {
 				isTurning = true
 				h.servoDirection = ServoDirectionRight
-			} else if h.westAverageDistance >= SideDistanceThreshold {
+			} else if !math.IsNaN(h.westAverageDistance) && h.westAverageDistance >= SideDistanceThreshold {
 				isTurning = true
 				h.servoDirection = ServoDirectionLeft
 			}
@@ -1584,7 +1623,7 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 		case <-ctx.Done():
 			return ctx.Err()
 		default:
-			if h.northAverageDistance <= StopDistanceThreshold {
+			if !math.IsNaN(h.northAverageDistance) && h.northAverageDistance <= StopDistanceThreshold {
 				completed = true
 				h.handlerLoggerProducer.Info("Challenge completed successfully. Stopping the robot.")
 			}
