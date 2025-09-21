@@ -32,6 +32,9 @@ var (
 	// CycleDelay is the delay between each cycle of the pilot
 	CycleDelay = 35 * time.Millisecond
 
+	// MinimumTimeBetweenTurns is the minimum time between turns
+	MinTimeBetweenTurns = 1 * time.Second
+
 	// HandlerLoggerProducerTag is the tag for the logger producer
 	HandlerLoggerProducerTag = "PILOT_HANDLER"
 
@@ -45,28 +48,34 @@ var (
 	MotorBackwardSlowPercentage float64 = 0.5
 
 	// MotorForwardFastPercentage is the percentage of the maximum speed for fast forward motor speed
-	MotorForwardFastPercentage float64 = 1.0
+	MotorForwardFastPercentage float64 = 0.7
 
 	// MotorForwardNormalPercentage is the percentage of the maximum speed for normal forward motor speed
-	MotorForwardNormalPercentage float64 = 0.9
+	MotorForwardNormalPercentage float64 = 0.6
 
 	// MotorForwardSlowPercentage is the percentage of the maximum speed for slow forward motor speed
-	MotorForwardSlowPercentage float64 = 0.8
+	MotorForwardSlowPercentage float64 = 0.5
+
+	// MotorTurningPercentage is the percentage of the maximum speed for turning motor speed
+	MotorTurningPercentage float64 = 0.85
 
 	// ServoBigTurnAnglePercentage is the percentage of the maximum angle for big turns
 	ServoBigTurnAnglePercentage float64 = 1
 
 	// ServoMediumTurnAnglePercentage is the percentage of the maximum angle for medium turns
-	ServoMediumTurnAnglePercentage float64 = 0.75
+	ServoMediumTurnAnglePercentage float64 = 0.7
 
 	// ServoSmallTurnAnglePercentage is the percentage of the maximum angle for small turns
-	ServoSmallTurnAnglePercentage float64 = 0.5
+	ServoSmallTurnAnglePercentage float64 = 0.4
 
 	// AlgorithmTurns is the number of turns in the algorithm
 	AlgorithmTurns = 12
 
+	// SafetyFrontDistanceChange is the scalar change for the safety front distance calculation
+	SafetyFrontDistanceChange = 1.5
+
 	// SafetyFrontDistanceStartThreshold is the distance threshold to start safety mode
-	SafetyFrontDistanceStartThreshold = 175.0
+	SafetyFrontDistanceStartThreshold = 150.0
 
 	// SafetyFrontDistanceStopThreshold is the distance threshold to stop safety mode
 	SafetyFrontDistanceStopThreshold = 350.0
@@ -78,13 +87,13 @@ var (
 	SideDistanceThreshold = 1500.0
 
 	// SideDistanceDifferencePercentage is the percentage difference threshold for side sensors
-	SideDistanceDifferencePercentage = 0.15 // 0.2
+	SideDistanceDifferencePercentage = 0.3 // 0.2, 0.15
+
+	// SideDistanceChange is the scalar change for the side distance calculation
+	SideDistanceChange = 1.0
 
 	// FrontStartTurnDistanceThreshold is the distance threshold to start turning
-	FrontStartTurnDistanceThreshold = 650.0 // 500.0, 600.0
-
-	// FrontStopTurnDistanceThreshold is the distance threshold to stop turning
-	FrontStopTurnDistanceThreshold = 1500.0
+	FrontStartTurnDistanceThreshold = 1000.0 // 500.0, 600.0, 650.0
 
 	// AverageAngleWidth is the width of the angle for average calculations
 	AverageAngleWidth = 5

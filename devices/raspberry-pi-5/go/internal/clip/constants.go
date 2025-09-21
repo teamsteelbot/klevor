@@ -25,7 +25,7 @@ var (
 
 	// NegativeLabels are the negative labels for CLIP
 	NegativeLabels = []NegativeLabel{
-		NegativeLabelBackground,
+		NegativeLabelWhiteBackground,
 		NegativeLabelBlackBlock,
 	}
 )

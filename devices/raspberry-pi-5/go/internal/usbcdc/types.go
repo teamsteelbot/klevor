@@ -126,9 +126,9 @@ func (c *CalculatedTurns) UpdateTurnsFromYawDegrees(yawDegrees float64) error {
 	c.accumulatedYawDegrees += deltaRawYawDegrees
 	currentSegmentCount := int(c.accumulatedYawDegrees / 90)
 
-	// Update the last segment count and accumulated turns if the segment count has changed
+	// Update the last segment count and accumulated turns if the segment count has changed by exactly 1
 	lastSegmentCount := c.lastSegmentCount
-	if currentSegmentCount != lastSegmentCount {
+	if int(math.Abs(float64(currentSegmentCount)-float64(lastSegmentCount))) == 1 {
 		c.accumulatedYaw90DegreesTurns += currentSegmentCount - lastSegmentCount
 		c.lastSegmentCount = currentSegmentCount
 	}

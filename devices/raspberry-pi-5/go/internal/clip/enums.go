@@ -22,7 +22,7 @@ const (
 
 const (
 	NegativeLabelNil NegativeLabel = iota
-	NegativeLabelBackground
+	NegativeLabelWhiteBackground
 	NegativeLabelBlackBlock
 )
 
@@ -36,8 +36,8 @@ var (
 
 	// NegativeLabelNames maps a given NegativeLabel to its string name
 	NegativeLabelNames = map[NegativeLabel]string{
-		NegativeLabelBackground: "background",
-		NegativeLabelBlackBlock: "black block",
+		NegativeLabelWhiteBackground: "white background",
+		NegativeLabelBlackBlock:      "black block",
 	}
 )
 
