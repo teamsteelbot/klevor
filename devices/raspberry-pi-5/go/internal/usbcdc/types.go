@@ -1532,7 +1532,7 @@ func (h *DefaultHandler) GetTurns() int {
 	if h.calculatedTurns == nil {
 		return 0
 	}
-	return h.calculatedTurns.GetTurns()
+	return int(math.Abs(float64(h.calculatedTurns.GetTurns())))
 }
 
 // ReceivedBNO08XYawDegrees returns the received BNO08X yaw degrees.

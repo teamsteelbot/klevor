@@ -26,6 +26,9 @@ var (
 	// RPLiDARDelay is the delay between RPLiDAR scans
 	RPLiDARDelay = 100 * time.Millisecond
 
+	// CLIPDelay is the delay between CLIP classifications
+	CLIPDelay = 40 * time.Millisecond
+
 	// HandlerLoggerProducerTag is the tag for the logger producer
 	HandlerLoggerProducerTag = "PILOT_HANDLER"
 
@@ -60,7 +63,7 @@ var (
 	AlgorithmTurns = 12
 
 	// SafetyFrontDistanceStartThreshold is the distance threshold to start safety mode
-	SafetyFrontDistanceStartThreshold = 200.0
+	SafetyFrontDistanceStartThreshold = 250.0
 
 	// SafetyFrontDistanceStopThreshold is the distance threshold to stop safety mode
 	SafetyFrontDistanceStopThreshold = 350.0
@@ -75,7 +78,7 @@ var (
 	SideDistanceDifferencePercentage = 0.15 // 0.2
 
 	// FrontStartTurnDistanceThreshold is the distance threshold to start turning
-	FrontStartTurnDistanceThreshold = 600.0 // 500.0
+	FrontStartTurnDistanceThreshold = 650.0 // 500.0, 600.0
 
 	// FrontStopTurnDistanceThreshold is the distance threshold to stop turning
 	FrontStopTurnDistanceThreshold = 1500.0
