@@ -728,7 +728,7 @@ func (h *DefaultHandler) getRPLiDARAverageDistance(
 //
 // An error if the challenge could not be handled, nil otherwise
 func (h *DefaultHandler) challengeWithObstaclesHandler(ctx context.Context) error {
-	/
+	/*
 		var WallCloseUp bool
 		var isTurning bool
 		var bno08xLastTurns int
