@@ -728,7 +728,7 @@ func (h *DefaultHandler) getRPLiDARAverageDistance(
 //
 // An error if the challenge could not be handled, nil otherwise
 func (h *DefaultHandler) challengeWithObstaclesHandler(ctx context.Context) error {
-	/*
+	/
 		var WallCloseUp bool
 		var isTurning bool
 		var bno08xLastTurns int
@@ -952,54 +952,78 @@ func (h *DefaultHandler) challengeWithObstaclesHandler(ctx context.Context) erro
 
 				// Check if the robot should turn left or right based on the side distances
 				if eastAverageDistance >= SideDistanceThreshold {
-					if err := h.setServoToRightByPercentage(
-						ctx,
-						ServoBigTurnAnglePercentage,
-					); err != nil {
-						return fmt.Errorf(
-							"failed to set servo to big right turn: %w",
-							err,
-						)
-					}
+					TemporaryTurns = bno08xLastTurns
 					isTurning = true
-					if westAverageDistance >= float64(LaneIdentifierThreshold) {
+				
+				 //Checks which lane is the robot located inside
+
+					if westAverageDistance >= float64(LaneIdentifierThreshold) && isTurning == true {
 						if northAverageDistance >= FrontCloseupThreshold {
 							h.motorSpeed = MotorForwardSlowPercentage
-							h.servoDirection = ServoDirectionCenter
+							h.servoDirection = ServoDirectionStriaght
 							WallCloseUp = true
 						}
 						if northAverageDistance <= float64(FrontCloseupThreshold) && WallCloseUp == true {
 							h.servoDirection = ServoDirectionLeft
 							h.motorSpeed = MotorBackwardSlowPercentage
-							h.motorSpeed = uint16(MotorForwardNormalPercentage)
+
+							// Basically this condition is meant to indicate when has the robot successfully made the turn
+							if bno08xLastTurns != TemporaryTurns {
+								isTurning = false
+								WallCloseUp = false
+								continue
+							}
 						}
-					}
-				} else if westAverageDistance >= SideDistanceThreshold {
-					if err := h.setServoToLeftByPercentage(
-						ctx,
-						ServoBigTurnAnglePercentage,
-					); err != nil {
-						return fmt.Errorf(
-							"failed to set servo to big left turn: %w",
-							err,
-						)
-					}
+					else {
+					    h.servoDirection = ServoDirectionRight
+						h.motorSpeed = MotorForwardSlowPercentage
+							// Basically this condition is meant to indicate when has the robot successfully made the turn
+							if bno08xLastTurns != TemporaryTurns {
+								h.servoDirection = ServoDirectionLeft
+								h.motorSpeed = MotorBackwardSlowPercentage
+								// keeps doing it until it reaches the wall (prob measurements with the rplidar)
+								h.servoDirection = ServoDirectionStraight
+								isTurning = false
+					}	}	}
+				}
+				else if westAverageDistance >= SideDistanceThreshold {
+					TemporaryTurns = bno08xLastTurns
 					isTurning = true
-					if eastAverageDistance >= float64(LaneIdentifierThreshold) {
+		
+					// Checks which lane is the robot located inside
+
+					if eastAverageDistance >= float64(LaneIdentifierThreshold) && isTurning == true {
 						if northAverageDistance >= FrontCloseupThreshold {
 							h.motorSpeed = MotorForwardSlowPercentage
-							h.servoDirection = ServoDirectionCenter
+							h.servoDirection = ServoDirectionStraight
 							WallCloseUp = true
 						}
 						if northAverageDistance <= float64(FrontCloseupThreshold) && WallCloseUp == true {
 							h.servoDirection = ServoDirectionRight
 							h.motorSpeed = MotorBackwardSlowPercentage
-							h.motorSpeed = uint16(MotorForwardNormalPercentage)
-						}
-					}
-				}
 
-				// After each turn, the robot starts looking for the objects (it should be roughly centered, and it could gather the objects position, (left, center or right) with the rplidar)
+							// Basically this condition is meant to indicate when has the robot successfully made the turn
+							if bno08xLastTurns != TemporaryTurns {
+								isTurning = false
+								WallCloseUp = false
+								continue
+							}
+						}
+					else {
+					    h.servoDirection = ServoDirectionLeft
+						h.motorSpeed = MotorForwardSlowPercentage
+							// Basically this condition is meant to indicate when has the robot successfully made the turn
+							if bno08xLastTurns != TemporaryTurns {
+								h.servoDirection = ServoDirectionRight
+								h.motorSpeed = MotorBackwardSlowPercentage
+								// keeps doing it until it reaches the wall (prob measurements with the rplidar)
+								h.servoDirection = ServoDirectionStraight
+								isTurning = false
+						}	}
+					}
+				} 
+
+				// After each turn, the robot starts looking for the objects (it should be roughly centered, and it could gather the objects position, (left or right lane) with the rplidar)
 
 				if !isTurning {
 					for i := 180; i < 360; i++ {
@@ -1007,11 +1031,11 @@ func (h *DefaultHandler) challengeWithObstaclesHandler(ctx context.Context) erro
 							if h.clipClassification == red_block {
 								h.servoDirection = ServoDirectionRight
 								h.motorSpeed = uint16(MotorForwardNormalPercentage)
-								if westAverageDistance <= float64(CameraRangeThreshold) && eastAverageDistance <= float64(CameraRangeThreshold {
-									h.servoDirection == ServoDirectionLeft
+								if westAverageDistance <= float64(CameraRangeThreshold) && eastAverageDistance <= float64(CameraRangeThreshold) {
+									h.servoDirection = ServoDirectionLeft
 								}
 								else if northAverageDistance <= float64(FrontCloseupThreshold) {
-									h.servoDirection = ServoDirectionCenter
+									h.servoDirection = ServoDirectionStraight
 									h.motorSpeed = uint16(MotorBackwardNormalPercentage)
 									return
 								}
@@ -1024,7 +1048,7 @@ func (h *DefaultHandler) challengeWithObstaclesHandler(ctx context.Context) erro
 									h.servoDirection = ServoDirectionRight
 						}
 								else if northAverageDistance <= float64(FrontCloseupThreshold) {
-									h.servoDirection = ServoDirectionCenter
+									h.servoDirection = ServoDirectionStraight
 									h.motorSpeed = uint16(MotorBackwardNormalPercentage)
 									continue
 						} 			}
