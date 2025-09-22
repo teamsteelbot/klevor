@@ -647,7 +647,7 @@ func (h *DefaultHandler) challengeWithObstaclesHandler(ctx context.Context) erro
 	/*
 		var WallCloseUp bool
 		var isTurning bool
-		var bno08xLastTurns int
+		var bno08xLast90DegreeTurns int
 		var westAverageDistance, eastAverageDistance, northAverageDistance, northNortheastAverageDistance, northNorthwestAverageDistance float64
 		for h.usbCDCHandler.Get90DegreeTurns() < Algorithm90DegreeTurns {
 			// Sleep the RPLiDAR delay to wait for new measures
@@ -779,12 +779,12 @@ func (h *DefaultHandler) challengeWithObstaclesHandler(ctx context.Context) erro
 				if isTurning {
 					// Get the latest BNO08x turns value
 					turns := h.usbCDCHandler.Get90DegreeTurns()
-					if turns > bno08xLastTurns {
+					if turns > bno08xLast90DegreeTurns {
 						h.handlerLoggerProducer.Info(
 							fmt.Sprintf(
 								"Detected a turn. Current turns: %d, Last turns: %d",
 								turns,
-								bno08xLastTurns,
+								bno08xLast90DegreeTurns,
 							),
 						)
 
@@ -797,7 +797,7 @@ func (h *DefaultHandler) challengeWithObstaclesHandler(ctx context.Context) erro
 						}
 
 						// Update for the next check
-						bno08xLastTurns = turns
+						bno08xLast90DegreeTurns = turns
 						isTurning = false
 					}
 					continue
@@ -868,7 +868,7 @@ func (h *DefaultHandler) challengeWithObstaclesHandler(ctx context.Context) erro
 
 				// Check if the robot should turn left or right based on the side distances
 				if eastAverageDistance >= SideDistanceThreshold {
-					TemporaryTurns = bno08xLastTurns
+					TemporaryTurns = bno08xLast90DegreeTurns
 					isTurning = true
 
 				 //Checks which lane is the robot located inside
@@ -884,7 +884,7 @@ func (h *DefaultHandler) challengeWithObstaclesHandler(ctx context.Context) erro
 							h.motorSpeed = MotorBackwardSlowPercentage
 
 							// Basically this condition is meant to indicate when has the robot successfully made the turn
-							if bno08xLastTurns != TemporaryTurns {
+							if bno08xLast90DegreeTurns != TemporaryTurns {
 								isTurning = false
 								WallCloseUp = false
 								continue
@@ -894,7 +894,7 @@ func (h *DefaultHandler) challengeWithObstaclesHandler(ctx context.Context) erro
 					    h.servoDirection = ServoDirectionRight
 						h.motorSpeed = MotorForwardSlowPercentage
 							// Basically this condition is meant to indicate when has the robot successfully made the turn
-							if bno08xLastTurns != TemporaryTurns {
+							if bno08xLast90DegreeTurns != TemporaryTurns {
 								h.servoDirection = ServoDirectionLeft
 								h.motorSpeed = MotorBackwardSlowPercentage
 								// keeps doing it until it reaches the wall (prob measurements with the rplidar)
@@ -903,7 +903,7 @@ func (h *DefaultHandler) challengeWithObstaclesHandler(ctx context.Context) erro
 					}	}	}
 				}
 				else if westAverageDistance >= SideDistanceThreshold {
-					TemporaryTurns = bno08xLastTurns
+					TemporaryTurns = bno08xLast90DegreeTurns
 					isTurning = true
 
 					// Checks which lane is the robot located inside
@@ -919,7 +919,7 @@ func (h *DefaultHandler) challengeWithObstaclesHandler(ctx context.Context) erro
 							h.motorSpeed = MotorBackwardSlowPercentage
 
 							// Basically this condition is meant to indicate when has the robot successfully made the turn
-							if bno08xLastTurns != TemporaryTurns {
+							if bno08xLast90DegreeTurns != TemporaryTurns {
 								isTurning = false
 								WallCloseUp = false
 								continue
@@ -929,7 +929,7 @@ func (h *DefaultHandler) challengeWithObstaclesHandler(ctx context.Context) erro
 					    h.servoDirection = ServoDirectionLeft
 						h.motorSpeed = MotorForwardSlowPercentage
 							// Basically this condition is meant to indicate when has the robot successfully made the turn
-							if bno08xLastTurns != TemporaryTurns {
+							if bno08xLast90DegreeTurns != TemporaryTurns {
 								h.servoDirection = ServoDirectionRight
 								h.motorSpeed = MotorBackwardSlowPercentage
 								// keeps doing it until it reaches the wall (prob measurements with the rplidar)
@@ -1354,7 +1354,7 @@ func (h *DefaultHandler) safetyFrontDistanceOnChallengeWithObstaclesHandler(
 		distance := h.getRPLiDARAverageDistance(cardinalDirection)
 
 		// Calculate the future distance change based on the current distance change
-		distanceChange := SafetyFrontDistanceChange * h.rplidarAverageDistancesChange[cardinalDirection]
+		distanceChange := FrontDistanceChange * h.rplidarAverageDistancesChange[cardinalDirection]
 
 		// If the distance is above or equal to the threshold, continue to the next direction
 		if math.IsNaN(distance) || distance+distanceChange >= SafetyFrontDistanceStartThreshold {
@@ -1407,7 +1407,7 @@ func (h *DefaultHandler) safetyFrontDistanceOnChallengeWithObstaclesHandler(
 				distance := h.getRPLiDARAverageDistance(cardinalDirection)
 
 				// Calculate the future distance change based on the current distance change
-				distanceChange := SafetyFrontDistanceChange * h.rplidarAverageDistancesChange[cardinalDirection]
+				distanceChange := FrontDistanceChange * h.rplidarAverageDistancesChange[cardinalDirection]
 
 				// If the distance is below the stop threshold, set the flag to false and break the loop
 				if !math.IsNaN(distance) && distance+distanceChange < SafetyFrontDistanceStopThreshold {
@@ -1502,8 +1502,11 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 						),
 					)
 
-					// Center the servo
-					if err = h.setServoToCenter(ctx); err != nil {
+					// Set the servo to the opposite direction with a small degree
+					if err = h.setServoToOppositeDirection(
+						ctx,
+						ServoSmallTurnAnglePercentage,
+					); err != nil {
 						return err
 					}
 
@@ -1519,10 +1522,10 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 			}
 
 			// Get the front distance change
-			northDistanceChange := SafetyFrontDistanceChange * h.rplidarAverageDistancesChange[gorplidarsdkhandler.CardinalDirectionNorth]
+			northDistanceChange := FrontDistanceChange * h.rplidarAverageDistancesChange[gorplidarsdkhandler.CardinalDirectionNorth]
 
 			// Check if the robot should turn left or right based on the side distances
-			if bno08xLastTurns == 0 || (!math.IsNaN(h.northAverageDistance) && h.northAverageDistance+northDistanceChange <= FrontStartTurnDistanceThreshold) {
+			if bno08xLast90DegreeTurns == 0 || (!math.IsNaN(h.northAverageDistance) && h.northAverageDistance+northDistanceChange <= FrontStartTurnDistanceThreshold) {
 				if time.Since(lastTurningTime) >= MinTimeBetweenTurns {
 					if (direction == ServoDirectionRight || direction == ServoDirectionNil) &&
 						(!math.IsNaN(h.eastAverageDistance) && h.eastAverageDistance >= SideDistanceThreshold) {
@@ -1563,22 +1566,50 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 			}
 
 			// Get the rate of change for west and east average distances
-			westDistanceChange := SafetyFrontDistanceChange * h.rplidarAverageDistancesChange[gorplidarsdkhandler.CardinalDirectionWest]
-			eastDistanceChange := SafetyFrontDistanceChange * h.rplidarAverageDistancesChange[gorplidarsdkhandler.CardinalDirectionEast]
+			westDistanceChange := SideDistanceChange * h.rplidarAverageDistancesChange[gorplidarsdkhandler.CardinalDirectionWest]
+			eastDistanceChange := SideDistanceChange * h.rplidarAverageDistancesChange[gorplidarsdkhandler.CardinalDirectionEast]
 
 			// Check if the servo should make a little turn to the left or right in order to center the robot
 			if math.IsNaN(h.eastAverageDistance) || math.IsNaN(h.westAverageDistance) {
 				if err = h.setServoToCenter(ctx); err != nil {
 					return err
 				}
-			} else if h.eastAverageDistance+eastDistanceChange >= (h.westAverageDistance+westDistanceChange)*(1+SideDistanceDifferencePercentage) {
+			} else if h.eastAverageDistance+eastDistanceChange >= (h.westAverageDistance+westDistanceChange)*(1+SideDistanceBigDifferencePercentage) {
+				if err = h.setServoToRight(
+					ctx,
+					ServoBigTurnAnglePercentage,
+				); err != nil {
+					return err
+				}
+			} else if h.eastAverageDistance+eastDistanceChange >= (h.westAverageDistance+westDistanceChange)*(1+SideDistanceMediumDifferencePercentage) {
+				if err = h.setServoToRight(
+					ctx,
+					ServoMediumTurnAnglePercentage,
+				); err != nil {
+					return err
+				}
+			} else if h.eastAverageDistance+eastDistanceChange >= (h.westAverageDistance+westDistanceChange)*(1+SideDistanceSmallDifferencePercentage) {
 				if err = h.setServoToRight(
 					ctx,
 					ServoSmallTurnAnglePercentage,
 				); err != nil {
 					return err
 				}
-			} else if h.westAverageDistance+westDistanceChange >= (h.eastAverageDistance+eastDistanceChange)*(1+SideDistanceDifferencePercentage) {
+			} else if h.westAverageDistance+westDistanceChange >= (h.eastAverageDistance+eastDistanceChange)*(1+SideDistanceBigDifferencePercentage) {
+				if err = h.setServoToLeft(
+					ctx,
+					ServoBigTurnAnglePercentage,
+				); err != nil {
+					return err
+				}
+			} else if h.westAverageDistance+westDistanceChange >= (h.eastAverageDistance+eastDistanceChange)*(1+SideDistanceMediumDifferencePercentage) {
+				if err = h.setServoToLeft(
+					ctx,
+					ServoMediumTurnAnglePercentage,
+				); err != nil {
+					return err
+				}
+			} else if h.westAverageDistance+westDistanceChange >= (h.eastAverageDistance+eastDistanceChange)*(1+SideDistanceSmallDifferencePercentage) {
 				if err = h.setServoToLeft(
 					ctx,
 					ServoSmallTurnAnglePercentage,
@@ -1630,7 +1661,7 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 			}
 
 			// Get the rate of change for the north average distance
-			northDistanceChange := SafetyFrontDistanceChange * h.rplidarAverageDistancesChange[gorplidarsdkhandler.CardinalDirectionNorth]
+			northDistanceChange := FrontDistanceChange * h.rplidarAverageDistancesChange[gorplidarsdkhandler.CardinalDirectionNorth]
 
 			// Check if the north average distance is below the stop distance threshold
 			if h.northAverageDistance+northDistanceChange <= StopDistanceThreshold {

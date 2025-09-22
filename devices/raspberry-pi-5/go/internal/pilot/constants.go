@@ -5,6 +5,9 @@ import (
 )
 
 var (
+	// AverageAngleWidth is the width of the angle for average calculations
+	AverageAngleWidth = 3
+
 	// SetServoAngleAttempts is the number of attempts to set the servo angle
 	SetServoAngleAttempts = 3
 
@@ -30,9 +33,9 @@ var (
 	CLIPDelay = 40 * time.Millisecond
 
 	// GyroscopeDelay is the delay between each gyroscope reading
-	GyroscopeDelay = 20 * time.Millisecond
+	GyroscopeDelay = 10 * time.Millisecond
 
-	// MinimumTimeBetweenTurns is the minimum time between turns
+	// MinTimeBetweenTurns is the minimum time between turns
 	MinTimeBetweenTurns = 1 * time.Second
 
 	// HandlerLoggerProducerTag is the tag for the logger producer
@@ -63,16 +66,19 @@ var (
 	ServoBigTurnAnglePercentage float64 = 1
 
 	// ServoMediumTurnAnglePercentage is the percentage of the maximum angle for medium turns
-	ServoMediumTurnAnglePercentage float64 = 0.8
+	ServoMediumTurnAnglePercentage float64 = 0.66
 
 	// ServoSmallTurnAnglePercentage is the percentage of the maximum angle for small turns
-	ServoSmallTurnAnglePercentage float64 = 0.6
+	ServoSmallTurnAnglePercentage float64 = 0.33
 
 	// Algorithm90DegreeTurns is the number of 90 degree turns in the algorithm
 	Algorithm90DegreeTurns uint = 12
 
-	// SafetyFrontDistanceChange is the scalar change for the safety front distance calculation
-	SafetyFrontDistanceChange = 1.5
+	// FrontDistanceChange is the scalar change for the safety front distance calculation
+	FrontDistanceChange = 1.5
+
+	// SideDistanceChange is the scalar change for the side distance calculation
+	SideDistanceChange = 1.25
 
 	// SafetyFrontDistanceStartThreshold is the distance threshold to start safety mode
 	SafetyFrontDistanceStartThreshold = 150.0
@@ -86,17 +92,17 @@ var (
 	// SideDistanceThreshold is the distance threshold for side sensors
 	SideDistanceThreshold = 1750.0
 
-	// SideDistanceDifferencePercentage is the percentage difference threshold for side sensors
-	SideDistanceDifferencePercentage = 0.3 // 0.2, 0.15
+	// SideDistanceBigDifferencePercentage is the percentage of big difference threshold for side distances
+	SideDistanceBigDifferencePercentage = 0.45
 
-	// SideDistanceChange is the scalar change for the side distance calculation
-	SideDistanceChange = 1.0
+	// SideDistanceMediumDifferencePercentage is the percentage of medium difference threshold for side distances
+	SideDistanceMediumDifferencePercentage = 0.30
+
+	// SideDistanceSmallDifferencePercentage is the percentage of small difference threshold for side distances
+	SideDistanceSmallDifferencePercentage = 0.15 // 0.2, 0.15, 0.3
 
 	// FrontStartTurnDistanceThreshold is the distance threshold to start turning
 	FrontStartTurnDistanceThreshold = 1000.0 // 500.0, 600.0, 650.0
-
-	// AverageAngleWidth is the width of the angle for average calculations
-	AverageAngleWidth = 3
 
 	// LaneIdentifierThreshold is used to determine which lane is the robot placed (only used in the closed challenge)
 	LaneIdentifierThreshold = 400.0
