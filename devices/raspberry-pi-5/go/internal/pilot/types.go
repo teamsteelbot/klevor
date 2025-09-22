@@ -939,7 +939,7 @@ func (h *DefaultHandler) challengeWithObstaclesHandler(ctx context.Context) erro
 					continue
 				}
 				*/
-				
+				/*
 				if err := h.setMotorForwardByPercentage(
 					ctx,
 					MotorForwardNormalPercentage,
@@ -1588,6 +1588,9 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 					lastTurningTime = time.Now()
 					isTurning = false
 				}
+
+				// Sleep a bit before the next cycle
+				time.Sleep(GyroscopeDelay)
 				continue
 			}
 
@@ -1670,9 +1673,6 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 				return err
 			}
 		}
-
-		// Sleep between each cycle
-		time.Sleep(CycleDelay)
 	}
 
 	// Log that is almost time to stop

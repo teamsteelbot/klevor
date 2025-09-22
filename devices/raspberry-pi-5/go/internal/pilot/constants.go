@@ -29,8 +29,8 @@ var (
 	// CLIPDelay is the delay between CLIP classifications
 	CLIPDelay = 40 * time.Millisecond
 
-	// CycleDelay is the delay between each cycle of the pilot
-	CycleDelay = 35 * time.Millisecond
+	// GyroscopeDelay is the delay between each gyroscope reading
+	GyroscopeDelay = 20 * time.Millisecond
 
 	// MinimumTimeBetweenTurns is the minimum time between turns
 	MinTimeBetweenTurns = 1 * time.Second
@@ -57,7 +57,7 @@ var (
 	MotorForwardSlowPercentage float64 = 0.5
 
 	// MotorTurningPercentage is the percentage of the maximum speed for turning motor speed
-	MotorTurningPercentage float64 = 0.85
+	MotorTurningPercentage float64 = 0.75
 
 	// ServoBigTurnAnglePercentage is the percentage of the maximum angle for big turns
 	ServoBigTurnAnglePercentage float64 = 1
@@ -96,7 +96,7 @@ var (
 	FrontStartTurnDistanceThreshold = 1000.0 // 500.0, 600.0, 650.0
 
 	// AverageAngleWidth is the width of the angle for average calculations
-	AverageAngleWidth = 5
+	AverageAngleWidth = 3
 
 	// LaneIdentifierThreshold is used to determine which lane is the robot placed (only used in the closed challenge)
 	LaneIdentifierThreshold = 400.0
