@@ -173,7 +173,7 @@ func (h *DefaultHandler) setMotorSpeed(
 			h.handlerLoggerProducer.Info(
 				fmt.Sprintf(
 					"Setting motor speed to %.3f% in backward direction",
-					speed * 100,
+					speed*100,
 				),
 			)
 			if err := h.usbCDCSender.SendMessage(
@@ -322,13 +322,13 @@ func (h *DefaultHandler) setServoAngle(
 			h.handlerLoggerProducer.Info(
 				fmt.Sprintf(
 					"Setting servo direction to left by %.3f%",
-					angle * 100,
+					angle*100,
 				),
 			)
 			if err := h.usbCDCSender.SendMessage(
 				internalusbcdc.NewOutgoingMessageFromFloat64Data(
 					internalusbcdc.OutgoingCategoryServoAngleToLeft,
-					angle * 100,
+					angle*100,
 				),
 			); err != nil {
 				return err
@@ -337,7 +337,7 @@ func (h *DefaultHandler) setServoAngle(
 			h.handlerLoggerProducer.Info(
 				fmt.Sprintf(
 					"Setting servo direction to right by %.3f%",
-					angle * 100,
+					angle*100,
 				),
 			)
 			if err := h.usbCDCSender.SendMessage(
@@ -505,13 +505,19 @@ func (h *DefaultHandler) updateCLIPClassification(ctx context.Context) error {
 				// Do nothing, both are nil
 			} else if lastCLIPClassification == nil && clipClassification != nil {
 				h.handlerLoggerProducer.Info(
-					fmt.Sprintf("CLIP classification changed: %v", clipClassification.GetLabel()),
+					fmt.Sprintf(
+						"CLIP classification changed: %v",
+						clipClassification.GetLabel(),
+					),
 				)
 			} else if lastCLIPClassification != nil && clipClassification == nil {
 				h.handlerLoggerProducer.Info("CLIP classification changed: nil")
 			} else if lastCLIPClassification.GetLabel() != clipClassification.GetLabel() {
 				h.handlerLoggerProducer.Info(
-					fmt.Sprintf("CLIP classification changed: %s", clipClassification.GetLabel()),
+					fmt.Sprintf(
+						"CLIP classification changed: %s",
+						clipClassification.GetLabel(),
+					),
 				)
 			}
 
@@ -643,7 +649,7 @@ func (h *DefaultHandler) challengeWithObstaclesHandler(ctx context.Context) erro
 		var isTurning bool
 		var bno08xLastTurns int
 		var westAverageDistance, eastAverageDistance, northAverageDistance, northNortheastAverageDistance, northNorthwestAverageDistance float64
-		for h.usbCDCHandler.GetTurns() < AlgorithmTurns {
+		for h.usbCDCHandler.Get90DegreeTurns() < Algorithm90DegreeTurns {
 			// Sleep the RPLiDAR delay to wait for new measures
 			time.Sleep(RPLiDARDelay - time.Since(h.rplidarLastMeasuresUpdateTime))
 
@@ -772,7 +778,7 @@ func (h *DefaultHandler) challengeWithObstaclesHandler(ctx context.Context) erro
 				// Check for the current turn and center the servo if necessary
 				if isTurning {
 					// Get the latest BNO08x turns value
-					turns := h.usbCDCHandler.GetTurns()
+					turns := h.usbCDCHandler.Get90DegreeTurns()
 					if turns > bno08xLastTurns {
 						h.handlerLoggerProducer.Info(
 							fmt.Sprintf(
@@ -848,8 +854,8 @@ func (h *DefaultHandler) challengeWithObstaclesHandler(ctx context.Context) erro
 					}
 					continue
 				}
-				*/
-				/*
+	*/
+	/*
 				if err := h.setMotorForwardByPercentage(
 					ctx,
 					MotorForwardNormalPercentage,
@@ -864,7 +870,7 @@ func (h *DefaultHandler) challengeWithObstaclesHandler(ctx context.Context) erro
 				if eastAverageDistance >= SideDistanceThreshold {
 					TemporaryTurns = bno08xLastTurns
 					isTurning = true
-				
+
 				 //Checks which lane is the robot located inside
 
 					if westAverageDistance >= float64(LaneIdentifierThreshold) && isTurning == true {
@@ -899,7 +905,7 @@ func (h *DefaultHandler) challengeWithObstaclesHandler(ctx context.Context) erro
 				else if westAverageDistance >= SideDistanceThreshold {
 					TemporaryTurns = bno08xLastTurns
 					isTurning = true
-		
+
 					// Checks which lane is the robot located inside
 
 					if eastAverageDistance >= float64(LaneIdentifierThreshold) && isTurning == true {
@@ -931,7 +937,7 @@ func (h *DefaultHandler) challengeWithObstaclesHandler(ctx context.Context) erro
 								isTurning = false
 						}	}
 					}
-				} 
+				}
 
 				// After each turn, the robot starts looking for the objects (it should be roughly centered, and it could gather the objects position, (left or right lane) with the rplidar)
 
@@ -968,7 +974,7 @@ func (h *DefaultHandler) challengeWithObstaclesHandler(ctx context.Context) erro
 					}
 				}
 			}
-		
+
 		// Log that is almost time to stop
 		h.handlerLoggerProducer.Info("Almost time to stop. Monitoring front distance...")
 
@@ -1078,7 +1084,10 @@ func (h *DefaultHandler) goBackwardSlowlyOnParking(ctx context.Context) error {
 //
 // ctx: The context to use for setting the motor and servo to the parking leave side
 // parkingLeaveSide: The side to leave the parking (left or right)
-func (h *DefaultHandler) setMotorAndServoToParkingLeaveSide(ctx context.Context, parkingLeaveSide ServoDirection) error {
+func (h *DefaultHandler) setMotorAndServoToParkingLeaveSide(
+	ctx context.Context,
+	parkingLeaveSide ServoDirection,
+) error {
 	// Set the servo to the parking leave side and the motor to forward slowly
 	switch parkingLeaveSide {
 	case ServoDirectionLeft:
@@ -1096,7 +1105,10 @@ func (h *DefaultHandler) setMotorAndServoToParkingLeaveSide(ctx context.Context,
 			return err
 		}
 	default:
-		return fmt.Errorf("invalid parking leave side: %w", ErrInvalidServoDirection)
+		return fmt.Errorf(
+			"invalid parking leave side: %w",
+			ErrInvalidServoDirection,
+		)
 	}
 	if err := h.setMotorForward(
 		ctx,
@@ -1118,7 +1130,11 @@ func (h *DefaultHandler) setMotorAndServoToParkingLeaveSide(ctx context.Context,
 // Returns:
 //
 // An error if the front distance threshold on parking could not be reached, nil otherwise
-func (h *DefaultHandler) goForwardSlowlyOnParking(ctx context.Context, parkingLeaveSide ServoDirection, cardinalDirections ...gorplidarsdkhandler.CardinalDirection) (bool, error) {
+func (h *DefaultHandler) goForwardSlowlyOnParking(
+	ctx context.Context,
+	parkingLeaveSide ServoDirection,
+	cardinalDirections ...gorplidarsdkhandler.CardinalDirection,
+) (bool, error) {
 	var frontDistanceThresholdReached bool
 	for !frontDistanceThresholdReached {
 		select {
@@ -1133,7 +1149,10 @@ func (h *DefaultHandler) goForwardSlowlyOnParking(ctx context.Context, parkingLe
 			case ServoDirectionRight:
 				oppositeCardinalDirection = gorplidarsdkhandler.CardinalDirectionWest
 			default:
-				return false, fmt.Errorf("invalid parking leave side: %w", ErrInvalidServoDirection)
+				return false, fmt.Errorf(
+					"invalid parking leave side: %w",
+					ErrInvalidServoDirection,
+				)
 			}
 
 			// Wait until the opposite distance is not NaN
@@ -1323,7 +1342,11 @@ func (h *DefaultHandler) challengeWithObstaclesAndParkingHandler(ctx context.Con
 // Returns:
 //
 // A boolean indicating if the safety front distance was handled, and an error if the safety front distance could not be handled, nil otherwise
-func (h *DefaultHandler) safetyFrontDistanceOnChallengeWithObstaclesHandler(ctx context.Context, isTurning bool, cardinalDirections ...gorplidarsdkhandler.CardinalDirection) (bool, error) {
+func (h *DefaultHandler) safetyFrontDistanceOnChallengeWithObstaclesHandler(
+	ctx context.Context,
+	isTurning bool,
+	cardinalDirections ...gorplidarsdkhandler.CardinalDirection,
+) (bool, error) {
 	// Check if any of the front distances is below the safety threshold
 	safetyFrontDistanceThresholdReached := false
 	for _, cardinalDirection := range cardinalDirections {
@@ -1439,10 +1462,10 @@ func (h *DefaultHandler) safetyFrontDistanceOnChallengeWithObstaclesHandler(ctx 
 // An error if the challenge could not be handled, nil otherwise
 func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) error {
 	var isTurning bool
-	var bno08xLastTurns int
+	var bno08xLast90DegreeTurns uint
 	var lastTurningTime time.Time
 	direction := ServoDirectionNil
-	for bno08xLastTurns < AlgorithmTurns {
+	for bno08xLast90DegreeTurns < Algorithm90DegreeTurns {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
@@ -1467,24 +1490,15 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 			// Check for the current turn and center the servo if necessary
 			if isTurning {
 				// Get the latest BNO08x turns value
-				turns := h.usbCDCHandler.GetTurns()
-
-				// Log the current and last turns
-				h.handlerLoggerProducer.Info(
-					fmt.Sprintf(
-						"Current turns: %d, Last turns: %d",
-						turns,
-						bno08xLastTurns,
-					),
-				)
+				turns := h.usbCDCHandler.Get90DegreeTurns()
 
 				// Check if the turns have increased
-				if turns > bno08xLastTurns {
+				if turns > bno08xLast90DegreeTurns {
 					h.handlerLoggerProducer.Info(
 						fmt.Sprintf(
-							"Detected a turn. Current turns: %d, Last turns: %d",
+							"Detected a 90-degree turn. Current turns: %d, Last turns: %d",
 							turns,
-							bno08xLastTurns,
+							bno08xLast90DegreeTurns,
 						),
 					)
 
@@ -1494,7 +1508,7 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 					}
 
 					// Update for the next check
-					bno08xLastTurns = turns
+					bno08xLast90DegreeTurns = turns
 					lastTurningTime = time.Now()
 					isTurning = false
 				}

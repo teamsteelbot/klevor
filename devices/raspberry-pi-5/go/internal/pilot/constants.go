@@ -68,8 +68,8 @@ var (
 	// ServoSmallTurnAnglePercentage is the percentage of the maximum angle for small turns
 	ServoSmallTurnAnglePercentage float64 = 0.6
 
-	// AlgorithmTurns is the number of turns in the algorithm
-	AlgorithmTurns = 12
+	// Algorithm90DegreeTurns is the number of 90 degree turns in the algorithm
+	Algorithm90DegreeTurns uint = 12
 
 	// SafetyFrontDistanceChange is the scalar change for the safety front distance calculation
 	SafetyFrontDistanceChange = 1.5
@@ -84,7 +84,7 @@ var (
 	StopDistanceThreshold = 1500.0
 
 	// SideDistanceThreshold is the distance threshold for side sensors
-	SideDistanceThreshold = 1850.0
+	SideDistanceThreshold = 1750.0
 
 	// SideDistanceDifferencePercentage is the percentage difference threshold for side sensors
 	SideDistanceDifferencePercentage = 0.3 // 0.2, 0.15

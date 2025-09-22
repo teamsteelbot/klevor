@@ -15,7 +15,10 @@ type (
 		NewSender() (Sender, error)
 		ReceivedStartMessage() bool
 		ReceivedChallenge() internal.Challenge
-		GetTurns() int
+		Get360DegreeTurns() uint
+		Get90DegreeTurns() uint
+		Get45DegreeTurns() uint
+		Get30DegreeTurns() uint
 		ReceivedBNO08XYawDegrees() float64
 		ReceivedBNO08XPitchDegrees() float64
 		ReceivedBNO08XRollDegrees() float64
