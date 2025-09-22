@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"math"
 )
 
 type (
@@ -54,25 +55,48 @@ func NewOutgoingMessageFromUint8Data(
 	}
 }
 
-// NewOutgoingMessageFromUint16Content creates a new instance of OutgoingMessage with uint16 content
+// NewOutgoingMessageFromUint16Data creates a new instance of OutgoingMessage with uint16 data
 //
 // Parameters:
 //
 // category: The category of the message
-// content: The uint16 content of the message
+// data: The uint16 data of the message
 //
 // Returns:
 //
 // An instance of OutgoingMessage
-func NewOutgoingMessageFromUint16Content(
+func NewOutgoingMessageFromUint16Data(
 	category OutgoingCategory,
-	content uint16,
+	data uint16,
 ) *OutgoingMessage {
-	data := make([]byte, 2)
-	binary.BigEndian.PutUint16(data, content)
+	buffer := make([]byte, 2)
+	binary.BigEndian.PutUint16(buffer, data)
 	return &OutgoingMessage{
 		Category: category,
-		Data:     data,
+		Data:     buffer,
+	}
+}
+
+// NewOutgoingMessageFromFloat64Data creates a new instance of OutgoingMessage with float64 data
+//
+// Parameters:
+//
+// category: The category of the message
+// data: The float64 data of the message
+//
+// Returns:
+//
+// An instance of OutgoingMessage
+func NewOutgoingMessageFromFloat64Data(
+	category OutgoingCategory,
+	data float64,
+) *OutgoingMessage {
+	buffer := make([]byte, 8)
+	bits := math.Float64bits(data)
+	binary.BigEndian.PutUint64(buffer, bits)
+	return &OutgoingMessage{
+		Category: category,
+		Data:     buffer,
 	}
 }
 
@@ -94,26 +118,6 @@ func NewOutgoingStatusMessage(
 	)
 }
 
-// NewOutgoingMessageFromUint16Data creates a new instance of OutgoingMessage with uint16 data
-//
-// Parameters:
-//
-// category: The category of the message
-// data: The uint16 data of the message
-//
-// Returns:
-//
-// An instance of OutgoingMessage
-func NewOutgoingMessageFromUint16Data(
-	category OutgoingCategory,
-	data uint16,
-) *OutgoingMessage {
-	return &OutgoingMessage{
-		Category: category,
-		Data:     []byte{uint8(data >> 8), uint8(data & 0xFF)},
-	}
-}
-
 // StringToPrint returns a human-readable string representation of the OutgoingMessage
 //
 // Returns:
@@ -124,25 +128,24 @@ func (msg *OutgoingMessage) StringToPrint() string {
 
 	switch msg.Category {
 	case OutgoingCategoryMotorSpeedStop,
-		OutgoingCategoryServoAngleCenter,
-		OutgoingCategoryGetMaxMotorSpeedValue,
-		OutgoingCategoryGetMaxServoAngleValue:
+		OutgoingCategoryServoAngleCenter:
 		dataDetails = "<no content>"
 	case OutgoingCategoryMotorSpeedForward,
 		OutgoingCategoryMotorSpeedBackward,
 		OutgoingCategoryServoAngleToLeft,
 		OutgoingCategoryServoAngleToRight:
-		if len(msg.Data) != 2 {
+		if len(msg.Data) != 8 {
 			dataDetails = fmt.Sprintf(
-				"invalid length: %d, expected: 2",
+				"invalid length: %d, expected: 8",
 				len(msg.Data),
 			)
 			break
 		}
 
-		// Combine the two bytes into a uint16 value
-		value := binary.BigEndian.Uint16(msg.Data[:])
-		dataDetails = fmt.Sprintf("%d", value)
+		// Combine the eight bytes to float 64 value
+		bits := binary.BigEndian.Uint64(msg.Data[:])
+		value := math.Float64frombits(bits)
+		dataDetails = fmt.Sprintf("%f", value)
 	case OutgoingCategoryStatus:
 		outgoingStatus, err := OutgoingStatusFromBytes(msg.Data)
 		if err != nil {

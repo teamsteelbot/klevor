@@ -39,7 +39,7 @@ const (
 	Float64BufferSize = 8
 
 	// MaxIncomingMessageDataLength is the maximum size of incoming message data
-	MaxIncomingMessageDataLength = 2
+	MaxIncomingMessageDataLength = Float64BufferSize
 
 	// MaxOutgoingMessageDataLength is the maximum size of outgoing message data
 	MaxOutgoingMessageDataLength = Float64BufferSize

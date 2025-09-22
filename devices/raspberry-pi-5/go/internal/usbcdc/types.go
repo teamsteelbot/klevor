@@ -51,8 +51,6 @@ type (
 		accumulatedBuffer              []byte
 		receivedStartMessage           bool
 		receivedChallenge              internal.Challenge
-		receivedMaxMotorSpeedValue     uint16
-		receivedMaxServoAngleValue     uint16
 		receivedBNO08XQuaternionX      float64
 		receivedBNO08XQuaternionY      float64
 		receivedBNO08XQuaternionZ      float64
@@ -63,14 +61,10 @@ type (
 		calculatedTurns                *CalculatedTurns
 		challengeReadyCh               chan struct{}
 		notifyChallengeOnce            sync.Once
-		maxMotorSpeedValueReadyCh      chan struct{}
-		notifyMaxMotorSpeedValueOnce   sync.Once
-		maxServoAngleValueReadyCh      chan struct{}
 		motorSpeedStartMessagesCh      chan struct{}
 		motorSpeedEndMessagesCh        chan struct{}
 		servoAngleStartMessagesCh      chan struct{}
 		servoAngleEndMessagesCh        chan struct{}
-		notifyMaxServoAngleValueOnce   sync.Once
 		debug                          bool
 		hasStarted                     atomic.Bool
 	}
@@ -552,10 +546,6 @@ func (h *DefaultHandler) incomingMessagesHandler(
 	// Mark the handler as started
 	h.hasStarted.Store(true)
 
-	// Send the message to get the max motor speed value and max servo direction value
-	h.outgoingMessagesCh <- OutgoingGetMaxMotorSpeedValueMessage
-	h.outgoingMessagesCh <- OutgoingGetMaxServoAngleValueMessage
-
 	for {
 		select {
 		case <-ctx.Done():
@@ -592,36 +582,6 @@ func (h *DefaultHandler) incomingMessagesHandler(
 
 					// Log the confirmation message sent
 					h.outgoingMessagesLoggerProducer.Info("Sent challenge confirmation message again")
-				case IncomingCategoryMaxMotorSpeedValue:
-					// Parse the max motor speed value
-					maxMotorSpeed := binary.BigEndian.Uint16(message.Data[:2])
-					h.receivedMaxMotorSpeedValue = maxMotorSpeed
-
-					// Log the received message
-					h.incomingMessagesLoggerProducer.Info(
-						fmt.Sprintf(
-							"Received max motor speed value: %d",
-							h.receivedMaxMotorSpeedValue,
-						),
-					)
-
-					// Notify listeners exactly once
-					h.notifyMaxMotorSpeedValueOnce.Do(func() { close(h.maxMotorSpeedValueReadyCh) })
-				case IncomingCategoryMaxServoAngleValue:
-					// Parse the max servo direction value
-					maxServoAngle := binary.BigEndian.Uint16(message.Data[:2])
-					h.receivedMaxServoAngleValue = maxServoAngle
-
-					// Log the received message
-					h.incomingMessagesLoggerProducer.Info(
-						fmt.Sprintf(
-							"Received max servo direction value: %d",
-							h.receivedMaxServoAngleValue,
-						),
-					)
-
-					// Notify listeners exactly once
-					h.notifyMaxServoAngleValueOnce.Do(func() { close(h.maxServoAngleValueReadyCh) })
 				case IncomingCategoryEulerDegreesPitch:
 					// Parse the BNO08X pitch degrees value
 					degreesUint64 := binary.BigEndian.Uint64(message.Data[:8])
@@ -1131,16 +1091,6 @@ func (h *DefaultHandler) Run(ctx context.Context, stopFn func()) error {
 	h.challengeReadyCh = make(chan struct{})
 	h.notifyChallengeOnce = sync.Once{}
 
-	// Reset received max motor speed value
-	h.receivedMaxMotorSpeedValue = 0
-	h.maxMotorSpeedValueReadyCh = make(chan struct{})
-	h.notifyMaxMotorSpeedValueOnce = sync.Once{}
-
-	// Reset received max servo direction value
-	h.receivedMaxServoAngleValue = 0
-	h.maxServoAngleValueReadyCh = make(chan struct{})
-	h.notifyMaxServoAngleValueOnce = sync.Once{}
-
 	// Reset received BNO08X calculated turns
 	h.calculatedTurns = nil
 
@@ -1499,28 +1449,6 @@ func (h *DefaultHandler) ReceivedChallenge() internal.Challenge {
 	return h.receivedChallenge
 }
 
-// ReceivedMaxMotorSpeedValue returns the received maximum motor speed value.
-//
-// Returns:
-//
-// The received maximum motor speed value.
-func (h *DefaultHandler) ReceivedMaxMotorSpeedValue() uint16 {
-	h.mutex.Lock()
-	defer h.mutex.Unlock()
-	return h.receivedMaxMotorSpeedValue
-}
-
-// ReceivedMaxServoAngleValue returns the received maximum servo direction value.
-//
-// Returns:
-//
-// The received maximum servo direction value.
-func (h *DefaultHandler) ReceivedMaxServoAngleValue() uint16 {
-	h.mutex.Lock()
-	defer h.mutex.Unlock()
-	return h.receivedMaxServoAngleValue
-}
-
 // GetTurns returns the calculated turns segment count.
 //
 // Returns:
@@ -1633,53 +1561,5 @@ func (h *DefaultHandler) WaitForChallenge(ctx context.Context) (
 		return internal.ChallengeNil, ctx.Err()
 	case <-h.challengeReadyCh:
 		return h.ReceivedChallenge(), nil
-	}
-}
-
-// WaitForMaxMotorSpeedValue waits until a max motor speed value message is received or the context is done.
-//
-// Parameters:
-//
-// ctx: The context to control cancellation and timeouts.
-//
-// Returns:
-//
-// The received max motor speed value or an error if the context is done before receiving it.
-func (h *DefaultHandler) WaitForMaxMotorSpeedValue(ctx context.Context) (
-	uint16,
-	error,
-) {
-	if v := h.ReceivedMaxMotorSpeedValue(); v != 0 {
-		return v, nil
-	}
-	select {
-	case <-ctx.Done():
-		return 0, ctx.Err()
-	case <-h.maxMotorSpeedValueReadyCh:
-		return h.ReceivedMaxMotorSpeedValue(), nil
-	}
-}
-
-// WaitForMaxServoAngleValue waits until a max servo direction value message is received or the context is done.
-//
-// Parameters:
-//
-// ctx: The context to control cancellation and timeouts.
-//
-// Returns:
-//
-// The received max servo direction value or an error if the context is done before receiving it.
-func (h *DefaultHandler) WaitForMaxServoAngleValue(ctx context.Context) (
-	uint16,
-	error,
-) {
-	if v := h.ReceivedMaxServoAngleValue(); v != 0 {
-		return v, nil
-	}
-	select {
-	case <-ctx.Done():
-		return 0, ctx.Err()
-	case <-h.maxServoAngleValueReadyCh:
-		return h.ReceivedMaxServoAngleValue(), nil
 	}
 }

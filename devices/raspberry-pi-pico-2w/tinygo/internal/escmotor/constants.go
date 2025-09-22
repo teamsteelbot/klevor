@@ -19,29 +19,32 @@ const (
 	// PWMFrequency is the frequency for the PWM signal in Hertz
 	PWMFrequency = 50
 
-	// MinPulseWidth is the minimum pulse width in microseconds
-	MinPulseWidth uint16 = 1000
+	// MinPulseWidth is the minimum pulse width
+	MinPulseWidth uint32 = 1_000_000
 
-	// NeutralPulseWidth is the neutral pulse width in microseconds
-	NeutralPulseWidth uint16 = 1500
+	// NeutralPulseWidth is the neutral pulse width
+	NeutralPulseWidth uint32 = 1_500_000
 
-	// MaxPulseWidth is the maximum pulse width in microseconds
-	MaxPulseWidth uint16 = 2000
+	// MaxPulseWidth is the maximum pulse width
+	MaxPulseWidth uint32 = 2_000_000
 
-	// MaxSpeed is the maximum speed to run the ESC motor
-	MaxSpeed uint16 = 100
+	// MaxForwardSpeed is the maximum speed to run the ESC motor
+	MaxForwardSpeed = 0.175
+
+	// MaxBackwardSpeed is the maximum speed to run the ESC motor in backward direction
+	MaxBackwardSpeed = 0.2
 
 	// BackwardToForwardDelay is the delay when changing from backward to forward to be in neutral first
-	BackwardToForwardDelay = 1000 * time.Millisecond // 1000 ms
+	BackwardToForwardDelay = 150 * time.Millisecond // 1000 ms, 500ms, 250ms, (150ms)
 
 	// ForwardToBackwardDelay is the delay when changing from forward to backward to be in neutral first
-	ForwardToBackwardDelay = 1000 * time.Millisecond // 1000 ms
-
-	// ChangeSteps is the interval to change the speed of the ESC motor
-	ChangeSteps = 20
+	ForwardToBackwardDelay = 250 * time.Millisecond // 1000 ms, 500ms, (250ms)
 )
 
 var (
+	// PulseSteps is the interval of pulse steps when changing speed
+	PulseSteps uint32 = 20_000 // (20_000), 10_000
+
 	// ESCMotorHandler is the default handler for ESC motors
 	ESCMotorHandler tinygoescmotor.Handler
 
@@ -59,13 +62,13 @@ func init() {
 		MinPulseWidth,
 		NeutralPulseWidth,
 		MaxPulseWidth,
-		ChangeSteps,
 		IsPolarityInverted,
-		MaxSpeed,
+		MaxForwardSpeed,
+		MaxBackwardSpeed,
+		&PulseSteps,
 		BackwardToForwardDelay,
 		ForwardToBackwardDelay,
-		nil,
-		// internal.Logger,
+		internal.Logger,
 	)
 	if err != tinygoerrors.ErrorCodeNil {
 		internal.Logger.ErrorMessageWithErrorCode(

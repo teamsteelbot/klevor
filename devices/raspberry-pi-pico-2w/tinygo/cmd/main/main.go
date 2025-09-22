@@ -152,14 +152,6 @@ func main() {
 
 			// Handle specific message categories
 			switch newMessage.Category {
-			case internalusbcdc.IncomingCategoryGetMaxMotorSpeedValue:
-				if err := internalusbcdc.USBCDCHandler.SendMaxMotorSpeedValueMessage(internalescmotor.MaxSpeed); err != tinygoerrors.ErrorCodeNil {
-					internalusbcdc.USBCDCHandler.SendErrorMessage(err)
-				}
-			case internalusbcdc.IncomingCategoryGetMaxServoAngleValue:
-				if err := internalusbcdc.USBCDCHandler.SendMaxServoAngleValueMessage(internalservo.MaxAngle); err != tinygoerrors.ErrorCodeNil {
-					internalusbcdc.USBCDCHandler.SendErrorMessage(err)
-				}
 			case internalusbcdc.IncomingCategoryServoAngleCenter, internalusbcdc.IncomingCategoryServoAngleToLeft, internalusbcdc.IncomingCategoryServoAngleToRight:
 				if err := internalservo.SetAngleBasedOnReceivedMessage(
 					internalusbcdc.USBCDCHandler,

@@ -51,8 +51,8 @@ func main() {
 
 		// Start testing the motor forward
 		stopOnError(
-			internalescmotor.ESCMotorHandler.SafeSetSpeedForward(
-				internalescmotor.MaxSpeed,
+			internalescmotor.ESCMotorHandler.SetSpeedForward(
+				internalescmotor.MaxForwardSpeed,
 			),
 		)
 
@@ -61,8 +61,8 @@ func main() {
 
 		// Start testing the motor backward
 		stopOnError(
-			internalescmotor.ESCMotorHandler.SafeSetSpeedBackward(
-				internalescmotor.MaxSpeed,
+			internalescmotor.ESCMotorHandler.SetSpeedBackward(
+				internalescmotor.MaxBackwardSpeed,
 			),
 		)
 

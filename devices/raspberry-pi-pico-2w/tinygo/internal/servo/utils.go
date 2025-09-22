@@ -1,6 +1,8 @@
 package servo
 
 import (
+	"math"
+
 	internalusbcdc "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc"
 	tinygobuffers "github.com/ralvarezdev/tinygo-buffers"
 	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
@@ -33,14 +35,14 @@ func SetAngleBasedOnReceivedMessage(
 	}
 
 	// Check if the servo angle should be retrieved from the message
-	var servoDirectionAngle uint16
+	var servoAnglePercentage float64
 	if message.Category != internalusbcdc.IncomingCategoryServoAngleCenter {
-		// Get uint16 angle from message content
-		angle, err := tinygobuffers.BytesToUint16(message.Data)
+		// Get angle percentage from message content
+		anglePercentage, err := tinygobuffers.BytesToFloat64(message.Data)
 		if err != tinygoerrors.ErrorCodeNil {
 			return err
 		}
-		servoDirectionAngle = angle
+		servoAnglePercentage = math.Abs(anglePercentage)
 	}
 
 	// Send start feedback message
@@ -57,12 +59,12 @@ func SetAngleBasedOnReceivedMessage(
 		}
 	case internalusbcdc.IncomingCategoryServoAngleToLeft:
 		// Set the servo angle to left
-		if err := ServoHandler.SafeSetAngleToLeft(servoDirectionAngle); err != tinygoerrors.ErrorCodeNil {
+		if err := ServoHandler.SetAngleToLeft(uint16(servoAnglePercentage*float64(MaxLeftAngle))); err != tinygoerrors.ErrorCodeNil {
 			return err
 		}
 	case internalusbcdc.IncomingCategoryServoAngleToRight:
 		// Set the servo angle to right
-		if err := ServoHandler.SafeSetAngleToRight(servoDirectionAngle); err != tinygoerrors.ErrorCodeNil {
+		if err := ServoHandler.SetAngleToRight(uint16(servoAnglePercentage*float64(MaxRightAngle))); err != tinygoerrors.ErrorCodeNil {
 			return err
 		}
 	}

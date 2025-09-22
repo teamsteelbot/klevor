@@ -478,50 +478,6 @@ func (d *DefaultHandler) SendConfirmationMessage() tinygoerrors.ErrorCode {
 	return d.SendMessage(confirmationMessage)
 }
 
-// SendMaxMotorSpeedValueMessage sends the maximum motor speed value message to the USB CDC.
-//
-// Parameters:
-//
-// maxMotorSpeed: The maximum motor speed value to send
-//
-// Returns:
-//
-// An error if it fails to send the maximum motor speed value message
-func (d *DefaultHandler) SendMaxMotorSpeedValueMessage(maxMotorSpeed uint16) tinygoerrors.ErrorCode {
-	// Create the max motor speed value message
-	maxMotorSpeedMessage, err := NewOutgoingMessageFromUint16Data(
-		OutgoingCategoryMaxMotorSpeedValue,
-		maxMotorSpeed,
-		d.outgoingMessageBuffer[:Uint16BufferSize],
-	)
-	if err != tinygoerrors.ErrorCodeNil {
-		return err
-	}
-	return d.SendMessage(maxMotorSpeedMessage)
-}
-
-// SendMaxServoAngleValueMessage sends the maximum servo angle value message to the USB CDC.
-//
-// Parameters:
-//
-// maxServoAngle: The maximum servo angle value to send
-//
-// Returns:
-//
-// An error if it fails to send the maximum servo angle value message
-func (d *DefaultHandler) SendMaxServoAngleValueMessage(maxServoAngle uint16) tinygoerrors.ErrorCode {
-	// Create the max servo angle value message
-	maxServoAngleMessage, err := NewOutgoingMessageFromUint16Data(
-		OutgoingCategoryMaxServoAngleValue,
-		maxServoAngle,
-		d.outgoingMessageBuffer[:Uint16BufferSize],
-	)
-	if err != tinygoerrors.ErrorCodeNil {
-		return err
-	}
-	return d.SendMessage(maxServoAngleMessage)
-}
-
 // SendHeartbeatMessage sends a heartbeat message to the USB CDC.
 //
 // Returns:

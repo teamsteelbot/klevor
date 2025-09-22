@@ -34,15 +34,13 @@ type (
 		usbCDCSender                  internalusbcdc.Sender
 		isRunning                     atomic.Bool
 		servoDirection                ServoDirection
-		servoAngle                    uint16
+		servoAngle                    float64
 		motorDirection                MotorDirection
-		motorSpeed                    uint16
+		motorSpeed                    float64
 		rplidarMeasures               *[360]*gorplidarsdkhandler.Measure
 		rplidarAverageDistances       map[gorplidarsdkhandler.CardinalDirection]float64
 		rplidarAverageDistancesChange map[gorplidarsdkhandler.CardinalDirection]float64
 		clipClassification            *gohailocliphandler.Classification
-		maxMotorSpeedValue            uint16
-		maxServoAngleValue            uint16
 		rplidarHandlerMutex           sync.RWMutex
 		clipHandlerMutex              sync.RWMutex
 		westAverageDistance           float64
@@ -127,7 +125,7 @@ func (h *DefaultHandler) IsRunning() bool {
 // An error if the speed could not be set, nil otherwise
 func (h *DefaultHandler) setMotorSpeed(
 	ctx context.Context,
-	speed uint16,
+	speed float64,
 	direction MotorDirection,
 ) error {
 	// Check if it's the same speed and direction as the current one
@@ -159,12 +157,12 @@ func (h *DefaultHandler) setMotorSpeed(
 		case MotorDirectionForward:
 			h.handlerLoggerProducer.Info(
 				fmt.Sprintf(
-					"Setting motor speed to %d in forward direction",
-					speed,
+					"Setting motor speed to %.3f% in forward direction",
+					speed*100,
 				),
 			)
 			if err := h.usbCDCSender.SendMessage(
-				internalusbcdc.NewOutgoingMessageFromUint16Data(
+				internalusbcdc.NewOutgoingMessageFromFloat64Data(
 					internalusbcdc.OutgoingCategoryMotorSpeedForward,
 					speed,
 				),
@@ -174,12 +172,12 @@ func (h *DefaultHandler) setMotorSpeed(
 		case MotorDirectionBackward:
 			h.handlerLoggerProducer.Info(
 				fmt.Sprintf(
-					"Setting motor speed to %d in backward direction",
-					speed,
+					"Setting motor speed to %.3f% in backward direction",
+					speed * 100,
 				),
 			)
 			if err := h.usbCDCSender.SendMessage(
-				internalusbcdc.NewOutgoingMessageFromUint16Data(
+				internalusbcdc.NewOutgoingMessageFromFloat64Data(
 					internalusbcdc.OutgoingCategoryMotorSpeedBackward,
 					speed,
 				),
@@ -225,30 +223,6 @@ func (h *DefaultHandler) setMotorSpeed(
 	return nil
 }
 
-// setMotorSpeedByPercentage sets the motor speed by percentage of the maximum motor speed value
-//
-// Parameters:
-//
-// ctx: The context to use for setting the motor speed
-// percentage: The percentage of the maximum motor speed value to set the motor
-// direction: The direction to set the motor
-//
-// Returns:
-//
-// An error if the speed could not be set, nil otherwise
-func (h *DefaultHandler) setMotorSpeedByPercentage(
-	ctx context.Context,
-	percentage float64,
-	direction MotorDirection,
-) error {
-	if h.maxMotorSpeedValue == 0 {
-		return ErrMaxMotorSpeedValueNotSet
-	}
-
-	speed := uint16(float64(h.maxMotorSpeedValue) * percentage)
-	return h.setMotorSpeed(ctx, speed, direction)
-}
-
 // setMotorStop stops the motor
 //
 // Parameters:
@@ -265,41 +239,41 @@ func (h *DefaultHandler) setMotorStop(ctx context.Context) error {
 	return nil
 }
 
-// setMotorForwardByPercentage sets the motor speed to forward by percentage of the maximum motor speed value
+// setMotorForward sets the motor speed to forward
 //
 // Parameters:
 //
 // ctx: The context to use for setting the motor speed
-// percentage: The percentage of the maximum motor speed value to set the motor
+// speed: The speed value to set the motor
 //
 // Returns:
 //
 // An error if the speed could not be set, nil otherwise
-func (h *DefaultHandler) setMotorForwardByPercentage(
+func (h *DefaultHandler) setMotorForward(
 	ctx context.Context,
-	percentage float64,
+	speed float64,
 ) error {
-	if err := h.setMotorSpeedByPercentage(ctx, percentage, MotorDirectionForward); err != nil {
+	if err := h.setMotorSpeed(ctx, speed, MotorDirectionForward); err != nil {
 		return fmt.Errorf("failed to set motor to forward: %w", err)
 	}
 	return nil
 }
 
-// setMotorBackwardByPercentage sets the motor speed to backward by percentage of the maximum motor speed value
+// setMotorBackward sets the motor speed to backward
 //
 // Parameters:
 //
 // ctx: The context to use for setting the motor speed
-// percentage: The percentage of the maximum motor speed value to set the motor
+// speed: The motor speed value to set the motor
 //
 // Returns:
 //
 // An error if the speed could not be set, nil otherwise
-func (h *DefaultHandler) setMotorBackwardByPercentage(
+func (h *DefaultHandler) setMotorBackward(
 	ctx context.Context,
-	percentage float64,
+	speed float64,
 ) error {
-	if err := h.setMotorSpeedByPercentage(ctx, percentage, MotorDirectionBackward); err != nil {
+	if err := h.setMotorSpeed(ctx, speed, MotorDirectionBackward); err != nil {
 		return fmt.Errorf("failed to set motor to backward: %w", err)
 	}
 	return nil
@@ -318,7 +292,7 @@ func (h *DefaultHandler) setMotorBackwardByPercentage(
 // An error if the servo direction could not be set, nil otherwise
 func (h *DefaultHandler) setServoAngle(
 	ctx context.Context,
-	angle uint16,
+	angle float64,
 	direction ServoDirection,
 ) error {
 	// Check if the servo direction and angle is the same as the current one
@@ -347,14 +321,14 @@ func (h *DefaultHandler) setServoAngle(
 		case ServoDirectionLeft:
 			h.handlerLoggerProducer.Info(
 				fmt.Sprintf(
-					"Setting servo direction to left with angle %d",
-					angle,
+					"Setting servo direction to left by %.3f%",
+					angle * 100,
 				),
 			)
 			if err := h.usbCDCSender.SendMessage(
-				internalusbcdc.NewOutgoingMessageFromUint16Data(
+				internalusbcdc.NewOutgoingMessageFromFloat64Data(
 					internalusbcdc.OutgoingCategoryServoAngleToLeft,
-					angle,
+					angle * 100,
 				),
 			); err != nil {
 				return err
@@ -362,12 +336,12 @@ func (h *DefaultHandler) setServoAngle(
 		case ServoDirectionRight:
 			h.handlerLoggerProducer.Info(
 				fmt.Sprintf(
-					"Setting servo direction to right with angle %d",
-					angle,
+					"Setting servo direction to right by %.3f%",
+					angle * 100,
 				),
 			)
 			if err := h.usbCDCSender.SendMessage(
-				internalusbcdc.NewOutgoingMessageFromUint16Data(
+				internalusbcdc.NewOutgoingMessageFromFloat64Data(
 					internalusbcdc.OutgoingCategoryServoAngleToRight,
 					angle,
 				),
@@ -413,30 +387,6 @@ func (h *DefaultHandler) setServoAngle(
 	return nil
 }
 
-// setServoAngleByPercentage sets the servo direction by percentage of the maximum servo direction value
-//
-// Parameters:
-//
-// ctx: The context to use for setting the servo angle
-// percentage: The percentage of the maximum servo direction value to set the servo
-// direction: The direction to set the servo
-//
-// Returns:
-//
-// An error if the servo direction could not be set, nil otherwise
-func (h *DefaultHandler) setServoAngleByPercentage(
-	ctx context.Context,
-	percentage float64,
-	direction ServoDirection,
-) error {
-	if h.maxServoAngleValue == 0 {
-		return ErrMaxServoAngleValueNotSet
-	}
-
-	angle := uint16(float64(h.maxServoAngleValue) * percentage)
-	return h.setServoAngle(ctx, angle, direction)
-}
-
 // setServoToCenter sets the servo to the center position
 //
 // Parameters:
@@ -465,29 +415,9 @@ func (h *DefaultHandler) setServoToCenter(ctx context.Context) error {
 // An error if the servo could not be set to left, nil otherwise
 func (h *DefaultHandler) setServoToLeft(
 	ctx context.Context,
-	angle uint16,
+	angle float64,
 ) error {
 	if err := h.setServoAngle(ctx, angle, ServoDirectionLeft); err != nil {
-		return fmt.Errorf("failed to set servo to left: %w", err)
-	}
-	return nil
-}
-
-// setServoToLeftByPercentage sets the servo to the left direction by percentage of the maximum servo direction value
-//
-// Parameters:
-//
-// ctx: The context to use for setting the servo angle
-// percentage: The percentage of the maximum servo direction value to set the servo
-//
-// Returns:
-//
-// An error if the servo could not be set to left, nil otherwise
-func (h *DefaultHandler) setServoToLeftByPercentage(
-	ctx context.Context,
-	percentage float64,
-) error {
-	if err := h.setServoAngleByPercentage(ctx, percentage, ServoDirectionLeft); err != nil {
 		return fmt.Errorf("failed to set servo to left: %w", err)
 	}
 	return nil
@@ -505,29 +435,9 @@ func (h *DefaultHandler) setServoToLeftByPercentage(
 // An error if the servo could not be set to right, nil otherwise
 func (h *DefaultHandler) setServoToRight(
 	ctx context.Context,
-	angle uint16,
+	angle float64,
 ) error {
 	if err := h.setServoAngle(ctx, angle, ServoDirectionRight); err != nil {
-		return fmt.Errorf("failed to set servo to right: %w", err)
-	}
-	return nil
-}
-
-// setServoToRightByPercentage sets the servo to the right direction by percentage of the maximum servo direction value
-//
-// Parameters:
-//
-// ctx: The context to use for setting the servo angle
-// percentage: The percentage of the maximum servo direction value to set the servo
-//
-// Returns:
-//
-// An error if the servo could not be set to right, nil otherwise
-func (h *DefaultHandler) setServoToRightByPercentage(
-	ctx context.Context,
-	percentage float64,
-) error {
-	if err := h.setServoAngleByPercentage(ctx, percentage, ServoDirectionRight); err != nil {
 		return fmt.Errorf("failed to set servo to right: %w", err)
 	}
 	return nil
@@ -538,20 +448,20 @@ func (h *DefaultHandler) setServoToRightByPercentage(
 // Parameters:
 //
 // ctx: The context to use for setting the servo angle
-// servoAngle: The angle to set the servo. If 0, the servo will be set to center
+// angle: The angle to set the servo. If 0, the servo will be set to center
 //
 // Returns:
 //
 // An error if the servo could not be set to the opposite direction, nil otherwise
 func (h *DefaultHandler) setServoToOppositeDirection(
 	ctx context.Context,
-	servoAngle uint16,
+	angle float64,
 ) error {
 	switch h.servoDirection {
 	case ServoDirectionRight:
-		return h.setServoToLeft(ctx, servoAngle)
+		return h.setServoToLeft(ctx, angle)
 	case ServoDirectionLeft:
-		return h.setServoToRight(ctx, servoAngle)
+		return h.setServoToRight(ctx, angle)
 	case ServoDirectionStraight:
 		return h.setServoToCenter(ctx)
 	default:
@@ -1120,7 +1030,7 @@ func (h *DefaultHandler) goBackwardSlowlyOnParking(ctx context.Context) error {
 		return err
 	}
 	// Set the motor to backward and the servo to the parking leave side
-	if err := h.setMotorBackwardByPercentage(
+	if err := h.setMotorBackward(
 		ctx,
 		MotorBackwardSlowPercentage,
 	); err != nil {
@@ -1172,14 +1082,14 @@ func (h *DefaultHandler) setMotorAndServoToParkingLeaveSide(ctx context.Context,
 	// Set the servo to the parking leave side and the motor to forward slowly
 	switch parkingLeaveSide {
 	case ServoDirectionLeft:
-		if err := h.setServoToLeftByPercentage(
+		if err := h.setServoToLeft(
 			ctx,
 			ServoBigTurnAnglePercentage,
 		); err != nil {
 			return err
 		}
 	case ServoDirectionRight:
-		if err := h.setServoToRightByPercentage(
+		if err := h.setServoToRight(
 			ctx,
 			ServoBigTurnAnglePercentage,
 		); err != nil {
@@ -1188,7 +1098,7 @@ func (h *DefaultHandler) setMotorAndServoToParkingLeaveSide(ctx context.Context,
 	default:
 		return fmt.Errorf("invalid parking leave side: %w", ErrInvalidServoDirection)
 	}
-	if err := h.setMotorForwardByPercentage(
+	if err := h.setMotorForward(
 		ctx,
 		MotorForwardSlowPercentage,
 	); err != nil {
@@ -1454,7 +1364,7 @@ func (h *DefaultHandler) safetyFrontDistanceOnChallengeWithObstaclesHandler(ctx 
 		return true, err
 	}
 
-	if err := h.setMotorBackwardByPercentage(
+	if err := h.setMotorBackward(
 		ctx,
 		MotorBackwardFastPercentage,
 	); err != nil {
@@ -1486,11 +1396,11 @@ func (h *DefaultHandler) safetyFrontDistanceOnChallengeWithObstaclesHandler(ctx 
 			if frontDistanceThresholdReached {
 				h.handlerLoggerProducer.Info("Safety front distance threshold reached.")
 				safe = true
+			} else {
+				// Sleep a bit before checking again
+				time.Sleep(RPLiDARDelay)
 			}
 		}
-
-		// Sleep a bit before checking again
-		time.Sleep(RPLiDARDelay)
 	}
 
 	// Set previous servo angle and motor speed back to normal
@@ -1618,7 +1528,7 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 						}
 					}
 					if isTurning {
-						if err = h.setServoAngleByPercentage(
+						if err = h.setServoAngle(
 							ctx,
 							ServoBigTurnAnglePercentage,
 							direction,
@@ -1628,8 +1538,8 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 					}
 				}
 
-				// Move forward at normal speed
-				if err = h.setMotorForwardByPercentage(
+				// Move forward at turning speed
+				if err = h.setMotorForward(
 					ctx,
 					MotorTurningPercentage,
 				); err != nil {
@@ -1648,16 +1558,16 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 					return err
 				}
 			} else if h.eastAverageDistance+eastDistanceChange >= (h.westAverageDistance+westDistanceChange)*(1+SideDistanceDifferencePercentage) {
-				if err = h.setServoToRightByPercentage(
+				if err = h.setServoToRight(
 					ctx,
-					ServoMediumTurnAnglePercentage,
+					ServoSmallTurnAnglePercentage,
 				); err != nil {
 					return err
 				}
 			} else if h.westAverageDistance+westDistanceChange >= (h.eastAverageDistance+eastDistanceChange)*(1+SideDistanceDifferencePercentage) {
-				if err = h.setServoToLeftByPercentage(
+				if err = h.setServoToLeft(
 					ctx,
-					ServoMediumTurnAnglePercentage,
+					ServoSmallTurnAnglePercentage,
 				); err != nil {
 					return err
 				}
@@ -1666,9 +1576,13 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 			}
 
 			// Move forward
-			if err = h.setMotorForwardByPercentage(
+			motorSpeed := MotorForwardNormalPercentage
+			if h.servoDirection == ServoDirectionStraight {
+				motorSpeed = MotorForwardFastPercentage
+			}
+			if err = h.setMotorForward(
 				ctx,
-				MotorForwardFastPercentage,
+				motorSpeed,
 			); err != nil {
 				return err
 			}
@@ -1682,7 +1596,7 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 	if err := h.setServoToCenter(ctx); err != nil {
 		return err
 	}
-	if err := h.setMotorForwardByPercentage(
+	if err := h.setMotorForward(
 		ctx,
 		MotorForwardNormalPercentage,
 	); err != nil {
@@ -1698,7 +1612,7 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 		default:
 			// Check if the north average distance is NaN
 			if math.IsNaN(h.northAverageDistance) {
-				continue
+				break
 			}
 
 			// Get the rate of change for the north average distance
@@ -1753,31 +1667,6 @@ func (h *DefaultHandler) runToWrap(ctx context.Context) error {
 	h.handlerLoggerProducer.Info(
 		fmt.Sprintf("Challenge message received: %s", challenge.String()),
 	)
-
-	// Wait for max motor speed value to be set
-	h.handlerLoggerProducer.Info("Waiting for max motor speed value...")
-	maxMotorSpeed, err := h.usbCDCHandler.WaitForMaxMotorSpeedValue(ctx)
-	if err != nil {
-		return fmt.Errorf("failed to wait for max motor speed value: %w", err)
-	}
-	h.handlerLoggerProducer.Info(
-		fmt.Sprintf("Max motor speed value received: %d", maxMotorSpeed),
-	)
-	h.maxMotorSpeedValue = maxMotorSpeed
-
-	// Wait for max servo direction value to be set
-	h.handlerLoggerProducer.Info("Waiting for max servo direction value...")
-	maxServoAngle, err := h.usbCDCHandler.WaitForMaxServoAngleValue(ctx)
-	if err != nil {
-		return fmt.Errorf("failed to wait for max servo direction value: %w", err)
-	}
-	h.handlerLoggerProducer.Info(
-		fmt.Sprintf(
-			"Max servo direction value received: %d",
-			maxServoAngle,
-		),
-	)
-	h.maxServoAngleValue = maxServoAngle
 
 	// Get the challenge handler
 	var handler func(ctx context.Context) error

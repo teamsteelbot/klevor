@@ -50,8 +50,8 @@ func main() {
 
 		// Start testing the servo to the right
 		centerOnError(
-			internalservo.ServoHandler.SafeSetAngleToRight(
-				internalservo.MaxAngle,
+			internalservo.ServoHandler.SetAngleToRight(
+				internalservo.MaxRightAngle,
 			),
 		)
 		time.Sleep(1 * time.Second)
@@ -62,8 +62,8 @@ func main() {
 
 		// Start testing the servo to the left
 		centerOnError(
-			internalservo.ServoHandler.SafeSetAngleToLeft(
-				internalservo.MaxAngle,
+			internalservo.ServoHandler.SetAngleToLeft(
+				internalservo.MaxLeftAngle,
 			),
 		)
 		time.Sleep(1 * time.Second)

@@ -12,11 +12,17 @@ import (
 )
 
 const (
-	// CenterAngle is the angle that represents the center position of the servo motors.
-	CenterAngle uint16 = 95 // 90
+	// ActuationRange is the actuation range of the servo motors in degrees.
+	ActuationRange uint16 = 180
 
-	// MaxAngle is the maximum angle for the servo motors.
-	MaxAngle uint16 = 35
+	// CenterAngle is the angle that represents the center position of the servo motors.
+	CenterAngle uint16 = 93 // 90, (93)
+
+	// MaxLeftAngle is the maximum left angle for the servo motors.
+	MaxLeftAngle uint16 = 35 // (35)
+
+	// MaxRightAngle is the maximum right angle for the servo motors.
+	MaxRightAngle uint16 = 30 // (30)
 
 	// IsDirectionInverted indicates if the servo direction is inverted.
 	IsDirectionInverted bool = true
@@ -25,10 +31,10 @@ const (
 	PWMFrequency uint16 = 330
 
 	// MinPulseWidth is the minimum pulse width in microseconds for the servo motors.
-	MinPulseWidth uint16 = 500
+	MinPulseWidth uint32 = 500_000
 
 	// MaxPulseWidth is the maximum pulse width in microseconds for the servo motors.
-	MaxPulseWidth uint16 = 2500
+	MaxPulseWidth uint32 = 2_500_000
 )
 
 var (
@@ -48,10 +54,12 @@ func init() {
 		PWMFrequency,
 		MinPulseWidth,
 		MaxPulseWidth,
+		ActuationRange,
 		CenterAngle,
-		MaxAngle,
+		MaxLeftAngle,
+		MaxRightAngle,
 		IsDirectionInverted,
-		nil, // internal.Logger
+		internal.Logger,
 	)
 	if err != tinygoerrors.ErrorCodeNil {
 		internal.Logger.ErrorMessageWithErrorCode(

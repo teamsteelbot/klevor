@@ -21,8 +21,8 @@ type (
 		SendErrorMessage(err tinygoerrors.ErrorCode) tinygoerrors.ErrorCode
 		SendStartMessage() tinygoerrors.ErrorCode
 		SendConfirmationMessage() tinygoerrors.ErrorCode
-		SendMaxMotorSpeedValueMessage(maxMotorSpeed uint16) tinygoerrors.ErrorCode
-		SendMaxServoAngleValueMessage(maxServoAngle uint16) tinygoerrors.ErrorCode
+		// SendMaxMotorSpeedValueMessage(maxMotorSpeed uint16) tinygoerrors.ErrorCode
+		// SendMaxServoAngleValueMessage(maxServoAngle uint16) tinygoerrors.ErrorCode
 		SendHeartbeatMessage() tinygoerrors.ErrorCode
 		SendMotorSpeedStartMessage() tinygoerrors.ErrorCode
 		SendMotorSpeedEndMessage() tinygoerrors.ErrorCode

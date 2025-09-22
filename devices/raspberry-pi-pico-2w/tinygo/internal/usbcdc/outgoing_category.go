@@ -14,8 +14,6 @@ const (
 	OutgoingCategoryChallenge
 	OutgoingCategoryStatus
 	OutgoingCategoryError
-	OutgoingCategoryMaxMotorSpeedValue
-	OutgoingCategoryMaxServoAngleValue
 	OutgoingCategoryQuaternionX
 	OutgoingCategoryQuaternionY
 	OutgoingCategoryQuaternionZ
@@ -42,7 +40,7 @@ func (o OutgoingCategory) DataLength() (int, tinygoerrors.ErrorCode) {
 		return 0, tinygoerrors.ErrorCodeNil
 	case OutgoingCategoryStatus, OutgoingCategoryChallenge:
 		return 1, tinygoerrors.ErrorCodeNil
-	case OutgoingCategoryError, OutgoingCategoryMaxMotorSpeedValue, OutgoingCategoryMaxServoAngleValue:
+	case OutgoingCategoryError:
 		return 2, tinygoerrors.ErrorCodeNil
 	case OutgoingCategoryQuaternionX, OutgoingCategoryQuaternionY, OutgoingCategoryQuaternionZ, OutgoingCategoryQuaternionW, OutgoingCategoryEulerDegreesYaw, OutgoingCategoryEulerDegreesPitch, OutgoingCategoryEulerDegreesRoll:
 		return 8, tinygoerrors.ErrorCodeNil
@@ -73,10 +71,6 @@ func OutgoingCategoryFromUint8(value uint8) (
 		return OutgoingCategoryChallenge, tinygoerrors.ErrorCodeNil
 	case OutgoingCategoryError:
 		return OutgoingCategoryError, tinygoerrors.ErrorCodeNil
-	case OutgoingCategoryMaxMotorSpeedValue:
-		return OutgoingCategoryMaxMotorSpeedValue, tinygoerrors.ErrorCodeNil
-	case OutgoingCategoryMaxServoAngleValue:
-		return OutgoingCategoryMaxServoAngleValue, tinygoerrors.ErrorCodeNil
 	case OutgoingCategoryQuaternionX:
 		return OutgoingCategoryQuaternionX, tinygoerrors.ErrorCodeNil
 	case OutgoingCategoryQuaternionY:

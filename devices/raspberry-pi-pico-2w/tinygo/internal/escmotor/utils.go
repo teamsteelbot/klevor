@@ -1,6 +1,8 @@
 package escmotor
 
 import (
+	"math"
+
 	internalusbcdc "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc"
 	tinygobuffers "github.com/ralvarezdev/tinygo-buffers"
 	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
@@ -33,14 +35,14 @@ func SetSpeedBasedOnReceivedMessage(
 	}
 
 	// Check if the motor speed should be retrieved from the message
-	var motorSpeed uint16
+	var motorSpeedPercentage float64
 	if message.Category != internalusbcdc.IncomingCategoryMotorSpeedStop {
-		// Get int16 speed from message content
-		speed, err := tinygobuffers.BytesToUint16(message.Data)
+		// Get speed percentage from message content
+		speedPercentage, err := tinygobuffers.BytesToFloat64(message.Data)
 		if err != tinygoerrors.ErrorCodeNil {
 			return err
 		}
-		motorSpeed = speed
+		motorSpeedPercentage = math.Abs(speedPercentage)
 	}
 
 	// Send start feedback message
@@ -57,12 +59,12 @@ func SetSpeedBasedOnReceivedMessage(
 		}
 	case internalusbcdc.IncomingCategoryMotorSpeedForward:
 		// Set the motor speed
-		if err := ESCMotorHandler.SafeSetSpeedForward(motorSpeed); err != tinygoerrors.ErrorCodeNil {
+		if err := ESCMotorHandler.SetSpeedForward(motorSpeedPercentage); err != tinygoerrors.ErrorCodeNil {
 			return err
 		}
 	case internalusbcdc.IncomingCategoryMotorSpeedBackward:
 		// Set the motor speed
-		if err := ESCMotorHandler.SafeSetSpeedBackward(motorSpeed); err != tinygoerrors.ErrorCodeNil {
+		if err := ESCMotorHandler.SetSpeedBackward(motorSpeedPercentage); err != tinygoerrors.ErrorCodeNil {
 			return err
 		}
 	}

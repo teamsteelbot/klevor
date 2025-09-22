@@ -15,11 +15,9 @@ const (
 	IncomingCategoryMotorSpeedStop
 	IncomingCategoryMotorSpeedForward
 	IncomingCategoryMotorSpeedBackward
-	IncomingCategoryGetMaxMotorSpeedValue
 	IncomingCategoryServoAngleCenter
 	IncomingCategoryServoAngleToLeft
 	IncomingCategoryServoAngleToRight
-	IncomingCategoryGetMaxServoAngleValue
 )
 
 // DataLength returns the size in bytes of the data for a given IncomingCategory
@@ -31,7 +29,7 @@ func (i IncomingCategory) DataLength() (int, tinygoerrors.ErrorCode) {
 	switch i {
 	case IncomingCategoryNil:
 		return 0, ErrorCodeUSBCDCNilIncomingCategory
-	case IncomingCategoryMotorSpeedStop, IncomingCategoryServoAngleCenter, IncomingCategoryGetMaxMotorSpeedValue, IncomingCategoryGetMaxServoAngleValue:
+	case IncomingCategoryMotorSpeedStop, IncomingCategoryServoAngleCenter:
 		return 0, tinygoerrors.ErrorCodeNil
 	case IncomingCategoryStatus:
 		return 1, tinygoerrors.ErrorCodeNil
@@ -88,16 +86,12 @@ func IncomingCategoryFromUint8(value uint8) (
 		return IncomingCategoryMotorSpeedForward, tinygoerrors.ErrorCodeNil
 	case IncomingCategoryMotorSpeedBackward:
 		return IncomingCategoryMotorSpeedBackward, tinygoerrors.ErrorCodeNil
-	case IncomingCategoryGetMaxMotorSpeedValue:
-		return IncomingCategoryGetMaxMotorSpeedValue, tinygoerrors.ErrorCodeNil
 	case IncomingCategoryServoAngleCenter:
 		return IncomingCategoryServoAngleCenter, tinygoerrors.ErrorCodeNil
 	case IncomingCategoryServoAngleToLeft:
 		return IncomingCategoryServoAngleToLeft, tinygoerrors.ErrorCodeNil
 	case IncomingCategoryServoAngleToRight:
 		return IncomingCategoryServoAngleToRight, tinygoerrors.ErrorCodeNil
-	case IncomingCategoryGetMaxServoAngleValue:
-		return IncomingCategoryGetMaxServoAngleValue, tinygoerrors.ErrorCodeNil
 	default:
 		return IncomingCategoryNil, ErrorCodeUSBCDCUnknownIncomingCategory
 	}

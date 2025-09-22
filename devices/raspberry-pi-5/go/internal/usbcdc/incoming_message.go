@@ -303,20 +303,6 @@ func (msg *IncomingMessage) StringToPrint() string {
 		bits := binary.BigEndian.Uint64(msg.Data[:])
 		value := math.Float64frombits(bits)
 		dataDetails = fmt.Sprintf("%f", value)
-	case IncomingCategoryMaxMotorSpeedValue,
-		IncomingCategoryMaxServoAngleValue:
-		// Check if the data length is valid for an uint16 value
-		if len(msg.Data) != 2 {
-			dataDetails = fmt.Sprintf(
-				"invalid length: %d, expected: 2",
-				len(msg.Data),
-			)
-			break
-		}
-
-		// Extract the uint16 value from the message data
-		value := binary.BigEndian.Uint16(msg.Data[:])
-		dataDetails = fmt.Sprintf("%d", value)
 	case IncomingCategoryError:
 		// Check if the data length is valid for an uint16 value
 		if len(msg.Data) != 2 {

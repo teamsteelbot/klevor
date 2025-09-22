@@ -14,8 +14,6 @@ const (
 	IncomingCategoryChallenge
 	IncomingCategoryStatus
 	IncomingCategoryError
-	IncomingCategoryMaxMotorSpeedValue
-	IncomingCategoryMaxServoAngleValue
 	IncomingCategoryQuaternionX
 	IncomingCategoryQuaternionY
 	IncomingCategoryQuaternionZ
@@ -35,8 +33,6 @@ var (
 		IncomingCategoryChallenge:          "challenge",
 		IncomingCategoryStatus:             "status",
 		IncomingCategoryError:              "error",
-		IncomingCategoryMaxMotorSpeedValue: "max_motor_speed_value",
-		IncomingCategoryMaxServoAngleValue: "max_servo_angle_value",
 		IncomingCategoryQuaternionX:        "quaternion_x",
 		IncomingCategoryQuaternionY:        "quaternion_y",
 		IncomingCategoryQuaternionZ:        "quaternion_z",
@@ -56,8 +52,6 @@ var (
 		uint8(IncomingCategoryChallenge):          IncomingCategoryChallenge,
 		uint8(IncomingCategoryStatus):             IncomingCategoryStatus,
 		uint8(IncomingCategoryError):              IncomingCategoryError,
-		uint8(IncomingCategoryMaxMotorSpeedValue): IncomingCategoryMaxMotorSpeedValue,
-		uint8(IncomingCategoryMaxServoAngleValue): IncomingCategoryMaxServoAngleValue,
 		uint8(IncomingCategoryQuaternionX):        IncomingCategoryQuaternionX,
 		uint8(IncomingCategoryQuaternionY):        IncomingCategoryQuaternionY,
 		uint8(IncomingCategoryQuaternionZ):        IncomingCategoryQuaternionZ,
@@ -77,8 +71,6 @@ var (
 		IncomingCategoryChallenge:          1,
 		IncomingCategoryStatus:             1,
 		IncomingCategoryError:              2,
-		IncomingCategoryMaxMotorSpeedValue: 2,
-		IncomingCategoryMaxServoAngleValue: 2,
 		IncomingCategoryQuaternionX:        8,
 		IncomingCategoryQuaternionY:        8,
 		IncomingCategoryQuaternionZ:        8,

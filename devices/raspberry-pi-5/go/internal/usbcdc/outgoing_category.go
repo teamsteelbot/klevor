@@ -15,11 +15,9 @@ const (
 	OutgoingCategoryMotorSpeedStop
 	OutgoingCategoryMotorSpeedForward
 	OutgoingCategoryMotorSpeedBackward
-	OutgoingCategoryGetMaxMotorSpeedValue
 	OutgoingCategoryServoAngleCenter
 	OutgoingCategoryServoAngleToLeft
 	OutgoingCategoryServoAngleToRight
-	OutgoingCategoryGetMaxServoAngleValue
 )
 
 var (
@@ -29,11 +27,9 @@ var (
 		OutgoingCategoryMotorSpeedStop:        "motor_speed_stop",
 		OutgoingCategoryMotorSpeedForward:     "motor_speed_forward",
 		OutgoingCategoryMotorSpeedBackward:    "motor_speed_backward",
-		OutgoingCategoryGetMaxMotorSpeedValue: "get_max_motor_speed_value",
 		OutgoingCategoryServoAngleCenter:      "servo_angle_center",
 		OutgoingCategoryServoAngleToLeft:      "servo_angle_to_left",
 		OutgoingCategoryServoAngleToRight:     "servo_angle_to_right",
-		OutgoingCategoryGetMaxServoAngleValue: "get_max_servo_angle_value",
 	}
 
 	// OutgoingCategories maps a given uint8 value to its OutgoingCategory enum
@@ -43,11 +39,9 @@ var (
 		uint8(OutgoingCategoryMotorSpeedStop):        OutgoingCategoryMotorSpeedStop,
 		uint8(OutgoingCategoryMotorSpeedForward):     OutgoingCategoryMotorSpeedForward,
 		uint8(OutgoingCategoryMotorSpeedBackward):    OutgoingCategoryMotorSpeedBackward,
-		uint8(OutgoingCategoryGetMaxMotorSpeedValue): OutgoingCategoryGetMaxMotorSpeedValue,
 		uint8(OutgoingCategoryServoAngleCenter):      OutgoingCategoryServoAngleCenter,
 		uint8(OutgoingCategoryServoAngleToLeft):      OutgoingCategoryServoAngleToLeft,
 		uint8(OutgoingCategoryServoAngleToRight):     OutgoingCategoryServoAngleToRight,
-		uint8(OutgoingCategoryGetMaxServoAngleValue): OutgoingCategoryGetMaxServoAngleValue,
 	}
 
 	// OutgoingCategoryDataLengths maps a given OutgoingCategory to its data length in bytes
@@ -55,13 +49,11 @@ var (
 		OutgoingCategoryNil:                   0,
 		OutgoingCategoryStatus:                1,
 		OutgoingCategoryMotorSpeedStop:        0,
-		OutgoingCategoryMotorSpeedForward:     2,
-		OutgoingCategoryMotorSpeedBackward:    2,
-		OutgoingCategoryGetMaxMotorSpeedValue: 0,
+		OutgoingCategoryMotorSpeedForward:     8,
+		OutgoingCategoryMotorSpeedBackward:    8,
 		OutgoingCategoryServoAngleCenter:      0,
-		OutgoingCategoryServoAngleToLeft:      2,
-		OutgoingCategoryServoAngleToRight:     2,
-		OutgoingCategoryGetMaxServoAngleValue: 0,
+		OutgoingCategoryServoAngleToLeft:      8,
+		OutgoingCategoryServoAngleToRight:     8,
 	}
 )
 

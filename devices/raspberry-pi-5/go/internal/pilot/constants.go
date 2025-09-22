@@ -39,34 +39,34 @@ var (
 	HandlerLoggerProducerTag = "PILOT_HANDLER"
 
 	// MotorBackwardFastPercentage is the percentage of the maximum speed for fast backward motor speed
-	MotorBackwardFastPercentage float64 = 0.7
+	MotorBackwardFastPercentage float64 = 1
 
 	// MotorBackwardNormalPercentage is the percentage of the maximum speed for normal backward motor speed
-	MotorBackwardNormalPercentage float64 = 0.6
+	MotorBackwardNormalPercentage float64 = 0.8
 
 	// MotorBackwardSlowPercentage is the percentage of the maximum speed for slow backward motor speed
-	MotorBackwardSlowPercentage float64 = 0.5
+	MotorBackwardSlowPercentage float64 = 0.6
 
 	// MotorForwardFastPercentage is the percentage of the maximum speed for fast forward motor speed
-	MotorForwardFastPercentage float64 = 0.7
+	MotorForwardFastPercentage float64 = 1
 
 	// MotorForwardNormalPercentage is the percentage of the maximum speed for normal forward motor speed
-	MotorForwardNormalPercentage float64 = 0.6
+	MotorForwardNormalPercentage float64 = 0.8
 
 	// MotorForwardSlowPercentage is the percentage of the maximum speed for slow forward motor speed
-	MotorForwardSlowPercentage float64 = 0.5
+	MotorForwardSlowPercentage float64 = 0.6
 
 	// MotorTurningPercentage is the percentage of the maximum speed for turning motor speed
-	MotorTurningPercentage float64 = 0.75
+	MotorTurningPercentage float64 = 0.8
 
 	// ServoBigTurnAnglePercentage is the percentage of the maximum angle for big turns
 	ServoBigTurnAnglePercentage float64 = 1
 
 	// ServoMediumTurnAnglePercentage is the percentage of the maximum angle for medium turns
-	ServoMediumTurnAnglePercentage float64 = 0.7
+	ServoMediumTurnAnglePercentage float64 = 0.8
 
 	// ServoSmallTurnAnglePercentage is the percentage of the maximum angle for small turns
-	ServoSmallTurnAnglePercentage float64 = 0.4
+	ServoSmallTurnAnglePercentage float64 = 0.6
 
 	// AlgorithmTurns is the number of turns in the algorithm
 	AlgorithmTurns = 12
@@ -84,7 +84,7 @@ var (
 	StopDistanceThreshold = 1500.0
 
 	// SideDistanceThreshold is the distance threshold for side sensors
-	SideDistanceThreshold = 1500.0
+	SideDistanceThreshold = 1850.0
 
 	// SideDistanceDifferencePercentage is the percentage difference threshold for side sensors
 	SideDistanceDifferencePercentage = 0.3 // 0.2, 0.15

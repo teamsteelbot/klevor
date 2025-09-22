@@ -189,18 +189,6 @@ var (
 		[]byte{},
 	)
 
-	// OutgoingGetMaxMotorSpeedValueMessage is the outgoing message to request the maximum motor speed value
-	OutgoingGetMaxMotorSpeedValueMessage = NewOutgoingMessage(
-		OutgoingCategoryGetMaxMotorSpeedValue,
-		[]byte{},
-	)
-
-	// OutgoingGetMaxServoAngleValueMessage is the outgoing message to request the maximum servo direction value
-	OutgoingGetMaxServoAngleValueMessage = NewOutgoingMessage(
-		OutgoingCategoryGetMaxServoAngleValue,
-		[]byte{},
-	)
-
 	// IncomingStartMessage is the incoming start message for USB-CDC communication
 	IncomingStartMessage = NewIncomingStatusMessage(IncomingStatusStart)
 
