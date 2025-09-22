@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 	"runtime"
+	"sync/atomic"
 	"time"
 
 	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal"
@@ -21,10 +22,10 @@ const (
 	receivingMessageTimeout = 5 * time.Second
 
 	// sendBNO08XDataInterval defines the interval to send BNO08X data.
-	sendBNO08XDataInterval = 25 * time.Millisecond
+	sendBNO08XDataInterval = 10 * time.Millisecond
 
 	// noMessageReceivedDelay is the time to sleep if no message is received.
-	noMessageReceivedDelay = 10 * time.Millisecond
+	noMessageReceivedDelay = 2 * time.Millisecond
 
 	// readMessageTimeout defines the timeout duration for reading messages.
 	readMessageTimeout = 5 * time.Second
@@ -78,6 +79,9 @@ func main() {
 		// Stop ESC motor and center servo before waiting for switch press
 		stopAndCenter()
 
+		// Add goroutine for BNO08X update loop
+		go bno08xUpdateLoop()
+
 		// Wait for switch press
 		if err := internalswitch.SwitchHandler.Wait(switchOnEvent); err != tinygoerrors.ErrorCodeNil {
 			internal.Logger.ErrorMessageWithErrorCode(
@@ -87,9 +91,6 @@ func main() {
 			)
 			os.Exit(1)
 		}
-
-		// Add goroutine for sending the BNO08X updates
-		go bno08xUpdateLoop()
 
 		// Reset the last message received time
 		lastMessageReceivedTime = time.Now()
