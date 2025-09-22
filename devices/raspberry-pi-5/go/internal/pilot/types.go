@@ -43,6 +43,8 @@ type (
 		clipClassification            *gohailocliphandler.Classification
 		rplidarHandlerMutex           sync.RWMutex
 		clipHandlerMutex              sync.RWMutex
+		southSouthwestAverageDistance float64
+		southSoutheastAverageDistance float64
 		westAverageDistance           float64
 		northwestAverageDistance      float64
 		northNorthwestAverageDistance float64
@@ -521,8 +523,8 @@ func (h *DefaultHandler) updateCLIPClassification(ctx context.Context) error {
 				)
 			}
 
-			// Sleep the CLIP delay
-			time.Sleep(CLIPDelay)
+			// Sleep the update delay
+			time.Sleep(UpdateDelay)
 		}
 	}
 }
@@ -577,6 +579,8 @@ func (h *DefaultHandler) updateRPLiDARAverageDistances(ctx context.Context) erro
 			h.rplidarAverageDistances = averageDistances
 
 			// Get the average common distances
+			h.southSoutheastAverageDistance = h.rplidarAverageDistances[gorplidarsdkhandler.CardinalDirectionSouthSoutheast]
+			h.southSouthwestAverageDistance = h.rplidarAverageDistances[gorplidarsdkhandler.CardinalDirectionSouthSouthwest]
 			h.westAverageDistance = h.rplidarAverageDistances[gorplidarsdkhandler.CardinalDirectionWest]
 			h.northwestAverageDistance = h.rplidarAverageDistances[gorplidarsdkhandler.CardinalDirectionNorthwest]
 			h.northNorthwestAverageDistance = h.rplidarAverageDistances[gorplidarsdkhandler.CardinalDirectionNorthNorthwest]
@@ -600,8 +604,8 @@ func (h *DefaultHandler) updateRPLiDARAverageDistances(ctx context.Context) erro
 				),
 			)
 
-			// Sleep the RPLiDAR delay
-			time.Sleep(RPLiDARDelay)
+			// Sleep the update delay
+			time.Sleep(UpdateDelay)
 		}
 	}
 }
@@ -1046,15 +1050,16 @@ func (h *DefaultHandler) goBackwardSlowlyOnParking(ctx context.Context) error {
 	// Wait until the front distance threshold to stop backward movement is reached
 	var stopBackwardMovement bool
 	for !stopBackwardMovement {
+		time.Sleep(UpdateDelay)
+
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
 		default:
 			// Check if the front distance threshold to stop backward movement is reached
 			frontDistances := []float64{
-				h.northNortheastAverageDistance,
-				h.northNorthwestAverageDistance,
-				h.northAverageDistance,
+				h.southSoutheastAverageDistance,
+				h.southSouthwestAverageDistance,
 			}
 			for _, distance := range frontDistances {
 				// Check if the distance is NaN
@@ -1063,7 +1068,7 @@ func (h *DefaultHandler) goBackwardSlowlyOnParking(ctx context.Context) error {
 				}
 
 				// Check if the distance is above the threshold
-				if distance >= StopBackwardDirectionOnParkingFrontDistanceThreshold {
+				if distance <= StopBackwardDirectionOnParkingBackwardDistanceThreshold {
 					stopBackwardMovement = true
 					break
 				}
@@ -1158,6 +1163,8 @@ func (h *DefaultHandler) goForwardSlowlyOnParking(
 			// Wait until the opposite distance is not NaN
 			oppositeDistance := math.NaN()
 			for {
+				time.Sleep(UpdateDelay)
+
 				select {
 				case <-ctx.Done():
 					return false, ctx.Err()
@@ -1170,9 +1177,6 @@ func (h *DefaultHandler) goForwardSlowlyOnParking(
 				if !math.IsNaN(oppositeDistance) {
 					break
 				}
-
-				// Sleep a bit before checking again
-				time.Sleep(RPLiDARDelay)
 			}
 			if oppositeDistance >= LeftParkingSideDistanceThreshold {
 				h.handlerLoggerProducer.Info("Opposite side distance threshold on parking reached.")
@@ -1208,6 +1212,8 @@ func (h *DefaultHandler) leaveParkingHandler(ctx context.Context) error {
 	// Check which side has the space to leave the parking
 	parkingLeaveSide := ServoDirectionNil
 	for parkingLeaveSide == ServoDirectionNil {
+		time.Sleep(UpdateDelay)
+
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
@@ -1218,9 +1224,6 @@ func (h *DefaultHandler) leaveParkingHandler(ctx context.Context) error {
 				parkingLeaveSide = ServoDirectionRight
 			}
 		}
-
-		// Sleep a bit before checking again
-		time.Sleep(RPLiDARDelay)
 	}
 
 	// Iterate to leave the parking
@@ -1396,6 +1399,8 @@ func (h *DefaultHandler) safetyFrontDistanceOnChallengeWithObstaclesHandler(
 
 	var safe bool
 	for !safe {
+		time.Sleep(UpdateDelay)
+
 		select {
 		case <-ctx.Done():
 			return true, ctx.Err()
@@ -1419,9 +1424,6 @@ func (h *DefaultHandler) safetyFrontDistanceOnChallengeWithObstaclesHandler(
 			if frontDistanceThresholdReached {
 				h.handlerLoggerProducer.Info("Safety front distance threshold reached.")
 				safe = true
-			} else {
-				// Sleep a bit before checking again
-				time.Sleep(RPLiDARDelay)
 			}
 		}
 	}
@@ -1463,9 +1465,14 @@ func (h *DefaultHandler) safetyFrontDistanceOnChallengeWithObstaclesHandler(
 func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) error {
 	var isTurning bool
 	var bno08xLast90DegreeTurns uint
+	var lastIterationTime time.Time
 	var lastTurningTime time.Time
 	direction := ServoDirectionNil
 	for bno08xLast90DegreeTurns < Algorithm90DegreeTurns {
+		// Set the last iteration time
+		time.Sleep(UpdateDelay - time.Since(lastIterationTime))
+		lastIterationTime = time.Now()
+
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
@@ -1484,7 +1491,7 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 				return err
 			}
 			if reached {
-				continue
+				break
 			}
 
 			// Check for the current turn and center the servo if necessary
@@ -1515,10 +1522,7 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 					lastTurningTime = time.Now()
 					isTurning = false
 				}
-
-				// Sleep a bit before the next cycle
-				time.Sleep(GyroscopeDelay)
-				continue
+				break
 			}
 
 			// Get the front distance change
@@ -1562,7 +1566,7 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 				); err != nil {
 					return err
 				}
-				continue
+				break
 			}
 
 			// Get the rate of change for west and east average distances
@@ -1651,6 +1655,8 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 	// Wait until the front distance is below the stop distance threshold
 	var completed bool
 	for !completed {
+		time.Sleep(UpdateDelay)
+
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
@@ -1667,11 +1673,9 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 			if h.northAverageDistance+northDistanceChange <= StopDistanceThreshold {
 				completed = true
 				h.handlerLoggerProducer.Info("Challenge completed successfully. Stopping the robot.")
+				break
 			}
 		}
-
-		// Sleep a bit before checking again
-		time.Sleep(RPLiDARDelay)
 	}
 	return nil
 }
@@ -1762,13 +1766,8 @@ func (h *DefaultHandler) runToWrap(ctx context.Context) error {
 		},
 	)
 
-	// Wait a moment to ensure the RPLiDAR measures update goroutine is ready
-	h.handlerLoggerProducer.Info("Waiting for RPLiDAR measures update goroutine to be ready...")
-	time.Sleep(RPLiDARDelay)
-
-	// Wait a moment to ensure the CLIP classification update goroutine is ready
-	h.handlerLoggerProducer.Info("Waiting for CLIP classification update goroutine to be ready...")
-	time.Sleep(CLIPDelay)
+	// Wait a moment to ensure the RPLiDAR and CLIP are ready
+	time.Sleep(InitializationDelay)
 
 	// Start the pilot
 	g.Go(

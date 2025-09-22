@@ -26,14 +26,11 @@ var (
 	// ServoAngleEndMessageTimeout is the timeout for the servo angle end message
 	ServoAngleEndMessageTimeout = 1 * time.Second // 200 ms, 500ms
 
-	// RPLiDARDelay is the delay between RPLiDAR scans
-	RPLiDARDelay = 100 * time.Millisecond
+	// InitializationDelay is the delay after initialization
+	InitializationDelay = 100 * time.Millisecond
 
-	// CLIPDelay is the delay between CLIP classifications
-	CLIPDelay = 40 * time.Millisecond
-
-	// GyroscopeDelay is the delay between each gyroscope reading
-	GyroscopeDelay = 10 * time.Millisecond
+	// UpdateDelay is the delay between updates
+	UpdateDelay = 10 * time.Millisecond
 
 	// MinTimeBetweenTurns is the minimum time between turns
 	MinTimeBetweenTurns = 1 * time.Second
@@ -116,8 +113,8 @@ var (
 	// ParkingLeaveSideDistanceThreshold is the distance threshold to leave the parking (only used in the closed challenge)
 	ParkingLeaveSideDistanceThreshold = 500.0
 
-	// StopBackwardDirectionOnParkingFrontDistanceThreshold is the distance threshold to stop the backward direction when leaving parking (only used in the closed challenge)
-	StopBackwardDirectionOnParkingFrontDistanceThreshold = 140.0
+	// StopBackwardDirectionOnParkingBackwardDistanceThreshold is the distance threshold to stop the backward direction when leaving parking (only used in the closed challenge)
+	StopBackwardDirectionOnParkingBackwardDistanceThreshold = 290.0
 
 	// StopForwardDirectionOnParkingFrontDistanceThreshold is the distance threshold to go forward for the first time when leaving parking (only used in the closed challenge)
 	StopForwardDirectionOnParkingFrontDistanceThreshold = 95.0
