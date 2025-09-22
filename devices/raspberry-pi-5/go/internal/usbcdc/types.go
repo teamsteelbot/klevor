@@ -18,8 +18,8 @@ import (
 )
 
 type (
-	// CalculatedTurns is the structure that holds the calculated turns information.
-	CalculatedTurns struct {
+	// YawDegreesHandler is the structure that holds the yaw degrees information.
+	YawDegreesHandler struct {
 		lastYawDegrees        float64
 		accumulatedYawDegrees float64
 	}
@@ -56,7 +56,7 @@ type (
 		receivedBNO08XYawDegrees       float64
 		receivedBNO08XPitchDegrees     float64
 		receivedBNO08XRollDegrees      float64
-		calculatedTurns                *CalculatedTurns
+		yawDegreesHandler              *YawDegreesHandler
 		challengeReadyCh               chan struct{}
 		notifyChallengeOnce            sync.Once
 		motorSpeedStartMessagesCh      chan struct{}
@@ -68,7 +68,7 @@ type (
 	}
 )
 
-// NewCalculatedTurns creates a new CalculatedTurns instance.
+// NewYawDegreesHandler creates a new YawDegreesHandler instance.
 //
 // Parameters:
 //
@@ -76,22 +76,22 @@ type (
 //
 // Returns:
 //
-// A pointer to a CalculatedTurns instance.
-func NewCalculatedTurns(initialYawDegrees float64) *CalculatedTurns {
-	return &CalculatedTurns{
+// A pointer to a YawDegreesHandler instance.
+func NewYawDegreesHandler(initialYawDegrees float64) *YawDegreesHandler {
+	return &YawDegreesHandler{
 		lastYawDegrees:        initialYawDegrees,
 		accumulatedYawDegrees: 0,
 	}
 }
 
-// UpdateYawDegrees updates the calculated turns based on the new yaw degrees value.
+// Update updates based on the new yaw degrees value.
 //
 // Parameters:
 //
 // yawDegrees: The current yaw angle in degrees
-func (c *CalculatedTurns) UpdateYawDegrees(yawDegrees float64) {
+func (y *YawDegreesHandler) Update(yawDegrees float64) {
 	// Calculate the change since last update
-	deltaYawDegrees := yawDegrees - c.lastYawDegrees
+	deltaYawDegrees := yawDegrees - y.lastYawDegrees
 	if deltaYawDegrees > 180 {
 		deltaYawDegrees -= 360
 	} else if deltaYawDegrees < -180 {
@@ -99,8 +99,8 @@ func (c *CalculatedTurns) UpdateYawDegrees(yawDegrees float64) {
 	}
 
 	// Update accumulated yaw and last yaw degrees
-	c.accumulatedYawDegrees += deltaYawDegrees
-	c.lastYawDegrees = yawDegrees
+	y.accumulatedYawDegrees += deltaYawDegrees
+	y.lastYawDegrees = yawDegrees
 }
 
 //
@@ -114,11 +114,11 @@ func (c *CalculatedTurns) UpdateYawDegrees(yawDegrees float64) {
 // Returns:
 //
 // The total number of n-degree turns made.
-func (c *CalculatedTurns) getNDegreeTurns(n float64) float64 {
+func (y *YawDegreesHandler) getNDegreeTurns(n float64) float64 {
 	if n == 0 {
 		return 0
 	}
-	return math.Abs(c.accumulatedYawDegrees / n)
+	return math.Abs(y.accumulatedYawDegrees / n)
 }
 
 // Get360DegreeTurns returns the total number of 360-degree turns made.
@@ -126,8 +126,8 @@ func (c *CalculatedTurns) getNDegreeTurns(n float64) float64 {
 // Returns:
 //
 // The total number of 360-degree turns made.
-func (c *CalculatedTurns) Get360DegreeTurns() uint {
-	return uint(c.getNDegreeTurns(360))
+func (y *YawDegreesHandler) Get360DegreeTurns() uint {
+	return uint(y.getNDegreeTurns(360))
 }
 
 // Get90DegreeTurns returns the total number of 90-degree turns made.
@@ -135,8 +135,8 @@ func (c *CalculatedTurns) Get360DegreeTurns() uint {
 // Returns:
 //
 // The total number of 90-degree turns made.
-func (c *CalculatedTurns) Get90DegreeTurns() uint {
-	return uint(c.getNDegreeTurns(90))
+func (y *YawDegreesHandler) Get90DegreeTurns() uint {
+	return uint(y.getNDegreeTurns(90))
 }
 
 // Get45DegreeTurns returns the total number of 45-degree turns made.
@@ -144,8 +144,8 @@ func (c *CalculatedTurns) Get90DegreeTurns() uint {
 // Returns:
 //
 // The total number of 45-degree turns made.
-func (c *CalculatedTurns) Get45DegreeTurns() uint {
-	return uint(c.getNDegreeTurns(45))
+func (y *YawDegreesHandler) Get45DegreeTurns() uint {
+	return uint(y.getNDegreeTurns(45))
 }
 
 // Get30DegreeTurns returns the total number of 30-degree turns made.
@@ -153,8 +153,8 @@ func (c *CalculatedTurns) Get45DegreeTurns() uint {
 // Returns:
 //
 // The total number of 30-degree turns made.
-func (c *CalculatedTurns) Get30DegreeTurns() uint {
-	return uint(c.getNDegreeTurns(30))
+func (y *YawDegreesHandler) Get30DegreeTurns() uint {
+	return uint(y.getNDegreeTurns(30))
 }
 
 // GetAccumulatedYawDegrees returns the accumulated yaw in degrees.
@@ -162,8 +162,8 @@ func (c *CalculatedTurns) Get30DegreeTurns() uint {
 // Returns:
 //
 // The accumulated yaw in degrees.
-func (c *CalculatedTurns) GetAccumulatedYawDegrees() float64 {
-	return c.accumulatedYawDegrees
+func (y *YawDegreesHandler) GetAccumulatedYawDegrees() float64 {
+	return y.accumulatedYawDegrees
 }
 
 // NewDefaultSender creates a new DefaultSender instance.
@@ -686,27 +686,27 @@ func (h *DefaultHandler) incomingMessagesHandler(
 	}
 }
 
-// updateCalculatedTurns updates the calculated turns based on the received yaw degrees.
-func (h *DefaultHandler) updateCalculatedTurns() {
-	if h.calculatedTurns == nil {
-		h.calculatedTurns = NewCalculatedTurns(h.receivedBNO08XYawDegrees)
+// updateYawDegreesHandler updates based on the received yaw degrees.
+func (h *DefaultHandler) updateYawDegreesHandler() {
+	if h.yawDegreesHandler == nil {
+		h.yawDegreesHandler = NewYawDegreesHandler(h.receivedBNO08XYawDegrees)
 		h.incomingMessagesLoggerProducer.Info(
 			fmt.Sprintf(
-				"Initialized calculated turns with initial yaw degrees: %f",
+				"Initial yaw degrees: %f",
 				h.receivedBNO08XYawDegrees,
 			),
 		)
 		return
 	}
 
-	// Update the calculated turns
-	h.calculatedTurns.UpdateYawDegrees(h.receivedBNO08XYawDegrees)
+	// Update the yaw degrees handler
+	h.yawDegreesHandler.Update(h.receivedBNO08XYawDegrees)
 
 	if h.incomingMessagesLoggerProducer.IsDebug() {
 		h.incomingMessagesLoggerProducer.Debug(
 			fmt.Sprintf(
 				"Updated accumulated yaw degrees: %.3f",
-				h.calculatedTurns.GetAccumulatedYawDegrees(),
+				h.yawDegreesHandler.GetAccumulatedYawDegrees(),
 			),
 		)
 	}
@@ -742,8 +742,8 @@ func (h *DefaultHandler) updateBNO08XYawDegrees(yawDegrees float64) {
 		)
 	}
 
-	// Update the calculated turns
-	h.updateCalculatedTurns()
+	// Update the yaw degrees handler
+	h.updateYawDegreesHandler()
 }
 
 // updateBNO08XPitchDegrees updates the BNO08X pitch degrees.
@@ -1109,8 +1109,8 @@ func (h *DefaultHandler) Run(ctx context.Context, stopFn func()) error {
 	h.challengeReadyCh = make(chan struct{})
 	h.notifyChallengeOnce = sync.Once{}
 
-	// Reset received BNO08X calculated turns
-	h.calculatedTurns = nil
+	// Reset BNO08X yaw degrees handler
+	h.yawDegreesHandler = nil
 
 	// Reset received BNO08X quaternion values
 	h.receivedBNO08XQuaternionX = 0.0
@@ -1475,10 +1475,10 @@ func (h *DefaultHandler) ReceivedChallenge() internal.Challenge {
 func (h *DefaultHandler) Get360DegreeTurns() uint {
 	h.mutex.Lock()
 	defer h.mutex.Unlock()
-	if h.calculatedTurns == nil {
+	if h.yawDegreesHandler == nil {
 		return 0
 	}
-	return uint(h.calculatedTurns.getNDegreeTurns(360))
+	return uint(h.yawDegreesHandler.getNDegreeTurns(360))
 }
 
 // Get90DegreeTurns returns the total number of 90-degree turns made.
@@ -1489,10 +1489,10 @@ func (h *DefaultHandler) Get360DegreeTurns() uint {
 func (h *DefaultHandler) Get90DegreeTurns() uint {
 	h.mutex.Lock()
 	defer h.mutex.Unlock()
-	if h.calculatedTurns == nil {
+	if h.yawDegreesHandler == nil {
 		return 0
 	}
-	return uint(h.calculatedTurns.getNDegreeTurns(90))
+	return uint(h.yawDegreesHandler.getNDegreeTurns(90))
 }
 
 // Get45DegreeTurns returns the total number of 45-degree turns made.
@@ -1503,10 +1503,10 @@ func (h *DefaultHandler) Get90DegreeTurns() uint {
 func (h *DefaultHandler) Get45DegreeTurns() uint {
 	h.mutex.Lock()
 	defer h.mutex.Unlock()
-	if h.calculatedTurns == nil {
+	if h.yawDegreesHandler == nil {
 		return 0
 	}
-	return uint(h.calculatedTurns.getNDegreeTurns(45))
+	return uint(h.yawDegreesHandler.getNDegreeTurns(45))
 }
 
 // Get30DegreeTurns returns the total number of 30-degree turns made.
@@ -1517,10 +1517,10 @@ func (h *DefaultHandler) Get45DegreeTurns() uint {
 func (h *DefaultHandler) Get30DegreeTurns() uint {
 	h.mutex.Lock()
 	defer h.mutex.Unlock()
-	if h.calculatedTurns == nil {
+	if h.yawDegreesHandler == nil {
 		return 0
 	}
-	return uint(h.calculatedTurns.getNDegreeTurns(30))
+	return uint(h.yawDegreesHandler.getNDegreeTurns(30))
 }
 
 // ReceivedBNO08XYawDegrees returns the received BNO08X yaw degrees.
