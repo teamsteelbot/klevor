@@ -11,7 +11,6 @@ type (
 	Handler interface {
 		Run(ctx context.Context, cancelFn context.CancelFunc) error
 		IsRunning() bool
-		IsClosed() bool
 		NewSender() (Sender, error)
 		ReceivedStartMessage() bool
 		ReceivedChallenge() internal.Challenge

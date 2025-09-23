@@ -19,6 +19,9 @@ const (
 	// MaxDistanceLimit is the maximum distance limit
 	MaxDistanceLimit = 3000
 
+	// MeasuresChSize is the size of the measures channel buffer
+	MeasuresChSize = 10
+
 	// UltraSimpleName is the name of the Slamtec executable
 	UltraSimpleName = "ultra_simple"
 )

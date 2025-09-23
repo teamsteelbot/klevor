@@ -42,9 +42,6 @@ const (
 	// InitializationDelay is the delay after initialization
 	InitializationDelay = 100 * time.Millisecond
 
-	// UpdateDelay is the delay between updates
-	UpdateDelay = 10 * time.Millisecond
-
 	// RPLiDARLogInterval is the interval for RPLiDAR logging
 	RPLiDARLogInterval = 100 * time.Millisecond
 
@@ -137,6 +134,7 @@ func NewDefaultService(
 		usbCDCHandler:  usbCDCHandler,
 		logger:         logger,
 		debug:          debug,
+		readyCh: 	 make(chan struct{}),
 	}, nil
 }
 
@@ -149,15 +147,6 @@ func (s *DefaultService) IsRunning() bool {
 	return s.isRunning.Load()
 }
 
-// IsClosed returns true if the sender is closed.
-//
-// Returns:
-//
-// True if the sender is closed, false otherwise.
-func (s *DefaultService) IsClosed() bool {
-	return s.closed.Load()
-}
-
 // updateCLIPClassification retrieves the latest CLIP classification
 //
 // Parameters:
@@ -168,25 +157,34 @@ func (s *DefaultService) IsClosed() bool {
 //
 // An error if the classification could not be retrieved
 func (s *DefaultService) updateCLIPClassification(ctx context.Context) error {
+	// Signal that the CLIP classification can send through the channel
+	if err := s.clipHandler.StartSendingClassifications(); err != nil {
+		return fmt.Errorf("failed to start sending CLIP classifications: %w", err)
+	}
+
+	// Get the classifications channel
+	classificationsCh, err := s.clipHandler.GetClassificationsChannel()
+	if err != nil {
+		return fmt.Errorf("failed to get classifications channel: %w", err)
+	}
+
 	var lastCLIPClassification *gohailocliphandler.Classification
 	var lastLogTime time.Time
 	for {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
-		default:
+		case clipClassification, ok := <-classificationsCh:
+			// Check if the channel is closed
+			if !ok {
+				return errors.New("classifications channel closed")
+			}
+
 			// Set the last classification
 			lastCLIPClassification = s.clipClassification
 
 			// Update the CLIP classification
 			s.clipHandlerMutex.Lock()
-			clipClassification, err := s.clipHandler.GetClassification()
-			if err != nil {
-				s.clipHandlerMutex.Unlock()
-				return fmt.Errorf("failed to get CLIP classification: %w", err)
-			}
-
-			// Set the classification and unlock the mutex
 			s.clipClassification = clipClassification
 			s.clipHandlerMutex.Unlock()
 
@@ -215,9 +213,6 @@ func (s *DefaultService) updateCLIPClassification(ctx context.Context) error {
 				// Update the last log time
 				lastLogTime = time.Now()
 			}
-
-			// Sleep the update delay
-			time.Sleep(UpdateDelay)
 		}
 	}
 }
@@ -232,15 +227,32 @@ func (s *DefaultService) updateCLIPClassification(ctx context.Context) error {
 //
 // An error if the average distances could not be updated, nil otherwise
 func (s *DefaultService) updateRPLiDARAverageDistances(ctx context.Context) error {
+	// Signal that the RPLiDAR can send through the channel
+	if err := s.rplidarHandler.StartSendingMeasures(); err != nil {
+		return fmt.Errorf("failed to start sending RPLiDAR measures: %w", err)
+	}
+
+	// Get the measures channel
+	measuresCh, err := s.rplidarHandler.GetMeasuresChannel()
+	if err != nil {
+		return fmt.Errorf("failed to get measures channel: %w", err)
+	}
+
 	var lastLogTime time.Time
 	for {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
-		default:
+		case measures, ok := <-measuresCh:
+			// Check if the channel is closed
+			if !ok {
+				return errors.New("measures channel closed")
+			}
+
 			// Calculate the average north, west and east distances
 			s.rplidarHandlerMutex.Lock()
-			averageDistances, err := s.rplidarHandler.GetAverageDistancesFromAllDirections(
+			averageDistances, err := gorplidarsdkhandler.GetAverageDistanceFromAllDirections(
+				measures,
 				AverageAngleWidth,
 			)
 			if err != nil {
@@ -252,7 +264,12 @@ func (s *DefaultService) updateRPLiDARAverageDistances(ctx context.Context) erro
 			}
 
 			// Check if the handler current average distances is not nil
-			if s.rplidarAverageDistances != nil {
+			if s.rplidarAverageDistances == nil {
+				// Initialize the average distances change map
+				s.rplidarAverageDistancesChange = make(
+					map[gorplidarsdkhandler.CardinalDirection]float64,
+				)
+			} else {
 				// Calculate the change for each direction
 				for direction, newDistance := range averageDistances {
 					oldDistance, ok := s.rplidarAverageDistances[direction]
@@ -273,11 +290,6 @@ func (s *DefaultService) updateRPLiDARAverageDistances(ctx context.Context) erro
 						s.rplidarAverageDistancesChange[direction] = math.Min(newDistance-oldDistance, MaxDistanceChange)
 					}
 				}
-			} else {
-				// Initialize the average distances change map
-				s.rplidarAverageDistancesChange = make(
-					map[gorplidarsdkhandler.CardinalDirection]float64,
-				)
 			}
 
 			// Set the average distances and the last update time
@@ -313,9 +325,6 @@ func (s *DefaultService) updateRPLiDARAverageDistances(ctx context.Context) erro
 				// Update the last log time
 				lastLogTime = time.Now()
 			}
-
-			// Sleep the update delay
-			time.Sleep(UpdateDelay)
 		}
 	}
 }
@@ -353,11 +362,6 @@ func (s *DefaultService) Run(ctx context.Context, cancelFn context.CancelFunc, c
 
 	s.mutex.Unlock()
 
-	defer s.mutex.Unlock()
-
-	// Reset the closed state
-	s.closed.Store(false)
-
 	// Create a logger producer
 	serviceLoggerProducer, err := s.logger.NewProducer(
 		ServiceLoggerProducerTag,
@@ -368,6 +372,14 @@ func (s *DefaultService) Run(ctx context.Context, cancelFn context.CancelFunc, c
 	}
 	s.serviceLoggerProducer = serviceLoggerProducer
 	defer s.serviceLoggerProducer.Close()
+
+	// Create a sender for the USB-CDC handler
+	usbCDCSender, err := s.usbCDCHandler.NewSender()
+	if err != nil {
+		return fmt.Errorf("failed to create USB-CDC sender: %w", err)
+	}
+	s.usbCDCSender = usbCDCSender
+	defer s.usbCDCSender.Close()
 
 	// Create a error group for the RPLiDAR measures update goroutine
 	g := errgroup.Group{}
@@ -414,13 +426,10 @@ func (s *DefaultService) close() {
 	s.mutex.Lock()
 
 	// Check if the handler is already closed
-	if s.IsClosed() {
+	if !s.IsRunning() {
 		s.mutex.Unlock()
 		return
 	}
-
-	// Mark the handler as closed
-	s.closed.Store(true)
 
 	s.mutex.Unlock()
 
@@ -498,6 +507,11 @@ func (s *DefaultService) SetMotorSpeed(
 	speed float64,
 	direction MotorDirection,
 ) error {
+	// Check if the USB-CDC sender is nil
+	if s.usbCDCSender == nil {
+		return ErrNilUSBCDCSender
+	}
+
 	// Check if it's the same speed and direction as the current one
 	if s.motorDirection == direction && s.motorSpeed == speed {
 		return nil
@@ -665,6 +679,11 @@ func (s *DefaultService) SetServoAngle(
 	angle float64,
 	direction ServoDirection,
 ) error {
+	// Check if the USB-CDC sender is nil
+	if s.usbCDCSender == nil {
+		return ErrNilUSBCDCSender
+	}
+	
 	// Check if the servo direction and angle is the same as the current one
 	if s.servoDirection == direction && s.servoAngle == angle {
 		return nil

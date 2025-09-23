@@ -35,6 +35,7 @@ func NewDefaultHandler(
 		NegativeLabelSliceToStringSlice(negativeLabels),
 		MinimumConfidenceThreshold,
 		logger,
+		ClassificationsChSize,
 		debug,
 	)
 }

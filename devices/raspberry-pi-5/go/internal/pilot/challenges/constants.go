@@ -20,6 +20,9 @@ const (
 	// MinTimeToCorrectAfterTurn is the minimum time to correct after a turn
 	MinTimeToCorrectAfterTurn = 1500 * time.Millisecond
 
+	// UpdateDelay is the delay between updates
+	UpdateDelay = 10 * time.Millisecond
+
 	// MaxDistanceChange is the maximum distance change for safety calculations
 	MaxDistanceChange = 100.0
 

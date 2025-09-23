@@ -3,9 +3,9 @@ module github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go
 go 1.25.1
 
 require (
-	github.com/ralvarezdev/go-concurrent-logger v0.1.7
-	github.com/ralvarezdev/go-hailo-clip-handler v0.1.11
-	github.com/ralvarezdev/go-rplidar-sdk-handler v0.1.15
+	github.com/ralvarezdev/go-concurrent-logger v0.1.8
+	github.com/ralvarezdev/go-hailo-clip-handler v0.2.0
+	github.com/ralvarezdev/go-rplidar-sdk-handler v0.2.1
 	github.com/ralvarezdev/go-strings v0.1.12 // indirect
 	github.com/ralvarezdev/go-tinygo-errors v0.1.9
 	github.com/ralvarezdev/tinygo-errors v0.0.4
@@ -13,7 +13,7 @@ require (
 	golang.org/x/sync v0.17.0
 )
 
-require github.com/ralvarezdev/go-context v0.1.0 // indirect
+require github.com/ralvarezdev/go-context v0.1.1 // indirect
 
 require (
 	github.com/creack/goselect v0.1.2 // indirect

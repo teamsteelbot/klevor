@@ -10,6 +10,9 @@ import (
 const (
 	// MinimumConfidenceThreshold is the minimum confidence threshold for a valid classification
 	MinimumConfidenceThreshold float32 = 0.8
+
+	// ClassificationsChSize is the size of the classifications channel buffer
+	ClassificationsChSize = 10
 )
 
 var (

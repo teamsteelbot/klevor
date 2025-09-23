@@ -19,5 +19,6 @@ var (
 	ErrNilIsTurning						= errors.New("is turning cannot be nil")
 	ErrNilLastTurningTime					= errors.New("last turning time cannot be nil")
 	ErrServiceAlreadyRunning= errors.New("service is already running")
+	ErrNilUSBCDCSender				   = errors.New("usb-cdc sender cannot be nil")
 
 )

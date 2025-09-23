@@ -27,6 +27,7 @@ func NewSlamtecC1Handler(
 		logger,
 		UltraSimplePath,
 		MaxDistanceLimit,
+		MeasuresChSize,
 		debug,
 	)
 }

@@ -1059,20 +1059,10 @@ func (h *DefaultHandler) Run(ctx context.Context, cancelFn context.CancelFunc) e
 		h.mutex.Unlock()
 		return ErrHandlerAlreadyRunning
 	}
-	defer func() {
-		h.mutex.Lock()
-
-		// Set running to false
-		h.isRunning.Store(false)
-
-		h.mutex.Unlock()
-	}()
+	defer h.close()
 
 	// Set running to true
 	h.isRunning.Store(true)
-
-	// Reset the closed state
-	h.closed.Store(false)
 
 	// Reset the hasStarted state
 	h.hasStarted.Store(false)
@@ -1083,7 +1073,6 @@ func (h *DefaultHandler) Run(ctx context.Context, cancelFn context.CancelFunc) e
 		OutgoingMessagesChannelBufferSize,
 	)
 	close(h.readyCh)
-	defer h.close()
 
 	// Initialize motor speed messages channel
 	h.motorSpeedStartMessagesCh = make(
@@ -1149,7 +1138,7 @@ func (h *DefaultHandler) Run(ctx context.Context, cancelFn context.CancelFunc) e
 	)()
 }
 
-// NewSender returns a new sE instance associated with this DefaultHandler.
+// NewSender returns a new Sender instance associated with this DefaultHandler.
 //
 // Parameters:
 //
@@ -1163,7 +1152,7 @@ func (h *DefaultHandler) NewSender() (Sender, error) {
 	defer h.mutex.Unlock()
 
 	// Check if the handler is already closed
-	if h.IsClosed() {
+	if !h.IsRunning() {
 		return nil, ErrHandlerClosed
 	}
 
@@ -1194,13 +1183,13 @@ func (h *DefaultHandler) close() {
 	h.mutex.Lock()
 
 	// Check if the handler is already closed
-	if h.IsClosed() {
+	if !h.IsRunning() { 
 		h.mutex.Unlock()
 		return
 	}
 
 	// Mark the handler as closed
-	h.closed.Store(true)
+	h.isRunning.Store(false)
 
 	h.mutex.Unlock()
 
@@ -1434,15 +1423,6 @@ func (h *DefaultHandler) WaitServoAngleEndMessage(ctx context.Context) error {
 func (h *DefaultHandler) ClearServoAngleStartAndEndMessagesCh() {
 	h.ClearServoAngleStartMessagesCh()
 	h.ClearServoAngleEndMessagesCh()
-}
-
-// IsClosed returns true if the outgoing messages channel has been closed.
-//
-// Returns:
-//
-// True if the outgoing messages channel is closed, otherwise false.
-func (h *DefaultHandler) IsClosed() bool {
-	return h.closed.Load()
 }
 
 // ReceivedStartMessage returns true if the start message has been received.

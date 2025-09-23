@@ -12,6 +12,7 @@ type (
 	// Service is the interface that defines the methods to interact with the challenges
 	Service interface {
 		Run(ctx context.Context, cancelFn context.CancelFunc, challenge internal.Challenge) error
+		IsRunning() bool
 		WaitUntilReady(ctx context.Context) error
 		GetMotorSpeed() float64
 		GetMotorDirection() MotorDirection
