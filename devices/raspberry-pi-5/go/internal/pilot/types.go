@@ -34,7 +34,7 @@ type (
 		challengeService      internalpilotchallenges.Service
 		isRunning             atomic.Bool
 		debug                 bool
-		gyroscopeOrientation   internal.GyroscopeOrientation
+		gyroscopeOrientation  internal.GyroscopeOrientation
 	}
 )
 
@@ -91,7 +91,7 @@ func NewDefaultHandler(
 		logger,
 		rplidarHandler,
 		clipHandler,
-		usbCDCHandler, 
+		usbCDCHandler,
 		gyroscopeOrientation,
 		debug,
 	)
@@ -100,13 +100,13 @@ func NewDefaultHandler(
 	}
 
 	return &DefaultHandler{
-		logger:           logger,
-		rplidarHandler:   rplidarHandler,
-		clipHandler:      clipHandler,
-		usbCDCHandler:    usbCDCHandler,
-		challengeService: challengeService,
-		gyroscopeOrientation:  gyroscopeOrientation,
-		debug:            debug,
+		logger:               logger,
+		rplidarHandler:       rplidarHandler,
+		clipHandler:          clipHandler,
+		usbCDCHandler:        usbCDCHandler,
+		challengeService:     challengeService,
+		gyroscopeOrientation: gyroscopeOrientation,
+		debug:                debug,
 	}, nil
 }
 
@@ -129,7 +129,10 @@ func (h *DefaultHandler) IsRunning() bool {
 // Returns:
 //
 // An error if the pilot could not be run, nil otherwise
-func (h *DefaultHandler) runToWrap(ctx context.Context, cancelFn context.CancelFunc) error {
+func (h *DefaultHandler) runToWrap(
+	ctx context.Context,
+	cancelFn context.CancelFunc,
+) error {
 	// Initialize the USB-CDC sender
 	usbCDCSender, err := h.usbCDCHandler.NewSender()
 	if err != nil {
@@ -171,7 +174,10 @@ func (h *DefaultHandler) runToWrap(ctx context.Context, cancelFn context.CancelF
 	// Wait for the challenge service to be ready
 	h.handlerLoggerProducer.Info("Waiting for challenge service to be ready...")
 	if err := h.challengeService.WaitUntilReady(ctx); err != nil {
-		return fmt.Errorf("failed to wait for challenge service readiness: %w", err)
+		return fmt.Errorf(
+			"failed to wait for challenge service readiness: %w",
+			err,
+		)
 	}
 
 	// Start the challenge handler goroutine
@@ -186,20 +192,40 @@ func (h *DefaultHandler) runToWrap(ctx context.Context, cancelFn context.CancelF
 				switch challenge {
 				case internal.ChallengeWithoutObstacles:
 					h.handlerLoggerProducer.Info("Starting challenge without obstacles handler")
-					handler, err := internalpilotchallenges.NewChallengeWithoutObstaclesHandler(h.challengeService, h.logger, h.debug)
+					handler, err := internalpilotchallenges.NewChallengeWithoutObstaclesHandler(
+						h.challengeService,
+						h.logger,
+						h.debug,
+					)
 					if err != nil {
-						return fmt.Errorf("failed to create challenge without obstacles handler: %w", err)
+						return fmt.Errorf(
+							"failed to create challenge without obstacles handler: %w",
+							err,
+						)
 					}
 					return handler.Run(ctx)
 				case internal.ChallengeWithObstacles, internal.ChallengeWithObstaclesAndParking:
 					h.handlerLoggerProducer.Info("Starting challenge with obstacles handler")
-					handler, err := internalpilotchallenges.NewChallengeWithObstaclesHandler(h.challengeService, h.logger, h.debug)
+					handler, err := internalpilotchallenges.NewChallengeWithObstaclesHandler(
+						h.challengeService,
+						h.logger,
+						h.debug,
+					)
 					if err != nil {
-						return fmt.Errorf("failed to create challenge with obstacles handler: %w", err)
+						return fmt.Errorf(
+							"failed to create challenge with obstacles handler: %w",
+							err,
+						)
 					}
-					return handler.Run(ctx, internal.ChallengeWithObstaclesAndParking == challenge)
+					return handler.Run(
+						ctx,
+						internal.ChallengeWithObstaclesAndParking == challenge,
+					)
 				default:
-					return fmt.Errorf("unknown challenge: %s", challenge.String())
+					return fmt.Errorf(
+						"unknown challenge: %s",
+						challenge.String(),
+					)
 				}
 			},
 			h.handlerLoggerProducer,

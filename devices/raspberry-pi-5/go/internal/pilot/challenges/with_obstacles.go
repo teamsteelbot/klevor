@@ -2,12 +2,12 @@ package challenges
 
 import (
 	"context"
-	"fmt"	
+	"fmt"
 	"math"
 	"time"
 
-	gorplidarsdkhandler "github.com/ralvarezdev/go-rplidar-sdk-handler"
 	goconcurrentlogger "github.com/ralvarezdev/go-concurrent-logger"
+	gorplidarsdkhandler "github.com/ralvarezdev/go-rplidar-sdk-handler"
 )
 
 const (
@@ -36,15 +36,15 @@ const (
 type (
 	// ChallengeWithObstaclesHandler is the type for the challenge with obstacles handler
 	ChallengeWithObstaclesHandler struct {
-		service Service
-		logger goconcurrentlogger.Logger
+		service               Service
+		logger                goconcurrentlogger.Logger
 		handlerLoggerProducer goconcurrentlogger.LoggerProducer
-		debug bool
+		debug                 bool
 	}
 )
 
 // ChallengeWithObstaclesHandler is the handler for the challenge with obstacles
-// 
+//
 // Parameters:
 //
 // service: The service to use for the challenge
@@ -54,7 +54,11 @@ type (
 // Returns:
 //
 // A pointer to the newly created ChallengeWithObstaclesHandler instance, or an error if the handler could not be created
-func NewChallengeWithObstaclesHandler(service Service, logger goconcurrentlogger.Logger, debug bool) (*ChallengeWithObstaclesHandler, error) {
+func NewChallengeWithObstaclesHandler(
+	service Service,
+	logger goconcurrentlogger.Logger,
+	debug bool,
+) (*ChallengeWithObstaclesHandler, error) {
 	// Check if the service is nil
 	if service == nil {
 		return nil, ErrNilService
@@ -82,9 +86,15 @@ func NewChallengeWithObstaclesHandler(service Service, logger goconcurrentlogger
 // Returns:
 //
 // An error if the challenge could not be handled, nil otherwise
-func (h *ChallengeWithObstaclesHandler) Run(ctx context.Context, parking bool) error {
+func (h *ChallengeWithObstaclesHandler) Run(
+	ctx context.Context,
+	parking bool,
+) error {
 	// Create a logger producer for the handler
-	handlerLoggerProducer, err := h.logger.NewProducer(ChallengeHandlerLoggerProducerTag, h.debug)
+	handlerLoggerProducer, err := h.logger.NewProducer(
+		ChallengeHandlerLoggerProducerTag,
+		h.debug,
+	)
 	if err != nil {
 		return fmt.Errorf("failed to create handler logger producer: %w", err)
 	}
@@ -98,13 +108,13 @@ func (h *ChallengeWithObstaclesHandler) Run(ctx context.Context, parking bool) e
 	if err := h.service.WaitUntilReady(ctx); err != nil {
 		return fmt.Errorf("service is not ready: %w", err)
 	}
-	
+
 	// Leave the parking
 	if parking {
-	if err := h.leaveParkingHandler(ctx); err != nil {
-		return fmt.Errorf("failed to leave parking: %w", err)
+		if err := h.leaveParkingHandler(ctx); err != nil {
+			return fmt.Errorf("failed to leave parking: %w", err)
+		}
 	}
-}
 
 	/*
 		var WallCloseUp bool
@@ -684,10 +694,10 @@ func (h *ChallengeWithObstaclesHandler) Run(ctx context.Context, parking bool) e
 
 	// Enter the parking
 	if parking {
-	if err := h.enterParkingHandler(ctx); err != nil {
-		return fmt.Errorf("failed to enter parking: %w", err)
+		if err := h.enterParkingHandler(ctx); err != nil {
+			return fmt.Errorf("failed to enter parking: %w", err)
+		}
 	}
-}
 
 	return nil
 }

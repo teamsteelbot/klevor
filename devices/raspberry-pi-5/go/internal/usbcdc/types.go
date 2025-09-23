@@ -308,7 +308,10 @@ func (h *DefaultHandler) IsRunning() bool {
 // Returns:
 //
 // An error if any issue occurs during reading or writing.
-func (h *DefaultHandler) runToWrap(ctx context.Context, cancelFn context.CancelFunc) error {
+func (h *DefaultHandler) runToWrap(
+	ctx context.Context,
+	cancelFn context.CancelFunc,
+) error {
 	// Create a logger producers
 	incomingMessagesLoggerProducer, err := h.logger.NewProducer(
 		IncomingMessagesLoggerProducerTag,
@@ -1051,7 +1054,10 @@ func (h *DefaultHandler) sendMessage(
 // Returns:
 //
 // An error if any issue occurs during reading or writing.
-func (h *DefaultHandler) Run(ctx context.Context, cancelFn context.CancelFunc) error {
+func (h *DefaultHandler) Run(
+	ctx context.Context,
+	cancelFn context.CancelFunc,
+) error {
 	h.mutex.Lock()
 
 	// Check if it's already running
@@ -1183,7 +1189,7 @@ func (h *DefaultHandler) close() {
 	h.mutex.Lock()
 
 	// Check if the handler is already closed
-	if !h.IsRunning() { 
+	if !h.IsRunning() {
 		h.mutex.Unlock()
 		return
 	}
@@ -1507,7 +1513,7 @@ func (h *DefaultHandler) Get30DegreeTurns() uint {
 //
 // Returns:
 //
-// The accumulated yaw degrees.	
+// The accumulated yaw degrees.
 func (h *DefaultHandler) GetAccumulatedYawDegrees() float64 {
 	h.mutex.Lock()
 	defer h.mutex.Unlock()

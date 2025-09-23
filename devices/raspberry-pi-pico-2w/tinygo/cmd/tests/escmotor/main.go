@@ -44,7 +44,6 @@ func main() {
 	// Wait 5 seconds before starting the test
 	time.Sleep(5 * time.Second)
 
-		
 	for {
 		// Turn on the LED
 		internalledonboard.OnBoardHandler.SetOn()

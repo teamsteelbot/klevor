@@ -5,5 +5,5 @@ import (
 )
 
 var (
-	ErrHandlerAlreadyRunning               = errors.New("handler is already running")
+	ErrHandlerAlreadyRunning = errors.New("handler is already running")
 )

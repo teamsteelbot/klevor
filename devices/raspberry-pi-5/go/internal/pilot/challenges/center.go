@@ -6,7 +6,6 @@ import (
 	"time"
 
 	gorplidarsdkhandler "github.com/ralvarezdev/go-rplidar-sdk-handler"
-	"github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal"
 )
 
 const (
@@ -106,7 +105,14 @@ func centerByGyroscopeHandler(
 	accumulatedYawDegrees := service.GetAccumulatedYawDegrees()
 
 	// Get the difference of the accumulated yaw degrees from the last 90-degree turn
-	deltaYawDegrees := accumulatedYawDegrees - float64(last90DegreeTurns)*90.0
+	var deltaYawDegrees float64
+	if last90DegreeTurns == 0 {
+		deltaYawDegrees = accumulatedYawDegrees
+	} else if accumulatedYawDegrees >= 0 {
+		deltaYawDegrees = accumulatedYawDegrees - float64(last90DegreeTurns)*90.0
+	} else {
+		deltaYawDegrees = accumulatedYawDegrees + float64(last90DegreeTurns)*90.0
+	}
 
 	// Check if the delta yaw degrees is within gyroscope tolerance
 	if math.Abs(deltaYawDegrees) <= GyroscopeTolerance {
@@ -118,16 +124,14 @@ func centerByGyroscopeHandler(
 
 	// Check to which side the robot should turn to center itself
 	gyroOrientation := service.GetGyroscopeOrientation()
-	if (gyroOrientation == internal.GyroscopeOrientationClockwise && deltaYawDegrees > 0) ||
-		(gyroOrientation == internal.GyroscopeOrientationCounterClockwise && deltaYawDegrees < 0) {
+	if gyroOrientation.IsToRight(deltaYawDegrees) {
 		if err := service.SetServoToLeft(
 			ctx,
 			math.Min(1, YawDegreesServoAngleRatio*math.Abs(deltaYawDegrees)),
 		); err != nil {
 			return err
 		}
-	} else if (gyroOrientation == internal.GyroscopeOrientationClockwise && deltaYawDegrees < 0) ||
-		(gyroOrientation == internal.GyroscopeOrientationCounterClockwise && deltaYawDegrees > 0) {
+	} else if gyroOrientation.IsToLeft(deltaYawDegrees) {
 		if err := service.SetServoToRight(
 			ctx,
 			math.Min(1, YawDegreesServoAngleRatio*math.Abs(deltaYawDegrees)),

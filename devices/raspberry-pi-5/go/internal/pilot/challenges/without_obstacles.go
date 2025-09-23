@@ -35,7 +35,7 @@ type (
 	}
 )
 
-// ChallengeWithoutObstaclesHandler is the handler for the challenge without obstacles
+// NewChallengeWithoutObstaclesHandler is the handler for the challenge without obstacles
 //
 // Parameters:
 //
@@ -46,7 +46,11 @@ type (
 // Returns:
 //
 // A pointer to the newly created ChallengeWithoutObstaclesHandler instance, or an error if the handler could not be created
-func NewChallengeWithoutObstaclesHandler(service Service, logger goconcurrentlogger.Logger, debug bool) (*ChallengeWithoutObstaclesHandler, error) {
+func NewChallengeWithoutObstaclesHandler(
+	service Service,
+	logger goconcurrentlogger.Logger,
+	debug bool,
+) (*ChallengeWithoutObstaclesHandler, error) {
 	// Check if the service is nil
 	if service == nil {
 		return nil, ErrNilService
@@ -75,7 +79,10 @@ func NewChallengeWithoutObstaclesHandler(service Service, logger goconcurrentlog
 // An error if the challenge could not be handled, nil otherwise
 func (h *ChallengeWithoutObstaclesHandler) Run(ctx context.Context) error {
 	// Create a logger producer for the handler
-	handlerLoggerProducer, err := h.logger.NewProducer(ChallengeHandlerLoggerProducerTag, h.debug)
+	handlerLoggerProducer, err := h.logger.NewProducer(
+		ChallengeHandlerLoggerProducerTag,
+		h.debug,
+	)
 	if err != nil {
 		return fmt.Errorf("failed to create handler logger producer: %w", err)
 	}

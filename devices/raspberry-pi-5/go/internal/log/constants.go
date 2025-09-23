@@ -14,7 +14,7 @@ const (
 
 	// TimestampFormat is the format for timestamps in log messages
 	TimestampFormat = "15:04:05.000"
-	
+
 	// GracefulShutdownTimeout is the timeout for graceful shutdown
 	GracefulShutdownTimeout = 10 * time.Second
 

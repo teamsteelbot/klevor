@@ -76,9 +76,33 @@ func PrintEulerDegrees(eulerDegrees [3]float64) {
 // quaternion: A [4]float64 array representing the quaternion (x, y, z, w)
 func PrintQuaternion(quaternion [4]float64) {
 	Logger.AddMessage(quaternionHeader, true)
-	Logger.AddMessageWithFloat64(quaternionXPrefix, quaternion[tinygobno08x.QuaternionXIndex], Float64Precision, true, true)
-	Logger.AddMessageWithFloat64(quaternionYPrefix, quaternion[tinygobno08x.QuaternionYIndex], Float64Precision, true, true)
-	Logger.AddMessageWithFloat64(quaternionZPrefix, quaternion[tinygobno08x.QuaternionZIndex], Float64Precision, true, true)
-	Logger.AddMessageWithFloat64(quaternionWPrefix, quaternion[tinygobno08x.QuaternionWIndex], Float64Precision, true, true)
+	Logger.AddMessageWithFloat64(
+		quaternionXPrefix,
+		quaternion[tinygobno08x.QuaternionXIndex],
+		Float64Precision,
+		true,
+		true,
+	)
+	Logger.AddMessageWithFloat64(
+		quaternionYPrefix,
+		quaternion[tinygobno08x.QuaternionYIndex],
+		Float64Precision,
+		true,
+		true,
+	)
+	Logger.AddMessageWithFloat64(
+		quaternionZPrefix,
+		quaternion[tinygobno08x.QuaternionZIndex],
+		Float64Precision,
+		true,
+		true,
+	)
+	Logger.AddMessageWithFloat64(
+		quaternionWPrefix,
+		quaternion[tinygobno08x.QuaternionWIndex],
+		Float64Precision,
+		true,
+		true,
+	)
 	Logger.Debug()
 }

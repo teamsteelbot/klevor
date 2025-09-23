@@ -23,37 +23,37 @@ const (
 var (
 	// OutgoingCategoryNames maps a given OutgoingCategory to its string name
 	OutgoingCategoryNames = map[OutgoingCategory]string{
-		OutgoingCategoryStatus:                "status",
-		OutgoingCategoryMotorSpeedStop:        "motor_speed_stop",
-		OutgoingCategoryMotorSpeedForward:     "motor_speed_forward",
-		OutgoingCategoryMotorSpeedBackward:    "motor_speed_backward",
-		OutgoingCategoryServoAngleCenter:      "servo_angle_center",
-		OutgoingCategoryServoAngleToLeft:      "servo_angle_to_left",
-		OutgoingCategoryServoAngleToRight:     "servo_angle_to_right",
+		OutgoingCategoryStatus:             "status",
+		OutgoingCategoryMotorSpeedStop:     "motor_speed_stop",
+		OutgoingCategoryMotorSpeedForward:  "motor_speed_forward",
+		OutgoingCategoryMotorSpeedBackward: "motor_speed_backward",
+		OutgoingCategoryServoAngleCenter:   "servo_angle_center",
+		OutgoingCategoryServoAngleToLeft:   "servo_angle_to_left",
+		OutgoingCategoryServoAngleToRight:  "servo_angle_to_right",
 	}
 
 	// OutgoingCategories maps a given uint8 value to its OutgoingCategory enum
 	OutgoingCategories = map[uint8]OutgoingCategory{
-		uint8(OutgoingCategoryNil):                   OutgoingCategoryNil,
-		uint8(OutgoingCategoryStatus):                OutgoingCategoryStatus,
-		uint8(OutgoingCategoryMotorSpeedStop):        OutgoingCategoryMotorSpeedStop,
-		uint8(OutgoingCategoryMotorSpeedForward):     OutgoingCategoryMotorSpeedForward,
-		uint8(OutgoingCategoryMotorSpeedBackward):    OutgoingCategoryMotorSpeedBackward,
-		uint8(OutgoingCategoryServoAngleCenter):      OutgoingCategoryServoAngleCenter,
-		uint8(OutgoingCategoryServoAngleToLeft):      OutgoingCategoryServoAngleToLeft,
-		uint8(OutgoingCategoryServoAngleToRight):     OutgoingCategoryServoAngleToRight,
+		uint8(OutgoingCategoryNil):                OutgoingCategoryNil,
+		uint8(OutgoingCategoryStatus):             OutgoingCategoryStatus,
+		uint8(OutgoingCategoryMotorSpeedStop):     OutgoingCategoryMotorSpeedStop,
+		uint8(OutgoingCategoryMotorSpeedForward):  OutgoingCategoryMotorSpeedForward,
+		uint8(OutgoingCategoryMotorSpeedBackward): OutgoingCategoryMotorSpeedBackward,
+		uint8(OutgoingCategoryServoAngleCenter):   OutgoingCategoryServoAngleCenter,
+		uint8(OutgoingCategoryServoAngleToLeft):   OutgoingCategoryServoAngleToLeft,
+		uint8(OutgoingCategoryServoAngleToRight):  OutgoingCategoryServoAngleToRight,
 	}
 
 	// OutgoingCategoryDataLengths maps a given OutgoingCategory to its data length in bytes
 	OutgoingCategoryDataLengths = map[OutgoingCategory]int{
-		OutgoingCategoryNil:                   0,
-		OutgoingCategoryStatus:                1,
-		OutgoingCategoryMotorSpeedStop:        0,
-		OutgoingCategoryMotorSpeedForward:     8,
-		OutgoingCategoryMotorSpeedBackward:    8,
-		OutgoingCategoryServoAngleCenter:      0,
-		OutgoingCategoryServoAngleToLeft:      8,
-		OutgoingCategoryServoAngleToRight:     8,
+		OutgoingCategoryNil:                0,
+		OutgoingCategoryStatus:             1,
+		OutgoingCategoryMotorSpeedStop:     0,
+		OutgoingCategoryMotorSpeedForward:  8,
+		OutgoingCategoryMotorSpeedBackward: 8,
+		OutgoingCategoryServoAngleCenter:   0,
+		OutgoingCategoryServoAngleToLeft:   8,
+		OutgoingCategoryServoAngleToRight:  8,
 	}
 )
 

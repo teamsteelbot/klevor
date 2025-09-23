@@ -107,3 +107,41 @@ func ChallengeFromBytes(data []byte) (Challenge, error) {
 func (g GyroscopeOrientation) String() string {
 	return GyroscopeOrientationNames[g]
 }
+
+// IsToLeft returns true if the gyroscope orientation indicates that the robot is oriented to the left
+//
+// Parameters:
+//
+// deltaYawDegrees: The difference in yaw degrees to evaluate
+//
+// Returns:
+//
+// A boolean indicating if the gyroscope orientation is to the left
+func (g GyroscopeOrientation) IsToLeft(deltaYawDegrees float64) bool {
+	if g == GyroscopeOrientationClockwise && deltaYawDegrees < 0 {
+		return true
+	}
+	if g == GyroscopeOrientationCounterClockwise && deltaYawDegrees > 0 {
+		return true
+	}
+	return false
+}
+
+// IsToRight returns true if the gyroscope orientation indicates that the robot is oriented to the right
+//
+// Parameters:
+//
+// deltaYawDegrees: The difference in yaw degrees to evaluate
+//
+// Returns:
+//
+// A boolean indicating if the gyroscope orientation is to the right
+func (g GyroscopeOrientation) IsToRight(deltaYawDegrees float64) bool {
+	if g == GyroscopeOrientationClockwise && deltaYawDegrees > 0 {
+		return true
+	}
+	if g == GyroscopeOrientationCounterClockwise && deltaYawDegrees < 0 {
+		return true
+	}
+	return false
+}

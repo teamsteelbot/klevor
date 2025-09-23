@@ -80,7 +80,7 @@ type (
 		readyCh                       chan struct{}
 		mutex                         sync.Mutex
 		debug                         bool
-		gyroscopeOrientation internal.GyroscopeOrientation
+		gyroscopeOrientation          internal.GyroscopeOrientation
 	}
 )
 
@@ -127,17 +127,17 @@ func NewDefaultService(
 	}
 
 	return &DefaultService{
-		motorSpeed:     0,
-		motorDirection: MotorDirectionStop,
-		servoAngle:     0,
-		servoDirection: ServoDirectionStraight,
-		clipHandler:    clipHandler,
-		rplidarHandler: rplidarHandler,
-		usbCDCHandler:  usbCDCHandler,
-		logger:         logger,
-		debug:          debug,
-		readyCh: 	 make(chan struct{}),
-		gyroscopeOrientation:  gyroscopeOrientation,
+		motorSpeed:           0,
+		motorDirection:       MotorDirectionStop,
+		servoAngle:           0,
+		servoDirection:       ServoDirectionStraight,
+		clipHandler:          clipHandler,
+		rplidarHandler:       rplidarHandler,
+		usbCDCHandler:        usbCDCHandler,
+		logger:               logger,
+		debug:                debug,
+		readyCh:              make(chan struct{}),
+		gyroscopeOrientation: gyroscopeOrientation,
 	}, nil
 }
 
@@ -163,7 +163,10 @@ func (s *DefaultService) updateCLIPClassification(ctx context.Context) error {
 	// Signal that the CLIP classification can send through the channel
 	s.serviceLoggerProducer.Info("Starting CLIP classification updates...")
 	if err := s.clipHandler.StartSendingClassifications(); err != nil {
-		return fmt.Errorf("failed to start sending CLIP classifications: %w", err)
+		return fmt.Errorf(
+			"failed to start sending CLIP classifications: %w",
+			err,
+		)
 	}
 
 	// Get the classifications channel
@@ -239,7 +242,7 @@ func (s *DefaultService) updateRPLiDARAverageDistances(ctx context.Context) erro
 	if err := s.rplidarHandler.StartSendingMeasures(); err != nil {
 		return fmt.Errorf("failed to start sending RPLiDAR measures: %w", err)
 	}
-	
+
 	// Get the measures channel
 	s.serviceLoggerProducer.Info("Getting RPLiDAR measures channel...")
 	measuresCh, err := s.rplidarHandler.GetMeasuresChannel()
@@ -296,9 +299,15 @@ func (s *DefaultService) updateRPLiDARAverageDistances(ctx context.Context) erro
 
 					// Set the distance change with a maximum limit
 					if newDistance < oldDistance {
-						s.rplidarAverageDistancesChange[direction] = math.Max(newDistance-oldDistance, -MaxDistanceChange)
+						s.rplidarAverageDistancesChange[direction] = math.Max(
+							newDistance-oldDistance,
+							-MaxDistanceChange,
+						)
 					} else {
-						s.rplidarAverageDistancesChange[direction] = math.Min(newDistance-oldDistance, MaxDistanceChange)
+						s.rplidarAverageDistancesChange[direction] = math.Min(
+							newDistance-oldDistance,
+							MaxDistanceChange,
+						)
 					}
 				}
 			}
@@ -351,7 +360,11 @@ func (s *DefaultService) updateRPLiDARAverageDistances(ctx context.Context) erro
 // Returns:
 //
 // An error if the service could not be started or if it encounters an error while running, nil otherwise
-func (s *DefaultService) Run(ctx context.Context, cancelFn context.CancelFunc, challenge internal.Challenge) error {
+func (s *DefaultService) Run(
+	ctx context.Context,
+	cancelFn context.CancelFunc,
+	challenge internal.Challenge,
+) error {
 	s.mutex.Lock()
 
 	// Check if it's already running
