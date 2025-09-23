@@ -879,15 +879,44 @@ func (h *DefaultHandler) challengeWithObstaclesHandler(ctx context.Context) erro
 
 					if westAverageDistance >= float64(LaneIdentifierThreshold) && isTurning == true {
 						if northAverageDistance >= FrontCloseupThreshold {
-							h.motorSpeed = MotorForwardSlowPercentage
-							h.servoDirection = ServoDirectionStriaght
+							if err := h.setMotorForwardByPercentage(
+								ctx,
+								MotorForwardSlowPercentage,
+							); err != nil {
+								return fmt.Errorf(
+									"failed to set motor to normal speed: %w",
+									err,
+								)
+							}
+							if err := h.setServoToCenter(ctx); err != nil {
+								return fmt.Errorf(
+									"failed to set servo to center: %w",
+									err,
+								)
+							}
 							WallCloseUp = true
 						}
 						if northAverageDistance <= float64(FrontCloseupThreshold) && WallCloseUp == true {
-							h.servoDirection = ServoDirectionLeft
-							h.motorSpeed = MotorBackwardSlowPercentage
+							if err := h.setServoToLeftByPercentage(
+								ctx,
+								ServoMediumTurnAnglePercentage,
+							); err != nil {
+								return fmt.Errorf(
+									"failed to set servo to small left turn: %w",
+									err,
+								)
+							}
+							if err := h.setMotorBackwardByPercentage(
+								ctx,
+								MotorBackwardSlowPercentage,
+							); err != nil {
+								return fmt.Errorf(
+									"failed to set motor to normal speed: %w",
+									err,
+								)
+							}
 
-							// Basically this condition is meant to indicate when has the robot successfully made the turn
+							// Basically this condition is meant to indicate when has the robot successfully made the turn (if its not enough, we can stop the turn at like 60 degrees or smth, then counteract the other 30 degrees while going backwards)
 							if bno08xLast90DegreeTurns != TemporaryTurns {
 								isTurning = false
 								WallCloseUp = false
@@ -895,14 +924,46 @@ func (h *DefaultHandler) challengeWithObstaclesHandler(ctx context.Context) erro
 							}
 						}
 					else {
-					    h.servoDirection = ServoDirectionRight
-						h.motorSpeed = MotorForwardSlowPercentage
+					    if err := h.setServoToRightByPercentage(
+							ctx,
+							ServoMediumTurnAnglePercentage,
+						); err != nil {
+							return fmt.Errorf(
+								"failed to set servo to small right turn: %w",
+								err,
+							)
+						}
+						if err := h.setMotorForwardByPercentage(
+							ctx,
+							MotorForwardSlowPercentage,
+						); err != nil {
+							return fmt.Errorf(
+								"failed to set motor to normal speed: %w",
+								err,
+							)
+						}
 							// Basically this condition is meant to indicate when has the robot successfully made the turn
 							if bno08xLast90DegreeTurns != TemporaryTurns {
-								h.servoDirection = ServoDirectionLeft
-								h.motorSpeed = MotorBackwardSlowPercentage
-								// keeps doing it until it reaches the wall (prob measurements with the rplidar)
-								h.servoDirection = ServoDirectionStraight
+								if err := h.setServoToRightByPercentage(
+									ctx,
+									ServoMediumTurnAnglePercentage,
+								); err != nil {
+									return fmt.Errorf(
+										"failed to set servo to small right turn: %w",
+										err,
+									)
+								}
+								if err := h.setMotorBackwardByPercentage(
+									ctx,
+									MotorBackwardSlowPercentage,
+								); err != nil {
+									return fmt.Errorf(
+										"failed to set motor to normal speed: %w",
+										err,
+									)
+								}
+								if (1 == 1) { // keeps doing it until it reaches the wall (prob measurements with the rplidar)
+									h.servoDirection = ServoDirectionStraight}
 								isTurning = false
 					}	}	}
 				}
@@ -914,13 +975,42 @@ func (h *DefaultHandler) challengeWithObstaclesHandler(ctx context.Context) erro
 
 					if eastAverageDistance >= float64(LaneIdentifierThreshold) && isTurning == true {
 						if northAverageDistance >= FrontCloseupThreshold {
-							h.motorSpeed = MotorForwardSlowPercentage
-							h.servoDirection = ServoDirectionStraight
+							if err := h.setMotorForwardByPercentage(
+								ctx,
+								MotorForwardSlowPercentage,
+							); err != nil {
+								return fmt.Errorf(
+									"failed to set motor to normal speed: %w",
+									err,
+								)
+							}
+							if err := h.setServoToCenter(ctx); err != nil {
+								return fmt.Errorf(
+									"failed to set servo to center: %w",
+									err,
+								)
+							}
 							WallCloseUp = true
 						}
 						if northAverageDistance <= float64(FrontCloseupThreshold) && WallCloseUp == true {
-							h.servoDirection = ServoDirectionRight
-							h.motorSpeed = MotorBackwardSlowPercentage
+							if err := h.setServoToRightByPercentage(
+								ctx,
+								ServoMediumTurnAnglePercentage,
+							); err != nil {
+								return fmt.Errorf(
+									"failed to set servo to small right turn: %w",
+									err,
+								)
+							}
+							if err := h.setMotorBackwardByPercentage(
+								ctx,
+								MotorBackwardSlowPercentage,
+							); err != nil {
+								return fmt.Errorf(
+									"failed to set motor to normal speed: %w",
+									err,
+								)
+							}
 
 							// Basically this condition is meant to indicate when has the robot successfully made the turn
 							if bno08xLast90DegreeTurns != TemporaryTurns {
@@ -930,14 +1020,51 @@ func (h *DefaultHandler) challengeWithObstaclesHandler(ctx context.Context) erro
 							}
 						}
 					else {
-					    h.servoDirection = ServoDirectionLeft
-						h.motorSpeed = MotorForwardSlowPercentage
+					    if err := h.setServoToLeftByPercentage(
+							ctx,
+							ServoMediumTurnAnglePercentage,
+						); err != nil {
+							return fmt.Errorf(
+								"failed to set servo to small left turn: %w",
+								err,
+							)
+						}
+						if err := h.setMotorBackwardByPercentage(
+							ctx,
+							MotorBackwardSlowPercentage,
+						); err != nil {
+							return fmt.Errorf(
+								"failed to set motor to normal speed: %w",
+								err,
+							)
+						}
 							// Basically this condition is meant to indicate when has the robot successfully made the turn
 							if bno08xLast90DegreeTurns != TemporaryTurns {
-								h.servoDirection = ServoDirectionRight
-								h.motorSpeed = MotorBackwardSlowPercentage
+								if err := h.setServoToLeftByPercentage(
+									ctx,
+									ServoMediumTurnAnglePercentage,
+								); err != nil {
+									return fmt.Errorf(
+										"failed to set servo to small left turn: %w",
+										err,
+									)
+								}
+								if err := h.setMotorBackwardByPercentage(
+									ctx,
+									MotorBackwardSlowPercentage,
+								); err != nil {
+									return fmt.Errorf(
+										"failed to set motor to normal speed: %w",
+										err,
+									)
+								}
 								// keeps doing it until it reaches the wall (prob measurements with the rplidar)
-								h.servoDirection = ServoDirectionStraight
+								if err := h.setServoToCenter(ctx); err != nil {
+									return fmt.Errorf(
+										"failed to set servo to center: %w",
+										err,
+									)
+								}
 								isTurning = false
 						}	}
 					}
@@ -949,27 +1076,101 @@ func (h *DefaultHandler) challengeWithObstaclesHandler(ctx context.Context) erro
 					for i := 180; i < 360; i++ {
 						if h.rplidarHandler.GetMeasures(i) <= CameraRangeThreshold {
 							if h.clipClassification == red_block {
-								h.servoDirection = ServoDirectionRight
-								h.motorSpeed = uint16(MotorForwardNormalPercentage)
+								if err := h.setServoToRightByPercentage(
+									ctx,
+									ServoMediumTurnAnglePercentage,
+								); err != nil {
+									return fmt.Errorf(
+										"failed to set servo to small right turn: %w",
+										err,
+									)
+								}
+								if err := h.setMotorForwardByPercentage(
+									ctx,
+									MotorForwardNormalPercentage,
+								); err != nil {
+									return fmt.Errorf(
+										"failed to set motor to normal speed: %w",
+										err,
+									)
+								}
 								if westAverageDistance <= float64(CameraRangeThreshold) && eastAverageDistance <= float64(CameraRangeThreshold) {
-									h.servoDirection = ServoDirectionLeft
+									if err := h.setServoToRightByPercentage(
+										ctx,
+										ServoMediumTurnAnglePercentage,
+									); err != nil {
+										return fmt.Errorf(
+											"failed to set servo to small right turn: %w",
+											err,
+										)
+									}
 								}
 								else if northAverageDistance <= float64(FrontCloseupThreshold) {
-									h.servoDirection = ServoDirectionStraight
-									h.motorSpeed = uint16(MotorBackwardNormalPercentage)
+									if err := h.setServoToCenter(ctx); err != nil {
+										return fmt.Errorf(
+											"failed to set servo to center: %w",
+											err,
+										)
+									}
+									if err := h.setMotorBackwardByPercentage(
+										ctx,
+										MotorBackwardNormalPercentage,
+									); err != nil {
+										return fmt.Errorf(
+											"failed to set motor to normal speed: %w",
+											err,
+										)
+									}
 									return
 								}
 							}
 							else if h.clipClassification == green_block {
-								h.servoDirection = ServoDirectionLeft
-								h.motorSpeed = uint16(MotorForwardNormalPercentage)
+								if err := h.setServoToLeftByPercentage(
+									ctx,
+									ServoMediumTurnAnglePercentage,
+								); err != nil {
+									return fmt.Errorf(
+										"failed to set servo to small left turn: %w",
+										err,
+									)
+								}
+								if err := h.setMotorForwardByPercentage(
+									ctx,
+									MotorForwardNormalPercentage,
+								); err != nil {
+									return fmt.Errorf(
+										"failed to set motor to normal speed: %w",
+										err,
+									)
+								}
 								if westAverageDistance <= float64(CameraRangeThreshold) and eastAverageDistance <= float64(CameraRangeThreshold) {
 									while (robot not aligned)
-									h.servoDirection = ServoDirectionRight
+									if err := h.setServoToRightByPercentage(
+										ctx,
+										ServoMediumTurnAnglePercentage,
+									); err != nil {
+										return fmt.Errorf(
+											"failed to set servo to small right turn: %w",
+											err,
+										)
+									}
 						}
 								else if northAverageDistance <= float64(FrontCloseupThreshold) {
-									h.servoDirection = ServoDirectionStraight
-									h.motorSpeed = uint16(MotorBackwardNormalPercentage)
+									if err := h.setServoToCenter(ctx); err != nil {
+										return fmt.Errorf(
+											"failed to set servo to center: %w",
+											err,
+										)
+									}
+									if err := h.setMotorBackwardByPercentage(
+										ctx,
+										MotorBackwardNormalPercentage,
+									); err != nil {
+										return fmt.Errorf(
+											"failed to set motor to normal speed: %w",
+											err,
+										)
+									}
 									continue
 						} 			}
 								}
