@@ -157,6 +157,12 @@ func (h *DefaultHandler) runToWrap(ctx context.Context, cancelFn context.CancelF
 		},
 	)
 
+	// Wait for the challenge service to be ready
+	h.handlerLoggerProducer.Info("Waiting for challenge service to be ready...")
+	if err := h.challengeService.WaitUntilReady(ctx); err != nil {
+		return fmt.Errorf("failed to wait for challenge service readiness: %w", err)
+	}
+
 	// Start the challenge handler goroutine
 	g.Go(
 		goconcurrentlogger.CancelContextAndLogOnError(

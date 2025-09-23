@@ -40,7 +40,7 @@ const (
 	ServoAngleEndMessageTimeout = 1 * time.Second // 200 ms, 500ms
 
 	// InitializationDelay is the delay after initialization
-	InitializationDelay = 100 * time.Millisecond
+	InitializationDelay = 200 * time.Millisecond
 
 	// RPLiDARLogInterval is the interval for RPLiDAR logging
 	RPLiDARLogInterval = 100 * time.Millisecond
@@ -75,7 +75,6 @@ type (
 		northeastAverageDistance      float64
 		eastAverageDistance           float64
 		isRunning                     atomic.Bool
-		closed                        atomic.Bool
 		logger                        goconcurrentlogger.Logger
 		serviceLoggerProducer         goconcurrentlogger.LoggerProducer
 		readyCh                       chan struct{}
@@ -158,16 +157,20 @@ func (s *DefaultService) IsRunning() bool {
 // An error if the classification could not be retrieved
 func (s *DefaultService) updateCLIPClassification(ctx context.Context) error {
 	// Signal that the CLIP classification can send through the channel
+	s.serviceLoggerProducer.Info("Starting CLIP classification updates...")
 	if err := s.clipHandler.StartSendingClassifications(); err != nil {
 		return fmt.Errorf("failed to start sending CLIP classifications: %w", err)
 	}
 
 	// Get the classifications channel
+	s.serviceLoggerProducer.Info("Getting CLIP classifications channel...")
 	classificationsCh, err := s.clipHandler.GetClassificationsChannel()
 	if err != nil {
 		return fmt.Errorf("failed to get classifications channel: %w", err)
 	}
 
+	// Log the start of the CLIP classification updates
+	s.serviceLoggerProducer.Info("CLIP classification updates started")
 	var lastCLIPClassification *gohailocliphandler.Classification
 	var lastLogTime time.Time
 	for {
@@ -228,16 +231,20 @@ func (s *DefaultService) updateCLIPClassification(ctx context.Context) error {
 // An error if the average distances could not be updated, nil otherwise
 func (s *DefaultService) updateRPLiDARAverageDistances(ctx context.Context) error {
 	// Signal that the RPLiDAR can send through the channel
+	s.serviceLoggerProducer.Info("Starting RPLiDAR measures updates...")
 	if err := s.rplidarHandler.StartSendingMeasures(); err != nil {
 		return fmt.Errorf("failed to start sending RPLiDAR measures: %w", err)
 	}
-
+	
 	// Get the measures channel
+	s.serviceLoggerProducer.Info("Getting RPLiDAR measures channel...")
 	measuresCh, err := s.rplidarHandler.GetMeasuresChannel()
 	if err != nil {
 		return fmt.Errorf("failed to get measures channel: %w", err)
 	}
 
+	// Log the start of the RPLiDAR measures updates
+	s.serviceLoggerProducer.Info("RPLiDAR measures updates started")
 	var lastLogTime time.Time
 	for {
 		select {
@@ -348,14 +355,7 @@ func (s *DefaultService) Run(ctx context.Context, cancelFn context.CancelFunc, c
 		s.mutex.Unlock()
 		return ErrServiceAlreadyRunning
 	}
-	defer func() {
-		s.mutex.Lock()
-
-		// Set running to false
-		s.isRunning.Store(false)
-
-		s.mutex.Unlock()
-	}()
+	defer s.close()
 
 	// Set running to true
 	s.isRunning.Store(true)
@@ -410,12 +410,35 @@ func (s *DefaultService) Run(ctx context.Context, cancelFn context.CancelFunc, c
 		)
 	}
 
-	// Wait a moment to ensure the RPLiDAR and CLIP are ready
+	// Wait until the RPLiDAR and CLIP handlers are ready
+	s.serviceLoggerProducer.Info("Waiting for RPLiDAR handler to be ready...")
+	if err := s.rplidarHandler.WaitUntilReady(ctx); err != nil {
+		return fmt.Errorf("RPLiDAR handler is not ready: %w", err)
+	}
+	s.serviceLoggerProducer.Info("RPLiDAR handler is ready")
+
+	if challenge == internal.ChallengeWithObstacles || challenge == internal.ChallengeWithObstaclesAndParking {
+		s.serviceLoggerProducer.Info("Waiting for CLIP handler to be ready...")
+		if err := s.clipHandler.WaitUntilReady(ctx); err != nil {
+			return fmt.Errorf("CLIP handler is not ready: %w", err)
+		}
+		s.serviceLoggerProducer.Info("CLIP handler is ready")
+	}
+
+	// Added delay after initialization
+	s.serviceLoggerProducer.Info(
+		fmt.Sprintf(
+			"Waiting for %s after initialization...",
+			InitializationDelay,
+		),
+	)
 	time.Sleep(InitializationDelay)
+
+	// Log that the service is ready
+	s.serviceLoggerProducer.Info("Service is ready")
 
 	// Close the ready channel to signal that the service is ready
 	close(s.readyCh)
-	defer s.close()
 
 	// Wait for the goroutines to finish
 	return g.Wait()
@@ -430,6 +453,9 @@ func (s *DefaultService) close() {
 		s.mutex.Unlock()
 		return
 	}
+
+	// Set running to false
+	s.isRunning.Store(false)
 
 	s.mutex.Unlock()
 
@@ -683,7 +709,7 @@ func (s *DefaultService) SetServoAngle(
 	if s.usbCDCSender == nil {
 		return ErrNilUSBCDCSender
 	}
-	
+
 	// Check if the servo direction and angle is the same as the current one
 	if s.servoDirection == direction && s.servoAngle == angle {
 		return nil

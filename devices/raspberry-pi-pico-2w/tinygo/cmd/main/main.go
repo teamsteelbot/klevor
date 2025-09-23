@@ -23,7 +23,7 @@ const (
 	receivingMessageTimeout = 5 * time.Second
 
 	// sendBNO08XDataInterval defines the interval to send BNO08X data.
-	sendBNO08XDataInterval = 10 * time.Millisecond
+	sendBNO08XDataInterval = 20 * time.Millisecond
 
 	// noMessageReceivedDelay is the time to sleep if no message is received.
 	noMessageReceivedDelay = 2 * time.Millisecond

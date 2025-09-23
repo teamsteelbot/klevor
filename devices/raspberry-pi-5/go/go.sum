@@ -10,10 +10,10 @@ github.com/ralvarezdev/go-context v0.1.1 h1:2szE1LJNGsB3IKi4y/n+gUZ1pjcyWWg1gr9t
 github.com/ralvarezdev/go-context v0.1.1/go.mod h1:wOyMbWyhhM8GwT3bzZ6Gvx8rJQfAXYpDwN9PUB7uR0M=
 github.com/ralvarezdev/go-crypto v0.6.4 h1:eX257KaSWGa4zU+COX7Ja0yzbkAPdwRAtPlDaejLWqE=
 github.com/ralvarezdev/go-crypto v0.6.4/go.mod h1:jY/KGELdLAiBZSbn7x5jRGCDifEGF4X5GvhgAFZJnSM=
-github.com/ralvarezdev/go-hailo-clip-handler v0.2.0 h1:T+8w0Yt6xVsWcS2d3vwWoc7cV3sVjdDeSaxw/bLZ6Dg=
-github.com/ralvarezdev/go-hailo-clip-handler v0.2.0/go.mod h1:cpS7EQ0NgLnYAofbxDjHzVn/LNS1GrkGXunyTPhMziQ=
-github.com/ralvarezdev/go-rplidar-sdk-handler v0.2.1 h1:F8BQw1HgnvucxltQ6q5UP205c2nvAeY87r6aDk6hd/M=
-github.com/ralvarezdev/go-rplidar-sdk-handler v0.2.1/go.mod h1:lXT/PZThSryI2Tp1NhQWmT5IJc2zkqOmPM0m0g0OC04=
+github.com/ralvarezdev/go-hailo-clip-handler v0.2.2 h1:uiPGayUEe4Vh7LJ3d6MX4DpuOnwHpQB1Sc3JKKabMSo=
+github.com/ralvarezdev/go-hailo-clip-handler v0.2.2/go.mod h1:cpS7EQ0NgLnYAofbxDjHzVn/LNS1GrkGXunyTPhMziQ=
+github.com/ralvarezdev/go-rplidar-sdk-handler v0.2.3 h1:3bJngHTXPRdX1pKGxbhUZ0MQm3Ry9rIkJqX5qrnjKuI=
+github.com/ralvarezdev/go-rplidar-sdk-handler v0.2.3/go.mod h1:lXT/PZThSryI2Tp1NhQWmT5IJc2zkqOmPM0m0g0OC04=
 github.com/ralvarezdev/go-strings v0.1.12 h1:AtOPDJ4lVO+33p7O4uECdD4C4D037h256zWz9uQ5eIQ=
 github.com/ralvarezdev/go-strings v0.1.12/go.mod h1:8sFOqmPJpqzS7bTjf91EzUCITnwpmkfifwY80GxV5r8=
 github.com/ralvarezdev/go-tinygo-errors v0.1.9 h1:G7zle5mbxST73NPYOLpr8lw0GOczfjRng3HosiTtqTM=
