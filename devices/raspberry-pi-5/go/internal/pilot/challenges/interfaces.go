@@ -4,11 +4,14 @@ import (
 	"context"
 
 	gorplidarsdkhandler "github.com/ralvarezdev/go-rplidar-sdk-handler"
+	gohailocliphandler "github.com/ralvarezdev/go-hailo-clip-handler"
+	"github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal"
 )
 
 type (
 	// Service is the interface that defines the methods to interact with the challenges
 	Service interface {
+		Run(ctx context.Context, cancelFn context.CancelFunc, challenge internal.Challenge) error
 		WaitUntilReady(ctx context.Context) error
 		GetMotorSpeed() float64
 		GetMotorDirection() MotorDirection
@@ -37,5 +40,6 @@ type (
 		Get45DegreeTurns() uint
 		Get30DegreeTurns() uint
 		GetAccumulatedYawDegrees() float64
+		GetCLIPClassification() *gohailocliphandler.Classification
 	}
 )

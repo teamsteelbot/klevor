@@ -9,7 +9,7 @@ import (
 type (
 	// Handler is the interface to manage the USB CDC communication.
 	Handler interface {
-		Run(ctx context.Context, stopFn func()) error
+		Run(ctx context.Context, cancelFn context.CancelFunc) error
 		IsRunning() bool
 		IsClosed() bool
 		NewSender() (Sender, error)

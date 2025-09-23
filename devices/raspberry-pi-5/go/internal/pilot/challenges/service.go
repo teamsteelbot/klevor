@@ -12,6 +12,7 @@ import (
 	goconcurrentlogger "github.com/ralvarezdev/go-concurrent-logger"
 	gohailocliphandler "github.com/ralvarezdev/go-hailo-clip-handler"
 	gorplidarsdkhandler "github.com/ralvarezdev/go-rplidar-sdk-handler"
+	"github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal"
 	internalusbcdc "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/usbcdc"
 	"golang.org/x/sync/errgroup"
 )
@@ -325,7 +326,12 @@ func (s *DefaultService) updateRPLiDARAverageDistances(ctx context.Context) erro
 //
 // ctx: The context to use for running the service
 // cancelFn: A function to call to cancel the context and stop the service
-func (s *DefaultService) Run(ctx context.Context, cancelFn context.CancelFunc) error {
+// challenge: The challenge to run
+//
+// Returns:
+//
+// An error if the service could not be started or if it encounters an error while running, nil otherwise
+func (s *DefaultService) Run(ctx context.Context, cancelFn context.CancelFunc, challenge internal.Challenge) error {
 	s.mutex.Lock()
 
 	// Check if it's already running
@@ -379,16 +385,18 @@ func (s *DefaultService) Run(ctx context.Context, cancelFn context.CancelFunc) e
 	)
 
 	// Initialize the CLIP classification update goroutine
-	g.Go(
-		goconcurrentlogger.CancelContextAndLogOnError(
-			ctx,
-			cancelFn,
-			func(ctx context.Context) error {
-				return s.updateCLIPClassification(ctx)
-			},
-			s.serviceLoggerProducer,
-		),
-	)
+	if challenge == internal.ChallengeWithObstacles || challenge == internal.ChallengeWithObstaclesAndParking {
+		g.Go(
+			goconcurrentlogger.CancelContextAndLogOnError(
+				ctx,
+				cancelFn,
+				func(ctx context.Context) error {
+					return s.updateCLIPClassification(ctx)
+				},
+				s.serviceLoggerProducer,
+			),
+		)
+	}
 
 	// Wait a moment to ensure the RPLiDAR and CLIP are ready
 	time.Sleep(InitializationDelay)
@@ -993,4 +1001,15 @@ func (s *DefaultService) Get30DegreeTurns() uint {
 // The accumulated yaw degrees of the robot
 func (s *DefaultService) GetAccumulatedYawDegrees() float64 {
 	return s.usbCDCHandler.GetAccumulatedYawDegrees()
+}
+
+// GetCLIPClassification returns the current CLIP classification
+//
+// Returns:
+//
+// A pointer to the current CLIP classification, or nil if no classification is available
+func (s *DefaultService) GetCLIPClassification() *gohailocliphandler.Classification {
+	s.clipHandlerMutex.Lock()
+	defer s.clipHandlerMutex.Unlock()
+	return s.clipClassification
 }

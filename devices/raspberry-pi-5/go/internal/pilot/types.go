@@ -10,7 +10,6 @@ import (
 	"sync"
 	"sync/atomic"
 	"syscall"
-	"time"
 
 	"golang.org/x/sync/errgroup"
 
@@ -18,21 +17,23 @@ import (
 	gohailocliphandler "github.com/ralvarezdev/go-hailo-clip-handler"
 	gorplidarsdkhandler "github.com/ralvarezdev/go-rplidar-sdk-handler"
 	"github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal"
+	internalpilotchallenges "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/pilot/challenges"
 	internalusbcdc "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/usbcdc"
 )
 
 type (
 	// DefaultHandler is the default implementation of the Handler interface
 	DefaultHandler struct {
-		mutex                         sync.Mutex
-		handlerLoggerProducer         goconcurrentlogger.LoggerProducer
-		logger                        goconcurrentlogger.Logger
-		rplidarHandler                gorplidarsdkhandler.Handler
-		clipHandler                   gohailocliphandler.Handler
-		usbCDCHandler                 internalusbcdc.Handler
-		usbCDCSender                  internalusbcdc.Sender
-		isRunning                     atomic.Bool
-		debug                         bool
+		mutex                 sync.Mutex
+		handlerLoggerProducer goconcurrentlogger.LoggerProducer
+		logger                goconcurrentlogger.Logger
+		rplidarHandler        gorplidarsdkhandler.Handler
+		clipHandler           gohailocliphandler.Handler
+		usbCDCHandler         internalusbcdc.Handler
+		usbCDCSender          internalusbcdc.Sender
+		challengeService      internalpilotchallenges.Service
+		isRunning             atomic.Bool
+		debug                 bool
 	}
 )
 
@@ -76,12 +77,25 @@ func NewDefaultHandler(
 		return nil, internalusbcdc.ErrNilHandler
 	}
 
+	// Create the challenge service
+	challengeService, err := internalpilotchallenges.NewDefaultService(
+		logger,
+		rplidarHandler,
+		clipHandler,
+		usbCDCHandler,
+		debug,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create challenge service: %w", err)
+	}
+
 	return &DefaultHandler{
-		logger:         logger,
-		rplidarHandler: rplidarHandler,
-		clipHandler:    clipHandler,
-		usbCDCHandler:  usbCDCHandler,
-		debug:          debug,
+		logger:           logger,
+		rplidarHandler:   rplidarHandler,
+		clipHandler:      clipHandler,
+		usbCDCHandler:    usbCDCHandler,
+		challengeService: challengeService,
+		debug:            debug,
 	}, nil
 }
 
@@ -99,11 +113,12 @@ func (h *DefaultHandler) IsRunning() bool {
 // Parameters:
 //
 // ctx: Context for managing cancellation and timeouts.
+// cancelFn: Function to call to cancel the context.
 //
 // Returns:
 //
 // An error if the pilot could not be run, nil otherwise
-func (h *DefaultHandler) runToWrap(ctx context.Context) error {
+func (h *DefaultHandler) runToWrap(ctx context.Context, cancelFn context.CancelFunc) error {
 	// Initialize the USB-CDC sender
 	usbCDCSender, err := h.usbCDCHandler.NewSender()
 	if err != nil {
@@ -131,71 +146,47 @@ func (h *DefaultHandler) runToWrap(ctx context.Context) error {
 		fmt.Sprintf("Challenge message received: %s", challenge.String()),
 	)
 
-	// Get the challenge handler
-	var handler func(ctx context.Context) error
-	switch challenge {
-	case internal.ChallengeWithObstacles:
-		h.handlerLoggerProducer.Info("Starting challenge with obstacles handler")
-		handler = h.challengeWithObstaclesHandler
-	case internal.ChallengeWithObstaclesAndParking:
-		h.handlerLoggerProducer.Info("Starting challenge with obstacles and parking handler")
-		handler = h.challengeWithObstaclesAndParkingHandler
-	case internal.ChallengeWithoutObstacles:
-		h.handlerLoggerProducer.Info("Starting challenge without obstacles handler")
-		handler = h.challengeWithoutObstaclesHandler
-	default:
-		return fmt.Errorf("unknown challenge: %s", challenge.String())
-	}
-
 	// Create a error group for the RPLiDAR measures update goroutine
 	g := errgroup.Group{}
 
-	// Initialize the RPLiDAR measures update goroutine
+	// Start the challenge service
 	g.Go(
 		func() error {
-			defer func() {
-				if r := recover(); r != nil {
-					h.handlerLoggerProducer.Error(
-						fmt.Errorf("panic recovered: %v", r),
-					)
-				}
-				fmt.Println("RPLiDAR average distances update goroutine exited")
-			}()
-			return h.updateRPLiDARAverageDistances(ctx)
+			defer h.handlerLoggerProducer.Info("Challenge service goroutine exited")
+			return h.challengeService.Run(ctx, cancelFn, challenge)
 		},
 	)
 
-	// Initialize the CLIP classification update goroutine
+	// Start the challenge handler goroutine
 	g.Go(
-		func() error {
-			defer func() {
-				if r := recover(); r != nil {
-					h.handlerLoggerProducer.Error(
-						fmt.Errorf("panic recovered: %v", r),
-					)
-				}
-				fmt.Println("CLIP classification update goroutine exited")
-			}()
-			return h.updateCLIPClassification(ctx)
-		},
-	)
+		goconcurrentlogger.CancelContextAndLogOnError(
+			ctx,
+			cancelFn,
+			func(ctx context.Context) error {
+				defer h.handlerLoggerProducer.Info("Challenge handler goroutine exited")
 
-	// Wait a moment to ensure the RPLiDAR and CLIP are ready
-	time.Sleep(InitializationDelay)
-
-	// Start the pilot
-	g.Go(
-		func() error {
-			defer func() {
-				if r := recover(); r != nil {
-					h.handlerLoggerProducer.Error(
-						fmt.Errorf("panic recovered: %v", r),
-					)
+				// Get the challenge handler
+				switch challenge {
+				case internal.ChallengeWithoutObstacles:
+					h.handlerLoggerProducer.Info("Starting challenge without obstacles handler")
+					handler, err := internalpilotchallenges.NewChallengeWithoutObstaclesHandler(h.challengeService, h.logger, h.debug)
+					if err != nil {
+						return fmt.Errorf("failed to create challenge without obstacles handler: %w", err)
+					}
+					return handler.Run(ctx)
+				case internal.ChallengeWithObstacles, internal.ChallengeWithObstaclesAndParking:
+					h.handlerLoggerProducer.Info("Starting challenge with obstacles handler")
+					handler, err := internalpilotchallenges.NewChallengeWithObstaclesHandler(h.challengeService, h.logger, h.debug)
+					if err != nil {
+						return fmt.Errorf("failed to create challenge with obstacles handler: %w", err)
+					}
+					return handler.Run(ctx, internal.ChallengeWithObstaclesAndParking == challenge)
+				default:
+					return fmt.Errorf("unknown challenge: %s", challenge.String())
 				}
-				fmt.Println("Pilot challenge handler goroutine exited")
-			}()
-			return handler(ctx)
-		},
+			},
+			h.handlerLoggerProducer,
+		),
 	)
 
 	// Wait for the goroutines to finish
@@ -333,7 +324,7 @@ func (h *DefaultHandler) Run() error {
 				ctx,
 				cancel,
 				func(ctx context.Context) error {
-					return h.runToWrap(ctx)
+					return h.runToWrap(ctx, cancel)
 				},
 				h.handlerLoggerProducer,
 			)()
