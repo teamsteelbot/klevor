@@ -1523,6 +1523,20 @@ func (h *DefaultHandler) Get30DegreeTurns() uint {
 	return uint(h.yawDegreesHandler.getNDegreeTurns(30))
 }
 
+// GetAccumulatedYawDegrees returns the accumulated yaw degrees.
+//
+// Returns:
+//
+// The accumulated yaw degrees.	
+func (h *DefaultHandler) GetAccumulatedYawDegrees() float64 {
+	h.mutex.Lock()
+	defer h.mutex.Unlock()
+	if h.yawDegreesHandler == nil {
+		return 0.0
+	}
+	return h.yawDegreesHandler.GetAccumulatedYawDegrees()
+}
+
 // ReceivedBNO08XYawDegrees returns the received BNO08X yaw degrees.
 //
 // Returns:

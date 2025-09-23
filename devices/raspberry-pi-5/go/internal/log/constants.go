@@ -14,9 +14,7 @@ const (
 
 	// TimestampFormat is the format for timestamps in log messages
 	TimestampFormat = "15:04:05.000"
-)
-
-var (
+	
 	// GracefulShutdownTimeout is the timeout for graceful shutdown
 	GracefulShutdownTimeout = 10 * time.Second
 
@@ -28,7 +26,9 @@ var (
 
 	// HandlerLoggerTag is the logger tag
 	HandlerLoggerTag = "LOGGER_HANDLER"
+)
 
+var (
 	// Filename is the default log filename
 	Filename = strings.ReplaceAll(
 		strings.ReplaceAll(

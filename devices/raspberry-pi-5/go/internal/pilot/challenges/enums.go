@@ -1,4 +1,4 @@
-package pilot
+package challenges
 
 type (
 	// ServoDirection is an enum to represent the different servo directions for the vehicle.

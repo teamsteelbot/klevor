@@ -99,11 +99,8 @@ const (
 )
 
 var (
-	// BNO08XInterval is the interval for BNO08X messages
-	BNO08XInterval = 25 * time.Millisecond
-
 	// ReadTimeout is the timeout duration for reading from the USB-CDC port
-	ReadTimeout = 4 * BNO08XInterval
+	ReadTimeout = 100 * time.Millisecond
 
 	// StopTimeout is the timeout duration for stopping the USB-CDC communication
 	StopTimeout = 3 * time.Second
@@ -128,15 +125,6 @@ var (
 
 	// OutgoingMessagesChannelBufferSize is the size of the outgoing messages channel buffer
 	OutgoingMessagesChannelBufferSize = 100
-
-	// OutgoingStopMessage is the outgoing stop message for USB-CDC communication
-	OutgoingStopMessage = NewOutgoingStatusMessage(OutgoingStatusStop)
-
-	// OutgoingOKMessage is the outgoing OK message for USB-CDC communication
-	OutgoingOKMessage = NewOutgoingStatusMessage(OutgoingStatusOK)
-
-	// OutgoingHeartbeatMessage is the outgoing heartbeat message for USB-CDC communication
-	OutgoingHeartbeatMessage = NewOutgoingStatusMessage(OutgoingStatusHeartbeat)
 
 	// QuaternionXIndex is the index for the quaternion X component
 	QuaternionXIndex = 0
@@ -176,6 +164,17 @@ var (
 
 	// EulerDegreesYawMaxValue is the maximum value for the Euler degrees yaw component
 	EulerDegreesYawMaxValue = 180.0
+)
+
+var (
+	// OutgoingStopMessage is the outgoing stop message for USB-CDC communication
+	OutgoingStopMessage = NewOutgoingStatusMessage(OutgoingStatusStop)
+
+	// OutgoingOKMessage is the outgoing OK message for USB-CDC communication
+	OutgoingOKMessage = NewOutgoingStatusMessage(OutgoingStatusOK)
+
+	// OutgoingHeartbeatMessage is the outgoing heartbeat message for USB-CDC communication
+	OutgoingHeartbeatMessage = NewOutgoingStatusMessage(OutgoingStatusHeartbeat)
 
 	// OutgoingMotorSpeedStopMessage is the outgoing motor speed stop message for USB-CDC communication
 	OutgoingMotorSpeedStopMessage = NewOutgoingMessage(
