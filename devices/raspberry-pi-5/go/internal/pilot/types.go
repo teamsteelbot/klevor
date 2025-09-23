@@ -34,6 +34,7 @@ type (
 		challengeService      internalpilotchallenges.Service
 		isRunning             atomic.Bool
 		debug                 bool
+		gyroscopeOrientation   internal.GyroscopeOrientation
 	}
 )
 
@@ -45,6 +46,7 @@ type (
 // rplidarHandler: The RPLidar handler to use for getting distance measurements.
 // clipHandler: The CLIP handler to use for controlling the robot's movement.
 // usbCDCHandler: The USB-CDC handler to use for communication with the robot.
+// gyroscopeOrientation: The orientation of the gyroscope (clockwise or counter-clockwise).
 // debug: A boolean indicating if debug logging is enabled.
 //
 // Returns:
@@ -55,6 +57,7 @@ func NewDefaultHandler(
 	rplidarHandler gorplidarsdkhandler.Handler,
 	clipHandler gohailocliphandler.Handler,
 	usbCDCHandler internalusbcdc.Handler,
+	gyroscopeOrientation internal.GyroscopeOrientation,
 	debug bool,
 ) (*DefaultHandler, error) {
 	// Check if the logger is nil
@@ -77,12 +80,19 @@ func NewDefaultHandler(
 		return nil, internalusbcdc.ErrNilHandler
 	}
 
+	// Check if the gyroscope orientation is valid
+	if gyroscopeOrientation != internal.GyroscopeOrientationClockwise &&
+		gyroscopeOrientation != internal.GyroscopeOrientationCounterClockwise {
+		return nil, internal.ErrInvalidGyroscopeOrientation
+	}
+
 	// Create the challenge service
 	challengeService, err := internalpilotchallenges.NewDefaultService(
 		logger,
 		rplidarHandler,
 		clipHandler,
-		usbCDCHandler,
+		usbCDCHandler, 
+		gyroscopeOrientation,
 		debug,
 	)
 	if err != nil {
@@ -95,6 +105,7 @@ func NewDefaultHandler(
 		clipHandler:      clipHandler,
 		usbCDCHandler:    usbCDCHandler,
 		challengeService: challengeService,
+		gyroscopeOrientation:  gyroscopeOrientation,
 		debug:            debug,
 	}, nil
 }

@@ -14,6 +14,7 @@ type (
 		Run(ctx context.Context, cancelFn context.CancelFunc, challenge internal.Challenge) error
 		IsRunning() bool
 		WaitUntilReady(ctx context.Context) error
+		GetGyroscopeOrientation() internal.GyroscopeOrientation
 		GetMotorSpeed() float64
 		GetMotorDirection() MotorDirection
 		GetServoAngle() float64

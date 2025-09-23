@@ -9,5 +9,6 @@ const (
 )
 
 var (
-	ErrNilChallenge = fmt.Errorf("challenge cannot be nil")
+	ErrNilChallenge            = fmt.Errorf("challenge cannot be nil")
+	ErrInvalidGyroscopeOrientation = fmt.Errorf("invalid gyroscope orientation")
 )

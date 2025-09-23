@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal"
 	internalclip "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/clip"
 	internallog "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/log"
 	internalpilot "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/pilot"
@@ -96,6 +97,7 @@ func main() {
 		rplidarHandler,
 		clipHandler,
 		usbCDCHandler,
+		internal.GyroscopeOrientationClockwise,
 		*pilotDebug,
 	)
 	if err != nil {

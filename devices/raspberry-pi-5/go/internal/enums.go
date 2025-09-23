@@ -7,6 +7,9 @@ import (
 type (
 	// Challenge represents the enum challenge messages sent and received from the Raspberry Pi Pico
 	Challenge uint8
+
+	// GyroscopeOrientation represents the enum gyroscope orientation (the direction to which the yaw degrees increases)
+	GyroscopeOrientation uint8
 )
 
 const (
@@ -14,6 +17,12 @@ const (
 	ChallengeWithoutObstacles
 	ChallengeWithObstacles
 	ChallengeWithObstaclesAndParking
+)
+
+const (
+	GyroscopeOrientationNil GyroscopeOrientation = iota
+	GyroscopeOrientationClockwise
+	GyroscopeOrientationCounterClockwise
 )
 
 var (
@@ -30,6 +39,12 @@ var (
 		uint8(ChallengeWithObstacles):           ChallengeWithObstacles,
 		uint8(ChallengeWithoutObstacles):        ChallengeWithoutObstacles,
 		uint8(ChallengeWithObstaclesAndParking): ChallengeWithObstaclesAndParking,
+	}
+
+	// GyroscopeOrientationNames maps a given GyroscopeOrientation to its string name
+	GyroscopeOrientationNames = map[GyroscopeOrientation]string{
+		GyroscopeOrientationClockwise:        "clockwise",
+		GyroscopeOrientationCounterClockwise: "counter_clockwise",
 	}
 )
 
@@ -82,4 +97,13 @@ func ChallengeFromBytes(data []byte) (Challenge, error) {
 		return ChallengeNil, ErrNilChallenge
 	}
 	return ChallengeFromUint8(data[0])
+}
+
+// String returns the name of the GyroscopeOrientation
+//
+// Returns:
+//
+// The name of the GyroscopeOrientation enum
+func (g GyroscopeOrientation) String() string {
+	return GyroscopeOrientationNames[g]
 }

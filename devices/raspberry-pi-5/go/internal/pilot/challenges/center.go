@@ -6,6 +6,7 @@ import (
 	"time"
 
 	gorplidarsdkhandler "github.com/ralvarezdev/go-rplidar-sdk-handler"
+	"github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal"
 )
 
 const (
@@ -29,6 +30,7 @@ const (
 // ctx: The context to use for the challenge
 // service: The service to use for the challenge
 // lastTurningTime: The last time the robot made a turn
+// turningDirection: The direction the robot turned (left or right)
 //
 // Returns:
 //
@@ -115,18 +117,23 @@ func centerByGyroscopeHandler(
 	}
 
 	// Check to which side the robot should turn to center itself
-	if deltaYawDegrees > 0 {
+	gyroOrientation := service.GetGyroscopeOrientation()
+	if (gyroOrientation == internal.GyroscopeOrientationClockwise && deltaYawDegrees > 0) ||
+		(gyroOrientation == internal.GyroscopeOrientationCounterClockwise && deltaYawDegrees < 0) {
 		if err := service.SetServoToLeft(
 			ctx,
 			math.Min(1, YawDegreesServoAngleRatio*math.Abs(deltaYawDegrees)),
 		); err != nil {
 			return err
 		}
-	} else if err := service.SetServoToRight(
-		ctx,
-		math.Min(1, YawDegreesServoAngleRatio*math.Abs(deltaYawDegrees)),
-	); err != nil {
-		return err
+	} else if (gyroOrientation == internal.GyroscopeOrientationClockwise && deltaYawDegrees < 0) ||
+		(gyroOrientation == internal.GyroscopeOrientationCounterClockwise && deltaYawDegrees > 0) {
+		if err := service.SetServoToRight(
+			ctx,
+			math.Min(1, YawDegreesServoAngleRatio*math.Abs(deltaYawDegrees)),
+		); err != nil {
+			return err
+		}
 	}
 	return nil
 }

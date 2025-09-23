@@ -80,6 +80,7 @@ type (
 		readyCh                       chan struct{}
 		mutex                         sync.Mutex
 		debug                         bool
+		gyroscopeOrientation internal.GyroscopeOrientation
 	}
 )
 
@@ -91,6 +92,7 @@ type (
 // rplidarHandler: The RPLiDAR handler to use for getting distance measurements
 // clipHandler: The CLIP handler to use for controlling the robot's movement
 // usbCDCHandler: The USB-CDC handler to use for communication with the robot
+// gyroscopeOrientation: The orientation of the gyroscope (clockwise or counter-clockwise)
 // debug: A boolean indicating if debug logging is enabled
 //
 // Returns:
@@ -101,6 +103,7 @@ func NewDefaultService(
 	rplidarHandler gorplidarsdkhandler.Handler,
 	clipHandler gohailocliphandler.Handler,
 	usbCDCHandler internalusbcdc.Handler,
+	gyroscopeOrientation internal.GyroscopeOrientation,
 	debug bool,
 ) (*DefaultService, error) {
 	// Check if the logger is nil
@@ -134,6 +137,7 @@ func NewDefaultService(
 		logger:         logger,
 		debug:          debug,
 		readyCh: 	 make(chan struct{}),
+		gyroscopeOrientation:  gyroscopeOrientation,
 	}, nil
 }
 
@@ -479,6 +483,15 @@ func (s *DefaultService) WaitUntilReady(ctx context.Context) error {
 	case <-s.readyCh:
 		return nil
 	}
+}
+
+// GetGyroscopeOrientation returns the orientation of the gyroscope
+//
+// Returns:
+//
+// The orientation of the gyroscope
+func (s *DefaultService) GetGyroscopeOrientation() internal.GyroscopeOrientation {
+	return s.gyroscopeOrientation
 }
 
 // GetMotorSpeed returns the current motor speed
