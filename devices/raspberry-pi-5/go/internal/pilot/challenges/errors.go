@@ -14,4 +14,10 @@ var (
 	ErrNoSpaceToLeaveParking               = errors.New("no space to leave parking")
 	ErrNilService                          = errors.New("service cannot be nil")
 	ErrNoCardinalDirections 			  = errors.New("cardinal directions cannot be nil")
+	ErrNilDirection 					  = errors.New("direction cannot be nil")
+	ErrNilLast90DegreeTurns                 = errors.New("last 90 degree turns cannot be nil")
+	ErrNilIsTurning						= errors.New("is turning cannot be nil")
+	ErrNilLastTurningTime					= errors.New("last turning time cannot be nil")
+	ErrServiceAlreadyRunning= errors.New("service is already running")
+
 )

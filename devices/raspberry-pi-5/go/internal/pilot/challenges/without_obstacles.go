@@ -10,6 +10,17 @@ import (
 	gorplidarsdkhandler "github.com/ralvarezdev/go-rplidar-sdk-handler"
 )
 
+const (
+	// StopDistanceThreshold is the distance threshold to stop the robot
+	StopDistanceThreshold = 1500.0
+
+	// SideDistanceThreshold is the distance threshold for side sensors
+	SideDistanceThreshold = 1750.0
+
+	// FrontStartTurnDistanceThreshold is the distance threshold to start turning
+	FrontStartTurnDistanceThreshold = 1000.0 // 500.0, 600.0, 650.0, 900.0
+)
+
 type (
 	// ChallengeWithoutObstaclesHandler is the type for the challenge without obstacles handler
 	ChallengeWithoutObstaclesHandler struct {
@@ -114,68 +125,34 @@ func (h *ChallengeWithoutObstaclesHandler) Run(ctx context.Context) error {
 			}
 
 			// Check for the current turn and center the servo if necessary
-			if isTurning {
-				turnCompleted, err := turnHandler(
-					ctx,
-					h.service,
-					last90DegreeTurns,
-					h.handlerLoggerProducer,
-				)
-				if err != nil {
-					return err
-				}
-				if turnCompleted {
-					last90DegreeTurns = h.service.Get90DegreeTurns()
-					isTurning = false
-					lastTurningTime = time.Now()
-					direction = ServoDirectionStraight
-				}
+			turnCompleted, err := turnHandler(
+				ctx,
+				h.service,
+				&last90DegreeTurns,
+				&isTurning,
+				&lastTurningTime,
+				&direction,
+				h.handlerLoggerProducer,
+			)
+			if err != nil {
+				return err
+			}
+			if turnCompleted {
+				break
 			}
 
-			// Get the front distance change
-			northDistanceChange := FrontDistanceChange * h.service.GetRPLiDARAverageDistanceChange(gorplidarsdkhandler.CardinalDirectionNorth)
-
-			// Check if the robot should turn left or right based on the side distances
-			if last90DegreeTurns == 0 ||
-				(!math.IsNaN(h.northAverageDistance) &&
-					h.northAverageDistance < northDistanceChange &&
-					h.northAverageDistance+northDistanceChange <= FrontStartTurnDistanceThreshold) {
-				if time.Since(lastTurningTime) >= MinTimeBetweenTurns {
-					if (direction == ServoDirectionRight || direction == ServoDirectionNil) &&
-						(!math.IsNaN(h.eastAverageDistance) && h.eastAverageDistance >= SideDistanceThreshold) {
-						isTurning = true
-
-						// Set the direction if it's nil
-						if direction == ServoDirectionNil {
-							direction = ServoDirectionRight
-						}
-					} else if (direction == ServoDirectionLeft || direction == ServoDirectionNil) &&
-						(!math.IsNaN(h.westAverageDistance) && h.westAverageDistance >= SideDistanceThreshold) {
-						isTurning = true
-
-						// Set the direction if it's nil
-						if direction == ServoDirectionNil {
-							direction = ServoDirectionLeft
-						}
-					}
-					if isTurning {
-						if err = h.service.SetServoAngle(
-							ctx,
-							ServoBigTurnAnglePercentage,
-							direction,
-						); err != nil {
-							return err
-						}
-					}
-				}
-
-				// Move forward at turning speed
-				if err = h.service.SetMotorForward(
-					ctx,
-					MotorTurningPercentage,
-				); err != nil {
-					return err
-				}
+			// Detect if a turn is necessary
+			if err := detectTurnHandler(
+				ctx,
+				h.service,
+				&last90DegreeTurns,
+				&isTurning,
+				&lastTurningTime,
+				&direction,
+			); err != nil {
+				return err
+			}
+			if isTurning {
 				break
 			}
 
@@ -183,7 +160,7 @@ func (h *ChallengeWithoutObstaclesHandler) Run(ctx context.Context) error {
 			if err = centerByGyroscopeHandler(
 				ctx,
 				h.service,
-				lastTurningTime,
+				last90DegreeTurns,
 			); err != nil {
 				return err
 			}
@@ -237,7 +214,6 @@ func (h *ChallengeWithoutObstaclesHandler) Run(ctx context.Context) error {
 			if h.service.GetNorthAverageDistance()+northDistanceChange <= StopDistanceThreshold {
 				completed = true
 				h.handlerLoggerProducer.Info("Challenge completed successfully. Stopping the robot.")
-				break
 			}
 		}
 	}

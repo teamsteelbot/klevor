@@ -230,7 +230,7 @@ func (h *DefaultHandler) Run() error {
 	h.mutex.Unlock()
 
 	// Context canceled on SIGINT/SIGTERM.
-	ctx, stop := signal.NotifyContext(
+	ctx, cancel := signal.NotifyContext(
 		context.Background(),
 		os.Interrupt,
 		syscall.SIGTERM,
@@ -243,7 +243,7 @@ func (h *DefaultHandler) Run() error {
 	g.Go(
 		func() error {
 			defer fmt.Println("Logger goroutine exited")
-			return h.logger.Run(ctx, stop)
+			return h.logger.Run(ctx, cancel)
 		},
 	)
 
@@ -272,7 +272,7 @@ func (h *DefaultHandler) Run() error {
 				fmt.Sprintf("CLIP embeddings path is empty: %v", err),
 			)
 		} else {
-			stop()
+			cancel()
 			h.handlerLoggerProducer.Error(
 				fmt.Errorf("failed to generate CLIP embeddings: %w", err),
 			)
@@ -282,13 +282,13 @@ func (h *DefaultHandler) Run() error {
 		}
 	}
 	h.handlerLoggerProducer.Info("CLIP embeddings generated successfully")
-	defer stop()
+	defer cancel()
 
 	// Initialize the CLIP goroutine
 	g.Go(
 		func() error {
 			defer fmt.Println("CLIP goroutine exited")
-			return h.clipHandler.Run(ctx, stop)
+			return h.clipHandler.Run(ctx, cancel)
 		},
 	)
 
@@ -296,7 +296,7 @@ func (h *DefaultHandler) Run() error {
 	g.Go(
 		func() error {
 			defer fmt.Println("RPLiDAR goroutine exited")
-			return h.rplidarHandler.Run(ctx, stop)
+			return h.rplidarHandler.Run(ctx, cancel)
 		},
 	)
 
@@ -304,14 +304,14 @@ func (h *DefaultHandler) Run() error {
 	g.Go(
 		func() error {
 			defer fmt.Println("USB-CDC goroutine exited")
-			return h.usbCDCHandler.Run(ctx, stop)
+			return h.usbCDCHandler.Run(ctx, cancel)
 		},
 	)
 
 	// Wait USB-CDC to be ready
 	h.handlerLoggerProducer.Info("Waiting for USB-CDC handler to be ready...")
 	if err := h.usbCDCHandler.WaitUntilReady(ctx); err != nil {
-		stop()
+		cancel()
 		h.handlerLoggerProducer.Error(
 			fmt.Errorf(
 				"failed to wait for USB-CDC handler readiness: %w",
@@ -327,19 +327,11 @@ func (h *DefaultHandler) Run() error {
 	// Initialize the run to wrap goroutine
 	g.Go(
 		func() error {
-			defer func() {
-				if r := recover(); r != nil {
-					h.handlerLoggerProducer.Error(
-						fmt.Errorf("panic recovered: %v", r),
-					)
-				}
-				h.handlerLoggerProducer.Close()
-				stop()
-			}()
-
-			return goconcurrentlogger.StopContextAndLogOnError(
+			defer h.handlerLoggerProducer.Close()
+			defer fmt.Println("Run to wrap goroutine exited")
+			return goconcurrentlogger.CancelContextAndLogOnError(
 				ctx,
-				stop,
+				cancel,
 				func(ctx context.Context) error {
 					return h.runToWrap(ctx)
 				},

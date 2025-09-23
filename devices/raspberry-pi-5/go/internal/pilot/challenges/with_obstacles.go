@@ -10,6 +10,29 @@ import (
 	goconcurrentlogger "github.com/ralvarezdev/go-concurrent-logger"
 )
 
+const (
+	// LaneIdentifierThreshold is used to determine which lane is the robot placed (only used in the closed challenge)
+	LaneIdentifierThreshold = 400.0
+
+	// FrontCloseupThreshold is used to move the robot closely to the wall (only used in the closed challenge)
+	FrontCloseupThreshold = 100.0
+
+	// CameraRangeThreshold is used to determine if an object is capable of being detected by the camera (only used in the closed challenge)
+	CameraRangeThreshold = 250.0
+
+	// ParkingLeaveSideDistanceThreshold is the distance threshold to leave the parking (only used in the closed challenge)
+	ParkingLeaveSideDistanceThreshold = 500.0
+
+	// StopBackwardDirectionOnParkingBackwardDistanceThreshold is the distance threshold to stop the backward direction when leaving parking (only used in the closed challenge)
+	StopBackwardDirectionOnParkingBackwardDistanceThreshold = 290.0
+
+	// StopForwardDirectionOnParkingFrontDistanceThreshold is the distance threshold to go forward for the first time when leaving parking (only used in the closed challenge)
+	StopForwardDirectionOnParkingFrontDistanceThreshold = 95.0
+
+	// LeftParkingSideDistanceThreshold is the distance threshold for the left side sensor when leaving parking (only used in the closed challenge)
+	LeftParkingSideDistanceThreshold = 450.0
+)
+
 type (
 	// ChallengeWithObstaclesHandler is the type for the challenge with obstacles handler
 	ChallengeWithObstaclesHandler struct {

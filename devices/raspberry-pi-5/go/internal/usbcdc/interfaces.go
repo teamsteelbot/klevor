@@ -19,7 +19,7 @@ type (
 		Get90DegreeTurns() uint
 		Get45DegreeTurns() uint
 		Get30DegreeTurns() uint
-		GetAcumulatedYawDegrees() float64
+		GetAccumulatedYawDegrees() float64
 		ReceivedBNO08XYawDegrees() float64
 		ReceivedBNO08XPitchDegrees() float64
 		ReceivedBNO08XRollDegrees() float64

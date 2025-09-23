@@ -10,6 +10,14 @@ import (
 	gorplidarsdkhandler "github.com/ralvarezdev/go-rplidar-sdk-handler"
 )
 
+const (
+	// SafetyFrontDistanceStartThreshold is the distance threshold to start safety mode
+	SafetyFrontDistanceStartThreshold = 150.0
+
+	// SafetyFrontDistanceStopThreshold is the distance threshold to stop safety mode
+	SafetyFrontDistanceStopThreshold = 325.0
+)
+
 // safetyFrontDistanceHandler handles the safety front distance
 //
 // Parameters:

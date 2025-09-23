@@ -8,6 +8,20 @@ import (
 	gorplidarsdkhandler "github.com/ralvarezdev/go-rplidar-sdk-handler"
 )
 
+const (
+	// SideDistanceMediumDifferencePercentage is the percentage of medium difference threshold for side distances
+	SideDistanceMediumDifferencePercentage = 0.35
+
+	// SideDistanceSmallDifferencePercentage is the percentage of small difference threshold for side distances
+	SideDistanceSmallDifferencePercentage = 0.15 // 0.2, 0.15, 0.3
+
+	// GyroscopeTolerance is the tolerance for the gyroscope
+	GyroscopeTolerance = 2.0
+
+	// YawDegreesServoAngleRatio is the ratio between yaw degrees and servo angle
+	YawDegreesServoAngleRatio = 2.0
+)
+
 // centerByRPLiDARHandler centers the robot using RPLiDAR data
 //
 // Parameters:
