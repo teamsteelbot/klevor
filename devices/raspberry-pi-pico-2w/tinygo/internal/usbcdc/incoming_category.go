@@ -34,7 +34,7 @@ func (i IncomingCategory) DataLength() (int, tinygoerrors.ErrorCode) {
 	case IncomingCategoryStatus:
 		return 1, tinygoerrors.ErrorCodeNil
 	case IncomingCategoryMotorSpeedForward, IncomingCategoryMotorSpeedBackward, IncomingCategoryServoAngleToLeft, IncomingCategoryServoAngleToRight:
-		return 2, tinygoerrors.ErrorCodeNil
+		return 8, tinygoerrors.ErrorCodeNil
 	default:
 		return 0, ErrorCodeUSBCDCUnknownIncomingCategory
 	}

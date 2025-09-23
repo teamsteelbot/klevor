@@ -55,6 +55,7 @@ func main() {
 				internalescmotor.MaxForwardSpeed,
 			),
 		)
+		time.Sleep(100 * time.Millisecond)
 
 		// Stop the motor for a while
 		// stopOnError(internalescmotor.ESCMotorHandler.Stop())
@@ -65,6 +66,7 @@ func main() {
 				internalescmotor.MaxBackwardSpeed,
 			),
 		)
+		time.Sleep(100 * time.Millisecond)
 
 		// Stop the motor
 		// stopOnError(internalescmotor.ESCMotorHandler.Stop())

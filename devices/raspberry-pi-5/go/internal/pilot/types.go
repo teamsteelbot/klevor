@@ -159,7 +159,7 @@ func (h *DefaultHandler) setMotorSpeed(
 		case MotorDirectionForward:
 			h.handlerLoggerProducer.Info(
 				fmt.Sprintf(
-					"Setting motor speed to %.3f% in forward direction",
+					"Setting motor speed to %.3f%% in forward direction",
 					speed*100,
 				),
 			)
@@ -174,7 +174,7 @@ func (h *DefaultHandler) setMotorSpeed(
 		case MotorDirectionBackward:
 			h.handlerLoggerProducer.Info(
 				fmt.Sprintf(
-					"Setting motor speed to %.3f% in backward direction",
+					"Setting motor speed to %.3f%% in backward direction",
 					speed*100,
 				),
 			)
@@ -323,7 +323,7 @@ func (h *DefaultHandler) setServoAngle(
 		case ServoDirectionLeft:
 			h.handlerLoggerProducer.Info(
 				fmt.Sprintf(
-					"Setting servo direction to left by %.3f%",
+					"Setting servo direction to left by %.3f%%",
 					angle*100,
 				),
 			)
@@ -338,7 +338,7 @@ func (h *DefaultHandler) setServoAngle(
 		case ServoDirectionRight:
 			h.handlerLoggerProducer.Info(
 				fmt.Sprintf(
-					"Setting servo direction to right by %.3f%",
+					"Setting servo direction to right by %.3f%%",
 					angle*100,
 				),
 			)
@@ -482,6 +482,7 @@ func (h *DefaultHandler) setServoToOppositeDirection(
 // An error if the classification could not be retrieved
 func (h *DefaultHandler) updateCLIPClassification(ctx context.Context) error {
 	var lastCLIPClassification *gohailocliphandler.Classification
+	var lastLogTime time.Time
 	for {
 		select {
 		case <-ctx.Done():
@@ -503,24 +504,29 @@ func (h *DefaultHandler) updateCLIPClassification(ctx context.Context) error {
 			h.clipHandlerMutex.Unlock()
 
 			// Log the classification if it has changed
-			if lastCLIPClassification == nil && clipClassification == nil {
-				// Do nothing, both are nil
-			} else if lastCLIPClassification == nil && clipClassification != nil {
-				h.handlerLoggerProducer.Info(
-					fmt.Sprintf(
-						"CLIP classification changed: %v",
-						clipClassification.GetLabel(),
-					),
-				)
-			} else if lastCLIPClassification != nil && clipClassification == nil {
-				h.handlerLoggerProducer.Info("CLIP classification changed: nil")
-			} else if lastCLIPClassification.GetLabel() != clipClassification.GetLabel() {
-				h.handlerLoggerProducer.Info(
-					fmt.Sprintf(
-						"CLIP classification changed: %s",
-						clipClassification.GetLabel(),
-					),
-				)
+			if time.Since(lastLogTime) >= CLIPLogInterval {
+				if lastCLIPClassification == nil && clipClassification == nil {
+					// Do nothing, both are nil
+				} else if lastCLIPClassification == nil && clipClassification != nil {
+					h.handlerLoggerProducer.Info(
+						fmt.Sprintf(
+							"CLIP classification changed: %v",
+							clipClassification.GetLabel(),
+						),
+					)
+				} else if lastCLIPClassification != nil && clipClassification == nil {
+					h.handlerLoggerProducer.Info("CLIP classification changed: nil")
+				} else if lastCLIPClassification.GetLabel() != clipClassification.GetLabel() {
+					h.handlerLoggerProducer.Info(
+						fmt.Sprintf(
+							"CLIP classification changed: %s",
+							clipClassification.GetLabel(),
+						),
+					)
+				}
+
+				// Update the last log time
+				lastLogTime = time.Now()
 			}
 
 			// Sleep the update delay
@@ -539,6 +545,7 @@ func (h *DefaultHandler) updateCLIPClassification(ctx context.Context) error {
 //
 // An error if the average distances could not be updated, nil otherwise
 func (h *DefaultHandler) updateRPLiDARAverageDistances(ctx context.Context) error {
+	var lastLogTime time.Time
 	for {
 		select {
 		case <-ctx.Done():
@@ -566,7 +573,18 @@ func (h *DefaultHandler) updateRPLiDARAverageDistances(ctx context.Context) erro
 						h.rplidarAverageDistancesChange[direction] = 0.0
 						continue
 					}
-					h.rplidarAverageDistancesChange[direction] = newDistance - oldDistance
+
+					// Ignore if there is no change. May happen if it hasn't been updated yet
+					if newDistance == oldDistance {
+						continue
+					}
+
+					// Set the distance change with a maximum limit
+					if newDistance < oldDistance {
+						h.rplidarAverageDistancesChange[direction] = math.Max(newDistance-oldDistance, -MaxDistanceChange)
+					} else {
+						h.rplidarAverageDistancesChange[direction] = math.Min(newDistance - oldDistance, MaxDistanceChange)
+					}
 				}
 			} else {
 				// Initialize the average distances change map
@@ -591,18 +609,23 @@ func (h *DefaultHandler) updateRPLiDARAverageDistances(ctx context.Context) erro
 			h.rplidarHandlerMutex.Unlock()
 
 			// Log the average distances
-			h.handlerLoggerProducer.Info(
-				fmt.Sprintf(
-					"W: %f, NW: %f, N-NW: %f, N: %f, N-NE: %f, NE: %f, E: %f",
-					h.westAverageDistance,
-					h.northwestAverageDistance,
-					h.northNorthwestAverageDistance,
-					h.northAverageDistance,
-					h.northNortheastAverageDistance,
-					h.northeastAverageDistance,
-					h.eastAverageDistance,
-				),
-			)
+			if time.Since(lastLogTime) >= RPLiDARLogInterval {
+				h.handlerLoggerProducer.Info(
+					fmt.Sprintf(
+						"W: %f, NW: %f, N-NW: %f, N: %f, N-NE: %f, NE: %f, E: %f",
+						h.westAverageDistance,
+						h.northwestAverageDistance,
+						h.northNorthwestAverageDistance,
+						h.northAverageDistance,
+						h.northNortheastAverageDistance,
+						h.northeastAverageDistance,
+						h.eastAverageDistance,
+					),
+				)
+
+				// Update the last log time
+				lastLogTime = time.Now()
+			}
 
 			// Sleep the update delay
 			time.Sleep(UpdateDelay)
@@ -1552,7 +1575,7 @@ func (h *DefaultHandler) safetyFrontDistanceOnChallengeWithObstaclesHandler(
 	cardinalDirections ...gorplidarsdkhandler.CardinalDirection,
 ) (bool, error) {
 	// Check if any of the front distances is below the safety threshold
-	safetyFrontDistanceThresholdReached := false
+	cardinalDirectionTrigger := gorplidarsdkhandler.CardinalDirectionNil
 	for _, cardinalDirection := range cardinalDirections {
 		// Get the average distance for the cardinal direction
 		distance := h.getRPLiDARAverageDistance(cardinalDirection)
@@ -1566,10 +1589,10 @@ func (h *DefaultHandler) safetyFrontDistanceOnChallengeWithObstaclesHandler(
 		}
 
 		// Set the flag to true
-		safetyFrontDistanceThresholdReached = true
+		cardinalDirectionTrigger = cardinalDirection
 		break
 	}
-	if !safetyFrontDistanceThresholdReached {
+	if cardinalDirectionTrigger == gorplidarsdkhandler.CardinalDirectionNil {
 		return false, nil
 	}
 
@@ -1581,8 +1604,10 @@ func (h *DefaultHandler) safetyFrontDistanceOnChallengeWithObstaclesHandler(
 	// Log the warning
 	h.handlerLoggerProducer.Warning(
 		fmt.Sprintf(
-			"Front distance is below the safety threshold %f.",
+			"Cardinal direction %s front distance is below the safety threshold %f: %f",
+			cardinalDirectionTrigger.String(),
 			SafetyFrontDistanceStartThreshold,
+			h.getRPLiDARAverageDistance(cardinalDirectionTrigger),
 		),
 	)
 
@@ -1730,7 +1755,10 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 			northDistanceChange := FrontDistanceChange * h.rplidarAverageDistancesChange[gorplidarsdkhandler.CardinalDirectionNorth]
 
 			// Check if the robot should turn left or right based on the side distances
-			if bno08xLast90DegreeTurns == 0 || (!math.IsNaN(h.northAverageDistance) && h.northAverageDistance+northDistanceChange <= FrontStartTurnDistanceThreshold) {
+			if bno08xLast90DegreeTurns == 0 ||
+				 (!math.IsNaN(h.northAverageDistance) && 
+				 h.northAverageDistance < northDistanceChange &&
+				 h.northAverageDistance+northDistanceChange <= FrontStartTurnDistanceThreshold) {
 				if time.Since(lastTurningTime) >= MinTimeBetweenTurns {
 					if (direction == ServoDirectionRight || direction == ServoDirectionNil) &&
 						(!math.IsNaN(h.eastAverageDistance) && h.eastAverageDistance >= SideDistanceThreshold) {
@@ -1775,49 +1803,35 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 			eastDistanceChange := SideDistanceChange * h.rplidarAverageDistancesChange[gorplidarsdkhandler.CardinalDirectionEast]
 
 			// Check if the servo should make a little turn to the left or right in order to center the robot
-			if math.IsNaN(h.eastAverageDistance) || math.IsNaN(h.westAverageDistance) {
+			if math.IsNaN(h.eastAverageDistance) || math.IsNaN(h.westAverageDistance) || time.Since(lastTurningTime) < MinTimeToCorrectAfterTurn {
 				if err = h.setServoToCenter(ctx); err != nil {
-					return err
-				}
-			} else if h.eastAverageDistance+eastDistanceChange >= (h.westAverageDistance+westDistanceChange)*(1+SideDistanceBigDifferencePercentage) {
-				if err = h.setServoToRight(
-					ctx,
-					ServoBigTurnAnglePercentage,
-				); err != nil {
 					return err
 				}
 			} else if h.eastAverageDistance+eastDistanceChange >= (h.westAverageDistance+westDistanceChange)*(1+SideDistanceMediumDifferencePercentage) {
 				if err = h.setServoToRight(
 					ctx,
-					ServoMediumTurnAnglePercentage,
+					ServoMediumCorrectionAnglePercentage,
 				); err != nil {
 					return err
 				}
 			} else if h.eastAverageDistance+eastDistanceChange >= (h.westAverageDistance+westDistanceChange)*(1+SideDistanceSmallDifferencePercentage) {
 				if err = h.setServoToRight(
 					ctx,
-					ServoSmallTurnAnglePercentage,
-				); err != nil {
-					return err
-				}
-			} else if h.westAverageDistance+westDistanceChange >= (h.eastAverageDistance+eastDistanceChange)*(1+SideDistanceBigDifferencePercentage) {
-				if err = h.setServoToLeft(
-					ctx,
-					ServoBigTurnAnglePercentage,
+					ServoSmallCorrectionAnglePercentage,
 				); err != nil {
 					return err
 				}
 			} else if h.westAverageDistance+westDistanceChange >= (h.eastAverageDistance+eastDistanceChange)*(1+SideDistanceMediumDifferencePercentage) {
 				if err = h.setServoToLeft(
 					ctx,
-					ServoMediumTurnAnglePercentage,
+					ServoMediumCorrectionAnglePercentage,
 				); err != nil {
 					return err
 				}
 			} else if h.westAverageDistance+westDistanceChange >= (h.eastAverageDistance+eastDistanceChange)*(1+SideDistanceSmallDifferencePercentage) {
 				if err = h.setServoToLeft(
 					ctx,
-					ServoSmallTurnAnglePercentage,
+					ServoSmallCorrectionAnglePercentage,
 				); err != nil {
 					return err
 				}
@@ -1827,7 +1841,7 @@ func (h *DefaultHandler) challengeWithoutObstaclesHandler(ctx context.Context) e
 
 			// Move forward
 			motorSpeed := MotorForwardNormalPercentage
-			if h.servoDirection == ServoDirectionStraight {
+			if h.servoDirection == ServoDirectionStraight && time.Since(lastTurningTime) >= MinTimeToCorrectAfterTurn{
 				motorSpeed = MotorForwardFastPercentage
 			}
 			if err = h.setMotorForward(

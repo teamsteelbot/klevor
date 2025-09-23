@@ -29,16 +29,16 @@ const (
 	MaxPulseWidth uint32 = 2_000_000
 
 	// MaxForwardSpeed is the maximum speed to run the ESC motor
-	MaxForwardSpeed = 0.175
+	MaxForwardSpeed = 0.175 // 0.175, 0.2
 
 	// MaxBackwardSpeed is the maximum speed to run the ESC motor in backward direction
-	MaxBackwardSpeed = 0.2
+	MaxBackwardSpeed = 0.225
 
 	// BackwardToForwardDelay is the delay when changing from backward to forward to be in neutral first
-	BackwardToForwardDelay = 150 * time.Millisecond // 1000 ms, 500ms, 250ms, (150ms)
+	BackwardToForwardDelay = 1000 * time.Millisecond // (1000 ms), 500ms, 250ms, 150ms (for really short times)
 
 	// ForwardToBackwardDelay is the delay when changing from forward to backward to be in neutral first
-	ForwardToBackwardDelay = 250 * time.Millisecond // 1000 ms, 500ms, (250ms)
+	ForwardToBackwardDelay = 1000 * time.Millisecond // (1000 ms), 500ms, 250ms (for really short times)
 )
 
 var (
@@ -65,7 +65,7 @@ func init() {
 		IsPolarityInverted,
 		MaxForwardSpeed,
 		MaxBackwardSpeed,
-		&PulseSteps,
+		nil, // &PulseSteps,
 		BackwardToForwardDelay,
 		ForwardToBackwardDelay,
 		internal.Logger,

@@ -32,11 +32,23 @@ var (
 	// UpdateDelay is the delay between updates
 	UpdateDelay = 10 * time.Millisecond
 
+	// RPLiDARLogInterval is the interval for RPLiDAR logging
+	RPLiDARLogInterval = 100 * time.Millisecond
+
+	// CLIPLogInterval is the interval for CLIP logging
+	CLIPLogInterval = 100 * time.Millisecond
+
 	// MinTimeBetweenTurns is the minimum time between turns
-	MinTimeBetweenTurns = 1 * time.Second
+	MinTimeBetweenTurns = 2 * time.Second
+
+	// MinTimeToCorrectAfterTurn is the minimum time to correct after a turn
+	MinTimeToCorrectAfterTurn = 1500 * time.Millisecond
 
 	// HandlerLoggerProducerTag is the tag for the logger producer
 	HandlerLoggerProducerTag = "PILOT_HANDLER"
+
+	// MaxDistanceChange is the maximum distance change for safety calculations
+	MaxDistanceChange = 100.0
 
 	// MotorBackwardFastPercentage is the percentage of the maximum speed for fast backward motor speed
 	MotorBackwardFastPercentage float64 = 1
@@ -68,14 +80,20 @@ var (
 	// ServoSmallTurnAnglePercentage is the percentage of the maximum angle for small turns
 	ServoSmallTurnAnglePercentage float64 = 0.33
 
+	// ServoMediumCorrectionAnglePercentage is the percentage of the maximum angle for medium corrections
+	ServoMediumCorrectionAnglePercentage float64 = 0.4
+
+	// ServoSmallCorrectionAnglePercentage is the percentage of the maximum angle for small corrections
+	ServoSmallCorrectionAnglePercentage float64 = 0.25
+
 	// Algorithm90DegreeTurns is the number of 90 degree turns in the algorithm
 	Algorithm90DegreeTurns uint = 12
 
 	// FrontDistanceChange is the scalar change for the safety front distance calculation
-	FrontDistanceChange = 1.5
+	FrontDistanceChange = 1.25
 
 	// SideDistanceChange is the scalar change for the side distance calculation
-	SideDistanceChange = 1.25
+	SideDistanceChange = 1.1
 
 	// SafetyFrontDistanceStartThreshold is the distance threshold to start safety mode
 	SafetyFrontDistanceStartThreshold = 150.0
@@ -89,17 +107,14 @@ var (
 	// SideDistanceThreshold is the distance threshold for side sensors
 	SideDistanceThreshold = 1750.0
 
-	// SideDistanceBigDifferencePercentage is the percentage of big difference threshold for side distances
-	SideDistanceBigDifferencePercentage = 0.45
-
 	// SideDistanceMediumDifferencePercentage is the percentage of medium difference threshold for side distances
-	SideDistanceMediumDifferencePercentage = 0.30
+	SideDistanceMediumDifferencePercentage = 0.35
 
 	// SideDistanceSmallDifferencePercentage is the percentage of small difference threshold for side distances
 	SideDistanceSmallDifferencePercentage = 0.15 // 0.2, 0.15, 0.3
 
 	// FrontStartTurnDistanceThreshold is the distance threshold to start turning
-	FrontStartTurnDistanceThreshold = 1000.0 // 500.0, 600.0, 650.0
+	FrontStartTurnDistanceThreshold = 1000.0 // 500.0, 600.0, 650.0, 900.0
 
 	// LaneIdentifierThreshold is used to determine which lane is the robot placed (only used in the closed challenge)
 	LaneIdentifierThreshold = 400.0

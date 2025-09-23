@@ -1,9 +1,9 @@
 package main
 
 import (
+	"context"
+	"math"
 	"os"
-	"runtime"
-	"sync/atomic"
 	"time"
 
 	"github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal"
@@ -13,6 +13,7 @@ import (
 	internalservo "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/servo"
 	internalswitch "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/switch"
 	internalusbcdc "github.com/ralvarezdev/klevor/devices/raspberry_pi_pico_2w/tinygo/internal/usbcdc"
+	tinygobuffers "github.com/ralvarezdev/tinygo-buffers"
 	tinygoerrors "github.com/ralvarezdev/tinygo-errors"
 	// tinygologger "github.com/ralvarezdev/tinygo-logger"
 )
@@ -41,6 +42,9 @@ var (
 	// lastMessageReceivedTime holds the timestamp of the last received message.
 	lastMessageReceivedTime time.Time
 
+	// lastBNO08XSentTime last sent time for BNO08X data
+	lastBNO08XSentTime time.Time
+
 	// newMessage is the newly received message.
 	newMessage internalusbcdc.IncomingMessage
 )
@@ -56,13 +60,20 @@ func stopAndCenter() {
 	}
 }
 
-// bno08xUpdateLoop continuously updates the BNO08X sensor data.
-func bno08xUpdateLoop() {
+// updateLoop continuously updates the BNO08X sensor data, motor commands, and servo commands.
+//
+// Parameters:
+//
+// ctx: The context to manage the lifecycle of the update loop
+func updateLoop(ctx context.Context) {
 	for {
-		// Update the BNO08X sensor data
-		internalbno08x.UARTRVC.Update()
-		time.Sleep(internalbno08x.Interval)
-		runtime.Gosched()
+		select {
+		case <-ctx.Done():
+			return
+		default:
+			internalbno08x.UARTRVC.Update()
+			time.Sleep(internalbno08x.Interval)
+		}
 	}
 }
 
@@ -76,11 +87,14 @@ func init() {
 
 func main() {
 	for {
+		// Create a context to manage the lifecycle of the update loop
+		ctx, cancel := context.WithCancel(context.Background())
+
 		// Stop ESC motor and center servo before waiting for switch press
 		stopAndCenter()
 
-		// Add goroutine for BNO08X update loop
-		go bno08xUpdateLoop()
+		// Add goroutine for update loop
+		go updateLoop(ctx)
 
 		// Wait for switch press
 		if err := internalswitch.SwitchHandler.Wait(switchOnEvent); err != tinygoerrors.ErrorCodeNil {
@@ -95,15 +109,25 @@ func main() {
 		// Reset the last message received time
 		lastMessageReceivedTime = time.Now()
 
-		// Last sent time for BNO08X data
-		lastBNO08XSentTime := time.Now()
-
 		// Set the exit condition to False
 		toExit := false
 		for !toExit {
 			// Log memory status
 			// tinygologger.DebugMemory(internal.Logger)
 
+			// Check if the last message received time exceeds the timeout
+			if time.Since(lastMessageReceivedTime) >= receivingMessageTimeout {
+				toExit = true
+
+				// Send a timeout error message
+				internalusbcdc.USBCDCHandler.SendErrorMessage(internalusbcdc.ErrorCodeUSBCDCReceivingMessageTimeoutReached)
+
+				// Stop the motor and center the servo
+				stopAndCenter()
+				break
+			}
+
+			// Send BNO08X data at defined intervals
 			if time.Since(lastBNO08XSentTime) >= sendBNO08XDataInterval {
 				// Get the Euler degrees from the BNO08X sensor
 				eulerDegrees := internalbno08x.UARTRVC.GetEulerDegrees()
@@ -120,23 +144,10 @@ func main() {
 				lastBNO08XSentTime = time.Now()
 			}
 
-			// Check if the last message received time exceeds the timeout
-			if time.Since(lastMessageReceivedTime) >= receivingMessageTimeout {
-				toExit = true
-
-				// Send a timeout error message
-				internalusbcdc.USBCDCHandler.SendErrorMessage(internalusbcdc.ErrorCodeUSBCDCReceivingMessageTimeoutReached)
-
-				// Stop the motor and center the servo
-				stopAndCenter()
-				break
-			}
-
 			// Check if a new message has arrived
 			hasNewMessageArrived := internalusbcdc.USBCDCHandler.IsAvailableToRead()
 			if !hasNewMessageArrived {
 				time.Sleep(noMessageReceivedDelay)
-				runtime.Gosched()
 				continue
 			}
 
@@ -154,17 +165,81 @@ func main() {
 			// Handle specific message categories
 			switch newMessage.Category {
 			case internalusbcdc.IncomingCategoryServoAngleCenter, internalusbcdc.IncomingCategoryServoAngleToLeft, internalusbcdc.IncomingCategoryServoAngleToRight:
-				if err := internalservo.SetAngleBasedOnReceivedMessage(
-					internalusbcdc.USBCDCHandler,
-					newMessage,
-				); err != tinygoerrors.ErrorCodeNil {
+				// Check if the servo angle should be retrieved from the message
+				var angle float64
+				if message.Category != internalusbcdc.IncomingCategoryServoAngleCenter {
+					// Get angle percentage from message content
+					signedAngle, err := tinygobuffers.BytesToFloat64(message.Data)
+					if err != tinygoerrors.ErrorCodeNil {
+						internalusbcdc.USBCDCHandler.SendErrorMessage(err)
+						continue
+					}
+					angle = math.Abs(signedAngle)
+				}
+
+				// Send start feedback message
+				if err := internalusbcdc.USBCDCHandler.SendServoAngleStartMessage(); err != tinygoerrors.ErrorCodeNil {
+					internalusbcdc.USBCDCHandler.SendErrorMessage(err)
+					continue
+				}
+
+				// Set the servo angle based on the received message
+				switch newMessage.Category {
+				case internalusbcdc.IncomingCategoryServoAngleCenter:
+					if err := internalservo.ServoHandler.SetAngleToCenter(); err != tinygoerrors.ErrorCodeNil {
+						internalusbcdc.USBCDCHandler.SendErrorMessage(err)
+					}
+				case internalusbcdc.IncomingCategoryServoAngleToLeft:
+					if err := internalservo.ServoHandler.SetAngleToLeft(uint16(angle * float64(internalservo.MaxLeftAngle))); err != tinygoerrors.ErrorCodeNil {
+						internalusbcdc.USBCDCHandler.SendErrorMessage(err)
+					}
+				case internalusbcdc.IncomingCategoryServoAngleToRight:
+					if err := internalservo.ServoHandler.SetAngleToRight(uint16(angle * float64(internalservo.MaxRightAngle))); err != tinygoerrors.ErrorCodeNil {
+						internalusbcdc.USBCDCHandler.SendErrorMessage(err)
+					}
+				}
+
+				// Send feedback message
+				if err := internalusbcdc.USBCDCHandler.SendServoAngleEndMessage(); err != tinygoerrors.ErrorCodeNil {
 					internalusbcdc.USBCDCHandler.SendErrorMessage(err)
 				}
 			case internalusbcdc.IncomingCategoryMotorSpeedStop, internalusbcdc.IncomingCategoryMotorSpeedForward, internalusbcdc.IncomingCategoryMotorSpeedBackward:
-				if err := internalescmotor.SetSpeedBasedOnReceivedMessage(
-					internalusbcdc.USBCDCHandler,
-					newMessage,
-				); err != tinygoerrors.ErrorCodeNil {
+				// Check if the motor speed should be retrieved from the message
+				var speed float64
+				if message.Category != internalusbcdc.IncomingCategoryMotorSpeedStop {
+					// Get speed percentage from message content
+					signedSpeed, err := tinygobuffers.BytesToFloat64(message.Data)
+					if err != tinygoerrors.ErrorCodeNil {
+						internalusbcdc.USBCDCHandler.SendErrorMessage(err)
+						continue
+					}
+					speed = math.Abs(signedSpeed)
+				}
+
+				// Send start feedback message
+				if err := internalusbcdc.USBCDCHandler.SendMotorSpeedStartMessage(); err != tinygoerrors.ErrorCodeNil {
+					internalusbcdc.USBCDCHandler.SendErrorMessage(err)
+					continue
+				}
+
+				// Set the motor speed based on the received message
+				switch newMessage.Category {
+				case internalusbcdc.IncomingCategoryMotorSpeedStop:
+					if err := internalescmotor.ESCMotorHandler.Stop(); err != tinygoerrors.ErrorCodeNil {
+						internalusbcdc.USBCDCHandler.SendErrorMessage(err)
+					}
+				case internalusbcdc.IncomingCategoryMotorSpeedForward:
+					if err := internalescmotor.ESCMotorHandler.SetSpeedForward(speed); err != tinygoerrors.ErrorCodeNil {
+						internalusbcdc.USBCDCHandler.SendErrorMessage(err)
+					}
+				case internalusbcdc.IncomingCategoryMotorSpeedBackward:
+					if err := internalescmotor.ESCMotorHandler.SetSpeedBackward(speed); err != tinygoerrors.ErrorCodeNil {
+						internalusbcdc.USBCDCHandler.SendErrorMessage(err)
+					}
+				}
+
+				// Send feedback message
+				if err := internalusbcdc.USBCDCHandler.SendMotorSpeedEndMessage(); err != tinygoerrors.ErrorCodeNil {
 					internalusbcdc.USBCDCHandler.SendErrorMessage(err)
 				}
 			case internalusbcdc.IncomingCategoryStatus:
@@ -203,5 +278,8 @@ func main() {
 				}
 			}
 		}
+
+		// Cancel the update loop context to stop the goroutine
+		cancel()
 	}
 }
