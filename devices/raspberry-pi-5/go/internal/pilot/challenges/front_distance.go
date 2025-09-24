@@ -15,7 +15,18 @@ const (
 	SafetyFrontDistanceStartThreshold = 150.0
 
 	// SafetyFrontDistanceStopThreshold is the distance threshold to stop safety mode
-	SafetyFrontDistanceStopThreshold = 325.0
+	SafetyFrontDistanceStopThreshold = 350.0
+
+	// SafetyBackDistanceThreshold is the distance threshold to stop moving backward
+	SafetyBackDistanceThreshold = 125.0
+)
+
+var (
+	// SafetyBackCardinalDirections are the cardinal directions to check for safety back distance
+	SafetyBackCardinalDirections = []gorplidarsdkhandler.CardinalDirection{
+		gorplidarsdkhandler.CardinalDirectionSouthSoutheast,
+		gorplidarsdkhandler.CardinalDirectionSouthSouthwest,
+	}
 )
 
 // safetyFrontDistanceHandler handles the safety front distance
@@ -87,11 +98,17 @@ func safetyFrontDistanceHandler(
 		)
 	}
 
-	// Set the servo to center and the motor to backward
+	// Stop the motor to prevent further movement
+	if err := service.SetMotorStop(ctx); err != nil {
+		return true, err
+	}
+
+	// Set the servo to center
 	if err := service.SetServoToCenter(ctx); err != nil {
 		return true, err
 	}
 
+	// Move backward at fast speed
 	if err := service.SetMotorBackward(
 		ctx,
 		MotorBackwardFastPercentage,
@@ -99,14 +116,40 @@ func safetyFrontDistanceHandler(
 		return true, err
 	}
 
-	var safe bool
-	for !safe {
+	// Wait until the front distance is above the stop threshold or an obstacle is detected on the back
+	reached := false
+	for !reached {
 		time.Sleep(UpdateDelay)
 
 		select {
 		case <-ctx.Done():
 			return true, ctx.Err()
 		default:
+			// Check if there's any obstacle on the back
+			backDistanceThresholdReached := false
+			for _, cardinalDirection := range SafetyBackCardinalDirections {
+				// Get the average distance for the cardinal direction
+				distance := service.GetRPLiDARAverageDistance(cardinalDirection)
+
+				// Calculate the future distance change based on the current distance change
+				distanceChange := BackDistanceChange * service.GetRPLiDARAverageDistanceChange(cardinalDirection)
+
+				// If the distance is below the back threshold, set the flag to false and break the loop
+				if !math.IsNaN(distance) && distance+distanceChange < SafetyBackDistanceThreshold {
+					backDistanceThresholdReached = true
+					break
+				}
+			}
+
+			// Check if the back distance threshold to stop backward movement is reached
+			if backDistanceThresholdReached {
+				if loggerProducer != nil {
+					loggerProducer.Warning("Safety back distance threshold reached. Stopping backward movement.")
+				}
+				reached = true
+				break
+			}
+
 			// Check if the front distance threshold to stop backward movement is reached
 			frontDistanceThresholdReached := true
 			for _, cardinalDirection := range cardinalDirections {
@@ -123,13 +166,19 @@ func safetyFrontDistanceHandler(
 				}
 			}
 
+			// If the front distance threshold is reached, set the reached flag to true
 			if frontDistanceThresholdReached {
 				if loggerProducer != nil {
 					loggerProducer.Info("Safety front distance threshold reached.")
 				}
-				safe = true
+				reached = true
 			}
 		}
+	}
+
+	// Stop the motor after reaching a safe distance
+	if err := service.SetMotorStop(ctx); err != nil {
+		return true, err
 	}
 
 	// Set previous servo angle and motor speed back to normal

@@ -13,12 +13,6 @@ import (
 const (
 	// StopDistanceThreshold is the distance threshold to stop the robot
 	StopDistanceThreshold = 1500.0
-
-	// SideDistanceThreshold is the distance threshold for side sensors
-	SideDistanceThreshold = 1500.0
-
-	// FrontStartTurnDistanceThreshold is the distance threshold to start turning
-	FrontStartTurnDistanceThreshold = 1000.0 // 500.0, 600.0, 650.0, 900.0
 )
 
 var (
@@ -111,7 +105,7 @@ func (h *ChallengeWithoutObstaclesHandler) Run(ctx context.Context) error {
 	h.handlerLoggerProducer.Info("Starting challenge without obstacles")
 
 	// Wait until the service is ready
-	if err := h.service.WaitUntilReady(ctx); err != nil {
+	if err = h.service.WaitUntilReady(ctx); err != nil {
 		return fmt.Errorf("service is not ready: %w", err)
 	}
 
@@ -169,7 +163,7 @@ func (h *ChallengeWithoutObstaclesHandler) Run(ctx context.Context) error {
 			}
 
 			// Detect if a turn is necessary
-			if err := detectTurnHandler(
+			if err = detectTurnHandler(
 				ctx,
 				h.service,
 				&last90DegreeTurns,
@@ -212,10 +206,10 @@ func (h *ChallengeWithoutObstaclesHandler) Run(ctx context.Context) error {
 	h.handlerLoggerProducer.Info("Almost time to stop. Monitoring front distance...")
 
 	// Set the servo to center and the motor to slow speed
-	if err := h.service.SetServoToCenter(ctx); err != nil {
+	if err = h.service.SetServoToCenter(ctx); err != nil {
 		return err
 	}
-	if err := h.service.SetMotorForward(
+	if err = h.service.SetMotorForward(
 		ctx,
 		MotorForwardNormalPercentage,
 	); err != nil {
@@ -231,6 +225,16 @@ func (h *ChallengeWithoutObstaclesHandler) Run(ctx context.Context) error {
 		case <-ctx.Done():
 			return ctx.Err()
 		default:
+			// Center by gyroscope
+			if err = centerByGyroscopeHandler(
+				ctx,
+				h.service,
+				last90DegreeTurns,
+				h.handlerLoggerProducer,
+			); err != nil {
+				return err
+			}
+
 			// Check if the north average distance is NaN
 			if math.IsNaN(h.service.GetNorthAverageDistance()) {
 				break

@@ -17,6 +17,12 @@ const (
 	// SideDistanceSmallDifferencePercentage is the percentage of small difference threshold for side distances
 	SideDistanceSmallDifferencePercentage = 0.15 // 0.2, 0.15, 0.3
 
+	// ServoMediumCorrectionAnglePercentage is the percentage of the maximum angle for medium corrections
+	ServoMediumCorrectionAnglePercentage float64 = 0.4
+
+	// ServoSmallCorrectionAnglePercentage is the percentage of the maximum angle for small corrections
+	ServoSmallCorrectionAnglePercentage float64 = 0.25
+
 	// GyroscopeTolerance is the tolerance for the gyroscope
 	GyroscopeTolerance = 2.0
 
@@ -40,7 +46,6 @@ const (
 // ctx: The context to use for the challenge
 // service: The service to use for the challenge
 // lastTurningTime: The last time the robot made a turn
-// turningDirection: The direction the robot turned (left or right)
 //
 // Returns:
 //
@@ -49,7 +54,6 @@ func centerByRPLiDARHandler(
 	ctx context.Context,
 	service Service,
 	lastTurningTime time.Time,
-	turningDirection ServoDirection,
 ) error {
 	// Get the rate of change for west and east average distances
 	westAverageDistance := service.GetWestAverageDistance()
@@ -127,9 +131,7 @@ func centerByGyroscopeHandler(
 
 	// Get the difference of the accumulated yaw degrees from the last 90-degree turn
 	var deltaYawDegrees float64
-	if last90DegreeTurns == 0 {
-		deltaYawDegrees = accumulatedYawDegrees
-	} else if accumulatedYawDegrees >= 0 {
+	if accumulatedYawDegrees >= 0 {
 		deltaYawDegrees = accumulatedYawDegrees - float64(last90DegreeTurns)*90.0
 	} else {
 		deltaYawDegrees = accumulatedYawDegrees + float64(last90DegreeTurns)*90.0
@@ -147,10 +149,16 @@ func centerByGyroscopeHandler(
 	gyroOrientation := service.GetGyroscopeOrientation()
 	if gyroOrientation.IsToRight(deltaYawDegrees) {
 		// Calculate the servo angle based on the delta yaw degrees
-		angle := math.Max(MinServoAngleCorrectionPercentage, math.Min(MaxServoAngleCorrectionPercentage, YawDegreesServoAngleRatio * math.Abs(deltaYawDegrees)))
+		angle := math.Max(
+			MinServoAngleCorrectionPercentage,
+			math.Min(
+				MaxServoAngleCorrectionPercentage,
+				YawDegreesServoAngleRatio*math.Abs(deltaYawDegrees),
+			),
+		)
 
 		// Avoid small unnecessary servo adjustments
-		if service.GetServoDirection() == ServoDirectionLeft && math.Abs(service.GetServoAngle() - angle) < YawDegreesMinServoAngleChange {
+		if service.GetServoDirection() == ServoDirectionLeft && math.Abs(service.GetServoAngle()-angle) < YawDegreesMinServoAngleChange {
 			return nil
 		}
 
@@ -173,10 +181,16 @@ func centerByGyroscopeHandler(
 		}
 	} else if gyroOrientation.IsToLeft(deltaYawDegrees) {
 		// Calculate the servo angle based on the delta yaw degrees
-		angle := math.Max(MinServoAngleCorrectionPercentage, math.Min(MaxServoAngleCorrectionPercentage, YawDegreesServoAngleRatio * math.Abs(deltaYawDegrees)))
+		angle := math.Max(
+			MinServoAngleCorrectionPercentage,
+			math.Min(
+				MaxServoAngleCorrectionPercentage,
+				YawDegreesServoAngleRatio*math.Abs(deltaYawDegrees),
+			),
+		)
 
 		// Avoid small unnecessary servo adjustments
-		if service.GetServoDirection() == ServoDirectionRight && math.Abs(service.GetServoAngle() - angle) < YawDegreesMinServoAngleChange {
+		if service.GetServoDirection() == ServoDirectionRight && math.Abs(service.GetServoAngle()-angle) < YawDegreesMinServoAngleChange {
 			return nil
 		}
 

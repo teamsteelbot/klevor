@@ -18,13 +18,13 @@ const (
 	MinTimeBetweenTurns = 2 * time.Second
 
 	// MinTimeToCorrectAfterTurn is the minimum time to correct after a turn
-	MinTimeToCorrectAfterTurn = 1500 * time.Millisecond
+	MinTimeToCorrectAfterTurn = 1 * time.Second // 1500 * time.Millisecond
 
 	// UpdateDelay is the delay between updates
 	UpdateDelay = 10 * time.Millisecond
 
 	// MaxDistanceChange is the maximum distance change for safety calculations
-	MaxDistanceChange = 100.0
+	MaxDistanceChange = 75.0
 
 	// MotorBackwardFastPercentage is the percentage of the maximum speed for fast backward motor speed
 	MotorBackwardFastPercentage float64 = 1
@@ -56,14 +56,11 @@ const (
 	// ServoSmallTurnAnglePercentage is the percentage of the maximum angle for small turns
 	ServoSmallTurnAnglePercentage float64 = 0.33
 
-	// ServoMediumCorrectionAnglePercentage is the percentage of the maximum angle for medium corrections
-	ServoMediumCorrectionAnglePercentage float64 = 0.4
-
-	// ServoSmallCorrectionAnglePercentage is the percentage of the maximum angle for small corrections
-	ServoSmallCorrectionAnglePercentage float64 = 0.25
-
 	// FrontDistanceChange is the scalar change for the safety front distance calculation
 	FrontDistanceChange = 1.25
+
+	// BackDistanceChange is the scalar change for the back distance calculation
+	BackDistanceChange = 1.2
 
 	// SideDistanceChange is the scalar change for the side distance calculation
 	SideDistanceChange = 1.1

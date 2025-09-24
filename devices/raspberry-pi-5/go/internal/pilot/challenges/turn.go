@@ -11,8 +11,14 @@ import (
 )
 
 const (
-	// frontDistanceStartTurnThreshold is the distance threshold to start turning
-	SafetyFrontDistanceStartTurnThreshold = 500.0
+	// SideDistanceThreshold is the distance threshold for side sensors
+	SideDistanceThreshold = 1500.0
+
+	// FrontStartTurnDistanceThreshold is the distance threshold to start turning
+	FrontStartTurnDistanceThreshold = 1000.0 // 500.0, 600.0, 650.0, 900.0
+
+	// SafetyFrontDistanceStartTurnThreshold is the distance threshold to start turning
+	SafetyFrontDistanceStartTurnThreshold = 700.0 // 600.0
 )
 
 // turnHandler handles the turning logic based on BNO08x sensor data.
@@ -200,7 +206,7 @@ func detectTurnHandler(
 			}
 		}
 
-		// Checlk if it's turning
+		// Check if it's turning
 		if !*isTurning {
 			return nil
 		}
@@ -210,7 +216,7 @@ func detectTurnHandler(
 			// Go backward if the front distance is below the threshold
 			if err := service.SetMotorBackward(
 				ctx,
-				MotorBackwardFastPercentage,
+				MotorBackwardNormalPercentage,
 			); err != nil {
 				return err
 			}
