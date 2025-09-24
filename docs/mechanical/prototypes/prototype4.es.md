@@ -45,13 +45,20 @@ A pesar de tener una base sólida acerca de lo que queríamos para construir a K
 
 **La relación de transmisión o relación de reducción se calcula con la siguiente fórmula:**
 
-![alt text](../../../v-photos/gear-ratio-formula.png)
+<p align="center">
+	<img src="../../assets/images/mechanical/gear-ratio-formula.png"
+alt="Gear Ratio Formula" width="600">
+	<br>
+	<i>Vista inferior del prototipo 3</i>
+</p>
 
 Esto significa que para aumentar el torque, tenemos que hacer que los piñones con menos dientes muevan a los piñones con más dientes, esto fué la solución para el problema de torque de nuestro robot.
 
 Posteriormente tuvimos que hacer que Klevor fuese más liviano, la razón era el cambio de ruedas antes mencionado, ya que los rines de las que fueron utilizadas en prototipos anteriores eran impresas en 3D, lo que hacía que se desgastasen rápido. El nuevo modelo de rueda que estamos usando tiene un rin hecho de aluminio y un caucho mas grueso, lo que a su vez excedería el peso máximo establecido por la WRO, lo que hicimos para solucionar este problema y a la vez añadir más velocidad a Klevor fue cambiar el motor, uno que también cuenta con 20000 RPM, pero con torque suficiente, lo que significa que el sistema reductor antes mencionado fué descartado. 
 
 Otra falla que presentó Klevor durante su desarrollo fué que el ángulo de giro de las ruedas era limitado, lo que suponía una dificultad a la hora de cruzar. Para corregirlo, modificamos la forma del trapecio de dirección del sistema de cruce Ackermann, el cual está compuesto por los dos brazos de dirección y la barra de acoplamiento que los une, al ajustar la posición y el ángulo de estos componentes, logramos que el ángulo de giro de Klevor incrementara significativamente.
+
+
 
 ## Lista de Materiales {:#materials-list}
 
