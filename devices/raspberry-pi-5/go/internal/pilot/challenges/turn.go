@@ -302,6 +302,13 @@ func detectTurnHandler(
 }
 
 // turnByWallCloseUpHandler handles turning where there is a wall close up on the back
+//
+// Parameters:
+//
+// ctx: The context to use for the challenge
+// service: The service to use for the challenge
+// lastTurningTime: A pointer to the last time the robot made a turn
+// loggerProducer: The logger producer to use for logging
 func turnByWallCloseUpHandler(
 	ctx context.Context,
 	service Service,
@@ -324,7 +331,6 @@ func turnByWallCloseUpHandler(
 
 	// Initialize temporary variables
 	var (
-		temporaryTurns      int
 		shouldTurn          bool
 		isTurning           bool
 		isTurningCompleted  bool
@@ -362,13 +368,11 @@ func turnByWallCloseUpHandler(
 
 			// Check if the robot should turn left or right based on the side distances
 			if !shouldTurn && eastDistance+eastDistanceChange >= SideDistanceThreshold {
-				temporaryTurns = last90DegreeTurns
 				shouldTurn = true
 			}
 
 			// Check if the robot should turn left or right based on the side distances
 			if !shouldTurn && westDistance+westDistanceChange >= SideDistanceThreshold {
-				temporaryTurns = last90DegreeTurns
 				shouldTurn = true
 			}
 
@@ -410,6 +414,11 @@ func turnByWallCloseUpHandler(
 						); err != nil {
 							return false, err
 						}
+
+						// Log that the robot is turning right
+						if loggerProducer != nil {
+							loggerProducer.Info("Turning right...")
+						}
 					}
 
 					// Check if the robot can collide with an object or a wall
@@ -450,133 +459,185 @@ func turnByWallCloseUpHandler(
 							}
 							continue
 						}
-						if wallCloseUp && northDistance+northDistanceChange <= FrontCloseupThreshold {
-							if err := service.SetServoToLeft(
+
+						// If the robot is not close to the wall, center by gyroscope while moving forward
+						if wallCloseUp && northDistance+northDistanceChange > FrontCloseupThreshold {
+							if err := centerByGyroscopeHandler(
 								ctx,
-								ServoBigTurnAngle,
+								service,
+								last90DegreeTurns,
+								loggerProducer,
 							); err != nil {
 								return false, err
 							}
-							if err := service.SetMotorBackward(
-								ctx,
-								MotorBackwardSlowSpeed,
-							); err != nil {
-								return false, err
-							}
+							continue
+						}
 
-							// Log that the robot is turning left
-							if loggerProducer != nil {
-								loggerProducer.Info("Turning left...")
-							}
+						// If the robot is close to the wall, start turning left
+						if err := service.SetServoToLeft(
+							ctx,
+							ServoBigTurnAngle,
+						); err != nil {
+							return false, err
+						}
+						if err := service.SetMotorBackward(
+							ctx,
+							MotorBackwardSlowSpeed,
+						); err != nil {
+							return false, err
+						}
 
-							// Sets the turning state to true
-							isTurning = true
+						// Log that the robot is turning left
+						if loggerProducer != nil {
+							loggerProducer.Info("Turning left...")
+						}
+
+						// Sets the turning state to true
+						isTurning = true
+						continue
+					}
+
+					// Wait for back close up to finish the turn
+					if err := backCloseUpHandler(
+						ctx,
+						service,
+						loggerProducer,
+					); err != nil {
+						return false, err
+					}
+
+					// Set that the turn is completed
+					isTurningCompleted = true
+				}
+			case gorplidarsdkhandler.CardinalDirectionWest:
+				// Handle it based on the inner lane side
+				switch *isInnerLaneSide {
+				case false:
+					// Handle a normal turn
+					if !isTurning {
+						if err := service.SetServoToLeft(
+							ctx,
+							ServoBigTurnAngle,
+						); err != nil {
+							return false, err
+						}
+						if err := service.SetMotorForward(
+							ctx,
+							MotorTurningSpeed,
+						); err != nil {
+							return false, err
+						}
+
+						// Log that the robot is turning left
+						if loggerProducer != nil {
+							loggerProducer.Info("Turning left...")
 						}
 					}
-				}
-			}
-			continue
-		}
 
-		// Checks which lane is the robot located inside
-		if westDistance+westDistanceChange >= SideDistanceThreshold {
-			if !wallCloseUp && eastDistance+eastDistanceChange >= LaneIdentifierThreshold {
-				if northDistance >= FrontCloseupThreshold {
-					if err := service.SetMotorForward(
+					// Check if the robot can collide with an object or a wall
+					cardinalDirections := getFrontDistanceCardinalDirections(isTurning)
+					reached, err := collisionHandler(
 						ctx,
-						MotorForwardSlowSpeed,
+						service,
+						isTurning,
+						loggerProducer,
+						cardinalDirections...,
+					)
+					if err != nil {
+						return false, err
+					}
+					if reached {
+						// Set that the turn is completed
+						isTurningCompleted = true
+						break
+					}
+				case true:
+					// Check if it's turning
+					if !isTurning {
+						if !wallCloseUp && northDistance+northDistanceChange >= FrontCloseupThreshold {
+							if err := service.SetMotorForward(
+								ctx,
+								MotorForwardSlowSpeed,
+							); err != nil {
+								return false, err
+							}
+							if err := service.SetServoToCenter(ctx); err != nil {
+								return false, err
+							}
+							wallCloseUp = true
+
+							// Log that the robot is moving forward to get close to the wall
+							if loggerProducer != nil {
+								loggerProducer.Info("Moving forward to get close to the wall...")
+							}
+							continue
+						}
+
+						// If the robot is not close to the wall, center by gyroscope while moving forward
+						if wallCloseUp && northDistance+northDistanceChange > FrontCloseupThreshold {
+							if err := centerByGyroscopeHandler(
+								ctx,
+								service,
+								last90DegreeTurns,
+								loggerProducer,
+							); err != nil {
+								return false, err
+							}
+							continue
+						}
+
+						// If the robot is close to the wall, start turning right
+						if err := service.SetServoToRight(
+							ctx,
+							ServoMediumTurnAngle,
+						); err != nil {
+							return false, err
+						}
+						if err := service.SetMotorBackward(
+							ctx,
+							MotorBackwardSlowSpeed,
+						); err != nil {
+							return false, err
+						}
+
+						// Log that the robot is turning right
+						if loggerProducer != nil {
+							loggerProducer.Info("Turning right...")
+						}
+
+						// Sets the turning state to true
+						isTurning = true
+					}
+
+					// Wait for back close up to finish the turn
+					if err := backCloseUpHandler(
+						ctx,
+						service,
+						loggerProducer,
 					); err != nil {
 						return false, err
 					}
-					if err := service.SetServoToCenter(ctx); err != nil {
-						return false, err
-					}
-					wallCloseUp = true
 
-					// Log that the robot is moving forward to get close to the wall
-					if loggerProducer != nil {
-						loggerProducer.Info("Moving forward to get close to the wall...")
-					}
-
-					continue
+					// Set that the turn is completed
+					isTurningCompleted = true
 				}
-
-				// If the robot is close to the wall, start turning right
-				if wallCloseUp && northDistance+northDistanceChange <= FrontCloseupThreshold {
-					if err := service.SetServoToRight(
-						ctx,
-						ServoMediumTurnAngle,
-					); err != nil {
-						return false, err
-					}
-					if err := service.SetMotorBackward(
-						ctx,
-						MotorBackwardSlowSpeed,
-					); err != nil {
-						return false, err
-					}
-
-					// Log that the robot is turning right
-					if loggerProducer != nil {
-						loggerProducer.Info("Turning right...")
-					}
-
-					// Sets the turning state to true
-					isTurning = true
-				}
+			default:
+				// If the cardinal direction is not set, return
+				return false, fmt.Errorf(
+					"invalid cardinal direction to turn in turnByWallCloseUpHandler: %s",
+					toCardinalDirection.String(),
+				)
 			}
 		}
 	}
 
-	/*
-		// Basically this condition is meant to indicate when has the robot successfully made the turn (if it's not enough, we can stop the turn at like 60 degrees or something, then counteract the other 30 degrees while going backwards)
-				if last90DegreeTurns != temporaryTurns {
-					// Set the turn completed flag as true
-					turnCompleted = true
-					break
-				}
-	*/
+	// Update the last turning time
+	*lastTurningTime = time.Now()
 
-	/*
-		// Basically this condition is meant to indicate when has the robot successfully made the turn
-							if last90DegreeTurns != temporaryTurns {
-								isTurning = false
-								wallCloseUp = false
-								continue
-							}
-						} else {
-							if err := service.SetServoToLeft(
-								ctx,
-								ServoMediumTurnAngle,
-							); err != nil {
-								return err
-							}
-							if err := service.SetMotorBackward(
-								ctx,
-								MotorBackwardSlowSpeed,
-							); err != nil {
-								return err
-							}
-							// Basically this condition is meant to indicate when has the robot successfully made the turn
-							if last90DegreeTurns != temporaryTurns {
-								if err := service.SetServoToLeft(
-									ctx,
-									ServoMediumTurnAngle,
-								); err != nil {
-									return err
-								}
-								if err := service.SetMotorBackward(
-									ctx,
-									MotorBackwardSlowSpeed,
-								); err != nil {
-									return err
-								}
-								// keeps doing it until it reaches the wall (prob measurements with the rplidar)
-								if err := service.SetServoToCenter(ctx); err != nil {
-									return err
-								}
-								isTurning = false
-							}
-						}
-	*/
+	// Log that the turn is completed
+	if loggerProducer != nil {
+		loggerProducer.Info("Turn completed.")
+	}
+
+	return true, nil
 }

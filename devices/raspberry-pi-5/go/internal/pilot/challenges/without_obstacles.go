@@ -91,11 +91,11 @@ func (h *ChallengeWithoutObstaclesHandler) Run(ctx context.Context) error {
 	}
 
 	// Start the challenge without obstacles handler
-	isTurning := false
+	// isTurning := false
 	last90DegreeTurns := 0
 	var lastUpdateTime time.Time
 	var lastTurningTime time.Time
-	direction := ServoDirectionNil
+	// direction := ServoDirectionNil
 	for last90DegreeTurns < Algorithm90DegreeTurns {
 		// Set the last iteration time
 		time.Sleep(UpdateDelay - time.Since(lastUpdateTime))
@@ -105,54 +105,72 @@ func (h *ChallengeWithoutObstaclesHandler) Run(ctx context.Context) error {
 		case <-ctx.Done():
 			return ctx.Err()
 		default:
-			// Check if the robot can collide with an object or a wall
-			cardinalDirections := getFrontDistanceCardinalDirections(isTurning)
-			reached, err := collisionHandler(
+			// Handle turning by wall close up
+			turned, err := turnByWallCloseUpHandler(
 				ctx,
 				h.service,
-				isTurning,
-				h.handlerLoggerProducer,
-				cardinalDirections...,
-			)
-			if err != nil {
-				return err
-			}
-			if reached {
-				break
-			}
-
-			// If the robot was turning, check if it should stop turning
-			// Check for the current turn and center the servo if necessary
-			turnCompleted, err := turnHandler(
-				ctx,
-				h.service,
-				&last90DegreeTurns,
-				&isTurning,
 				&lastTurningTime,
 				h.handlerLoggerProducer,
 			)
 			if err != nil {
 				return err
 			}
-			if turnCompleted {
-				break
+			if turned {
+				// Update last 90 degree turns
+				last90DegreeTurns++
+				continue
 			}
 
-			// Detect if a turn is necessary
-			if err = detectTurnHandler(
-				ctx,
-				h.service,
-				&last90DegreeTurns,
-				&isTurning,
-				&lastTurningTime,
-				&direction,
-				h.handlerLoggerProducer,
-			); err != nil {
-				return err
-			}
-			if isTurning {
-				break
-			}
+			/*
+				// Check if the robot can collide with an object or a wall
+				cardinalDirections := getFrontDistanceCardinalDirections(isTurning)
+				reached, err := collisionHandler(
+					ctx,
+					h.service,
+					isTurning,
+					h.handlerLoggerProducer,
+					cardinalDirections...,
+				)
+				if err != nil {
+					return err
+				}
+				if reached {
+					break
+				}
+
+				// If the robot was turning, check if it should stop turning
+				// Check for the current turn and center the servo if necessary
+				turnCompleted, err := turnHandler(
+					ctx,
+					h.service,
+					&last90DegreeTurns,
+					&isTurning,
+					&lastTurningTime,
+					h.handlerLoggerProducer,
+				)
+				if err != nil {
+					return err
+				}
+				if turnCompleted {
+					break
+				}
+
+				// Detect if a turn is necessary
+				if err = detectTurnHandler(
+					ctx,
+					h.service,
+					&last90DegreeTurns,
+					&isTurning,
+					&lastTurningTime,
+					&direction,
+					h.handlerLoggerProducer,
+				); err != nil {
+					return err
+				}
+				if isTurning {
+					break
+				}
+			*/
 
 			// Center by gyroscope
 			if err = centerByGyroscopeHandler(
