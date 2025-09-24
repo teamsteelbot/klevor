@@ -162,62 +162,60 @@ func (h *ChallengeWithObstaclesHandler) Run(
 				&isObjectAvoidanceInProgress,
 				h.handlerLoggerProducer,
 			)
-			{
-				if err != nil {
-					return err
-				}
-				if isObjectAvoidanceInProgress {
-					// Check if the object detection is in the same section
-					if lastObjectDetectionTime.IsZero() || time.Since(lastObjectDetectionTime) >= ObjectDetectionInTheSameSectionDelay {
-						// Add the positive label to the sections obstacles
-						sectionIndex := last90DegreeTurns % 4
+			if err != nil {
+				return err
+			}
+			if isObjectAvoidanceInProgress {
+				// Check if the object detection is in the same section
+				if lastObjectDetectionTime.IsZero() || time.Since(lastObjectDetectionTime) >= ObjectDetectionInTheSameSectionDelay {
+					// Add the positive label to the sections obstacles
+					sectionIndex := last90DegreeTurns % 4
 
-						// If it's not the first full road completion, corroborate the obstacle
-						if last90DegreeTurns >= 4 {
-							// Check if the obstacle is the same as the initial one
-							if sectionsObstacles[sectionIndex][currentSectionObstacleCount] == internalclip.PositiveLabelNil {
-								sectionsObstacles[sectionIndex][currentSectionObstacleCount] = positiveLabel
-							}
-
-							// If the obstacle is different from the initial one, log it
-							if sectionsObstacles[sectionIndex][currentSectionObstacleCount] != positiveLabel {
-								h.handlerLoggerProducer.Warning(
-									fmt.Sprintf(
-										"Different obstacle detected in section %d: %s (was %s)",
-										sectionIndex+1,
-										positiveLabel.String(),
-										sectionsObstacles[sectionIndex][currentSectionObstacleCount].String(),
-									),
-								)
-							}
-							currentSectionObstacleCount++
+					// If it's not the first full road completion, corroborate the obstacle
+					if last90DegreeTurns >= 4 {
+						// Check if the obstacle is the same as the initial one
+						if sectionsObstacles[sectionIndex][currentSectionObstacleCount] == internalclip.PositiveLabelNil {
+							sectionsObstacles[sectionIndex][currentSectionObstacleCount] = positiveLabel
 						}
+
+						// If the obstacle is different from the initial one, log it
+						if sectionsObstacles[sectionIndex][currentSectionObstacleCount] != positiveLabel {
+							h.handlerLoggerProducer.Warning(
+								fmt.Sprintf(
+									"Different obstacle detected in section %d: %s (was %s)",
+									sectionIndex+1,
+									positiveLabel.String(),
+									sectionsObstacles[sectionIndex][currentSectionObstacleCount].String(),
+								),
+							)
+						}
+						currentSectionObstacleCount++
 					}
-					break
 				}
+				break
+			}
 
-				// Center by gyroscope
-				if err = centerByGyroscopeHandler(
-					ctx,
-					h.service,
-					last90DegreeTurns,
-					h.handlerLoggerProducer,
-				); err != nil {
-					return err
-				}
+			// Center by gyroscope
+			if err = centerByGyroscopeHandler(
+				ctx,
+				h.service,
+				last90DegreeTurns,
+				h.handlerLoggerProducer,
+			); err != nil {
+				return err
+			}
 
-				// Move forward
-				motorSpeed := MotorForwardNormalSpeed
-				servoDirection := h.service.GetServoDirection()
-				if servoDirection == ServoDirectionStraight && time.Since(lastTurningTime) >= MinTimeToCorrectAfterTurn {
-					motorSpeed = MotorForwardFastSpeed
-				}
-				if err = h.service.SetMotorForward(
-					ctx,
-					motorSpeed,
-				); err != nil {
-					return err
-				}
+			// Move forward
+			motorSpeed := MotorForwardNormalSpeed
+			servoDirection := h.service.GetServoDirection()
+			if servoDirection == ServoDirectionStraight && time.Since(lastTurningTime) >= MinTimeToCorrectAfterTurn {
+				motorSpeed = MotorForwardFastSpeed
+			}
+			if err = h.service.SetMotorForward(
+				ctx,
+				motorSpeed,
+			); err != nil {
+				return err
 			}
 		}
 	}

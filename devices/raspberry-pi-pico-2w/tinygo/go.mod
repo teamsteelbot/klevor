@@ -6,10 +6,10 @@ require (
 	github.com/ralvarezdev/tinygo-bno08x v0.5.12
 	github.com/ralvarezdev/tinygo-buffers v0.1.8
 	github.com/ralvarezdev/tinygo-errors v0.0.4
-	github.com/ralvarezdev/tinygo-escmotor v0.2.5
+	github.com/ralvarezdev/tinygo-escmotor v0.2.6
 	github.com/ralvarezdev/tinygo-logger v0.0.14
 	github.com/ralvarezdev/tinygo-pullup v0.0.2
-	github.com/ralvarezdev/tinygo-servo v0.2.1
+	github.com/ralvarezdev/tinygo-servo v0.2.5
 	github.com/soypat/cyw43439 v0.0.0-20250505012923-830110c8f4af
 )
 

@@ -5,7 +5,7 @@ go 1.25.1
 require (
 	github.com/ralvarezdev/go-concurrent-logger v0.1.8
 	github.com/ralvarezdev/go-hailo-clip-handler v0.2.2
-	github.com/ralvarezdev/go-rplidar-sdk-handler v0.2.3
+	github.com/ralvarezdev/go-rplidar-sdk-handler v0.2.4
 	github.com/ralvarezdev/go-strings v0.1.12 // indirect
 	github.com/ralvarezdev/go-tinygo-errors v0.1.9
 	github.com/ralvarezdev/tinygo-errors v0.0.4

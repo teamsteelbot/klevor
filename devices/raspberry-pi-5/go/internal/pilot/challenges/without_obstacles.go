@@ -123,6 +123,22 @@ func (h *ChallengeWithoutObstaclesHandler) Run(ctx context.Context) error {
 				continue
 			}
 
+			// Check if the robot can collide with an object or a wall
+			cardinalDirections := getFrontDistanceCardinalDirections(false)
+			reached, err := collisionHandler(
+				ctx,
+				h.service,
+				false,
+				h.handlerLoggerProducer,
+				cardinalDirections...,
+			)
+			if err != nil {
+				return err
+			}
+			if reached {
+				break
+			}
+
 			/*
 				// Check if the robot can collide with an object or a wall
 				cardinalDirections := getFrontDistanceCardinalDirections(isTurning)

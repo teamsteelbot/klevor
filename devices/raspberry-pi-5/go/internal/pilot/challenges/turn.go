@@ -419,6 +419,9 @@ func turnByWallCloseUpHandler(
 						if loggerProducer != nil {
 							loggerProducer.Info("Turning right...")
 						}
+
+						// Sets the turning state to true
+						isTurning = true
 					}
 
 					// Check if the robot can collide with an object or a wall
@@ -532,6 +535,9 @@ func turnByWallCloseUpHandler(
 						if loggerProducer != nil {
 							loggerProducer.Info("Turning left...")
 						}
+
+						// Sets the turning state to true
+						isTurning = true
 					}
 
 					// Check if the robot can collide with an object or a wall

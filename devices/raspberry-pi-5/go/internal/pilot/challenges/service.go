@@ -61,6 +61,7 @@ type (
 		clipClassification            *gohailocliphandler.Classification
 		rplidarHandlerMutex           sync.RWMutex
 		rplidarHandler                gorplidarsdkhandler.Handler
+		rplidarMeasures  			[360]*gorplidarsdkhandler.Measure
 		rplidarAverageDistances       map[gorplidarsdkhandler.CardinalDirection]float64
 		rplidarAverageDistancesChange map[gorplidarsdkhandler.CardinalDirection]float64
 		usbCDCSender                  internalusbcdc.Sender
@@ -237,6 +238,24 @@ func (s *DefaultService) updateCLIPClassification(ctx context.Context) error {
 //
 // An error if the average distances could not be updated, nil otherwise
 func (s *DefaultService) updateRPLiDARAverageDistances(ctx context.Context) error {
+	s.rplidarHandlerMutex.RLock()
+
+	// Get the measures to initialize the average distances
+	s.rplidarMeasures = *s.rplidarHandler.GetMeasures()
+
+	// Calculate the initial average distances
+	averageDistances, err := gorplidarsdkhandler.GetAverageDistanceFromAllDirections(
+		&s.rplidarMeasures,
+		AverageAngleWidth,
+	)
+	if err != nil {
+		s.rplidarHandlerMutex.RUnlock()
+		return fmt.Errorf("failed to get average distances: %w", err)
+	}
+	s.rplidarAverageDistances = averageDistances
+
+	s.rplidarHandlerMutex.RUnlock()
+
 	// Signal that the RPLiDAR can send through the channel
 	s.serviceLoggerProducer.Info("Starting RPLiDAR measures updates...")
 	if err := s.rplidarHandler.StartSendingMeasures(); err != nil {
@@ -257,63 +276,56 @@ func (s *DefaultService) updateRPLiDARAverageDistances(ctx context.Context) erro
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
-		case measures, ok := <-measuresCh:
+		case measure, ok := <-measuresCh:
 			// Check if the channel is closed
 			if !ok {
 				return errors.New("measures channel closed")
 			}
 
-			// Calculate the average north, west and east distances
 			s.rplidarHandlerMutex.Lock()
+
+			// Update the measure
+			s.rplidarMeasures[int(measure.GetAngle())] = measure
+
+			// Calculate the average distances
 			averageDistances, err := gorplidarsdkhandler.GetAverageDistanceFromAllDirections(
-				measures,
+				&s.rplidarMeasures,
 				AverageAngleWidth,
 			)
 			if err != nil {
 				s.rplidarHandlerMutex.Unlock()
-				return fmt.Errorf(
-					"average distances could not be calculated: %w",
-					err,
-				)
-			}
-
-			// Check if the handler current average distances is not nil
-			if s.rplidarAverageDistances == nil {
-				// Initialize the average distances change map
-				s.rplidarAverageDistancesChange = make(
-					map[gorplidarsdkhandler.CardinalDirection]float64,
-				)
-			} else {
-				// Calculate the change for each direction
-				for direction, newDistance := range averageDistances {
-					oldDistance, ok := s.rplidarAverageDistances[direction]
-					if !ok || oldDistance == 0 {
-						s.rplidarAverageDistancesChange[direction] = 0.0
-						continue
-					}
-
-					// Ignore if there is no change. May happen if it hasn't been updated yet
-					if newDistance == oldDistance {
-						continue
-					}
-
-					// Set the distance change with a maximum limit
-					if newDistance < oldDistance {
-						s.rplidarAverageDistancesChange[direction] = math.Max(
-							newDistance-oldDistance,
-							-MaxDistanceChange,
-						)
-					} else {
-						s.rplidarAverageDistancesChange[direction] = math.Min(
-							newDistance-oldDistance,
-							MaxDistanceChange,
-						)
-					}
-				}
+				return fmt.Errorf("failed to get average distances: %w", err)
 			}
 
 			// Set the average distances and the last update time
 			s.rplidarAverageDistances = averageDistances
+
+			// Calculate the change for each direction
+			for direction, newDistance := range averageDistances {
+				oldDistance, ok := s.rplidarAverageDistances[direction]
+				if !ok || oldDistance == 0 {
+					s.rplidarAverageDistancesChange[direction] = 0.0
+					continue
+				}
+
+				// Ignore if there is no change. May happen if it hasn't been updated yet
+				if newDistance == oldDistance {
+					continue
+				}
+
+				// Set the distance change with a maximum limit
+				if newDistance < oldDistance {
+					s.rplidarAverageDistancesChange[direction] = math.Max(
+						newDistance-oldDistance,
+						-MaxDistanceChange,
+					)
+				} else {
+					s.rplidarAverageDistancesChange[direction] = math.Min(
+						newDistance-oldDistance,
+						MaxDistanceChange,
+					)
+				}
+			}
 
 			// Get the average common distances
 			s.southSoutheastAverageDistance = s.rplidarAverageDistances[gorplidarsdkhandler.CardinalDirectionSouthSoutheast]
@@ -376,6 +388,17 @@ func (s *DefaultService) Run(
 
 	// Set running to true
 	s.isRunning.Store(true)
+
+	// Reset the measures
+	s.rplidarMeasures = [360]*gorplidarsdkhandler.Measure{}
+
+	// Reset the average distances
+	s.rplidarAverageDistances = make(map[gorplidarsdkhandler.CardinalDirection]float64)
+
+	// Reset the average distances change map
+	s.rplidarAverageDistancesChange = make(
+		map[gorplidarsdkhandler.CardinalDirection]float64,
+	)
 
 	s.mutex.Unlock()
 

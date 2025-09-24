@@ -15,6 +15,9 @@ var (
 
 	// failedToSetServoAngleMessage is the message printed when setting the servo angle fails
 	failedToSetServoAngleMessage = []byte("Failed to set servo angle:")
+
+	// delayBetweenServoChanges is the delay between each servo change
+	delayBetweenServoChanges = 2 * time.Second
 )
 
 // centerOnError centers the servo and exits the program if there is an error.
@@ -54,11 +57,11 @@ func main() {
 				internalservo.MaxRightAngle,
 			),
 		)
-		time.Sleep(1 * time.Second)
+		time.Sleep(delayBetweenServoChanges)
 
 		// Center the servo for a while
 		centerOnError(internalservo.ServoHandler.SetAngleToCenter())
-		time.Sleep(1 * time.Second)
+		time.Sleep(delayBetweenServoChanges)
 
 		// Start testing the servo to the left
 		centerOnError(
@@ -66,11 +69,11 @@ func main() {
 				internalservo.MaxLeftAngle,
 			),
 		)
-		time.Sleep(1 * time.Second)
+		time.Sleep(delayBetweenServoChanges)
 
 		// Center the servo
 		centerOnError(internalservo.ServoHandler.SetAngleToCenter())
-		time.Sleep(1 * time.Second)
+		time.Sleep(delayBetweenServoChanges)
 
 		// Turn off the LED
 		internalledonboard.OnBoardHandler.SetOff()

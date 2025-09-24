@@ -16,10 +16,10 @@ const (
 	ActuationRange uint16 = 180
 
 	// CenterAngle is the angle that represents the center position of the servo motors.
-	CenterAngle uint16 = 93 // 90, (93)
+	CenterAngle uint16 = 118 // 90, (93 SERVO1), (112 SERVO2)
 
 	// MaxLeftAngle is the maximum left angle for the servo motors.
-	MaxLeftAngle uint16 = 35 // (35)
+	MaxLeftAngle uint16 = 30 // (35)
 
 	// MaxRightAngle is the maximum right angle for the servo motors.
 	MaxRightAngle uint16 = 30 // (30)
