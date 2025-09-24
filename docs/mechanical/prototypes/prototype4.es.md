@@ -1,6 +1,59 @@
-# Prototipo 4 
+# Prototipo 4 {:#prototype4}
 
-## Lista de Materiales
+## Introducción
+
+Este prototipo de Klevor es el fruto de un arduo trabajo enfocado en mejorar su eficiencia a la hora de realizar los desafíos que depara esta edición de la WRO. A lo largo de estas mejoras, hemos priorizado la ingeniería mecánica para superar las limitaciones de prototipos anteriores y optimizar su desempeño.
+
+Desde el primer concepto, Klevor fue pensadocon una idea clara. Se estableció que su cerebro sería una Raspberry Pi 5, una decisión que nos permitió añadir capacidades de inteligencia artificial con un AI HAT+ y una Raspberry Pi Cam 3 para la detección precisa de objetos. Para la navegación, utilizamos el sensor RPLidar C1, que proporciona una detección en múltiples ángulos.
+
+Klevor utiliza un sistema de tracción 4x4 para maximizar la fuerza y el control. Además, implementamos un sistema de cruce Ackermann, que optimiza el ángulo de giro de las ruedas. Este sistema, conocido por su uso en automóviles, alinea las ruedas de dirección de manera que todas giren alrededor de un punto común, lo que principalmente mejora la estabilidad durante los giros.
+
+Para construir las partes únicas de nuestro robot, como las bases y los soportes, usamos un programa de diseño llamado Fusion360. Con este programa, pudimos crear cada pieza desde cero y luego imprimirlas en 3D. Gracias esto, pudimos tener más margen de error, o corregir más rapido, logrando un diseño óptimo.
+
+A lo largo la explicación de este prototipo, detallaremos el trayecto de Klevor, desde las primeras ideas de sus componentes hasta la creación de soluciones que ayudaron con nuestros problemas de potencia, tracción y peso.
+
+## Cambios
+Para mejorar el rendimiento y la eficiencia de Klevor, hemos implementado varios cambios en su diseño. Estas mejoras se enfocan en optimizar la tracción, la potencia del motor y la distribución del peso.
+
+- Nuevo chasis y ruedas
+
+El nuevo chasis de Klevor fue diseñado específicamente para integrar de manera eficiente los nuevos componentes, asegurando que cada uno tenga el espacio adecuado para su funcionamiento. La principal razón para este rediseño fue la incorporación de nuestras nuevas ruedas de aluminio. A diferencia de los prototipos anteriores, estas ruedas tienen un diámetro y ancho mayores, y cuentan con un caucho más grueso y liso. Este diseño le proporciona a Klevor un mejor agarre en superficies planas, corrigiendo problemas de tracción que teníamos anteriormente.
+
+- Mayor torque y eficiencia motriz
+
+Hemos reemplazado el motor anterior (INJORA 48T) por uno con mayor torque. Este cambio nos permite aprovechar al máximo la velocidad del motor, que alcanza las 20,000 RPM, sin necesidad de un sistema para reducir las revoluciones por minuto (RPM).
+
+- Reducción de peso
+
+Otro cambio significativo es la sustitución de la fuente de alimentación. En prototipos anteriores, utilizábamos un power bank de casi 600g (Shargeek Storm 2), lo que limitaba las modificaciones de diseño. Ahora, con un nuevo power bank de solo 350g, hemos logrado una reducción considerable del peso. Esta mejora nos dio más libertad para optimizar el chasis sin tener que preocuparnos tanto por el peso total del robot.
+
+## ¿Cómo diseñamos a Klevor?
+
+Primeramente pensamos en ¿qué necesitamos para tener un robot eficiente? A partir de eso, se estableció una idea clara, un robot programado en una Rasperry Pi 5, lo que nos permitiría posteriormente usar un Raspberry PI AI HAT+ y entrenar a nuestra Raspberry Pi Cam 3 mediante inteligencia artificial, lo que definitivamente nos ayudaría a tener un mejor rendimiento en el desafío cerrado, y para que Klevor detecte los objetos a su alerededor, sensores capaces de detectar en varios ángulos, es por eso que desde nuestro segundo prototipo empezamos a usar el RPLidar C1. En cuanto a mecánica, desde el principio quisimos usar un sistema de tracción 4x4, y un sistema de cruce Ackermann.
+
+Para lograr hacer que todo esto funcionase, pensamos en cada componente que teníamos que usar, para construir bases y soportes para los mismos, decidimos que una buena opción era imprimir estas piezas con una impresora 3D, más específicamente con un filamento tipo PTEG, el cual es bastante resistente, no muy costoso y fácil de conseguir, lo que nos permitiría hacer varias pruebas.
+
+Todas nuestras piezas impresas fueros creadas desde 0, diseñadas en un programa de diseño llamado Fusion360, el cual fué de ayuda en varios aspectos, ya que podíamos simular las dimensiones de cada componente en el software y así posteriormente crear diferentes diseños para el chasis.
+
+
+## Problemas y soluciones durante el desarrollo
+A pesar de tener una base sólida acerca de lo que queríamos para construir a Klevor, se nos presentaron varios inconvenientes durante la construcción del mismo, para el primer prototipo de Klevor decidimos usar un Motor Injora 48T, que pensabamos íba a mover todo nuestro robot, a pesar de tener 20000 RPM, este no contaba con el torque suficiente para hacer a Klevor moverse, por lo que ideamos un sistema reductor de RPM, basándonos en los siguientes principios:
+
+**Cuando un piñón más pequeño (impulsor) mueve uno más grande (impulsado), la velocidad disminuye y el torque aumenta.**
+
+**Cuando uno más grande mueve a uno más pequeño, la velocidad aumenta y el torque disminuye.**
+
+**La relación de transmisión o relación de reducción se calcula con la siguiente fórmula:**
+
+![alt text](../../../v-photos/gear-ratio-formula.png)
+
+Esto significa que para aumentar el torque, tenemos que hacer que los piñones con menos dientes muevan a los piñones con más dientes, esto fué la solución para el problema de torque de nuestro robot.
+
+Posteriormente tuvimos que hacer que Klevor fuese más liviano, la razón era el cambio de ruedas antes mencionado, ya que los rines de las que fueron utilizadas en prototipos anteriores eran impresas en 3D, lo que hacía que se desgastasen rápido. El nuevo modelo de rueda que estamos usando tiene un rin hecho de aluminio y un caucho mas grueso, lo que a su vez excedería el peso máximo establecido por la WRO, lo que hicimos para solucionar este problema y a la vez añadir más velocidad a Klevor fue cambiar el motor, uno que también cuenta con 20000 RPM, pero con torque suficiente, lo que significa que el sistema reductor antes mencionado fué descartado. 
+
+Otra falla que presentó Klevor durante su desarrollo fué que el ángulo de giro de las ruedas era limitado, lo que suponía una dificultad a la hora de cruzar. Para corregirlo, modificamos la forma del trapecio de dirección del sistema de cruce Ackermann, el cual está compuesto por los dos brazos de dirección y la barra de acoplamiento que los une, al ajustar la posición y el ángulo de estos componentes, logramos que el ángulo de giro de Klevor incrementara significativamente.
+
+## Lista de Materiales {:#materials-list}
 
 | Componente                                                                                                           | Unidad | Costo por Unidad ($) | Total ($) |
 |----------------------------------------------------------------------------------------------------------------------|--------|----------------------|-----------|
