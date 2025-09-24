@@ -2,9 +2,11 @@ package challenges
 
 import (
 	"context"
+	"fmt"
 	"math"
 	"time"
 
+	goconcurrentlogger "github.com/ralvarezdev/go-concurrent-logger"
 	gorplidarsdkhandler "github.com/ralvarezdev/go-rplidar-sdk-handler"
 )
 
@@ -19,7 +21,16 @@ const (
 	GyroscopeTolerance = 2.0
 
 	// YawDegreesServoAngleRatio is the ratio between yaw degrees and servo angle
-	YawDegreesServoAngleRatio = 2.0
+	YawDegreesServoAngleRatio = 0.015
+
+	// YawDegreesMinServoAngleChange is the minimum servo angle percentage change for yaw degrees correction
+	YawDegreesMinServoAngleChange = 0.05
+
+	// MaxServoAngleCorrectionPercentage is the maximum servo angle percentage for correction
+	MaxServoAngleCorrectionPercentage = 0.8
+
+	// MinServoAngleCorrectionPercentage is the minimum servo angle percentage for correction
+	MinServoAngleCorrectionPercentage = 0.25
 )
 
 // centerByRPLiDARHandler centers the robot using RPLiDAR data
@@ -92,6 +103,7 @@ func centerByRPLiDARHandler(
 // ctx: The context to use for the challenge
 // service: The service to use for the challenge
 // last90DegreeTurns: The last recorded number of 90-degree turns
+// loggerProducer: The logger producer to use for logging
 //
 // Returns:
 //
@@ -99,8 +111,17 @@ func centerByRPLiDARHandler(
 func centerByGyroscopeHandler(
 	ctx context.Context,
 	service Service,
-	last90DegreeTurns uint,
+	last90DegreeTurns int,
+	loggerProducer goconcurrentlogger.LoggerProducer,
 ) error {
+	// If there are no 90-degree turns recorded, center the servo and return
+	if last90DegreeTurns == 0 {
+		if err := service.SetServoToCenter(ctx); err != nil {
+			return err
+		}
+		return nil
+	}
+
 	// Get the latest accumulated yaw degrees value
 	accumulatedYawDegrees := service.GetAccumulatedYawDegrees()
 
@@ -125,18 +146,56 @@ func centerByGyroscopeHandler(
 	// Check to which side the robot should turn to center itself
 	gyroOrientation := service.GetGyroscopeOrientation()
 	if gyroOrientation.IsToRight(deltaYawDegrees) {
+		// Calculate the servo angle based on the delta yaw degrees
+		angle := math.Max(MinServoAngleCorrectionPercentage, math.Min(MaxServoAngleCorrectionPercentage, YawDegreesServoAngleRatio * math.Abs(deltaYawDegrees)))
+
+		// Avoid small unnecessary servo adjustments
+		if service.GetServoDirection() == ServoDirectionLeft && math.Abs(service.GetServoAngle() - angle) < YawDegreesMinServoAngleChange {
+			return nil
+		}
+
+		// Set the servo to the right based on the delta yaw degrees
 		if err := service.SetServoToLeft(
 			ctx,
-			math.Min(1, YawDegreesServoAngleRatio*math.Abs(deltaYawDegrees)),
+			angle,
 		); err != nil {
 			return err
 		}
+
+		// Log the centering action
+		if loggerProducer != nil {
+			loggerProducer.Info(
+				fmt.Sprintf(
+					"Centering action: Turned servo left. Yaw degrees: %f",
+					deltaYawDegrees,
+				),
+			)
+		}
 	} else if gyroOrientation.IsToLeft(deltaYawDegrees) {
+		// Calculate the servo angle based on the delta yaw degrees
+		angle := math.Max(MinServoAngleCorrectionPercentage, math.Min(MaxServoAngleCorrectionPercentage, YawDegreesServoAngleRatio * math.Abs(deltaYawDegrees)))
+
+		// Avoid small unnecessary servo adjustments
+		if service.GetServoDirection() == ServoDirectionRight && math.Abs(service.GetServoAngle() - angle) < YawDegreesMinServoAngleChange {
+			return nil
+		}
+
+		// Set the servo to the right based on the delta yaw degrees
 		if err := service.SetServoToRight(
 			ctx,
-			math.Min(1, YawDegreesServoAngleRatio*math.Abs(deltaYawDegrees)),
+			angle,
 		); err != nil {
 			return err
+		}
+
+		// Log the centering action
+		if loggerProducer != nil {
+			loggerProducer.Info(
+				fmt.Sprintf(
+					"Centering action: Turned servo right. Yaw degrees: %f",
+					deltaYawDegrees,
+				),
+			)
 		}
 	}
 	return nil

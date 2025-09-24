@@ -10,6 +10,11 @@ import (
 	gorplidarsdkhandler "github.com/ralvarezdev/go-rplidar-sdk-handler"
 )
 
+const (
+	// frontDistanceStartTurnThreshold is the distance threshold to start turning
+	SafetyFrontDistanceStartTurnThreshold = 500.0
+)
+
 // turnHandler handles the turning logic based on BNO08x sensor data.
 //
 // Parameters:
@@ -19,8 +24,7 @@ import (
 // last90DegreeTurns: A pointer to the last recorded number of 90-degree turns
 // isTurning: A pointer to a boolean indicating if the robot is currently turning
 // lastTurningTime: A pointer to the last time the robot started turning
-// direction: A pointer to the current servo direction
-// handlerLoggerProducer: The logger producer to use for logging
+// loggerProducer: The logger producer to use for logging
 //
 // Returns:
 //
@@ -28,11 +32,10 @@ import (
 func turnHandler(
 	ctx context.Context,
 	service Service,
-	last90DegreeTurns *uint,
+	last90DegreeTurns *int,
 	isTurning *bool,
 	lastTurningTime *time.Time,
-	direction *ServoDirection,
-	handlerLoggerProducer goconcurrentlogger.LoggerProducer,
+	loggerProducer goconcurrentlogger.LoggerProducer,
 ) (bool, error) {
 	// Check if the service is nil
 	if service == nil {
@@ -54,11 +57,6 @@ func turnHandler(
 		return false, ErrNilLastTurningTime
 	}
 
-	// Check if the direction is nil
-	if direction == nil {
-		return false, ErrNilDirection
-	}
-
 	// Omit if it's not turning
 	if !*isTurning {
 		return false, nil
@@ -69,11 +67,11 @@ func turnHandler(
 
 	// Check if the turns have increased
 	if turns > *last90DegreeTurns {
-		handlerLoggerProducer.Info(
+		loggerProducer.Info(
 			fmt.Sprintf(
 				"Detected a 90-degree turn. Current turns: %d, Last turns: %d",
 				turns,
-				last90DegreeTurns,
+				*last90DegreeTurns,
 			),
 		)
 
@@ -84,6 +82,12 @@ func turnHandler(
 
 		// Update the last turns value
 		*last90DegreeTurns = turns
+
+		// Update the last turning time
+		*lastTurningTime = time.Now()
+
+		// Reset the turning state
+		*isTurning = false
 
 		return true, nil
 	}
@@ -100,6 +104,7 @@ func turnHandler(
 // isTurning: A pointer to a boolean indicating if the robot is currently turning
 // lastTurningTime: The last time the robot started turning
 // direction: A pointer to the current servo direction
+// loggerProducer: The logger producer to use for logging
 //
 // Returns:
 //
@@ -107,10 +112,11 @@ func turnHandler(
 func detectTurnHandler(
 	ctx context.Context,
 	service Service,
-	last90DegreeTurns *uint,
+	last90DegreeTurns *int,
 	isTurning *bool,
 	lastTurningTime *time.Time,
 	direction *ServoDirection,
+	loggerProducer goconcurrentlogger.LoggerProducer,
 ) error {
 	// Check if the service is nil
 	if service == nil {
@@ -153,12 +159,21 @@ func detectTurnHandler(
 	// Check if the robot should turn left or right based on the side distances
 	if *last90DegreeTurns == 0 ||
 		(!math.IsNaN(northAverageDistance) &&
-			northAverageDistance < northDistanceChange &&
 			northAverageDistance+northDistanceChange <= FrontStartTurnDistanceThreshold) {
 		if time.Since(*lastTurningTime) >= MinTimeBetweenTurns {
 			if (*direction == ServoDirectionRight || *direction == ServoDirectionNil) &&
 				(!math.IsNaN(eastAverageDistance) && eastAverageDistance >= SideDistanceThreshold) {
 				*isTurning = true
+
+				// Log the turn detection
+				if loggerProducer != nil {
+					loggerProducer.Info(
+						fmt.Sprintf(
+							"Detected a turn to the right. Current turns: %d",
+							*last90DegreeTurns,
+						),
+					)
+				}
 
 				// Set the direction if it's nil
 				if *direction == ServoDirectionNil {
@@ -168,19 +183,75 @@ func detectTurnHandler(
 				(!math.IsNaN(westAverageDistance) && westAverageDistance >= SideDistanceThreshold) {
 				*isTurning = true
 
+				// Log the turn detection
+				if loggerProducer != nil {
+					loggerProducer.Info(
+						fmt.Sprintf(
+							"Detected a turn to the left. Current turns: %d",
+							*last90DegreeTurns,
+						),
+					)
+				}
+
 				// Set the direction if it's nil
 				if *direction == ServoDirectionNil {
 					*direction = ServoDirectionLeft
 				}
 			}
-			if *isTurning {
-				if err := service.SetServoAngle(
-					ctx,
-					ServoBigTurnAnglePercentage,
-					*direction,
-				); err != nil {
-					return err
+		}
+
+		// Checlk if it's turning
+		if !*isTurning {
+			return nil
+		}
+
+		// Check if the front distance is below the turn threshold
+		if !math.IsNaN(northAverageDistance) && northAverageDistance+northDistanceChange < SafetyFrontDistanceStartTurnThreshold {
+			// Go backward if the front distance is below the threshold
+			if err := service.SetMotorBackward(
+				ctx,
+				MotorBackwardFastPercentage,
+			); err != nil {
+				return err
+			}
+
+			// Wait until the front distance is above the threshold
+			reached := false
+			for !reached {
+				time.Sleep(UpdateDelay)
+
+				select {
+				case <-ctx.Done():
+					return ctx.Err()
+				default:
+					// Get the front distance and distance change
+					northAverageDistance = service.GetNorthAverageDistance()
+					northDistanceChange = FrontDistanceChange * service.GetRPLiDARAverageDistanceChange(gorplidarsdkhandler.CardinalDirectionNorth)
+
+					// If the front distance is above the threshold, stop moving backward
+					if !math.IsNaN(northAverageDistance) && northAverageDistance+northDistanceChange >= SafetyFrontDistanceStartTurnThreshold {
+						if loggerProducer != nil {
+							loggerProducer.Info("Front distance is safe to turn.")
+						}
+						if err := service.SetMotorStop(ctx); err != nil {
+							return err
+						}
+
+						// Set reached flag as true
+						reached = true
+					}
 				}
+			}
+		}
+
+		// If it's turning, set the servo to the turn angle
+		if *isTurning {
+			if err := service.SetServoAngle(
+				ctx,
+				ServoBigTurnAnglePercentage,
+				*direction,
+			); err != nil {
+				return err
 			}
 		}
 

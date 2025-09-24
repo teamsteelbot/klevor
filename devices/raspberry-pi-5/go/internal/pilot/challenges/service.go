@@ -1034,7 +1034,7 @@ func (s *DefaultService) GetNorthAverageDistance() float64 {
 // Returns:
 //
 // The number of 360 degree turns made by the robot
-func (s *DefaultService) Get360DegreeTurns() uint {
+func (s *DefaultService) Get360DegreeTurns() int {
 	return s.usbCDCHandler.Get360DegreeTurns()
 }
 
@@ -1043,7 +1043,7 @@ func (s *DefaultService) Get360DegreeTurns() uint {
 // Returns:
 //
 // The number of 90 degree turns made by the robot
-func (s *DefaultService) Get90DegreeTurns() uint {
+func (s *DefaultService) Get90DegreeTurns() int {
 	return s.usbCDCHandler.Get90DegreeTurns()
 }
 
@@ -1052,7 +1052,7 @@ func (s *DefaultService) Get90DegreeTurns() uint {
 // Returns:
 //
 // The number of 45 degree turns made by the robot
-func (s *DefaultService) Get45DegreeTurns() uint {
+func (s *DefaultService) Get45DegreeTurns() int {
 	return s.usbCDCHandler.Get45DegreeTurns()
 }
 
@@ -1061,7 +1061,7 @@ func (s *DefaultService) Get45DegreeTurns() uint {
 // Returns:
 //
 // The number of 30 degree turns made by the robot
-func (s *DefaultService) Get30DegreeTurns() uint {
+func (s *DefaultService) Get30DegreeTurns() int {
 	return s.usbCDCHandler.Get30DegreeTurns()
 }
 

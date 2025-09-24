@@ -15,10 +15,28 @@ const (
 	StopDistanceThreshold = 1500.0
 
 	// SideDistanceThreshold is the distance threshold for side sensors
-	SideDistanceThreshold = 1750.0
+	SideDistanceThreshold = 1500.0
 
 	// FrontStartTurnDistanceThreshold is the distance threshold to start turning
 	FrontStartTurnDistanceThreshold = 1000.0 // 500.0, 600.0, 650.0, 900.0
+)
+
+var (
+	// safetyFrontDistanceTurningCardinalDirections are the cardinal directions to check for safety front distance when turning
+	safetyFrontDistanceTurningCardinalDirections = []gorplidarsdkhandler.CardinalDirection{
+		gorplidarsdkhandler.CardinalDirectionNorthwest,
+		gorplidarsdkhandler.CardinalDirectionNorthNorthwest,
+		gorplidarsdkhandler.CardinalDirectionNorth,
+		gorplidarsdkhandler.CardinalDirectionNorthNortheast,
+		gorplidarsdkhandler.CardinalDirectionNortheast,
+	}
+
+	// safetyFrontDistanceStraightCardinalDirections are the cardinal directions to check for safety front distance when going straight
+	safetyFrontDistanceStraightCardinalDirections = []gorplidarsdkhandler.CardinalDirection{
+		gorplidarsdkhandler.CardinalDirectionNorthNorthwest,
+		gorplidarsdkhandler.CardinalDirectionNorth,
+		gorplidarsdkhandler.CardinalDirectionNorthNortheast,
+	}
 )
 
 type (
@@ -98,31 +116,33 @@ func (h *ChallengeWithoutObstaclesHandler) Run(ctx context.Context) error {
 	}
 
 	// Start the challenge without obstacles handler
-	var isTurning bool
-	var last90DegreeTurns uint
-	var lastIterationTime time.Time
+	isTurning := false
+	last90DegreeTurns := 0
+	var lastUpdateTime time.Time
 	var lastTurningTime time.Time
 	direction := ServoDirectionNil
 	for last90DegreeTurns < Algorithm90DegreeTurns {
 		// Set the last iteration time
-		time.Sleep(UpdateDelay - time.Since(lastIterationTime))
-		lastIterationTime = time.Now()
+		time.Sleep(UpdateDelay - time.Since(lastUpdateTime))
+		lastUpdateTime = time.Now()
 
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
 		default:
 			// Check if the front distance is below the safety threshold
+			var cardinalDirections []gorplidarsdkhandler.CardinalDirection
+			if isTurning {
+				cardinalDirections = safetyFrontDistanceTurningCardinalDirections
+			} else {
+				cardinalDirections = safetyFrontDistanceStraightCardinalDirections
+			}
 			reached, err := safetyFrontDistanceHandler(
 				ctx,
 				h.service,
 				h.handlerLoggerProducer,
 				isTurning,
-				gorplidarsdkhandler.CardinalDirectionNorthwest,
-				gorplidarsdkhandler.CardinalDirectionNorthNorthwest,
-				gorplidarsdkhandler.CardinalDirectionNorth,
-				gorplidarsdkhandler.CardinalDirectionNorthNortheast,
-				gorplidarsdkhandler.CardinalDirectionNortheast,
+				cardinalDirections...,
 			)
 			if err != nil {
 				return err
@@ -131,6 +151,7 @@ func (h *ChallengeWithoutObstaclesHandler) Run(ctx context.Context) error {
 				break
 			}
 
+			// If the robot was turning, check if it should stop turning
 			// Check for the current turn and center the servo if necessary
 			turnCompleted, err := turnHandler(
 				ctx,
@@ -138,7 +159,6 @@ func (h *ChallengeWithoutObstaclesHandler) Run(ctx context.Context) error {
 				&last90DegreeTurns,
 				&isTurning,
 				&lastTurningTime,
-				&direction,
 				h.handlerLoggerProducer,
 			)
 			if err != nil {
@@ -156,6 +176,7 @@ func (h *ChallengeWithoutObstaclesHandler) Run(ctx context.Context) error {
 				&isTurning,
 				&lastTurningTime,
 				&direction,
+				h.handlerLoggerProducer,
 			); err != nil {
 				return err
 			}
@@ -168,6 +189,7 @@ func (h *ChallengeWithoutObstaclesHandler) Run(ctx context.Context) error {
 				ctx,
 				h.service,
 				last90DegreeTurns,
+				h.handlerLoggerProducer,
 			); err != nil {
 				return err
 			}

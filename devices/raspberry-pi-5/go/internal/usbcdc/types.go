@@ -126,8 +126,8 @@ func (y *YawDegreesHandler) getNDegreeTurns(n float64) float64 {
 // Returns:
 //
 // The total number of 360-degree turns made.
-func (y *YawDegreesHandler) Get360DegreeTurns() uint {
-	return uint(y.getNDegreeTurns(360))
+func (y *YawDegreesHandler) Get360DegreeTurns() int {
+	return int(y.getNDegreeTurns(360))
 }
 
 // Get90DegreeTurns returns the total number of 90-degree turns made.
@@ -135,8 +135,8 @@ func (y *YawDegreesHandler) Get360DegreeTurns() uint {
 // Returns:
 //
 // The total number of 90-degree turns made.
-func (y *YawDegreesHandler) Get90DegreeTurns() uint {
-	return uint(y.getNDegreeTurns(90))
+func (y *YawDegreesHandler) Get90DegreeTurns() int {
+	return int(y.getNDegreeTurns(90))
 }
 
 // Get45DegreeTurns returns the total number of 45-degree turns made.
@@ -144,8 +144,8 @@ func (y *YawDegreesHandler) Get90DegreeTurns() uint {
 // Returns:
 //
 // The total number of 45-degree turns made.
-func (y *YawDegreesHandler) Get45DegreeTurns() uint {
-	return uint(y.getNDegreeTurns(45))
+func (y *YawDegreesHandler) Get45DegreeTurns() int {
+	return int(y.getNDegreeTurns(45))
 }
 
 // Get30DegreeTurns returns the total number of 30-degree turns made.
@@ -153,8 +153,8 @@ func (y *YawDegreesHandler) Get45DegreeTurns() uint {
 // Returns:
 //
 // The total number of 30-degree turns made.
-func (y *YawDegreesHandler) Get30DegreeTurns() uint {
-	return uint(y.getNDegreeTurns(30))
+func (y *YawDegreesHandler) Get30DegreeTurns() int {
+	return int(y.getNDegreeTurns(30))
 }
 
 // GetAccumulatedYawDegrees returns the accumulated yaw in degrees.
@@ -1458,13 +1458,13 @@ func (h *DefaultHandler) ReceivedChallenge() internal.Challenge {
 // Returns:
 //
 // The total number of 360-degree turns made.
-func (h *DefaultHandler) Get360DegreeTurns() uint {
+func (h *DefaultHandler) Get360DegreeTurns() int {
 	h.mutex.Lock()
 	defer h.mutex.Unlock()
 	if h.yawDegreesHandler == nil {
 		return 0
 	}
-	return uint(h.yawDegreesHandler.getNDegreeTurns(360))
+	return h.yawDegreesHandler.Get360DegreeTurns()
 }
 
 // Get90DegreeTurns returns the total number of 90-degree turns made.
@@ -1472,13 +1472,13 @@ func (h *DefaultHandler) Get360DegreeTurns() uint {
 // Returns:
 //
 // The total number of 90-degree turns made.
-func (h *DefaultHandler) Get90DegreeTurns() uint {
+func (h *DefaultHandler) Get90DegreeTurns() int {
 	h.mutex.Lock()
 	defer h.mutex.Unlock()
 	if h.yawDegreesHandler == nil {
 		return 0
 	}
-	return uint(h.yawDegreesHandler.getNDegreeTurns(90))
+	return h.yawDegreesHandler.Get90DegreeTurns()
 }
 
 // Get45DegreeTurns returns the total number of 45-degree turns made.
@@ -1486,13 +1486,13 @@ func (h *DefaultHandler) Get90DegreeTurns() uint {
 // Returns:
 //
 // The total number of 45-degree turns made.
-func (h *DefaultHandler) Get45DegreeTurns() uint {
+func (h *DefaultHandler) Get45DegreeTurns() int {
 	h.mutex.Lock()
 	defer h.mutex.Unlock()
 	if h.yawDegreesHandler == nil {
 		return 0
 	}
-	return uint(h.yawDegreesHandler.getNDegreeTurns(45))
+	return h.yawDegreesHandler.Get45DegreeTurns()
 }
 
 // Get30DegreeTurns returns the total number of 30-degree turns made.
@@ -1500,13 +1500,13 @@ func (h *DefaultHandler) Get45DegreeTurns() uint {
 // Returns:
 //
 // The total number of 30-degree turns made.
-func (h *DefaultHandler) Get30DegreeTurns() uint {
+func (h *DefaultHandler) Get30DegreeTurns() int {
 	h.mutex.Lock()
 	defer h.mutex.Unlock()
 	if h.yawDegreesHandler == nil {
 		return 0
 	}
-	return uint(h.yawDegreesHandler.getNDegreeTurns(30))
+	return h.yawDegreesHandler.Get30DegreeTurns()
 }
 
 // GetAccumulatedYawDegrees returns the accumulated yaw degrees.

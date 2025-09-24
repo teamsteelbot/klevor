@@ -9,7 +9,7 @@ require (
 	github.com/ralvarezdev/tinygo-escmotor v0.2.5
 	github.com/ralvarezdev/tinygo-logger v0.0.14
 	github.com/ralvarezdev/tinygo-pullup v0.0.2
-	github.com/ralvarezdev/tinygo-servo v0.2.0
+	github.com/ralvarezdev/tinygo-servo v0.2.1
 	github.com/soypat/cyw43439 v0.0.0-20250505012923-830110c8f4af
 )
 

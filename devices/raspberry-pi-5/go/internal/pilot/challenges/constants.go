@@ -12,7 +12,7 @@ const (
 	ChallengeHandlerLoggerProducerTag = "CHALLENGE_HANDLER"
 
 	// Algorithm90DegreeTurns is the number of 90 degree turns in the algorithm
-	Algorithm90DegreeTurns uint = 12
+	Algorithm90DegreeTurns = 12
 
 	// MinTimeBetweenTurns is the minimum time between turns
 	MinTimeBetweenTurns = 2 * time.Second

@@ -52,10 +52,10 @@ type (
 		GetNorthAverageDistance() float64
 		GetRPLiDARAverageDistance(cardinalDirection gorplidarsdkhandler.CardinalDirection) float64
 		GetRPLiDARAverageDistanceChange(cardinalDirection gorplidarsdkhandler.CardinalDirection) float64
-		Get360DegreeTurns() uint
-		Get90DegreeTurns() uint
-		Get45DegreeTurns() uint
-		Get30DegreeTurns() uint
+		Get360DegreeTurns() int
+		Get90DegreeTurns() int
+		Get45DegreeTurns() int
+		Get30DegreeTurns() int
 		GetAccumulatedYawDegrees() float64
 		GetCLIPClassification() *gohailocliphandler.Classification
 	}

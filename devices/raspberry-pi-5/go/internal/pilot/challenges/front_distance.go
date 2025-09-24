@@ -24,6 +24,7 @@ const (
 //
 // ctx: The context to use for the challenge
 // service: The service to use for the challenge
+// loggerProducer: The logger producer to use for logging
 // isTurning: A flag indicating if the robot is currently turning
 // cardinalDirections: The cardinal directions to check the front distances (e.g., North, North-Northeast, North-Northwest)
 //
@@ -33,7 +34,7 @@ const (
 func safetyFrontDistanceHandler(
 	ctx context.Context,
 	service Service,
-	handlerLoggerProducer goconcurrentlogger.LoggerProducer,
+	loggerProducer goconcurrentlogger.LoggerProducer,
 	isTurning bool,
 	cardinalDirections ...gorplidarsdkhandler.CardinalDirection,
 ) (bool, error) {
@@ -75,8 +76,8 @@ func safetyFrontDistanceHandler(
 	previousMotorSpeed := service.GetMotorSpeed()
 
 	// Log the warning
-	if handlerLoggerProducer != nil {
-		handlerLoggerProducer.Warning(
+	if loggerProducer != nil {
+		loggerProducer.Warning(
 			fmt.Sprintf(
 				"Cardinal direction %s front distance is below the safety threshold %f: %f",
 				cardinalDirectionTrigger.String(),
@@ -123,8 +124,8 @@ func safetyFrontDistanceHandler(
 			}
 
 			if frontDistanceThresholdReached {
-				if handlerLoggerProducer != nil {
-					handlerLoggerProducer.Info("Safety front distance threshold reached.")
+				if loggerProducer != nil {
+					loggerProducer.Info("Safety front distance threshold reached.")
 				}
 				safe = true
 			}
