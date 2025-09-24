@@ -15,24 +15,6 @@ const (
 	StopDistanceThreshold = 1500.0
 )
 
-var (
-	// safetyFrontDistanceTurningCardinalDirections are the cardinal directions to check for safety front distance when turning
-	safetyFrontDistanceTurningCardinalDirections = []gorplidarsdkhandler.CardinalDirection{
-		gorplidarsdkhandler.CardinalDirectionNorthwest,
-		gorplidarsdkhandler.CardinalDirectionNorthNorthwest,
-		gorplidarsdkhandler.CardinalDirectionNorth,
-		gorplidarsdkhandler.CardinalDirectionNorthNortheast,
-		gorplidarsdkhandler.CardinalDirectionNortheast,
-	}
-
-	// safetyFrontDistanceStraightCardinalDirections are the cardinal directions to check for safety front distance when going straight
-	safetyFrontDistanceStraightCardinalDirections = []gorplidarsdkhandler.CardinalDirection{
-		gorplidarsdkhandler.CardinalDirectionNorthNorthwest,
-		gorplidarsdkhandler.CardinalDirectionNorth,
-		gorplidarsdkhandler.CardinalDirectionNorthNortheast,
-	}
-)
-
 type (
 	// ChallengeWithoutObstaclesHandler is the type for the challenge without obstacles handler
 	ChallengeWithoutObstaclesHandler struct {
@@ -41,7 +23,6 @@ type (
 		handlerLoggerProducer goconcurrentlogger.LoggerProducer
 		debug                 bool
 		servoAngle            float64
-		servoDirection        ServoDirection
 		motorSpeed            float64
 		motorDirection        float64
 	}
@@ -124,18 +105,13 @@ func (h *ChallengeWithoutObstaclesHandler) Run(ctx context.Context) error {
 		case <-ctx.Done():
 			return ctx.Err()
 		default:
-			// Check if the front distance is below the safety threshold
-			var cardinalDirections []gorplidarsdkhandler.CardinalDirection
-			if isTurning {
-				cardinalDirections = safetyFrontDistanceTurningCardinalDirections
-			} else {
-				cardinalDirections = safetyFrontDistanceStraightCardinalDirections
-			}
-			reached, err := safetyFrontDistanceHandler(
+			// Check if the robot can collide with an object or a wall
+			cardinalDirections := getFrontDistanceCardinalDirections(isTurning)
+			reached, err := collisionHandler(
 				ctx,
 				h.service,
-				h.handlerLoggerProducer,
 				isTurning,
+				h.handlerLoggerProducer,
 				cardinalDirections...,
 			)
 			if err != nil {
@@ -189,9 +165,10 @@ func (h *ChallengeWithoutObstaclesHandler) Run(ctx context.Context) error {
 			}
 
 			// Move forward
-			motorSpeed := MotorForwardNormalPercentage
-			if h.servoDirection == ServoDirectionStraight && time.Since(lastTurningTime) >= MinTimeToCorrectAfterTurn {
-				motorSpeed = MotorForwardFastPercentage
+			motorSpeed := MotorForwardNormalSpeed
+			servoDirection := h.service.GetServoDirection()
+			if servoDirection == ServoDirectionStraight && time.Since(lastTurningTime) >= MinTimeToCorrectAfterTurn {
+				motorSpeed = MotorForwardFastSpeed
 			}
 			if err = h.service.SetMotorForward(
 				ctx,
@@ -211,7 +188,7 @@ func (h *ChallengeWithoutObstaclesHandler) Run(ctx context.Context) error {
 	}
 	if err = h.service.SetMotorForward(
 		ctx,
-		MotorForwardNormalPercentage,
+		MotorForwardNormalSpeed,
 	); err != nil {
 		return err
 	}

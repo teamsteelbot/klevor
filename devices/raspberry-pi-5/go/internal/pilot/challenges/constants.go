@@ -2,6 +2,8 @@ package challenges
 
 import (
 	"time"
+
+	gorplidarsdkhandler "github.com/ralvarezdev/go-rplidar-sdk-handler"
 )
 
 const (
@@ -26,35 +28,44 @@ const (
 	// MaxDistanceChange is the maximum distance change for safety calculations
 	MaxDistanceChange = 75.0
 
-	// MotorBackwardFastPercentage is the percentage of the maximum speed for fast backward motor speed
-	MotorBackwardFastPercentage float64 = 1
+	// MotorBackwardFastSpeed of speed for fast backward motor speed
+	MotorBackwardFastSpeed float64 = 1
 
-	// MotorBackwardNormalPercentage is the percentage of the maximum speed for normal backward motor speed
-	MotorBackwardNormalPercentage float64 = 0.8
+	// MotorBackwardNormalSpeed of speed for normal backward motor speed
+	MotorBackwardNormalSpeed float64 = 0.8
 
-	// MotorBackwardSlowPercentage is the percentage of the maximum speed for slow backward motor speed
-	MotorBackwardSlowPercentage float64 = 0.6
+	// MotorBackwardSlowSpeed of speed for slow backward motor speed
+	MotorBackwardSlowSpeed float64 = 0.6
 
-	// MotorForwardFastPercentage is the percentage of the maximum speed for fast forward motor speed
-	MotorForwardFastPercentage float64 = 1
+	// MotorForwardFastSpeed of speed for fast forward motor speed
+	MotorForwardFastSpeed float64 = 1
 
-	// MotorForwardNormalPercentage is the percentage of the maximum speed for normal forward motor speed
-	MotorForwardNormalPercentage float64 = 0.8
+	// MotorForwardNormalSpeed of speed for normal forward motor speed
+	MotorForwardNormalSpeed float64 = 0.8
 
-	// MotorForwardSlowPercentage is the percentage of the maximum speed for slow forward motor speed
-	MotorForwardSlowPercentage float64 = 0.6
+	// MotorForwardSlowSpeed of speed for slow forward motor speed
+	MotorForwardSlowSpeed float64 = 0.6
 
-	// MotorTurningPercentage is the percentage of the maximum speed for turning motor speed
-	MotorTurningPercentage float64 = 0.8
+	// MotorTurningSpeed of speed for turning motor speed
+	MotorTurningSpeed float64 = 0.8
 
-	// ServoBigTurnAnglePercentage is the percentage of the maximum angle for big turns
-	ServoBigTurnAnglePercentage float64 = 1
+	// ServoBigTurnAngle of angle for big turns
+	ServoBigTurnAngle float64 = 1
 
-	// ServoMediumTurnAnglePercentage is the percentage of the maximum angle for medium turns
-	ServoMediumTurnAnglePercentage float64 = 0.66
+	// ServoMediumTurnAngle of angle for medium turns
+	ServoMediumTurnAngle float64 = 0.66
 
-	// ServoSmallTurnAnglePercentage is the percentage of the maximum angle for small turns
-	ServoSmallTurnAnglePercentage float64 = 0.33
+	// ServoSmallTurnAngle of angle for small turns
+	ServoSmallTurnAngle float64 = 0.33
+
+	// ServoObjectAvoidanceOnFrontAngle is the percentage of the angle for object avoidance on front
+	ServoObjectAvoidanceOnFrontAngle float64 = 0.75
+
+	// ServoObjectAvoidanceOnSameSideAngle of angle for object avoidance on same side
+	ServoObjectAvoidanceOnSameSideAngle float64 = 0.25
+
+	// ServoObjectAvoidanceOnOppositeSideAngle of angle for object avoidance on opposite side
+	ServoObjectAvoidanceOnOppositeSideAngle float64 = 1
 
 	// FrontDistanceChange is the scalar change for the safety front distance calculation
 	FrontDistanceChange = 1.25
@@ -64,4 +75,71 @@ const (
 
 	// SideDistanceChange is the scalar change for the side distance calculation
 	SideDistanceChange = 1.1
+
+	// SafetyFrontDistanceStartThreshold is the distance threshold to start safety mode
+	SafetyFrontDistanceStartThreshold = 150.0
+
+	// SafetyFrontDistanceStopThreshold is the distance threshold to stop safety mode
+	SafetyFrontDistanceStopThreshold = 350.0
+
+	// SafetyBackDistanceThreshold is the distance threshold to stop moving backward
+	SafetyBackDistanceThreshold = 125.0
+)
+
+var (
+	// FrontDistanceTurningCardinalDirections are the cardinal directions to check for safety front distance when turning
+	FrontDistanceTurningCardinalDirections = []gorplidarsdkhandler.CardinalDirection{
+		gorplidarsdkhandler.CardinalDirectionNorthwest,
+		gorplidarsdkhandler.CardinalDirectionNorthNorthwest,
+		gorplidarsdkhandler.CardinalDirectionNorth,
+		gorplidarsdkhandler.CardinalDirectionNorthNortheast,
+		gorplidarsdkhandler.CardinalDirectionNortheast,
+	}
+
+	// FrontDistanceStraightCardinalDirections are the cardinal directions to check for safety front distance when going straight
+	FrontDistanceStraightCardinalDirections = []gorplidarsdkhandler.CardinalDirection{
+		gorplidarsdkhandler.CardinalDirectionNorthNorthwest,
+		gorplidarsdkhandler.CardinalDirectionNorth,
+		gorplidarsdkhandler.CardinalDirectionNorthNortheast,
+	}
+
+	// ObjectDetectionFrontCardinalDirections are the cardinal directions for object detection front distance
+	ObjectDetectionFrontCardinalDirections = []gorplidarsdkhandler.CardinalDirection{
+		gorplidarsdkhandler.CardinalDirectionNorth,
+		gorplidarsdkhandler.CardinalDirectionNorthNortheast,
+		gorplidarsdkhandler.CardinalDirectionNorthNorthwest,
+	}
+
+	// ObjectDetectionLeftCardinalDirections are the cardinal directions for object detection left distance
+	ObjectDetectionLeftCardinalDirections = []gorplidarsdkhandler.CardinalDirection{
+		gorplidarsdkhandler.CardinalDirectionWest,
+		gorplidarsdkhandler.CardinalDirectionWestNorthwest,
+		gorplidarsdkhandler.CardinalDirectionNorthwest,
+	}
+
+	// ObjectDetectionRightCardinalDirections are the cardinal directions for object detection right distance
+	ObjectDetectionRightCardinalDirections = []gorplidarsdkhandler.CardinalDirection{
+		gorplidarsdkhandler.CardinalDirectionEast,
+		gorplidarsdkhandler.CardinalDirectionEastNortheast,
+		gorplidarsdkhandler.CardinalDirectionNortheast,
+	}
+
+	// ObstaclesDetectionCardinalDirections are the cardinal directions to check for obstacles detection
+	ObstaclesDetectionCardinalDirections = []gorplidarsdkhandler.CardinalDirection{
+		gorplidarsdkhandler.CardinalDirectionWest,
+		gorplidarsdkhandler.CardinalDirectionWestNorthwest,
+		gorplidarsdkhandler.CardinalDirectionNorthwest,
+		gorplidarsdkhandler.CardinalDirectionNorthNorthwest,
+		gorplidarsdkhandler.CardinalDirectionNorth,
+		gorplidarsdkhandler.CardinalDirectionNorthNortheast,
+		gorplidarsdkhandler.CardinalDirectionNortheast,
+		gorplidarsdkhandler.CardinalDirectionEastNortheast,
+		gorplidarsdkhandler.CardinalDirectionEast,
+	}
+
+	// BackCardinalDirections are the cardinal directions to check for safety back distance
+	BackCardinalDirections = []gorplidarsdkhandler.CardinalDirection{
+		gorplidarsdkhandler.CardinalDirectionSouthSoutheast,
+		gorplidarsdkhandler.CardinalDirectionSouthSouthwest,
+	}
 )

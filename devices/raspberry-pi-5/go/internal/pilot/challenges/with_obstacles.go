@@ -17,9 +17,6 @@ const (
 	// FrontCloseupThreshold is used to move the robot closely to the wall (only used in the closed challenge)
 	FrontCloseupThreshold = 100.0
 
-	// CameraRangeThreshold is used to determine if an object is capable of being detected by the camera (only used in the closed challenge)
-	CameraRangeThreshold = 250.0
-
 	// ParkingLeaveSideDistanceThreshold is the distance threshold to leave the parking (only used in the closed challenge)
 	ParkingLeaveSideDistanceThreshold = 500.0
 
@@ -43,7 +40,7 @@ type (
 	}
 )
 
-// ChallengeWithObstaclesHandler is the handler for the challenge with obstacles
+// NewChallengeWithObstaclesHandler is the handler for the challenge with obstacles
 //
 // Parameters:
 //
@@ -105,245 +102,114 @@ func (h *ChallengeWithObstaclesHandler) Run(
 	h.handlerLoggerProducer.Info("Starting challenge with obstacles")
 
 	// Wait until the service is ready
-	if err := h.service.WaitUntilReady(ctx); err != nil {
+	if err = h.service.WaitUntilReady(ctx); err != nil {
 		return fmt.Errorf("service is not ready: %w", err)
 	}
 
 	// Leave the parking
 	if parking {
-		if err := h.leaveParkingHandler(ctx); err != nil {
+		if err = h.leaveParkingHandler(ctx); err != nil {
 			return fmt.Errorf("failed to leave parking: %w", err)
 		}
 	}
 
-	/*
-		var WallCloseUp bool
-		var isTurning bool
-		var bno08xLast90DegreeTurns int
-		var westAverageDistance, eastAverageDistance, northAverageDistance, northNortheastAverageDistance, northNorthwestAverageDistance float64
-		for h.usbCDCHandler.Get90DegreeTurns() < Algorithm90DegreeTurns {
-			// Sleep the RPLiDAR delay to wait for new measures
-			time.Sleep(RPLiDARDelay - time.Since(h.rplidarLastMeasuresUpdateTime))
+		// Main loop
+		wallCloseUp := false
+		isTurning := false
+		last90DegreeTurns := 0
+		direction := ServoDirectionNil
+		isObjectAvoidanceInProgress := false
+		var TemporaryTurns int
+		var lastTurningTime time.Time
+		var lastUpdateTime time.Time
+		for last90DegreeTurns < Algorithm90DegreeTurns {
+			time.Sleep(UpdateDelay - time.Since(lastUpdateTime))
+			lastUpdateTime = time.Now()
 
 			select {
 			case <-ctx.Done():
 				return ctx.Err()
 			default:
-				// Update the RPLiDAR average distances
-				if err := h.updateRPLiDARAverageDistances(); err != nil {
-					return fmt.Errorf(
-						"failed to update RPLiDAR average distances: %w",
-						err,
-					)
-				}
-				westAverageDistance = h.getAverageDirectionDistance(gorplidarsdkhandler.CardinalDirectionWest)
-				eastAverageDistance = h.getAverageDirectionDistance(gorplidarsdkhandler.CardinalDirectionEast)
-				northAverageDistance = h.getAverageDirectionDistance(gorplidarsdkhandler.CardinalDirectionNorth)
-				northNortheastAverageDistance = h.getAverageDirectionDistance(gorplidarsdkhandler.CardinalDirectionNorthNortheast)
-				northNorthwestAverageDistance = h.getAverageDirectionDistance(gorplidarsdkhandler.CardinalDirectionNorthNorthwest)
-
-				// Log the average distances
-				h.handlerLoggerProducer.Info(
-					fmt.Sprintf(
-						"W: %f, N-NW: %f, N: %f, N-NE: %f, E: %f",
-						westAverageDistance,
-						northNorthwestAverageDistance,
-						northAverageDistance,
-						northNortheastAverageDistance,
-						eastAverageDistance,
-					),
-				)
-
-				// Check if the front distance is below the safety threshold
-				if !WallCloseUp {
-					if northAverageDistance < SafetyFrontDistanceStartThreshold || northNortheastAverageDistance < SafetyFrontDistanceStartThreshold || northNorthwestAverageDistance < SafetyFrontDistanceStartThreshold {
-						previousServoAngle := h.servoAngle
-						previousServoDirection := h.servoDirection
-						previousMotorSpeed := h.motorSpeed
-
-						// Log the warning
-						h.handlerLoggerProducer.Warning(
-							fmt.Sprintf(
-								"Front distance is below the safety threshold %f.",
-								SafetyFrontDistanceStartThreshold,
-							),
-						)
-
-						// Set the servo to center and the motor to backward
-						if err := h.setServoToCenter(ctx); err != nil {
-							return fmt.Errorf("failed to set servo to center: %w", err)
-						}
-
-						if err := h.setMotorBackwardByPercentage(
-							ctx,
-							MotorBackwardSlowPercentage,
-						); err != nil {
-							return fmt.Errorf(
-								"failed to set motor to backward: %w",
-								err,
-							)
-						}
-
-						var safe bool
-						for !safe {
-							// Sleep the RPLiDAR delay to wait for new measures
-							time.Sleep(RPLiDARDelay - time.Since(h.rplidarLastMeasuresUpdateTime))
-
-							select {
-							case <-ctx.Done():
-								return ctx.Err()
-							default:
-								// Update the RPLiDAR average distances
-								if err := h.updateRPLiDARAverageDistances(); err != nil {
-									return fmt.Errorf(
-										"failed to update RPLiDAR average distances: %w",
-										err,
-									)
-								}
-								northAverageDistance = h.getAverageDirectionDistance(gorplidarsdkhandler.CardinalDirectionNorth)
-								northNortheastAverageDistance = h.getAverageDirectionDistance(gorplidarsdkhandler.CardinalDirectionNorthNortheast)
-								northNorthwestAverageDistance = h.getAverageDirectionDistance(gorplidarsdkhandler.CardinalDirectionNorthNorthwest)
-
-								if northAverageDistance >= SafetyFrontDistanceStopThreshold && northNortheastAverageDistance >= SafetyFrontDistanceStopThreshold && northNorthwestAverageDistance >= SafetyFrontDistanceStopThreshold {
-									h.handlerLoggerProducer.Info("Safety front distance threshold reached.")
-									safe = true
-								}
-							}
-						}
-					}
-					// Set previous servo angle and motor speed back to normal
-					if isTurning {
-						if err := h.setServoAngle(
-							ctx,
-							previousServoAngle,
-							previousServoDirection,
-						); err != nil {
-							return fmt.Errorf(
-								"failed to set servo to previous angle and direction: %w",
-								err,
-							)
-						}
-					} else {
-						if err := h.setServoToOppositeDirection(
-							ctx,
-							previousServoAngle,
-						); err != nil {
-							return fmt.Errorf(
-								"failed to set servo to opposite direction: %w",
-								err,
-							)
-						}
-					}
-					if err := h.setMotorSpeed(
+				// Check if the robot can collide with an object or a wall
+				if !wallCloseUp {
+					cardinalDirections := getFrontDistanceCardinalDirections(isTurning)
+					reached, err := collisionHandler(
 						ctx,
-						previousMotorSpeed,
-						MotorDirectionForward,
-					); err != nil {
-						return fmt.Errorf(
-							"failed to set motor to previous speed: %w",
-							err,
-						)
+						h.service,
+						isTurning,
+						h.handlerLoggerProducer,
+						cardinalDirections...,
+					)
+					if err != nil {
+						return err
 					}
-					continue
+					if reached {
+						break
+					}
 				}
 
+				// If the robot was turning, check if it should stop turning
 				// Check for the current turn and center the servo if necessary
-				if isTurning {
-					// Get the latest BNO08x turns value
-					turns := h.usbCDCHandler.Get90DegreeTurns()
-					if turns > bno08xLast90DegreeTurns {
-						h.handlerLoggerProducer.Info(
-							fmt.Sprintf(
-								"Detected a turn. Current turns: %d, Last turns: %d",
-								turns,
-								bno08xLast90DegreeTurns,
-							),
-						)
-
-						// Center the servo
-						if err := h.setServoToCenter(ctx); err != nil {
-							return fmt.Errorf(
-								"failed to set servo to center: %w",
-								err,
-							)
-						}
-
-						// Update for the next check
-						bno08xLast90DegreeTurns = turns
-						isTurning = false
-					}
-					continue
-				}
-				/*
-				// Check if the robot should move forward or turn
-				if northAverageDistance >= FrontStartTurnDistanceThreshold {
-					var motorSpeedPercentage float64
-					if northNortheastAverageDistance >= FrontStartTurnDistanceThreshold && northNorthwestAverageDistance >= FrontStartTurnDistanceThreshold {
-						motorSpeedPercentage = MotorForwardFastPercentage
-					} else {
-						motorSpeedPercentage = MotorForwardNormalPercentage
-					}
-
-					// Move forward
-					if err := h.setMotorForwardByPercentage(
-						ctx,
-						motorSpeedPercentage,
-					); err != nil {
-						return fmt.Errorf(
-							"failed to set motor to forward speed: %w",
-							err,
-						)
-					}
-
-					// Check if the servo should make a little turn to the left or right in order to center the robot
-					if eastAverageDistance >= westAverageDistance*(1+SideDistanceDifferencePercentage) {
-						if err := h.setServoToRightByPercentage(
-							ctx,
-							ServoSmallTurnAnglePercentage,
-						); err != nil {
-							return fmt.Errorf(
-								"failed to set servo to small right turn: %w",
-								err,
-							)
-						}
-					} else if westAverageDistance >= eastAverageDistance*(1+SideDistanceDifferencePercentage) {
-						if err := h.setServoToLeftByPercentage(
-							ctx,
-							ServoSmallTurnAnglePercentage,
-						); err != nil {
-							return fmt.Errorf(
-								"failed to set servo to small left turn: %w",
-								err,
-							)
-						}
-					} else {
-						if err := h.setServoToCenter(ctx); err != nil {
-							return fmt.Errorf(
-								"failed to set servo to center: %w",
-								err,
-							)
-						}
-					}
-					continue
-				}
-	*/
-	/*
-				if err := h.setMotorForwardByPercentage(
+				turnCompleted, err := turnHandler(
 					ctx,
-					MotorForwardNormalPercentage,
+					h.service,
+					&last90DegreeTurns,
+					&isTurning,
+					&lastTurningTime,
+					h.handlerLoggerProducer,
+				)
+				if err != nil {
+					return err
+				}
+				if turnCompleted {
+					break
+				}
+
+				// Detect if a turn is necessary
+				if err = detectTurnHandler(
+					ctx,
+					h.service,
+					&last90DegreeTurns,
+					&isTurning,
+					&lastTurningTime,
+					&direction,
+					h.handlerLoggerProducer,
 				); err != nil {
-					return fmt.Errorf(
-						"failed to set motor to normal speed: %w",
-						err,
-					)
+					return err
+				}
+				if isTurning {
+					break
+				}
+
+				// Center by gyroscope
+				if err = centerByGyroscopeHandler(
+					ctx,
+					h.service,
+					last90DegreeTurns,
+					h.handlerLoggerProducer,
+				); err != nil {
+					return err
+				}
+
+				// Move forward
+				motorSpeed := MotorForwardNormalPercentage
+				servoDirection := h.service.GetServoDirection()
+				if servoDirection == ServoDirectionStraight && time.Since(lastTurningTime) >= MinTimeToCorrectAfterTurn {
+					motorSpeed = MotorForwardFastPercentage
+				}
+				if err = h.service.SetMotorForward(
+					ctx,
+					motorSpeed,
+				); err != nil {
+					return err
 				}
 
 				// Check if the robot should turn left or right based on the side distances
 				if eastAverageDistance >= SideDistanceThreshold {
-					TemporaryTurns = bno08xLast90DegreeTurns
+					TemporaryTurns = last90DegreeTurns
 					isTurning = true
 
-				 //Checks which lane is the robot located inside
+				 // Checks which lane is the robot located inside
 
 					if westAverageDistance >= float64(LaneIdentifierThreshold) && isTurning == true {
 						if northAverageDistance >= FrontCloseupThreshold {
@@ -351,43 +217,31 @@ func (h *ChallengeWithObstaclesHandler) Run(
 								ctx,
 								MotorForwardSlowPercentage,
 							); err != nil {
-								return fmt.Errorf(
-									"failed to set motor to normal speed: %w",
-									err,
-								)
+								return err
 							}
 							if err := h.setServoToCenter(ctx); err != nil {
-								return fmt.Errorf(
-									"failed to set servo to center: %w",
-									err,
-								)
+								return err
 							}
-							WallCloseUp = true
+							wallCloseUp = true
 						}
-						if northAverageDistance <= float64(FrontCloseupThreshold) && WallCloseUp == true {
+						if northAverageDistance <= float64(FrontCloseupThreshold) && wallCloseUp {
 							if err := h.setServoToLeftByPercentage(
 								ctx,
 								ServoMediumTurnAnglePercentage,
 							); err != nil {
-								return fmt.Errorf(
-									"failed to set servo to small left turn: %w",
-									err,
-								)
+								return err
 							}
 							if err := h.setMotorBackwardByPercentage(
 								ctx,
 								MotorBackwardSlowPercentage,
 							); err != nil {
-								return fmt.Errorf(
-									"failed to set motor to normal speed: %w",
-									err,
-								)
+								return err
 							}
 
 							// Basically this condition is meant to indicate when has the robot successfully made the turn (if its not enough, we can stop the turn at like 60 degrees or smth, then counteract the other 30 degrees while going backwards)
-							if bno08xLast90DegreeTurns != TemporaryTurns {
+							if last90DegreeTurns != TemporaryTurns {
 								isTurning = false
-								WallCloseUp = false
+								wallCloseUp = false
 								continue
 							}
 						}
@@ -396,39 +250,28 @@ func (h *ChallengeWithObstaclesHandler) Run(
 							ctx,
 							ServoMediumTurnAnglePercentage,
 						); err != nil {
-							return fmt.Errorf(
-								"failed to set servo to small right turn: %w",
-								err,
-							)
+							return err
 						}
 						if err := h.setMotorForwardByPercentage(
 							ctx,
 							MotorForwardSlowPercentage,
 						); err != nil {
-							return fmt.Errorf(
-								"failed to set motor to normal speed: %w",
-								err,
+							return err
 							)
 						}
 							// Basically this condition is meant to indicate when has the robot successfully made the turn
-							if bno08xLast90DegreeTurns != TemporaryTurns {
+							if last90DegreeTurns != TemporaryTurns {
 								if err := h.setServoToRightByPercentage(
 									ctx,
 									ServoMediumTurnAnglePercentage,
 								); err != nil {
-									return fmt.Errorf(
-										"failed to set servo to small right turn: %w",
-										err,
-									)
+									return err
 								}
 								if err := h.setMotorBackwardByPercentage(
 									ctx,
 									MotorBackwardSlowPercentage,
 								); err != nil {
-									return fmt.Errorf(
-										"failed to set motor to normal speed: %w",
-										err,
-									)
+									return err
 								}
 								if (1 == 1) { // keeps doing it until it reaches the wall (prob measurements with the rplidar)
 									h.servoDirection = ServoDirectionStraight}
@@ -436,7 +279,7 @@ func (h *ChallengeWithObstaclesHandler) Run(
 					}	}	}
 				}
 				else if westAverageDistance >= SideDistanceThreshold {
-					TemporaryTurns = bno08xLast90DegreeTurns
+					TemporaryTurns = last90DegreeTurns
 					isTurning = true
 
 					// Checks which lane is the robot located inside
@@ -447,43 +290,31 @@ func (h *ChallengeWithObstaclesHandler) Run(
 								ctx,
 								MotorForwardSlowPercentage,
 							); err != nil {
-								return fmt.Errorf(
-									"failed to set motor to normal speed: %w",
-									err,
-								)
+								return err
 							}
 							if err := h.setServoToCenter(ctx); err != nil {
-								return fmt.Errorf(
-									"failed to set servo to center: %w",
-									err,
-								)
+								return err
 							}
-							WallCloseUp = true
+							wallCloseUp = true
 						}
-						if northAverageDistance <= float64(FrontCloseupThreshold) && WallCloseUp == true {
+						if northAverageDistance <= float64(FrontCloseupThreshold) && wallCloseUp == true {
 							if err := h.setServoToRightByPercentage(
 								ctx,
 								ServoMediumTurnAnglePercentage,
 							); err != nil {
-								return fmt.Errorf(
-									"failed to set servo to small right turn: %w",
-									err,
-								)
+								return err
 							}
 							if err := h.setMotorBackwardByPercentage(
 								ctx,
 								MotorBackwardSlowPercentage,
 							); err != nil {
-								return fmt.Errorf(
-									"failed to set motor to normal speed: %w",
-									err,
-								)
+								return err
 							}
 
 							// Basically this condition is meant to indicate when has the robot successfully made the turn
-							if bno08xLast90DegreeTurns != TemporaryTurns {
+							if last90DegreeTurns != TemporaryTurns {
 								isTurning = false
-								WallCloseUp = false
+								wallCloseUp = false
 								continue
 							}
 						}
@@ -492,46 +323,31 @@ func (h *ChallengeWithObstaclesHandler) Run(
 							ctx,
 							ServoMediumTurnAnglePercentage,
 						); err != nil {
-							return fmt.Errorf(
-								"failed to set servo to small left turn: %w",
-								err,
-							)
+							return err
 						}
 						if err := h.setMotorBackwardByPercentage(
 							ctx,
 							MotorBackwardSlowPercentage,
 						); err != nil {
-							return fmt.Errorf(
-								"failed to set motor to normal speed: %w",
-								err,
-							)
+							return err
 						}
 							// Basically this condition is meant to indicate when has the robot successfully made the turn
-							if bno08xLast90DegreeTurns != TemporaryTurns {
+							if last90DegreeTurns != TemporaryTurns {
 								if err := h.setServoToLeftByPercentage(
 									ctx,
 									ServoMediumTurnAnglePercentage,
 								); err != nil {
-									return fmt.Errorf(
-										"failed to set servo to small left turn: %w",
-										err,
-									)
+									return err
 								}
 								if err := h.setMotorBackwardByPercentage(
 									ctx,
 									MotorBackwardSlowPercentage,
 								); err != nil {
-									return fmt.Errorf(
-										"failed to set motor to normal speed: %w",
-										err,
-									)
+									return err
 								}
 								// keeps doing it until it reaches the wall (prob measurements with the rplidar)
 								if err := h.setServoToCenter(ctx); err != nil {
-									return fmt.Errorf(
-										"failed to set servo to center: %w",
-										err,
-									)
+									return err
 								}
 								isTurning = false
 						}	}
@@ -539,55 +355,42 @@ func (h *ChallengeWithObstaclesHandler) Run(
 				}
 
 				// After each turn, the robot starts looking for the objects (it should be roughly centered, and it could gather the objects position, (left or right lane) with the rplidar)
-
 				if !isTurning {
-					for i := 180; i < 360; i++ {
-						if h.rplidarHandler.GetMeasures(i) <= CameraRangeThreshold {
+					// Check
+					for _, cardinalDirection := range obstaclesDetectionCardinalDirections {
+						// Get the average distance for the cardinal direction
+						if h.service.GetRPLiDARAverageDistance(cardinalDirection) <= CameraRangeThreshold {
+
 							if h.clipClassification == red_block {
 								if err := h.setServoToRightByPercentage(
 									ctx,
 									ServoMediumTurnAnglePercentage,
 								); err != nil {
-									return fmt.Errorf(
-										"failed to set servo to small right turn: %w",
-										err,
-									)
+									return err
 								}
 								if err := h.setMotorForwardByPercentage(
 									ctx,
 									MotorForwardNormalPercentage,
 								); err != nil {
-									return fmt.Errorf(
-										"failed to set motor to normal speed: %w",
-										err,
-									)
+									return err
 								}
 								if westAverageDistance <= float64(CameraRangeThreshold) && eastAverageDistance <= float64(CameraRangeThreshold) {
 									if err := h.setServoToRightByPercentage(
 										ctx,
 										ServoMediumTurnAnglePercentage,
 									); err != nil {
-										return fmt.Errorf(
-											"failed to set servo to small right turn: %w",
-											err,
-										)
+										return err
 									}
 								}
 								else if northAverageDistance <= float64(FrontCloseupThreshold) {
 									if err := h.setServoToCenter(ctx); err != nil {
-										return fmt.Errorf(
-											"failed to set servo to center: %w",
-											err,
-										)
+										return err
 									}
 									if err := h.setMotorBackwardByPercentage(
 										ctx,
 										MotorBackwardNormalPercentage,
 									); err != nil {
-										return fmt.Errorf(
-											"failed to set motor to normal speed: %w",
-											err,
-										)
+										return err
 									}
 									return
 								}
@@ -597,19 +400,13 @@ func (h *ChallengeWithObstaclesHandler) Run(
 									ctx,
 									ServoMediumTurnAnglePercentage,
 								); err != nil {
-									return fmt.Errorf(
-										"failed to set servo to small left turn: %w",
-										err,
-									)
+									return err
 								}
 								if err := h.setMotorForwardByPercentage(
 									ctx,
 									MotorForwardNormalPercentage,
 								); err != nil {
-									return fmt.Errorf(
-										"failed to set motor to normal speed: %w",
-										err,
-									)
+									return err
 								}
 								if westAverageDistance <= float64(CameraRangeThreshold) and eastAverageDistance <= float64(CameraRangeThreshold) {
 									while (robot not aligned)
@@ -617,27 +414,18 @@ func (h *ChallengeWithObstaclesHandler) Run(
 										ctx,
 										ServoMediumTurnAnglePercentage,
 									); err != nil {
-										return fmt.Errorf(
-											"failed to set servo to small right turn: %w",
-											err,
-										)
+										return err
 									}
 						}
 								else if northAverageDistance <= float64(FrontCloseupThreshold) {
 									if err := h.setServoToCenter(ctx); err != nil {
-										return fmt.Errorf(
-											"failed to set servo to center: %w",
-											err,
-										)
+										return err
 									}
 									if err := h.setMotorBackwardByPercentage(
 										ctx,
 										MotorBackwardNormalPercentage,
 									); err != nil {
-										return fmt.Errorf(
-											"failed to set motor to normal speed: %w",
-											err,
-										)
+										return err
 									}
 									continue
 						} 			}
@@ -653,16 +441,13 @@ func (h *ChallengeWithObstaclesHandler) Run(
 
 		// Set the servo to center and the motor to slow speed
 		if err := h.setServoToCenter(ctx); err != nil {
-			return fmt.Errorf("failed to set servo to center: %w", err)
+			return err
 		}
 		if err := h.setMotorForwardByPercentage(
 			ctx,
 			MotorForwardSlowPercentage,
 		); err != nil {
-			return fmt.Errorf(
-				"failed to set motor to slow speed: %w",
-				err,
-			)
+			return err
 		}
 
 		// Wait until the front distance is below the stop distance threshold
@@ -677,10 +462,7 @@ func (h *ChallengeWithObstaclesHandler) Run(
 			default:
 				// Update the RPLiDAR average distances
 				if err := h.updateRPLiDARAverageDistances(); err != nil {
-					return fmt.Errorf(
-						"failed to update RPLiDAR average distances: %w",
-						err,
-					)
+					return err
 				}
 				northAverageDistance = h.getAverageDirectionDistance(gorplidarsdkhandler.CardinalDirectionNorth)
 
@@ -690,7 +472,6 @@ func (h *ChallengeWithObstaclesHandler) Run(
 				}
 			}
 		}
-	*/
 
 	// Enter the parking
 	if parking {
@@ -828,13 +609,7 @@ func (h *ChallengeWithObstaclesHandler) goForwardSlowlyOnParking(
 			return false, ctx.Err()
 		default:
 			// Check if the opposite side of the parking leave side has reached the threshold for the parking to be considered left
-			var oppositeCardinalDirection gorplidarsdkhandler.CardinalDirection
-			switch parkingLeaveSide {
-			case ServoDirectionLeft:
-				oppositeCardinalDirection = gorplidarsdkhandler.CardinalDirectionEast
-			case ServoDirectionRight:
-				oppositeCardinalDirection = gorplidarsdkhandler.CardinalDirectionWest
-			default:
+			if parkingLeaveSide != ServoDirectionLeft && parkingLeaveSide != ServoDirectionRight {
 				return false, fmt.Errorf(
 					"invalid parking leave side: %w",
 					ErrInvalidServoDirection,
@@ -842,6 +617,7 @@ func (h *ChallengeWithObstaclesHandler) goForwardSlowlyOnParking(
 			}
 
 			// Wait until the opposite distance is not NaN
+			oppositeCardinalDirection := parkingLeaveSide.OppositeCardinalDirection()
 			oppositeDistance := math.NaN()
 			for {
 				time.Sleep(UpdateDelay)
@@ -942,11 +718,7 @@ func (h *ChallengeWithObstaclesHandler) leaveParkingHandler(ctx context.Context)
 			left, err := h.goForwardSlowlyOnParking(
 				ctx,
 				parkingLeaveSide,
-				gorplidarsdkhandler.CardinalDirectionNorth,
-				gorplidarsdkhandler.CardinalDirectionNorthNortheast,
-				gorplidarsdkhandler.CardinalDirectionNorthNorthwest,
-				gorplidarsdkhandler.CardinalDirectionNorthwest,
-				gorplidarsdkhandler.CardinalDirectionNortheast,
+				FrontDistanceTurningCardinalDirections...
 			)
 			if err != nil {
 				return fmt.Errorf(
@@ -954,9 +726,7 @@ func (h *ChallengeWithObstaclesHandler) leaveParkingHandler(ctx context.Context)
 					err,
 				)
 			}
-			if left {
-				leftParkingCompleted = true
-			}
+			leftParkingCompleted = left
 		}
 	}
 

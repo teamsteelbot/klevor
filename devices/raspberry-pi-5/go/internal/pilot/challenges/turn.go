@@ -182,9 +182,7 @@ func detectTurnHandler(
 				}
 
 				// Set the direction if it's nil
-				if *direction == ServoDirectionNil {
-					*direction = ServoDirectionRight
-				}
+				*direction = ServoDirectionRight
 			} else if (*direction == ServoDirectionLeft || *direction == ServoDirectionNil) &&
 				(!math.IsNaN(westAverageDistance) && westAverageDistance >= SideDistanceThreshold) {
 				*isTurning = true
@@ -200,9 +198,7 @@ func detectTurnHandler(
 				}
 
 				// Set the direction if it's nil
-				if *direction == ServoDirectionNil {
-					*direction = ServoDirectionLeft
-				}
+				*direction = ServoDirectionLeft
 			}
 		}
 
@@ -213,10 +209,21 @@ func detectTurnHandler(
 
 		// Check if the front distance is below the turn threshold
 		if !math.IsNaN(northAverageDistance) && northAverageDistance+northDistanceChange < SafetyFrontDistanceStartTurnThreshold {
+			// Log that the front distance is too close
+			if loggerProducer != nil {
+				loggerProducer.Info(
+					fmt.Sprintf(
+						"Front distance (%.2f mm) is below the safety threshold (%.2f mm). Moving backward until it's safe to turn.",
+						northAverageDistance+northDistanceChange,
+						SafetyFrontDistanceStartTurnThreshold,
+					),
+				)
+			}
+
 			// Go backward if the front distance is below the threshold
 			if err := service.SetMotorBackward(
 				ctx,
-				MotorBackwardNormalPercentage,
+				MotorBackwardNormalSpeed,
 			); err != nil {
 				return err
 			}
@@ -237,7 +244,7 @@ func detectTurnHandler(
 					// If the front distance is above the threshold, stop moving backward
 					if !math.IsNaN(northAverageDistance) && northAverageDistance+northDistanceChange >= SafetyFrontDistanceStartTurnThreshold {
 						if loggerProducer != nil {
-							loggerProducer.Info("Front distance is safe to turn.")
+							loggerProducer.Info("Front distance is safe to turn. Resuming turn.")
 						}
 						if err := service.SetMotorStop(ctx); err != nil {
 							return err
@@ -254,7 +261,7 @@ func detectTurnHandler(
 		if *isTurning {
 			if err := service.SetServoAngle(
 				ctx,
-				ServoBigTurnAnglePercentage,
+				ServoBigTurnAngle,
 				*direction,
 			); err != nil {
 				return err
@@ -264,7 +271,7 @@ func detectTurnHandler(
 		// Move forward at turning speed
 		if err := service.SetMotorForward(
 			ctx,
-			MotorTurningPercentage,
+			MotorTurningSpeed,
 		); err != nil {
 			return err
 		}

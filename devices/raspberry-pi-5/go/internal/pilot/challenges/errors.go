@@ -21,4 +21,5 @@ var (
 	ErrServiceAlreadyRunning               = errors.New("service is already running")
 	ErrNilUSBCDCSender                     = errors.New("usb-cdc sender cannot be nil")
 	ErrNilLastServoCorrectionTime          = errors.New("last servo correction time cannot be nil")
+	ErrNilIsObjectAvoidanceInProgress      = errors.New("is object avoidance in progress cannot be nil")
 )

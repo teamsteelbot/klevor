@@ -10,43 +10,24 @@ import (
 	gorplidarsdkhandler "github.com/ralvarezdev/go-rplidar-sdk-handler"
 )
 
-const (
-	// SafetyFrontDistanceStartThreshold is the distance threshold to start safety mode
-	SafetyFrontDistanceStartThreshold = 150.0
-
-	// SafetyFrontDistanceStopThreshold is the distance threshold to stop safety mode
-	SafetyFrontDistanceStopThreshold = 350.0
-
-	// SafetyBackDistanceThreshold is the distance threshold to stop moving backward
-	SafetyBackDistanceThreshold = 125.0
-)
-
-var (
-	// SafetyBackCardinalDirections are the cardinal directions to check for safety back distance
-	SafetyBackCardinalDirections = []gorplidarsdkhandler.CardinalDirection{
-		gorplidarsdkhandler.CardinalDirectionSouthSoutheast,
-		gorplidarsdkhandler.CardinalDirectionSouthSouthwest,
-	}
-)
-
-// safetyFrontDistanceHandler handles the safety front distance
+// collisionHandler handles the collision logic based on RPLiDAR sensor data.
 //
 // Parameters:
 //
 // ctx: The context to use for the challenge
 // service: The service to use for the challenge
-// loggerProducer: The logger producer to use for logging
 // isTurning: A flag indicating if the robot is currently turning
+// loggerProducer: The logger producer to use for logging
 // cardinalDirections: The cardinal directions to check the front distances (e.g., North, North-Northeast, North-Northwest)
 //
 // Returns:
 //
 // A boolean indicating if the safety front distance was handled, and an error if the safety front distance could not be handled, nil otherwise
-func safetyFrontDistanceHandler(
+func collisionHandler(
 	ctx context.Context,
 	service Service,
-	loggerProducer goconcurrentlogger.LoggerProducer,
 	isTurning bool,
+	loggerProducer goconcurrentlogger.LoggerProducer,
 	cardinalDirections ...gorplidarsdkhandler.CardinalDirection,
 ) (bool, error) {
 	// Check if the service is nil
@@ -103,17 +84,40 @@ func safetyFrontDistanceHandler(
 		return true, err
 	}
 
-	// Set the servo to center
-	if err := service.SetServoToCenter(ctx); err != nil {
-		return true, err
+	// Check if the robot is turning (new strategy)
+	if isTurning {
+		// If the robot is not turning, set the servo to the opposite direction
+		if err := service.SetServoToOppositeDirection(
+			ctx,
+			previousServoAngle,
+		); err != nil {
+			return true, err
+		}
+	} else {
+		// If the robot is turning, set the servo to center
+		if err := service.SetServoToCenter(ctx); err != nil {
+			return true, err
+		}
 	}
+
+	/*
+		// Set the servo to center
+		if err := service.SetServoToCenter(ctx); err != nil {
+			return true, err
+		}
+	*/
 
 	// Move backward at fast speed
 	if err := service.SetMotorBackward(
 		ctx,
-		MotorBackwardFastPercentage,
+		MotorBackwardNormalSpeed,
 	); err != nil {
 		return true, err
+	}
+
+	// Log that the robot is moving backward
+	if loggerProducer != nil {
+		loggerProducer.Info("Moving backward...")
 	}
 
 	// Wait until the front distance is above the stop threshold or an obstacle is detected on the back
@@ -127,7 +131,7 @@ func safetyFrontDistanceHandler(
 		default:
 			// Check if there's any obstacle on the back
 			backDistanceThresholdReached := false
-			for _, cardinalDirection := range SafetyBackCardinalDirections {
+			for _, cardinalDirection := range BackCardinalDirections {
 				// Get the average distance for the cardinal direction
 				distance := service.GetRPLiDARAverageDistance(cardinalDirection)
 
@@ -169,7 +173,7 @@ func safetyFrontDistanceHandler(
 			// If the front distance threshold is reached, set the reached flag to true
 			if frontDistanceThresholdReached {
 				if loggerProducer != nil {
-					loggerProducer.Info("Safety front distance threshold reached.")
+					loggerProducer.Info("Safety front distance threshold reached. Resuming normal operation.")
 				}
 				reached = true
 			}
