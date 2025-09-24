@@ -91,10 +91,12 @@ func (h *ChallengeWithoutObstaclesHandler) Run(ctx context.Context) error {
 	}
 
 	// Start the challenge without obstacles handler
-	// isTurning := false
-	last90DegreeTurns := 0
-	var lastUpdateTime time.Time
-	var lastTurningTime time.Time
+	var (
+		// isTurning       bool
+		last90DegreeTurns int
+		lastUpdateTime    time.Time
+		lastTurningTime   time.Time
+	)
 	// direction := ServoDirectionNil
 	for last90DegreeTurns < Algorithm90DegreeTurns {
 		// Set the last iteration time

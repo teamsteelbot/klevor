@@ -7,7 +7,6 @@ import (
 	"time"
 
 	goconcurrentlogger "github.com/ralvarezdev/go-concurrent-logger"
-	gohailocliphandler "github.com/ralvarezdev/go-hailo-clip-handler"
 	gorplidarsdkhandler "github.com/ralvarezdev/go-rplidar-sdk-handler"
 	internalclip "github.com/ralvarezdev/klevor/devices/raspberry_pi_5/go/internal/clip"
 )
@@ -121,27 +120,49 @@ func (h *ChallengeWithObstaclesHandler) Run(
 		}
 	}
 
-		// Main loop
-		wallCloseUp := false
-		isTurning := false
-		last90DegreeTurns := 0
-		direction := ServoDirectionNil
-		isObjectAvoidanceInProgress := false
-		temporaryTurns := 0
-		currentSectionObstacleCount := 0
-		var lastTurningTime time.Time
-		var lastUpdateTime time.Time
-		var lastObjectDetectionTime time.Time
-		for last90DegreeTurns < Algorithm90DegreeTurns {
-			time.Sleep(UpdateDelay - time.Since(lastUpdateTime))
-			lastUpdateTime = time.Now()
+	// Initialize variables
+	var (
+		isObjectAvoidanceInProgress bool
+		currentSectionObstacleCount int
+		last90DegreeTurns           int
+		lastTurningTime             time.Time
+		lastUpdateTime              time.Time
+		lastObjectDetectionTime     time.Time
+	)
 
-			select {
-			case <-ctx.Done():
-				return ctx.Err()
-			default:
-				// Check if the robot is avoiding an obstacle
-				positiveLabel, err := avoidObstacles(ctx, h.service, isTurning, &isObjectAvoidanceInProgress, h.handlerLoggerProducer) {
+	// Run until the robot has completed the required number of 90 degree turns
+	for last90DegreeTurns < Algorithm90DegreeTurns {
+		time.Sleep(UpdateDelay - time.Since(lastUpdateTime))
+		lastUpdateTime = time.Now()
+
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+			// Handle turning by wall close up
+			turned, err := turnByWallCloseUpHandler(
+				ctx,
+				h.service,
+				&lastTurningTime,
+				h.handlerLoggerProducer,
+			)
+			if err != nil {
+				return err
+			}
+			if turned {
+				// Update last 90 degree turns
+				last90DegreeTurns++
+				continue
+			}
+
+			// Check if the robot is avoiding an obstacle
+			positiveLabel, err := avoidObstacles(
+				ctx,
+				h.service,
+				&isObjectAvoidanceInProgress,
+				h.handlerLoggerProducer,
+			)
+			{
 				if err != nil {
 					return err
 				}
@@ -175,119 +196,72 @@ func (h *ChallengeWithObstaclesHandler) Run(
 					break
 				}
 
-				// Check if the robot can collide with an object or a wall
-				if !wallCloseUp {
-					cardinalDirections := getFrontDistanceCardinalDirections(isTurning)
-					reached, err := collisionHandler(
-						ctx,
-						service,
-						isTurning,
-						h.handlerLoggerProducer,
-						cardinalDirections...,
-					)
-					if err != nil {
-						return err
-					}
-					if reached {
-						break
-					}
+				// Center by gyroscope
+				if err = centerByGyroscopeHandler(
+					ctx,
+					h.service,
+					last90DegreeTurns,
+					h.handlerLoggerProducer,
+				); err != nil {
+					return err
 				}
 
-					// If the robot was turning, check if it should stop turning
-					// Check for the current turn and center the servo if necessary
-					turnCompleted, err := turnHandler(
-						ctx,
-						h.service,
-						&last90DegreeTurns,
-						&isTurning,
-						&lastTurningTime,
-						h.handlerLoggerProducer,
-					)
-					if err != nil {
-						return err
-					}
-					if turnCompleted {
-						// Reset the object avoidance state and the last object detection time
-						isObjectAvoidanceInProgress = false
-						lastObjectDetectionTime = time.Time{}
-						currentSectionObstacleCount = 0
-						break
-
-					}
-
-					// Detect if a turn is necessary
-					if err = detectTurnHandler(
-						ctx,
-						h.service,
-						&last90DegreeTurns,
-						&isTurning,
-						&lastTurningTime,
-						&direction,
-						h.handlerLoggerProducer,
-					); err != nil {
-						return err
-					}
-					if isTurning {
-						break
-					}
-
-					// Center by gyroscope
-					if err = centerByGyroscopeHandler(
-						ctx,
-						h.service,
-						last90DegreeTurns,
-						h.handlerLoggerProducer,
-					); err != nil {
-						return err
-					}
-
-					// Move forward
-					motorSpeed := MotorForwardNormalSpeed
-					servoDirection := h.service.GetServoDirection()
-					if servoDirection == ServoDirectionStraight && time.Since(lastTurningTime) >= MinTimeToCorrectAfterTurn {
-						motorSpeed = MotorForwardFastSpeed
-					}
-					if err = h.service.SetMotorForward(
-						ctx,
-						motorSpeed,
-					); err != nil {
-						return err
-					}
+				// Move forward
+				motorSpeed := MotorForwardNormalSpeed
+				servoDirection := h.service.GetServoDirection()
+				if servoDirection == ServoDirectionStraight && time.Since(lastTurningTime) >= MinTimeToCorrectAfterTurn {
+					motorSpeed = MotorForwardFastSpeed
 				}
-			}
-
-		// Log that is almost time to stop
-		h.handlerLoggerProducer.Info("Almost time to stop. Monitoring front distance...")
-
-		// Set the servo to center and the motor to slow speed
-		if err := h.service.SetServoToCenter(ctx); err != nil {
-			return err
-		}
-		if err := h.service.SetMotorForward(
-			ctx,
-			MotorForwardSlowSpeed,
-		); err != nil {
-			return err
-		}
-
-		// Wait until the front distance is below the stop distance threshold
-		var completed bool
-		for !completed {
-			// Wait for the RPLiDAR to update
-			time.Sleep(UpdateDelay)
-
-			select {
-			case <-ctx.Done():
-				return ctx.Err()
-			default:
-				northDistance = h.getAverageDirectionDistance(gorplidarsdkhandler.CardinalDirectionNorth)
-
-				if northDistance <= StopDistanceThreshold {
-					completed = true
-					h.handlerLoggerProducer.Info("Challenge completed successfully. Stopping the robot.")
+				if err = h.service.SetMotorForward(
+					ctx,
+					motorSpeed,
+				); err != nil {
+					return err
 				}
 			}
 		}
+	}
+
+	// Log that is almost time to stop
+	h.handlerLoggerProducer.Info("Almost time to stop. Monitoring front distance...")
+
+	// Set the servo to center and the motor to slow speed
+	if err := h.service.SetServoToCenter(ctx); err != nil {
+		return err
+	}
+	if err := h.service.SetMotorForward(
+		ctx,
+		MotorForwardSlowSpeed,
+	); err != nil {
+		return err
+	}
+
+	// Wait until the front distance is below the stop distance threshold
+	var completed bool
+	for !completed {
+		// Wait for the RPLiDAR to update
+		time.Sleep(UpdateDelay)
+
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+			// Get the north distance and its change
+			northDistance := h.service.GetRPLiDARAverageDistance(gorplidarsdkhandler.CardinalDirectionNorth)
+			northDistanceChange := h.service.GetRPLiDARAverageDistanceChange(gorplidarsdkhandler.CardinalDirectionNorth)
+
+			// Check if any measure is NaN
+			if math.IsNaN(northDistance) || math.IsNaN(northDistanceChange) {
+				continue
+			}
+
+			// Check if the north distance is below the stop distance threshold
+			if northDistance <= StopDistanceThreshold {
+				completed = true
+				h.handlerLoggerProducer.Info("Challenge completed successfully. Stopping the robot.")
+			}
+		}
+	}
 
 	// Enter the parking
 	if parking {
@@ -376,14 +350,14 @@ func (h *ChallengeWithObstaclesHandler) setMotorAndServoToParkingLeaveSide(
 	case ServoDirectionLeft:
 		if err := h.service.SetServoToLeft(
 			ctx,
-			ServoBigTurnAnglePercentage,
+			ServoBigTurnAngle,
 		); err != nil {
 			return err
 		}
 	case ServoDirectionRight:
 		if err := h.service.SetServoToRight(
 			ctx,
-			ServoBigTurnAnglePercentage,
+			ServoBigTurnAngle,
 		); err != nil {
 			return err
 		}
@@ -534,7 +508,7 @@ func (h *ChallengeWithObstaclesHandler) leaveParkingHandler(ctx context.Context)
 			left, err := h.goForwardSlowlyOnParking(
 				ctx,
 				parkingLeaveSide,
-				FrontDistanceTurningCardinalDirections...
+				FrontDistanceTurningCardinalDirections...,
 			)
 			if err != nil {
 				return fmt.Errorf(

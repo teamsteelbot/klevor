@@ -29,7 +29,6 @@ const (
 //
 // ctx: The context to use for the challenge
 // service: The service to use for the challenge
-// isTurning: A flag indicating if the robot is currently turning
 // isObjectAvoidanceInProgress: A flag indicating if the robot is currently avoiding an obstacle
 // loggerProducer: The logger producer to use for logging
 //
@@ -39,19 +38,12 @@ const (
 func avoidObstacles(
 	ctx context.Context,
 	service Service,
-	isTurning bool,
 	isObjectAvoidanceInProgress *bool,
 	loggerProducer goconcurrentlogger.LoggerProducer,
 ) (internalclip.PositiveLabel, error) {
 	// Check if the service is nil
 	if service == nil {
 		return internalclip.PositiveLabelNil, ErrNilService
-	}
-
-	// Check if the robot is currently turning
-	if isTurning {
-		// If the robot is turning, do not attempt to avoid obstacles
-		return internalclip.PositiveLabelNil, nil
 	}
 
 	// Check if the isObjectAvoidanceInProgress is nil
