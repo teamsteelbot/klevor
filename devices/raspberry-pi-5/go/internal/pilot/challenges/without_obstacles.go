@@ -212,16 +212,17 @@ func (h *ChallengeWithoutObstaclesHandler) Run(ctx context.Context) error {
 				return err
 			}
 
-			// Check if the north average distance is NaN
-			if math.IsNaN(h.service.GetNorthAverageDistance()) {
-				break
-			}
-
-			// Get the rate of change for the north average distance
+			// Get the north distance and its change
+			northDistance := h.service.GetNorthAverageDistance()
 			northDistanceChange := FrontDistanceChange * h.service.GetRPLiDARAverageDistanceChange(gorplidarsdkhandler.CardinalDirectionNorth)
 
+			// Check if any measure is NaN, if so, continue
+			if math.IsNaN(northDistance) || math.IsNaN(northDistanceChange) {
+				continue
+			}
+
 			// Check if the north average distance is below the stop distance threshold
-			if h.service.GetNorthAverageDistance()+northDistanceChange <= StopDistanceThreshold {
+			if northDistance+northDistanceChange <= StopDistanceThreshold {
 				completed = true
 				h.handlerLoggerProducer.Info("Challenge completed successfully. Stopping the robot.")
 			}

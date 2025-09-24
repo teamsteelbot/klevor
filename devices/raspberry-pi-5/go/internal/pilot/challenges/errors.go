@@ -22,4 +22,6 @@ var (
 	ErrNilUSBCDCSender                     = errors.New("usb-cdc sender cannot be nil")
 	ErrNilLastServoCorrectionTime          = errors.New("last servo correction time cannot be nil")
 	ErrNilIsObjectAvoidanceInProgress      = errors.New("is object avoidance in progress cannot be nil")
+	ErrNilTemporaryTurns                   = errors.New("temporary turns cannot be nil")
+	ErrNilWallCloseUp                      = errors.New("wall close up cannot be nil")
 )

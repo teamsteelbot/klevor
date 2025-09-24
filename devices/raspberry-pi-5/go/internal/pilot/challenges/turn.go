@@ -19,6 +19,18 @@ const (
 
 	// SafetyFrontDistanceStartTurnThreshold is the distance threshold to start turning
 	SafetyFrontDistanceStartTurnThreshold = 700.0 // 600.0
+
+	// LaneIdentifierThreshold is used to determine which lane is the robot placed (only used in the closed challenge)
+	LaneIdentifierThreshold = 400.0
+
+	// FrontCloseupThreshold is used to move the robot closely to the wall (only used in the closed challenge)
+	FrontCloseupThreshold = 100.0
+
+	// MinTimeBetweenTurns is the minimum time between turns
+	MinTimeBetweenTurns = 2 * time.Second
+
+	// MinTimeBetweenTurnByWallCloseUp is the minimum time between turns by wall close up
+	MinTimeBetweenTurnByWallCloseUp = 3 * time.Second
 )
 
 // turnHandler handles the turning logic based on BNO08x sensor data.
@@ -155,20 +167,24 @@ func detectTurnHandler(
 	}
 
 	// Get the front distance change
-	northAverageDistance := service.GetNorthAverageDistance()
+	northDistance := service.GetNorthAverageDistance()
 	northDistanceChange := FrontDistanceChange * service.GetRPLiDARAverageDistanceChange(gorplidarsdkhandler.CardinalDirectionNorth)
 
+	// Check if the front distance and distance change are NaN, if so, return
+	if math.IsNaN(northDistance) || math.IsNaN(northDistanceChange) {
+		return nil
+	}
+
 	// Get the west and east average distances
-	westAverageDistance := service.GetWestAverageDistance()
-	eastAverageDistance := service.GetEastAverageDistance()
+	westDistance := service.GetWestAverageDistance()
+	eastDistance := service.GetEastAverageDistance()
 
 	// Check if the robot should turn left or right based on the side distances
 	if *last90DegreeTurns == 0 ||
-		(!math.IsNaN(northAverageDistance) &&
-			northAverageDistance+northDistanceChange <= FrontStartTurnDistanceThreshold) {
+		northDistance+northDistanceChange <= FrontStartTurnDistanceThreshold {
 		if time.Since(*lastTurningTime) >= MinTimeBetweenTurns {
 			if (*direction == ServoDirectionRight || *direction == ServoDirectionNil) &&
-				(!math.IsNaN(eastAverageDistance) && eastAverageDistance >= SideDistanceThreshold) {
+				(!math.IsNaN(eastDistance) && eastDistance >= SideDistanceThreshold) {
 				*isTurning = true
 
 				// Log the turn detection
@@ -184,7 +200,7 @@ func detectTurnHandler(
 				// Set the direction if it's nil
 				*direction = ServoDirectionRight
 			} else if (*direction == ServoDirectionLeft || *direction == ServoDirectionNil) &&
-				(!math.IsNaN(westAverageDistance) && westAverageDistance >= SideDistanceThreshold) {
+				(!math.IsNaN(westDistance) && westDistance >= SideDistanceThreshold) {
 				*isTurning = true
 
 				// Log the turn detection
@@ -208,13 +224,13 @@ func detectTurnHandler(
 		}
 
 		// Check if the front distance is below the turn threshold
-		if !math.IsNaN(northAverageDistance) && northAverageDistance+northDistanceChange < SafetyFrontDistanceStartTurnThreshold {
+		if northDistance+northDistanceChange < SafetyFrontDistanceStartTurnThreshold {
 			// Log that the front distance is too close
 			if loggerProducer != nil {
 				loggerProducer.Info(
 					fmt.Sprintf(
 						"Front distance (%.2f mm) is below the safety threshold (%.2f mm). Moving backward until it's safe to turn.",
-						northAverageDistance+northDistanceChange,
+						northDistance+northDistanceChange,
 						SafetyFrontDistanceStartTurnThreshold,
 					),
 				)
@@ -238,11 +254,16 @@ func detectTurnHandler(
 					return ctx.Err()
 				default:
 					// Get the front distance and distance change
-					northAverageDistance = service.GetNorthAverageDistance()
+					northDistance = service.GetNorthAverageDistance()
 					northDistanceChange = FrontDistanceChange * service.GetRPLiDARAverageDistanceChange(gorplidarsdkhandler.CardinalDirectionNorth)
 
+					// Check if any measure is NaN, if so, continue
+					if math.IsNaN(northDistance) || math.IsNaN(northDistanceChange) {
+						continue
+					}
+
 					// If the front distance is above the threshold, stop moving backward
-					if !math.IsNaN(northAverageDistance) && northAverageDistance+northDistanceChange >= SafetyFrontDistanceStartTurnThreshold {
+					if northDistance+northDistanceChange >= SafetyFrontDistanceStartTurnThreshold {
 						if loggerProducer != nil {
 							loggerProducer.Info("Front distance is safe to turn. Resuming turn.")
 						}
@@ -278,4 +299,284 @@ func detectTurnHandler(
 		return nil
 	}
 	return nil
+}
+
+// turnByWallCloseUpHandler handles turning where there is a wall close up on the back
+func turnByWallCloseUpHandler(
+	ctx context.Context,
+	service Service,
+	lastTurningTime *time.Time,
+	loggerProducer goconcurrentlogger.LoggerProducer,
+) (bool, error) {
+	// Check if the service is nil
+	if service == nil {
+		return false, ErrNilService
+	}
+	// Check if the lastTurningTime is nil
+	if lastTurningTime == nil {
+		return false, ErrNilLastTurningTime
+	}
+
+	// Check if there isn't enough time has passed since the last turn
+	if time.Since(*lastTurningTime) < MinTimeBetweenTurnByWallCloseUp {
+		return false, nil
+	}
+
+	// Initialize temporary variables
+	var (
+		temporaryTurns      int
+		shouldTurn          bool
+		isTurning           bool
+		isTurningCompleted  bool
+		wallCloseUp         bool
+		isInnerLaneSide     *bool
+		toCardinalDirection gorplidarsdkhandler.CardinalDirection
+	)
+
+	// Loop until the robot has turned
+	for !isTurningCompleted {
+		// Sleep for the update delay
+		time.Sleep(UpdateDelay)
+
+		select {
+		case <-ctx.Done():
+			return false, ctx.Err()
+		default:
+			// Get the average distances from the RPLiDAR
+			northDistance := service.GetRPLiDARAverageDistance(gorplidarsdkhandler.CardinalDirectionNorth)
+			northDistanceChange := FrontDistanceChange * service.GetRPLiDARAverageDistanceChange(gorplidarsdkhandler.CardinalDirectionNorth)
+			eastDistance := service.GetRPLiDARAverageDistance(gorplidarsdkhandler.CardinalDirectionEast)
+			eastDistanceChange := SideDistanceChange * service.GetRPLiDARAverageDistanceChange(gorplidarsdkhandler.CardinalDirectionEast)
+			westDistance := service.GetRPLiDARAverageDistance(gorplidarsdkhandler.CardinalDirectionWest)
+			westDistanceChange := SideDistanceChange * service.GetRPLiDARAverageDistanceChange(gorplidarsdkhandler.CardinalDirectionWest)
+
+			// Get the last recorded number of 90-degree turns
+			last90DegreeTurns := service.Get90DegreeTurns()
+
+			// Check if any measure is NaN, if so, continue to the next iteration
+			if math.IsNaN(northDistance) || math.IsNaN(northDistanceChange) ||
+				math.IsNaN(eastDistance) || math.IsNaN(eastDistanceChange) ||
+				math.IsNaN(westDistance) || math.IsNaN(westDistanceChange) {
+				continue
+			}
+
+			// Check if the robot should turn left or right based on the side distances
+			if !shouldTurn && eastDistance+eastDistanceChange >= SideDistanceThreshold {
+				temporaryTurns = last90DegreeTurns
+				shouldTurn = true
+			}
+
+			// Check if the robot should turn left or right based on the side distances
+			if !shouldTurn && westDistance+westDistanceChange >= SideDistanceThreshold {
+				temporaryTurns = last90DegreeTurns
+				shouldTurn = true
+			}
+
+			// If the robot shouldn't be turning, return
+			if !shouldTurn {
+				return false, nil
+			}
+
+			// Check which side has the inner lane (only once)
+			if isInnerLaneSide == nil {
+				if eastDistance+eastDistanceChange >= SideDistanceThreshold {
+					inner := westDistance+westDistanceChange >= LaneIdentifierThreshold
+					isInnerLaneSide = &inner
+					toCardinalDirection = gorplidarsdkhandler.CardinalDirectionEast
+				} else if westDistance+westDistanceChange >= SideDistanceThreshold {
+					inner := eastDistance+eastDistanceChange >= LaneIdentifierThreshold
+					isInnerLaneSide = &inner
+					toCardinalDirection = gorplidarsdkhandler.CardinalDirectionWest
+				}
+			}
+
+			// Checks which lane is the robot located inside
+			switch toCardinalDirection {
+			case gorplidarsdkhandler.CardinalDirectionEast:
+				// Handle it based on the inner lane side
+				switch *isInnerLaneSide {
+				case false:
+					// Handle a normal turn
+					if !isTurning {
+						if err := service.SetServoToRight(
+							ctx,
+							ServoBigTurnAngle,
+						); err != nil {
+							return false, err
+						}
+						if err := service.SetMotorForward(
+							ctx,
+							MotorTurningSpeed,
+						); err != nil {
+							return false, err
+						}
+					}
+
+					// Check if the robot can collide with an object or a wall
+					cardinalDirections := getFrontDistanceCardinalDirections(isTurning)
+					reached, err := collisionHandler(
+						ctx,
+						service,
+						isTurning,
+						loggerProducer,
+						cardinalDirections...,
+					)
+					if err != nil {
+						return false, err
+					}
+					if reached {
+						// Set that the turn is completed
+						isTurningCompleted = true
+						break
+					}
+				case true:
+					// Check if it's turning
+					if !isTurning {
+						if !wallCloseUp && northDistance+northDistanceChange >= FrontCloseupThreshold {
+							if err := service.SetMotorForward(
+								ctx,
+								MotorForwardSlowSpeed,
+							); err != nil {
+								return false, err
+							}
+							if err := service.SetServoToCenter(ctx); err != nil {
+								return false, err
+							}
+							wallCloseUp = true
+
+							// Log that the robot is moving forward to get close to the wall
+							if loggerProducer != nil {
+								loggerProducer.Info("Moving forward to get close to the wall...")
+							}
+							continue
+						}
+						if wallCloseUp && northDistance+northDistanceChange <= FrontCloseupThreshold {
+							if err := service.SetServoToLeft(
+								ctx,
+								ServoBigTurnAngle,
+							); err != nil {
+								return false, err
+							}
+							if err := service.SetMotorBackward(
+								ctx,
+								MotorBackwardSlowSpeed,
+							); err != nil {
+								return false, err
+							}
+
+							// Log that the robot is turning left
+							if loggerProducer != nil {
+								loggerProducer.Info("Turning left...")
+							}
+
+							// Sets the turning state to true
+							isTurning = true
+						}
+					}
+				}
+			}
+			continue
+		}
+
+		// Checks which lane is the robot located inside
+		if westDistance+westDistanceChange >= SideDistanceThreshold {
+			if !wallCloseUp && eastDistance+eastDistanceChange >= LaneIdentifierThreshold {
+				if northDistance >= FrontCloseupThreshold {
+					if err := service.SetMotorForward(
+						ctx,
+						MotorForwardSlowSpeed,
+					); err != nil {
+						return false, err
+					}
+					if err := service.SetServoToCenter(ctx); err != nil {
+						return false, err
+					}
+					wallCloseUp = true
+
+					// Log that the robot is moving forward to get close to the wall
+					if loggerProducer != nil {
+						loggerProducer.Info("Moving forward to get close to the wall...")
+					}
+
+					continue
+				}
+
+				// If the robot is close to the wall, start turning right
+				if wallCloseUp && northDistance+northDistanceChange <= FrontCloseupThreshold {
+					if err := service.SetServoToRight(
+						ctx,
+						ServoMediumTurnAngle,
+					); err != nil {
+						return false, err
+					}
+					if err := service.SetMotorBackward(
+						ctx,
+						MotorBackwardSlowSpeed,
+					); err != nil {
+						return false, err
+					}
+
+					// Log that the robot is turning right
+					if loggerProducer != nil {
+						loggerProducer.Info("Turning right...")
+					}
+
+					// Sets the turning state to true
+					isTurning = true
+				}
+			}
+		}
+	}
+
+	/*
+		// Basically this condition is meant to indicate when has the robot successfully made the turn (if it's not enough, we can stop the turn at like 60 degrees or something, then counteract the other 30 degrees while going backwards)
+				if last90DegreeTurns != temporaryTurns {
+					// Set the turn completed flag as true
+					turnCompleted = true
+					break
+				}
+	*/
+
+	/*
+		// Basically this condition is meant to indicate when has the robot successfully made the turn
+							if last90DegreeTurns != temporaryTurns {
+								isTurning = false
+								wallCloseUp = false
+								continue
+							}
+						} else {
+							if err := service.SetServoToLeft(
+								ctx,
+								ServoMediumTurnAngle,
+							); err != nil {
+								return err
+							}
+							if err := service.SetMotorBackward(
+								ctx,
+								MotorBackwardSlowSpeed,
+							); err != nil {
+								return err
+							}
+							// Basically this condition is meant to indicate when has the robot successfully made the turn
+							if last90DegreeTurns != temporaryTurns {
+								if err := service.SetServoToLeft(
+									ctx,
+									ServoMediumTurnAngle,
+								); err != nil {
+									return err
+								}
+								if err := service.SetMotorBackward(
+									ctx,
+									MotorBackwardSlowSpeed,
+								); err != nil {
+									return err
+								}
+								// keeps doing it until it reaches the wall (prob measurements with the rplidar)
+								if err := service.SetServoToCenter(ctx); err != nil {
+									return err
+								}
+								isTurning = false
+							}
+						}
+	*/
 }

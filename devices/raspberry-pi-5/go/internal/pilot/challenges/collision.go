@@ -49,8 +49,13 @@ func collisionHandler(
 		// Calculate the future distance change based on the current distance change
 		distanceChange := FrontDistanceChange * service.GetRPLiDARAverageDistanceChange(cardinalDirection)
 
+		// Check if the distance is NaN (no data)
+		if math.IsNaN(distance) || math.IsNaN(distanceChange) {
+			continue
+		}
+
 		// If the distance is above or equal to the threshold, continue to the next direction
-		if math.IsNaN(distance) || distance+distanceChange >= SafetyFrontDistanceStartThreshold {
+		if distance+distanceChange >= SafetyFrontDistanceStartThreshold {
 			continue
 		}
 
@@ -120,63 +125,24 @@ func collisionHandler(
 		loggerProducer.Info("Moving backward...")
 	}
 
-	// Wait until the front distance is above the stop threshold or an obstacle is detected on the back
-	reached := false
-	for !reached {
-		time.Sleep(UpdateDelay)
-
-		select {
-		case <-ctx.Done():
-			return true, ctx.Err()
-		default:
-			// Check if there's any obstacle on the back
-			backDistanceThresholdReached := false
-			for _, cardinalDirection := range BackCardinalDirections {
-				// Get the average distance for the cardinal direction
-				distance := service.GetRPLiDARAverageDistance(cardinalDirection)
-
-				// Calculate the future distance change based on the current distance change
-				distanceChange := BackDistanceChange * service.GetRPLiDARAverageDistanceChange(cardinalDirection)
-
-				// If the distance is below the back threshold, set the flag to false and break the loop
-				if !math.IsNaN(distance) && distance+distanceChange < SafetyBackDistanceThreshold {
-					backDistanceThresholdReached = true
-					break
-				}
-			}
-
-			// Check if the back distance threshold to stop backward movement is reached
-			if backDistanceThresholdReached {
-				if loggerProducer != nil {
-					loggerProducer.Warning("Safety back distance threshold reached. Stopping backward movement.")
-				}
-				reached = true
-				break
-			}
-
-			// Check if the front distance threshold to stop backward movement is reached
-			frontDistanceThresholdReached := true
-			for _, cardinalDirection := range cardinalDirections {
-				// Get the average distance for the cardinal direction
-				distance := service.GetRPLiDARAverageDistance(cardinalDirection)
-
-				// Calculate the future distance change based on the current distance change
-				distanceChange := FrontDistanceChange * service.GetRPLiDARAverageDistanceChange(cardinalDirection)
-
-				// If the distance is below the stop threshold, set the flag to false and break the loop
-				if !math.IsNaN(distance) && distance+distanceChange < SafetyFrontDistanceStopThreshold {
-					frontDistanceThresholdReached = false
-					break
-				}
-			}
-
-			// If the front distance threshold is reached, set the reached flag to true
-			if frontDistanceThresholdReached {
-				if loggerProducer != nil {
-					loggerProducer.Info("Safety front distance threshold reached. Resuming normal operation.")
-				}
-				reached = true
-			}
+	// If it's turning, we don't care about the front distance, only the back distance
+	if isTurning {
+		if err := backCloseUpHandler(
+			ctx,
+			service,
+			loggerProducer,
+		); err != nil {
+			return true, err
+		}
+	} else {
+		// Wait until the front distance is above the stop threshold or an obstacle is detected on the back
+		if err := safeFrontHandler(
+			ctx,
+			service,
+			loggerProducer,
+			cardinalDirections...,
+		); err != nil {
+			return true, err
 		}
 	}
 
@@ -208,4 +174,160 @@ func collisionHandler(
 		return true, err
 	}
 	return true, nil
+}
+
+// backCloseUpHandler handles the back close up logic based on RPLiDAR sensor data.
+//
+// Parameters:
+//
+// ctx: The context to use for the challenge
+// service: The service to use for the challenge
+// loggerProducer: The logger producer to use for logging
+//
+// Returns:
+//
+// An error if the back close up could not be handled, nil otherwise
+func backCloseUpHandler(
+	ctx context.Context,
+	service Service,
+	loggerProducer goconcurrentlogger.LoggerProducer,
+) error {
+	// Check if the service is nil
+	if service == nil {
+		return ErrNilService
+	}
+
+	// Check if it's going backward
+	if service.GetMotorDirection() != MotorDirectionBackward {
+		return fmt.Errorf("back close up handler can only be used when going backward")
+	}
+
+	// Wait until the back distance is above the threshold
+	for {
+		time.Sleep(UpdateDelay)
+
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+			// Check if there's any obstacle on the back
+			for _, cardinalDirection := range BackCardinalDirections {
+				// Get the average distance for the cardinal direction
+				distance := service.GetRPLiDARAverageDistance(cardinalDirection)
+
+				// Calculate the future distance change based on the current distance change
+				distanceChange := BackDistanceChange * service.GetRPLiDARAverageDistanceChange(cardinalDirection)
+
+				// Check if the distance is NaN (no data)
+				if math.IsNaN(distance) || math.IsNaN(distanceChange) {
+					continue
+				}
+
+				// If the distance is below the back threshold, set the flag to false and break the loop
+				if distance+distanceChange < SafetyBackDistanceThreshold {
+					if loggerProducer != nil {
+						loggerProducer.Warning("Safety back distance threshold reached. Stopping backward movement.")
+					}
+					return nil
+				}
+			}
+		}
+	}
+}
+
+// safeFrontHandler handles the safe front logic based on RPLiDAR sensor data.
+//
+// Parameters:
+//
+// ctx: The context to use for the challenge
+// service: The service to use for the challenge
+// loggerProducer: The logger producer to use for logging
+// cardinalDirections: The cardinal directions to check the front distances (e.g., North, North-Northeast, North-Northwest)
+//
+// Returns:
+//
+// An error if the safe front could not be handled, nil otherwise
+func safeFrontHandler(
+	ctx context.Context,
+	service Service,
+	loggerProducer goconcurrentlogger.LoggerProducer,
+	cardinalDirections ...gorplidarsdkhandler.CardinalDirection,
+) error {
+	// Check if the service is nil
+	if service == nil {
+		return ErrNilService
+	}
+
+	// Check if it's going backward
+	if service.GetMotorDirection() != MotorDirectionBackward {
+		return fmt.Errorf("safe front handler can only be used when going backward")
+	}
+
+	// Wait until the front distance is above the stop threshold or an obstacle is detected on the back
+	for {
+		time.Sleep(UpdateDelay)
+
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+			// Check if there's any obstacle on the back
+			backDistanceThresholdReached := false
+			for _, cardinalDirection := range BackCardinalDirections {
+				// Get the average distance for the cardinal direction
+				distance := service.GetRPLiDARAverageDistance(cardinalDirection)
+
+				// Calculate the future distance change based on the current distance change
+				distanceChange := BackDistanceChange * service.GetRPLiDARAverageDistanceChange(cardinalDirection)
+
+				// Check if the distance is NaN (no data)
+				if math.IsNaN(distance) || math.IsNaN(distanceChange) {
+					continue
+				}
+
+				// If the distance is below the back threshold, set the flag to false and break the loop
+				if distance+distanceChange < SafetyBackDistanceThreshold {
+					backDistanceThresholdReached = true
+					break
+				}
+			}
+
+			// Check if the back distance threshold to stop backward movement is reached
+			if backDistanceThresholdReached {
+				if loggerProducer != nil {
+					loggerProducer.Warning("Safety back distance threshold reached. Stopping backward movement.")
+				}
+				return nil
+			}
+
+			// Check if the front distance threshold to stop backward movement is reached
+			frontDistanceThresholdReached := true
+			for _, cardinalDirection := range cardinalDirections {
+				// Get the average distance for the cardinal direction
+				distance := service.GetRPLiDARAverageDistance(cardinalDirection)
+
+				// Calculate the future distance change based on the current distance change
+				distanceChange := FrontDistanceChange * service.GetRPLiDARAverageDistanceChange(cardinalDirection)
+
+				// Check if the distance is NaN (no data)
+				if math.IsNaN(distance) || math.IsNaN(distanceChange) {
+					continue
+				}
+
+				// If the distance is below the stop threshold, set the flag to false and break the loop
+				if distance+distanceChange < SafetyFrontDistanceStopThreshold {
+					frontDistanceThresholdReached = false
+					break
+				}
+			}
+
+			// If the front distance threshold is reached, set the reached flag to true
+			if frontDistanceThresholdReached {
+				if loggerProducer != nil {
+					loggerProducer.Info("Safety front distance threshold reached. Resuming normal operation.")
+				}
+				return nil
+			}
+		}
+	}
 }

@@ -37,6 +37,9 @@ const (
 
 	// MinServoAngleCorrectionPercentage is the minimum servo angle percentage for correction
 	MinServoAngleCorrectionPercentage = 0.25
+
+	// MinTimeToCorrectAfterTurn is the minimum time to correct after a turn
+	MinTimeToCorrectAfterTurn = 1 * time.Second // 1500 * time.Millisecond
 )
 
 // centerByRPLiDARHandler centers the robot using RPLiDAR data
@@ -61,8 +64,23 @@ func centerByRPLiDARHandler(
 	westAverageDistanceChange := SideDistanceChange * service.GetRPLiDARAverageDistanceChange(gorplidarsdkhandler.CardinalDirectionWest)
 	eastAverageDistanceChange := SideDistanceChange * service.GetRPLiDARAverageDistanceChange(gorplidarsdkhandler.CardinalDirectionEast)
 
+	// Check if any measure is NaN, if so, center the servo and return
+	for _, distance := range []float64{
+		westAverageDistance,
+		eastAverageDistance,
+		westAverageDistanceChange,
+		eastAverageDistanceChange,
+	} {
+		if math.IsNaN(distance) {
+			if err := service.SetServoToCenter(ctx); err != nil {
+				return err
+			}
+			return nil
+		}
+	}
+
 	// Check if the servo should make a little turn to the left or right in order to center the robot
-	if math.IsNaN(eastAverageDistance) || math.IsNaN(westAverageDistance) || time.Since(lastTurningTime) < MinTimeToCorrectAfterTurn {
+	if time.Since(lastTurningTime) < MinTimeToCorrectAfterTurn {
 		if err := service.SetServoToCenter(ctx); err != nil {
 			return err
 		}

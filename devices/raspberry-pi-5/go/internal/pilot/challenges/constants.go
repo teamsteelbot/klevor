@@ -16,12 +16,6 @@ const (
 	// Algorithm90DegreeTurns is the number of 90 degree turns in the algorithm
 	Algorithm90DegreeTurns = 12
 
-	// MinTimeBetweenTurns is the minimum time between turns
-	MinTimeBetweenTurns = 2 * time.Second
-
-	// MinTimeToCorrectAfterTurn is the minimum time to correct after a turn
-	MinTimeToCorrectAfterTurn = 1 * time.Second // 1500 * time.Millisecond
-
 	// UpdateDelay is the delay between updates
 	UpdateDelay = 10 * time.Millisecond
 

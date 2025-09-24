@@ -3,6 +3,7 @@ package challenges
 import (
 	"context"
 	"fmt"
+	"math"
 	"time"
 
 	goconcurrentlogger "github.com/ralvarezdev/go-concurrent-logger"
@@ -34,28 +35,28 @@ const (
 //
 // Returns:
 //
-// A boolean indicating if an obstacle was avoided, and an error if the obstacle could not be avoided, nil otherwise
+// An error if the robot could not avoid obstacles, nil otherwise
 func avoidObstacles(
 	ctx context.Context,
 	service Service,
 	isTurning bool,
 	isObjectAvoidanceInProgress *bool,
 	loggerProducer goconcurrentlogger.LoggerProducer,
-) (bool, error) {
+) (internalclip.PositiveLabel, error) {
 	// Check if the service is nil
 	if service == nil {
-		return false, ErrNilService
+		return internalclip.PositiveLabelNil, ErrNilService
 	}
 
 	// Check if the robot is currently turning
 	if isTurning {
 		// If the robot is turning, do not attempt to avoid obstacles
-		return false, nil
+		return internalclip.PositiveLabelNil, nil
 	}
 
 	// Check if the isObjectAvoidanceInProgress is nil
 	if isObjectAvoidanceInProgress == nil {
-		return false, ErrNilIsObjectAvoidanceInProgress
+		return internalclip.PositiveLabelNil, ErrNilIsObjectAvoidanceInProgress
 	}
 
 	// After each turn, the robot starts looking for the objects (it should be roughly centered, and it could gather the objects position, (left or right lane) with the rplidar)
@@ -63,11 +64,16 @@ func avoidObstacles(
 	var cardinalDirectionWithObstacle gorplidarsdkhandler.CardinalDirection
 	for _, cardinalDirection := range ObstaclesDetectionCardinalDirections {
 		// Get the average distance and average distance change for the cardinal direction
-		averageDistance := service.GetRPLiDARAverageDistance(cardinalDirection)
-		averageDistanceChange := service.GetRPLiDARAverageDistanceChange(cardinalDirection)
+		distance := service.GetRPLiDARAverageDistance(cardinalDirection)
+		distanceChange := service.GetRPLiDARAverageDistanceChange(cardinalDirection)
+
+		// If the distance is NaN, continue to the next cardinal direction
+		if math.IsNaN(distance) || math.IsNaN(distanceChange) {
+			continue
+		}
 
 		// Check if the average distance and average distance change are below the threshold
-		if averageDistance+averageDistanceChange <= CameraRangeThreshold {
+		if distance+distanceChange <= CameraRangeThreshold {
 			// Get the CLIP classification
 			obstacleDetected = service.GetCLIPClassification()
 			cardinalDirectionWithObstacle = cardinalDirection
@@ -84,7 +90,7 @@ func avoidObstacles(
 
 		// Set the isObjectAvoidanceInProgress to false
 		*isObjectAvoidanceInProgress = false
-		return false, nil
+		return internalclip.PositiveLabelNil, nil
 	}
 
 	// Log the obstacle detected only if there wasn't an obstacle avoidance in progress
@@ -98,10 +104,19 @@ func avoidObstacles(
 		)
 	}
 
+	// Get the corresponding positive label
+	var positiveLabel internalclip.PositiveLabel
+	switch obstacleDetected.GetLabel() {
+	case internalclip.PositiveLabelRedBlock.String():
+		positiveLabel = internalclip.PositiveLabelRedBlock
+	case internalclip.PositiveLabelGreenBlock.String():
+		positiveLabel = internalclip.PositiveLabelGreenBlock
+	}
+
 	// Stop the motor before avoiding the obstacle if it wasn't already avoiding an obstacle
 	if !*isObjectAvoidanceInProgress {
 		if err := service.SetMotorStop(ctx); err != nil {
-			return true, err
+			return positiveLabel, err
 		}
 	}
 
@@ -131,7 +146,7 @@ func avoidObstacles(
 			servoAngle = ServoObjectAvoidanceOnFrontAngle
 			objectDetectionIsOnFront = true
 		default:
-			return false, fmt.Errorf(
+			return positiveLabel, fmt.Errorf(
 				"invalid object detection direction: %s",
 				objectDetectionDirection.String(),
 			)
@@ -152,7 +167,7 @@ func avoidObstacles(
 			servoAngle = ServoObjectAvoidanceOnFrontAngle
 			objectDetectionIsOnFront = true
 		default:
-			return false, fmt.Errorf(
+			return positiveLabel, fmt.Errorf(
 				"invalid object detection direction: %s",
 				objectDetectionDirection.String(),
 			)
@@ -168,13 +183,18 @@ func avoidObstacles(
 
 		select {
 		case <-ctx.Done():
-			return false, ctx.Err()
+			return positiveLabel, ctx.Err()
 		default:
 			// Check the backward distances to avoid a collision
 			for _, cardinalDirection := range BackCardinalDirections {
 				// Get the cardinal direction average distance and average distance change
 				cardinalDirectionDistance := service.GetRPLiDARAverageDistance(cardinalDirection)
 				cardinalDirectionDistanceChange := service.GetRPLiDARAverageDistanceChange(cardinalDirection)
+
+				// If any measure is NaN, continue to the next cardinal direction
+				if math.IsNaN(cardinalDirectionDistance) || math.IsNaN(cardinalDirectionDistanceChange) {
+					continue
+				}
 
 				// Check if the object is still too close
 				if cardinalDirectionDistance+cardinalDirectionDistanceChange < SafetyBackDistanceThreshold {
@@ -186,6 +206,11 @@ func avoidObstacles(
 			// Get the cardinal direction average distance and average distance change
 			cardinalDirectionDistance := service.GetRPLiDARAverageDistance(cardinalDirectionWithObstacle)
 			cardinalDirectionDistanceChange := service.GetRPLiDARAverageDistanceChange(cardinalDirectionWithObstacle)
+
+			// If any measure is NaN, continue
+			if math.IsNaN(cardinalDirectionDistance) || math.IsNaN(cardinalDirectionDistanceChange) {
+				continue
+			}
 
 			// Check if the object is still too close
 			if objectDetectionIsOnOppositeSide && cardinalDirectionDistance+cardinalDirectionDistanceChange >= MinDistanceOnOppositeSideToAvoidObstacle {
@@ -223,7 +248,7 @@ func avoidObstacles(
 						servoAngle,
 						servoDirection,
 					); err != nil {
-						return true, err
+						return positiveLabel, err
 					}
 				}
 
@@ -232,10 +257,7 @@ func avoidObstacles(
 					ctx,
 					MotorBackwardNormalSpeed,
 				); err != nil {
-					return false, fmt.Errorf(
-						"failed to set motor to backward speed: %w",
-						err,
-					)
+					return positiveLabel, err
 				}
 
 				// Log the motor set to backward
@@ -246,100 +268,24 @@ func avoidObstacles(
 
 	// Stop the motor before turning the servo
 	if err := service.SetMotorStop(ctx); err != nil {
-		return true, err
+		return positiveLabel, err
 	}
 
-		// Set the servo angle and direction to avoid the obstacle
-		if err := service.SetServoAngle(
-			ctx,
-			servoAngle,
-			servoDirection,
-		); err != nil {
-			return true, err
-		}
-
-		/*
-			if err := h.setMotorForwardByPercentage(
-					ctx,
-					MotorForwardNormalPercentage,
-				); err != nil {
-					return fmt.Errorf(
-						"failed to set motor to normal speed: %w",
-						err,
-					)
-				}
-				if westAverageDistance <= float64(CameraRangeThreshold) && eastAverageDistance <= float64(CameraRangeThreshold) {
-					if err := h.setServoToRightByPercentage(
-						ctx,
-						ServoMediumTurnAnglePercentage,
-					); err != nil {
-						return fmt.Errorf(
-							"failed to set servo to small right turn: %w",
-							err,
-						)
-					}
-				}
-				else if northAverageDistance <= float64(FrontCloseupThreshold) {
-					if err := h.setServoToCenter(ctx); err != nil {
-						return fmt.Errorf(
-							"failed to set servo to center: %w",
-							err,
-						)
-					}
-					if err := h.setMotorBackwardByPercentage(
-						ctx,
-						MotorBackwardNormalPercentage,
-					); err != nil {
-						return fmt.Errorf(
-							"failed to set motor to normal speed: %w",
-							err,
-						)
-					}
-					return
-				}
-		*/
-
-		/*
-			if err := h.setMotorForwardByPercentage(
-				ctx,
-				MotorForwardNormalPercentage,
-			); err != nil {
-				return fmt.Errorf(
-					"failed to set motor to normal speed: %w",
-					err,
-				)
-			}
-			if westAverageDistance <= float64(CameraRangeThreshold) and eastAverageDistance <= float64(CameraRangeThreshold) {
-				while (robot not aligned)
-				if err := h.setServoToRightByPercentage(
-					ctx,
-					ServoMediumTurnAnglePercentage,
-				); err != nil {
-					return fmt.Errorf(
-						"failed to set servo to small right turn: %w",
-						err,
-					)
-				}
-			}
-			else if northAverageDistance <= float64(FrontCloseupThreshold) {
-				if err := h.setServoToCenter(ctx); err != nil {
-					return fmt.Errorf(
-						"failed to set servo to center: %w",
-						err,
-					)
-				}
-				if err := h.setMotorBackwardByPercentage(
-					ctx,
-					MotorBackwardNormalPercentage,
-				); err != nil {
-					return fmt.Errorf(
-						"failed to set motor to normal speed: %w",
-						err,
-					)
-				}
-				continue
-			}
-		*/
+	// Set the servo angle and direction to avoid the obstacle
+	if err := service.SetServoAngle(
+		ctx,
+		servoAngle,
+		servoDirection,
+	); err != nil {
+		return positiveLabel, err
 	}
-	return true, nil
+
+	// Move forward to avoid the obstacle
+	if err := service.SetMotorForward(
+		ctx,
+		MotorForwardNormalSpeed,
+	); err != nil {
+		return positiveLabel, err
+	}
+	return positiveLabel, nil
 }
