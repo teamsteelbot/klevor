@@ -38,7 +38,6 @@ A continuación, explicaremos a detalle cómo funciona este sistema motriz. Para
 
 ## ¿Cómo funciona nuestro sistema reductor de RPM?
 
-
  Este sistema permite que el motor, originalmente muy rápido pero con poco torque, pueda aplicar una mayor fuerza al moverse, algo importante para los desafíos, que requieren tracción y superación de obstáculos.
 
  Este sistema cuenta con el ya antes mencionado, Motor INJORA 48T, con una velocidad de 20000 RPM con un piñón de 20 dientes instalado en su boquilla. Además de los piñones cuyos diseños 2D están adjuntos, que constan de 36, 8, 24, 17 y 40 dientes; todos provenientes de kits de LEGO.

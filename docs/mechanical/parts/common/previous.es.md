@@ -4,19 +4,41 @@
 
 ### Versión 1 {:#camera-mounting-v1}
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="../../../assets/images/github/models/plans/common/previous/raspberry-pi-camera-module-3-mounting-v1.png" alt="Versión 1 del Soporte para la Raspberry Pi Camera Module 3" width="200" class="mechanical-image">
+	<br>
+	<i>Versión 1 del Soporte para la Raspberry Pi Camera Module 3</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
-	<img src="../../../assets/images/github/models/plans/common/previous/raspberry-pi-camera-module-3-mounting-v1.png" alt="Versión 1 del Soporte para la Raspberry Pi Camera Module 3" class="mechanical-image">
+	<img src="../../../assets/images/github/models/plans/common/previous/raspberry-pi-camera-module-3-mounting-v1.png" alt="Versión 1 del Soporte para la Raspberry Pi Camera Module 3" 
+class="mechanical-image">
 	<i>Versión 1 del Soporte para la Raspberry Pi Camera Module 3</i>
 </div>
+mkdocs-only-end -->
 
 Fue diseñada para estar alta y que no fuese obstruida, además, está seccionada en dos partes, la superior (donde va la cámara) y la inferior (pilares) fue diseñada para que su ángulo de visión sea modificable. Esto solo mientras se hacen pruebas.
 
 ### Versión 2 {:#camera-mounting-v2}
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="../../../assets/images/github/models/plans/common/previous/raspberry-pi-camera-module-3-mounting-v2.png" alt="Versión 2 del Soporte para la Raspberry Pi Camera Module 3" width="200" class="mechanical-image">
+	<br>
+	<i>Versión 2 del Soporte para la Raspberry Pi Camera Module 3</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
-	<img src="../../../assets/images/github/models/plans/common/previous/raspberry-pi-camera-module-3-mounting-v2.png" alt="Versión 2 del Soporte para la Raspberry Pi Camera Module 3" class="mechanical-image">
+	<img src="../../../assets/images/github/models/plans/common/previous/raspberry-pi-camera-module-3-mounting-v2.png" alt="Versión 2 del Soporte para la Raspberry Pi Camera Module 3" 
+class="mechanical-image">
 	<i>Versión 2 del Soporte para la Raspberry Pi Camera Module 3</i>
 </div>
+mkdocs-only-end -->
 
 Luego de varias pruebas logramos determinar el ángulo ideal para la cámara, por eso unimos ambas piezas que anteriormente eran graduables.
 
@@ -24,24 +46,100 @@ Luego de varias pruebas logramos determinar el ángulo ideal para la cámara, po
 
 ## Sistema reductor de RPM {:#rpm-reduction-system}
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="../../../assets/images/github/models/views/common/current/rpm-reduction-system.png" alt="RPM Reduction System" width="200" class="mechanical-image">
+	<br>
+	<i>Sistema reductor de RPM</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
-	<img src="../../../assets/images/github/models/views/common/current/rpm-reduction-system.png" alt="Sistema reductor de RPM" class="mechanical-image">
+	<img src="../../../assets/images/github/models/views/common/current/rpm-reduction-system.png" alt="RPM Reduction System" 
+class="mechanical-image">
 	<i>Sistema reductor de RPM</i>
 </div>
+mkdocs-only-end -->
 
 En este modelo 3D podemos ver cómo está diseñado este sistema. Pasaremos a mostrar y explicar las piezas que lo conforman.
 
 ### Base del sistema {:#rpm-reduction-system-base}
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="../../../assets/images/github/models/plans/common/current/rpm-reduction-system-mounting.png" alt="RPM Reduction System Mounting" width="200" class="mechanical-image">
+	<br>
+	<i>Base del sistema reductor de RPM</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
-	<img src="../../../assets/images/github/models/plans/common/current/rpm-reduction-system-mounting.png" alt="Base del sistema reductor de RPM" class="mechanical-image">
+	<img src="../../../assets/images/github/models/plans/common/current/rpm-reduction-system-mounting.png" alt="RPM Reduction System Mounting" 
+class="mechanical-image">
 	<i>Base del sistema reductor de RPM</i>
 </div>
+mkdocs-only-end -->
 
 Es el cuerpo en el que se ensamblan todos los componentes de este sistema. Está diseñado para ocupar el menor espacio posible mientras cumple su función al 100%.
 
 ### Piñones {:#rpm-reduction-system-gears}
 
+<!-- github-only-start -->
+<table>
+	<tbody>
+		<tr>
+			<td>
+				<p align="center">
+					<img src="../../../assets/images/github/models/plans/common/current/lego-36-teeth-pinion.png"
+alt="Piñón de 36 dientes" width="600">
+					<br>
+					<i>Piñón de 36 dientes</i>
+				</p>
+			</td>
+			<td>
+				<p align="center">
+					<img src="../../../assets/images/github/models/plans/common/current/lego-24-teeth-pinion.png"
+alt="Piñón de 24 dientes" width="600">
+					<br>
+					<i>Piñón de 24 dientes</i>
+				</p>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<p align="center">
+					<img src="../../../assets/images/github/models/plans/common/current/lego-20-teeth-pinion.png"
+alt="Piñón de 20 dientes" width="600">
+					<br>
+					<i>Piñón de 20 dientes</i>
+				</p>
+			</td>
+			<td>
+				<p align="center">
+					<img src="../../../assets/images/github/models/plans/common/current/17-teeth-metallic-pinion.png"
+alt="Piñón metálico de 17 dientes" width="600">
+					<br>
+					<i>Piñón metálico de 17 dientes</i>
+				</p>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<p align="center">
+					<img src="../../../assets/images/github/models/plans/common/current/lego-8-teeth-pinion.png"
+alt="Piñón de 8 dientes" width="600">
+					<br>
+					<i>Piñón de 8 dientes</i>
+				</p>
+			</td>
+		</tr>
+	</tbody>
+</table>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="center mechanical-images-container">
 	<div class="hcenter">
 		<img src="../../../assets/images/github/models/plans/common/current/lego-36-teeth-pinion.png" alt="Piñón de 36 dientes" class="mechanical-image">
@@ -64,33 +162,67 @@ Es el cuerpo en el que se ensamblan todos los componentes de este sistema. Está
 		<i>Piñón de 8 dientes</i>
 	</div>
 </div>
+mkdocs-only-end -->
 
 Esta es la parte más importante de nuestro sistema, son los que hacen que el motor pierda velocidad, pero que a su vez, gane fuerza. Estos engranajes son sobrantes de kits, pero quisimos adecuarlos a nuestro sistema para que no fuesen desperdiciadas.
 
 ### Eje principal {:#rpm-reduction-system-main-shaft}
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="../../../assets/images/github/models/plans/common/current/rpm-reduction-system-shaft.png" alt="Eje del sistema reductor de RPM" width="200" class="mechanical-image">
+	<br>
+	<i>Eje del sistema reductor de RPM</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
-	<img src="../../../assets/images/github/models/plans/common/current/rpm-reduction-system-shaft.png" alt="Eje del sistema reductor de RPM" class="mechanical-image">
+	<img src="../../../assets/images/github/models/plans/common/current/rpm-reduction-system-shaft.png" alt="Eje del sistema reductor de RPM" 
+class="mechanical-image">
 	<i>Eje del sistema reductor de RPM</i>
 </div>
+mkdocs-only-end -->
 
 Utilizamos dos unidades de este tipo de eje, cuya función principal es sujetar los piñones manteniéndolos a una altura fija y estable dentro del sistema. Gracias a su resistencia,esta pieza permite la alineación precisa de los engranajes.
 
 ### Separadores {:#rpm-reduction-system-separators}
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="../../../assets/images/github/models/plans/common/current/lego-3-5-separator.png" alt="Separadores del sistema reductor de RPM" width="200" class="mechanical-image">
+	<br>
+	<i>Separadores del sistema reductor de RPM</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
-	<img src="../../../assets/images/github/models/plans/common/current/lego-3-5-separator.png" alt="Separadores del sistema reductor de RPM" class="mechanical-image">
+	<img src="../../../assets/images/github/models/plans/common/current/lego-3-5-separator.png" alt="Separadores del sistema reductor de RPM" 
+class="mechanical-image">
 	<i>Separadores del sistema reductor de RPM</i>
 </div>
+mkdocs-only-end -->
 
 Se encargan de mantener los engranajes en un mismo sitio para que estos coincidan en sus giros. Esta también es una pieza reutilizada. Usamos tres unidades
 
 ### Bujes {:#rpm-reduction-system-bushings}
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="../../../assets/images/github/models/plans/common/current/transmission-mount-bushing.png" alt="Bujes del sistema reductor de RPM" width="200" class="mechanical-image">
+	<br>
+	<i>Bujes del sistema reductor de RPM</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
-	<img src="../../../assets/images/github/models/plans/common/current/transmission-mount-bushing.png" alt="Bujes del sistema reductor de RPM" class="mechanical-image">
+	<img src="../../../assets/images/github/models/plans/common/current/transmission-mount-bushing.png" alt="Bujes del sistema reductor de RPM" 
+class="mechanical-image">
 	<i>Bujes del sistema reductor de RPM</i>
 </div>
+mkdocs-only-end -->
 
 Los bujes cumplen una función fundamental en nuestro sistema, ya que se encargan de sostener firmemente los ejes, también permiten el giro libre y eficiente de los engranajes. 
 
@@ -98,10 +230,21 @@ Los bujes cumplen una función fundamental en nuestro sistema, ya que se encarga
 
 ### Separador en forma de cruceta {:#cross-shaped-separator}
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="../../../assets/images/github/models/plans/common/current/servo-4-pointed-crosshead.png" alt="Separador en forma de cruceta" width="200" class="mechanical-image">
+	<br>
+	<i>Separador en forma de cruceta</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
-	<img src="../../../assets/images/github/models/plans/common/current/servo-4-pointed-crosshead.png" alt="Separador en forma de cruceta" class="mechanical-image">
+	<img src="../../../assets/images/github/models/plans/common/current/servo-4-pointed-crosshead.png" alt="Separador en forma de cruceta" 
+class="mechanical-image">
 	<i>Separador en forma de cruceta</i>
 </div>
+mkdocs-only-end -->
 
 Esta pieza se conecta directamente con el buje que se encuentra justo detrás del piñón de 36 dientes. Aprovechamos su diseño, que permite que encaje tanto con el buje como con uno de los ejes, asegurando así una alineación precisa. Todo el sistema está pensado para que las piezas entren a presión, garantizando una unión firme.
 
@@ -113,64 +256,141 @@ El sistema está diseñado para convertir la alta velocidad del motor INJORA 48T
 
 ### Diferenciales {:#differentials}
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="../../../assets/images/github/models/plans/common/current/differential.png" alt="Diferenciales" width="200" class="mechanical-image">
+	<br>
+	<i>Diferenciales</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
-	<img src="../../../assets/images/github/models/plans/common/current/differential.png" alt="Diferenciales" class="mechanical-image">
+	<img src="../../../assets/images/github/models/plans/common/current/differential.png" alt="Diferenciales" 
+class="mechanical-image">
 	<i>Diferenciales</i>
 </div>
+mkdocs-only-end -->
 
 Todo nuestro sistema motriz está basado en el uso de dos diferenciales, los cuales juegan un papel fundamental al permitir que las cuatro ruedas tengan tracción. Gracias a esta configuración, se logra una distribución perfecta de la fuerrza.
 
 ### Caja de diferencial {:#gearbox}
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="../../../assets/images/github/models/plans/common/current/gearbox.png" alt="Caja de diferencial" width="200" class="mechanical-image">
+	<br>
+	<i>Caja de diferencial</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
-	<img src="../../../assets/images/github/models/plans/common/current/gearbox.png" alt="Caja de diferencial" class="mechanical-image">
+	<img src="../../../assets/images/github/models/plans/common/current/gearbox.png" alt="Caja de diferencial" 
+class="mechanical-image">
 	<i>Caja de diferencial</i>
 </div>
+mkdocs-only-end -->
 
 Esta es la estructura donde está el diferencial, protegiéndolo y manteniéndolo en su lugar. Desde este punto, también salen los componentes que permiten el giro de la rueda. Su diseño asegura la estabilidad del diferencial así como su debido funcionamiento.
 
 ### Eje transmisor {:#transmission-shaft}
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="../../../assets/images/github/models/plans/common/current/main-transmission-shaft.png" alt="Eje transmisor" width="200" class="mechanical-image">
+	<br>
+	<i>Eje transmisor</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
-	<img src="../../../assets/images/github/models/plans/common/current/main-transmission-shaft.png" alt="Eje transmisor" class="mechanical-image">
+	<img src="../../../assets/images/github/models/plans/common/current/main-transmission-shaft.png" alt="Eje transmisor" 
+class="mechanical-image">
 	<i>Eje transmisor</i>
 </div>
+mkdocs-only-end -->
 
 Esta pieza cumple la función clave de conectar ambos diferenciales, permitiendo una sincronización entre ellos. Gracias a esta conexión, se asegura que las cuatro ruedas del robot se muevan de forma uniforme, distribuyendo el torque de manera equilibrada.
 
 ### Copas transmisoras {:#transmission-cups}
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="../../../assets/images/github/models/plans/common/current/transmission-cup.png" alt="Copas transmisoras" width="200" class="mechanical-image">
+	<br>
+	<i>Copas transmisoras</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
-	<img src="../../../assets/images/github/models/plans/common/current/transmission-cup.png" alt="Copas transmisoras" class="mechanical-image">
+	<img src="../../../assets/images/github/models/plans/common/current/transmission-cup.png" alt="Copas transmisoras" 
+class="mechanical-image">
 	<i>Copas transmisoras</i>
 </div>
+mkdocs-only-end -->
 
 Esta pieza la utilizamos específicamente en el diferencial. Está diseñada con precisión para encajar perfectamente con el semieje, permitiendo así que las ruedas reciban el movimiento de manera eficiente. 
 
 ### Nudillos traseros {:#rear-knuckles}
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="../../../assets/images/github/models/plans/common/current/back-knuckle.png" alt="Nudillos traseros" width="200" class="mechanical-image">
+	<br>
+	<i>Nudillos traseros</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
-	<img src="../../../assets/images/github/models/plans/common/current/back-knuckle.png" alt="Nudillos traseros" class="mechanical-image">
+	<img src="../../../assets/images/github/models/plans/common/current/back-knuckle.png" alt="Nudillos traseros" 
+class="mechanical-image">
 	<i>Nudillos traseros</i>
 </div>
+mkdocs-only-end -->
 
 Es la pieza encargada de sostener directamente la rueda, funcionando como el punto de unión entre esta y el sistema de transmisión. Su diseño permite un encaje preciso con las copas transmisoras, asegurando así una conexión firme y eficiente para la movilidad del robot.
 
 ### Nudillos delanteros {:#front-knuckles}
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="../../../assets/images/github/models/plans/common/current/front-knuckle.png" alt="Nudillos delanteros" width="200" class="mechanical-image">
+	<br>
+	<i>Nudillos delanteros</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
-	<img src="../../../assets/images/github/models/plans/common/current/front-knuckle.png" alt="Nudillos delanteros" class="mechanical-image">
+	<img src="../../../assets/images/github/models/plans/common/current/front-knuckle.png" alt="Nudillos delanteros" 
+class="mechanical-image">
 	<i>Nudillos delanteros</i>
 </div>
+mkdocs-only-end -->
 
 También se encarga de conectarse con la rueda y con una copa transmisora, pero a diferencia del nudillo trasero este es un poco más alargado, para encajar con las barras del sistema Ackermann.
 
 ### Ruedas {:#wheels}
 
+<!-- github-only-start -->
+<p align="center">
+	<img src="../../../assets/images/github/models/plans/common/current/wheels.png" alt="Ruedas" width="200" class="mechanical-image">
+	<br>
+	<i>Ruedas</i>
+</p>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
 <div class="hcenter">
-	<img src="../../../assets/images/github/models/plans/common/current/wheels.png" alt="Ruedas" class="mechanical-image">
+	<img src="../../../assets/images/github/models/plans/common/current/wheels.png" alt="Ruedas" 
+class="mechanical-image">
 	<i>Ruedas</i>
 </div>
+mkdocs-only-end -->
 
 Utilizamos un total de cuatro unidades de esta rueda, las cuales fueron diseñadas completamente por nosotros, cuidando cada detalle para lograr un aspecto único que refleje identidad visual en el diseño del robot.
 
