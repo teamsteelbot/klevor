@@ -1,5 +1,103 @@
 # Prototipo 4 {:#prototype4}
 
+## Fotos del vehículo
+
+<!-- github-only-start -->
+<table>
+	<tbody>
+		<tr>
+			<td>
+				<p align="center">
+					<img src="../../assets/images/github/v-photos/prototype4/prototype4-front-view.png"
+alt="Vista delantera del prototipo 4" width="600">
+					<br>
+					<i>Vista delantera del prototipo 4</i>
+				</p>
+			</td>
+			<td>
+				<p align="center">
+					<img src="../../assets/images/github/v-photos/prototype4/prototype4-back-view.png"
+alt="Vista trasera del prototipo 4" width="600">
+					<br>
+					<i>Vista trasera del prototipo 4</i>
+				</p>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<p align="center">
+					<img src="../../assets/images/github/v-photos/prototype4/prototype4-right-view.png"
+alt="Vista derecha del prototipo 4" width="600">
+					<br>
+					<i>Vista derecha del prototipo 4</i>
+				</p>
+			</td>
+			<td>
+				<p align="center">
+					<img src="../../assets/images/github/v-photos/prototype4/prototype4-left-view.png"
+alt="Vista izquierda del prototipo 4" width="600">
+					<br>
+					<i>Vista izquierda del prototipo 4</i>
+				</p>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<p align="center">
+					<img src="../../assets/images/github/v-photos/prototype4/prototype4-top-view.png"
+alt="Vista superior del prototipo 4" width="600">
+					<br>
+					<i>Vista superior del prototipo 4</i>
+				</p>
+			</td>
+			<td>
+				<p align="center">
+					<img src="../../assets/images/github/v-photos/prototype4/prototype4-bottom-view.png"
+alt="Vista inferior del prototipo 4" width="600">
+					<br>
+					<i>Vista inferior del prototipo 4</i>
+				</p>
+			</td>
+		</tr>
+	</tbody>
+</table>
+<!-- github-only-end -->
+
+<!-- mkdocs-only-start
+<div class="vehicle-views-container">
+    <div class="hcenter">
+        <img src="/assets/images/github/v-photos/prototype4/prototype4-front-view.png" 
+alt="Vista delantera" class="vehicle-view-image">
+        <i>Vista delantera</i>
+    </div>
+    <div class="hcenter">
+        <img src="/assets/images/github/v-photos/prototype4/prototype4-back-view.png" 
+alt="Vista Trasera" class="vehicle-view-image">
+        <i>Vista trasera</i>
+    </div>
+    <div class="hcenter">
+        <img src="/assets/images/github/v-photos/prototype4/prototype4-right-view.png" 
+alt="Vista derecha" class="vehicle-view-image">
+        <i>Vista derecha</i>
+    </div>
+    <div class="hcenter">
+        <img src="/assets/images/github/v-photos/prototype4/prototype4-left-view.png" 
+alt="Vista izquierda" class="vehicle-view-image">
+        <i>Vista izquierda</i>
+    </div>
+    <div class="hcenter">
+        <img src="/assets/images/github/v-photos/prototype4/prototype4-top-view.png"
+alt="Vista superior" class="vehicle-view-image">
+        <i>Vista superior</i>
+    </div>
+    <div class="hcenter">
+        <img src="/assets/images/github/v-photos/prototype4/prototype4SS-bottom-view.png" 
+alt="Vista inferior" class="vehicle-view-image">
+        <i>Vista inferior</i>
+    </div>
+</div>
+mkdocs-only-end -->
+
 ## Introducción
 
 Este prototipo de Klevor es el fruto de un arduo trabajo enfocado en mejorar su eficiencia a la hora de realizar los desafíos que depara esta edición de la WRO. A lo largo de estas mejoras, hemos priorizado la ingeniería mecánica para superar las limitaciones de prototipos anteriores y optimizar su desempeño.
@@ -49,7 +147,7 @@ A pesar de tener una base sólida acerca de lo que queríamos para construir a K
 	<img src="../../assets/images/mechanical/gear-ratio-formula.png"
 alt="Gear Ratio Formula" width="600">
 	<br>
-	<i>Vista inferior del prototipo 3</i>
+	<i>Gear Ratio Formula</i>
 </p>
 
 Esto significa que para aumentar el torque, tenemos que hacer que los piñones con menos dientes muevan a los piñones con más dientes, esto fué la solución para el problema de torque de nuestro robot.
