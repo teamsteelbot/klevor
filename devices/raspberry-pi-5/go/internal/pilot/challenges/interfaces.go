@@ -43,7 +43,9 @@ type (
 			ctx context.Context,
 			anglePercentage float64,
 		) error
+		GetSouthwestAverageDistance() float64
 		GetSouthSouthwestAverageDistance() float64
+		GetSoutheastAverageDistance() float64
 		GetSouthSoutheastAverageDistance() float64
 		GetWestAverageDistance() float64
 		GetEastAverageDistance() float64

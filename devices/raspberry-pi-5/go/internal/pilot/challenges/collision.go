@@ -46,8 +46,11 @@ func collisionHandler(
 		// Get the average distance for the cardinal direction
 		distance := service.GetRPLiDARAverageDistance(cardinalDirection)
 
+		// Get the front distance change based on the cardinal direction
+		distanceChangeRate := getFrontDistanceChangeBasedOnTheCardinalDirections(cardinalDirection)
+
 		// Calculate the future distance change based on the current distance change
-		distanceChange := FrontDistanceChange * service.GetRPLiDARAverageDistanceChange(cardinalDirection)
+		distanceChange := distanceChangeRate * service.GetRPLiDARAverageDistanceChange(cardinalDirection)
 
 		// Check if the distance is NaN (no data)
 		if math.IsNaN(distance) || math.IsNaN(distanceChange) {
@@ -215,8 +218,11 @@ func backCloseUpHandler(
 				// Get the average distance for the cardinal direction
 				distance := service.GetRPLiDARAverageDistance(cardinalDirection)
 
+				// Get the back distance change based on the cardinal direction
+				distanceChangeRate := getBackDistanceChangeBasedOnTheCardinalDirections(cardinalDirection)
+
 				// Calculate the future distance change based on the current distance change
-				distanceChange := BackDistanceChange * service.GetRPLiDARAverageDistanceChange(cardinalDirection)
+				distanceChange := distanceChangeRate * service.GetRPLiDARAverageDistanceChange(cardinalDirection)
 
 				// Check if the distance is NaN (no data)
 				if math.IsNaN(distance) || math.IsNaN(distanceChange) {
@@ -277,8 +283,11 @@ func safeFrontHandler(
 				// Get the average distance for the cardinal direction
 				distance := service.GetRPLiDARAverageDistance(cardinalDirection)
 
+				// Get the back distance change based on the cardinal direction
+				distanceChangeRate := getBackDistanceChangeBasedOnTheCardinalDirections(cardinalDirection)
+
 				// Calculate the future distance change based on the current distance change
-				distanceChange := BackDistanceChange * service.GetRPLiDARAverageDistanceChange(cardinalDirection)
+				distanceChange := distanceChangeRate * service.GetRPLiDARAverageDistanceChange(cardinalDirection)
 
 				// Check if the distance is NaN (no data)
 				if math.IsNaN(distance) || math.IsNaN(distanceChange) {
@@ -306,8 +315,11 @@ func safeFrontHandler(
 				// Get the average distance for the cardinal direction
 				distance := service.GetRPLiDARAverageDistance(cardinalDirection)
 
+				// Get the front distance change based on the cardinal direction
+				distanceChangeRate := getFrontDistanceChangeBasedOnTheCardinalDirections(cardinalDirection)
+
 				// Calculate the future distance change based on the current distance change
-				distanceChange := FrontDistanceChange * service.GetRPLiDARAverageDistanceChange(cardinalDirection)
+				distanceChange := distanceChangeRate * service.GetRPLiDARAverageDistanceChange(cardinalDirection)
 
 				// Check if the distance is NaN (no data)
 				if math.IsNaN(distance) || math.IsNaN(distanceChange) {

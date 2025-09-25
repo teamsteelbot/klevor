@@ -61,11 +61,13 @@ type (
 		clipClassification            *gohailocliphandler.Classification
 		rplidarHandlerMutex           sync.RWMutex
 		rplidarHandler                gorplidarsdkhandler.Handler
-		rplidarMeasures  			[360]*gorplidarsdkhandler.Measure
+		rplidarMeasures               [360]*gorplidarsdkhandler.Measure
 		rplidarAverageDistances       map[gorplidarsdkhandler.CardinalDirection]float64
 		rplidarAverageDistancesChange map[gorplidarsdkhandler.CardinalDirection]float64
 		usbCDCSender                  internalusbcdc.Sender
 		usbCDCHandler                 internalusbcdc.Handler
+		southwestAverageDistance      float64
+		southeastAverageDistance      float64
 		southSouthwestAverageDistance float64
 		southSoutheastAverageDistance float64
 		westAverageDistance           float64
@@ -328,6 +330,8 @@ func (s *DefaultService) updateRPLiDARAverageDistances(ctx context.Context) erro
 			}
 
 			// Get the average common distances
+			s.southeastAverageDistance = s.rplidarAverageDistances[gorplidarsdkhandler.CardinalDirectionSoutheast]
+			s.southwestAverageDistance = s.rplidarAverageDistances[gorplidarsdkhandler.CardinalDirectionSouthwest]
 			s.southSoutheastAverageDistance = s.rplidarAverageDistances[gorplidarsdkhandler.CardinalDirectionSouthSoutheast]
 			s.southSouthwestAverageDistance = s.rplidarAverageDistances[gorplidarsdkhandler.CardinalDirectionSouthSouthwest]
 			s.westAverageDistance = s.rplidarAverageDistances[gorplidarsdkhandler.CardinalDirectionWest]
@@ -343,7 +347,7 @@ func (s *DefaultService) updateRPLiDARAverageDistances(ctx context.Context) erro
 			if time.Since(lastLogTime) >= RPLiDARLogInterval {
 				s.serviceLoggerProducer.Info(
 					fmt.Sprintf(
-						"W: %f, NW: %f, N-NW: %f, N: %f, N-NE: %f, NE: %f, E: %f",
+						"W: %f, NW: %f, N-NW: %f, N: %f, N-NE: %f, NE: %f, E: %f, SE: %f, S-SE: %f, S-SW: %f, SW: %f",
 						s.westAverageDistance,
 						s.northwestAverageDistance,
 						s.northNorthwestAverageDistance,
@@ -351,6 +355,10 @@ func (s *DefaultService) updateRPLiDARAverageDistances(ctx context.Context) erro
 						s.northNortheastAverageDistance,
 						s.northeastAverageDistance,
 						s.eastAverageDistance,
+						s.southeastAverageDistance,
+						s.southSoutheastAverageDistance,
+						s.southSouthwestAverageDistance,
+						s.southwestAverageDistance,
 					),
 				)
 
@@ -987,6 +995,24 @@ func (s *DefaultService) GetRPLiDARAverageDistanceChange(
 		return 0.0
 	}
 	return distanceChange
+}
+
+// GetSouthwestAverageDistance returns the average distance to the southwest
+//
+// Returns:
+//
+// The average distance to the southwest
+func (s *DefaultService) GetSouthwestAverageDistance() float64 {
+	return s.southwestAverageDistance
+}
+
+// GetSoutheastAverageDistance returns the average distance to the southeast
+//
+// Returns:
+//
+// The average distance to the southeast
+func (s *DefaultService) GetSoutheastAverageDistance() float64 {
+	return s.southeastAverageDistance
 }
 
 // GetSouthSouthwestAverageDistance returns the average distance to the south-southwest

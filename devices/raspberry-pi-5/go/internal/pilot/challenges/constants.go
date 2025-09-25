@@ -23,25 +23,25 @@ const (
 	MaxDistanceChange = 75.0
 
 	// MotorBackwardFastSpeed of speed for fast backward motor speed
-	MotorBackwardFastSpeed float64 = 1
+	MotorBackwardFastSpeed float64 = 0.9 // 1 (not too charged), 0.9 (full charged)
 
 	// MotorBackwardNormalSpeed of speed for normal backward motor speed
-	MotorBackwardNormalSpeed float64 = 0.8
+	MotorBackwardNormalSpeed float64 = 0.7 // 0.8 (not too charged), 0.7 (full charged)
 
 	// MotorBackwardSlowSpeed of speed for slow backward motor speed
-	MotorBackwardSlowSpeed float64 = 0.6
+	MotorBackwardSlowSpeed float64 = 0.55 // 0.6 (not too charged), 0.55 (full charged)
 
 	// MotorForwardFastSpeed of speed for fast forward motor speed
-	MotorForwardFastSpeed float64 = 1
+	MotorForwardFastSpeed float64 = 0.9 // 1 (not too charged), 0.9 (full charged)
 
 	// MotorForwardNormalSpeed of speed for normal forward motor speed
-	MotorForwardNormalSpeed float64 = 0.8
+	MotorForwardNormalSpeed float64 = 0.7 // 0.8 (not too charged), 0.7 (full charged)
 
 	// MotorForwardSlowSpeed of speed for slow forward motor speed
-	MotorForwardSlowSpeed float64 = 0.6
+	MotorForwardSlowSpeed float64 = 0.55 // 0.6 (not too charged), 0.55 (full charged)
 
 	// MotorTurningSpeed of speed for turning motor speed
-	MotorTurningSpeed float64 = 0.8
+	MotorTurningSpeed float64 = 0.65 // 0.75 (not too charged), 0.65 (full charged)
 
 	// ServoBigTurnAngle of angle for big turns
 	ServoBigTurnAngle float64 = 1
@@ -62,10 +62,16 @@ const (
 	ServoObjectAvoidanceOnOppositeSideAngle float64 = 1
 
 	// FrontDistanceChange is the scalar change for the safety front distance calculation
-	FrontDistanceChange = 1.25
+	FrontDistanceChange = 1.5
+
+	// FrontDiagonalDistanceChange is the scalar change for the front diagonal distance calculation
+	FrontDiagonalDistanceChange = 2.0
 
 	// BackDistanceChange is the scalar change for the back distance calculation
-	BackDistanceChange = 1.2
+	BackDistanceChange = 1.5
+
+	// BackDiagonalDistanceChange is the scalar change for the back diagonal distance calculation
+	BackDiagonalDistanceChange = 2.0
 
 	// SideDistanceChange is the scalar change for the side distance calculation
 	SideDistanceChange = 1.1
@@ -77,7 +83,7 @@ const (
 	SafetyFrontDistanceStopThreshold = 350.0
 
 	// SafetyBackDistanceThreshold is the distance threshold to stop moving backward
-	SafetyBackDistanceThreshold = 125.0
+	SafetyBackDistanceThreshold = 300.0
 )
 
 var (
@@ -133,7 +139,9 @@ var (
 
 	// BackCardinalDirections are the cardinal directions to check for safety back distance
 	BackCardinalDirections = []gorplidarsdkhandler.CardinalDirection{
-		gorplidarsdkhandler.CardinalDirectionSouthSoutheast,
+		gorplidarsdkhandler.CardinalDirectionSouthwest,
 		gorplidarsdkhandler.CardinalDirectionSouthSouthwest,
+		gorplidarsdkhandler.CardinalDirectionSouthSoutheast,
+		gorplidarsdkhandler.CardinalDirectionSoutheast,
 	}
 )
