@@ -17,14 +17,11 @@ const (
 	// FrontStartTurnDistanceThreshold is the distance threshold to start turning
 	FrontStartTurnDistanceThreshold = 1000.0 // 500.0, 600.0, 650.0, 900.0
 
-	// SafetyFrontDistanceStartTurnThreshold is the distance threshold to start turning
-	SafetyFrontDistanceStartTurnThreshold = 700.0 // 600.0
+	// SafetyFrontDistanceTurnThreshold is the safety distance threshold to turn
+	SafetyFrontDistanceTurnThreshold = 700.0 // 600.0
 
 	// LaneIdentifierThreshold is used to determine which lane is the robot placed (only used in the closed challenge)
 	LaneIdentifierThreshold = 400.0
-
-	// FrontCloseupThreshold is used to move the robot closely to the wall (only used in the closed challenge)
-	FrontCloseupThreshold = 100.0
 
 	// MinTimeBetweenTurns is the minimum time between turns
 	MinTimeBetweenTurns = 2 * time.Second
@@ -224,14 +221,14 @@ func detectTurnHandler(
 		}
 
 		// Check if the front distance is below the turn threshold
-		if northDistance+northDistanceChange < SafetyFrontDistanceStartTurnThreshold {
+		if northDistance+northDistanceChange < SafetyFrontDistanceTurnThreshold {
 			// Log that the front distance is too close
 			if loggerProducer != nil {
 				loggerProducer.Info(
 					fmt.Sprintf(
 						"Front distance (%.2f mm) is below the safety threshold (%.2f mm). Moving backward until it's safe to turn.",
 						northDistance+northDistanceChange,
-						SafetyFrontDistanceStartTurnThreshold,
+						SafetyFrontDistanceTurnThreshold,
 					),
 				)
 			}
@@ -263,7 +260,7 @@ func detectTurnHandler(
 					}
 
 					// If the front distance is above the threshold, stop moving backward
-					if northDistance+northDistanceChange >= SafetyFrontDistanceStartTurnThreshold {
+					if northDistance+northDistanceChange >= SafetyFrontDistanceTurnThreshold {
 						if loggerProducer != nil {
 							loggerProducer.Info("Front distance is safe to turn. Resuming turn.")
 						}
@@ -307,11 +304,13 @@ func detectTurnHandler(
 //
 // ctx: The context to use for the challenge
 // service: The service to use for the challenge
+// direction: A pointer to the current servo direction
 // lastTurningTime: A pointer to the last time the robot made a turn
 // loggerProducer: The logger producer to use for logging
 func turnByWallCloseUpHandler(
 	ctx context.Context,
 	service Service,
+	direction *ServoDirection,
 	lastTurningTime *time.Time,
 	loggerProducer goconcurrentlogger.LoggerProducer,
 ) (bool, error) {
@@ -319,6 +318,12 @@ func turnByWallCloseUpHandler(
 	if service == nil {
 		return false, ErrNilService
 	}
+
+	// Check if the direction is nil
+	if direction == nil {
+		return false, ErrNilDirection
+	}
+
 	// Check if the lastTurningTime is nil
 	if lastTurningTime == nil {
 		return false, ErrNilLastTurningTime
@@ -331,10 +336,11 @@ func turnByWallCloseUpHandler(
 
 	// Initialize temporary variables
 	var (
+		wallCloseUp bool
+		frontStartDistanceReached bool
 		shouldTurn          bool
 		isTurning           bool
 		isTurningCompleted  bool
-		wallCloseUp         bool
 		isInnerLaneSide     *bool
 		toCardinalDirection gorplidarsdkhandler.CardinalDirection
 	)
@@ -348,32 +354,61 @@ func turnByWallCloseUpHandler(
 		case <-ctx.Done():
 			return false, ctx.Err()
 		default:
-			// Get the average distances from the RPLiDAR
-			northDistance := service.GetRPLiDARAverageDistance(gorplidarsdkhandler.CardinalDirectionNorth)
-			northDistanceChange := FrontDistanceChange * service.GetRPLiDARAverageDistanceChange(gorplidarsdkhandler.CardinalDirectionNorth)
-			eastDistance := service.GetRPLiDARAverageDistance(gorplidarsdkhandler.CardinalDirectionEast)
+			// Check if the robot is close to the wall, if not, move forward slowly to get close
+			for _, cardinalDirection := range getFrontDistanceCardinalDirections(isTurning) {
+				// Get the front distance change rate from the cardinal direction
+				distanceChangeRate := getFrontDistanceChangeFromCardinalDirection(cardinalDirection)
+
+				// Get the distance and distance change for the cardinal direction
+				distance := service.GetRPLiDARAverageDistance(cardinalDirection)
+				distanceChange := distanceChangeRate * service.GetRPLiDARAverageDistanceChange(cardinalDirection)
+
+				// Check if any measure is NaN, if so, continue to the next cardinal direction
+				if math.IsNaN(distance) || math.IsNaN(distanceChange) {
+					continue
+				}
+
+				// Get the front start distance thresholds from the cardinal direction
+				frontStartDistanceThreshold := getFrontStartDistanceThresholdFromCardinalDirection(cardinalDirection)
+
+				// If the distance is below the closeup threshold, break the loop
+				if !frontStartDistanceReached && distance+distanceChange <= frontStartDistanceThreshold {
+					frontStartDistanceReached = true
+					break
+				}				
+			}
+	
+			// Get the side distances and their changes
+			eastDistance := service.GetEastAverageDistance()
 			eastDistanceChange := SideDistanceChange * service.GetRPLiDARAverageDistanceChange(gorplidarsdkhandler.CardinalDirectionEast)
-			westDistance := service.GetRPLiDARAverageDistance(gorplidarsdkhandler.CardinalDirectionWest)
+			westDistance := service.GetWestAverageDistance()
 			westDistanceChange := SideDistanceChange * service.GetRPLiDARAverageDistanceChange(gorplidarsdkhandler.CardinalDirectionWest)
 
 			// Get the last recorded number of 90-degree turns
 			last90DegreeTurns := service.Get90DegreeTurns()
 
 			// Check if any measure is NaN, if so, continue to the next iteration
-			if math.IsNaN(northDistance) || math.IsNaN(northDistanceChange) ||
-				math.IsNaN(eastDistance) || math.IsNaN(eastDistanceChange) ||
+			if math.IsNaN(eastDistance) || math.IsNaN(eastDistanceChange) ||
 				math.IsNaN(westDistance) || math.IsNaN(westDistanceChange) {
 				continue
 			}
 
 			// Check if the robot should turn left or right based on the side distances
-			if !shouldTurn && eastDistance+eastDistanceChange >= SideDistanceThreshold {
+			if !shouldTurn && (*direction == ServoDirectionNil || *direction == ServoDirectionRight) &&
+				eastDistance+eastDistanceChange >= SideDistanceThreshold {
 				shouldTurn = true
+
+				// Set the direction to right
+				*direction = ServoDirectionRight
 			}
 
 			// Check if the robot should turn left or right based on the side distances
-			if !shouldTurn && westDistance+westDistanceChange >= SideDistanceThreshold {
+			if !shouldTurn && (*direction == ServoDirectionNil || *direction == ServoDirectionLeft) &&
+				westDistance+westDistanceChange >= SideDistanceThreshold {
 				shouldTurn = true
+
+				// Set the direction to left
+				*direction = ServoDirectionLeft
 			}
 
 			// If the robot shouldn't be turning, return
@@ -444,7 +479,7 @@ func turnByWallCloseUpHandler(
 				case true:
 					// Check if it's turning
 					if !isTurning {
-						if !wallCloseUp && northDistance+northDistanceChange >= FrontCloseupThreshold {
+						if !wallCloseUp && !frontStartDistanceReached {
 							if err := service.SetMotorForward(
 								ctx,
 								MotorForwardSlowSpeed,
@@ -454,17 +489,19 @@ func turnByWallCloseUpHandler(
 							if err := service.SetServoToCenter(ctx); err != nil {
 								return false, err
 							}
-							wallCloseUp = true
 
 							// Log that the robot is moving forward to get close to the wall
 							if loggerProducer != nil {
 								loggerProducer.Info("Moving forward to get close to the wall...")
 							}
+
+							// Sets the wall close up state to true
+							wallCloseUp = true
 							continue
 						}
 
 						// If the robot is not close to the wall, center by gyroscope while moving forward
-						if wallCloseUp && northDistance+northDistanceChange > FrontCloseupThreshold {
+						if !frontStartDistanceReached {
 							if err := centerByGyroscopeHandler(
 								ctx,
 								service,
@@ -560,7 +597,7 @@ func turnByWallCloseUpHandler(
 				case true:
 					// Check if it's turning
 					if !isTurning {
-						if !wallCloseUp && northDistance+northDistanceChange >= FrontCloseupThreshold {
+						if !wallCloseUp && !frontStartDistanceReached {
 							if err := service.SetMotorForward(
 								ctx,
 								MotorForwardSlowSpeed,
@@ -570,17 +607,19 @@ func turnByWallCloseUpHandler(
 							if err := service.SetServoToCenter(ctx); err != nil {
 								return false, err
 							}
-							wallCloseUp = true
 
 							// Log that the robot is moving forward to get close to the wall
 							if loggerProducer != nil {
 								loggerProducer.Info("Moving forward to get close to the wall...")
 							}
+
+							// Sets the wall close up state to true
+							wallCloseUp = true
 							continue
 						}
 
 						// If the robot is not close to the wall, center by gyroscope while moving forward
-						if wallCloseUp && northDistance+northDistanceChange > FrontCloseupThreshold {
+						if !frontStartDistanceReached {
 							if err := centerByGyroscopeHandler(
 								ctx,
 								service,
@@ -595,7 +634,7 @@ func turnByWallCloseUpHandler(
 						// If the robot is close to the wall, start turning right
 						if err := service.SetServoToRight(
 							ctx,
-							ServoMediumTurnAngle,
+							ServoBigTurnAngle,
 						); err != nil {
 							return false, err
 						}

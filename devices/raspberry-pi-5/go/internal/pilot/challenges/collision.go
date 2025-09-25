@@ -10,6 +10,11 @@ import (
 	gorplidarsdkhandler "github.com/ralvarezdev/go-rplidar-sdk-handler"
 )
 
+const (
+	// MinBackwardTime is the minimum time to move backward when a collision is detected
+	MinBackwardTime = 100 * time.Millisecond
+)
+
 // collisionHandler handles the collision logic based on RPLiDAR sensor data.
 //
 // Parameters:
@@ -22,7 +27,7 @@ import (
 //
 // Returns:
 //
-// A boolean indicating if the safety front distance was handled, and an error if the safety front distance could not be handled, nil otherwise
+// A boolean indicating if a collision was detected and handled, and an error if the collision could not be handled, nil otherwise
 func collisionHandler(
 	ctx context.Context,
 	service Service,
@@ -47,7 +52,7 @@ func collisionHandler(
 		distance := service.GetRPLiDARAverageDistance(cardinalDirection)
 
 		// Get the front distance change based on the cardinal direction
-		distanceChangeRate := getFrontDistanceChangeBasedOnTheCardinalDirections(cardinalDirection)
+		distanceChangeRate := getFrontDistanceChangeFromCardinalDirection(cardinalDirection)
 
 		// Calculate the future distance change based on the current distance change
 		distanceChange := distanceChangeRate * service.GetRPLiDARAverageDistanceChange(cardinalDirection)
@@ -57,8 +62,11 @@ func collisionHandler(
 			continue
 		}
 
+		// Get the appropriate safety front distance start threshold based on the cardinal direction
+		frontDistanceStartThreshold := getFrontStartDistanceThresholdFromCardinalDirection(cardinalDirection)
+
 		// If the distance is above or equal to the threshold, continue to the next direction
-		if distance+distanceChange >= SafetyFrontDistanceStartThreshold {
+		if distance+distanceChange >= frontDistanceStartThreshold {
 			continue
 		}
 
@@ -74,6 +82,7 @@ func collisionHandler(
 	previousServoAngle := service.GetServoAngle()
 	previousServoDirection := service.GetServoDirection()
 	previousMotorSpeed := service.GetMotorSpeed()
+	previousMotorDirection := service.GetMotorDirection()
 
 	// Log the warning
 	if loggerProducer != nil {
@@ -81,15 +90,17 @@ func collisionHandler(
 			fmt.Sprintf(
 				"Cardinal direction %s front distance is below the safety threshold %f: %f",
 				cardinalDirectionTrigger.String(),
-				SafetyFrontDistanceStartThreshold,
+				getFrontStartDistanceThresholdFromCardinalDirection(cardinalDirectionTrigger),
 				service.GetRPLiDARAverageDistance(cardinalDirectionTrigger),
 			),
 		)
 	}
 
 	// Stop the motor to prevent further movement
-	if err := service.SetMotorStop(ctx); err != nil {
-		return true, err
+	if previousMotorDirection != MotorDirectionStop {
+		if err := service.SetMotorStop(ctx); err != nil {
+			return true, err
+		}
 	}
 
 	// Check if the robot is turning (new strategy)
@@ -169,12 +180,14 @@ func collisionHandler(
 	); err != nil {
 		return true, err
 	}
-	if err := service.SetMotorSpeed(
-		ctx,
-		previousMotorSpeed,
-		MotorDirectionForward,
-	); err != nil {
-		return true, err
+	if previousMotorDirection != MotorDirectionStop {
+		if err := service.SetMotorSpeed(
+			ctx,
+			previousMotorSpeed,
+			MotorDirectionForward,
+		); err != nil {
+			return true, err
+		}
 	}
 	return true, nil
 }
@@ -205,6 +218,9 @@ func backCloseUpHandler(
 		return fmt.Errorf("back close up handler can only be used when going backward")
 	}
 
+	// Wait for the minimum backward time to ensure the robot moves backward a bit
+	time.Sleep(MinBackwardTime)
+
 	// Wait until the back distance is above the threshold
 	for {
 		time.Sleep(UpdateDelay)
@@ -219,7 +235,7 @@ func backCloseUpHandler(
 				distance := service.GetRPLiDARAverageDistance(cardinalDirection)
 
 				// Get the back distance change based on the cardinal direction
-				distanceChangeRate := getBackDistanceChangeBasedOnTheCardinalDirections(cardinalDirection)
+				distanceChangeRate := getBackDistanceChangeFromCardinalDirection(cardinalDirection)
 
 				// Calculate the future distance change based on the current distance change
 				distanceChange := distanceChangeRate * service.GetRPLiDARAverageDistanceChange(cardinalDirection)
@@ -229,8 +245,11 @@ func backCloseUpHandler(
 					continue
 				}
 
+				// Get the appropriate back distance threshold based on the cardinal direction
+				backStopDistanceThreshold := getBackStopDistanceThresholdFromCardinalDirection(cardinalDirection)
+
 				// If the distance is below the back threshold, set the flag to false and break the loop
-				if distance+distanceChange < SafetyBackDistanceThreshold {
+				if distance+distanceChange < backStopDistanceThreshold {
 					if loggerProducer != nil {
 						loggerProducer.Warning("Safety back distance threshold reached. Stopping backward movement.")
 					}
@@ -269,6 +288,9 @@ func safeFrontHandler(
 		return fmt.Errorf("safe front handler can only be used when going backward")
 	}
 
+	// Sleep for the minimum backward time to ensure the robot moves backward a bit
+	time.Sleep(MinBackwardTime)
+
 	// Wait until the front distance is above the stop threshold or an obstacle is detected on the back
 	for {
 		time.Sleep(UpdateDelay)
@@ -284,7 +306,7 @@ func safeFrontHandler(
 				distance := service.GetRPLiDARAverageDistance(cardinalDirection)
 
 				// Get the back distance change based on the cardinal direction
-				distanceChangeRate := getBackDistanceChangeBasedOnTheCardinalDirections(cardinalDirection)
+				distanceChangeRate := getBackDistanceChangeFromCardinalDirection(cardinalDirection)
 
 				// Calculate the future distance change based on the current distance change
 				distanceChange := distanceChangeRate * service.GetRPLiDARAverageDistanceChange(cardinalDirection)
@@ -294,8 +316,12 @@ func safeFrontHandler(
 					continue
 				}
 
+				// Get the appropriate back distance threshold based on the cardinal direction
+				backStopDistanceThreshold := getBackStopDistanceThresholdFromCardinalDirection(cardinalDirection)
+
 				// If the distance is below the back threshold, set the flag to false and break the loop
-				if distance+distanceChange < SafetyBackDistanceThreshold {
+				if distance+distanceChange < backStopDistanceThreshold {
+					
 					backDistanceThresholdReached = true
 					break
 				}
@@ -316,7 +342,7 @@ func safeFrontHandler(
 				distance := service.GetRPLiDARAverageDistance(cardinalDirection)
 
 				// Get the front distance change based on the cardinal direction
-				distanceChangeRate := getFrontDistanceChangeBasedOnTheCardinalDirections(cardinalDirection)
+				distanceChangeRate := getFrontDistanceChangeFromCardinalDirection(cardinalDirection)
 
 				// Calculate the future distance change based on the current distance change
 				distanceChange := distanceChangeRate * service.GetRPLiDARAverageDistanceChange(cardinalDirection)
@@ -326,8 +352,11 @@ func safeFrontHandler(
 					continue
 				}
 
+				// Get the appropriate safety front distance stop threshold based on the cardinal direction
+				safetyFrontDistanceStopThreshold := getFrontStartDistanceThresholdFromCardinalDirection(cardinalDirection)
+
 				// If the distance is below the stop threshold, set the flag to false and break the loop
-				if distance+distanceChange < SafetyFrontDistanceStopThreshold {
+				if distance+distanceChange < safetyFrontDistanceStopThreshold {
 					frontDistanceThresholdReached = false
 					break
 				}

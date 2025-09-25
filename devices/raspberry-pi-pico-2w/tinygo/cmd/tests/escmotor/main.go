@@ -44,31 +44,31 @@ func main() {
 	// Wait 5 seconds before starting the test
 	time.Sleep(5 * time.Second)
 
-	for {
+	for i := 0.0; i <= 1.0; i += 0.1{
 		// Turn on the LED
 		internalledonboard.OnBoardHandler.SetOn()
 
 		// Start testing the motor forward
 		stopOnError(
 			internalescmotor.ESCMotorHandler.SetSpeedForward(
-				internalescmotor.MaxForwardSpeed,
+				i*internalescmotor.MaxForwardSpeed,
 			),
 		)
 		time.Sleep(100 * time.Millisecond)
 
 		// Stop the motor for a while
-		// stopOnError(internalescmotor.ESCMotorHandler.Stop())
+		stopOnError(internalescmotor.ESCMotorHandler.Stop())
 
 		// Start testing the motor backward
 		stopOnError(
 			internalescmotor.ESCMotorHandler.SetSpeedBackward(
-				internalescmotor.MaxBackwardSpeed,
+				i*internalescmotor.MaxBackwardSpeed,
 			),
 		)
 		time.Sleep(100 * time.Millisecond)
 
 		// Stop the motor
-		// stopOnError(internalescmotor.ESCMotorHandler.Stop())
+		stopOnError(internalescmotor.ESCMotorHandler.Stop())
 
 		// Turn off the LED
 		internalledonboard.OnBoardHandler.SetOff()

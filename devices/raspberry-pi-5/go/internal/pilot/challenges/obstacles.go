@@ -188,8 +188,11 @@ func avoidObstacles(
 					continue
 				}
 
+				// Get the appropriate back distance threshold based on the cardinal direction
+				backStopDistanceThreshold := getBackStopDistanceThresholdFromCardinalDirection(cardinalDirection)
+
 				// Check if the object is still too close
-				if cardinalDirectionDistance+cardinalDirectionDistanceChange < SafetyBackDistanceThreshold {
+				if cardinalDirectionDistance+cardinalDirectionDistanceChange < backStopDistanceThreshold {
 					objectTooClose = false
 					break
 				}

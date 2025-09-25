@@ -121,6 +121,7 @@ func (h *ChallengeWithObstaclesHandler) Run(
 	}
 
 	// Initialize variables
+	direction := ServoDirectionNil
 	var (
 		isObjectAvoidanceInProgress bool
 		currentSectionObstacleCount int
@@ -143,6 +144,7 @@ func (h *ChallengeWithObstaclesHandler) Run(
 			turned, err := turnByWallCloseUpHandler(
 				ctx,
 				h.service,
+				&direction,
 				&lastTurningTime,
 				h.handlerLoggerProducer,
 			)
@@ -206,14 +208,9 @@ func (h *ChallengeWithObstaclesHandler) Run(
 			}
 
 			// Move forward
-			motorSpeed := MotorForwardNormalSpeed
-			servoDirection := h.service.GetServoDirection()
-			if servoDirection == ServoDirectionStraight && time.Since(lastTurningTime) >= MinTimeToCorrectAfterTurn {
-				motorSpeed = MotorForwardFastSpeed
-			}
 			if err = h.service.SetMotorForward(
 				ctx,
-				motorSpeed,
+				MotorForwardNormalSpeed,
 			); err != nil {
 				return err
 			}

@@ -11,6 +11,9 @@ import (
 )
 
 const (
+	// SideDistanceChange is the scalar change for the side distance calculation
+	SideDistanceChange = 1.1
+
 	// SideDistanceMediumDifferencePercentage is the percentage of medium difference threshold for side distances
 	SideDistanceMediumDifferencePercentage = 0.35
 
@@ -27,19 +30,19 @@ const (
 	GyroscopeTolerance = 2.0
 
 	// YawDegreesServoAngleRatio is the ratio between yaw degrees and servo angle
-	YawDegreesServoAngleRatio = 0.015
+	YawDegreesServoAngleRatio = 0.035 // 0.015, 0.025, 0.035
 
 	// YawDegreesMinServoAngleChange is the minimum servo angle percentage change for yaw degrees correction
 	YawDegreesMinServoAngleChange = 0.05
 
 	// MaxServoAngleCorrectionPercentage is the maximum servo angle percentage for correction
-	MaxServoAngleCorrectionPercentage = 0.8
+	MaxServoAngleCorrectionPercentage = 0.66 // 0.8
 
 	// MinServoAngleCorrectionPercentage is the minimum servo angle percentage for correction
-	MinServoAngleCorrectionPercentage = 0.25
+	MinServoAngleCorrectionPercentage = 0.25 // 0.33
 
 	// MinTimeToCorrectAfterTurn is the minimum time to correct after a turn
-	MinTimeToCorrectAfterTurn = 1 * time.Second // 1500 * time.Millisecond
+	MinTimeToCorrectAfterTurn = 500 * time.Millisecond // 1500 * time.Millisecond, 1000 * time.Millisecond
 )
 
 // centerByRPLiDARHandler centers the robot using RPLiDAR data

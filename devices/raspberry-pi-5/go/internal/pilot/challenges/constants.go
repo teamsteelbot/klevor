@@ -6,6 +6,8 @@ import (
 	gorplidarsdkhandler "github.com/ralvarezdev/go-rplidar-sdk-handler"
 )
 
+// MOTOR: MIN SPEED = 0.65 (0.55 didn't work well)
+
 const (
 	// ServiceLoggerProducerTag is the tag for the service logger producer
 	ServiceLoggerProducerTag = "CHALLENGE_SERVICE"
@@ -20,28 +22,28 @@ const (
 	UpdateDelay = 10 * time.Millisecond
 
 	// MaxDistanceChange is the maximum distance change for safety calculations
-	MaxDistanceChange = 75.0
+	MaxDistanceChange = 350.0 // 75.0, 200.0, 250.0, 350.0
 
 	// MotorBackwardFastSpeed of speed for fast backward motor speed
-	MotorBackwardFastSpeed float64 = 0.9 // 1 (not too charged), 0.9 (full charged)
+	MotorBackwardFastSpeed float64 = 0.6 // 1 (not too charged), 0.9, 0.75 (full charged)
 
 	// MotorBackwardNormalSpeed of speed for normal backward motor speed
-	MotorBackwardNormalSpeed float64 = 0.7 // 0.8 (not too charged), 0.7 (full charged)
+	MotorBackwardNormalSpeed float64 = 0.5 // 0.8 (not too charged), 0.7, 0.675, 0.6, 0.5, 0.4 (full charged)
 
 	// MotorBackwardSlowSpeed of speed for slow backward motor speed
-	MotorBackwardSlowSpeed float64 = 0.55 // 0.6 (not too charged), 0.55 (full charged)
+	MotorBackwardSlowSpeed float64 = 0.4 // 0.6 (not too charged), 0.55, 0.6 (full charged)
 
 	// MotorForwardFastSpeed of speed for fast forward motor speed
-	MotorForwardFastSpeed float64 = 0.9 // 1 (not too charged), 0.9 (full charged)
+	MotorForwardFastSpeed float64 = 0.6 // 1 (not too charged), 0.9, 0.875, 0.75, 0.675, 0.6 (full charged)
 
 	// MotorForwardNormalSpeed of speed for normal forward motor speed
-	MotorForwardNormalSpeed float64 = 0.7 // 0.8 (not too charged), 0.7 (full charged)
+	MotorForwardNormalSpeed float64 = 0.5 // 0.8 (not too charged), 0.7, 0.675, 0.6, 0.5 (full charged)
 
 	// MotorForwardSlowSpeed of speed for slow forward motor speed
-	MotorForwardSlowSpeed float64 = 0.55 // 0.6 (not too charged), 0.55 (full charged)
+	MotorForwardSlowSpeed float64 = 0.4 // 0.6 (not too charged), 0.55, 0.6, 0.5, 0.4 (full charged)
 
 	// MotorTurningSpeed of speed for turning motor speed
-	MotorTurningSpeed float64 = 0.65 // 0.75 (not too charged), 0.65 (full charged)
+	MotorTurningSpeed float64 = 0.5 // 0.75 (not too charged), 0.65, 0.5 (full charged)
 
 	// ServoBigTurnAngle of angle for big turns
 	ServoBigTurnAngle float64 = 1
@@ -62,28 +64,37 @@ const (
 	ServoObjectAvoidanceOnOppositeSideAngle float64 = 1
 
 	// FrontDistanceChange is the scalar change for the safety front distance calculation
-	FrontDistanceChange = 1.5
+	FrontDistanceChange = 3.0 // 1.5, 2.0, 2.5, 3.0
 
 	// FrontDiagonalDistanceChange is the scalar change for the front diagonal distance calculation
-	FrontDiagonalDistanceChange = 2.0
+	FrontDiagonalDistanceChange = 2.5 // 1.5, 2.0, 2.5
 
 	// BackDistanceChange is the scalar change for the back distance calculation
-	BackDistanceChange = 1.5
+	BackDistanceChange = 2 // 1.0, 1.5, 2.0
 
 	// BackDiagonalDistanceChange is the scalar change for the back diagonal distance calculation
 	BackDiagonalDistanceChange = 2.0
 
-	// SideDistanceChange is the scalar change for the side distance calculation
-	SideDistanceChange = 1.1
+	// FrontStartDistanceThreshold is the distance threshold to start the collision handler when an obstacle is detected in the front directions
+	FrontStartDistanceThreshold = 160.0
 
-	// SafetyFrontDistanceStartThreshold is the distance threshold to start safety mode
-	SafetyFrontDistanceStartThreshold = 150.0
+	// FrontSemiDiagonalStartDistanceThreshold is the distance threshold to start the collision handler when an obstacle is detected in the front semi-diagonal directions
+	FrontSemiDiagonalStartDistanceThreshold = 200.0
 
-	// SafetyFrontDistanceStopThreshold is the distance threshold to stop safety mode
-	SafetyFrontDistanceStopThreshold = 350.0
+	// FrontDiagonalStartDistanceThreshold is the distance threshold to start the collision handler when an obstacle is detected in the front diagonal directions
+	FrontDiagonalStartDistanceThreshold = 240.0
 
-	// SafetyBackDistanceThreshold is the distance threshold to stop moving backward
-	SafetyBackDistanceThreshold = 300.0
+	// FrontStopDistanceThreshold is the distance threshold to stop the collision handler when an obstacle is detected in the front directions
+	FrontStopDistanceThreshold = 400.0
+
+	// FrontDiagonalStopDistanceThreshold is the distance threshold to stop the collision handler when an obstacle is detected in the front diagonal directions
+	FrontDiagonalStopDistanceThreshold = 420.0
+
+	// BackStopDistanceThreshold is the distance threshold to stop the collision handler when an obstacle is detected in the back directions
+	BackStopDistanceThreshold = 350.0 // 350.0
+
+	// BackDiagonalStopDistanceThreshold is the distance threshold to stop the collision handler when an obstacle is detected in the back diagonal directions
+	BackDiagonalStopDistanceThreshold = 350.0 // 400.0, 325.0
 )
 
 var (

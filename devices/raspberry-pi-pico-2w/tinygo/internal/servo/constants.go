@@ -59,7 +59,7 @@ func init() {
 		MaxLeftAngle,
 		MaxRightAngle,
 		IsDirectionInverted,
-		internal.Logger,
+		nil, // internal.Logger,
 	)
 	if err != tinygoerrors.ErrorCodeNil {
 		internal.Logger.ErrorMessageWithErrorCode(

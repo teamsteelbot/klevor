@@ -91,8 +91,9 @@ func (h *ChallengeWithoutObstaclesHandler) Run(ctx context.Context) error {
 	}
 
 	// Start the challenge without obstacles handler
+	direction := ServoDirectionNil
 	var (
-		// isTurning       bool
+		isTurning       bool
 		last90DegreeTurns int
 		lastUpdateTime    time.Time
 		lastTurningTime   time.Time
@@ -107,10 +108,12 @@ func (h *ChallengeWithoutObstaclesHandler) Run(ctx context.Context) error {
 		case <-ctx.Done():
 			return ctx.Err()
 		default:
+			/*
 			// Handle turning by wall close up
 			turned, err := turnByWallCloseUpHandler(
 				ctx,
 				h.service,
+				&direction,
 				&lastTurningTime,
 				h.handlerLoggerProducer,
 			)
@@ -138,8 +141,9 @@ func (h *ChallengeWithoutObstaclesHandler) Run(ctx context.Context) error {
 			if reached {
 				break
 			}
+			*/
 
-			/*
+		
 				// Check if the robot can collide with an object or a wall
 				cardinalDirections := getFrontDistanceCardinalDirections(isTurning)
 				reached, err := collisionHandler(
@@ -188,7 +192,6 @@ func (h *ChallengeWithoutObstaclesHandler) Run(ctx context.Context) error {
 				if isTurning {
 					break
 				}
-			*/
 
 			// Center by gyroscope
 			if err = centerByGyroscopeHandler(
@@ -201,14 +204,9 @@ func (h *ChallengeWithoutObstaclesHandler) Run(ctx context.Context) error {
 			}
 
 			// Move forward
-			motorSpeed := MotorForwardNormalSpeed
-			servoDirection := h.service.GetServoDirection()
-			if servoDirection == ServoDirectionStraight && time.Since(lastTurningTime) >= MinTimeToCorrectAfterTurn {
-				motorSpeed = MotorForwardFastSpeed
-			}
 			if err = h.service.SetMotorForward(
 				ctx,
-				motorSpeed,
+				MotorForwardFastSpeed,
 			); err != nil {
 				return err
 			}
