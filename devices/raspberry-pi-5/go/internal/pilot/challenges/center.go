@@ -30,19 +30,19 @@ const (
 	GyroscopeTolerance = 2.0
 
 	// YawDegreesServoAngleRatio is the ratio between yaw degrees and servo angle
-	YawDegreesServoAngleRatio = 0.035 // 0.015, 0.025, 0.035
+	YawDegreesServoAngleRatio = 0.03 // 0.015, 0.025, 0.035, 0.03
 
 	// YawDegreesMinServoAngleChange is the minimum servo angle percentage change for yaw degrees correction
-	YawDegreesMinServoAngleChange = 0.05
+	YawDegreesMinServoAngleChange = 0.03 // 0.05, 0.03
 
 	// MaxServoAngleCorrectionPercentage is the maximum servo angle percentage for correction
-	MaxServoAngleCorrectionPercentage = 0.66 // 0.8
+	MaxServoAngleCorrectionPercentage = 0.66 // 0.8, 0.66
 
 	// MinServoAngleCorrectionPercentage is the minimum servo angle percentage for correction
-	MinServoAngleCorrectionPercentage = 0.25 // 0.33
+	MinServoAngleCorrectionPercentage = 0.25 // 0.33, 0.25
 
 	// MinTimeToCorrectAfterTurn is the minimum time to correct after a turn
-	MinTimeToCorrectAfterTurn = 500 * time.Millisecond // 1500 * time.Millisecond, 1000 * time.Millisecond
+	MinTimeToCorrectAfterTurn = 200 * time.Millisecond // 1500ms, 1000ms, 250ms, 200ms
 )
 
 // centerByRPLiDARHandler centers the robot using RPLiDAR data
@@ -61,18 +61,18 @@ func centerByRPLiDARHandler(
 	service Service,
 	lastTurningTime time.Time,
 ) error {
-	// Get the rate of change for west and east average distances
-	westAverageDistance := service.GetWestAverageDistance()
-	eastAverageDistance := service.GetEastAverageDistance()
-	westAverageDistanceChange := SideDistanceChange * service.GetRPLiDARAverageDistanceChange(gorplidarsdkhandler.CardinalDirectionWest)
-	eastAverageDistanceChange := SideDistanceChange * service.GetRPLiDARAverageDistanceChange(gorplidarsdkhandler.CardinalDirectionEast)
+	// Get west and east average distances
+	westDistance := service.GetRPLiDARAverageDistanceOnNextUpdate(
+		gorplidarsdkhandler.CardinalDirectionWest,
+	)
+	eastDistance := service.GetRPLiDARAverageDistanceOnNextUpdate(
+		gorplidarsdkhandler.CardinalDirectionEast,
+	)
 
 	// Check if any measure is NaN, if so, center the servo and return
 	for _, distance := range []float64{
-		westAverageDistance,
-		eastAverageDistance,
-		westAverageDistanceChange,
-		eastAverageDistanceChange,
+		westDistance,
+		eastDistance,
 	} {
 		if math.IsNaN(distance) {
 			if err := service.SetServoToCenter(ctx); err != nil {
@@ -87,28 +87,28 @@ func centerByRPLiDARHandler(
 		if err := service.SetServoToCenter(ctx); err != nil {
 			return err
 		}
-	} else if eastAverageDistance+eastAverageDistanceChange >= (westAverageDistance+westAverageDistanceChange)*(1+SideDistanceMediumDifferencePercentage) {
+	} else if eastDistance >= westDistance*(1+SideDistanceMediumDifferencePercentage) {
 		if err := service.SetServoToRight(
 			ctx,
 			ServoMediumCorrectionAnglePercentage,
 		); err != nil {
 			return err
 		}
-	} else if eastAverageDistance+eastAverageDistanceChange >= (westAverageDistance+westAverageDistanceChange)*(1+SideDistanceSmallDifferencePercentage) {
+	} else if eastDistance >= westDistance*(1+SideDistanceSmallDifferencePercentage) {
 		if err := service.SetServoToRight(
 			ctx,
 			ServoSmallCorrectionAnglePercentage,
 		); err != nil {
 			return err
 		}
-	} else if westAverageDistance+westAverageDistanceChange >= (eastAverageDistance+eastAverageDistanceChange)*(1+SideDistanceMediumDifferencePercentage) {
+	} else if westDistance >= eastDistance*(1+SideDistanceMediumDifferencePercentage) {
 		if err := service.SetServoToLeft(
 			ctx,
 			ServoMediumCorrectionAnglePercentage,
 		); err != nil {
 			return err
 		}
-	} else if westAverageDistance+westAverageDistanceChange >= (eastAverageDistance+eastAverageDistanceChange)*(1+SideDistanceSmallDifferencePercentage) {
+	} else if westDistance >= eastDistance*(1+SideDistanceSmallDifferencePercentage) {
 		if err := service.SetServoToLeft(
 			ctx,
 			ServoSmallCorrectionAnglePercentage,

@@ -55,17 +55,18 @@ func avoidObstacles(
 	var obstacleDetected *gohailocliphandler.Classification
 	var cardinalDirectionWithObstacle gorplidarsdkhandler.CardinalDirection
 	for _, cardinalDirection := range ObstaclesDetectionCardinalDirections {
-		// Get the average distance and average distance change for the cardinal direction
-		distance := service.GetRPLiDARAverageDistance(cardinalDirection)
-		distanceChange := service.GetRPLiDARAverageDistanceChange(cardinalDirection)
+		// Calculate the future distance change based on the current distance change
+		distance := service.GetRPLiDARAverageDistanceOnNextUpdate(
+			cardinalDirection,
+		)
 
 		// If the distance is NaN, continue to the next cardinal direction
-		if math.IsNaN(distance) || math.IsNaN(distanceChange) {
+		if math.IsNaN(distance) {
 			continue
 		}
 
 		// Check if the average distance and average distance change are below the threshold
-		if distance+distanceChange <= CameraRangeThreshold {
+		if distance <= CameraRangeThreshold {
 			// Get the CLIP classification
 			obstacleDetected = service.GetCLIPClassification()
 			cardinalDirectionWithObstacle = cardinalDirection
@@ -179,12 +180,13 @@ func avoidObstacles(
 		default:
 			// Check the backward distances to avoid a collision
 			for _, cardinalDirection := range BackCardinalDirections {
-				// Get the cardinal direction average distance and average distance change
-				cardinalDirectionDistance := service.GetRPLiDARAverageDistance(cardinalDirection)
-				cardinalDirectionDistanceChange := service.GetRPLiDARAverageDistanceChange(cardinalDirection)
+				// Calculate the future distance change based on the current distance change
+				distance := service.GetRPLiDARAverageDistanceOnNextUpdate(
+					cardinalDirection,
+				)
 
 				// If any measure is NaN, continue to the next cardinal direction
-				if math.IsNaN(cardinalDirectionDistance) || math.IsNaN(cardinalDirectionDistanceChange) {
+				if math.IsNaN(distance) {
 					continue
 				}
 
@@ -192,7 +194,7 @@ func avoidObstacles(
 				backStopDistanceThreshold := getBackStopDistanceThresholdFromCardinalDirection(cardinalDirection)
 
 				// Check if the object is still too close
-				if cardinalDirectionDistance+cardinalDirectionDistanceChange < backStopDistanceThreshold {
+				if distance < backStopDistanceThreshold {
 					objectTooClose = false
 					break
 				}

@@ -2,6 +2,7 @@ package challenges
 
 import (
 	"context"
+	"time"
 
 	gohailocliphandler "github.com/ralvarezdev/go-hailo-clip-handler"
 	gorplidarsdkhandler "github.com/ralvarezdev/go-rplidar-sdk-handler"
@@ -21,6 +22,8 @@ type (
 		GetGyroscopeOrientation() internal.GyroscopeOrientation
 		GetMotorSpeed() float64
 		GetMotorDirection() MotorDirection
+		GetMotorDirectionTimeSet() time.Time
+		GetMotorDirectionDistanceChangeMultiplier() float64
 		GetServoAngle() float64
 		GetServoDirection() ServoDirection
 		SetMotorSpeed(
@@ -53,7 +56,13 @@ type (
 		GetNortheastAverageDistance() float64
 		GetNorthAverageDistance() float64
 		GetRPLiDARAverageDistance(cardinalDirection gorplidarsdkhandler.CardinalDirection) float64
-		GetRPLiDARAverageDistanceChange(cardinalDirection gorplidarsdkhandler.CardinalDirection) float64
+		GetRawRPLiDARAverageDistanceChange(cardinalDirection gorplidarsdkhandler.CardinalDirection) float64
+		GetRPLiDARAverageDistanceChange(
+			cardinalDirection gorplidarsdkhandler.CardinalDirection,
+		) float64
+		GetRPLiDARAverageDistanceOnNextUpdate(
+			cardinalDirection gorplidarsdkhandler.CardinalDirection,
+		) float64
 		Get360DegreeTurns() int
 		Get90DegreeTurns() int
 		Get45DegreeTurns() int

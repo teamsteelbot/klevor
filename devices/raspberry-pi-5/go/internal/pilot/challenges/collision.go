@@ -48,17 +48,13 @@ func collisionHandler(
 	// Check if any of the front distances is below the safety threshold
 	cardinalDirectionTrigger := gorplidarsdkhandler.CardinalDirectionNil
 	for _, cardinalDirection := range cardinalDirections {
-		// Get the average distance for the cardinal direction
-		distance := service.GetRPLiDARAverageDistance(cardinalDirection)
-
-		// Get the front distance change based on the cardinal direction
-		distanceChangeRate := getFrontDistanceChangeFromCardinalDirection(cardinalDirection)
-
-		// Calculate the future distance change based on the current distance change
-		distanceChange := distanceChangeRate * service.GetRPLiDARAverageDistanceChange(cardinalDirection)
+		// Calculate the future distance based on the current distance change
+		distance := service.GetRPLiDARAverageDistanceOnNextUpdate(
+			cardinalDirection,
+		)
 
 		// Check if the distance is NaN (no data)
-		if math.IsNaN(distance) || math.IsNaN(distanceChange) {
+		if math.IsNaN(distance) {
 			continue
 		}
 
@@ -66,7 +62,7 @@ func collisionHandler(
 		frontDistanceStartThreshold := getFrontStartDistanceThresholdFromCardinalDirection(cardinalDirection)
 
 		// If the distance is above or equal to the threshold, continue to the next direction
-		if distance+distanceChange >= frontDistanceStartThreshold {
+		if distance >= frontDistanceStartThreshold {
 			continue
 		}
 
@@ -88,10 +84,11 @@ func collisionHandler(
 	if loggerProducer != nil {
 		loggerProducer.Warning(
 			fmt.Sprintf(
-				"Cardinal direction %s front distance is below the safety threshold %f: %f",
+				"Cardinal direction %s front distance is below the safety threshold %f, current: %f, calculated next update: %f",
 				cardinalDirectionTrigger.String(),
 				getFrontStartDistanceThresholdFromCardinalDirection(cardinalDirectionTrigger),
 				service.GetRPLiDARAverageDistance(cardinalDirectionTrigger),
+				service.GetRPLiDARAverageDistanceOnNextUpdate(cardinalDirectionTrigger),
 			),
 		)
 	}
@@ -231,17 +228,13 @@ func backCloseUpHandler(
 		default:
 			// Check if there's any obstacle on the back
 			for _, cardinalDirection := range BackCardinalDirections {
-				// Get the average distance for the cardinal direction
-				distance := service.GetRPLiDARAverageDistance(cardinalDirection)
-
-				// Get the back distance change based on the cardinal direction
-				distanceChangeRate := getBackDistanceChangeFromCardinalDirection(cardinalDirection)
-
-				// Calculate the future distance change based on the current distance change
-				distanceChange := distanceChangeRate * service.GetRPLiDARAverageDistanceChange(cardinalDirection)
+				// Calculate the future distance based on the current distance change
+				distance := service.GetRPLiDARAverageDistanceOnNextUpdate(
+					cardinalDirection,
+				)
 
 				// Check if the distance is NaN (no data)
-				if math.IsNaN(distance) || math.IsNaN(distanceChange) {
+				if math.IsNaN(distance) {
 					continue
 				}
 
@@ -249,7 +242,7 @@ func backCloseUpHandler(
 				backStopDistanceThreshold := getBackStopDistanceThresholdFromCardinalDirection(cardinalDirection)
 
 				// If the distance is below the back threshold, set the flag to false and break the loop
-				if distance+distanceChange < backStopDistanceThreshold {
+				if distance < backStopDistanceThreshold {
 					if loggerProducer != nil {
 						loggerProducer.Warning("Safety back distance threshold reached. Stopping backward movement.")
 					}
@@ -302,17 +295,13 @@ func safeFrontHandler(
 			// Check if there's any obstacle on the back
 			backDistanceThresholdReached := false
 			for _, cardinalDirection := range BackCardinalDirections {
-				// Get the average distance for the cardinal direction
-				distance := service.GetRPLiDARAverageDistance(cardinalDirection)
-
-				// Get the back distance change based on the cardinal direction
-				distanceChangeRate := getBackDistanceChangeFromCardinalDirection(cardinalDirection)
-
 				// Calculate the future distance change based on the current distance change
-				distanceChange := distanceChangeRate * service.GetRPLiDARAverageDistanceChange(cardinalDirection)
+				distance := service.GetRPLiDARAverageDistanceOnNextUpdate(
+					cardinalDirection,
+				)
 
 				// Check if the distance is NaN (no data)
-				if math.IsNaN(distance) || math.IsNaN(distanceChange) {
+				if math.IsNaN(distance) {
 					continue
 				}
 
@@ -320,8 +309,8 @@ func safeFrontHandler(
 				backStopDistanceThreshold := getBackStopDistanceThresholdFromCardinalDirection(cardinalDirection)
 
 				// If the distance is below the back threshold, set the flag to false and break the loop
-				if distance+distanceChange < backStopDistanceThreshold {
-					
+				if distance < backStopDistanceThreshold {
+
 					backDistanceThresholdReached = true
 					break
 				}
@@ -338,17 +327,13 @@ func safeFrontHandler(
 			// Check if the front distance threshold to stop backward movement is reached
 			frontDistanceThresholdReached := true
 			for _, cardinalDirection := range cardinalDirections {
-				// Get the average distance for the cardinal direction
-				distance := service.GetRPLiDARAverageDistance(cardinalDirection)
-
-				// Get the front distance change based on the cardinal direction
-				distanceChangeRate := getFrontDistanceChangeFromCardinalDirection(cardinalDirection)
-
 				// Calculate the future distance change based on the current distance change
-				distanceChange := distanceChangeRate * service.GetRPLiDARAverageDistanceChange(cardinalDirection)
+				distance := service.GetRPLiDARAverageDistanceOnNextUpdate(
+					cardinalDirection,
+				)
 
 				// Check if the distance is NaN (no data)
-				if math.IsNaN(distance) || math.IsNaN(distanceChange) {
+				if math.IsNaN(distance) {
 					continue
 				}
 
@@ -356,7 +341,7 @@ func safeFrontHandler(
 				safetyFrontDistanceStopThreshold := getFrontStartDistanceThresholdFromCardinalDirection(cardinalDirection)
 
 				// If the distance is below the stop threshold, set the flag to false and break the loop
-				if distance+distanceChange < safetyFrontDistanceStopThreshold {
+				if distance < safetyFrontDistanceStopThreshold {
 					frontDistanceThresholdReached = false
 					break
 				}

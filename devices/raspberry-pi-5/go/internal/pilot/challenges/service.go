@@ -28,16 +28,22 @@ const (
 	SetMotorSpeedAttempts = 3
 
 	// MotorSpeedStartMessageTimeout is the timeout for the motor speed start message
-	MotorSpeedStartMessageTimeout = 1 * time.Second // 200ms, 500ms
+	MotorSpeedStartMessageTimeout = 1 * time.Second // 200ms, 500ms, 1000ms
 
 	// ServoAngleStartMessageTimeout is the timeout for the servo angle start message
-	ServoAngleStartMessageTimeout = 1 * time.Second
+	ServoAngleStartMessageTimeout = 1 * time.Second // 1000ms
 
 	// MotorSpeedEndMessageTimeout is the timeout for the motor speed end message
-	MotorSpeedEndMessageTimeout = 3 * time.Second // 1500 ms, 2000ms
+	MotorSpeedEndMessageTimeout = 3 * time.Second // 1500 ms, 2000ms, 3000ms
 
 	// ServoAngleEndMessageTimeout is the timeout for the servo angle end message
-	ServoAngleEndMessageTimeout = 1 * time.Second // 200 ms, 500ms
+	ServoAngleEndMessageTimeout = 1 * time.Second // 200 ms, 500ms, 1000ms
+
+	// MotorDirectionTimeSetInterval is the interval for the motor direction distance change multiplier calculation
+	MotorDirectionTimeSetInterval = 150 * time.Millisecond
+
+	// MotorDirectionTimeSetFactor is the factor to multiply the distance change rate based on the time that the current motor direction has been set per interval
+	MotorDirectionTimeSetFactor = 0.1
 
 	// InitializationDelay is the delay after initialization
 	InitializationDelay = 200 * time.Millisecond
@@ -54,6 +60,7 @@ type (
 	DefaultService struct {
 		motorSpeed                    float64
 		motorDirection                MotorDirection
+		motorDirectionTimeSet         time.Time
 		servoAngle                    float64
 		servoDirection                ServoDirection
 		clipHandlerMutex              sync.Mutex
@@ -556,6 +563,27 @@ func (s *DefaultService) GetMotorDirection() MotorDirection {
 	return s.motorDirection
 }
 
+// GetMotorDirectionTimeSet returns the time when the current motor direction was set
+//
+// Returns:
+//
+// The time when the current motor direction was set
+func (s *DefaultService) GetMotorDirectionTimeSet() time.Time {
+	return s.motorDirectionTimeSet
+}
+
+// GetMotorDirectionDistanceChangeMultiplier returns the multiplier for the distance change based on the time the current motor direction has been set
+//
+// Parameters:
+//
+// The multiplier for the distance change based on the time the current motor direction has been set
+func (s *DefaultService) GetMotorDirectionDistanceChangeMultiplier() float64 {
+	if s.motorDirectionTimeSet.IsZero() || time.Since(s.motorDirectionTimeSet) < MotorDirectionTimeSetInterval {
+		return 0
+	}
+	return 1 + MotorDirectionTimeSetFactor*float64(time.Since(s.motorDirectionTimeSet)/MotorDirectionTimeSetInterval)
+}
+
 // GetServoAngle returns the current servo angle
 //
 // Returns:
@@ -604,6 +632,9 @@ func (s *DefaultService) SetMotorSpeed(
 	s.usbCDCHandler.ClearMotorSpeedStartAndEndMessagesCh()
 
 	// Update the motor direction and speed
+	if s.motorDirection != direction {
+		s.motorDirectionTimeSet = time.Now()
+	}
 	s.motorDirection = direction
 	s.motorSpeed = speed
 
@@ -969,7 +1000,7 @@ func (s *DefaultService) GetRPLiDARAverageDistance(
 	return distance
 }
 
-// GetRPLiDARAverageDistanceChange gets the average distance change for a specific direction
+// GetRawRPLiDARAverageDistanceChange gets the average distance change for a specific direction
 //
 // Parameters:
 //
@@ -978,7 +1009,7 @@ func (s *DefaultService) GetRPLiDARAverageDistance(
 // Returns:
 //
 // The average distance change for the specified direction, or 0.0 if the direction is not found
-func (s *DefaultService) GetRPLiDARAverageDistanceChange(
+func (s *DefaultService) GetRawRPLiDARAverageDistanceChange(
 	direction gorplidarsdkhandler.CardinalDirection,
 ) float64 {
 	s.rplidarHandlerMutex.RLock()
@@ -995,6 +1026,158 @@ func (s *DefaultService) GetRPLiDARAverageDistanceChange(
 		return 0.0
 	}
 	return distanceChange
+}
+
+// GetDistanceChangeFactor gets the distance change factor for the given cardinal direction based on the current servo angle
+//
+// Parameters:
+//
+// cardinalDirection: The cardinal direction which its distance change factor will be obtained
+//
+// Returns:
+//
+// A float64 representing the distance change factor for the given cardinal direction
+func (s *DefaultService) GetDistanceChangeFactor(cardinalDirection gorplidarsdkhandler.CardinalDirection) float64 {
+	// Forward, straight
+	if s.motorDirection == MotorDirectionForward && s.servoDirection == ServoDirectionStraight {
+		switch cardinalDirection {
+		case gorplidarsdkhandler.CardinalDirectionNorth:
+			return 3.0
+		case gorplidarsdkhandler.CardinalDirectionNorthNorthwest,
+			gorplidarsdkhandler.CardinalDirectionNorthNortheast:
+			return 2.5
+		case gorplidarsdkhandler.CardinalDirectionNorthwest,
+			gorplidarsdkhandler.CardinalDirectionNortheast:
+			return 2.0
+		default:
+			return 1.0
+		}
+	}
+
+	// Forward, right
+	if s.motorDirection == MotorDirectionForward && s.servoDirection == ServoDirectionRight {
+		switch cardinalDirection {
+		case gorplidarsdkhandler.CardinalDirectionNorthNorthwest:
+			return 3.0
+		case gorplidarsdkhandler.CardinalDirectionNorth,
+			gorplidarsdkhandler.CardinalDirectionNorthwest:
+			return 2.5
+		case gorplidarsdkhandler.CardinalDirectionWestNorthwest,
+			gorplidarsdkhandler.CardinalDirectionWest:
+			return 2.0
+		default:
+			return 1.0
+		}
+	}
+
+	// Forward, left
+	if s.motorDirection == MotorDirectionForward && s.servoDirection == ServoDirectionLeft {
+		switch cardinalDirection {
+		case gorplidarsdkhandler.CardinalDirectionNorthNortheast:
+			return 3.0
+		case gorplidarsdkhandler.CardinalDirectionNorth,
+			gorplidarsdkhandler.CardinalDirectionNortheast:
+			return 2.5
+		case gorplidarsdkhandler.CardinalDirectionEastNortheast,
+			gorplidarsdkhandler.CardinalDirectionEast:
+			return 2.0
+		default:
+			return 1.0
+		}
+	}
+
+	// Backward, straight
+	if s.motorDirection == MotorDirectionBackward && s.servoDirection == ServoDirectionStraight {
+		switch cardinalDirection {
+		case gorplidarsdkhandler.CardinalDirectionSouthSoutheast,
+			gorplidarsdkhandler.CardinalDirectionSouthSouthwest:
+			return 3.0
+		default:
+			return 1.0
+		}
+	}
+
+	// Backward, right
+	if s.motorDirection == MotorDirectionBackward && s.servoDirection == ServoDirectionRight {
+		switch cardinalDirection {
+		case gorplidarsdkhandler.CardinalDirectionSouthSouthwest:
+			return 3.0
+		case gorplidarsdkhandler.CardinalDirectionSouthSoutheast:
+			return 2.5
+		case gorplidarsdkhandler.CardinalDirectionWest,
+			gorplidarsdkhandler.CardinalDirectionWestNorthwest,
+			gorplidarsdkhandler.CardinalDirectionNorthwest:
+			return 2.0
+		case gorplidarsdkhandler.CardinalDirectionNorthNorthwest:
+			return 1.5
+		default:
+			return 1.0
+		}
+	}
+
+	// Backward, left
+	if s.motorDirection == MotorDirectionBackward && s.servoDirection == ServoDirectionLeft {
+		switch cardinalDirection {
+		case gorplidarsdkhandler.CardinalDirectionSouthSoutheast:
+			return 3.0
+		case gorplidarsdkhandler.CardinalDirectionSouthSouthwest:
+			return 2.5
+		case gorplidarsdkhandler.CardinalDirectionEast,
+			gorplidarsdkhandler.CardinalDirectionEastNortheast,
+			gorplidarsdkhandler.CardinalDirectionNortheast:
+			return 2.0
+		case gorplidarsdkhandler.CardinalDirectionNorthNortheast:
+			return 1.5
+		default:
+			return 1.0
+		}
+	}
+	return 1.0
+}
+
+// GetRPLiDARAverageDistanceChange gets the distance change for the given cardinal direction
+//
+// Parameters:
+//
+// cardinalDirection: The cardinal direction which its distance change will be calculated
+//
+// Returns:
+//
+// The distance change for the given cardinal direction
+func (s *DefaultService) GetRPLiDARAverageDistanceChange(
+	cardinalDirection gorplidarsdkhandler.CardinalDirection,
+) float64 {
+	// Get the distance change factor for the given cardinal direction
+	distanceChangeFactor := s.GetDistanceChangeFactor(cardinalDirection)
+
+	// Get the distance change for the given cardinal direction
+	distanceChange := s.GetRawRPLiDARAverageDistanceChange(cardinalDirection)
+
+	// Get the current motor direction distance change multiplier
+	multiplier := s.GetMotorDirectionDistanceChangeMultiplier()
+
+	return distanceChangeFactor * multiplier * distanceChange
+}
+
+// GetRPLiDARAverageDistanceOnNextUpdate returns the approximate calculation for the RPLiDAR average distance on next update
+//
+// Parameters:
+//
+// cardinalDirection: The cardinal direction which its distance change will be calculated
+//
+// Returns:
+//
+// Approximate calculation for the RPLiDAR average distance on next update
+func (s *DefaultService) GetRPLiDARAverageDistanceOnNextUpdate(
+	cardinalDirection gorplidarsdkhandler.CardinalDirection,
+) float64 {
+	// Get the calculated RPLiDAR average distance change
+	distanceChange := s.GetRPLiDARAverageDistanceChange(cardinalDirection)
+
+	// Get the RPLiDAR average distance
+	distance := s.GetRPLiDARAverageDistance(cardinalDirection)
+
+	return distance + distanceChange
 }
 
 // GetSouthwestAverageDistance returns the average distance to the southwest

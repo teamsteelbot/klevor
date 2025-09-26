@@ -63,18 +63,6 @@ const (
 	// ServoObjectAvoidanceOnOppositeSideAngle of angle for object avoidance on opposite side
 	ServoObjectAvoidanceOnOppositeSideAngle float64 = 1
 
-	// FrontDistanceChange is the scalar change for the safety front distance calculation
-	FrontDistanceChange = 3.0 // 1.5, 2.0, 2.5, 3.0
-
-	// FrontDiagonalDistanceChange is the scalar change for the front diagonal distance calculation
-	FrontDiagonalDistanceChange = 2.5 // 1.5, 2.0, 2.5
-
-	// BackDistanceChange is the scalar change for the back distance calculation
-	BackDistanceChange = 2 // 1.0, 1.5, 2.0
-
-	// BackDiagonalDistanceChange is the scalar change for the back diagonal distance calculation
-	BackDiagonalDistanceChange = 2.0
-
 	// FrontStartDistanceThreshold is the distance threshold to start the collision handler when an obstacle is detected in the front directions
 	FrontStartDistanceThreshold = 160.0
 

@@ -241,17 +241,28 @@ func (h *ChallengeWithObstaclesHandler) Run(
 		case <-ctx.Done():
 			return ctx.Err()
 		default:
-			// Get the north distance and its change
-			northDistance := h.service.GetRPLiDARAverageDistance(gorplidarsdkhandler.CardinalDirectionNorth)
-			northDistanceChange := h.service.GetRPLiDARAverageDistanceChange(gorplidarsdkhandler.CardinalDirectionNorth)
+			// Center by gyroscope
+			if err = centerByGyroscopeHandler(
+				ctx,
+				h.service,
+				last90DegreeTurns,
+				h.handlerLoggerProducer,
+			); err != nil {
+				return err
+			}
+
+			// Calculate the future distance change based on the current distance change
+			distance := h.service.GetRPLiDARAverageDistanceOnNextUpdate(
+				gorplidarsdkhandler.CardinalDirectionNorth,
+			)
 
 			// Check if any measure is NaN
-			if math.IsNaN(northDistance) || math.IsNaN(northDistanceChange) {
+			if math.IsNaN(distance) {
 				continue
 			}
 
 			// Check if the north distance is below the stop distance threshold
-			if northDistance <= StopDistanceThreshold {
+			if distance <= StopDistanceThreshold {
 				completed = true
 				h.handlerLoggerProducer.Info("Challenge completed successfully. Stopping the robot.")
 			}

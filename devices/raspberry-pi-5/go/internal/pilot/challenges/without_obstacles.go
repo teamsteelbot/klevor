@@ -93,7 +93,7 @@ func (h *ChallengeWithoutObstaclesHandler) Run(ctx context.Context) error {
 	// Start the challenge without obstacles handler
 	direction := ServoDirectionNil
 	var (
-		isTurning       bool
+		isTurning         bool
 		last90DegreeTurns int
 		lastUpdateTime    time.Time
 		lastTurningTime   time.Time
@@ -109,47 +109,29 @@ func (h *ChallengeWithoutObstaclesHandler) Run(ctx context.Context) error {
 			return ctx.Err()
 		default:
 			/*
-			// Handle turning by wall close up
-			turned, err := turnByWallCloseUpHandler(
-				ctx,
-				h.service,
-				&direction,
-				&lastTurningTime,
-				h.handlerLoggerProducer,
-			)
-			if err != nil {
-				return err
-			}
-			if turned {
-				// Update last 90 degree turns
-				last90DegreeTurns++
-				continue
-			}
+				// Handle turning by wall close up
+				turned, err := turnByWallCloseUpHandler(
+					ctx,
+					h.service,
+					&direction,
+					&lastTurningTime,
+					h.handlerLoggerProducer,
+				)
+				if err != nil {
+					return err
+				}
+				if turned {
+					// Update last 90 degree turns
+					last90DegreeTurns++
+					continue
+				}
 
-			// Check if the robot can collide with an object or a wall
-			cardinalDirections := getFrontDistanceCardinalDirections(false)
-			reached, err := collisionHandler(
-				ctx,
-				h.service,
-				false,
-				h.handlerLoggerProducer,
-				cardinalDirections...,
-			)
-			if err != nil {
-				return err
-			}
-			if reached {
-				break
-			}
-			*/
-
-		
 				// Check if the robot can collide with an object or a wall
-				cardinalDirections := getFrontDistanceCardinalDirections(isTurning)
+				cardinalDirections := getFrontDistanceCardinalDirections(false)
 				reached, err := collisionHandler(
 					ctx,
 					h.service,
-					isTurning,
+					false,
 					h.handlerLoggerProducer,
 					cardinalDirections...,
 				)
@@ -159,39 +141,56 @@ func (h *ChallengeWithoutObstaclesHandler) Run(ctx context.Context) error {
 				if reached {
 					break
 				}
+			*/
 
-				// If the robot was turning, check if it should stop turning
-				// Check for the current turn and center the servo if necessary
-				turnCompleted, err := turnHandler(
-					ctx,
-					h.service,
-					&last90DegreeTurns,
-					&isTurning,
-					&lastTurningTime,
-					h.handlerLoggerProducer,
-				)
-				if err != nil {
-					return err
-				}
-				if turnCompleted {
-					break
-				}
+			// Check if the robot can collide with an object or a wall
+			cardinalDirections := getFrontDistanceCardinalDirections(isTurning)
+			reached, err := collisionHandler(
+				ctx,
+				h.service,
+				isTurning,
+				h.handlerLoggerProducer,
+				cardinalDirections...,
+			)
+			if err != nil {
+				return err
+			}
+			if reached {
+				break
+			}
 
-				// Detect if a turn is necessary
-				if err = detectTurnHandler(
-					ctx,
-					h.service,
-					&last90DegreeTurns,
-					&isTurning,
-					&lastTurningTime,
-					&direction,
-					h.handlerLoggerProducer,
-				); err != nil {
-					return err
-				}
-				if isTurning {
-					break
-				}
+			// If the robot was turning, check if it should stop turning
+			// Check for the current turn and center the servo if necessary
+			turnCompleted, err := turnHandler(
+				ctx,
+				h.service,
+				&last90DegreeTurns,
+				&isTurning,
+				&lastTurningTime,
+				h.handlerLoggerProducer,
+			)
+			if err != nil {
+				return err
+			}
+			if turnCompleted {
+				break
+			}
+
+			// Detect if a turn is necessary
+			if err = detectTurnHandler(
+				ctx,
+				h.service,
+				&last90DegreeTurns,
+				&isTurning,
+				&lastTurningTime,
+				&direction,
+				h.handlerLoggerProducer,
+			); err != nil {
+				return err
+			}
+			if isTurning {
+				break
+			}
 
 			// Center by gyroscope
 			if err = centerByGyroscopeHandler(
@@ -246,17 +245,18 @@ func (h *ChallengeWithoutObstaclesHandler) Run(ctx context.Context) error {
 				return err
 			}
 
-			// Get the north distance and its change
-			northDistance := h.service.GetNorthAverageDistance()
-			northDistanceChange := FrontDistanceChange * h.service.GetRPLiDARAverageDistanceChange(gorplidarsdkhandler.CardinalDirectionNorth)
+			// Calculate the future distance change based on the current distance change
+			distance := h.service.GetRPLiDARAverageDistanceOnNextUpdate(
+				gorplidarsdkhandler.CardinalDirectionNorth,
+			)
 
-			// Check if any measure is NaN, if so, continue
-			if math.IsNaN(northDistance) || math.IsNaN(northDistanceChange) {
+			// Check if any measure is NaN
+			if math.IsNaN(distance) {
 				continue
 			}
 
-			// Check if the north average distance is below the stop distance threshold
-			if northDistance+northDistanceChange <= StopDistanceThreshold {
+			// Check if the north distance is below the stop distance threshold
+			if distance <= StopDistanceThreshold {
 				completed = true
 				h.handlerLoggerProducer.Info("Challenge completed successfully. Stopping the robot.")
 			}

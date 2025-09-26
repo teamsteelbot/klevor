@@ -20,60 +20,15 @@ func getFrontDistanceCardinalDirections(isTurning bool) []gorplidarsdkhandler.Ca
 	return FrontDistanceStraightCardinalDirections
 }
 
-// getFrontDistanceChangeFromCardinalDirection returns the front distance change based on the cardinal directions
+// getFrontStartDistanceThresholdFromCardinalDirection returns the front start distance threshold based on the cardinal direction
 //
 // Parameters:
 //
-// cardinalDirections: A slice of cardinal directions to check the front distances.
+// cardinalDirection: The cardinal direction to check the front distance start threshold.
 //
 // Returns:
 //
-// A float64 representing the front distance change based on the cardinal directions
-func getFrontDistanceChangeFromCardinalDirection(cardinalDirection gorplidarsdkhandler.CardinalDirection) float64 {
-	switch cardinalDirection {
-	case gorplidarsdkhandler.CardinalDirectionNorth,
-		gorplidarsdkhandler.CardinalDirectionNorthNortheast,
-		gorplidarsdkhandler.CardinalDirectionNorthNorthwest:
-		return FrontDistanceChange
-	case gorplidarsdkhandler.CardinalDirectionNortheast,
-		gorplidarsdkhandler.CardinalDirectionNorthwest:
-		return FrontDiagonalDistanceChange
-	default:
-		return 1.0
-	}
-}
-
-// getBackDistanceChangeFromCardinalDirection returns the back distance change based on the cardinal directions
-//
-// Parameters:
-//
-// cardinalDirection: The cardinal direction to check the back distances.
-//
-// Returns:
-//
-// A float64 representing the back distance change based on the cardinal directions
-func getBackDistanceChangeFromCardinalDirection(cardinalDirection gorplidarsdkhandler.CardinalDirection) float64 {
-	switch cardinalDirection {
-	case gorplidarsdkhandler.CardinalDirectionSouthSoutheast,
-		gorplidarsdkhandler.CardinalDirectionSouthSouthwest:
-		return BackDistanceChange
-	case gorplidarsdkhandler.CardinalDirectionSoutheast,
-		gorplidarsdkhandler.CardinalDirectionSouthwest:
-		return BackDiagonalDistanceChange
-	default:
-		return 1.0
-	}
-}
-
-// getFrontStartDistanceThresholdFromCardinalDirection returns the front start distance threshold based on the cardinal directions
-//
-// Parameters:
-//
-// cardinalDirection: The cardinal direction to check the front distances.
-//
-// Returns:
-//
-// A float64 representing the front start distance threshold based on the cardinal directions
+// A float64 representing the front start distance threshold based on the cardinal direction
 func getFrontStartDistanceThresholdFromCardinalDirection(cardinalDirection gorplidarsdkhandler.CardinalDirection) float64 {
 	switch cardinalDirection {
 	case gorplidarsdkhandler.CardinalDirectionNorth:
@@ -89,15 +44,15 @@ func getFrontStartDistanceThresholdFromCardinalDirection(cardinalDirection gorpl
 	}
 }
 
-// getFrontStopDistanceThresholdFromCardinalDirection returns the front stop distance threshold based on the cardinal directions
+// getFrontStopDistanceThresholdFromCardinalDirection returns the front stop distance threshold based on the cardinal direction
 //
 // Parameters:
 //
-// cardinalDirection: The cardinal direction to check the front distances.
+// cardinalDirection: The cardinal direction to check the front distance stop threshold.
 //
 // Returns:
 //
-// A float64 representing the front stop distance threshold based on the cardinal directions
+// A float64 representing the front stop distance threshold based on the cardinal direction
 func getFrontStopDistanceThresholdFromCardinalDirection(cardinalDirection gorplidarsdkhandler.CardinalDirection) float64 {
 	switch cardinalDirection {
 	case gorplidarsdkhandler.CardinalDirectionNorth,
@@ -112,15 +67,15 @@ func getFrontStopDistanceThresholdFromCardinalDirection(cardinalDirection gorpli
 	}
 }
 
-// getBackStopDistanceThresholdFromCardinalDirection returns the back stop distance threshold based on the cardinal directions
+// getBackStopDistanceThresholdFromCardinalDirection returns the back stop distance threshold based on the cardinal direction
 //
 // Parameters:
 //
-// cardinalDirection: The cardinal direction to check the back distances.
+// cardinalDirection: The cardinal direction to check the back stop distances threshold.
 //
 // Returns:
 //
-// A float64 representing the back stop distance threshold based on the cardinal directions
+// A float64 representing the back stop distance threshold based on the cardinal direction
 func getBackStopDistanceThresholdFromCardinalDirection(cardinalDirection gorplidarsdkhandler.CardinalDirection) float64 {
 	switch cardinalDirection {
 	case gorplidarsdkhandler.CardinalDirectionSouthSoutheast,

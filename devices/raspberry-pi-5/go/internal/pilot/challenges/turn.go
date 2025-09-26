@@ -15,7 +15,7 @@ const (
 	SideDistanceThreshold = 1500.0
 
 	// FrontStartTurnDistanceThreshold is the distance threshold to start turning
-	FrontStartTurnDistanceThreshold = 1000.0 // 500.0, 600.0, 650.0, 900.0
+	FrontStartTurnDistanceThreshold = 1000.0 // 500.0, 600.0, 650.0, 900.0, 1000.0
 
 	// SafetyFrontDistanceTurnThreshold is the safety distance threshold to turn
 	SafetyFrontDistanceTurnThreshold = 700.0 // 600.0
@@ -163,12 +163,13 @@ func detectTurnHandler(
 		return nil
 	}
 
-	// Get the front distance change
-	northDistance := service.GetNorthAverageDistance()
-	northDistanceChange := FrontDistanceChange * service.GetRPLiDARAverageDistanceChange(gorplidarsdkhandler.CardinalDirectionNorth)
+	// Calculate the future distance based on the current distance change
+	northDistance := service.GetRPLiDARAverageDistanceOnNextUpdate(
+		gorplidarsdkhandler.CardinalDirectionNorth,
+	)
 
-	// Check if the front distance and distance change are NaN, if so, return
-	if math.IsNaN(northDistance) || math.IsNaN(northDistanceChange) {
+	// Check if the front distance is NaN, if so, return
+	if math.IsNaN(northDistance) {
 		return nil
 	}
 
@@ -178,7 +179,7 @@ func detectTurnHandler(
 
 	// Check if the robot should turn left or right based on the side distances
 	if *last90DegreeTurns == 0 ||
-		northDistance+northDistanceChange <= FrontStartTurnDistanceThreshold {
+		northDistance <= FrontStartTurnDistanceThreshold {
 		if time.Since(*lastTurningTime) >= MinTimeBetweenTurns {
 			if (*direction == ServoDirectionRight || *direction == ServoDirectionNil) &&
 				(!math.IsNaN(eastDistance) && eastDistance >= SideDistanceThreshold) {
@@ -221,13 +222,13 @@ func detectTurnHandler(
 		}
 
 		// Check if the front distance is below the turn threshold
-		if northDistance+northDistanceChange < SafetyFrontDistanceTurnThreshold {
+		if northDistance < SafetyFrontDistanceTurnThreshold {
 			// Log that the front distance is too close
 			if loggerProducer != nil {
 				loggerProducer.Info(
 					fmt.Sprintf(
 						"Front distance (%.2f mm) is below the safety threshold (%.2f mm). Moving backward until it's safe to turn.",
-						northDistance+northDistanceChange,
+						northDistance,
 						SafetyFrontDistanceTurnThreshold,
 					),
 				)
@@ -250,17 +251,18 @@ func detectTurnHandler(
 				case <-ctx.Done():
 					return ctx.Err()
 				default:
-					// Get the front distance and distance change
-					northDistance = service.GetNorthAverageDistance()
-					northDistanceChange = FrontDistanceChange * service.GetRPLiDARAverageDistanceChange(gorplidarsdkhandler.CardinalDirectionNorth)
+					// Calculate the future distance based on the current distance change
+					northDistance = service.GetRPLiDARAverageDistanceOnNextUpdate(
+						gorplidarsdkhandler.CardinalDirectionNorth,
+					)
 
-					// Check if any measure is NaN, if so, continue
-					if math.IsNaN(northDistance) || math.IsNaN(northDistanceChange) {
-						continue
+					// Check if the front distance is NaN, if so, return
+					if math.IsNaN(northDistance) {
+						return nil
 					}
 
 					// If the front distance is above the threshold, stop moving backward
-					if northDistance+northDistanceChange >= SafetyFrontDistanceTurnThreshold {
+					if northDistance >= SafetyFrontDistanceTurnThreshold {
 						if loggerProducer != nil {
 							loggerProducer.Info("Front distance is safe to turn. Resuming turn.")
 						}
@@ -336,13 +338,13 @@ func turnByWallCloseUpHandler(
 
 	// Initialize temporary variables
 	var (
-		wallCloseUp bool
+		wallCloseUp               bool
 		frontStartDistanceReached bool
-		shouldTurn          bool
-		isTurning           bool
-		isTurningCompleted  bool
-		isInnerLaneSide     *bool
-		toCardinalDirection gorplidarsdkhandler.CardinalDirection
+		shouldTurn                bool
+		isTurning                 bool
+		isTurningCompleted        bool
+		isInnerLaneSide           *bool
+		toCardinalDirection       gorplidarsdkhandler.CardinalDirection
 	)
 
 	// Loop until the robot has turned
@@ -356,15 +358,11 @@ func turnByWallCloseUpHandler(
 		default:
 			// Check if the robot is close to the wall, if not, move forward slowly to get close
 			for _, cardinalDirection := range getFrontDistanceCardinalDirections(isTurning) {
-				// Get the front distance change rate from the cardinal direction
-				distanceChangeRate := getFrontDistanceChangeFromCardinalDirection(cardinalDirection)
-
-				// Get the distance and distance change for the cardinal direction
-				distance := service.GetRPLiDARAverageDistance(cardinalDirection)
-				distanceChange := distanceChangeRate * service.GetRPLiDARAverageDistanceChange(cardinalDirection)
+				// Calculate the future distance based on the current distance change
+				distance := service.GetRPLiDARAverageDistanceOnNextUpdate(cardinalDirection)
 
 				// Check if any measure is NaN, if so, continue to the next cardinal direction
-				if math.IsNaN(distance) || math.IsNaN(distanceChange) {
+				if math.IsNaN(distance) {
 					continue
 				}
 
@@ -372,12 +370,12 @@ func turnByWallCloseUpHandler(
 				frontStartDistanceThreshold := getFrontStartDistanceThresholdFromCardinalDirection(cardinalDirection)
 
 				// If the distance is below the closeup threshold, break the loop
-				if !frontStartDistanceReached && distance+distanceChange <= frontStartDistanceThreshold {
+				if !frontStartDistanceReached && distance <= frontStartDistanceThreshold {
 					frontStartDistanceReached = true
 					break
-				}				
+				}
 			}
-	
+
 			// Get the side distances and their changes
 			eastDistance := service.GetEastAverageDistance()
 			eastDistanceChange := SideDistanceChange * service.GetRPLiDARAverageDistanceChange(gorplidarsdkhandler.CardinalDirectionEast)
