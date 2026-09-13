@@ -1,5 +1,8 @@
 # Klevor
 
+> [!NOTE]
+> Este repositorio corresponde a nuestra participación en la World Robot Olympiad 2025. Si buscas información sobre nuestra participación en la World Robot Olympiad 2026 con V-Titan, el robot del Team Voltimor, visita el repositorio [**vtitan**](https://github.com/teamvoltimor/vtitan).
+
 > [!IMPORTANT]
 > If you want to access this content in English, click [**here**](README-en.md)
 
