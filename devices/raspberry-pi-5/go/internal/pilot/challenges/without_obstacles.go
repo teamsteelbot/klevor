@@ -107,95 +107,145 @@ func (h *ChallengeWithoutObstaclesHandler) Run(ctx context.Context) error {
 		select {
 		case <-ctx.Done():
 			return ctx.Err()
-		default:
-			/*
-				// Handle turning by wall close up
-				turned, err := turnByWallCloseUpHandler(
+		default:				
+			// If the robot was turning, check if it should stop turning
+			if isTurning {
+				turnCompleted, err := turnCompletedHandler(
 					ctx,
 					h.service,
-					&direction,
-					&lastTurningTime,
+					last90DegreeTurns,
 					h.handlerLoggerProducer,
 				)
 				if err != nil {
 					return err
 				}
-				if turned {
-					// Update last 90 degree turns
+				if turnCompleted {
+					// Update the last turning time
+					lastTurningTime = time.Now()
+
+					// Update is turning flag
+					isTurning = false
+
+					// Increase 90-degree turns
 					last90DegreeTurns++
+					break
+				}
+
+				// Calculate the future distance based on the current distance change
+				northDistance := h.service.GetRPLiDARAverageDistanceOnNextUpdate(
+					gorplidarsdkhandler.CardinalDirectionNorth,
+				)
+
+				// Check if the front distance is NaN, if so, return
+				if math.IsNaN(northDistance) {
 					continue
 				}
 
-				// Check if the robot can collide with an object or a wall
-				cardinalDirections := getFrontDistanceCardinalDirections(false)
-				reached, err := collisionHandler(
+
+				// Check if the front distance is below the turn threshold
+				if northDistance < SafetyFrontDistanceTurnThreshold {
+					// Log that the front distance is too close
+					if h.handlerLoggerProducer != nil {
+						h.handlerLoggerProducer.Info(
+							fmt.Sprintf(
+								"Front distance (%.2f mm) is below the safety threshold (%.2f mm). Moving backward until it's safe to turn.",
+								northDistance,
+								SafetyFrontDistanceTurnThreshold,
+							),
+						)
+					}
+					if err := h.service.SetMotorStop(ctx); err != nil {
+						return err
+					}
+					if err := h.service.SetServoToCenter(ctx); err != nil {
+						return err
+					}
+					// Go backward if the front distance is below the threshold
+					if err := h.service.SetMotorBackward(
+						ctx,
+						MotorBackwardNormalSpeed,
+					); err != nil {
+						return err
+					}
+
+					// Wait until the front distance is above the threshold
+					reached := false
+					for !reached {
+						time.Sleep(UpdateDelay)
+
+						select {
+						case <-ctx.Done():
+							return ctx.Err()
+						default:
+							// Calculate the future distance based on the current distance change
+							northDistance = h.service.GetRPLiDARAverageDistanceOnNextUpdate(
+								gorplidarsdkhandler.CardinalDirectionNorth,
+							)
+
+							// Check if the front distance is NaN, if so, return
+							if math.IsNaN(northDistance) {
+								break
+							}
+
+							// If the front distance is above the threshold, stop moving backward
+							if northDistance >= SafetyFrontDistanceTurnThreshold {
+								if h.handlerLoggerProducer != nil {
+									h.handlerLoggerProducer.Info("Front distance is safe to turn. Resuming turn.")
+								}
+								if err := h.service.SetMotorStop(ctx); err != nil {
+									return err
+								}
+
+								// Set reached flag as true
+								reached = true
+							}
+						}
+					}
+					
+
+				// Set the servo to the turn angle
+				if err := h.service.SetServoAngle(
+					ctx,
+					ServoBigTurnAngle,
+					direction,
+				); err != nil {
+					return err
+				}
+
+				// Move forward at turning speed
+				if err := h.service.SetMotorForward(
+					ctx,
+					MotorTurningSpeed,
+				); err != nil {
+					return err
+				}
+				break
+			}
+			} else {
+				// Detect if a turn is necessary
+				turnDetected, err := detectTurnHandler(
 					ctx,
 					h.service,
-					false,
+					last90DegreeTurns,
+					lastTurningTime,
+					&direction,
 					h.handlerLoggerProducer,
-					cardinalDirections...,
 				)
 				if err != nil {
 					return err
 				}
-				if reached {
+				if turnDetected {
+					// Update the is turning flag
+					isTurning = true
 					break
 				}
-			*/
-
-			// Check if the robot can collide with an object or a wall
-			cardinalDirections := getFrontDistanceCardinalDirections(isTurning)
-			reached, err := collisionHandler(
-				ctx,
-				h.service,
-				isTurning,
-				h.handlerLoggerProducer,
-				cardinalDirections...,
-			)
-			if err != nil {
-				return err
-			}
-			if reached {
-				break
 			}
 
-			// If the robot was turning, check if it should stop turning
-			// Check for the current turn and center the servo if necessary
-			turnCompleted, err := turnHandler(
+			// Center from gyroscope and RPLiDAR
+			if err = centerFromSidesByRPLiDARAndGyroscopeHandler(
 				ctx,
 				h.service,
-				&last90DegreeTurns,
-				&isTurning,
-				&lastTurningTime,
-				h.handlerLoggerProducer,
-			)
-			if err != nil {
-				return err
-			}
-			if turnCompleted {
-				break
-			}
-
-			// Detect if a turn is necessary
-			if err = detectTurnHandler(
-				ctx,
-				h.service,
-				&last90DegreeTurns,
-				&isTurning,
-				&lastTurningTime,
-				&direction,
-				h.handlerLoggerProducer,
-			); err != nil {
-				return err
-			}
-			if isTurning {
-				break
-			}
-
-			// Center by gyroscope
-			if err = centerByGyroscopeHandler(
-				ctx,
-				h.service,
+				lastTurningTime,
 				last90DegreeTurns,
 				h.handlerLoggerProducer,
 			); err != nil {
@@ -235,10 +285,11 @@ func (h *ChallengeWithoutObstaclesHandler) Run(ctx context.Context) error {
 		case <-ctx.Done():
 			return ctx.Err()
 		default:
-			// Center by gyroscope
-			if err = centerByGyroscopeHandler(
+			// Center from gyroscope and RPLiDAR
+			if err = centerFromSidesByRPLiDARAndGyroscopeHandler(
 				ctx,
 				h.service,
+				lastTurningTime,
 				last90DegreeTurns,
 				h.handlerLoggerProducer,
 			); err != nil {

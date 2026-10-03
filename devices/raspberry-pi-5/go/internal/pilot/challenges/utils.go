@@ -14,10 +14,28 @@ import (
 //
 // A slice of cardinal directions to check the front distances (e.g., North, North-Northeast, North-Northwest)
 func getFrontDistanceCardinalDirections(isTurning bool) []gorplidarsdkhandler.CardinalDirection {
-	if isTurning {
-		return FrontDistanceTurningCardinalDirections
-	}
-	return FrontDistanceStraightCardinalDirections
+	/*
+		if isTurning {
+			return FrontDistanceTurningCardinalDirections
+		}
+		return FrontDistanceStraightCardinalDirections
+
+		// FrontDistanceTurningCardinalDirections are the cardinal directions to check for safety front distance when turning
+		FrontDistanceTurningCardinalDirections = []gorplidarsdkhandler.CardinalDirection{
+			gorplidarsdkhandler.CardinalDirectionNorthwest,
+			gorplidarsdkhandler.CardinalDirectionNorthNorthwest,
+			gorplidarsdkhandler.CardinalDirectionNorth,
+			gorplidarsdkhandler.CardinalDirectionNorthNortheast,
+			gorplidarsdkhandler.CardinalDirectionNortheast,
+		}
+
+		// FrontDistanceStraightCardinalDirections are the cardinal directions to check for safety front distance when going straight
+		FrontDistanceStraightCardinalDirections = []gorplidarsdkhandler.CardinalDirection{
+			gorplidarsdkhandler.CardinalDirectionNorthNorthwest,
+			gorplidarsdkhandler.CardinalDirectionNorth,
+			gorplidarsdkhandler.CardinalDirectionNorthNortheast,
+		}*/
+	return []gorplidarsdkhandler.CardinalDirection{}
 }
 
 // getFrontStartDistanceThresholdFromCardinalDirection returns the front start distance threshold based on the cardinal direction

@@ -60,6 +60,7 @@ type (
 		GetRPLiDARAverageDistanceChange(
 			cardinalDirection gorplidarsdkhandler.CardinalDirection,
 		) float64
+		GetMaxDistanceChangeForCardinalDirection(cardinalDirection gorplidarsdkhandler.CardinalDirection) float64
 		GetRPLiDARAverageDistanceOnNextUpdate(
 			cardinalDirection gorplidarsdkhandler.CardinalDirection,
 		) float64

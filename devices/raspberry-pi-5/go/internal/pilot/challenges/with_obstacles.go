@@ -17,7 +17,7 @@ const (
 	ParkingLeaveSideDistanceThreshold = 500.0
 
 	// StopBackwardDirectionOnParkingBackwardDistanceThreshold is the distance threshold to stop the backward direction when leaving parking (only used in the closed challenge)
-	StopBackwardDirectionOnParkingBackwardDistanceThreshold = 290.0
+	StopBackwardDirectionOnParkingBackwardDistanceThreshold = 100.0
 
 	// StopForwardDirectionOnParkingFrontDistanceThreshold is the distance threshold to go forward for the first time when leaving parking (only used in the closed challenge)
 	StopForwardDirectionOnParkingFrontDistanceThreshold = 95.0
@@ -312,8 +312,7 @@ func (h *ChallengeWithObstaclesHandler) goBackwardSlowlyOnParking(ctx context.Co
 		default:
 			// Check if the front distance threshold to stop backward movement is reached
 			frontDistances := []float64{
-				h.service.GetSouthSoutheastAverageDistance(),
-				h.service.GetSouthSouthwestAverageDistance(),
+				h.service.GetNorthAverageDistance(),
 			}
 			for _, distance := range frontDistances {
 				// Check if the distance is NaN
@@ -322,7 +321,7 @@ func (h *ChallengeWithObstaclesHandler) goBackwardSlowlyOnParking(ctx context.Co
 				}
 
 				// Check if the distance is above the threshold
-				if distance <= StopBackwardDirectionOnParkingBackwardDistanceThreshold {
+				if distance >= StopBackwardDirectionOnParkingBackwardDistanceThreshold {
 					stopBackwardMovement = true
 					break
 				}
@@ -478,8 +477,14 @@ func (h *ChallengeWithObstaclesHandler) leaveParkingHandler(ctx context.Context)
 			// Check if any of the sides has the space to leave the parking
 			if !math.IsNaN(westDistance) && westDistance >= ParkingLeaveSideDistanceThreshold {
 				parkingLeaveSide = ServoDirectionLeft
+				h.handlerLoggerProducer.Info(
+					"Leave parking side: left",
+				)
 			} else if !math.IsNaN(eastDistance) && eastDistance >= ParkingLeaveSideDistanceThreshold {
 				parkingLeaveSide = ServoDirectionRight
+				h.handlerLoggerProducer.Info(
+					"Leave parking side: right",
+				)
 			}
 		}
 	}
@@ -514,7 +519,7 @@ func (h *ChallengeWithObstaclesHandler) leaveParkingHandler(ctx context.Context)
 			left, err := h.goForwardSlowlyOnParking(
 				ctx,
 				parkingLeaveSide,
-				FrontDistanceTurningCardinalDirections...,
+				gorplidarsdkhandler.CardinalDirectionNorth,
 			)
 			if err != nil {
 				return fmt.Errorf(

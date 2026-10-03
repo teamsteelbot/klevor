@@ -21,29 +21,26 @@ const (
 	// UpdateDelay is the delay between updates
 	UpdateDelay = 10 * time.Millisecond
 
-	// MaxDistanceChange is the maximum distance change for safety calculations
-	MaxDistanceChange = 350.0 // 75.0, 200.0, 250.0, 350.0
-
 	// MotorBackwardFastSpeed of speed for fast backward motor speed
-	MotorBackwardFastSpeed float64 = 0.6 // 1 (not too charged), 0.9, 0.75 (full charged)
+	MotorBackwardFastSpeed float64 = 0.65 // 1 (not too charged), 0.9, 0.75 (full charged)
 
 	// MotorBackwardNormalSpeed of speed for normal backward motor speed
-	MotorBackwardNormalSpeed float64 = 0.5 // 0.8 (not too charged), 0.7, 0.675, 0.6, 0.5, 0.4 (full charged)
+	MotorBackwardNormalSpeed float64 = 0.6 // 0.8 (not too charged), 0.7, 0.675, 0.6, 0.5, 0.4 (full charged)
 
 	// MotorBackwardSlowSpeed of speed for slow backward motor speed
-	MotorBackwardSlowSpeed float64 = 0.4 // 0.6 (not too charged), 0.55, 0.6 (full charged)
+	MotorBackwardSlowSpeed float64 = 0.45 // 0.6 (not too charged), 0.55, 0.6 (full charged)
 
 	// MotorForwardFastSpeed of speed for fast forward motor speed
-	MotorForwardFastSpeed float64 = 0.6 // 1 (not too charged), 0.9, 0.875, 0.75, 0.675, 0.6 (full charged)
+	MotorForwardFastSpeed float64 = 0.65 // 1 (not too charged), 0.9, 0.875, 0.75, 0.675, 0.6 (full charged)
 
 	// MotorForwardNormalSpeed of speed for normal forward motor speed
-	MotorForwardNormalSpeed float64 = 0.5 // 0.8 (not too charged), 0.7, 0.675, 0.6, 0.5 (full charged)
+	MotorForwardNormalSpeed float64 = 0.45 // 0.8 (not too charged), 0.7, 0.675, 0.6, 0.5 (full charged)
 
 	// MotorForwardSlowSpeed of speed for slow forward motor speed
-	MotorForwardSlowSpeed float64 = 0.4 // 0.6 (not too charged), 0.55, 0.6, 0.5, 0.4 (full charged)
+	MotorForwardSlowSpeed float64 = 0.5 // 0.6 (not too charged), 0.55, 0.6, 0.5, 0.4 (full charged)
 
 	// MotorTurningSpeed of speed for turning motor speed
-	MotorTurningSpeed float64 = 0.5 // 0.75 (not too charged), 0.65, 0.5 (full charged)
+	MotorTurningSpeed float64 = 0.7 // 0.75 (not too charged), 0.65, 0.5 (full charged)
 
 	// ServoBigTurnAngle of angle for big turns
 	ServoBigTurnAngle float64 = 1
@@ -86,22 +83,6 @@ const (
 )
 
 var (
-	// FrontDistanceTurningCardinalDirections are the cardinal directions to check for safety front distance when turning
-	FrontDistanceTurningCardinalDirections = []gorplidarsdkhandler.CardinalDirection{
-		gorplidarsdkhandler.CardinalDirectionNorthwest,
-		gorplidarsdkhandler.CardinalDirectionNorthNorthwest,
-		gorplidarsdkhandler.CardinalDirectionNorth,
-		gorplidarsdkhandler.CardinalDirectionNorthNortheast,
-		gorplidarsdkhandler.CardinalDirectionNortheast,
-	}
-
-	// FrontDistanceStraightCardinalDirections are the cardinal directions to check for safety front distance when going straight
-	FrontDistanceStraightCardinalDirections = []gorplidarsdkhandler.CardinalDirection{
-		gorplidarsdkhandler.CardinalDirectionNorthNorthwest,
-		gorplidarsdkhandler.CardinalDirectionNorth,
-		gorplidarsdkhandler.CardinalDirectionNorthNortheast,
-	}
-
 	// ObjectDetectionFrontCardinalDirections are the cardinal directions for object detection front distance
 	ObjectDetectionFrontCardinalDirections = []gorplidarsdkhandler.CardinalDirection{
 		gorplidarsdkhandler.CardinalDirectionNorth,

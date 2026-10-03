@@ -14,17 +14,11 @@ const (
 	// SideDistanceChange is the scalar change for the side distance calculation
 	SideDistanceChange = 1.1
 
-	// SideDistanceMediumDifferencePercentage is the percentage of medium difference threshold for side distances
-	SideDistanceMediumDifferencePercentage = 0.35
+	// SideDistanceDifferencePercentage is the percentage of difference threshold for side distances
+	SideDistanceDifferencePercentage = 0.5
 
-	// SideDistanceSmallDifferencePercentage is the percentage of small difference threshold for side distances
-	SideDistanceSmallDifferencePercentage = 0.15 // 0.2, 0.15, 0.3
-
-	// ServoMediumCorrectionAnglePercentage is the percentage of the maximum angle for medium corrections
-	ServoMediumCorrectionAnglePercentage float64 = 0.4
-
-	// ServoSmallCorrectionAnglePercentage is the percentage of the maximum angle for small corrections
-	ServoSmallCorrectionAnglePercentage float64 = 0.25
+	// SideDistanceServoCorrectionAnglePercentage is the percentage of the maximum angle for side distance corrections
+	SideDistanceServoCorrectionAnglePercentage float64 = 0.66
 
 	// GyroscopeTolerance is the tolerance for the gyroscope
 	GyroscopeTolerance = 2.0
@@ -33,7 +27,7 @@ const (
 	YawDegreesServoAngleRatio = 0.03 // 0.015, 0.025, 0.035, 0.03
 
 	// YawDegreesMinServoAngleChange is the minimum servo angle percentage change for yaw degrees correction
-	YawDegreesMinServoAngleChange = 0.03 // 0.05, 0.03
+	YawDegreesMinServoAngleChange = 0.015 // 0.05, 0.03
 
 	// MaxServoAngleCorrectionPercentage is the maximum servo angle percentage for correction
 	MaxServoAngleCorrectionPercentage = 0.66 // 0.8, 0.66
@@ -45,27 +39,36 @@ const (
 	MinTimeToCorrectAfterTurn = 200 * time.Millisecond // 1500ms, 1000ms, 250ms, 200ms
 )
 
-// centerByRPLiDARHandler centers the robot using RPLiDAR data
+// centerFromSidesByRPLiDARAndGyroscopeHandler centers the robot using RPLiDAR data, if the difference is not too much, it uses the gyroscope to keep the robot straight
 //
 // Parameters:
 //
 // ctx: The context to use for the challenge
 // service: The service to use for the challenge
 // lastTurningTime: The last time the robot made a turn
+// last90DegreeTurns: The last recorded number of 90-degree turns
+// loggerProducer: The logger producer to use for logging
 //
 // Returns:
 //
 // An error if the robot could not be centered, nil otherwise
-func centerByRPLiDARHandler(
+func centerFromSidesByRPLiDARAndGyroscopeHandler(
 	ctx context.Context,
 	service Service,
 	lastTurningTime time.Time,
+	last90DegreeTurns int,
+	loggerProducer goconcurrentlogger.LoggerProducer,
 ) error {
+	// Check if the service is nil
+	if service == nil {
+		return ErrNilService
+	}
+
 	// Get west and east average distances
-	westDistance := service.GetRPLiDARAverageDistanceOnNextUpdate(
+	westDistance := service.GetRPLiDARAverageDistance(
 		gorplidarsdkhandler.CardinalDirectionWest,
 	)
-	eastDistance := service.GetRPLiDARAverageDistanceOnNextUpdate(
+	eastDistance := service.GetRPLiDARAverageDistance(
 		gorplidarsdkhandler.CardinalDirectionEast,
 	)
 
@@ -84,38 +87,34 @@ func centerByRPLiDARHandler(
 
 	// Check if the servo should make a little turn to the left or right in order to center the robot
 	if time.Since(lastTurningTime) < MinTimeToCorrectAfterTurn {
-		if err := service.SetServoToCenter(ctx); err != nil {
+		if err := centerByGyroscopeHandler(
+			ctx,
+			service,
+			last90DegreeTurns,
+			loggerProducer,
+		); err != nil {
 			return err
 		}
-	} else if eastDistance >= westDistance*(1+SideDistanceMediumDifferencePercentage) {
+	} else if eastDistance >= westDistance*(1+SideDistanceDifferencePercentage) {
 		if err := service.SetServoToRight(
 			ctx,
-			ServoMediumCorrectionAnglePercentage,
+			SideDistanceServoCorrectionAnglePercentage,
 		); err != nil {
 			return err
 		}
-	} else if eastDistance >= westDistance*(1+SideDistanceSmallDifferencePercentage) {
-		if err := service.SetServoToRight(
-			ctx,
-			ServoSmallCorrectionAnglePercentage,
-		); err != nil {
-			return err
-		}
-	} else if westDistance >= eastDistance*(1+SideDistanceMediumDifferencePercentage) {
+	} else if westDistance >= eastDistance*(1+SideDistanceDifferencePercentage) {
 		if err := service.SetServoToLeft(
 			ctx,
-			ServoMediumCorrectionAnglePercentage,
+			SideDistanceServoCorrectionAnglePercentage,
 		); err != nil {
 			return err
 		}
-	} else if westDistance >= eastDistance*(1+SideDistanceSmallDifferencePercentage) {
-		if err := service.SetServoToLeft(
-			ctx,
-			ServoSmallCorrectionAnglePercentage,
-		); err != nil {
-			return err
-		}
-	} else if err := service.SetServoToCenter(ctx); err != nil {
+	} else if err := centerByGyroscopeHandler(
+		ctx,
+		service,
+		last90DegreeTurns,
+		loggerProducer,
+	); err != nil {
 		return err
 	}
 	return nil

@@ -294,10 +294,10 @@ func (s *DefaultService) updateRPLiDARAverageDistances(ctx context.Context) erro
 			s.rplidarHandlerMutex.Lock()
 
 			// Update the measure
-			s.rplidarMeasures[int(measure.GetAngle())] = measure
+			s.rplidarMeasures[int(measure.GetAngle())%360] = measure
 
 			// Calculate the average distances
-			averageDistances, err := gorplidarsdkhandler.GetAverageDistanceFromAllDirections(
+			averageDistances, err = gorplidarsdkhandler.GetAverageDistanceFromAllDirections(
 				&s.rplidarMeasures,
 				AverageAngleWidth,
 			)
@@ -305,9 +305,6 @@ func (s *DefaultService) updateRPLiDARAverageDistances(ctx context.Context) erro
 				s.rplidarHandlerMutex.Unlock()
 				return fmt.Errorf("failed to get average distances: %w", err)
 			}
-
-			// Set the average distances and the last update time
-			s.rplidarAverageDistances = averageDistances
 
 			// Calculate the change for each direction
 			for direction, newDistance := range averageDistances {
@@ -326,15 +323,18 @@ func (s *DefaultService) updateRPLiDARAverageDistances(ctx context.Context) erro
 				if newDistance < oldDistance {
 					s.rplidarAverageDistancesChange[direction] = math.Max(
 						newDistance-oldDistance,
-						-MaxDistanceChange,
+						-s.GetMaxDistanceChangeForCardinalDirection(direction),
 					)
 				} else {
 					s.rplidarAverageDistancesChange[direction] = math.Min(
 						newDistance-oldDistance,
-						MaxDistanceChange,
+						s.GetMaxDistanceChangeForCardinalDirection(direction),
 					)
 				}
 			}
+
+			// Set the average distances and the last update time
+			s.rplidarAverageDistances = averageDistances
 
 			// Get the average common distances
 			s.southeastAverageDistance = s.rplidarAverageDistances[gorplidarsdkhandler.CardinalDirectionSoutheast]
@@ -474,9 +474,9 @@ func (s *DefaultService) Run(
 
 	if challenge == internal.ChallengeWithObstacles || challenge == internal.ChallengeWithObstaclesAndParking {
 		s.serviceLoggerProducer.Info("Waiting for CLIP handler to be ready...")
-		if err := s.clipHandler.WaitUntilReady(ctx); err != nil {
-			return fmt.Errorf("CLIP handler is not ready: %w", err)
-		}
+		// if err := s.clipHandler.WaitUntilReady(ctx); err != nil {
+		//	return fmt.Errorf("CLIP handler is not ready: %w", err)
+		// }
 		s.serviceLoggerProducer.Info("CLIP handler is ready")
 	}
 
@@ -579,7 +579,7 @@ func (s *DefaultService) GetMotorDirectionTimeSet() time.Time {
 // The multiplier for the distance change based on the time the current motor direction has been set
 func (s *DefaultService) GetMotorDirectionDistanceChangeMultiplier() float64 {
 	if s.motorDirectionTimeSet.IsZero() || time.Since(s.motorDirectionTimeSet) < MotorDirectionTimeSetInterval {
-		return 0
+		return 1.0
 	}
 	return 1 + MotorDirectionTimeSetFactor*float64(time.Since(s.motorDirectionTimeSet)/MotorDirectionTimeSetInterval)
 }
@@ -1178,6 +1178,39 @@ func (s *DefaultService) GetRPLiDARAverageDistanceOnNextUpdate(
 	distance := s.GetRPLiDARAverageDistance(cardinalDirection)
 
 	return distance + distanceChange
+}
+
+// GetMaxDistanceChangeForCardinalDirection returns the max distance change for the given cardinal direction
+//
+// Parameters:
+//
+// cardinalDirection: Cardinal direction to get the max distance change
+//
+// Returns:
+//
+// The maximum distance change for the given cardinal direction
+func (s *DefaultService) GetMaxDistanceChangeForCardinalDirection(cardinalDirection gorplidarsdkhandler.CardinalDirection) float64 {
+	switch cardinalDirection {
+	case gorplidarsdkhandler.CardinalDirectionNorth:
+		return 300.0
+	case gorplidarsdkhandler.CardinalDirectionNorthNortheast,
+		gorplidarsdkhandler.CardinalDirectionNorthNorthwest:
+		return 150.0
+	case gorplidarsdkhandler.CardinalDirectionNorthwest,
+		gorplidarsdkhandler.CardinalDirectionNortheast:
+		return 100.0
+	case gorplidarsdkhandler.CardinalDirectionEastNortheast,
+		gorplidarsdkhandler.CardinalDirectionWestNorthwest:
+		return 75.0
+	case gorplidarsdkhandler.CardinalDirectionEast,
+		gorplidarsdkhandler.CardinalDirectionWest:
+		return 50.0
+	case gorplidarsdkhandler.CardinalDirectionSouthSouthwest,
+		gorplidarsdkhandler.CardinalDirectionSouthSoutheast:
+		return 250.0
+	default:
+		return 50.0
+	}
 }
 
 // GetSouthwestAverageDistance returns the average distance to the southwest
