@@ -58,3 +58,6 @@ __pycache__
 /**/*/*.exe
 /devices/raspberry-pi-5/go/output
 /devices/raspberry-pi-pico-2w/tinygo/output
+
+# Docker
+/devices/raspberry-pi-5/volumes
