@@ -61,3 +61,5 @@ __pycache__
 
 # Docker
 /devices/raspberry-pi-5/volumes
+# CodeGraph index (local; rebuild with `codegraph init`)
+.codegraph/
