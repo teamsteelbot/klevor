@@ -2,5 +2,6 @@
 # https://mise.jdx.dev/
 
 [tools]
+python = "3.14.6"
 # Task runner (go-task). Pinned so `task` resolves to go-task, not Taskwarrior.
 task = "3.54.0"
